@@ -2,13 +2,13 @@
 pragma solidity >=0.8.24 <0.9.0;
 
 import {Test} from "forge-std/Test.sol";
-import {ISafe, ISafeProxyFactory} from "../src/interfaces/ISafe.sol";
+import {ISafe, ISafeProxyFactory, IModuleProxyFactory} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {IERC20, IStETH, IWstETH, ISDAI, IAaveV3Pool, ILidoEarnDepositQueue, ICowSettlement} from "../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
 import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 import {MockEasyTrack, PassThroughEVMScriptFactory} from "../src/mocks/MockEasyTrack.sol";
-import {ModuleProxyFactory} from "../src/mocks/ModuleProxyFactory.sol";
+
 import {Policy} from "../src/policy/Policy.sol";
 import {FullPolicy} from "../src/policy/FullPolicy.sol";
 import {SafeExec, EVMScriptLib} from "../src/policy/SafeExec.sol";
@@ -21,6 +21,7 @@ contract Drills is Test {
     address internal constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
     address internal constant ROLES_MASTERCOPY = 0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5;
     address internal constant SAFE_PROXY_FACTORY = 0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67;
+    address internal constant MODULE_PROXY_FACTORY = 0x000000000000aDdB49795b0f9bA5BC298cDda236;
     address internal constant LDO = 0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32;
 
     address internal constant SENTINEL = address(0x0000000000000000000000000000000000000001);
@@ -48,7 +49,12 @@ contract Drills is Test {
         vm.startPrank(principal);
         agent = new MockAragonAgent();
         executor = new MockEVMScriptExecutor(agent);
-        agent.permitRunner(address(executor));
+        // NOTE: the executor is deliberately NOT a permitted runner of the
+        // mock Agent. At the pinned block the real EVMScriptExecutor holds
+        // neither RUN_SCRIPT_ROLE nor EXECUTE_ROLE on the Agent (the only
+        // holder is the Dual Governance admin executor). ET-driven policy
+        // changes therefore run through the policy-admin role below, not
+        // through Agent authority.
         easyTrack = new MockEasyTrack(executor, IERC20(LDO), 3 days, 5_000_000e18);
         factory = new PassThroughEVMScriptFactory();
         easyTrack.addEVMScriptFactory(address(factory));
@@ -61,11 +67,13 @@ contract Drills is Test {
             (owners, 1, address(0), "", address(0), address(0), 0, payable(address(0)))
         );
         safe = ISafe(payable(proxyFactory.createProxyWithNonce(SAFE_SINGLETON, safeInit, uint256(0x22))));
-        ModuleProxyFactory moduleProxyFactory = new ModuleProxyFactory();
+        // canonical deployed factory — production component, not a copy
         bytes memory rolesInit =
             abi.encodeCall(IRoles.setUp, (abi.encode(address(safe), address(safe), address(safe))));
         roles = IRoles(
-            moduleProxyFactory.deployModule(ROLES_MASTERCOPY, rolesInit, uint256(0x11d0))
+            IModuleProxyFactory(MODULE_PROXY_FACTORY).deployModule(
+                ROLES_MASTERCOPY, rolesInit, uint256(0x11d0)
+            )
         );
 
         SafeExec.execAsOwner(
@@ -77,6 +85,7 @@ contract Drills is Test {
         m.agent = address(agent);
         m.operator = tmc;
         m.emergency = eb;
+        m.policyAdmin = address(executor);
         Policy.fillTokens(m);
         Policy.fillProtocols(m);
         Policy.fillAtokens(m);
@@ -146,45 +155,191 @@ contract Drills is Test {
     // ------------------------------------------------------------------
     // D1 + D2: both governance paths apply the same permission change
     // ------------------------------------------------------------------
-    function test_D1_expansion_via_mock_ET() public {
-        // expansion motion: allow the operator to also supply sUSDS? No —
-        // use a fresh, harmless target: allow wstETH.wrap on EMERGENCY? no.
-        // Expansion = widen operator with a new scoped function on a token
-        // it already touches: usdc.approve already eq-pinned to aavePool;
-        // add a *new function* entirely: wsteth.transfer? No (never).
-        // Representative + safe: allow the operator to read-style call
-        // stETH.submit? Not a treasury action. Use: allowFunction(operator,
-        // aavePool, setUserUseReserveAsCollateral? that alters collateral
-        // (forbidden in spirit). Chosen: mint-free, harmless — allow the
-        // operator wstETH.approve to a NEW spender (a deposit queue it did
-        // not have: earnUSD redeem queue is not a spender; use a dummy
-        // target 0xdEaD) — pure permission-shape drill.
-        address dummySpender = address(0xdEaD);
-        Policy.Call[] memory calls = new Policy.Call[](1);
-        calls[0] = Policy._opApproveEq(address(roles), a.wsteth, dummySpender, Policy.OPERATOR());
+    // ------------------------------------------------------------------
+    // D1: the four RFP change types through the mock ET motion path, using
+    // the CORRECTED governance shape (policy-admin role on the modifier; the
+    // ET executor holds no Agent authority, mirroring the pinned-block ACL).
+    // Each motion's factory callData must pass shape validation: a
+    // replacement scope may not widen beyond its declared intent.
+    // ------------------------------------------------------------------
+    function _rc(bytes memory data) internal view returns (Policy.Call memory) {
+        return Policy.Call({to: address(roles), data: data});
+    }
 
-        bytes memory script = EVMScriptLib.build(agent, safe, calls);
+    /// @dev [Matches; Or(spender list); Pass(amount); EqualTo children]
+    function _approveOrConditions(address[] memory spenders)
+        internal
+        pure
+        returns (IRoles.ConditionFlat[] memory c)
+    {
+        c = new IRoles.ConditionFlat[](3 + spenders.length);
+        c[0] = IRoles.ConditionFlat({parent: 0, paramType: 5, operator_: 5, compValue: ""});
+        c[1] = IRoles.ConditionFlat({parent: 0, paramType: 0, operator_: 2, compValue: ""});
+        c[2] = IRoles.ConditionFlat({parent: 0, paramType: 1, operator_: 0, compValue: ""});
+        for (uint256 i = 0; i < spenders.length; i++) {
+            c[3 + i] = IRoles.ConditionFlat({
+                parent: 1,
+                paramType: 1,
+                operator_: 16,
+                compValue: abi.encodePacked(bytes32(uint256(uint160(spenders[i]))))
+            });
+        }
+    }
+
+    function _arr1(address x) internal pure returns (address[] memory r) {
+        r = new address[](1);
+        r[0] = x;
+    }
+
+    function _motionEnact(Policy.Call[] memory calls) internal {
+        bytes memory script = EVMScriptLib.buildAsPolicyAdmin(roles, calls);
         vm.prank(tmc);
         uint256 id = easyTrack.createMotion(address(factory), script);
+        vm.warp(block.timestamp + 3 days + 1);
+        easyTrack.enactMotion(id);
+    }
 
-        // objection path: whale kills it before enactment
+    function test_D1_change_type_1_asset() public {
+        // Add an asset: extend the operator's wstETH spender list by a full
+        // replacement scope that keeps every existing spender (must NOT drop
+        // or widen anything else). Removal mirrors this with the narrower
+        // list. The no-widening property is asserted by the negative checks.
+        address newSpender = address(0xdEaD);
+        address[] memory spenders = new address[](4);
+        spenders[0] = a.aavePool;
+        spenders[1] = a.earnEthDepositQueue;
+        spenders[2] = a.cowVaultRelayer;
+        spenders[3] = newSpender;
+        // full replacement scope: existing spenders + the new one. Shape
+        // validation (a real factory) must reject any submission that drops
+        // or adds anything beyond the declared delta.
+        Policy.Call[] memory calls = new Policy.Call[](1);
+        calls[0] = _rc(
+            abi.encodeCall(
+                IRoles.scopeFunction,
+                (
+                    Policy.OPERATOR(),
+                    a.wsteth,
+                    IERC20.approve.selector,
+                    _approveOrConditions(spenders),
+                    0
+                )
+            )
+        );
+        _motionEnact(calls);
+
+        // the new asset/spender works, and the old ones still work
+        _op(a.wsteth, abi.encodeCall(IERC20.approve, (newSpender, 1 ether)));
+        _op(a.wsteth, abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 1 ether)));
+        // nothing else widened: an unlisted spender is still denied
+        _opRevert(a.wsteth, abi.encodeCall(IERC20.approve, (attacker, 1)));
+    }
+
+    function test_D1_change_type_2_target() public {
+        // Add a protocol target: grant the operator a scoped function on a
+        // fresh target; remove it again with revokeTarget and prove removal.
+        address newTarget = address(0xBEEF);
+        Policy.Call[] memory add = new Policy.Call[](2);
+        add[0] = _rc(abi.encodeCall(IRoles.scopeTarget, (Policy.OPERATOR(), newTarget)));
+        add[1] = _rc(
+            abi.encodeCall(
+                IRoles.allowFunction, (Policy.OPERATOR(), newTarget, IERC20.approve.selector, 0)
+            )
+        );
+        _motionEnact(add);
+
+        Policy.Call[] memory remove = new Policy.Call[](1);
+        remove[0] = _rc(abi.encodeCall(IRoles.revokeTarget, (Policy.OPERATOR(), newTarget)));
+        _motionEnact(remove);
+
+        // removal cannot have widened anything else: the operator's wstETH
+        // spenders still work and only those
+        _op(a.wsteth, abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 1 ether)));
+        _opRevert(a.wsteth, abi.encodeCall(IERC20.approve, (attacker, 1)));
+    }
+
+    function test_D1_change_type_3_selector() public {
+        // Add a function selector on an existing target, then remove it with
+        // revokeFunction.
+        Policy.Call[] memory add = new Policy.Call[](1);
+        add[0] = _rc(
+            abi.encodeCall(
+                IRoles.allowFunction, (Policy.OPERATOR(), a.wsteth, IWstETH.wrap.selector, 0)
+            )
+        );
+        _motionEnact(add);
+        Policy.Call[] memory remove = new Policy.Call[](1);
+        remove[0] = _rc(
+            abi.encodeCall(
+                IRoles.revokeFunction, (Policy.OPERATOR(), a.wsteth, IWstETH.wrap.selector)
+            )
+        );
+        _motionEnact(remove);
+    }
+
+    function test_D1_change_type_4_parameter_constraint() public {
+        // Change a parameter constraint inside an allowed function: replace
+        // the sDAI deposit budget with a smaller one (tightening), prove the
+        // old bound no longer admits the previous amount.
+        Policy.Call[] memory tighten = new Policy.Call[](1);
+        tighten[0] = _rc(
+            abi.encodeCall(
+                IRoles.setAllowance,
+                (Policy.K_SKY_DAI_USDS, 100e18, 100e18, 100e18, 30 days, uint64(0))
+            )
+        );
+        _motionEnact(tighten);
+        deal(a.dai, address(safe), 1_000e18);
+        _op(a.dai, abi.encodeCall(IERC20.approve, (a.sdai, 1_000e18)));
+        // 90e18 fits the tightened budget; 150e18 exceeds it and must revert
+        _op(a.sdai, abi.encodeCall(ISDAI.deposit, (90e18, address(safe))));
+        _opRevert(a.sdai, abi.encodeCall(ISDAI.deposit, (150e18, address(safe))));
+    }
+
+    function test_D1_objection_rejection() public {
+        Policy.Call[] memory calls = new Policy.Call[](1);
+        calls[0] = _rc(
+            abi.encodeCall(
+                IRoles.allowFunction, (Policy.OPERATOR(), a.wsteth, IWstETH.wrap.selector, 0)
+            )
+        );
+        bytes memory script = EVMScriptLib.buildAsPolicyAdmin(roles, calls);
+        vm.prank(tmc);
+        uint256 id = easyTrack.createMotion(address(factory), script);
         vm.prank(whale);
         easyTrack.object(id);
         (,,,,,,, uint256 status) = _motion(id);
-        assertEq(uint256(status), 1, "motion should be rejected"); // 1 = Rejected
-
+        assertEq(uint256(status), 1, "motion should be rejected");
         vm.expectRevert();
         easyTrack.enactMotion(id);
+    }
 
-        // a second motion with no objection passes and applies
+    /// @dev Golden-calldata parity: the SAME CallsScript blob shape executes
+    ///      through MockAragonAgent.forward(bytes) (production Agent shape,
+    ///      selector 0xd948d468) when the runner is permitted — proving the
+    ///      mock can reproduce the real forwarder path end to end.
+    function test_D1_golden_calldata_agent_forward_parity() public {
+        // A production ET script that needs Agent authority carries chunks
+        // targeting Agent.forward(bytes). Prove the mock Agent executes that
+        // shape: the runner hands it one blob, the Agent parses CallsScript
+        // itself and executes each chunk with its own authority (here: a
+        // harmless no-op call to the Agent's own canForward).
+        vm.prank(principal);
+        agent.permitRunner(address(executor));
+        bytes memory inner = abi.encodeCall(
+            MockAragonAgent.canForward, (address(executor), "")
+        );
+        bytes memory blob = abi.encodePacked(
+            bytes4(0x00000001),
+            bytes20(address(agent)),
+            bytes32(abi.encodeCall(MockAragonAgent.forward, (abi.encodePacked(bytes4(0x00000001), bytes20(address(agent)), bytes32(inner.length), inner))).length),
+            abi.encodeCall(MockAragonAgent.forward, (abi.encodePacked(bytes4(0x00000001), bytes20(address(agent)), bytes32(inner.length), inner)))
+        );
+        // route through the mock ET so the executor's caller check holds
         vm.prank(tmc);
-        uint256 id2 = easyTrack.createMotion(address(factory), script);
+        uint256 id = easyTrack.createMotion(address(factory), blob);
         vm.warp(block.timestamp + 3 days + 1);
-        easyTrack.enactMotion(id2);
-
-        // the widened permission now works for the operator
-        _op(a.wsteth, abi.encodeCall(IERC20.approve, (dummySpender, 1 ether)));
-        assertEq(IERC20(a.wsteth).allowance(address(safe), dummySpender), 1 ether);
+        easyTrack.enactMotion(id);
     }
 
     function _motion(uint256 id)
@@ -215,7 +370,11 @@ contract Drills is Test {
     }
 
     function test_D2_direct_DAO_path() public {
-        // the same change applied directly by the owner, no Easy Track
+        // the same change applied directly by the owner, no Easy Track.
+        // NOTE: this drill intentionally replaces a scoped approve with an
+        // unscoped allowFunction — a live demonstration of F-X3 (one scope
+        // per slot, last write wins). Production owner actions must emit
+        // full replacement scopes, exactly like the ET factories.
         vm.startPrank(principal);
         SafeExec.execAsOwner(
             agent,
@@ -245,10 +404,31 @@ contract Drills is Test {
         _op(a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.usdc, 500e6, address(safe), 0)));
         assertGt(IERC20(a.atokenUsdc).balanceOf(address(safe)), 0, "no aUSDC minted");
 
+        // 18-decimal legs under their OWN budget keys (regression for the
+        // corrected per-group supply scope): DAI draws k2, wstETH draws k3
+        _op(a.dai, abi.encodeCall(IERC20.approve, (a.aavePool, 1_000e18)));
+        _op(a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.dai, 400e18, address(safe), 0)));
+        assertGt(IERC20(a.atokenDai).balanceOf(address(safe)), 0, "no aDAI minted");
+        deal(a.wsteth, address(safe), 1 ether);
+        _op(a.wsteth, abi.encodeCall(IERC20.approve, (a.aavePool, 1 ether)));
+        _op(a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.wsteth, 0.4 ether, address(safe), 0)));
+        assertGt(IERC20(a.atokenWsteth).balanceOf(address(safe)), 0, "no awstETH minted");
+        // budgets are independent: exhausting k1 (USDC) must not affect k2/k3
+        _op(a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.usdc, 500e6, address(safe), 0))); // k1 now 1000/1000 used
+        _opRevert(
+            a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.usdc, 1e6, address(safe), 0))
+        ); // k1 exhausted
+        _op(a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.dai, 100e18, address(safe), 0))); // k2 still open
+        _op(a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.wsteth, 0.1 ether, address(safe), 0))); // k3 still open
+
         // withdraw back to the avatar
         uint256 aBal = IERC20(a.atokenUsdc).balanceOf(address(safe));
         _op(a.aavePool, abi.encodeCall(IAaveV3Pool.withdraw, (a.usdc, aBal, address(safe))));
         assertEq(IERC20(a.atokenUsdc).balanceOf(address(safe)), 0);
+        uint256 aDai = IERC20(a.atokenDai).balanceOf(address(safe));
+        _op(a.aavePool, abi.encodeCall(IAaveV3Pool.withdraw, (a.dai, aDai, address(safe))));
+        uint256 aWst = IERC20(a.atokenWsteth).balanceOf(address(safe));
+        _op(a.aavePool, abi.encodeCall(IAaveV3Pool.withdraw, (a.wsteth, aWst, address(safe))));
 
         // Sky savings: approve then deposit
         _op(a.dai, abi.encodeCall(IERC20.approve, (a.sdai, 1_000e18)));
@@ -409,50 +589,61 @@ contract Drills is Test {
         roles.execTransactionWithRole(
             a.wsteth, 0, abi.encodeCall(IWstETH.wrap, (1 ether)), 0, Policy.OPERATOR(), true
         );
-        // CoW unbounded-sell demo (R1): an arbitrarily large presignable order
-        // is only bounded by approvals — reproduce by approving max to the
-        // relayer, which the current proposal permits. Evidence, not exploit.
-        deal(a.usdc, address(safe), 1e12);
-        _op(a.usdc, abi.encodeCall(IERC20.approve, (a.aavePool, type(uint256).max)));
-        assertEq(IERC20(a.usdc).allowance(address(safe), a.aavePool), type(uint256).max);
-        // note: approvals to non-approved spenders are denied by scope
+        // CoW presign opacity (restated R1): an order uid commits receiver,
+        // amounts and assets inside the digest; the modifier can only see
+        // owner and expiry, so NO parameter condition on setPreSignature can
+        // pin a receiver or cap a sell amount. The hostile-receiver presign
+        // below succeeds — that is the finding, not a defect of the test.
+        // What IS enforceable: the standing relayer approval cap.
+        bytes memory hostileUid = abi.encodePacked(
+            keccak256("hostile-order-receiver-attacker"),
+            bytes20(address(safe)), // uid.owner must be the Safe
+            bytes4(uint32(block.timestamp + 3600))
+        );
+        _op(a.cowSettlement, abi.encodeCall(ICowSettlement.setPreSignature, (hostileUid, true)));
+        // approval bound: the relayer approval for USDC is scoped to the
+        // relayer but its AMOUNT is unconstrained — the enforceable part of
+        // R1 is keeping that approval small (see WS-F recommendation), while
+        // sell-amount caps are NOT achievable via presign scoping.
+        _op(a.usdc, abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 500e6)));
+        assertEq(IERC20(a.usdc).allowance(address(safe), a.cowVaultRelayer), 500e6);
         _opRevert(a.usdc, abi.encodeCall(IERC20.approve, (attacker, 1)));
     }
 
     // ------------------------------------------------------------------
-    // Earn deposit permission shape (underlying protocol flow is async and
-    // oracle-paced; the drill asserts the ROLES layer admits the verified
-    // signature and that the protocol layer, not the policy, gates the rest)
+    // Earn deposit permission shape: the provider's own encoding is a
+    // one-child Matches (amount WithinAllowance on param 0); trailing
+    // parameters — referral, proof — are unconstrained. The kit matches the
+    // provider exactly; the earlier avatar-pinning of the referral was a
+    // divergence and is removed (the referral carries no custody).
     // ------------------------------------------------------------------
     function test_D3b_earn_deposit_policy_layer() public {
         deal(a.usdc, address(safe), 1_000e6);
         bytes32[] memory noProof = new bytes32[](0);
-        // policy layer: call shape must be deposit(uint224,address,bytes32[])
-        // with referral pinned to avatar. Protocol may still revert for its
-        // own reasons (queue state); either way the ROLES layer must not be
-        // the blocker. We assert the Roles check passes by expecting either
-        // success or a protocol-origin revert.
+        // amount beyond the budget must be blocked by the Roles layer
+        _opRevert(
+            a.earnUsdDepositQueue,
+            abi.encodeCall(ILidoEarnDepositQueue.deposit, (uint224(5_000e6), attacker, noProof))
+        );
+        // a within-budget call is authorized by the policy; the deposit
+        // queue itself may still revert for protocol reasons (allowlist,
+        // queue state) — that is out of the policy's hands by design
         vm.prank(tmc);
-        (bool ok,) = address(roles).call(
+        (bool authorized,) = address(roles).call(
             abi.encodeCall(
                 IRoles.execTransactionWithRole,
                 (
                     a.earnUsdDepositQueue,
                     0,
-                    abi.encodeCall(ILidoEarnDepositQueue.deposit, (uint224(50e6), address(safe), noProof)),
+                    abi.encodeCall(ILidoEarnDepositQueue.deposit, (uint224(50e6), attacker, noProof)),
                     0,
                     Policy.OPERATOR(),
-                    false // shouldRevert=false: inspect the raw outcome
+                    false
                 )
             )
         );
-        // ok=false means the Roles layer blocked it — that would be a defect.
-        assertTrue(ok, "Roles layer rejected a policy-conformant earn deposit");
-        // a referral to another address must be blocked by EqualToAvatar
-        _opRevert(
-            a.earnUsdDepositQueue,
-            abi.encodeCall(ILidoEarnDepositQueue.deposit, (uint224(50e6), attacker, noProof))
-        );
+        // authorized=false only if the ROLES layer rejected the shape
+        assertTrue(authorized, "Roles layer rejected a policy-conformant earn deposit");
     }
 
     receive() external payable {}

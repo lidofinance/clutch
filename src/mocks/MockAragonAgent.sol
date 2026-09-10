@@ -20,23 +20,27 @@ abstract contract OwnableInline {
 
 /// @title MockAragonAgent — dry-run stand-in for the Lido DAO Aragon Agent
 ///        (0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c).
-/// @dev Fidelity contract (WS-M R17): this mock implements the same execution
-///      interface and flow the real Agent exposes to the treasury graph:
-///      - `forward(address,bytes)`: gated exactly like the real Agent's
-///        forward, which requires RUN_SCRIPT_ROLE on the ACL. Here the role is
-///        emulated with an allowlist (the owner and explicitly permitted
-///        runners, i.e. the MockEVMScriptExecutor).
-///      - `execute(address,uint256,bytes)`: the direct execution path used by
-///        EVM scripts that need Agent authority, owner-gated here.
-///      - receives ETH and tokens like the real Agent.
-///      Everything downstream (Safe, Roles modifier, tokens, protocols) is the
-///      production deployment; only this head is mocked. Controlled by a
-///      dedicated throwaway EOA (the "executor"), never a production signer.
+/// @dev Fidelity contract (WS-M R17), corrected 2026-09-10 after review:
+///      the real Agent implements the Aragon forwarder with a SINGLE-argument
+///      `forward(bytes)` (selector 0xd948d468; the two-argument form does not
+///      exist on the deployed implementation), plus `execute(address,
+///      uint256, bytes)` and `canForward(address,bytes)`. The Agent itself
+///      parses the CallsScript blob it is handed and executes each chunk with
+///      its own authority.
+///      On the real Agent these are gated by Aragon ACL roles. At the pinned
+///      block the ONLY holder of RUN_SCRIPT_ROLE and EXECUTE_ROLE on the
+///      Agent is the Dual Governance admin executor
+///      0x23E0B465633FF5178808F4A75186E2F2F9537021; the Easy Track EVM script
+///      executor holds NEITHER. The mock mirrors that: `permittedRunners`
+///      starts EMPTY. The dry-run must not paper over the missing Easy Track
+///      grant — ET-driven policy changes run through the policy-admin role on
+///      the Roles modifier instead (see FullPolicy / Drills D1), which needs
+///      no Agent authority at all.
 contract MockAragonAgent is OwnableInline {
-    event Forwarded(address indexed to, bytes data);
+    event Forwarded(bytes evmScript);
     event Executed(address indexed to, uint256 value, bytes data);
 
-    /// @dev emulates ACL RUN_SCRIPT_ROLE holders on the real Agent.
+    /// @dev mirrors ACL RUN_SCRIPT_ROLE holders; deliberately empty at birth.
     mapping(address => bool) public permittedRunners;
 
     modifier onlyRunner() {
@@ -54,46 +58,52 @@ contract MockAragonAgent is OwnableInline {
         permittedRunners[runner] = false;
     }
 
-    /// @dev Real Agent.forward: performs `to.call(data)` with Agent authority.
-    ///      Restricted to RUN_SCRIPT_ROLE holders on mainnet; onlyRunner here.
-    function forward(address to, bytes calldata data) external payable onlyRunner {
-        (bool ok, bytes memory ret) = to.call{value: 0}(data);
-        require(ok, _returndataToBubbles(ret));
-        emit Forwarded(to, data);
+    /// @dev Aragon forwarder: parse and execute a CallsScript blob as the
+    ///      Agent. Spec 0x00000001, chunks of [to (20)][len (32)][calldata].
+    function forward(bytes memory evmScript) public payable onlyRunner {
+        require(evmScript.length >= 4, "AGENT: short script");
+        require(bytes4(evmScript) == 0x00000001, "AGENT: unknown spec");
+        uint256 location = 4;
+        while (location < evmScript.length) {
+            address to;
+            assembly {
+                to := shr(96, mload(add(add(evmScript, 0x20), location)))
+            }
+            location += 20;
+            uint256 len;
+            assembly {
+                len := mload(add(add(evmScript, 0x20), location))
+            }
+            location += 32;
+            require(location + len <= evmScript.length, "AGENT: truncated chunk");
+            bytes memory cd = new bytes(len);
+            for (uint256 i = 0; i < len; i++) {
+                cd[i] = evmScript[location + i];
+            }
+            (bool ok,) = to.call(cd);
+            require(ok, "AGENT: chunk reverted");
+            location += len;
+        }
+        emit Forwarded(evmScript);
     }
 
-    /// @dev Real Agent.execute: performs a call with value from Agent authority.
+    /// @dev AragonApp execute path: one arbitrary call with Agent authority.
     function execute(address to, uint256 value, bytes calldata data)
         external
         onlyOwner
         returns (bytes memory)
     {
         (bool ok, bytes memory ret) = to.call{value: value}(data);
-        require(ok, _returndataToBubbles(ret));
+        require(ok, "AGENT: execute reverted");
         emit Executed(to, value, data);
         return ret;
     }
 
+    /// @dev AragonForwarder::canForward — reports whether the ACL would let
+    ///      the caller forward. Mirrors the deployed answer for the executor.
+    function canForward(address, bytes memory) external view returns (bool) {
+        return permittedRunners[msg.sender] || msg.sender == owner;
+    }
+
     receive() external payable {}
-
-    function _returndataToBubbles(bytes memory ret) internal pure returns (string memory) {
-        // Bubble revert strings from downstream (Safe/Roles) for debuggability.
-        if (ret.length >= 4) {
-            bytes4 selector = bytes4(ret);
-            // RoleViolation(bytes32,address) and similar custom errors surface as raw;
-            // string errors decode cleanly.
-            if (selector == 0x08c379a0) {
-                return abi.decode(_slice(ret, 4), (string));
-            }
-        }
-        return "AGENT: call reverted";
-    }
-
-    function _slice(bytes memory data, uint256 start) internal pure returns (bytes memory) {
-        bytes memory out = new bytes(data.length - start);
-        for (uint256 i = start; i < data.length; i++) {
-            out[i - start] = data[i];
-        }
-        return out;
-    }
 }

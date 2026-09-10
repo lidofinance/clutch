@@ -119,8 +119,8 @@ interface IRoles {
             uint128 refill,
             uint128 maxRefill,
             uint64 period,
-            uint64 timestamp,
-            uint128 balance
+            uint128 balance,
+            uint64 timestamp
         );
 
     function getModulesPaginated(uint256 start, uint256 pageSize)

@@ -52,6 +52,16 @@ library Policy {
         return keccak256("emergency");
     }
 
+    /// @dev Third role for the corrected governance path: ET-driven policy
+    ///      changes execute through the Roles modifier as this role (same
+    ///      mechanism the emergency role uses), so Easy Track never needs
+    ///      RUN_SCRIPT authority on the Agent. Dry-run member: the mock EVMScript
+    ///      executor. Production member: a Lido-built, shape-validating
+    ///      contract (WS-D).
+    function POLICY_ADMIN() internal pure returns (bytes32) {
+        return keccak256("policy-admin");
+    }
+
     bytes32 internal constant K_AAVE_USDC_USDT = keccak256("aave_supply_usdc_usdt");
     bytes32 internal constant K_AAVE_DAI_USDS = keccak256("aave_supply_dai_usds");
     bytes32 internal constant K_AAVE_WSTETH = keccak256("aave_supply_wsteth");
@@ -70,6 +80,7 @@ library Policy {
         address agent; // dry-run: MockAragonAgent; production: Aragon Agent
         address operator; // dry-run: stand-in for the TMC Safe
         address emergency; // dry-run: stand-in for the EB Safe
+        address policyAdmin; // dry-run: mock EVMScript executor; production: narrow Lido contract
         address steth;
         address wsteth;
         address ldo;
@@ -340,29 +351,35 @@ library Policy {
     }
 
     /// @dev Aave v3 Core supply(asset, amount, onBehalfOf, referralCode)
-    ///      with asset in an allow-list and amount within ONE allowance key.
-    ///      DD FINDING (evidence test_D5): Roles v4 logical-operator children
-    ///      keep the same evaluation scope, so per-asset budget coupling
-    ///      ("USDC draws k1, DAI draws k2") is NOT expressible on a single
-    ///      selector. The proposal's three separate Aave budgets cannot all
-    ///      bind `supply` on-chain; the enforceable form is one shared budget
-    ///      per selector. Recorded as a WS-C/WS-F finding for the RFP reply.
-    function _opAaveSupply(
+    ///      with per-asset-group budgets: a root Or whose children are FULL
+    /// Matches branches, one per (asset-group, budget-key) pair. Each branch
+    /// re-describes the whole call and carries its own WithinAllowance in
+    /// the amount position, so USDC/USDT share k1, DAI/USDS share k2 and
+    /// wstETH draws k3 — the provider's declared shape, verified on the
+    /// deployed mastercopy (ReviewProbe.test_FX4_per_asset_budgets_ARE_
+    /// expressible). CORRECTION 2026-09-10: an earlier revision claimed this
+    /// shape was inexpressible; the claim was wrong and is retracted.
+    ///      Layout (BFS): [0] root Or; [1..n] Matches branches (parent 0);
+    ///      then per-branch children in call-param order: asset EqualTo,
+    ///      amount WithinAllowance, onBehalfOf EqualToAvatar, referral Pass.
+    function _opAaveSupplyMulti(
         address roles,
         address[] memory assets,
-        bytes32 key,
+        bytes32[] memory keys,
         bytes32 roleKey,
         address pool
     ) internal pure returns (Call memory) {
         uint256 n = assets.length;
-        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](5 + n);
-        c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
-        c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_NONE, operator_: OP_OR, compValue: ""});
-        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_WITHIN_ALLOWANCE, compValue: abi.encodePacked(key)});
-        c[3] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO_AVATAR, compValue: ""});
-        c[4] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
+        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](1 + 5 * n);
+        c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_NONE, operator_: OP_OR, compValue: ""});
         for (uint256 i = 0; i < n; i++) {
-            c[5 + i] = IRoles.ConditionFlat({parent: 1, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(assets[i])});
+            uint256 b = 1 + i; // branch node index
+            uint256 k = 1 + n + 4 * i; // first child index of branch i (exact stride, no ghost slots)
+            c[b] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
+            c[k] = IRoles.ConditionFlat({parent: uint8(b), paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(assets[i])});
+            c[k + 1] = IRoles.ConditionFlat({parent: uint8(b), paramType: PARAM_STATIC, operator_: OP_WITHIN_ALLOWANCE, compValue: abi.encodePacked(keys[i])});
+            c[k + 2] = IRoles.ConditionFlat({parent: uint8(b), paramType: PARAM_STATIC, operator_: OP_EQUAL_TO_AVATAR, compValue: ""});
+            c[k + 3] = IRoles.ConditionFlat({parent: uint8(b), paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
         }
         return _call(
             roles,
@@ -424,22 +441,20 @@ library Policy {
         return _call(roles, abi.encodeCall(IRoles.scopeFunction, (roleKey, vault, sel, c, EXEC_NONE)));
     }
 
-    /// @dev Earn deposit(uint224,address,bytes32[]): amount within allowance,
-    ///      referral pinned to avatar (conservative; parity item R17/F-C-1),
-    ///      proof array pass. Array nodes require a child element node per
-    ///      Integrity.sol, so the unconstrained bytes32[] carries a Static/Pass
-    ///      element template.
+    /// @dev Earn deposit(uint224,address,bytes32[]) matching the provider:
+    ///      amount within allowance; referral (param 2) unconstrained — it
+    ///      carries no custody and the provider leaves it open; proof array
+    ///      unconstrained. A Matches root with fewer children than parameters
+    ///      is legal (ReviewProbe.test_FX7); undescribed trailing parameters
+    ///      are simply unconstrained.
     function _opEarnDeposit(address roles, address queue, bytes32 key, bytes32 roleKey)
         internal
         pure
         returns (Call memory)
     {
-        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](5);
+        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](2);
         c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
         c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_WITHIN_ALLOWANCE, compValue: abi.encodePacked(key)});
-        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO_AVATAR, compValue: ""});
-        c[3] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_ARRAY, operator_: OP_PASS, compValue: ""});
-        c[4] = IRoles.ConditionFlat({parent: 3, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
         return _call(
             roles,
             abi.encodeCall(

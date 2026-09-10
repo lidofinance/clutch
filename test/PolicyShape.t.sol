@@ -17,7 +17,7 @@ contract PolicyShape is Test {
         Policy.fillAtokens(a);
         Policy.Call[] memory calls = FullPolicy.build(a, address(0x401e5));
         assertGt(calls.length, 80, "policy too small");
-        assertLe(calls.length, 136, "policy too large");
+        assertLe(calls.length, 160, "policy too large");
         for (uint256 i = 0; i < calls.length; i++) {
             assertGt(calls[i].data.length, 4, "empty calldata");
             assertEq(calls[i].to, address(0x401e5), "target must be roles");

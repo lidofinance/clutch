@@ -17,7 +17,7 @@ library FullPolicy {
         pure
         returns (Policy.Call[] memory)
     {
-        Policy.Call[] memory calls = new Policy.Call[](136);
+        Policy.Call[] memory calls = new Policy.Call[](160);
         uint256 i = 0;
 
         // -- membership ------------------------------------------------
@@ -25,6 +25,9 @@ library FullPolicy {
         calls[i++] = Policy._setDefaultRole(roles, a.operator, Policy.OPERATOR());
         calls[i++] = Policy._assignRoles(roles, a.emergency, Policy.EMERGENCY());
         calls[i++] = Policy._setDefaultRole(roles, a.emergency, Policy.EMERGENCY());
+        // corrected ET governance path: no Agent authority involved
+        calls[i++] = Policy._assignRoles(roles, a.policyAdmin, Policy.POLICY_ADMIN());
+        calls[i++] = Policy._setDefaultRole(roles, a.policyAdmin, Policy.POLICY_ADMIN());
 
         // -- allowances (dust scale; structure identical; sizing = WS-F) --
         calls[i++] = Policy._setAllowance(roles, Policy.K_AAVE_USDC_USDT, 1_000e6);
@@ -59,26 +62,38 @@ library FullPolicy {
         calls[i++] = Policy._allowFunction(roles, Policy.OPERATOR(), a.wsteth, IWstETH.unwrap.selector);
 
         // -- operator: Aave v3 Core --------------------------------------
+        // ONE approve scope per token: all spenders (Aave pool, Sky vault,
+        // Earn queue, CoW relayer) merged into a single Or. A second scope on
+        // the same (role, target, selector) would REPLACE the whole entry
+        // (F-X3) — an earlier revision did exactly that for DAI/USDS and
+        // silently wiped the Aave+CoW spenders; corrected 2026-09-10.
         calls[i++] = Policy._opApproveOr(roles, a.usdc, _three(a.aavePool, a.earnUsdDepositQueue, a.cowVaultRelayer), Policy.OPERATOR());
         calls[i++] = Policy._opApproveOr(roles, a.usdt, _two(a.aavePool, a.cowVaultRelayer), Policy.OPERATOR());
-        calls[i++] = Policy._opApproveOr(roles, a.dai, _two(a.aavePool, a.cowVaultRelayer), Policy.OPERATOR());
-        calls[i++] = Policy._opApproveOr(roles, a.usds, _two(a.aavePool, a.cowVaultRelayer), Policy.OPERATOR());
+        calls[i++] = Policy._opApproveOr(roles, a.dai, _three(a.aavePool, a.sdai, a.cowVaultRelayer), Policy.OPERATOR());
+        calls[i++] = Policy._opApproveOr(roles, a.usds, _three(a.aavePool, a.susds, a.cowVaultRelayer), Policy.OPERATOR());
         calls[i++] = Policy._opApproveOr(roles, a.wsteth, _three(a.aavePool, a.earnEthDepositQueue, a.cowVaultRelayer), Policy.OPERATOR());
 
-        // one shared Aave supply budget: see Policy._opAaveSupply DD finding
-        calls[i++] = Policy._opAaveSupply(
-            roles,
-            _five(a.usdc, a.usdt, a.dai, a.usds, a.wsteth),
-            Policy.K_AAVE_USDC_USDT,
-            Policy.OPERATOR(),
-            a.aavePool
+        // the provider's three-budget shape (see Policy._opAaveSupplyMulti):
+        // USDC/USDT share k1, DAI/USDS share k2, wstETH draws k3
+        address[] memory supplyAssets = new address[](5);
+        supplyAssets[0] = a.usdc;
+        supplyAssets[1] = a.usdt;
+        supplyAssets[2] = a.dai;
+        supplyAssets[3] = a.usds;
+        supplyAssets[4] = a.wsteth;
+        bytes32[] memory supplyKeys = new bytes32[](5);
+        supplyKeys[0] = Policy.K_AAVE_USDC_USDT;
+        supplyKeys[1] = Policy.K_AAVE_USDC_USDT;
+        supplyKeys[2] = Policy.K_AAVE_DAI_USDS;
+        supplyKeys[3] = Policy.K_AAVE_DAI_USDS;
+        supplyKeys[4] = Policy.K_AAVE_WSTETH;
+        calls[i++] = Policy._opAaveSupplyMulti(
+            roles, supplyAssets, supplyKeys, Policy.OPERATOR(), a.aavePool
         );
         // withdraw is unbudgeted for both roles (risk-reducing direction)
         calls[i++] = Policy._exitAaveWithdraw(roles, _five(a.usdc, a.usdt, a.dai, a.usds, a.wsteth), a.aavePool, Policy.OPERATOR());
 
-        // -- operator: Sky savings ----------------------------------------
-        calls[i++] = Policy._opApproveEq(roles, a.dai, a.sdai, Policy.OPERATOR());
-        calls[i++] = Policy._opApproveEq(roles, a.usds, a.susds, Policy.OPERATOR());
+        // -- operator: Sky savings (spenders already merged above) ---------
         calls[i++] = Policy._opSavingsDeposit(roles, a.sdai, Policy.K_SKY_DAI_USDS, Policy.OPERATOR());
         calls[i++] = Policy._opSavingsDeposit(roles, a.susds, Policy.K_SKY_DAI_USDS, Policy.OPERATOR());
         calls[i++] = Policy._exitSavings(roles, a.sdai, ISDAI.redeem.selector, Policy.OPERATOR());
@@ -133,6 +148,22 @@ library FullPolicy {
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.atokenWsteth);
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), address(roles));
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.safe);
+
+        // -- policy-admin target scoping ------------------------------------
+        // NOTE (WS-D): parameters are unconstrained here. Production must
+        // constrain roleKey (operator only for widening, none for revocation
+        // except emergency's own revoke-only scope) and validate whole-tree
+        // replacements; that validation lives in the Lido-built factories.
+        calls[i++] = Policy._scopeTarget(roles, Policy.POLICY_ADMIN(), address(roles));
+        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.allowTarget.selector);
+        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.scopeTarget.selector);
+        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.allowFunction.selector);
+        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.scopeFunction.selector);
+        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.revokeFunction.selector);
+        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.revokeTarget.selector);
+        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.setAllowance.selector);
+        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.assignRoles.selector);
+        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.setDefaultRole.selector);
 
         // -- emergency: revoke approvals (spender list sync invariant R8) ---
         address[] memory spenders = _seven(

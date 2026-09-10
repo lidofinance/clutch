@@ -2,12 +2,12 @@
 pragma solidity >=0.8.24 <0.9.0;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {ISafe, ISafeProxyFactory} from "../src/interfaces/ISafe.sol";
+import {ISafe, ISafeProxyFactory, IModuleProxyFactory} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
 import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 import {MockEasyTrack, PassThroughEVMScriptFactory} from "../src/mocks/MockEasyTrack.sol";
-import {ModuleProxyFactory} from "../src/mocks/ModuleProxyFactory.sol";
+
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {Policy} from "../src/policy/Policy.sol";
 import {FullPolicy} from "../src/policy/FullPolicy.sol";
@@ -27,6 +27,7 @@ contract DeployDryRun is Script {
     address internal constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
     address internal constant ROLES_MASTERCOPY = 0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5;
     address internal constant SAFE_PROXY_FACTORY = 0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67;
+    address internal constant MODULE_PROXY_FACTORY = 0x000000000000aDdB49795b0f9bA5BC298cDda236;
     address internal constant LDO = 0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32;
 
     // Production Easy Track timing (WS-B verified).
@@ -71,10 +72,14 @@ contract DeployDryRun is Script {
             payable(proxyFactory.createProxyWithNonce(SAFE_SINGLETON, safeInit, uint256(0x11d0)))
         );
 
-        ModuleProxyFactory moduleProxyFactory = new ModuleProxyFactory();
+        // canonical deployed factory — production component, not a copy
         bytes memory rolesInit =
             abi.encodeCall(IRoles.setUp, (abi.encode(address(safe), address(safe), address(safe))));
-        IRoles roles = IRoles(moduleProxyFactory.deployModule(ROLES_MASTERCOPY, rolesInit, uint256(0x11d0)));
+        IRoles roles = IRoles(
+            IModuleProxyFactory(MODULE_PROXY_FACTORY).deployModule(
+                ROLES_MASTERCOPY, rolesInit, uint256(0x11d0)
+            )
+        );
 
         // enable the modifier as a Safe module, as the owner (production path)
         SafeExec.execAsOwner(

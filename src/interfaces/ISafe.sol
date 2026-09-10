@@ -74,16 +74,13 @@ interface ISafeProxyFactory {
     ) external returns (address proxy);
 }
 
-/// @dev Zodiac's ModuleProxyFactory (gnosisguild/zodiac-core). Deploys
-///      EIP-1167-style minimal proxies whose implementation address lives in
-///      proxy BYTECODE, not storage. This matters: the deployed Roles v4
-///      mastercopy keeps its own state from slot 0, so a SafeProxy (singleton
-///      pointer at slot 0) gets its implementation pointer overwritten by
-///      setUp() and re-points at whatever address setUp wrote first. Foundry
-///      drill evidence 2026-09-10; production must use the same proxy shape
-///      the provider's tooling uses.
+/// @dev The CANONICAL deployed ModuleProxyFactory (verified code at the
+///      pinned block): 0x000000000000aDdB49795b0f9bA5BC298cDda236.
+///      The kit previously deployed a local copy, breaking its own
+///      production-components-only rule; corrected 2026-09-10.
 interface IModuleProxyFactory {
     function deployModule(address masterCopy, bytes memory initializer, uint256 saltNonce)
         external
         returns (address proxy);
 }
+
