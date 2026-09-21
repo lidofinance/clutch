@@ -59,22 +59,23 @@ contract MockAragonAgent is OwnableInline {
     }
 
     /// @dev Aragon forwarder: parse and execute a CallsScript blob as the
-    ///      Agent. Spec 0x00000001, chunks of [to (20)][len (32)][calldata].
+    ///      Agent. Spec 0x00000001, chunks of [to (20)][len (uint32)][calldata]
+    ///      where len covers selector and args. P0-1 fix: the length field was
+    ///      previously read as a 32-byte word, which no production script uses.
     function forward(bytes memory evmScript) public payable onlyRunner {
         require(evmScript.length >= 4, "AGENT: short script");
         require(bytes4(evmScript) == 0x00000001, "AGENT: unknown spec");
         uint256 location = 4;
         while (location < evmScript.length) {
+            require(location + 24 <= evmScript.length, "AGENT: truncated header");
             address to;
-            assembly {
-                to := shr(96, mload(add(add(evmScript, 0x20), location)))
-            }
-            location += 20;
             uint256 len;
             assembly {
-                len := mload(add(add(evmScript, 0x20), location))
+                to := shr(96, mload(add(add(evmScript, 0x20), location)))
+                len := shr(224, mload(add(add(evmScript, 0x20), add(location, 20))))
             }
-            location += 32;
+            location += 24;
+            require(len != 0, "AGENT: empty chunk");
             require(location + len <= evmScript.length, "AGENT: truncated chunk");
             bytes memory cd = new bytes(len);
             for (uint256 i = 0; i < len; i++) {

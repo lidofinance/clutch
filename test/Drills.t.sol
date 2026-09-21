@@ -196,7 +196,7 @@ contract Drills is Test {
         vm.prank(tmc);
         uint256 id = easyTrack.createMotion(address(factory), script);
         vm.warp(block.timestamp + 3 days + 1);
-        easyTrack.enactMotion(id);
+        easyTrack.enactMotion(id, script);
     }
 
     function test_D1_change_type_1_asset() public {
@@ -311,35 +311,95 @@ contract Drills is Test {
         (,,,,,,, uint256 status) = _motion(id);
         assertEq(uint256(status), 1, "motion should be rejected");
         vm.expectRevert();
-        easyTrack.enactMotion(id);
+        easyTrack.enactMotion(id, script);
     }
 
-    /// @dev Golden-calldata parity: the SAME CallsScript blob shape executes
-    ///      through MockAragonAgent.forward(bytes) (production Agent shape,
-    ///      selector 0xd948d468) when the runner is permitted — proving the
-    ///      mock can reproduce the real forwarder path end to end.
-    function test_D1_golden_calldata_agent_forward_parity() public {
-        // A production ET script that needs Agent authority carries chunks
-        // targeting Agent.forward(bytes). Prove the mock Agent executes that
-        // shape: the runner hands it one blob, the Agent parses CallsScript
-        // itself and executes each chunk with its own authority (here: a
-        // harmless no-op call to the Agent's own canForward).
+    /// @dev P0-1 governance-encoding parity. Builds a CallsScript in the exact
+    ///      production wire format of EVMScriptCreator @ 3183d1f6 —
+    ///      [spec(4)][to(20)][uint32 len][calldata], len covering selector and
+    ///      args — and drives it through the mock executor. Revision 4 showed
+    ///      the previous harness used a 32-byte length field, so the old
+    ///      parity test only proved the mock agreed with itself.
+    function test_D1_production_callscript_encoding_accepted() public {
         vm.prank(principal);
         agent.permitRunner(address(executor));
-        bytes memory inner = abi.encodeCall(
-            MockAragonAgent.canForward, (address(executor), "")
-        );
-        bytes memory blob = abi.encodePacked(
-            bytes4(0x00000001),
-            bytes20(address(agent)),
-            bytes32(abi.encodeCall(MockAragonAgent.forward, (abi.encodePacked(bytes4(0x00000001), bytes20(address(agent)), bytes32(inner.length), inner))).length),
-            abi.encodeCall(MockAragonAgent.forward, (abi.encodePacked(bytes4(0x00000001), bytes20(address(agent)), bytes32(inner.length), inner)))
-        );
-        // route through the mock ET so the executor's caller check holds
+        bytes memory inner = abi.encodeCall(MockAragonAgent.canForward, (address(executor), ""));
+        bytes memory innerScript = _callsScript(address(agent), inner);
+        bytes memory outer = abi.encodeCall(MockAragonAgent.forward, (innerScript));
+        bytes memory blob = _callsScript(address(agent), outer);
+
         vm.prank(tmc);
         uint256 id = easyTrack.createMotion(address(factory), blob);
         vm.warp(block.timestamp + 3 days + 1);
-        easyTrack.enactMotion(id);
+        easyTrack.enactMotion(id, blob);
+    }
+
+    /// @dev A 32-byte length field is the old harness format. Production never
+    ///      emits it and the corrected executor must reject it.
+    function test_D1_nonstandard_length_encoding_rejected() public {
+        bytes memory inner = abi.encodeCall(MockAragonAgent.canForward, (address(executor), ""));
+        bytes memory bad = abi.encodePacked(
+            bytes4(0x00000001), bytes20(address(agent)), bytes32(inner.length), inner
+        );
+        vm.prank(tmc);
+        uint256 id = easyTrack.createMotion(address(factory), bad);
+        vm.warp(block.timestamp + 3 days + 1);
+        vm.expectRevert();
+        easyTrack.enactMotion(id, bad);
+    }
+
+    /// @dev A truncated length must not read past the script.
+    function test_D1_malformed_length_rejected() public {
+        bytes memory inner = abi.encodeCall(MockAragonAgent.canForward, (address(executor), ""));
+        bytes memory bad = abi.encodePacked(
+            bytes4(0x00000001), bytes20(address(agent)), uint32(inner.length + 64), inner
+        );
+        vm.prank(tmc);
+        uint256 id = easyTrack.createMotion(address(factory), bad);
+        vm.warp(block.timestamp + 3 days + 1);
+        vm.expectRevert();
+        easyTrack.enactMotion(id, bad);
+    }
+
+    /// @dev Several calls in one script, the normal factory output shape.
+    function test_D1_multi_call_script_executes_in_order() public {
+        address dummyA = address(0xdEaD);
+        address dummyB = address(0xbEEF);
+        Policy.Call[] memory calls = new Policy.Call[](2);
+        calls[0] = Policy._opApproveEq(address(roles), a.wsteth, dummyA, Policy.OPERATOR(), type(uint256).max);
+        calls[1] = Policy._opApproveEq(address(roles), a.steth, dummyB, Policy.OPERATOR(), type(uint256).max);
+        bytes memory script = EVMScriptLib.buildAsPolicyAdmin(roles, calls);
+        vm.prank(tmc);
+        uint256 id = easyTrack.createMotion(address(factory), script);
+        vm.warp(block.timestamp + 3 days + 1);
+        easyTrack.enactMotion(id, script);
+        _op(a.wsteth, abi.encodeCall(IERC20.approve, (dummyA, 1 ether)));
+        _op(a.steth, abi.encodeCall(IERC20.approve, (dummyB, 1 ether)));
+        assertEq(IERC20(a.wsteth).allowance(address(safe), dummyA), 1 ether);
+    }
+
+    /// @dev P0-1 stale-script rejection. Production regenerates the script from
+    ///      the re-supplied factory call data and compares it with the hash
+    ///      recorded at creation, so a substituted script cannot enact.
+    function test_D1_substituted_script_rejected_at_enactment() public {
+        Policy.Call[] memory good = new Policy.Call[](1);
+        good[0] = Policy._opApproveEq(address(roles), a.wsteth, address(0xdEaD), Policy.OPERATOR(), type(uint256).max);
+        bytes memory goodScript = EVMScriptLib.buildAsPolicyAdmin(roles, good);
+
+        Policy.Call[] memory evil = new Policy.Call[](1);
+        evil[0] = Policy._opApproveEq(address(roles), a.wsteth, attacker, Policy.OPERATOR(), type(uint256).max);
+        bytes memory evilScript = EVMScriptLib.buildAsPolicyAdmin(roles, evil);
+
+        vm.prank(tmc);
+        uint256 id = easyTrack.createMotion(address(factory), goodScript);
+        vm.warp(block.timestamp + 3 days + 1);
+        vm.expectRevert(bytes("ET: unexpected evm script"));
+        easyTrack.enactMotion(id, evilScript);
+        easyTrack.enactMotion(id, goodScript);
+    }
+
+    function _callsScript(address to, bytes memory data) internal pure returns (bytes memory) {
+        return abi.encodePacked(bytes4(0x00000001), bytes20(to), uint32(data.length), data);
     }
 
     function _motion(uint256 id)
@@ -349,7 +409,7 @@ contract Drills is Test {
             address creator,
             address f,
             bytes memory cd,
-            bytes memory script,
+            bytes32 scriptHash,
             uint256 startDate,
             uint256 snapshot,
             uint256 objections,
@@ -361,7 +421,7 @@ contract Drills is Test {
             m.creator,
             m.evmScriptFactory,
             m.evmScriptCallData,
-            m.evmScript,
+            m.evmScriptHash,
             m.startDate,
             m.snapshotDate,
             m.objectionsAmount,

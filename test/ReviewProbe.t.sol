@@ -14,7 +14,7 @@ import {SafeExec} from "../src/policy/SafeExec.sol";
 /// @title ReviewProbe — independent review of the WS-M findings (2026-09-10).
 /// @dev Not part of the kit's own suite. Each test decides one contested claim
 ///      against the deployed Roles v4 mastercopy on the pinned fork.
-contract ReviewProbe is Test {
+abstract contract ReviewBase is Test {
     uint256 internal constant FORK_BLOCK = 25946643;
     address internal constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
     address internal constant ROLES_MASTERCOPY = 0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5;
@@ -80,6 +80,9 @@ contract ReviewProbe is Test {
     // Provider's declared policy: three supply() entries, one budget each.
     // Probe: root Or over three Matches branches, one allowance key each.
     // =================================================================
+}
+
+contract ReviewProbe is ReviewBase {
     function test_FX4_per_asset_budgets_ARE_expressible() public {
         // fresh allowance keys, deliberately different scales
         _own(address(roles), abi.encodeCall(IRoles.setAllowance, (K_USDC, 1_000e6, 1_000e6, 1_000e6, 30 days, 0)));
@@ -120,9 +123,9 @@ contract ReviewProbe is Test {
         _own(address(roles), abi.encodeCall(IRoles.allowFunction, (Policy.OPERATOR(), a.usdc, IERC20.approve.selector, 0)));
         _own(address(roles), abi.encodeCall(IRoles.allowFunction, (Policy.OPERATOR(), a.dai, IERC20.approve.selector, 0)));
         _own(address(roles), abi.encodeCall(IRoles.allowFunction, (Policy.OPERATOR(), a.wsteth, IERC20.approve.selector, 0)));
-        assertTrue(_op(a.usdc, abi.encodeCall(IERC20.approve, (a.aavePool, type(uint256).max))), "approve usdc");
-        assertTrue(_op(a.dai, abi.encodeCall(IERC20.approve, (a.aavePool, type(uint256).max))), "approve dai");
-        assertTrue(_op(a.wsteth, abi.encodeCall(IERC20.approve, (a.aavePool, type(uint256).max))), "approve wsteth");
+        assertTrue(_op(a.usdc, abi.encodeCall(IERC20.approve, (a.aavePool, 4_000_000e6))), "approve usdc");
+        assertTrue(_op(a.dai, abi.encodeCall(IERC20.approve, (a.aavePool, 1_000_000e18))), "approve dai");
+        assertTrue(_op(a.wsteth, abi.encodeCall(IERC20.approve, (a.aavePool, 1_000e18))), "approve wsteth");
 
         // 2. each asset draws its OWN key at its OWN scale
         assertTrue(_op(a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.usdc, 900e6, address(safe), 0))), "usdc 900 within k1");
@@ -162,9 +165,9 @@ contract ReviewProbe is Test {
         deal(a.usdc, address(safe), 5_000e6);
         deal(a.dai, address(safe), 5_000e18);
         deal(a.wsteth, address(safe), 5e18);
-        _op(a.usdc, abi.encodeCall(IERC20.approve, (a.aavePool, type(uint256).max)));
-        _op(a.dai, abi.encodeCall(IERC20.approve, (a.aavePool, type(uint256).max)));
-        _op(a.wsteth, abi.encodeCall(IERC20.approve, (a.aavePool, type(uint256).max)));
+        _op(a.usdc, abi.encodeCall(IERC20.approve, (a.aavePool, 4_000_000e6)));
+        _op(a.dai, abi.encodeCall(IERC20.approve, (a.aavePool, 1_000_000e18)));
+        _op(a.wsteth, abi.encodeCall(IERC20.approve, (a.aavePool, 1_000e18)));
 
         assertTrue(_op(a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.usdc, 100e6, address(safe), 0))), "usdc ok");
         assertTrue(_op(a.aavePool, abi.encodeCall(IAaveV3Pool.supply, (a.dai, 1e18, address(safe), 0))), "1 DAI must draw its own k2 budget");
@@ -214,11 +217,120 @@ contract ReviewProbe is Test {
             (Policy.OPERATOR(), a.earnUsdDepositQueue, ILidoEarnDepositQueue.deposit.selector, c, 0)));
         emit log("Integrity ACCEPTED a 1-child Matches on a 3-param function");
         deal(a.usdc, address(safe), 1_000e6);
-        _op(a.usdc, abi.encodeCall(IERC20.approve, (a.earnUsdDepositQueue, type(uint256).max)));
+        _op(a.usdc, abi.encodeCall(IERC20.approve, (a.earnUsdDepositQueue, 900e6)));
         bytes32[] memory noProof = new bytes32[](0);
         bool ok = _op(a.earnUsdDepositQueue,
             abi.encodeCall(ILidoEarnDepositQueue.deposit, (uint224(10e6), address(safe), noProof)));
         emit log_named_string("call with 3 params against a 1-child condition", ok ? "ALLOWED" : "DENIED at check time");
         assertTrue(ok, "a 1-child Matches leaves trailing params unconstrained and allows the call");
+    }
+
+    // =================================================================
+    // P0-2 regression guards (2026-09-21). The two escalation routes that
+    // revision 3 and revision 4 demonstrated must now be closed.
+    // =================================================================
+    function test_p0_policyadmin_cannot_change_role_membership() public {
+        bytes32[] memory keys = new bytes32[](1);
+        keys[0] = Policy.OPERATOR();
+        bool[] memory yes = new bool[](1);
+        yes[0] = true;
+        vm.prank(a.policyAdmin);
+        (bool ok,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (address(roles), 0, abi.encodeCall(IRoles.assignRoles, (attacker, keys, yes)),
+             0, Policy.POLICY_ADMIN(), true)));
+        assertFalse(ok, "membership setters must not be reachable from governance");
+    }
+
+    function test_p0_policyadmin_cannot_touch_the_emergency_role() public {
+        vm.prank(a.policyAdmin);
+        (bool ok,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (address(roles), 0, abi.encodeCall(IRoles.revokeTarget, (Policy.EMERGENCY(), a.usdc)),
+             0, Policy.POLICY_ADMIN(), true)));
+        assertFalse(ok, "role key must be pinned to the operator");
+    }
+
+    /// @dev The indirect route revision 4 found: grant the operator a
+    ///      permission whose target is the modifier itself, then reach
+    ///      owner-only administration through the avatar.
+    function test_p0_policyadmin_cannot_grant_operator_admin_targets() public {
+        vm.prank(a.policyAdmin);
+        (bool scoped,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (address(roles), 0, abi.encodeCall(IRoles.scopeTarget, (Policy.OPERATOR(), address(roles))),
+             0, Policy.POLICY_ADMIN(), true)));
+        assertFalse(scoped, "the modifier must be refused as an administered target");
+        vm.prank(a.policyAdmin);
+        (bool scopedSafe,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (address(roles), 0, abi.encodeCall(IRoles.scopeTarget, (Policy.OPERATOR(), address(safe))),
+             0, Policy.POLICY_ADMIN(), true)));
+        assertFalse(scopedSafe, "the Safe must be refused as an administered target");
+        vm.prank(a.policyAdmin);
+        (bool allowed,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (address(roles), 0, abi.encodeCall(IRoles.allowFunction,
+                (Policy.OPERATOR(), address(roles), IRoles.revokeTarget.selector, 0)),
+             0, Policy.POLICY_ADMIN(), true)));
+        assertFalse(allowed, "granting an admin selector to the operator must fail");
+        // and the emergency role still works afterwards
+        deal(a.usdc, address(safe), 10e6);
+        vm.prank(a.emergency);
+        assertTrue(roles.execTransactionWithRole(a.usdc, 0,
+            abi.encodeCall(IERC20.transfer, (a.agent, 1e6)), 0, Policy.EMERGENCY(), true),
+            "emergency must remain armed");
+    }
+
+    function test_p0_policyadmin_cannot_raise_a_foreign_allowance_key() public {
+        vm.prank(a.policyAdmin);
+        (bool ok,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (address(roles), 0, abi.encodeCall(IRoles.setAllowance,
+                (keccak256("not-an-operator-budget"), 1e30, 1e30, 1e30, 30 days, 0)),
+             0, Policy.POLICY_ADMIN(), true)));
+        assertFalse(ok, "allowance key must be one of the operator budgets");
+    }
+
+    // =================================================================
+    // P0-3 regression guards: approval authority is bounded and an
+    // incident action cannot be undone by the operator.
+    // =================================================================
+    function test_p0_operator_cannot_set_unlimited_relayer_approval() public {
+        assertFalse(_op(a.usdc, abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, type(uint256).max))),
+            "unlimited approval must be rejected");
+        assertTrue(_op(a.usdc, abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 1_000e6))),
+            "a bounded approval is still allowed");
+        assertTrue(_op(a.usdc, abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 0))),
+            "self-revocation must stay available");
+    }
+
+    function test_p0_emergency_can_durably_stop_operator_reapproval() public {
+        assertTrue(_op(a.usdc, abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 1_000e6))));
+        // incident: zero the approval AND remove the operator's ability to set it
+        vm.startPrank(a.emergency);
+        assertTrue(roles.execTransactionWithRole(a.usdc, 0,
+            abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 0)), 0, Policy.EMERGENCY(), true));
+        assertTrue(roles.execTransactionWithRole(address(roles), 0,
+            abi.encodeCall(IRoles.revokeFunction, (Policy.OPERATOR(), a.usdc, IERC20.approve.selector)),
+            0, Policy.EMERGENCY(), true), "emergency must be able to revoke the operator's approve");
+        vm.stopPrank();
+        assertEq(IERC20(a.usdc).allowance(address(safe), a.cowVaultRelayer), 0);
+        assertFalse(_op(a.usdc, abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 1e6))),
+            "operator must not be able to restore the approval after the incident");
+    }
+
+    /// @dev P0-3: an operator order that is already pre-signed survives an
+    ///      approval reset, so the emergency role must be able to invalidate
+    ///      the order identifier itself.
+    function test_p0_emergency_can_invalidate_an_outstanding_order() public {
+        bytes memory uid = abi.encodePacked(
+            keccak256("operator order"), bytes20(address(safe)), bytes4(uint32(block.timestamp + 3600))
+        );
+        assertTrue(_op(a.cowSettlement, abi.encodeWithSignature("setPreSignature(bytes,bool)", uid, true)),
+            "operator presigns");
+        vm.prank(a.emergency);
+        assertTrue(roles.execTransactionWithRole(a.cowSettlement, 0,
+            abi.encodeWithSignature("invalidateOrder(bytes)", uid), 0, Policy.EMERGENCY(), true),
+            "emergency must be able to invalidate an outstanding order");
+        // the operator cannot bring it back: the uid is now marked filled
+        vm.prank(a.emergency);
+        (bool reSign,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (a.cowSettlement, 0, abi.encodeWithSignature("invalidateOrder(bytes)", uid), 0, Policy.EMERGENCY(), true)));
+        assertTrue(reSign, "invalidation is idempotent");
     }
 }

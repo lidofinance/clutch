@@ -9,7 +9,8 @@ import {MockAragonAgent} from "./MockAragonAgent.sol";
 ///      - callable only by the (mock) Easy Track, mirroring the deployed
 ///        executor's caller check;
 ///      - decodes the Aragon CallsScript EVM script spec (executor id
-///        0x00000001: chunks of [to (20)][calldataLength (32)][calldata]);
+///        0x00000001: chunks of [to (20)][calldataLength (uint32)][calldata],
+///        the production wire format per EVMScriptCreator @ 3183d1f6);
 ///      - executes each chunk as *this contract*, exactly like the production
 ///        CallsScript runner. Scripts that need Agent authority therefore carry
 ///        chunks targeting `MockAragonAgent.forward(...)`, which the real
@@ -50,46 +51,38 @@ contract MockEVMScriptExecutor {
     }
 
     function _runCallsScript(bytes memory _evmScript) internal returns (bytes memory returndata) {
-        if (_evmScript.length < 4) revert MalformedScript();
-        bytes4 spec = bytes4(_evmScript[0]) | (bytes4(_evmScript[1]) >> 8) | (bytes4(_evmScript[2]) >> 16)
-            | (bytes4(_evmScript[3]) >> 24);
+        uint256 len = _evmScript.length;
+        if (len < 4) revert MalformedScript();
+        bytes4 spec;
+        bytes memory ptr = _evmScript;
+        assembly {
+            ptr := add(ptr, 0x20)
+            spec := mload(ptr)
+        }
         if (spec != EVM_SCRIPT_SPEC) revert InvalidSpec(spec);
 
         uint256 location = 4;
         uint256 index = 0;
-        bytes memory ptr = _evmScript;
-        assembly {
-            ptr := add(ptr, 0x20) // point at data start
-        }
-        while (location < _evmScript.length) {
+        while (location < len) {
+            // [to (20 bytes)][calldataLength (uint32, 4 bytes)][calldata]
+            if (location + 24 > len) revert MalformedScript();
             address to;
-            assembly {
-                to := shr(96, mload(add(ptr, location)))
-            }
-            location += 20;
             uint256 calldataLength;
             assembly {
-                calldataLength := mload(add(ptr, location))
+                to := shr(96, mload(add(ptr, location)))
+                calldataLength := shr(224, mload(add(ptr, add(location, 20))))
             }
-            location += 32;
-            if (location + calldataLength > _evmScript.length) revert MalformedScript();
+            location += 24;
+            if (calldataLength == 0) revert MalformedScript();
+            if (location + calldataLength > len) revert MalformedScript();
 
-            bytes memory callData;
+            bytes memory callData = new bytes(calldataLength);
             assembly {
-                callData := mload(0x40)
-                mstore(callData, calldataLength)
-                // ptr points at the data start of the script (length prefix
-                // already skipped); chunk calldata starts at ptr + location
                 let src := add(ptr, location)
                 let dst := add(callData, 0x20)
-                for {
-                    let i := 0
-                } lt(i, calldataLength) {
-                    i := add(i, 32)
-                } {
+                for { let i := 0 } lt(i, calldataLength) { i := add(i, 32) } {
                     mstore(add(dst, i), mload(add(src, i)))
                 }
-                mstore(0x40, add(callData, add(0x20, calldataLength)))
             }
 
             (bool ok, bytes memory ret) = to.call{value: 0}(callData);

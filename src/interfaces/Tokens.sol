@@ -84,4 +84,7 @@ interface ILidoEarnRedeemQueue {
 
 interface ICowSettlement {
     function setPreSignature(bytes calldata orderUid, bool signed) external;
+    /// @dev Marks the order UID filled so it cannot be reused by re-signing.
+    ///      Checks that the caller owns the UID. Selector 0x15337bc0.
+    function invalidateOrder(bytes calldata orderUid) external;
 }

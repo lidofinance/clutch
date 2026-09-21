@@ -30,6 +30,10 @@ library SafeExec {
 }
 
 /// @dev Builds Aragon CallsScript payloads (spec 0x00000001) for the
+///      production wire format: [spec(4)][to(20)][len(uint32)][calldata],
+///      where len covers selector+args. Matches EVMScriptCreator of the
+///      Easy Track source at commit 3183d1f6. P0-1 fix: the length field was
+///      previously a 32-byte word, which no production executor accepts.
 ///      CORRECTED ET governance path: each policy admin call becomes one
 ///      chunk targeting the Roles modifier through `execTransactionWithRole`
 ///      as the policy-admin role — the same avatar-execution mechanism the
@@ -52,7 +56,7 @@ library EVMScriptLib {
                 (calls[i].to, 0, calls[i].data, 0, Policy.POLICY_ADMIN(), true)
             );
             script = abi.encodePacked(
-                script, bytes20(address(roles)), bytes32(chunkData.length), chunkData
+                script, bytes20(address(roles)), uint32(chunkData.length), chunkData
             );
         }
     }
@@ -69,7 +73,7 @@ library EVMScriptLib {
         script = abi.encodePacked(SPEC);
         for (uint256 i = 0; i < calls.length; i++) {
             script = abi.encodePacked(
-                script, bytes20(calls[i].to), bytes32(calls[i].data.length), calls[i].data
+                script, bytes20(calls[i].to), uint32(calls[i].data.length), calls[i].data
             );
         }
     }

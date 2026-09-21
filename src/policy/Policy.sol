@@ -25,14 +25,17 @@ library Policy {
     uint8 internal constant PARAM_NONE = 0;
     uint8 internal constant PARAM_STATIC = 1;
     uint8 internal constant PARAM_DYNAMIC = 2;
+    uint8 internal constant PARAM_TUPLE = 3;
     uint8 internal constant PARAM_ARRAY = 4;
     uint8 internal constant PARAM_CALLDATA = 5;
 
     uint8 internal constant OP_PASS = 0;
     uint8 internal constant OP_MATCHES = 5;
     uint8 internal constant OP_OR = 2;
+    uint8 internal constant OP_NOR = 3;
     uint8 internal constant OP_EQUAL_TO_AVATAR = 15;
     uint8 internal constant OP_EQUAL_TO = 16;
+    uint8 internal constant OP_LESS_THAN = 18;
     uint8 internal constant OP_WITHIN_ALLOWANCE = 28;
 
     uint8 internal constant EXEC_NONE = 0;
@@ -306,17 +309,25 @@ library Policy {
     // Scoped permission builders (each mirrors one constellation entry)
     // ------------------------------------------------------------------
 
-    /// @dev token.approve(spender constrained, amount pass) for the operator.
+    /// @dev P0-3: token.approve(spender pinned, amount bounded).
+    ///      Revision 4 showed the operator could set an unlimited relayer
+    ///      approval and restore it after an emergency revocation, so an
+    ///      approval snapshot was never a loss bound. The amount is now
+    ///      either exactly zero (self-revocation stays available) or strictly
+    ///      below a per-token ceiling.
     function _opApproveEq(
         address roles,
         address token,
         address spender,
-        bytes32 roleKey
+        bytes32 roleKey,
+        uint256 cap
     ) internal pure returns (Call memory) {
-        IRoles.ConditionFlat[] memory c;
-        (c,) = _rootWith(2);
+        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](5);
+        c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
         c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(spender)});
-        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
+        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_NONE, operator_: OP_OR, compValue: ""});
+        c[3] = IRoles.ConditionFlat({parent: 2, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqUint(0)});
+        c[4] = IRoles.ConditionFlat({parent: 2, paramType: PARAM_STATIC, operator_: OP_LESS_THAN, compValue: _eqUint(cap)});
         return _call(
             roles,
             abi.encodeCall(
@@ -326,21 +337,24 @@ library Policy {
         );
     }
 
-    /// @dev token.approve(spender in list, amount pass).
+    /// @dev P0-3: token.approve(spender in list, amount bounded). See above.
     function _opApproveOr(
         address roles,
         address token,
         address[] memory spenders,
-        bytes32 roleKey
+        bytes32 roleKey,
+        uint256 cap
     ) internal pure returns (Call memory) {
         uint256 n = spenders.length;
-        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](3 + n);
+        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](3 + n + 2);
         c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
         c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_NONE, operator_: OP_OR, compValue: ""});
-        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
+        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_NONE, operator_: OP_OR, compValue: ""});
         for (uint256 i = 0; i < n; i++) {
             c[3 + i] = IRoles.ConditionFlat({parent: 1, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(spenders[i])});
         }
+        c[3 + n] = IRoles.ConditionFlat({parent: 2, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqUint(0)});
+        c[4 + n] = IRoles.ConditionFlat({parent: 2, paramType: PARAM_STATIC, operator_: OP_LESS_THAN, compValue: _eqUint(cap)});
         return _call(
             roles,
             abi.encodeCall(
@@ -556,8 +570,119 @@ library Policy {
         );
     }
 
+    // ------------------------------------------------------------------
+    // P0-2: bounded policy-admin scopes.
+    //
+    // Revision 4 proved that pinning only the role key leaves an indirect
+    // escalation: the governance role grants the OPERATOR a permission whose
+    // target is the modifier itself, and the operator then calls owner-only
+    // administration through the avatar. Every policy-admin scope below
+    // therefore pins the role key to OPERATOR *and* forbids the modifier and
+    // the Safe as the target, using Nor over the two admin addresses.
+    //
+    // This is the in-modifier layer only. It is a deny-list of the two
+    // addresses that grant administration, which is necessary and not
+    // sufficient; the positive allow-list and the stale-motion rule live in
+    // PolicyAdminController.
+    // ------------------------------------------------------------------
+
+    /// @dev Layout for an admin call whose params are (roleKey, target, ...rest).
+    ///      Node 0 root, node 1 roleKey == OPERATOR, node 2 target Nor-guard,
+    ///      nodes 3..n Pass for the remaining params, then the Nor children.
+    function _paGuard(uint256 paramCount, address roles, address safe)
+        internal
+        pure
+        returns (IRoles.ConditionFlat[] memory c)
+    {
+        require(paramCount >= 2, "paGuard: params");
+        uint256 trailing = paramCount - 2;
+        c = new IRoles.ConditionFlat[](1 + paramCount + 2);
+        c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
+        c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqBytes32(OPERATOR())});
+        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_NONE, operator_: OP_NOR, compValue: ""});
+        for (uint256 k = 0; k < trailing; k++) {
+            c[3 + k] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
+        }
+        c[3 + trailing] = IRoles.ConditionFlat({parent: 2, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(roles)});
+        c[4 + trailing] = IRoles.ConditionFlat({parent: 2, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(safe)});
+    }
+
+    function _paScoped(address roles, address safe, bytes4 sel, uint256 paramCount)
+        internal
+        pure
+        returns (Call memory)
+    {
+        return _call(
+            roles,
+            abi.encodeCall(
+                IRoles.scopeFunction, (POLICY_ADMIN(), roles, sel, _paGuard(paramCount, roles, safe), EXEC_NONE)
+            )
+        );
+    }
+
+    /// @dev scopeFunction(roleKey, target, selector, ConditionFlat[], options).
+    ///      The condition array carries a Tuple element template so Integrity
+    ///      accepts an unconstrained dynamic array of structs.
+    function _paScopeFunction(address roles, address safe) internal pure returns (Call memory) {
+        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](13);
+        c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
+        c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqBytes32(OPERATOR())});
+        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_NONE, operator_: OP_NOR, compValue: ""});
+        c[3] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""}); // selector
+        c[4] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_ARRAY, operator_: OP_PASS, compValue: ""}); // conditions
+        c[5] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""}); // options
+        c[6] = IRoles.ConditionFlat({parent: 2, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(roles)});
+        c[7] = IRoles.ConditionFlat({parent: 2, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(safe)});
+        c[8] = IRoles.ConditionFlat({parent: 4, paramType: PARAM_TUPLE, operator_: OP_PASS, compValue: ""});
+        c[9] = IRoles.ConditionFlat({parent: 8, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
+        c[10] = IRoles.ConditionFlat({parent: 8, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
+        c[11] = IRoles.ConditionFlat({parent: 8, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
+        c[12] = IRoles.ConditionFlat({parent: 8, paramType: PARAM_DYNAMIC, operator_: OP_PASS, compValue: ""});
+        return _call(
+            roles,
+            abi.encodeCall(
+                IRoles.scopeFunction, (POLICY_ADMIN(), roles, IRoles.scopeFunction.selector, c, EXEC_NONE)
+            )
+        );
+    }
+
+    /// @dev setAllowance(key, balance, maxRefill, refill, period, timestamp):
+    ///      the key must be one of the operator's own budget keys.
+    function _paSetAllowance(address roles, bytes32[] memory keys) internal pure returns (Call memory) {
+        uint256 n = keys.length;
+        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](7 + n);
+        c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
+        c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_NONE, operator_: OP_OR, compValue: ""});
+        for (uint256 k = 0; k < 5; k++) {
+            c[2 + k] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
+        }
+        for (uint256 k = 0; k < n; k++) {
+            c[7 + k] = IRoles.ConditionFlat({parent: 1, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqBytes32(keys[k])});
+        }
+        return _call(
+            roles,
+            abi.encodeCall(
+                IRoles.scopeFunction, (POLICY_ADMIN(), roles, IRoles.setAllowance.selector, c, EXEC_NONE)
+            )
+        );
+    }
+
+    function operatorBudgetKeys() internal pure returns (bytes32[] memory k) {
+        k = new bytes32[](6);
+        k[0] = K_AAVE_USDC_USDT;
+        k[1] = K_AAVE_DAI_USDS;
+        k[2] = K_AAVE_WSTETH;
+        k[3] = K_SKY_DAI_USDS;
+        k[4] = K_EARN_USD;
+        k[5] = K_EARN_ETH;
+    }
+
     /// @dev CoW swap sell legs: approvals of each sell token to the vault relayer.
-    function _opCowApprove(address roles, address token, address relayer) internal pure returns (Call memory) {
-        return _opApproveEq(roles, token, relayer, OPERATOR());
+    function _opCowApprove(address roles, address token, address relayer, uint256 cap)
+        internal
+        pure
+        returns (Call memory)
+    {
+        return _opApproveEq(roles, token, relayer, OPERATOR(), cap);
     }
 }

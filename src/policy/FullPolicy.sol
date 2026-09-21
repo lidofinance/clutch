@@ -3,7 +3,7 @@ pragma solidity >=0.8.24 <0.9.0;
 
 import {IRoles} from "../interfaces/IRoles.sol";
 import {ISafe} from "../interfaces/ISafe.sol";
-import {IWstETH, ISDAI, ILidoEarnDepositQueue, ILidoEarnRedeemQueue} from "../interfaces/Tokens.sol";
+import {IWstETH, ISDAI, ILidoEarnDepositQueue, ILidoEarnRedeemQueue, ICowSettlement} from "../interfaces/Tokens.sol";
 import {Policy} from "./Policy.sol";
 
 /// @title FullPolicy — assembles the complete dry-run policy as an ordered
@@ -11,6 +11,13 @@ import {Policy} from "./Policy.sol";
 /// @dev Call order: role assignment -> allowances -> operator permissions ->
 ///      emergency permissions. Every entry cites its constellation source.
 library FullPolicy {
+    // P0-3 approval ceilings. An approval is either exactly zero or strictly
+    // below these values, so no role can leave an unlimited standing approval.
+    // Dry-run scale; production sizing is a mandate decision.
+    uint256 internal constant APPROVE_CAP_6 = 5_000_000e6;
+    uint256 internal constant APPROVE_CAP_18 = 5_000_000e18;
+    uint256 internal constant APPROVE_CAP_WSTETH = 2_500e18;
+
 
     function build(Policy.Addresses memory a, address roles)
         internal
@@ -57,7 +64,7 @@ library FullPolicy {
         // -- operator: Lido staking -------------------------------------
         // stETH.approve: wstETH (wrap) + CoW relayer (stETH is a swap sell leg)
         address[] memory stethSpenders = _two(a.wsteth, a.cowVaultRelayer);
-        calls[i++] = Policy._opApproveOr(roles, a.steth, stethSpenders, Policy.OPERATOR());
+        calls[i++] = Policy._opApproveOr(roles, a.steth, stethSpenders, Policy.OPERATOR(), APPROVE_CAP_18);
         calls[i++] = Policy._allowFunction(roles, Policy.OPERATOR(), a.wsteth, IWstETH.wrap.selector);
         calls[i++] = Policy._allowFunction(roles, Policy.OPERATOR(), a.wsteth, IWstETH.unwrap.selector);
 
@@ -67,11 +74,11 @@ library FullPolicy {
         // the same (role, target, selector) would REPLACE the whole entry
         // (F-X3) — an earlier revision did exactly that for DAI/USDS and
         // silently wiped the Aave+CoW spenders; corrected 2026-09-10.
-        calls[i++] = Policy._opApproveOr(roles, a.usdc, _three(a.aavePool, a.earnUsdDepositQueue, a.cowVaultRelayer), Policy.OPERATOR());
-        calls[i++] = Policy._opApproveOr(roles, a.usdt, _two(a.aavePool, a.cowVaultRelayer), Policy.OPERATOR());
-        calls[i++] = Policy._opApproveOr(roles, a.dai, _three(a.aavePool, a.sdai, a.cowVaultRelayer), Policy.OPERATOR());
-        calls[i++] = Policy._opApproveOr(roles, a.usds, _three(a.aavePool, a.susds, a.cowVaultRelayer), Policy.OPERATOR());
-        calls[i++] = Policy._opApproveOr(roles, a.wsteth, _three(a.aavePool, a.earnEthDepositQueue, a.cowVaultRelayer), Policy.OPERATOR());
+        calls[i++] = Policy._opApproveOr(roles, a.usdc, _three(a.aavePool, a.earnUsdDepositQueue, a.cowVaultRelayer), Policy.OPERATOR(), APPROVE_CAP_6);
+        calls[i++] = Policy._opApproveOr(roles, a.usdt, _two(a.aavePool, a.cowVaultRelayer), Policy.OPERATOR(), APPROVE_CAP_6);
+        calls[i++] = Policy._opApproveOr(roles, a.dai, _three(a.aavePool, a.sdai, a.cowVaultRelayer), Policy.OPERATOR(), APPROVE_CAP_18);
+        calls[i++] = Policy._opApproveOr(roles, a.usds, _three(a.aavePool, a.susds, a.cowVaultRelayer), Policy.OPERATOR(), APPROVE_CAP_18);
+        calls[i++] = Policy._opApproveOr(roles, a.wsteth, _three(a.aavePool, a.earnEthDepositQueue, a.cowVaultRelayer), Policy.OPERATOR(), APPROVE_CAP_WSTETH);
 
         // the provider's three-budget shape (see Policy._opAaveSupplyMulti):
         // USDC/USDT share k1, DAI/USDS share k2, wstETH draws k3
@@ -122,7 +129,7 @@ library FullPolicy {
         // a second scopeFunction on the same (target, approve) would REPLACE
         // the whole scope (DD finding: last write wins). LDO keeps its own
         // single-spender scope.
-        calls[i++] = Policy._opCowApprove(roles, a.ldo, a.cowVaultRelayer);
+        calls[i++] = Policy._opCowApprove(roles, a.ldo, a.cowVaultRelayer, APPROVE_CAP_18);
 
         // -- emergency target scoping -------------------------------------
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.steth);
@@ -148,22 +155,23 @@ library FullPolicy {
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.atokenWsteth);
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), address(roles));
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.safe);
+        calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.cowSettlement);
 
-        // -- policy-admin target scoping ------------------------------------
-        // NOTE (WS-D): parameters are unconstrained here. Production must
-        // constrain roleKey (operator only for widening, none for revocation
-        // except emergency's own revoke-only scope) and validate whole-tree
-        // replacements; that validation lives in the Lido-built factories.
+        // -- policy-admin: bounded scope (P0-2) ------------------------------
+        // Revision 4 showed that role-key pinning alone leaves an indirect
+        // escalation route: grant the OPERATOR a permission targeting the
+        // modifier, then call owner-only administration through the avatar.
+        // Every scope below pins roleKey == OPERATOR and forbids the modifier
+        // and the Safe as the administered target. Membership setters
+        // (assignRoles, setDefaultRole) and the unscoped allowTarget are
+        // removed entirely: membership is a DAO-vote action.
         calls[i++] = Policy._scopeTarget(roles, Policy.POLICY_ADMIN(), address(roles));
-        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.allowTarget.selector);
-        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.scopeTarget.selector);
-        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.allowFunction.selector);
-        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.scopeFunction.selector);
-        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.revokeFunction.selector);
-        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.revokeTarget.selector);
-        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.setAllowance.selector);
-        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.assignRoles.selector);
-        calls[i++] = Policy._allowFunction(roles, Policy.POLICY_ADMIN(), address(roles), IRoles.setDefaultRole.selector);
+        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.scopeTarget.selector, 2);
+        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.revokeTarget.selector, 2);
+        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.allowFunction.selector, 4);
+        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.revokeFunction.selector, 3);
+        calls[i++] = Policy._paScopeFunction(roles, a.safe);
+        calls[i++] = Policy._paSetAllowance(roles, Policy.operatorBudgetKeys());
 
         // -- emergency: revoke approvals (spender list sync invariant R8) ---
         address[] memory spenders = _seven(
@@ -184,6 +192,11 @@ library FullPolicy {
         calls[i++] = Policy._exitSavings(roles, a.susds, ISDAI.redeem.selector, Policy.EMERGENCY());
         calls[i++] = Policy._exitSavings(roles, a.susds, ISDAI.withdraw.selector, Policy.EMERGENCY());
         calls[i++] = Policy._allowFunction(roles, Policy.EMERGENCY(), a.wsteth, IWstETH.unwrap.selector);
+        // P0-3: outstanding orders. Zeroing an approval does not cancel an
+        // order that is already pre-signed, so the emergency role must be able
+        // to invalidate the UID. Invalidation marks it filled, which also
+        // prevents reuse by re-signing.
+        calls[i++] = Policy._allowFunction(roles, Policy.EMERGENCY(), a.cowSettlement, ICowSettlement.invalidateOrder.selector);
         // Earn exits (both vaults, both queue kinds) — claim legs pinned to avatar
         calls[i++] = Policy._allowFunction(roles, Policy.EMERGENCY(), a.earnUsdDepositQueue, ILidoEarnDepositQueue.cancelDepositRequest.selector);
         calls[i++] = _claimScopedToAvatar(roles, a.earnUsdDepositQueue, Policy.EMERGENCY());

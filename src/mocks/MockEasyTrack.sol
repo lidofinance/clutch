@@ -37,7 +37,7 @@ contract MockEasyTrack {
         address creator;
         address evmScriptFactory;
         bytes evmScriptCallData;
-        bytes evmScript;
+        bytes32 evmScriptHash;
         uint256 startDate;
         uint256 snapshotDate;
         uint256 objectionsAmount;
@@ -133,7 +133,7 @@ contract MockEasyTrack {
             creator: msg.sender,
             evmScriptFactory: _evmScriptFactory,
             evmScriptCallData: _evmScriptCallData,
-            evmScript: evmScript,
+            evmScriptHash: keccak256(evmScript),
             startDate: block.timestamp,
             snapshotDate: block.timestamp,
             objectionsAmount: 0,
@@ -161,7 +161,15 @@ contract MockEasyTrack {
         emit MotionObjected(_motionId, msg.sender, weight, motion.objectionsAmount);
     }
 
-    function enactMotion(uint256 _motionId) external motionExists(_motionId) {
+    /// @dev Production signature: the caller re-supplies the factory call data,
+    ///      the motion's script is regenerated from it, and the result must
+    ///      hash to the value recorded at creation. This is what rejects a
+    ///      stale or substituted script, so the harness must carry it too.
+    ///      Mirrors EasyTrack.enactMotion(uint256,bytes) @ 3183d1f6.
+    function enactMotion(uint256 _motionId, bytes memory _evmScriptCallData)
+        external
+        motionExists(_motionId)
+    {
         Motion storage motion = motions[_motionId];
         require(motion.status == MotionStatus.Pending, "ET: motion not pending");
         require(
@@ -169,8 +177,13 @@ contract MockEasyTrack {
             "ET: objection period not passed"
         );
 
+        bytes memory evmScript = IEVMScriptFactory(motion.evmScriptFactory).createEVMScript(
+            motion.creator, _evmScriptCallData
+        );
+        require(motion.evmScriptHash == keccak256(evmScript), "ET: unexpected evm script");
+
         motion.status = MotionStatus.Enacted;
-        evmScriptExecutor.executeEVMScript(motion.evmScript);
+        evmScriptExecutor.executeEVMScript(evmScript);
         emit MotionEnacted(_motionId);
     }
 
