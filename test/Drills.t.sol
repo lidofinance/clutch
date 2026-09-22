@@ -10,6 +10,7 @@ import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 import {MockEasyTrack, PassThroughEVMScriptFactory} from "../src/mocks/MockEasyTrack.sol";
 
 import {Policy} from "../src/policy/Policy.sol";
+import {MockModuleGuard} from "../src/mocks/MockModuleGuard.sol";
 import {FullPolicy} from "../src/policy/FullPolicy.sol";
 import {SafeExec, EVMScriptLib} from "../src/policy/SafeExec.sol";
 
@@ -18,9 +19,10 @@ import {SafeExec, EVMScriptLib} from "../src/policy/SafeExec.sol";
 ///        operator lifecycle; D4 emergency; D5 budgets; D6 adversarial.
 contract Drills is Test {
     uint256 internal constant FORK_BLOCK = 25946643; // WS-B pin
-    address internal constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
+    // Safe v1.5.0: the first release whose module path calls a guard.
+    address internal constant SAFE_SINGLETON = 0xFf51A5898e281Db6DfC7855790607438dF2ca44b;
     address internal constant ROLES_MASTERCOPY = 0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5;
-    address internal constant SAFE_PROXY_FACTORY = 0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67;
+    address internal constant SAFE_PROXY_FACTORY = 0x14F2982D601c9458F93bd70B218933A6f8165e7b;
     address internal constant MODULE_PROXY_FACTORY = 0x000000000000aDdB49795b0f9bA5BC298cDda236;
     address internal constant LDO = 0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32;
 
@@ -31,7 +33,9 @@ contract Drills is Test {
     MockEasyTrack internal easyTrack;
     PassThroughEVMScriptFactory internal factory;
     ISafe internal safe;
-    IRoles internal roles;
+    IRoles internal roles; // operator + governance, guarded
+    IRoles internal safety; // emergency + technical, never guarded
+    MockModuleGuard internal guard;
 
     address internal tmc = makeAddr("tmc-standin"); // operator stand-in
     address internal eb = makeAddr("eb-standin"); // emergency stand-in
@@ -75,9 +79,23 @@ contract Drills is Test {
                 ROLES_MASTERCOPY, rolesInit, uint256(0x11d0)
             )
         );
+        safety = IRoles(
+            IModuleProxyFactory(MODULE_PROXY_FACTORY).deployModule(
+                ROLES_MASTERCOPY, rolesInit, uint256(0x11d1)
+            )
+        );
 
         SafeExec.execAsOwner(
             agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))
+        );
+        SafeExec.execAsOwner(
+            agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety)))
+        );
+        // The screening guard is vendor-supplied in production. It is Safe-wide,
+        // so it must let the safety modifier through by module address.
+        guard = new MockModuleGuard(address(safety));
+        SafeExec.execAsOwner(
+            agent, safe, address(safe), abi.encodeCall(ISafe.setModuleGuard, (address(guard)))
         );
 
         Policy.Addresses memory m;
@@ -87,14 +105,20 @@ contract Drills is Test {
         m.emergency = eb;
         m.technical = makeAddr("emergency-brakes");
         m.policyAdmin = address(executor);
+        m.rolesOperator = address(roles);
+        m.rolesSafety = address(safety);
         Policy.fillTokens(m);
         Policy.fillProtocols(m);
         Policy.fillAtokens(m);
         a = m;
 
-        Policy.Call[] memory calls = FullPolicy.build(m, address(roles));
-        for (uint256 i = 0; i < calls.length; i++) {
-            SafeExec.execAsOwner(agent, safe, calls[i].to, calls[i].data);
+        Policy.Call[] memory ops = FullPolicy.buildOperator(m, address(roles));
+        for (uint256 i = 0; i < ops.length; i++) {
+            SafeExec.execAsOwner(agent, safe, ops[i].to, ops[i].data);
+        }
+        Policy.Call[] memory saf = FullPolicy.buildSafety(m, address(safety), address(roles));
+        for (uint256 i = 0; i < saf.length; i++) {
+            SafeExec.execAsOwner(agent, safe, saf[i].to, saf[i].data);
         }
         vm.stopPrank();
 
@@ -143,14 +167,14 @@ contract Drills is Test {
 
     function _em(address to, bytes memory data) internal {
         vm.prank(eb);
-        bool ok = roles.execTransactionWithRole(to, 0, data, 0, Policy.EMERGENCY(), true);
+        bool ok = safety.execTransactionWithRole(to, 0, data, 0, Policy.EMERGENCY(), true);
         assertTrue(ok, "emergency call failed");
     }
 
     function _emRevert(address to, bytes memory data) internal {
         vm.prank(eb);
         vm.expectRevert();
-        roles.execTransactionWithRole(to, 0, data, 0, Policy.EMERGENCY(), true);
+        safety.execTransactionWithRole(to, 0, data, 0, Policy.EMERGENCY(), true);
     }
 
     // ------------------------------------------------------------------
@@ -565,32 +589,52 @@ contract Drills is Test {
 
     function _tech(address to, bytes memory data) internal returns (bool ok) {
         vm.prank(a.technical);
-        (ok,) = address(roles).call(abi.encodeCall(
+        (ok,) = address(safety).call(abi.encodeCall(
             IRoles.execTransactionWithRole, (to, 0, data, 0, Policy.TECHNICAL(), true)));
     }
 
     /// @dev Module disabling answers a defect in the permission layer, so it
     ///      sits with the technical committee, not the financial one, and the
     ///      module argument is pinned.
+    /// @dev With two modules enabled the linked-list predecessor is no longer
+    ///      the sentinel, so it must be resolved from the Safe.
+    function _prevModule(address module) internal view returns (address) {
+        (address[] memory mods,) = safe.getModulesPaginated(SENTINEL, 10);
+        address prev = SENTINEL;
+        for (uint256 i = 0; i < mods.length; i++) {
+            if (mods[i] == module) return prev;
+            prev = mods[i];
+        }
+        revert("module not enabled");
+    }
+
     function test_D4_module_disabling_is_technical_only_and_pinned() public {
         // the financial emergency role no longer holds it
-        _emRevert(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(roles))));
+        _emRevert(address(safe), abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles))));
         // nor does the operator
-        _opRevert(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(roles))));
+        _opRevert(address(safe), abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles))));
         // the technical role cannot point it at some other module
         assertFalse(
             _tech(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(0xdEaD)))),
-            "module argument must be pinned to this modifier"
+            "module argument must be pinned to the operator modifier"
         );
         // it can disable this modifier
         assertTrue(
-            _tech(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(roles)))),
-            "technical role must be able to disable the module"
+            _tech(address(safe), abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles)))),
+            "technical role must be able to disable the operator modifier"
         );
-        assertFalse(safe.isModuleEnabled(address(roles)), "module should be off");
-        // every role is now dead, which is the point
+        assertFalse(safe.isModuleEnabled(address(roles)), "operator modifier should be off");
+        // the operator is dead
         _opRevert(a.wsteth, abi.encodeCall(IWstETH.wrap, (1 ether)));
-        _emRevert(a.wsteth, abi.encodeCall(IWstETH.unwrap, (1 ether)));
+        // but recovery survives, which is the point of the split
+        assertTrue(safe.isModuleEnabled(address(safety)), "safety modifier must stay enabled");
+        deal(a.usdc, address(safe), 10e6);
+        _em(a.usdc, abi.encodeCall(IERC20.transfer, (address(agent), 1e6)));
+        // it cannot switch off the safety modifier either: the pin is exact
+        assertFalse(
+            _tech(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(safety)))),
+            "the safety modifier must not be disablable through this role"
+        );
         // and the owner path restores it
         vm.startPrank(principal);
         SafeExec.execAsOwner(
@@ -724,4 +768,51 @@ contract Drills is Test {
     }
 
     receive() external payable {}
+
+    // ------------------------------------------------------------------
+    // D7: pre-execution blocking. Safe v1.5.0 calls a guard on the module
+    // path, which v1.4.1 does not do at all. The guard is Safe-wide, so the
+    // policy is split across two modifiers and the guard is told which one is
+    // calling.
+    // ------------------------------------------------------------------
+    function test_D7_guard_blocks_a_flagged_operator_transaction() public {
+        deal(a.usdc, address(safe), 1_000e6);
+        // unflagged: the operator works
+        _op(a.usdc, abi.encodeCall(IERC20.approve, (a.aavePool, 1e6)));
+        // flagged: the same call is refused before it executes
+        guard.flag(a.usdc, IERC20.approve.selector, true);
+        vm.prank(tmc);
+        (bool ok,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (a.usdc, 0, abi.encodeCall(IERC20.approve, (a.aavePool, 2e6)), 0, Policy.OPERATOR(), true)));
+        assertFalse(ok, "guard must block a flagged operator transaction");
+    }
+
+    function test_D7_guard_never_blocks_recovery() public {
+        deal(a.usdc, address(safe), 1_000e6);
+        // flag the exact call the emergency role needs
+        guard.flag(a.usdc, IERC20.transfer.selector, true);
+        guard.flag(a.usdc, IERC20.approve.selector, true);
+        // the operator is blocked
+        vm.prank(tmc);
+        (bool opOk,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (a.usdc, 0, abi.encodeCall(IERC20.approve, (a.aavePool, 1e6)), 0, Policy.OPERATOR(), true)));
+        assertFalse(opOk, "operator must be blocked");
+        // recovery still works, because the guard is told which module called
+        _em(a.usdc, abi.encodeCall(IERC20.transfer, (address(agent), 1e6)));
+        assertEq(IERC20(a.usdc).balanceOf(address(agent)), 1e6, "recovery must never be blockable");
+    }
+
+    function test_D7_dao_can_remove_a_failed_guard() public {
+        deal(a.usdc, address(safe), 1_000e6);
+        guard.flag(a.usdc, IERC20.approve.selector, true);
+        vm.prank(tmc);
+        (bool blocked,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (a.usdc, 0, abi.encodeCall(IERC20.approve, (a.aavePool, 1e6)), 0, Policy.OPERATOR(), true)));
+        assertFalse(blocked, "blocked while the guard is installed");
+        // the owner path detaches it, so a broken vendor is not a permanent freeze
+        vm.startPrank(principal);
+        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.setModuleGuard, (address(0))));
+        vm.stopPrank();
+        _op(a.usdc, abi.encodeCall(IERC20.approve, (a.aavePool, 1e6)));
+    }
 }

@@ -33,6 +33,13 @@ interface ISafe {
 
     function enableModule(address module) external;
 
+    /// @dev Safe v1.5.0. Guards the module execution path, which v1.4.1 does
+    ///      not do at all. The callback receives the calling module, which is
+    ///      why the policy is split across two modifier instances.
+    function setModuleGuard(address moduleGuard) external;
+
+    function setGuard(address guard) external;
+
     function disableModule(address prevModule, address module) external;
 
     function getOwners() external view returns (address[] memory);

@@ -24,9 +24,11 @@ import {SafeExec} from "../src/policy/SafeExec.sol";
 ///        RPC=... EXECUTOR=0x... forge script script/DeployDryRun.s.sol --broadcast
 contract DeployDryRun is Script {
     // Production singletons (WS-B verified at block 25946643).
-    address internal constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
+    // Safe v1.5.0: required, because only from this release does the Safe
+    // call a guard on the module execution path.
+    address internal constant SAFE_SINGLETON = 0xFf51A5898e281Db6DfC7855790607438dF2ca44b;
     address internal constant ROLES_MASTERCOPY = 0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5;
-    address internal constant SAFE_PROXY_FACTORY = 0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67;
+    address internal constant SAFE_PROXY_FACTORY = 0x14F2982D601c9458F93bd70B218933A6f8165e7b;
     address internal constant MODULE_PROXY_FACTORY = 0x000000000000aDdB49795b0f9bA5BC298cDda236;
     address internal constant LDO = 0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32;
 
@@ -48,6 +50,11 @@ contract DeployDryRun is Script {
 
         // --- sanity: singletons must carry code -------------------------
         require(SAFE_SINGLETON.code.length > 0, "singleton missing");
+        require(
+            keccak256(SAFE_SINGLETON.code)
+                == 0xdda019cbd7c867a533a2a86e5c53434fdc50b13122b5a5ddb4a8df61b31c20f2,
+            "safe singleton codehash mismatch"
+        );
         require(ROLES_MASTERCOPY.code.length > 0, "roles mastercopy missing");
         require(SAFE_PROXY_FACTORY.code.length > 0, "proxy factory missing");
 
@@ -80,10 +87,18 @@ contract DeployDryRun is Script {
                 ROLES_MASTERCOPY, rolesInit, uint256(0x11d0)
             )
         );
+        IRoles safety = IRoles(
+            IModuleProxyFactory(MODULE_PROXY_FACTORY).deployModule(
+                ROLES_MASTERCOPY, rolesInit, uint256(0x11d1)
+            )
+        );
 
         // enable the modifier as a Safe module, as the owner (production path)
         SafeExec.execAsOwner(
             agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))
+        );
+        SafeExec.execAsOwner(
+            agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety)))
         );
 
         // --- apply the full policy through the production change path ------
@@ -96,9 +111,15 @@ contract DeployDryRun is Script {
         Policy.fillProtocols(a);
         Policy.fillAtokens(a);
 
-        Policy.Call[] memory calls = FullPolicy.build(a, address(roles));
+        a.rolesOperator = address(roles);
+        a.rolesSafety = address(safety);
+        Policy.Call[] memory calls = FullPolicy.buildOperator(a, address(roles));
         for (uint256 i = 0; i < calls.length; i++) {
             SafeExec.execAsOwner(agent, safe, calls[i].to, calls[i].data);
+        }
+        Policy.Call[] memory safCalls = FullPolicy.buildSafety(a, address(safety), address(roles));
+        for (uint256 i = 0; i < safCalls.length; i++) {
+            SafeExec.execAsOwner(agent, safe, safCalls[i].to, safCalls[i].data);
         }
 
         vm.stopBroadcast();

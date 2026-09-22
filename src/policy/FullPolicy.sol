@@ -19,7 +19,10 @@ library FullPolicy {
     uint256 internal constant APPROVE_CAP_WSTETH = 2_500e18;
 
 
-    function build(Policy.Addresses memory a, address roles)
+    /// @notice Permissions written into the OPERATOR modifier: the operator
+    ///         role and the governance role that administers it. This modifier is
+    ///         the one the module guard screens.
+    function buildOperator(Policy.Addresses memory a, address roles)
         internal
         pure
         returns (Policy.Call[] memory)
@@ -30,8 +33,6 @@ library FullPolicy {
         // -- membership ------------------------------------------------
         calls[i++] = Policy._assignRoles(roles, a.operator, Policy.OPERATOR());
         calls[i++] = Policy._setDefaultRole(roles, a.operator, Policy.OPERATOR());
-        calls[i++] = Policy._assignRoles(roles, a.emergency, Policy.EMERGENCY());
-        calls[i++] = Policy._setDefaultRole(roles, a.emergency, Policy.EMERGENCY());
         // corrected ET governance path: no Agent authority involved
         calls[i++] = Policy._assignRoles(roles, a.policyAdmin, Policy.POLICY_ADMIN());
         calls[i++] = Policy._setDefaultRole(roles, a.policyAdmin, Policy.POLICY_ADMIN());
@@ -131,6 +132,48 @@ library FullPolicy {
         // single-spender scope.
         calls[i++] = Policy._opCowApprove(roles, a.ldo, a.cowVaultRelayer, APPROVE_CAP_18);
 
+        // -- policy-admin: bounded scope (P0-2) ------------------------------
+        // Revision 4 showed that role-key pinning alone leaves an indirect
+        // escalation route: grant the OPERATOR a permission targeting the
+        // modifier, then call owner-only administration through the avatar.
+        // Every scope below pins roleKey == OPERATOR and forbids the modifier
+        // and the Safe as the administered target. Membership setters
+        // (assignRoles, setDefaultRole) and the unscoped allowTarget are
+        // removed entirely: membership is a DAO-vote action.
+        calls[i++] = Policy._scopeTarget(roles, Policy.POLICY_ADMIN(), address(roles));
+        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.scopeTarget.selector, 2);
+        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.revokeTarget.selector, 2);
+        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.allowFunction.selector, 4);
+        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.revokeFunction.selector, 3);
+        calls[i++] = Policy._paScopeFunction(roles, a.safe);
+        calls[i++] = Policy._paSetAllowance(roles, Policy.operatorBudgetKeys());
+
+        // truncate to used length
+        assembly {
+            mstore(calls, i)
+        }
+        return calls;
+    }
+
+    /// @notice Permissions written into the SAFETY modifier: the emergency and
+    ///         technical roles. Kept on a separate module so the guard can let
+    ///         them through while screening the operator, and so disabling the
+    ///         operator's modifier does not disarm recovery.
+    /// @param roles the safety modifier
+    /// @param operatorRoles the operator modifier it polices
+    function buildSafety(Policy.Addresses memory a, address roles, address operatorRoles)
+        internal
+        pure
+        returns (Policy.Call[] memory)
+    {
+        Policy.Call[] memory calls = new Policy.Call[](136);
+        uint256 i = 0;
+
+        calls[i++] = Policy._assignRoles(roles, a.emergency, Policy.EMERGENCY());
+        calls[i++] = Policy._setDefaultRole(roles, a.emergency, Policy.EMERGENCY());
+        calls[i++] = Policy._assignRoles(roles, a.technical, Policy.TECHNICAL());
+        calls[i++] = Policy._setDefaultRole(roles, a.technical, Policy.TECHNICAL());
+
         // -- emergency target scoping -------------------------------------
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.steth);
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.wsteth);
@@ -153,25 +196,9 @@ library FullPolicy {
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.atokenDai);
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.atokenUsds);
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.atokenWsteth);
-        calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), address(roles));
+        calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), operatorRoles);
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.safe);
         calls[i++] = Policy._scopeTarget(roles, Policy.EMERGENCY(), a.cowSettlement);
-
-        // -- policy-admin: bounded scope (P0-2) ------------------------------
-        // Revision 4 showed that role-key pinning alone leaves an indirect
-        // escalation route: grant the OPERATOR a permission targeting the
-        // modifier, then call owner-only administration through the avatar.
-        // Every scope below pins roleKey == OPERATOR and forbids the modifier
-        // and the Safe as the administered target. Membership setters
-        // (assignRoles, setDefaultRole) and the unscoped allowTarget are
-        // removed entirely: membership is a DAO-vote action.
-        calls[i++] = Policy._scopeTarget(roles, Policy.POLICY_ADMIN(), address(roles));
-        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.scopeTarget.selector, 2);
-        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.revokeTarget.selector, 2);
-        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.allowFunction.selector, 4);
-        calls[i++] = Policy._paScoped(roles, a.safe, IRoles.revokeFunction.selector, 3);
-        calls[i++] = Policy._paScopeFunction(roles, a.safe);
-        calls[i++] = Policy._paSetAllowance(roles, Policy.operatorBudgetKeys());
 
         // -- emergency: revoke approvals (spender list sync invariant R8) ---
         address[] memory spenders = _seven(
@@ -208,8 +235,8 @@ library FullPolicy {
         calls[i++] = _claim2ScopedToAvatar(roles, a.earnEthRedeemQueue, Policy.EMERGENCY());
 
         // -- emergency: block the operator (revoke-only, roleKey pinned) ----
-        calls[i++] = Policy._emRevokeTarget(roles);
-        calls[i++] = Policy._emRevokeFunction(roles);
+        calls[i++] = Policy._emRevokeTarget(roles, operatorRoles);
+        calls[i++] = Policy._emRevokeFunction(roles, operatorRoles);
         // -- technical emergency: module disabling only, module pinned ------
         // Module disabling answers a defect in the permission layer, which the
         // engineering organisation recognises, so it sits with the technical
@@ -218,7 +245,7 @@ library FullPolicy {
         calls[i++] = Policy._assignRoles(roles, a.technical, Policy.TECHNICAL());
         calls[i++] = Policy._setDefaultRole(roles, a.technical, Policy.TECHNICAL());
         calls[i++] = Policy._scopeTarget(roles, Policy.TECHNICAL(), a.safe);
-        calls[i++] = Policy._techDisableModule(roles, a.safe);
+        calls[i++] = Policy._techDisableModule(roles, a.safe, operatorRoles);
 
         // -- emergency: return to treasury (pinned to the Agent literal) ---
         calls[i++] = Policy._transferToAgent(roles, a.steth, a.agent);
@@ -238,12 +265,14 @@ library FullPolicy {
         calls[i++] = Policy._transferToAgent(roles, a.atokenUsds, a.agent);
         calls[i++] = Policy._transferToAgent(roles, a.atokenWsteth, a.agent);
 
+
         // truncate to used length
         assembly {
             mstore(calls, i)
         }
         return calls;
     }
+
 
     /// @dev claim(address) with receiver pinned to the avatar.
     function _claimScopedToAvatar(address roles, address queue, bytes32 roleKey)

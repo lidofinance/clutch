@@ -11,8 +11,9 @@ policy is a required follow-up before any finding about the proposal itself.
 Due-diligence execution harness for the Lido Active Treasury Management RFP ×
 the Zodiac constellation proposal (gnosisguild/lido-atm-constellation @ 02ea37d,
 tracking HEAD). Everything downstream of the mocked governance heads is
-**production-grade**: the Safe deploys from the v1.4.1 singleton
-(0x41675C099F32341bf84BFc5382aF534df5C7461a), the Roles modifier proxies the
+**production-grade**: the Safe deploys from the v1.5.0 singleton
+(0xFf51A5898e281Db6DfC7855790607438dF2ca44b, the first release whose module
+path calls a guard), the Roles modifier proxies the
 **deployed** v4 mastercopy (0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5), and all
 tokens/protocols are mainnet contracts exercised on a pinned fork
 (block 25946643).

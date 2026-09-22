@@ -92,6 +92,8 @@ library Policy {
         address emergency; // dry-run: stand-in for the EB Safe
         address policyAdmin; // dry-run: mock EVMScript executor; production: the ET script executor
         address technical; // Emergency Brakes multisig: module disabling only
+        address rolesOperator; // modifier carrying operator + governance, guarded
+        address rolesSafety; // modifier carrying emergency + technical, unguarded
         address steth;
         address wsteth;
         address ldo;
@@ -530,7 +532,9 @@ library Policy {
 
     /// @dev The Safe-owns-modifier mechanism: emergency may call
     ///      roles.revokeTarget(roleKey pinned to operator, target pass).
-    function _emRevokeTarget(address roles) internal pure returns (Call memory) {
+    /// @param roles modifier the permission is written into (safety)
+    /// @param target modifier whose operator scope may be revoked (operator)
+    function _emRevokeTarget(address roles, address target) internal pure returns (Call memory) {
         IRoles.ConditionFlat[] memory c;
         (c,) = _rootWith(2);
         c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqBytes32(OPERATOR())});
@@ -539,14 +543,14 @@ library Policy {
             roles,
             abi.encodeCall(
                 IRoles.scopeFunction,
-                (EMERGENCY(), roles, IRoles.revokeTarget.selector, c, EXEC_NONE)
+                (EMERGENCY(), target, IRoles.revokeTarget.selector, c, EXEC_NONE)
             )
         );
     }
 
     /// @dev Emergency may call roles.revokeFunction(roleKey pinned to
     ///      operator, target pass, selector pass).
-    function _emRevokeFunction(address roles) internal pure returns (Call memory) {
+    function _emRevokeFunction(address roles, address target) internal pure returns (Call memory) {
         IRoles.ConditionFlat[] memory c;
         (c,) = _rootWith(3);
         c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqBytes32(OPERATOR())});
@@ -556,7 +560,7 @@ library Policy {
             roles,
             abi.encodeCall(
                 IRoles.scopeFunction,
-                (EMERGENCY(), roles, IRoles.revokeFunction.selector, c, EXEC_NONE)
+                (EMERGENCY(), target, IRoles.revokeFunction.selector, c, EXEC_NONE)
             )
         );
     }
@@ -583,11 +587,18 @@ library Policy {
     ///      power cannot be turned on a future second module. prevModule is a
     ///      linked-list pointer whose value depends on the Safe's module list
     ///      at call time, so it stays unconstrained.
-    function _techDisableModule(address roles, address safe) internal pure returns (Call memory) {
+    /// @param roles the modifier the permission is written into (safety)
+    /// @param safe the avatar
+    /// @param moduleToDisable the modifier this power may switch off (operator)
+    function _techDisableModule(address roles, address safe, address moduleToDisable)
+        internal
+        pure
+        returns (Call memory)
+    {
         IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](3);
         c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
         c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
-        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(roles)});
+        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(moduleToDisable)});
         return _call(
             roles,
             abi.encodeCall(

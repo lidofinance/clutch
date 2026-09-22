@@ -8,6 +8,7 @@ import {IERC20, IWstETH, IAaveV3Pool, ILidoEarnDepositQueue} from "../src/interf
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
 import {IModuleProxyFactory} from "../src/interfaces/ISafe.sol";
 import {Policy} from "../src/policy/Policy.sol";
+import {MockModuleGuard} from "../src/mocks/MockModuleGuard.sol";
 import {FullPolicy} from "../src/policy/FullPolicy.sol";
 import {SafeExec} from "../src/policy/SafeExec.sol";
 
@@ -16,9 +17,10 @@ import {SafeExec} from "../src/policy/SafeExec.sol";
 ///      against the deployed Roles v4 mastercopy on the pinned fork.
 abstract contract ReviewBase is Test {
     uint256 internal constant FORK_BLOCK = 25946643;
-    address internal constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
+    // Safe v1.5.0: the first release whose module path calls a guard.
+    address internal constant SAFE_SINGLETON = 0xFf51A5898e281Db6DfC7855790607438dF2ca44b;
     address internal constant ROLES_MASTERCOPY = 0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5;
-    address internal constant SAFE_PROXY_FACTORY = 0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67;
+    address internal constant SAFE_PROXY_FACTORY = 0x14F2982D601c9458F93bd70B218933A6f8165e7b;
 
     bytes32 internal constant K_USDC = keccak256("probe_usdc");
     bytes32 internal constant K_DAI = keccak256("probe_dai");
@@ -26,7 +28,9 @@ abstract contract ReviewBase is Test {
 
     MockAragonAgent internal agent;
     ISafe internal safe;
-    IRoles internal roles;
+    IRoles internal roles; // operator modifier, guarded
+    IRoles internal safety; // emergency + technical modifier, never guarded
+    MockModuleGuard internal guard;
     address internal tmc = makeAddr("tmc-standin");
     address internal attacker = makeAddr("attacker");
     address internal principal;
@@ -42,16 +46,25 @@ abstract contract ReviewBase is Test {
         owners[0] = address(agent);
         safe = ISafe(payable(pf.createProxyWithNonce(SAFE_SINGLETON,
             abi.encodeCall(ISafe.setup, (owners, 1, address(0), "", address(0), address(0), 0, payable(address(0)))), 0x77)));
-        roles = IRoles(IModuleProxyFactory(0x000000000000aDdB49795b0f9bA5BC298cDda236).deployModule(ROLES_MASTERCOPY,
-            abi.encodeCall(IRoles.setUp, (abi.encode(address(safe), address(safe), address(safe)))), 0x11d1));
+        IModuleProxyFactory mpf = IModuleProxyFactory(0x000000000000aDdB49795b0f9bA5BC298cDda236);
+        bytes memory init = abi.encodeCall(IRoles.setUp, (abi.encode(address(safe), address(safe), address(safe))));
+        roles = IRoles(mpf.deployModule(ROLES_MASTERCOPY, init, 0x11d1));
+        safety = IRoles(mpf.deployModule(ROLES_MASTERCOPY, init, 0x11d2));
         SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
+        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety))));
+        guard = new MockModuleGuard(address(safety));
+        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.setModuleGuard, (address(guard))));
+
         Policy.Addresses memory m;
         m.safe = address(safe); m.agent = address(agent); m.operator = tmc; m.emergency = makeAddr("eb");
         m.technical = makeAddr("emergency-brakes"); m.policyAdmin = makeAddr("policy-admin");
+        m.rolesOperator = address(roles); m.rolesSafety = address(safety);
         Policy.fillTokens(m); Policy.fillProtocols(m); Policy.fillAtokens(m);
         a = m;
-        Policy.Call[] memory calls = FullPolicy.build(m, address(roles));
-        for (uint256 i = 0; i < calls.length; i++) SafeExec.execAsOwner(agent, safe, calls[i].to, calls[i].data);
+        Policy.Call[] memory ops = FullPolicy.buildOperator(m, address(roles));
+        for (uint256 i = 0; i < ops.length; i++) SafeExec.execAsOwner(agent, safe, ops[i].to, ops[i].data);
+        Policy.Call[] memory saf = FullPolicy.buildSafety(m, address(safety), address(roles));
+        for (uint256 i = 0; i < saf.length; i++) SafeExec.execAsOwner(agent, safe, saf[i].to, saf[i].data);
         vm.stopPrank();
     }
 
@@ -273,7 +286,7 @@ contract ReviewProbe is ReviewBase {
         // and the emergency role still works afterwards
         deal(a.usdc, address(safe), 10e6);
         vm.prank(a.emergency);
-        assertTrue(roles.execTransactionWithRole(a.usdc, 0,
+        assertTrue(safety.execTransactionWithRole(a.usdc, 0,
             abi.encodeCall(IERC20.transfer, (a.agent, 1e6)), 0, Policy.EMERGENCY(), true),
             "emergency must remain armed");
     }
@@ -304,9 +317,9 @@ contract ReviewProbe is ReviewBase {
         assertTrue(_op(a.usdc, abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 1_000e6))));
         // incident: zero the approval AND remove the operator's ability to set it
         vm.startPrank(a.emergency);
-        assertTrue(roles.execTransactionWithRole(a.usdc, 0,
+        assertTrue(safety.execTransactionWithRole(a.usdc, 0,
             abi.encodeCall(IERC20.approve, (a.cowVaultRelayer, 0)), 0, Policy.EMERGENCY(), true));
-        assertTrue(roles.execTransactionWithRole(address(roles), 0,
+        assertTrue(safety.execTransactionWithRole(address(roles), 0,
             abi.encodeCall(IRoles.revokeFunction, (Policy.OPERATOR(), a.usdc, IERC20.approve.selector)),
             0, Policy.EMERGENCY(), true), "emergency must be able to revoke the operator's approve");
         vm.stopPrank();
@@ -325,12 +338,12 @@ contract ReviewProbe is ReviewBase {
         assertTrue(_op(a.cowSettlement, abi.encodeWithSignature("setPreSignature(bytes,bool)", uid, true)),
             "operator presigns");
         vm.prank(a.emergency);
-        assertTrue(roles.execTransactionWithRole(a.cowSettlement, 0,
+        assertTrue(safety.execTransactionWithRole(a.cowSettlement, 0,
             abi.encodeWithSignature("invalidateOrder(bytes)", uid), 0, Policy.EMERGENCY(), true),
             "emergency must be able to invalidate an outstanding order");
         // the operator cannot bring it back: the uid is now marked filled
         vm.prank(a.emergency);
-        (bool reSign,) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
+        (bool reSign,) = address(safety).call(abi.encodeCall(IRoles.execTransactionWithRole,
             (a.cowSettlement, 0, abi.encodeWithSignature("invalidateOrder(bytes)", uid), 0, Policy.EMERGENCY(), true)));
         assertTrue(reSign, "invalidation is idempotent");
     }
