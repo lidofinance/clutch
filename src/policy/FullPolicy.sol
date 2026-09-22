@@ -210,8 +210,15 @@ library FullPolicy {
         // -- emergency: block the operator (revoke-only, roleKey pinned) ----
         calls[i++] = Policy._emRevokeTarget(roles);
         calls[i++] = Policy._emRevokeFunction(roles);
-        // -- emergency: disableModule on the Safe (UNPINNED params — R3 demo)
-        calls[i++] = Policy._allowFunction(roles, Policy.EMERGENCY(), a.safe, ISafe.disableModule.selector);
+        // -- technical emergency: module disabling only, module pinned ------
+        // Module disabling answers a defect in the permission layer, which the
+        // engineering organisation recognises, so it sits with the technical
+        // committee rather than the financial one. The module argument is
+        // pinned, closing the long-standing unpinned-parameter finding.
+        calls[i++] = Policy._assignRoles(roles, a.technical, Policy.TECHNICAL());
+        calls[i++] = Policy._setDefaultRole(roles, a.technical, Policy.TECHNICAL());
+        calls[i++] = Policy._scopeTarget(roles, Policy.TECHNICAL(), a.safe);
+        calls[i++] = Policy._techDisableModule(roles, a.safe);
 
         // -- emergency: return to treasury (pinned to the Agent literal) ---
         calls[i++] = Policy._transferToAgent(roles, a.steth, a.agent);

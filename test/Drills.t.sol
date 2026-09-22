@@ -85,6 +85,7 @@ contract Drills is Test {
         m.agent = address(agent);
         m.operator = tmc;
         m.emergency = eb;
+        m.technical = makeAddr("emergency-brakes");
         m.policyAdmin = address(executor);
         Policy.fillTokens(m);
         Policy.fillProtocols(m);
@@ -562,22 +563,38 @@ contract Drills is Test {
         _emRevert(a.usdc, abi.encodeCall(IERC20.transfer, (attacker, 1e6)));
     }
 
-    function test_D4_disable_module_unpinned_R3() public {
-        // R3 evidence: emergency can disable the module with ANY (prev,module)
-        // arguments — reproducing the proposal's unpinned scope on mainnet
-        // singleton bytecode. The scope reaches only modules the Safe has.
-        _em(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(roles))));
+    function _tech(address to, bytes memory data) internal returns (bool ok) {
+        vm.prank(a.technical);
+        (ok,) = address(roles).call(abi.encodeCall(
+            IRoles.execTransactionWithRole, (to, 0, data, 0, Policy.TECHNICAL(), true)));
+    }
+
+    /// @dev Module disabling answers a defect in the permission layer, so it
+    ///      sits with the technical committee, not the financial one, and the
+    ///      module argument is pinned.
+    function test_D4_module_disabling_is_technical_only_and_pinned() public {
+        // the financial emergency role no longer holds it
+        _emRevert(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(roles))));
+        // nor does the operator
+        _opRevert(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(roles))));
+        // the technical role cannot point it at some other module
+        assertFalse(
+            _tech(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(0xdEaD)))),
+            "module argument must be pinned to this modifier"
+        );
+        // it can disable this modifier
+        assertTrue(
+            _tech(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(roles)))),
+            "technical role must be able to disable the module"
+        );
         assertFalse(safe.isModuleEnabled(address(roles)), "module should be off");
-        // roles path dead: both roles blocked
+        // every role is now dead, which is the point
         _opRevert(a.wsteth, abi.encodeCall(IWstETH.wrap, (1 ether)));
         _emRevert(a.wsteth, abi.encodeCall(IWstETH.unwrap, (1 ether)));
-        // owner still reaches the Safe (DAO recovery equivalence)
+        // and the owner path restores it
         vm.startPrank(principal);
         SafeExec.execAsOwner(
-            agent,
-            safe,
-            address(safe),
-            abi.encodeCall(ISafe.enableModule, (address(roles)))
+            agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))
         );
         vm.stopPrank();
         assertTrue(safe.isModuleEnabled(address(roles)));

@@ -46,7 +46,8 @@ abstract contract ReviewBase is Test {
             abi.encodeCall(IRoles.setUp, (abi.encode(address(safe), address(safe), address(safe)))), 0x11d1));
         SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
         Policy.Addresses memory m;
-        m.safe = address(safe); m.agent = address(agent); m.operator = tmc; m.emergency = makeAddr("eb"); m.policyAdmin = makeAddr("policy-admin");
+        m.safe = address(safe); m.agent = address(agent); m.operator = tmc; m.emergency = makeAddr("eb");
+        m.technical = makeAddr("emergency-brakes"); m.policyAdmin = makeAddr("policy-admin");
         Policy.fillTokens(m); Policy.fillProtocols(m); Policy.fillAtokens(m);
         a = m;
         Policy.Call[] memory calls = FullPolicy.build(m, address(roles));

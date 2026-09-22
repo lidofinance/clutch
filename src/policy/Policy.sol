@@ -2,6 +2,7 @@
 pragma solidity >=0.8.24 <0.9.0;
 
 import {IRoles} from "../interfaces/IRoles.sol";
+import {ISafe} from "../interfaces/ISafe.sol";
 import {IERC20, IStETH, IWstETH, ISDAI, IAaveV3Pool, ILidoEarnDepositQueue, ILidoEarnRedeemQueue, ICowSettlement} from "../interfaces/Tokens.sol";
 
 /// @title Policy — the lido-atm-constellation permission set, expressed as
@@ -61,6 +62,12 @@ library Policy {
     ///      RUN_SCRIPT authority on the Agent. Dry-run member: the mock EVMScript
     ///      executor. Production member: a Lido-built, shape-validating
     ///      contract (WS-D).
+    /// @dev Technical emergency: the Emergency Brakes multisig. Holds one
+    ///      power, module disabling, with the module argument pinned.
+    function TECHNICAL() internal pure returns (bytes32) {
+        return keccak256("technical-emergency");
+    }
+
     function POLICY_ADMIN() internal pure returns (bytes32) {
         return keccak256("policy-admin");
     }
@@ -83,7 +90,8 @@ library Policy {
         address agent; // dry-run: MockAragonAgent; production: Aragon Agent
         address operator; // dry-run: stand-in for the TMC Safe
         address emergency; // dry-run: stand-in for the EB Safe
-        address policyAdmin; // dry-run: mock EVMScript executor; production: narrow Lido contract
+        address policyAdmin; // dry-run: mock EVMScript executor; production: the ET script executor
+        address technical; // Emergency Brakes multisig: module disabling only
         address steth;
         address wsteth;
         address ldo;
@@ -566,6 +574,24 @@ library Policy {
             abi.encodeCall(
                 IRoles.scopeFunction,
                 (OPERATOR(), settlement, ICowSettlement.setPreSignature.selector, c, EXEC_NONE)
+            )
+        );
+    }
+
+    /// @dev disableModule(prevModule, module) for the technical emergency role.
+    ///      The module argument is pinned to this modifier by EqualTo, so the
+    ///      power cannot be turned on a future second module. prevModule is a
+    ///      linked-list pointer whose value depends on the Safe's module list
+    ///      at call time, so it stays unconstrained.
+    function _techDisableModule(address roles, address safe) internal pure returns (Call memory) {
+        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](3);
+        c[0] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_CALLDATA, operator_: OP_MATCHES, compValue: ""});
+        c[1] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_PASS, compValue: ""});
+        c[2] = IRoles.ConditionFlat({parent: 0, paramType: PARAM_STATIC, operator_: OP_EQUAL_TO, compValue: _eqAddress(roles)});
+        return _call(
+            roles,
+            abi.encodeCall(
+                IRoles.scopeFunction, (TECHNICAL(), safe, ISafe.disableModule.selector, c, EXEC_NONE)
             )
         );
     }
