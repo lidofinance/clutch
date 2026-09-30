@@ -1,0 +1,26 @@
+name: docs
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate docs bundle
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: install validator dependency
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet pyyaml==6.0.2
+      - name: validate bundle
+        run: .venv/bin/python scripts/validate_docs.py
+      - name: check document-status register
+        run: .venv/bin/python scripts/validate_docs.py --check-status

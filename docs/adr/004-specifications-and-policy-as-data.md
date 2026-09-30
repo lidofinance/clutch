@@ -1,0 +1,82 @@
+---
+type: Decision
+title: "ADR 004: Specifications and the permission policy as data"
+description: Hand-written conceptual specs, a generated API reference, invariants mapped to tests, the LIP as an external layer, runbooks as their own class, and a permission policy kept as a data file that a compiler applies and a round-trip check reads back from the chain.
+tags: [specs, policy, invariants, testing, runbooks]
+status: draft
+review_status: slop
+decision: proposed
+constrains_operator: false
+generated:
+  by: claude-code/opus-5.5
+  at: 2026-09-30T20:28:17Z
+verified: []
+sources:
+  - id: s1
+    resource: /registers/decision-log.md
+    title: Decision log — EM on specifications and the policy, 2026-09-30
+  - id: s2
+    resource: /research/ai-first-practice-2026-09.md
+    title: AI-first repository practice — lend-markets specification layers
+  - id: s3
+    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/src/policy/FullPolicy.sol"
+    title: Kit policy builders at 370e20a — the current Solidity source of the policy
+  - id: s4
+    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/ReviewProbe.t.sol#L197"
+    title: Kit test at 370e20a — a later write to the same role, target and selector replaces the earlier tree
+  - id: s5
+    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/README.md"
+    title: Kit harness README at 370e20a — known divergence from the design
+---
+
+# ADR 004: Specifications and the permission policy as data
+
+## Context
+
+- Today the policy is hand-written Solidity that builds each condition tree [s3].
+- A write to a role, target and selector replaces the stored tree. It does not merge into it. A regression test in the kit guards this [s4].
+- The kit's policy predates the launch scope and the Stonks swap path, so it diverges from the design [s5].
+- Tests read off the implementation inherit its bugs. lido-lend-markets derives tests from requirements and keeps specs in two layers [s2].
+
+## Decision
+
+EM accepted the positioned model on 2026-09-30 [s1]:
+
+1. **Conceptual specifications** are written by hand. They hold what code cannot say: the architecture, the roles matrix, the permission model, the invariants and the threat model.
+2. **The API reference** is generated from NatSpec. Nobody edits it by hand.
+3. **Invariants** have IDs `INV-NNN`. Each maps to a named test, and CI fails on an invariant without a test.
+4. **Behaviour** is written as WHEN/THEN scenarios. Tests derive from the specifications, never from the implementation. A behaviour change updates its specification in the same commit.
+5. **The LIP** is a third, external layer. It summarises and cites the conceptual specifications and must never contradict them.
+6. **Runbooks** are a separate class under `docs/runbooks/`. There is one per emergency or technical action. Each maps to a permission and carries a drill record.
+7. **The permission policy is a data file.** A script compiles it into modifier calls. A round-trip check reads the applied conditions back from the modifier on a fork and compares them with the data file, so the chain checks the compiler. Behaviour tests assert what each role can and cannot do, independent of the encoding.
+
+Rejected: keeping the Solidity builders as the source of truth, and adopting the TypeScript policy format of the original proposal [s1].
+
+An agent drafted this record. It stays `proposed` until EM accepts the text.
+
+## Options considered
+
+- Solidity builders as the source of truth. Not chosen: the encoding and the intent live in one place, and nothing independent checks the encoding.
+- The original proposal's TypeScript format. Not chosen: it adds a toolchain, and the kit never applied it.
+- A data file without a round-trip check. Not chosen: a compiler bug would then reach the chain unseen.
+
+## Consequences
+
+- The compiler must emit one complete tree per role, target and selector, because a write replaces the slot [s4].
+- The round-trip check must use the deployed mastercopy's enum values and its `Allowance` field order: `refill`, `maxRefill`, `period`, `balance`, `timestamp`.
+- Until the migration, the Solidity builders stay, and [test/README.md](https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/README.md) marks where they diverge from the design [s5].
+- The data format and the compiler are phase 1 and phase 2 work in the roadmap.
+
+## Confirmation
+
+- INV-016: the round-trip check passes on a fork.
+- The invariant-to-test check in CI, once it exists.
+
+## Reversal conditions
+
+- The round-trip check cannot read some condition back from the modifier.
+- The compiler proves harder to verify than the builders it replaces.
+
+## Open questions
+
+- OD-16: the data format and the compiler toolchain.

@@ -1,0 +1,16 @@
+# The owning team is not set yet (docs/registers/open-decisions.md, OD-10).
+# When it is, replace <team> and remove the leading "# " on each rule.
+# Agent instruction files, trust configuration and the permission policy always
+# need a human owner.
+#
+# *                      @lidofinance/<team>
+# /AGENTS.md             @lidofinance/<team>
+# /CLAUDE.md             @lidofinance/<team>
+# /skills/               @lidofinance/<team>
+# /.github/              @lidofinance/<team>
+# /config/actors.yaml    @lidofinance/<team>
+# /LICENSE               @lidofinance/<team>
+# /SECURITY.md           @lidofinance/<team>
+# /docs/adr/             @lidofinance/<team>
+# /src/policy/           @lidofinance/<team>
+# /src/gov/              @lidofinance/<team>

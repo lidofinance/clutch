@@ -1,0 +1,19 @@
+# Allowlist for OKF actor ids in generated.by and verified[].by (OKF 0.2 section 7).
+#
+# human:em is EM, the interim acceptor of decisions (docs/adr/002).
+# human:tmc is the Treasury Management Committee, the permanent acceptor.
+# human:emergency-brakes is the Emergency Brakes multisig, which also verifies
+#   every ADR that constrains the operator before it is accepted.
+# Add an agent or process only when it is actually used.
+version: 1
+
+humans:
+  - human:em
+  - human:tmc
+  - human:emergency-brakes
+
+processes:
+  - process:status-register
+
+agents:
+  - claude-code/opus-5.5

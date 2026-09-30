@@ -1,8 +1,24 @@
-cache/
+# Foundry
 out/
+cache/
+# Dry-run broadcasts stay local. Production deployment records are designed
+# separately and live under deployed/<run>/.
+broadcast/
+
+# Local only
 .env
-lib/
+.env.*
+!.env.example
+notes/
+private/
+
+# Harness manifests written by local runs
 dryrun-manifest.json
 bootstrap-manifest.json
 teardown-manifest.json
-broadcast/
+
+# Tooling
+__pycache__/
+.venv/
+node_modules/
+.DS_Store
