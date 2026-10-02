@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T11:52:17Z
+  at: 2026-10-02T14:28:58Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on on-chain blocking and the guard, 2026-09-22, and on the route, 2026-10-02
+    title: Decision log — EM on on-chain blocking and the guard, 2026-09-22, and on the route and the vendor's guard, 2026-10-02
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — guard hooks per Safe version, the committee Safe, Safe v1.5.0 provenance and audits
@@ -42,6 +42,9 @@ sources:
   - id: s10
     resource: /research/safe-v150-guard-compatibility-2026-10-02.md
     title: Safe v1.5.0 and the screening guard — the compatibility check of 2026-10-02
+  - id: s11
+    resource: "urn:clutch:restricted:screening-guard-build-2026-10-02"
+    title: Restricted evidence on the guard's audit pin, its deployed build, its approval kinds and Lido's detector for it, checked 2026-10-02; held outside the repository until the vendor is announced
 ---
 
 # ADR 010: Pre-execution screening
@@ -54,6 +57,9 @@ sources:
   - It is not a module guard, and Safe v1.5.0 refuses to set it as one [s4][s7].
   - In practice the vendor's key approves each exact transaction on chain, once, before it executes. A transaction without an approval reverts [s7].
   - The owners can remove the guard only through a fixed 10-day timelock that the vendor cannot block [s7].
+  - The audit report pins the commit of its fix review. The build that the Lido multisigs run adds one later change: both timelocks, from 1 day to 10 days. That change is on a branch of the vendor's repository, not on its main branch, and the vendor's documentation still says 1 day [s11].
+  - The vendor's key can approve three kinds of hash: one exact transaction, once; one exact call, at any nonce; or one function on one target, with any arguments. Only the first is bound to one transaction [s11].
+  - Lido's on-chain monitoring already has a detector for this guard. It alerts on standing approvals, the start of either timelock, the bypass mode, policy contracts, keeper changes, and owner, guard and module changes on the guarded Safe. It supports Safe v1.3.0 and v1.4.1 only [s11].
 - Easy Track's trusted caller is immutable [s8].
 
 ## Decision
@@ -72,16 +78,25 @@ EM decided on 2026-10-02, closing OD-01 [s1]: "Option 1: dedicated operator Safe
 
 EM decided on 2026-10-02, closing OD-02 and OD-19 [s1]: both new Safes use Safe v1.5.0, on the condition that the vendor's guard is compatible with it, and the operator Safe's threshold is 4 of 7. The check of 2026-10-02 found the guard compatible with v1.5.0 [s10].
 
+EM decided on 2026-10-02, closing OD-07 [s1]:
+
+8. The DAO vote grants the operator role and registers the factories only after the guard is set on the operator Safe with its bypass mode off. This is checked when the vote starts and watched until it executes.
+9. The agreement forbids standing approvals on this guard, of the nonce-free and the function-call kinds. The guard's two built-in timelock approvals stay.
+10. The guard instance uses the build that the four Lido instances run, with 10-day timelocks. Lido reviews the one change made after the guard's audit. The vendor is asked to merge it into its main branch, correct its documentation and add it to its audit report.
+11. The vendor's written confirmation that its approval service supports Safe v1.5.0 is a gate before deployment. Without it, the operator Safe uses Safe v1.4.1.
+12. Lido's monitoring for this guard adds Safe v1.5.0 and the new instance. A dollar limit per top-up motion is a request to the vendor, not a gate.
+13. The redaction of the vendor's identity ends when the mandate is posted on the forum, after the vendor agrees in writing to be named for this use. Commercial terms never enter this repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
-- **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules, ever. It holds the operator role on the operator modifier, and it is the trusted caller of every factory. It runs Safe v1.5.0 with a threshold of 4 of 7.
-- **Guard.** One instance of the vendor's guard, set on the operator Safe with `setGuard`. Enforcement must be on before the operator role is granted.
+- **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules, ever. It holds the operator role on the operator modifier, and it is the trusted caller of every factory. It runs Safe v1.5.0, or v1.4.1 without the vendor's confirmation, with a threshold of 4 of 7.
+- **Guard.** One instance of the vendor's guard, of the build that the Lido multisigs run, set on the operator Safe with `setGuard`. The vendor's key then turns the bypass mode off. The owners cannot turn it on again without the vendor's approval and the 10-day bypass timelock [s11]. Only then does the enabling vote grant the operator role (decision 8).
 - **What it screens.** Every transaction of the operator Safe: every operator action and the creation of every motion. Motion enactment is not screened, but Easy Track's hash check fixes a motion's content at creation.
 - **What it never touches.** The emergency Safe, the Emergency Brakes multisig and the DAO path act through the safety modifier or the owner path, and no guard is set on the Asset Safe. Recovery is therefore unscreened by construction.
 - **Removal.** Only the operator Safe's owners can remove the guard, through the 10-day timelock. A vendor outage therefore stops the operator for at most ten days, and a hostile removal stays visible for ten days.
-- **Monitoring.** Alert on: the start of the guard's removal timelock or its bypass timelock; the bypass mode turning on; any approval that is not bound to one transaction; any new approver key; any added policy contract; and any module enabled or guard changed on the operator Safe. Every operator transaction calls the same modifier function, so one reusable approval of that function would approve all vault activity. The vendor agreement must exclude such approvals.
+- **Monitoring.** Lido's existing detector for this guard carries the alerts the vault needs: the start of either timelock, the bypass mode turning on, a standing approval, a keeper change, an added policy contract, and module, guard or owner changes on the operator Safe [s11]. It must add Safe v1.5.0 and the new instance (decision 12). Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity. The agreement forbids such approvals (decision 9).
 - **Tooling.** Add the new instance to the estate's existing bytecode-verification and state-check configurations for this guard.
 
 ## Options considered
@@ -98,7 +113,9 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The operator Safe's address is pinned in several places. It is the immutable trusted caller of every factory [s8], the member that the toggle factory administers, a value in the governance role's conditions, and the operator role's holder. Replacing it needs a DAO vote that re-registers every factory. A vendor fault does not force a replacement, because the owners can remove the guard after ten days.
 - Fail closed: a vendor outage stops operator activity and new motions. Recovery is unaffected.
 - The guard is the one component that can stop operator activity and motion creation, and Lido does not write it. This narrows provider independence on purpose. The structural mitigations are that recovery never passes through it, the owners can remove it after ten days, and the technical role can disable the operator modifier.
-- The deployed guard includes two changes made after its audit's fix review: an early return for callers other than the guarded Safe, and the 10-day timelocks. The assurance phase must review both [s7].
+- The build adds one change after the audit's fix review: the 10-day timelocks. It is not on the vendor's main branch, and the vendor's documentation still says 1 day. Lido reviews the change, and the vendor is asked to merge and document it [s11]. An earlier version of this record counted two such changes. The second, an early return for callers other than the guarded Safe, is the commit that the report's fix review pins [s11].
+- Without the vendor's written confirmation of v1.5.0 support, the operator Safe runs v1.4.1, the guard's production version. OD-17 then covers the Asset Safe only.
+- The vendor's name enters this repository when the mandate is posted on the forum, with the vendor's written consent. The restricted fork tests then move into the harness.
 - Both new Safes run v1.5.0, the first in the Lido estate as far as the six Lido Safes checked show. The guard has no production history on v1.5.0; the fork check is the evidence [s10].
 - The kit still tests the rejected route A, with a mock module guard on the Asset Safe. The harness must move to a transaction guard on a mock operator Safe, preferably the vendor's deployed bytecode on a fork.
 
@@ -111,10 +128,11 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 ## Reversal conditions
 
 - The vendor cannot or will not run a guard instance for the operator Safe.
-- The review of the post-audit changes finds a defect.
+- The review of the post-audit change finds a defect.
+- The vendor does not accept the exclusion of standing approvals.
 - Approval latency makes routine operation impractical.
 
 ## Open questions
 
-- OD-07: the vendor agreement, its announcement, the review of the post-audit changes, and the vendor's confirmation that its approval service supports v1.5.0 Safes.
+- OD-12: the Lido-side party to the vendor agreement. Asked who signs, EM named the vendor.
 - OD-17: the incident-history check on Safe v1.5.0, which both new Safes now use.
