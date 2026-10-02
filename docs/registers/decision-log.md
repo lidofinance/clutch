@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T11:52:17Z
+  at: 2026-10-02T12:12:55Z
 verified: []
 sources:
   - id: s1
@@ -28,6 +28,18 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-02 — OD-04: Lido Lend and the protocol cap
+
+> 3. Capped first three months as 25% protocol cap, uncapped then as Lido product
+
+Recorded as: OD-04 is closed. Lido Lend counts against the protocol cap for its first three months. After that it is a Lido own product with no cap per product ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), [ADR 011](/adr/011-launch-scope.md)). The agent reads "first three months" as three calendar months from Lido Lend's mainnet launch, not from the vault's first deposit. Open item OD-12 asks EM to confirm this reading. [s3]
+
+## 2026-10-02 — OD-03: the base of the yield-bearing cap
+
+> 1. Literal (Block A)
+
+Recorded as: OD-03 is closed with the literal reading. The yield-bearing cap is measured against the top-4 stablecoins plus the yield-bearing stablecoins that the vault holds directly. Own-product and protocol positions are outside the base. The option also carried two actions: the mandate's illustrative balance renames its "USD-denominated" heading, so that it does not read as the cap's base; and the budget is computed again on the literal base ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). [s3]
 
 ## 2026-10-02 — OD-02 and OD-19: the two new Safes
 

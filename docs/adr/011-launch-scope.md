@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-02T12:12:55Z
 verified: []
 sources:
   - id: s1
@@ -57,7 +57,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 | earnETH, earnUSD | vault positions | asynchronous deposit and redeem |
 | LDO | held | in the rebalancing set |
 | Stonks 2.0 instances | rebalancing and recovery | [ADR 007](/adr/007-swapping-through-stonks.md) |
-| Lido Lend | lending, after launch | one motion through the Morpho Blue template once the market exists |
+| Lido Lend | lending, after launch | one motion through the Morpho Blue template once the market exists; the protocol cap applies for its first three months, then none as a Lido own product (OD-04, decided 2026-10-02) |
 
 Out of the launch scope: sDAI, Aave and every other third-party lending market.
 
@@ -84,4 +84,4 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market.
 
 ## Open questions
 
-- OD-04: whether Lido Lend counts against the per-protocol cap.
+None open. OD-04 was decided on 2026-10-02 ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).

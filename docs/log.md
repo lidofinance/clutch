@@ -2,6 +2,8 @@
 
 ## 2026-10-02
 
+* **Decision**: Recorded EM's choice for OD-04: Lido Lend counts against the protocol cap for its first three months, then is uncapped as a Lido product. Updated ADR 009, ADR 011, the open decisions (OD-04 closed; OD-12 gains the start-date reading), the parameters and the LIP draft. The attested computation now switches the Lido Lend key on that date.
+* **Decision**: Recorded EM's choice for OD-03, the literal base of the yield-bearing cap. Updated ADR 009, the open decisions, the parameters and the LIP draft. The attested computation ran again with the literal base; it gives the yield-bearing key no figure until the first retune after seeding.
 * **Decision**: Recorded EM's choices for OD-02 (Safe v1.5.0 for both new Safes, on the condition that the screening vendor's guard is compatible) and OD-19 (operator Safe threshold 4 of 7). Added the research note on the compatibility check, which met the condition. OD-17 applies again.
 * **Decision**: Recorded EM's choice for OD-01: the screening vendor's existing transaction guard on a dedicated operator Safe, which is also the trusted caller of every factory. Updated ADR 005, ADR 006 and ADR 010, the open decisions (OD-01 closed, OD-02 and OD-07 narrowed, OD-19 added), the parameters, INV-010, the runbook list, the LIP draft's section 9.1 and the harness README. The vendor's identity stays out; its evidence is cited as restricted.
 

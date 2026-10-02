@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T11:52:17Z
+  at: 2026-10-02T12:12:55Z
 verified: []
 sources:
   - id: s1
@@ -467,7 +467,7 @@ The `Allowance` struct field order in the deployed mastercopy is `refill, maxRef
 | earnUSD | Held, vault position | Asynchronous deposit and redeem queues |
 | LDO | Held, in the rebalancing set | |
 | Swap instances | Rebalancing and recovery venue | Both roles, through the treasury swap contracts. Price is oracle-bounded and the destination is fixed per instance; no direct exchange permission and no standing relayer approval exists |
-| Lido Lend | Lending venue | Expected October 2026, Morpho-Blue-compatible. **Zero-day ready by design:** the Morpho-Blue template ships at launch with end-to-end tests against the live Morpho Blue deployment, so onboarding is one Easy Track motion carrying the market address once it exists. No vote, no new contract, no policy migration |
+| Lido Lend | Lending venue | Expected October 2026, Morpho-Blue-compatible. **Zero-day ready by design:** the Morpho-Blue template ships at launch with end-to-end tests against the live Morpho Blue deployment, so onboarding is one Easy Track motion carrying the market address once it exists. No vote, no new contract, no policy migration. The protocol cap applies for its first three months, then none as a Lido own product (OD-04) |
 
 Assets explicitly **not** in the launch set: sDAI and third-party lending markets other than Lido Lend.
 
@@ -564,7 +564,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Objection period | Easy Track window before a motion may enact | 72 hours, the Easy Track default |
 | Objection threshold | Share of LDO supply that rejects a motion | 0.5 percent, the Easy Track default |
 | Approval ceiling per token | Upper bound on an approval the operator may set | **[Open, OD-08]** One deposit, not one month of them. Swapping needs no approval at all now, so the only approvals are to protocol contracts and the budget already bounds the flow |
-| Budget per key | Monthly token-unit allowance | **Derived, run and attested** on 2026-09-22 outside this repository. Monthly flow equals the stock cap for that key, because exits are unbudgeted and a tighter flow would throttle re-entry after a defensive exit. The inputs include unapproved mandate terms, so the computation and its result enter this repository when the mandate is approved |
+| Budget per key | Monthly token-unit allowance | **Derived, run and attested** on 2026-09-22 outside this repository. Monthly flow equals the stock cap for that key, because exits are unbudgeted and a tighter flow would throttle re-entry after a defensive exit. Yield-bearing keys get the headroom against the literal base, the stablecoins plus yield-bearing stablecoins held directly, from a holdings snapshot at each retune (OD-03). The inputs include unapproved mandate terms, so the computation and its result enter this repository when the mandate is approved |
 | Lido own-product budgets | Monthly allowance for the vault products | The mandate sets no per-product cap and the whole vault may sit in Lido products, so these keys are bounded by the mandate size rather than by a ratio. That is a weak control. The budget exists to bound blast radius per month, not to enforce a ratio |
 | Budget retune cadence | How often unit budgets are re-derived | Fortnightly, riding the existing rebalancing review. Budgets are token units and caps are ratios, so they drift with price |
 | Budget refill period floor | Lower bound enforced on `period` | 30 days proposed |
@@ -636,7 +636,7 @@ The [open-decisions register](/registers/open-decisions.md) tracks every open it
 
 1. **OD-17, Safe v1.5.0 incident history.** Both new Safes use v1.5.0. Its audits are recorded; its incident history is not.
 2. **OD-07, the vendor agreement.** The vendor's existing guard fits the chosen route and passed the fork check on v1.5.0. The agreement, its announcement, a review of the two changes made after the guard's audit, and the vendor's support for v1.5.0 Safes in its approval service are still open.
-3. **OD-03 and OD-04, two mandate ambiguities.** The yield-bearing cap's denominator share, and whether Lido Lend counts against the per-protocol cap. Both move the budget figures and belong in the mandate text, not in a script.
+3. **Mandate text owed.** The own-product limit and the protocol cap must state that Lido Lend counts against the protocol cap for its first three months (OD-04). The illustrative balance renames its "USD-denominated" heading (OD-03).
 
 ## Links
 

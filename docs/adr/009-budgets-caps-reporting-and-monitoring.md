@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-02T12:12:55Z
 verified: []
 sources:
   - id: s1
@@ -50,6 +50,16 @@ EM decided on 2026-09-22 [s1]:
 7. Detectors run in the Lido on-chain monitoring and in the screening vendor's service.
 8. Paging and escalation run through the general Lido incident process.
 
+EM decided on 2026-10-02, closing OD-03 [s1]:
+
+9. The yield-bearing cap is measured against the top-4 stablecoins plus the yield-bearing stablecoins that the vault holds directly. Own-product and protocol positions are outside the base.
+10. The mandate's illustrative balance renames its "USD-denominated" heading, so that it does not read as the cap's base.
+11. The budget is computed again on the literal base.
+
+EM decided on 2026-10-02, closing OD-04 [s1]:
+
+12. Lido Lend counts against the protocol cap for its first three months. After that it is a Lido own product with no cap per product.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
@@ -57,7 +67,9 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - **Caps are detective.** The mandate must say that exposure caps are enforced by measurement, publication and remediation, not by reverting a transaction.
 - **Which caps need prices.** A cap within one denomination needs balances only. A cap on a liquid staking token or on a yield-bearing asset needs on-chain rates. A cap across classes needs a market oracle.
 - **Budget shape.** Monthly flow equals the stock cap for each key. Exits are unbudgeted, so a tighter flow would throttle re-entry after a defensive exit. Keys for Lido products have no ratio to bound, because the whole vault may sit in them. They bound only the amount that can move in one month, which is the whole mandate. That is a weak control, and the LIP must say so.
-- **Budget figures.** The attested computation ran on 2026-09-22 with an independent attester and pinned inputs. Its inputs include unapproved mandate terms, so its results enter this repository only after the mandate is approved.
+- **Yield-bearing keys.** A yield-bearing key gets the headroom: the cap's share of the stablecoins plus yield-bearing stablecoins held directly, minus the current holding of that token, and never less than zero. Converting a stablecoin into a yield-bearing stablecoin leaves the base unchanged. The headroom depends on what the vault holds, so each fortnightly retune derives it from a holdings snapshot read at a pinned block. Without a snapshot, the key gets no budget.
+- **Lido Lend key.** The protocol cap applies until three calendar months after Lido Lend goes live. From that date the key is bounded by the mandate size, like every own-product key. The months count from Lido Lend's mainnet launch, a reading still to confirm (OD-12).
+- **Budget figures.** The attested computation ran on 2026-09-22 with an independent attester and pinned inputs. It ran again on 2026-10-02 with the literal base. The yield-bearing key now gets no figure until the first retune after seeding, and the other keys are unchanged. The inputs include unapproved mandate terms, so the results enter this repository only after the mandate is approved.
 - **Approvals.** An operator approval is either zero or below a per-token ceiling. The proposed ceiling is one deposit, not one month of deposits (OD-08).
 - **Refill floor.** A motion cannot set a refill period below a floor. The proposed floor is 30 days (OD-08).
 - **Reports.** The payload is on IPFS and holds balances, positions, exposures, each ratio with its numerator and denominator, and the price source with its timestamp. Where a report justifies a top-up, its content identifier goes in the payment's `reference` field, which lands in an Ethereum event.
@@ -74,6 +86,10 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - A periodic report that is not tied to a funding motion has no on-chain anchor. Its immutability rests on content addressing and the forum post that cites it. That is enough for an informational control. It is not an Ethereum guarantee.
 - Every detective control ends at a person. The mandate must name them.
 - Budgets drift with price, because caps are ratios and budgets are token units. The two-week retune absorbs the drift.
+- Under the literal base, a yield-bearing stablecoin has room only next to stablecoins that the vault holds directly. The illustrative allocation holds none, so it plans no yield-bearing position.
+- The committee can enlarge the base before a test by holding more stablecoins. The test at deposit time and the published history limit this. They do not prevent it.
+- The policy must hold the Lido Lend budget key, with a ceiling that allows the uncapped budget, from deployment. Otherwise the cap could not lift by motion alone. During the first three months, the allowance set by the onboarding motion and the fortnightly test hold the cap.
+- The mandate text owes two changes: the own-product limit and the protocol cap must state the three-month rule for Lido Lend; and the illustrative balance renames its "USD-denominated" heading.
 
 ## Confirmation
 
@@ -87,7 +103,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 ## Open questions
 
-- OD-03 and OD-04: the two mandate ambiguities that move the budget figures.
+- OD-12: confirm when Lido Lend's three months start.
 - OD-08: approval ceilings and the refill floor.
 - OD-13: who writes the detectors.
 - OD-14: who publishes reports, on what schedule, what happens on a stale price, and who answers for a late report.
