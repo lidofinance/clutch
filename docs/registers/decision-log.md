@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:07:21Z
+  at: 2026-10-02T14:28:58Z
 verified: []
 sources:
   - id: s1
@@ -28,6 +28,21 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-02 — OD-07: the screening vendor's guard
+
+> Q1. 1.
+> Q2. A
+> Q3. 1.
+> Q4. 1, [the screening vendor]
+
+Recorded as: OD-07 is closed. (Q1) The DAO vote grants the operator role and registers the factories only after the guard is set on the operator Safe with its bypass mode off. This is checked when the vote starts and watched until it executes. The agreement forbids standing approvals on this guard, of the nonce-free and the function-call kinds. The guard's two built-in timelock approvals stay. (Q2) Block A: the guard instance uses the build that the four Lido instances run, with 10-day timelocks. Lido reviews the one change made after the guard's audit. The vendor is asked to merge it into its main branch, correct its documentation and add it to its audit report. (Q3) The vendor's written confirmation that its approval service supports Safe v1.5.0 is a gate before deployment. Without it, the operator Safe uses Safe v1.4.1. Lido's monitoring for this guard adds v1.5.0 and the new instance. A dollar limit per top-up motion is a request to the vendor, not a gate. (Q4) The redaction of the vendor's identity ends when the mandate is posted on the forum, after the vendor agrees in writing to be named for this use. Commercial terms never enter the repository. Asked who signs the agreement, EM named the vendor. The agent reads this as the counterparty; the Lido-side party is still to be named, and OD-12 asks EM to confirm ([ADR 010](/adr/010-pre-execution-screening.md), [ADR 001](/adr/001-repository-scope-visibility-licence-name.md)). [s3]
+
+## 2026-10-02 — OD-07 asked
+
+> run interview on OD-07
+
+[s3]
 
 ## 2026-10-02 — OD-06 Q2: the limit
 

@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T13:35:00Z
+  at: 2026-10-02T14:28:58Z
 verified: []
 sources:
   - id: s1
@@ -58,12 +58,16 @@ EM decided on 2026-10-02 [s1]:
 8. Both new Safes, the Asset Safe and the operator Safe, use Safe v1.5.0, on the condition that the screening vendor's guard is compatible with it. The check of 2026-10-02 found it compatible ([research note](/research/safe-v150-guard-compatibility-2026-10-02.md)).
 9. The operator Safe's threshold is 4 of 7.
 
+EM decided on 2026-10-02, closing OD-07 [s1]:
+
+10. The screening vendor confirms in writing that its approval service supports Safe v1.5.0. Without that confirmation, the operator Safe uses Safe v1.4.1 ([ADR 010](/adr/010-pre-execution-screening.md)).
+
 ## Proposed direction
 
 The rest of this section is the design that the kit implements [s3]. EM has not accepted it as text.
 
 - **Asset Safe.** A new Safe owned one-of-one by the Aragon Agent. It holds every asset. No guard is set on it. It runs Safe v1.5.0.
-- **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules. It carries the screening guard, holds the operator role and is the trusted caller of every factory. It runs Safe v1.5.0 with a threshold of 4 of 7.
+- **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules. It carries the screening guard, holds the operator role and is the trusted caller of every factory. It runs Safe v1.5.0, or v1.4.1 if the vendor does not confirm v1.5.0 support, with a threshold of 4 of 7.
 - **Operator modifier.** A minimal proxy of the Roles mastercopy. Owner, avatar and target are the Asset Safe. It carries the `operator` and `governance` roles.
 - **Safety modifier.** A second minimal proxy with the same settings. It carries the `emergency` and `technical` roles.
 - The Asset Safe owns both modifiers. A role's call executes as the Safe, so a narrowly scoped role can administer a modifier without any authority over the Agent. This is how the emergency role revokes the operator.

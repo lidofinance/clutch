@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:07:21Z
+  at: 2026-10-02T14:28:58Z
 verified: []
 sources:
   - id: s1
@@ -26,7 +26,7 @@ sources:
 |---|---|---|---|
 | Operator | the operator Safe, a new Safe with the committee's signers | EM decision of 2026-10-02 [s1] | [ADR 005](/adr/005-account-graph-and-roles.md) |
 | Operator Safe threshold | four of seven | EM decision of 2026-10-02 [s1] | ADR 005 |
-| Safe version of the Asset Safe and the operator Safe | v1.5.0 | EM decision of 2026-10-02, on a condition that the compatibility check met [s1] | ADR 005 |
+| Safe version of the Asset Safe and the operator Safe | v1.5.0; the operator Safe uses v1.4.1 if the vendor does not confirm v1.5.0 support in writing | EM decisions of 2026-10-02: a condition that the compatibility check met, and the vendor's confirmation as a gate [s1] | ADR 005 |
 | Emergency Safe | threshold two; owner set equal to the committee's | EM decision [s1] | ADR 005 |
 | Technical role holder | the Emergency Brakes Safe, three of five | EM decision [s1]; quorum read [s2] | ADR 005 |
 | Easy Track objection period | 72 hours, 259,200 seconds, global | Read [s2] | — |
@@ -51,8 +51,9 @@ sources:
 | Budget refill-period floor | 30 days | Proposed; open: OD-08 | ADR 009 |
 | Approval ceiling per token | one deposit | Proposed; open: OD-08 | ADR 009 |
 | Report storage | IPFS; no DataBus | EM decision [s1] | ADR 009 |
-| Screening guard | the screening vendor's existing transaction guard, one instance on the operator Safe | EM decision of 2026-10-02 [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
-| Guard removal timelock | 10 days, fixed in the vendor's code | Vendor constant | ADR 010 |
+| Screening guard | the screening vendor's existing transaction guard, one instance on the operator Safe, of the build that the Lido multisigs run | EM decisions of 2026-10-02 [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
+| Guard removal and bypass timelocks | 10 days each, fixed in the chosen build | EM decision of 2026-10-02 [s1]; a constant in the vendor's code | ADR 010 |
+| Standing approvals on the guard | none, except the guard's two built-in timelock approvals | EM decision of 2026-10-02 [s1] | ADR 010 |
 | Screening failure mode | fail closed on the operator | EM decision [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
 | Flagging authority | the screening vendor, alone | EM decision [s1] | ADR 010 |
 | Emergency time to initiate | at most six hours | Mandate ceiling; a hard gate [s1] | [ROADMAP](https://github.com/lidofinance/clutch/blob/main/ROADMAP.md) |

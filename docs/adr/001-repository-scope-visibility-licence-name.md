@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-02T14:28:58Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM's setup answers of 2026-09-30
+    title: Decision log — EM's setup answers of 2026-09-30, and the vendor's announcement, 2026-10-02
   - id: s2
     resource: "https://www.gnu.org/licenses/gpl-3.0.html"
     title: GNU General Public License, version 3, section 13
@@ -59,6 +59,10 @@ EM decided these points on 2026-09-30 [s1]:
 6. **Name.** Clutch. A clutch is the set of eggs brooded together in one nest. The name continues the bird names of Lido governance: GOOSE [s7], EGG, NEST [s8] and Gaggle.
 7. **No token.** Clutch must never become a token symbol. CLUTCH is already the symbol of unrelated tokens, for example on Ethereum [s5] and on Solana [s6].
 
+EM decided on 2026-10-02, closing OD-07 [s1]:
+
+8. **The vendor's name.** The redaction of the screening vendor's identity ends when the mandate is posted on the forum, after the vendor agrees in writing to be named for this use. Commercial terms never enter the repository.
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Options considered
@@ -74,7 +78,7 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 - Every source file carries `SPDX-License-Identifier: AGPL-3.0-or-later`, except files derived from Easy Track, which keep `GPL-3.0`.
 - The kit's history names the policy provider of the original proposal. The provider's own proposal repository is public, so the history passes the publication test.
 - AGPL-3.0 section 13 requires that users who interact with a modified version over a network can receive its source [s4]. Public source at deployment, with explorer verification, is the planned answer.
-- The decision log redacts the screening vendor's name and the mandate size.
+- The decision log redacts the screening vendor's name and the mandate size. The vendor's name enters when the mandate is posted on the forum (decision 8).
 
 ## Confirmation
 
