@@ -9,7 +9,8 @@ No runbook is written yet. The table lists the runbooks that the design owes, wi
 | Revoke the operator | emergency Safe | `revokeTarget` and `revokeFunction` on the operator modifier, role key pinned to `operator` | No | No |
 | Zero the approvals | emergency Safe | `approve(spender, 0)` on each launch token | No | No |
 | Exit positions to the Safe | emergency Safe | redeem, withdraw, cancel and claim on each position, receiver and owner pinned to the avatar | No | No |
-| Recovery swap | emergency Safe | `transfer` pinned to a recovery swap instance, then `placeOrder` by anyone | No | No |
+| Recovery swap | emergency Safe | `transfer` pinned to a recovery swap instance, then `placeOrder` by the emergency Safe as the instance's manager | No | No |
+| Clear a stuck recovery order | emergency Safe | after expiry, anyone returns the tokens to the instance; the emergency Safe places a new order, or recovers the tokens to the Aragon Agent | No | No |
 | Return assets to the Agent | emergency Safe | `transfer` pinned to the Aragon Agent | No | No |
 | Disable the operator modifier | Emergency Brakes Safe | `disableModule` on the Asset Safe, module argument pinned to the operator modifier | No | No |
 | Pause Easy Track | Emergency Brakes Safe | the existing Easy Track `pause()` | No | No |

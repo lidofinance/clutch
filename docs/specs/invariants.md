@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T11:39:59Z
+  at: 2026-10-02T13:35:00Z
 verified: []
 sources:
   - id: s1
@@ -30,7 +30,7 @@ State "Draft" means the ADR is proposed. State "Pending" means the invariant dep
 | ID | Invariant | Set by | State | Kit test |
 |---|---|---|---|---|
 | INV-001 | The Aragon Agent is the only owner of the Asset Safe, with threshold one. | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | None: the harness sets this up but does not assert it |
-| INV-002 | No role except the DAO path can move an asset out of the Asset Safe, except the emergency role to the Aragon Agent or to a recovery swap instance, and the operator to a rebalancing swap instance. | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 007](/adr/007-swapping-through-stonks.md) | Pending: swap instances | `test_D4_emergency_flow`, `test_D6_adversarial` cover the Agent-only part |
+| INV-002 | No role except the DAO path can move an asset out of the Asset Safe, with three exceptions: the emergency role to the Aragon Agent or to a recovery swap instance; and the operator to a rebalancing swap instance. A token that enters a rebalancing instance leaves it only as proceeds to the Asset Safe or as a recovery to the Aragon Agent. | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 007](/adr/007-swapping-through-stonks.md) | Pending: swap instances | `test_D4_emergency_flow`, `test_D6_adversarial` cover the Agent-only part |
 | INV-003 | Every receiver, owner and beneficiary argument in an operator permission is pinned to the avatar. | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | `test_D3_operator_cannot_route_around_avatar` |
 | INV-004 | The governance role cannot change role membership, cannot touch the emergency role, cannot give the operator an administrative target, and cannot set an allowance outside the operator's budget keys. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Draft | the four `test_p0_policyadmin_cannot_*` tests |
 | INV-005 | Easy Track enacts a motion only if the rebuilt script matches the stored hash. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Draft | `test_D1_substituted_script_rejected_at_enactment` (mock Easy Track) |
@@ -42,6 +42,6 @@ State "Draft" means the ADR is proposed. State "Pending" means the invariant dep
 | INV-011 | A budget is consumed only by a successful call, never beyond its balance, and it refills per elapsed period up to its maximum. Keys of different assets and decimals are independent. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Draft | `test_D5_budget_enforcement_and_refill`, `test_FX4_per_asset_budgets_ARE_expressible`, `test_regression_18_decimal_supply_draws_own_budget` |
 | INV-012 | A budget change by motion stays within the per-key ceilings and cannot set a refill period below the floor. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Pending: floor value, OD-08 | `test_native_allowance_bounds_including_period_floor` |
 | INV-013 | The operator holds no order pre-signing permission and no approval to the CoW relayer. It swaps only by transfer to a pinned rebalancing instance. | [ADR 007](/adr/007-swapping-through-stonks.md) | Violated: the kit grants pre-signing [s3] | None yet |
-| INV-014 | The emergency role swaps only by transfer to a pinned recovery instance, whose receiver is the Aragon Agent. | [ADR 007](/adr/007-swapping-through-stonks.md) | Pending: swap instances | None yet |
+| INV-014 | The emergency role swaps only by transfer to a pinned recovery instance, whose receiver and recovery address are the Aragon Agent and whose manager is the emergency Safe. | [ADR 007](/adr/007-swapping-through-stonks.md) | Pending: swap instances | None yet |
 | INV-015 | The operator's permissions cover only the launch scope: no sDAI, no Aave and no other third-party lending market. | [ADR 011](/adr/011-launch-scope.md) | Violated: the kit grants Aave v3 and sDAI [s3] | None yet |
 | INV-016 | The conditions read back from each modifier equal the policy data file. | [ADR 004](/adr/004-specifications-and-policy-as-data.md) | Pending: data file and compiler | None yet |

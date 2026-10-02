@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T11:52:17Z
+  at: 2026-10-02T13:35:00Z
 verified: []
 sources:
   - id: s1
@@ -72,9 +72,9 @@ The rest of this section is the design that the kit implements [s3]. EM has not 
 | Role | Holder | Modifier | May do | May not do |
 |---|---|---|---|---|
 | DAO | Aragon Agent, by vote through Dual Governance | owner path | everything: own the Safe, replace the policy, change membership | — |
-| `operator` | operator Safe, the committee's signers, four of seven, screened ([ADR 010](/adr/010-pre-execution-screening.md)) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders up to a cap | move assets out; borrow; administer a modifier or the Safe; change its own permissions |
+| `operator` | operator Safe, the committee's signers, four of seven, screened ([ADR 010](/adr/010-pre-execution-screening.md)) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders up to a cap; as manager of the rebalancing swap instances, place orders and recover unsold tokens to the Aragon Agent ([ADR 007](/adr/007-swapping-through-stonks.md)) | move assets out, except into a rebalancing instance; borrow; administer a modifier or the Safe; change its own permissions |
 | `governance` | Easy Track executor | operator | toggle pre-scoped operator role keys; set operator budgets within ceilings | author a permission; name a target; grant a role to another address; touch the emergency role |
-| `emergency` | emergency Safe, two signatures, the committee's signers | safety | zero approvals; exit positions to the Safe; send assets to recovery swap instances or to the Agent; revoke the operator's targets and functions | add a permission; enter a protocol; borrow; change the recovery destination; disable a module |
+| `emergency` | emergency Safe, two signatures, the committee's signers | safety | zero approvals; exit positions to the Safe; send assets to recovery swap instances or to the Agent; revoke the operator's targets and functions; as manager of the recovery swap instances, place orders and recover tokens to the Aragon Agent | add a permission; enter a protocol; borrow; change the recovery destination; disable a module |
 | `technical` | Emergency Brakes Safe, three of five | safety | disable the operator modifier; the module argument is pinned | anything else, including disabling the safety modifier |
 
 ## Options considered

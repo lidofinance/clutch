@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T12:12:55Z
+  at: 2026-10-02T13:35:00Z
 verified: []
 sources:
   - id: s1
@@ -28,6 +28,27 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-02 — OD-05 Q3: where recovered rebalancing tokens go
+
+> 1.
+
+Recorded as: option 1 of the Q3 walkthrough. Instances come from the standard factory, whose recovery address is the treasury. Tokens recovered from a rebalancing instance therefore go to the treasury, not back to the vault. The agent had recommended deploying rebalancing instances outside the factory, so that they recover to the Asset Safe; EM chose the factory ([ADR 007](/adr/007-swapping-through-stonks.md)). [s3]
+
+## 2026-10-02 — OD-05 Q1 and Q2: instance managers and parameters
+
+> - Q1: 1
+> - Q2: 1
+>
+> walk me through Q3 more with examples and considerations, compare with how it worked before for stonks, etc.
+
+Recorded as: (Q1) the committee Safes manage the instances. The operator Safe manages the rebalancing instances, and the emergency Safe manages the recovery instances. This replaces the 2026-09-22 choice of the Aragon Agent as manager. (Q2) The parameters copy the live values by pair class, for both families. EM asked for a deeper walkthrough of Q3 before answering it. [s3]
+
+## 2026-10-02 — OD-05 asked
+
+> interview me about OD-05
+
+[s3]
 
 ## 2026-10-02 — OD-04: Lido Lend and the protocol cap
 
