@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T12:12:55Z
+  at: 2026-10-02T13:35:00Z
 verified: []
 sources:
   - id: s1
@@ -24,7 +24,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
-| OD-05 | Order duration, margin and price tolerance for each swap instance, by pair class. | [ADR 007](/adr/007-swapping-through-stonks.md), [parameters](/registers/parameters.md) | Copy the live split: 1800 s, 110 bp and 550 bp for volatile pairs; 1800 s, 30 bp and 150 bp for stablecoin pairs [s2] | EM; constrains the operator |
 | OD-06 | The period and the limit of the funding registry. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Match the period to the mandate's monthly top-up rule. Size the limit by attested computation. An existing registry uses a six-month period [s2] | EM; constrains the operator |
 | OD-07 | The screening vendor's guard. Its existing transaction guard fits the chosen route and passed the fork check on Safe v1.5.0. Still open: the vendor agreement, its announcement, who reviews the two changes made after the guard's audit, and whether the vendor's approval service supports v1.5.0 Safes. | [ADR 010](/adr/010-pre-execution-screening.md) | Grant the operator role only after the guard is set and enforcing. The agreement excludes reusable approvals of the modifier's function and confirms v1.5.0 support. The assurance phase reviews the post-audit changes | EM |
 | OD-08 | The approval ceiling per token and the budget refill-period floor. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | A ceiling of one deposit, not one month of deposits, and a 30-day floor. Values by attested computation | EM; constrains the operator |
@@ -37,7 +36,7 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-15 | How do the committee and the Emergency Brakes multisig record a verification of a page? | [ADR 002](/adr/002-decision-and-review-process.md) | A member commits the `verified` entry through a reviewed pull request, and the entry links the body's decision record | EM |
 | OD-16 | The policy data format and the compiler toolchain. | [ADR 004](/adr/004-specifications-and-policy-as-data.md) | Decide in the phase 1 specification | EM |
 | OD-17 | Incident-history check on Safe v1.5.0. EM asked for "a dd about audits and incident history". Both new Safes now use v1.5.0. The audits are recorded; the incident history is not. | [ADR 010](/adr/010-pre-execution-screening.md) | Record it before ADR 005 and ADR 010 are accepted | Evidence owed; EM decides |
-| OD-18 | Does the Stonks price source cover every pair in the instance list? | [ADR 007](/adr/007-swapping-through-stonks.md) | Check each pair on a fork before the instance list is final | Evidence owed; EM decides |
+| OD-20 | Who configures the swap pricing before launch, and when? The vault's pairs need a new converter instance with the vault's token lists, and oracle-router feeds for wstETH, WETH, USDC, USDT, DAI and USDS. | [ADR 007](/adr/007-swapping-through-stonks.md) | Put the converter and the feeds in the enabling vote. Verify every pair on a fork before the instance list is final | EM, then the DAO |
 
 ## Closed
 
@@ -48,3 +47,5 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-19 | The operator Safe's threshold | 2026-10-02 | EM: 4 of 7 [s1] |
 | OD-03 | What is the base of the yield-bearing cap? | 2026-10-02 | EM: "Literal (Block A)": the top-4 stablecoins plus the yield-bearing stablecoins held directly. Own-product and protocol positions are outside the base ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |
 | OD-04 | Does Lido Lend count against the protocol cap? | 2026-10-02 | EM: capped for the first three months, then uncapped as a Lido product ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |
+| OD-05 | How are the swap instances configured? | 2026-10-02 | EM: the operator Safe and the emergency Safe manage their families; the live values are copied by pair class; instances come from the standard factory, so recovered tokens go to the treasury ([ADR 007](/adr/007-swapping-through-stonks.md)) [s1] |
+| OD-18 | Does the Stonks price source cover every pair? | 2026-10-02 | Answered by evidence: no. The deployed stack prices only stETH and LDO. The configuration moved to OD-20 ([research note](/research/stonks-instances-2026-10-02.md)) |

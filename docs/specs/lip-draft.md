@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T12:12:55Z
+  at: 2026-10-02T13:35:00Z
 verified: []
 sources:
   - id: s1
@@ -376,7 +376,7 @@ Neither role receives a direct exchange permission. Every swap, routine or emerg
 The path is two steps and only the first needs a permission:
 
 1. The role calls `transfer` on the asset, with the recipient pinned by `EqualTo` to an approved swap instance.
-2. Anyone calls `placeOrder` on that instance. It builds an order whose minimum output comes from `estimateTradeOutput`, an on-chain oracle-derived quote bounded by the instance's margin and price tolerance, and whose settlement receiver is fixed in the instance.
+2. The instance's manager calls `placeOrder`. The operator Safe manages the rebalancing instances and the emergency Safe the recovery instances (OD-05). The order's minimum output is the oracle quote less the instance's margin; the manager can raise it, never lower it. Its settlement receiver is fixed in the instance.
 
 **The receiver is what separates the two roles.** It is an immutable set at deployment, so the destination of proceeds is structural rather than chosen per order. Two families of instances are deployed:
 
@@ -387,7 +387,7 @@ The path is two steps and only the first needs a permission:
 
 The operator therefore cannot route proceeds anywhere but the vault, and the emergency role cannot route them anywhere but the Agent, without either constraint being expressed as a condition.
 
-Properties confirmed on the deployed instances: `RECEIVER()` is a per-instance immutable and the two live instances differ, one settling to the Agent and one to another contract; `estimateTradeOutput` returns a live oracle quote; `ORDER_DURATION_IN_SECONDS`, `MARGIN_IN_BASIS_POINTS` and `PRICE_TOLERANCE_IN_BASIS_POINTS` are per-instance immutables, currently 1800, 110 and 550 on the live instances; and `recoverERC20`, `recoverEther` and `recoverERC721` exist, so assets are not stranded when an order does not fill.
+Properties confirmed on the deployed instances: `RECEIVER()` is a per-instance immutable and the two live instances differ, one settling to the Agent and one to another contract; `estimateTradeOutput` returns a live oracle quote; `ORDER_DURATION_IN_SECONDS`, `MARGIN_IN_BASIS_POINTS` and `PRICE_TOLERANCE_IN_BASIS_POINTS` are per-instance immutables, currently 1800, 110 and 550 on the live instances; and `recoverERC20`, `recoverEther` and `recoverERC721` exist, so assets are not stranded when an order does not fill. Only an instance's admin or manager can place an order or recover tokens, and recovered tokens always go to the instance's fixed recovery address. Every instance from the standard factory has Aragon Voting as admin and the Aragon Agent as recovery address. The Stonks 2.0 instances also fix a maximum improvement and allow partial fills.
 
 What this removes from the design: the operator needs no order pre-signing permission, and no role needs a standing approval to an exchange relayer. The unbounded-approval exposure and the opaque-order problem both disappear for swapping.
 
@@ -418,7 +418,8 @@ That gives roughly eleven recovery instances and ten rebalancing instances, abou
 Each instance's address is pinned in the transfer permission of the token it sells, so the set is fixed at policy-application time and grows only by a policy change.
 - **Swaps are not instant.** Orders run for a bounded duration with an oracle-derived floor, so a rebalance is a queued action, not an immediate one. The emergency service level remains time-to-initiate.
 - **Assets sit in the instance between transfer and settlement.** This is a short custody excursion out of the Asset Safe and should be stated plainly rather than glossed.
-- **The manager is the Aragon Agent** on every instance. The existing treasury instances set the operator committee as manager; these deliberately do not, so the committee cannot recover assets out of an instance it has just sold into. Recovery from an instance is a DAO action.
+- **The committee Safes are the managers** (OD-05). The operator Safe manages the rebalancing instances, and its orders pass the screening guard. The emergency Safe manages the recovery instances. A manager cannot take tokens: recovery always pays the Aragon Agent. Tokens recovered from a rebalancing instance therefore leave the vault for the treasury, and a top-up motion brings them back if the mandate allows it.
+- **Pricing must be configured before launch.** The deployed converter prices only stETH and LDO. The vault's pairs need a new converter instance and oracle-router feeds for wstETH, WETH, USDC, USDT, DAI and USDS (OD-20).
 - **No existing instance is reused.** The deployed treasury instances are the earlier revision with the receiver hardcoded, and their manager is the operator committee. Both properties are wrong for this system, and sharing an instance would mix vault flows with ordinary DAO swaps in one balance.
 
 ##### 6.2 Module disabling — the technical role **[Implemented]**
@@ -568,9 +569,10 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Lido own-product budgets | Monthly allowance for the vault products | The mandate sets no per-product cap and the whole vault may sit in Lido products, so these keys are bounded by the mandate size rather than by a ratio. That is a weak control. The budget exists to bound blast radius per month, not to enforce a ratio |
 | Budget retune cadence | How often unit budgets are re-derived | Fortnightly, riding the existing rebalancing review. Budgets are token units and caps are ratios, so they drift with price |
 | Budget refill period floor | Lower bound enforced on `period` | 30 days proposed |
-| Swap order duration | Per-instance immutable on each swap instance | **[Open]** live instances use 1800 seconds |
-| Swap margin | Per-instance immutable, basis points | **[Open]** live instances use 110 |
-| Swap price tolerance | Per-instance immutable, basis points | **[Open]** live instances use 550 |
+| Swap order duration | Per-instance immutable on each swap instance | 1800 seconds, as on the live instances (OD-05) |
+| Swap margin | Per-instance immutable, basis points | 110 for volatile pairs, 30 for stablecoin pairs (OD-05) |
+| Swap price tolerance | Per-instance immutable, basis points | 550 for volatile pairs, 150 for stablecoin pairs (OD-05) |
+| Swap maximum improvement and partial fills | Per-instance immutables | 1000 basis points; partial fills on (OD-05) |
 | Recipient period limit | Funding cap per period in the registry | **[Open]** must follow the mandate's top-up rule |
 
 ### Roles and Authority
