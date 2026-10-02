@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T12:12:55Z
+  at: 2026-10-02T14:07:21Z
 verified: []
 sources:
   - id: s1
@@ -27,6 +27,9 @@ sources:
   - id: s5
     resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/ReviewProbe.t.sol#L307"
     title: Kit test at 370e20a — an unlimited approval is refused
+  - id: s6
+    resource: /research/funding-registries-2026-10-02.md
+    title: Easy Track funding registries, 2026-10-02 — the top-up factory writes a fixed payment reference
 ---
 
 # ADR 009: Budgets, exposure caps, reporting and monitoring
@@ -72,8 +75,8 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - **Budget figures.** The attested computation ran on 2026-09-22 with an independent attester and pinned inputs. It ran again on 2026-10-02 with the literal base. The yield-bearing key now gets no figure until the first retune after seeding, and the other keys are unchanged. The inputs include unapproved mandate terms, so the results enter this repository only after the mandate is approved.
 - **Approvals.** An operator approval is either zero or below a per-token ceiling. The proposed ceiling is one deposit, not one month of deposits (OD-08).
 - **Refill floor.** A motion cannot set a refill period below a floor. The proposed floor is 30 days (OD-08).
-- **Reports.** The payload is on IPFS and holds balances, positions, exposures, each ratio with its numerator and denominator, and the price source with its timestamp. Where a report justifies a top-up, its content identifier goes in the payment's `reference` field, which lands in an Ethereum event.
-- **Monitoring.** The Lido on-chain monitoring carries policy drift, the approval inventory, budget burn, module and owner changes on both Safes, and motion events. The screening vendor carries depegs, protocol compromise and counterparty anomalies. Findings route into the existing notification and incident channels.
+- **Reports.** The payload is on IPFS and holds balances, positions, exposures, each ratio with its numerator and denominator, and the price source with its timestamp. The standard top-up factory writes a fixed payment reference, so a top-up cannot carry the report's identifier in it [s6]. The identifier goes in the forum post that the mandate requires before each top-up. Where to anchor it on chain is open (OD-14).
+- **Monitoring.** The Lido on-chain monitoring carries policy drift, the approval inventory, budget burn, module and owner changes on both Safes, and motion events. For funding it flags a top-up motion outside days 1 to 10 of a month, apart from the seed; a month's top-ups above the posted shortfall; and any top-up motion after an objected one ([ADR 008](/adr/008-funding-through-existing-payments.md)). The screening vendor carries depegs, protocol compromise and counterparty anomalies. Findings route into the existing notification and incident channels.
 
 ## Options considered
 
@@ -83,7 +86,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 ## Consequences
 
-- A periodic report that is not tied to a funding motion has no on-chain anchor. Its immutability rests on content addressing and the forum post that cites it. That is enough for an informational control. It is not an Ethereum guarantee.
+- No report has an on-chain anchor yet, a top-up's report included, because the top-up factory fixes the payment reference [s6]. A report's immutability rests on content addressing and the forum post that cites it. That is enough for an informational control. It is not an Ethereum guarantee.
 - Every detective control ends at a person. The mandate must name them.
 - Budgets drift with price, because caps are ratios and budgets are token units. The two-week retune absorbs the drift.
 - Under the literal base, a yield-bearing stablecoin has room only next to stablecoins that the vault holds directly. The illustrative allocation holds none, so it plans no yield-bearing position.
@@ -106,4 +109,4 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - OD-12: confirm when Lido Lend's three months start.
 - OD-08: approval ceilings and the refill floor.
 - OD-13: who writes the detectors.
-- OD-14: who publishes reports, on what schedule, what happens on a stale price, and who answers for a late report.
+- OD-14: who publishes reports, on what schedule, what happens on a stale price, who answers for a late report, and where a report's identifier is anchored on chain.

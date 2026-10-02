@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T13:35:00Z
+  at: 2026-10-02T14:07:21Z
 verified: []
 sources:
   - id: s1
@@ -28,6 +28,26 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-02 — OD-06 Q2: the limit
+
+> A
+
+Recorded as: OD-06 is closed with Block A of the Q2 challenge game. Two registries carry the funding, one for stablecoins and one for stETH, each with a limit of one TM Floor Value per month. Stablecoins count at par. The stETH limit is the floor at the Coingecko price pinned when the enabling vote is prepared, set by attested computation. The objection is the control, and the registry is the backstop. The LIP states both gaps: the registry can delay a permitted stETH refill after an ETH fall, and it allows more than one floor a month. Monitoring flags out-of-cycle top-ups, a month's top-ups above the posted shortfall, and a top-up after an objected one. The screening policy carries a dollar rule per motion if the vendor supports it. The DAO re-pins the stETH limit by vote when needed. EM chose this over Block B, one dollar limit on chain through a new token registry ([ADR 008](/adr/008-funding-through-existing-payments.md)). [s3]
+
+## 2026-10-02 — OD-06 Q1: the period
+
+> 1. One month
+>
+> For Q2 run a challenge game, use srawman vs steelman, read mandate accurately, suggest what's recommended
+
+Recorded as: the registry period is one calendar month ([ADR 008](/adr/008-funding-through-existing-payments.md)). EM asked for a challenge game on Q2 before answering it. [s3]
+
+## 2026-10-02 — OD-06 asked
+
+> continue with OD-06 interview
+
+[s3]
 
 ## 2026-10-02 — OD-05 Q3: where recovered rebalancing tokens go
 

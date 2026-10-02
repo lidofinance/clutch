@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T13:35:00Z
+  at: 2026-10-02T14:07:21Z
 verified: []
 sources:
   - id: s1
@@ -16,6 +16,9 @@ sources:
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30
+  - id: s3
+    resource: /research/funding-registries-2026-10-02.md
+    title: Easy Track funding registries, 2026-10-02
 ---
 
 # Open decisions
@@ -24,19 +27,19 @@ EM decides every item until the Treasury Management Committee takes over as acce
 
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
-| OD-06 | The period and the limit of the funding registry. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Match the period to the mandate's monthly top-up rule. Size the limit by attested computation. An existing registry uses a six-month period [s2] | EM; constrains the operator |
-| OD-07 | The screening vendor's guard. Its existing transaction guard fits the chosen route and passed the fork check on Safe v1.5.0. Still open: the vendor agreement, its announcement, who reviews the two changes made after the guard's audit, and whether the vendor's approval service supports v1.5.0 Safes. | [ADR 010](/adr/010-pre-execution-screening.md) | Grant the operator role only after the guard is set and enforcing. The agreement excludes reusable approvals of the modifier's function and confirms v1.5.0 support. The assurance phase reviews the post-audit changes | EM |
+| OD-07 | The screening vendor's guard. Its existing transaction guard fits the chosen route and passed the fork check on Safe v1.5.0. Still open: the vendor agreement, its announcement, who reviews the two changes made after the guard's audit, whether the vendor's approval service supports v1.5.0 Safes, and whether its policy can check a dollar limit per top-up motion ([ADR 008](/adr/008-funding-through-existing-payments.md)). | [ADR 010](/adr/010-pre-execution-screening.md) | Grant the operator role only after the guard is set and enforcing. The agreement excludes reusable approvals of the modifier's function and confirms v1.5.0 support. The assurance phase reviews the post-audit changes | EM |
 | OD-08 | The approval ceiling per token and the budget refill-period floor. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | A ceiling of one deposit, not one month of deposits, and a 30-day floor. Values by attested computation | EM; constrains the operator |
 | OD-09 | How does an immediate removal work? EM asked that the removal templates skip the objection window. Easy Track sets one global duration when a motion is created [s2]. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Immediate de-scoping stays an emergency-role action. Easy Track removal stays the routine path. Do not change the global duration or run a second Easy Track | EM; constrains the operator |
 | OD-10 | Which team owns the repository in CODEOWNERS? | `.github/CODEOWNERS` | Set it before the first external contributor joins | EM |
-| OD-11 | Do the shared payment ACL parameters stay unchanged, with seeding only in USDC, USDT, DAI, stETH or ETH? | [ADR 008](/adr/008-funding-through-existing-payments.md) | Yes. Every Easy Track payment setup shares the permission, and a change rewrites all 22 entries by vote [s2] | EM; constrains the operator |
+| OD-11 | Do the shared payment ACL parameters stay unchanged, with seeding only in USDC, USDT, DAI, stETH or ETH? Which token list does the stablecoin registry use? The shared list also allows sUSDS, and Aragon Voting administers it for every stablecoin setup. The Agent holds less than 8 ETH [s3]. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Yes. Every Easy Track payment setup shares the permission, and a change rewrites all 22 entries by vote [s2]. Give the vault its own token list of USDC, USDT and DAI. Drop ETH from the seeding assets | EM; constrains the operator |
 | OD-12 | Confirm three recorded readings: the vision answer; the answer about the acceptor, which left the rest of the review process unchanged; and the start of Lido Lend's three capped months, read as Lido Lend's mainnet launch. | [Decision log](/registers/decision-log.md), [ADR 002](/adr/002-decision-and-review-process.md), [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Confirm all three | EM |
 | OD-13 | Who writes and maintains the vault's detectors in each monitoring estate? | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | The committee specifies the rules. The team that runs each estate implements them | EM |
-| OD-14 | Reporting operations: who publishes, on what schedule, what happens when a price is stale or missing, and who answers for a late report? | Mandate text; [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Name all four in the mandate | EM with the committee |
+| OD-14 | Reporting operations: who publishes, on what schedule, what happens when a price is stale or missing, and who answers for a late report? Where is a report's identifier anchored on chain, now that the standard top-up factory fixes the payment reference [s3]? | Mandate text; [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Name the first four in the mandate. Until an on-chain anchor is chosen, the identifier goes in the forum post that precedes each top-up | EM with the committee |
 | OD-15 | How do the committee and the Emergency Brakes multisig record a verification of a page? | [ADR 002](/adr/002-decision-and-review-process.md) | A member commits the `verified` entry through a reviewed pull request, and the entry links the body's decision record | EM |
 | OD-16 | The policy data format and the compiler toolchain. | [ADR 004](/adr/004-specifications-and-policy-as-data.md) | Decide in the phase 1 specification | EM |
 | OD-17 | Incident-history check on Safe v1.5.0. EM asked for "a dd about audits and incident history". Both new Safes now use v1.5.0. The audits are recorded; the incident history is not. | [ADR 010](/adr/010-pre-execution-screening.md) | Record it before ADR 005 and ADR 010 are accepted | Evidence owed; EM decides |
 | OD-20 | Who configures the swap pricing before launch, and when? The vault's pairs need a new converter instance with the vault's token lists, and oracle-router feeds for wstETH, WETH, USDC, USDT, DAI and USDS. | [ADR 007](/adr/007-swapping-through-stonks.md) | Put the converter and the feeds in the enabling vote. Verify every pair on a fork before the instance list is final | EM, then the DAO |
+| OD-21 | How do the legacy investments that the mandate carries over move into the vault, and who holds them now? The mandate lists EarnETH, EarnUSD and Twyne, and they reduce the seed. The Agent and the committee's Safe hold no shares of the current earnETH and earnUSD vaults [s3]. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Find the holder first. A position held for the DAO moves in the enabling vote, because the payment permission denies these tokens [s2]. Size the seed after the move | EM |
 
 ## Closed
 
@@ -49,3 +52,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-04 | Does Lido Lend count against the protocol cap? | 2026-10-02 | EM: capped for the first three months, then uncapped as a Lido product ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |
 | OD-05 | How are the swap instances configured? | 2026-10-02 | EM: the operator Safe and the emergency Safe manage their families; the live values are copied by pair class; instances come from the standard factory, so recovered tokens go to the treasury ([ADR 007](/adr/007-swapping-through-stonks.md)) [s1] |
 | OD-18 | Does the Stonks price source cover every pair? | 2026-10-02 | Answered by evidence: no. The deployed stack prices only stETH and LDO. The configuration moved to OD-20 ([research note](/research/stonks-instances-2026-10-02.md)) |
+| OD-06 | The period and the limit of the funding registry | 2026-10-02 | EM: "1. One month", then "A" after a challenge game: two registries, stablecoins and stETH, each with a limit of one TM Floor Value per month; stETH at a pinned Coingecko price; the objection is the control and the registry is the backstop ([ADR 008](/adr/008-funding-through-existing-payments.md)) [s1] |
