@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-02T11:39:59Z
 verified: []
 sources:
   - id: s1
@@ -38,7 +38,7 @@ State "Draft" means the ADR is proposed. State "Pending" means the invariant dep
 | INV-007 | Withdrawing a role key from the toggle factory's allowlist makes every queued motion for that key fail at enactment. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Draft | `test_factory_only_dao_withdrawal_kills_a_queued_motion` |
 | INV-008 | An operator approval is zero or below its per-token ceiling. After the emergency role revokes the approve permission, the operator cannot restore any approval. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Pending: ceiling values, OD-08 | `test_p0_operator_cannot_set_unlimited_relayer_approval`, `test_p0_emergency_can_durably_stop_operator_reapproval` |
 | INV-009 | Only the technical role can disable a module, only the operator modifier, and the safety modifier stays enabled and working afterwards. | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | `test_D4_module_disabling_is_technical_only_and_pinned` |
-| INV-010 | The screening guard can refuse an operator transaction before it executes. It never refuses a safety-modifier transaction. The owner path can remove it. | [ADR 010](/adr/010-pre-execution-screening.md) | Pending: OD-01, OD-07 | the three `test_D7_*` tests (mock guard) |
+| INV-010 | The operator Safe executes a transaction only with the screening vendor's single-use approval, or through the guard's 10-day removal path. It has no modules. No vendor code is on the path of the safety modifier, the technical role or the DAO. | [ADR 010](/adr/010-pre-execution-screening.md) | Pending: the kit tests the rejected module-guard route | None for this route; the three `test_D7_*` tests cover the rejected route |
 | INV-011 | A budget is consumed only by a successful call, never beyond its balance, and it refills per elapsed period up to its maximum. Keys of different assets and decimals are independent. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Draft | `test_D5_budget_enforcement_and_refill`, `test_FX4_per_asset_budgets_ARE_expressible`, `test_regression_18_decimal_supply_draws_own_budget` |
 | INV-012 | A budget change by motion stays within the per-key ceilings and cannot set a refill period below the floor. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Pending: floor value, OD-08 | `test_native_allowance_bounds_including_period_floor` |
 | INV-013 | The operator holds no order pre-signing permission and no approval to the CoW relayer. It swaps only by transfer to a pinned rebalancing instance. | [ADR 007](/adr/007-swapping-through-stonks.md) | Violated: the kit grants pre-signing [s3] | None yet |
