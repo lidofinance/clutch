@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-02T11:52:27Z
+  at: 2026-10-02T12:12:55Z
 verified: []
 ---
 
@@ -26,9 +26,9 @@ Review statuses: `slop` means drafted by an agent and not checked by a human. `h
 | [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | slop | proposed | 2026-10-02 | none |
 | [adr/007-swapping-through-stonks.md](/adr/007-swapping-through-stonks.md) | Decision | slop | proposed | 2026-09-30 | none |
 | [adr/008-funding-through-existing-payments.md](/adr/008-funding-through-existing-payments.md) | Decision | slop | proposed | 2026-09-30 | none |
-| [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-09-30 | none |
+| [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-10-02 | none |
 | [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-10-02 | none |
-| [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-09-30 | none |
+| [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-10-02 | none |
 | [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-09-30 | none |
 | [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-10-02 | none |
 | [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-10-02 | none |
