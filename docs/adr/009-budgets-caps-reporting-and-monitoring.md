@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:07:21Z
+  at: 2026-10-02T14:56:03Z
 verified: []
 sources:
   - id: s1
@@ -30,6 +30,15 @@ sources:
   - id: s6
     resource: /research/funding-registries-2026-10-02.md
     title: Easy Track funding registries, 2026-10-02 — the top-up factory writes a fixed payment reference
+  - id: s7
+    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/src/policy/Policy.sol#L328-L377"
+    title: Kit policy at 370e20a — an approval is zero or below a fixed cap, and spends no budget
+  - id: s8
+    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/src/policy/Policy.sol#L474-L489"
+    title: Kit policy at 370e20a — the deposit call spends the budget
+  - id: s9
+    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/src/policy/Policy.sol#L688-L705"
+    title: Kit policy at 370e20a — the governance permission on budgets pins the key and bounds nothing else
 ---
 
 # ADR 009: Budgets, exposure caps, reporting and monitoring
@@ -39,6 +48,8 @@ sources:
 - The permission layer cannot see valuation. It can bound a call, not a portfolio ratio [s2].
 - A budget is a consumable allowance per key. A call consumes it only on success, and it refills per elapsed period up to a maximum [s3].
 - A budget counts token units, so assets with different decimals need different keys [s2].
+- In the kit, an approval is zero or below a fixed cap and spends no budget. The deposit call spends the budget [s7][s8]. A spender can pull what it is approved for without any deposit call, so the budget does not bound what a spender takes.
+- In the kit, the governance permission on budgets pins the key and passes every other value [s9]. Ceilings and a period floor can be expressed with native conditions [s4], but no permission uses them yet.
 
 ## Decision
 
@@ -63,6 +74,12 @@ EM decided on 2026-10-02, closing OD-04 [s1]:
 
 12. Lido Lend counts against the protocol cap for its first three months. After that it is a Lido own product with no cap per product.
 
+EM decided on 2026-10-02, closing OD-08 [s1]:
+
+13. An operator approval to a protocol spender spends the budget of the key that the spender serves. An approval of zero is always allowed and spends nothing. Deposit calls no longer spend budget.
+14. The stETH approval to the wstETH contract has no budget key. It keeps a fixed ceiling of one TM Floor Value in stETH, the figure that OD-06 computes.
+15. A budget motion cannot set a refill period below 30 days.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
@@ -73,21 +90,29 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - **Yield-bearing keys.** A yield-bearing key gets the headroom: the cap's share of the stablecoins plus yield-bearing stablecoins held directly, minus the current holding of that token, and never less than zero. Converting a stablecoin into a yield-bearing stablecoin leaves the base unchanged. The headroom depends on what the vault holds, so each fortnightly retune derives it from a holdings snapshot read at a pinned block. Without a snapshot, the key gets no budget.
 - **Lido Lend key.** The protocol cap applies until three calendar months after Lido Lend goes live. From that date the key is bounded by the mandate size, like every own-product key. The months count from Lido Lend's mainnet launch, a reading still to confirm (OD-12).
 - **Budget figures.** The attested computation ran on 2026-09-22 with an independent attester and pinned inputs. It ran again on 2026-10-02 with the literal base. The yield-bearing key now gets no figure until the first retune after seeding, and the other keys are unchanged. The inputs include unapproved mandate terms, so the results enter this repository only after the mandate is approved.
-- **Approvals.** An operator approval is either zero or below a per-token ceiling. The proposed ceiling is one deposit, not one month of deposits (OD-08).
-- **Refill floor.** A motion cannot set a refill period below a floor. The proposed floor is 30 days (OD-08).
+- **Approvals.** Each approval branch names one spender and spends that spender's key, so a token approved to two spenders draws on two keys. The operator approves only what it deposits, in the same transaction, so no approval stands between transactions.
+- **The budget factory.** It builds one branch per key, so each key has its own ceiling on `balance`, `maxRefill` and `refill`, and every branch bounds `period` below by 30 days. The kit test shows one shared ceiling only [s4].
 - **Reports.** The payload is on IPFS and holds balances, positions, exposures, each ratio with its numerator and denominator, and the price source with its timestamp. The standard top-up factory writes a fixed payment reference, so a top-up cannot carry the report's identifier in it [s6]. The identifier goes in the forum post that the mandate requires before each top-up. Where to anchor it on chain is open (OD-14).
-- **Monitoring.** The Lido on-chain monitoring carries policy drift, the approval inventory, budget burn, module and owner changes on both Safes, and motion events. For funding it flags a top-up motion outside days 1 to 10 of a month, apart from the seed; a month's top-ups above the posted shortfall; and any top-up motion after an objected one ([ADR 008](/adr/008-funding-through-existing-payments.md)). The screening vendor carries depegs, protocol compromise and counterparty anomalies. Findings route into the existing notification and incident channels.
+- **Monitoring.** The Lido on-chain monitoring carries policy drift, the approval inventory, budget burn, module and owner changes on both Safes, and motion events. For funding it flags a top-up motion outside days 1 to 10 of a month, apart from the seed; a month's top-ups above the posted shortfall; and any top-up motion after an objected one ([ADR 008](/adr/008-funding-through-existing-payments.md)). For budgets it flags a second budget motion on the same key within 14 days. The screening vendor carries depegs, protocol compromise and counterparty anomalies. Findings route into the existing notification and incident channels.
 
 ## Options considered
 
 - Preventive caps through a custom condition adapter. Not chosen: the adapter is a static call, so it cannot keep a ledger, and a check of the current state admits a transaction that breaches the cap right after the check.
 - DataBus as the report anchor. Not chosen by EM for now. It is not on Ethereum, so the anchor would sit on another chain.
 - Budgets entered by hand. Not chosen: a financial figure comes only from an attested computation.
+- A fixed approval ceiling per token, sized to the key's budget ceiling, with deposits still spending the budget. Not chosen by EM: a spender could pull each new approval without a deposit, and the budget would never bound it.
+- A smaller fixed ceiling of one deposit. Not chosen: it adds a figure per token and still lets repeated approvals feed a spender.
+- A refill-period floor of 14 days, to match the retune. Not chosen: the conditions cannot compare the refill with the period, so it would double the refill per month.
 
 ## Consequences
 
 - No report has an on-chain anchor yet, a top-up's report included, because the top-up factory fixes the payment reference [s6]. A report's immutability rests on content addressing and the forum post that cites it. That is enough for an informational control. It is not an Ethereum guarantee.
 - Every detective control ends at a person. The mandate must name them.
+- Approvals per key per period cannot exceed the budget, whatever a spender does. Only a budget motion can add room.
+- An approval spends budget even if its deposit then fails or is cancelled. The room on that key comes back at the next refill or retune.
+- One large approval is still a standing exposure up to the budget. The same-transaction practice and the emergency role's power to zero approvals bound it.
+- A budget motion can reset a key's balance to its ceiling. Only the fortnightly procedure and the objection window limit how often, because motions can run in parallel. Monitoring flags a second budget motion on a key within 14 days.
+- The kit meters deposits and caps approvals. The policy migration in [ADR 004](/adr/004-specifications-and-policy-as-data.md) moves the metering to the approval.
 - Budgets drift with price, because caps are ratios and budgets are token units. The two-week retune absorbs the drift.
 - Under the literal base, a yield-bearing stablecoin has room only next to stablecoins that the vault holds directly. The illustrative allocation holds none, so it plans no yield-bearing position.
 - The committee can enlarge the base before a test by holding more stablecoins. The test at deposit time and the published history limit this. They do not prevent it.
@@ -107,6 +132,5 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 ## Open questions
 
 - OD-12: confirm when Lido Lend's three months start.
-- OD-08: approval ceilings and the refill floor.
 - OD-13: who writes the detectors.
 - OD-14: who publishes reports, on what schedule, what happens on a stale price, who answers for a late report, and where a report's identifier is anchored on chain.

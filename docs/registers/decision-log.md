@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:28:58Z
+  at: 2026-10-02T14:56:03Z
 verified: []
 sources:
   - id: s1
@@ -28,6 +28,19 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-02 — OD-08: approvals and the refill-period floor
+
+> Q1. 1. B
+> Q2. 1. 30 days
+
+Recorded as: OD-08 is closed. (Q1) Block B: an operator approval to a protocol spender spends the budget of the key that the spender serves. An approval of zero is always allowed and spends nothing. Deposit calls no longer spend budget. The stETH approval to the wstETH contract has no budget key and keeps a fixed ceiling of one TM Floor Value in stETH, the figure of OD-06. No new figure and no new contract. EM chose this over a fixed ceiling sized to the budget, and over a smaller fixed ceiling of one deposit, which the agent had recommended before it found that a spender can pull an approval without any deposit call. (Q2) A budget motion cannot set a refill period below 30 days ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). [s3]
+
+## 2026-10-02 — OD-08 asked
+
+> run interview on OD-08
+
+[s3]
 
 ## 2026-10-02 — OD-07: the screening vendor's guard
 

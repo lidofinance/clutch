@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:28:58Z
+  at: 2026-10-02T14:56:24Z
 verified: []
 sources:
   - id: s1
@@ -27,7 +27,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
-| OD-08 | The approval ceiling per token and the budget refill-period floor. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | A ceiling of one deposit, not one month of deposits, and a 30-day floor. Values by attested computation | EM; constrains the operator |
 | OD-09 | How does an immediate removal work? EM asked that the removal templates skip the objection window. Easy Track sets one global duration when a motion is created [s2]. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Immediate de-scoping stays an emergency-role action. Easy Track removal stays the routine path. Do not change the global duration or run a second Easy Track | EM; constrains the operator |
 | OD-10 | Which team owns the repository in CODEOWNERS? | `.github/CODEOWNERS` | Set it before the first external contributor joins | EM |
 | OD-11 | Do the shared payment ACL parameters stay unchanged, with seeding only in USDC, USDT, DAI, stETH or ETH? Which token list does the stablecoin registry use? The shared list also allows sUSDS, and Aragon Voting administers it for every stablecoin setup. The Agent holds less than 8 ETH [s3]. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Yes. Every Easy Track payment setup shares the permission, and a change rewrites all 22 entries by vote [s2]. Give the vault its own token list of USDC, USDT and DAI. Drop ETH from the seeding assets | EM; constrains the operator |
@@ -39,6 +38,7 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-17 | Incident-history check on Safe v1.5.0. EM asked for "a dd about audits and incident history". Both new Safes now use v1.5.0. The audits are recorded; the incident history is not. If the vendor does not confirm v1.5.0 support, the operator Safe uses v1.4.1, and this check covers the Asset Safe only. | [ADR 010](/adr/010-pre-execution-screening.md) | Record it before ADR 005 and ADR 010 are accepted | Evidence owed; EM decides |
 | OD-20 | Who configures the swap pricing before launch, and when? The vault's pairs need a new converter instance with the vault's token lists, and oracle-router feeds for wstETH, WETH, USDC, USDT, DAI and USDS. | [ADR 007](/adr/007-swapping-through-stonks.md) | Put the converter and the feeds in the enabling vote. Verify every pair on a fork before the instance list is final | EM, then the DAO |
 | OD-21 | How do the legacy investments that the mandate carries over move into the vault, and who holds them now? The mandate lists EarnETH, EarnUSD and Twyne, and they reduce the seed. The Agent and the committee's Safe hold no shares of the current earnETH and earnUSD vaults [s3]. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Find the holder first. A position held for the DAO moves in the enabling vote, because the payment permission denies these tokens [s2]. Size the seed after the move | EM |
+| OD-22 | Should DAI earn, or stay idle? DAI can seed the vault, but no operator permission moves it: it is not in the rebalancing set ([ADR 007](/adr/007-swapping-through-stonks.md)), sDAI is out of scope, and no DAI-to-USDS converter is in scope ([ADR 011](/adr/011-launch-scope.md)). Only recovery can move it. | [ADR 011](/adr/011-launch-scope.md) | If DAI should earn, add the DAI-to-USDS converter as a conversion: it needs no price and no swap instance. If DAI is the liquidity buffer, say so in ADR 011 | EM; constrains the operator |
 
 ## Closed
 
@@ -53,3 +53,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-18 | Does the Stonks price source cover every pair? | 2026-10-02 | Answered by evidence: no. The deployed stack prices only stETH and LDO. The configuration moved to OD-20 ([research note](/research/stonks-instances-2026-10-02.md)) |
 | OD-06 | The period and the limit of the funding registry | 2026-10-02 | EM: "1. One month", then "A" after a challenge game: two registries, stablecoins and stETH, each with a limit of one TM Floor Value per month; stETH at a pinned Coingecko price; the objection is the control and the registry is the backstop ([ADR 008](/adr/008-funding-through-existing-payments.md)) [s1] |
 | OD-07 | The screening vendor's guard: the agreement, the build, the confirmations and the announcement | 2026-10-02 | EM: "Q1. 1.", "Q2. A", "Q3. 1.", "Q4. 1, [the screening vendor]": the operator role only after the guard enforces; no standing approvals; the build that the Lido multisigs run, with 10-day timelocks; written v1.5.0 support as a gate, with v1.4.1 as the fallback; the redaction ends when the mandate is posted, with the vendor's consent ([ADR 010](/adr/010-pre-execution-screening.md)) [s1] |
+| OD-08 | The approval ceiling per token and the budget refill-period floor | 2026-10-02 | EM: "Q1. 1. B" and "Q2. 1. 30 days": an approval to a protocol spender spends the budget of the key it serves, and deposits no longer do; the stETH approval to the wstETH contract keeps a fixed ceiling of one TM Floor Value in stETH; the refill-period floor is 30 days ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |
