@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T12:12:55Z
+  at: 2026-10-02T14:57:11Z
 verified: []
 sources:
   - id: s1
@@ -84,4 +84,6 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market.
 
 ## Open questions
 
-None open. OD-04 was decided on 2026-10-02 ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+- OD-22: whether DAI earns or stays idle. No operator permission moves DAI: it is not in the rebalancing set, sDAI is out of scope, and no DAI-to-USDS converter is in scope.
+
+OD-04 was decided on 2026-10-02 ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).

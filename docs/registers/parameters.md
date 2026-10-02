@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:28:58Z
+  at: 2026-10-02T14:56:24Z
 verified: []
 sources:
   - id: s1
@@ -48,8 +48,8 @@ sources:
 | Lido Lend cap | the protocol cap for three calendar months from Lido Lend's mainnet launch, then none, as a Lido own product | EM decision of 2026-10-02 [s1]; start reading to confirm, OD-12 | ADR 009 |
 | Yield-bearing cap base | the top-4 stablecoins plus the yield-bearing stablecoins held directly; own-product and protocol positions excluded | EM decision of 2026-10-02 [s1] | ADR 009 |
 | Budget retune cadence | every two weeks | EM decision [s1] | ADR 009 |
-| Budget refill-period floor | 30 days | Proposed; open: OD-08 | ADR 009 |
-| Approval ceiling per token | one deposit | Proposed; open: OD-08 | ADR 009 |
+| Budget refill-period floor | 30 days | EM decision of 2026-10-02 [s1] | ADR 009 |
+| Approval bound | an approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget; the stETH approval to the wstETH contract has a fixed ceiling of one TM Floor Value in stETH | EM decision of 2026-10-02 [s1] | ADR 009 |
 | Report storage | IPFS; no DataBus | EM decision [s1] | ADR 009 |
 | Screening guard | the screening vendor's existing transaction guard, one instance on the operator Safe, of the build that the Lido multisigs run | EM decisions of 2026-10-02 [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
 | Guard removal and bypass timelocks | 10 days each, fixed in the chosen build | EM decision of 2026-10-02 [s1]; a constant in the vendor's code | ADR 010 |
