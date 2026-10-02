@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 006: Governance through Easy Track factories"
-description: Easy Track factories are the only new contracts; the committee is their trusted caller; each factory builds a permission tree from a template fixed at audit time, so a motion carries parameters, never a tree.
+description: Easy Track factories are the only new contracts; the committee's dedicated operator Safe is their trusted caller; each factory builds a permission tree from a template fixed at audit time, so a motion carries parameters, never a tree.
 tags: [governance, easy-track, factories, templates]
 status: draft
 review_status: slop
@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-02T11:39:59Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on factories, trusted caller, disclosure and templates, 2026-09-22
+    title: Decision log — EM on factories, trusted caller, disclosure and templates, 2026-09-22, and on the operator Safe, 2026-10-02
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Easy Track settings, global duration, hash check, script format
@@ -27,6 +27,9 @@ sources:
   - id: s5
     resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/FactoryOnly.t.sol#L77"
     title: Kit test at 370e20a — withdrawing a key kills a queued motion
+  - id: s7
+    resource: "https://github.com/lidofinance/easy-track/blob/3183d1f68d47f5713e0183720aacd10a7dd12670/contracts/TrustedCaller.sol#L13"
+    title: Easy Track TrustedCaller — the trusted caller is set once at deployment and cannot change
   - id: s6
     resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/ReviewProbe.t.sol#L246"
     title: Kit tests at 370e20a — the governance role cannot change membership, touch the emergency role, grant an administrative target or raise a foreign allowance key
@@ -47,7 +50,7 @@ EM decided on 2026-09-22 [s1]:
 
 1. Easy Track factories are the only new contracts: "I am okay with building necessary ET factories, that's the only allowed new contracts".
 2. The DAO does not approve each new protocol by vote. An Easy Track factory onboards it.
-3. The Treasury Management Committee is the trusted caller of the factories.
+3. The Treasury Management Committee is the trusted caller of the factories. On 2026-10-02 EM set the committee's dedicated operator Safe as that trusted caller, so every motion is created through the screening guard ([ADR 010](/adr/010-pre-execution-screening.md)).
 4. The minimum for every motion is a forum disclosure, alerting set up for the new target, and runbook discipline. The final stops are an objection or the Easy Track pause by the Emergency Brakes multisig.
 5. The template catalogue is accepted: wrap and unwrap, tokenized vault, asynchronous queue vault, spender approval, swap instance approval, Morpho Blue, and two removal templates.
 6. EM also asked that the removal templates skip the objection window. Easy Track cannot do this per factory [s2]. Open item OD-09 holds the choice.
@@ -57,6 +60,7 @@ EM decided on 2026-09-22 [s1]:
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
 
 - Each factory owns one template. A motion carries typed parameters only, such as a target, an asset and a budget key. The factory builds the tree.
+- Every factory's trusted caller is the operator Safe. Easy Track fixes the trusted caller at deployment [s7].
 - Every factory hard-codes the `operator` role key and refuses the modifiers and the Safe as a target.
 - The role-toggle factory exists in the kit [s4]. The budget factory and the template factories are not built.
 - The modifier constrains the governance role again, so a factory bug cannot widen anything. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator an administrative target, and cannot set an allowance outside the operator's budget keys [s6].
@@ -74,6 +78,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 - The audit question becomes "can this template ever emit something unsafe". Each template must pin every receiver, owner and beneficiary field, bound every value-moving amount, never emit an administrative selector, and produce a script in the production format.
 - A motion can point the operator at a contract that no one has audited. The template bounds how the vault interacts with it, so the loss ceiling is the attached budget. The controls are the objection window, the disclosure and monitoring. The LIP must say so plainly.
+- Replacing the operator Safe means redeploying every factory with the new trusted caller and registering each one again by DAO vote [s7].
 - The committee proposes its own expansions. The objection window, the disclosure rule and the Emergency Brakes pause are the counterweights.
 
 ## Confirmation

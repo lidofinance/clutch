@@ -15,16 +15,17 @@ This harness runs the Clutch permission policy against production contracts on a
 | `MockAragonAgent` | the Aragon Agent: single-argument `forward(bytes)`, `execute`, `canForward` |
 | `MockEVMScriptExecutor` | the Easy Track script executor: parses the production CallsScript format |
 | `MockEasyTrack` | Easy Track: re-invokes the factory at enactment and requires a matching script hash |
-| `MockModuleGuard` | the screening vendor's module guard, which the vendor supplies in production |
+| `MockModuleGuard` | a module guard on the Asset Safe, the screening route that [ADR 010](../docs/adr/010-pre-execution-screening.md) rejected |
 
 ## Known divergence from the accepted design
 
-The policy in `src/policy/` predates two design decisions and does not yet follow them:
+The harness predates three design decisions and does not yet follow them:
 
 - The launch scope in [ADR 011](../docs/adr/011-launch-scope.md). The policy still grants Aave v3 supply and withdraw and sDAI deposits, which are outside the launch scope.
 - Swapping through Stonks 2.0 in [ADR 007](../docs/adr/007-swapping-through-stonks.md). The policy still grants the operator direct order pre-signing.
+- Pre-execution screening in [ADR 010](../docs/adr/010-pre-execution-screening.md). The harness tests a module guard on the Asset Safe. The decision is the screening vendor's transaction guard on a dedicated operator Safe, which is also the trusted caller of every factory.
 
-Both are resolved when the policy moves to a data file under [ADR 004](../docs/adr/004-specifications-and-policy-as-data.md). Until then, results about these venues describe the harness, not the design.
+The first two are resolved when the policy moves to a data file under [ADR 004](../docs/adr/004-specifications-and-policy-as-data.md). The third needs the guard tests rewritten for a mock operator Safe. Until then, results about these venues and about screening describe the harness, not the design.
 
 ## Commands
 

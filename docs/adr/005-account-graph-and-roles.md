@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 005: Account graph and roles"
-description: A Safe owned only by the Aragon Agent holds the assets; two Roles modifiers split the operator and governance roles from the emergency and technical roles; the emergency Safe carries the committee's signers at a quorum of two; the Emergency Brakes multisig can disable the operator modifier and nothing else.
+description: A Safe owned only by the Aragon Agent holds the assets; two Roles modifiers split the operator and governance roles from the emergency and technical roles; a dedicated operator Safe with the committee's signers holds the operator role; the emergency Safe carries the same signers at a quorum of two; the Emergency Brakes multisig can disable the operator modifier and nothing else.
 tags: [architecture, roles, safe, zodiac, emergency]
 status: draft
 review_status: slop
@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-02T11:52:17Z
 verified: []
 sources:
   - id: s1
@@ -39,7 +39,7 @@ sources:
 - The Easy Track executor holds neither `RUN_SCRIPT_ROLE` nor `EXECUTE_ROLE` on the Aragon Agent. The Dual Governance admin executor holds both [s2].
 - The committee's Safe runs v1.3.0 with a quorum of four of seven. The Emergency Brakes Safe runs v1.3.0 with a quorum of three of five, and it holds the Easy Track pause but not the unpause [s2].
 - The Roles mastercopy is locked, with owner `0x…01` [s2]. It keeps its own storage from slot 0, so a Safe-style proxy in front of it bricks the instance. It must be deployed as an EIP-1167 minimal proxy through the Zodiac module proxy factory [s3].
-- A module guard receives the calling module, not the role key. One modifier therefore cannot let a guard block the operator without also blocking recovery [s3].
+- A module guard receives the calling module, not the role key. One modifier therefore cannot let a guard block the operator without also blocking recovery [s3]. The screening route chosen in [ADR 010](/adr/010-pre-execution-screening.md) puts no guard on the Asset Safe. The split stays because recovery must survive the technical role's switch.
 
 ## Decision
 
@@ -52,11 +52,18 @@ EM decided on 2026-09-22 [s1]:
 5. Keeping the emergency Safe's signers equal to the committee's is a manual runbook duty, as for HashConsensus and some Dual Governance committees.
 6. The policy splits across two modifiers.
 
+EM decided on 2026-10-02 [s1]:
+
+7. A dedicated operator Safe with its own screening guard holds the operator role, and it is also the trusted caller of every factory ([ADR 010](/adr/010-pre-execution-screening.md)).
+8. Both new Safes, the Asset Safe and the operator Safe, use Safe v1.5.0, on the condition that the screening vendor's guard is compatible with it. The check of 2026-10-02 found it compatible ([research note](/research/safe-v150-guard-compatibility-2026-10-02.md)).
+9. The operator Safe's threshold is 4 of 7.
+
 ## Proposed direction
 
 The rest of this section is the design that the kit implements [s3]. EM has not accepted it as text.
 
-- **Asset Safe.** A new Safe owned one-of-one by the Aragon Agent. It holds every asset. Its version depends on OD-01 and OD-02.
+- **Asset Safe.** A new Safe owned one-of-one by the Aragon Agent. It holds every asset. No guard is set on it. It runs Safe v1.5.0.
+- **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules. It carries the screening guard, holds the operator role and is the trusted caller of every factory. It runs Safe v1.5.0 with a threshold of 4 of 7.
 - **Operator modifier.** A minimal proxy of the Roles mastercopy. Owner, avatar and target are the Asset Safe. It carries the `operator` and `governance` roles.
 - **Safety modifier.** A second minimal proxy with the same settings. It carries the `emergency` and `technical` roles.
 - The Asset Safe owns both modifiers. A role's call executes as the Safe, so a narrowly scoped role can administer a modifier without any authority over the Agent. This is how the emergency role revokes the operator.
@@ -65,7 +72,7 @@ The rest of this section is the design that the kit implements [s3]. EM has not 
 | Role | Holder | Modifier | May do | May not do |
 |---|---|---|---|---|
 | DAO | Aragon Agent, by vote through Dual Governance | owner path | everything: own the Safe, replace the policy, change membership | — |
-| `operator` | committee Safe, four of seven | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders up to a cap | move assets out; borrow; administer a modifier or the Safe; change its own permissions |
+| `operator` | operator Safe, the committee's signers, four of seven, screened ([ADR 010](/adr/010-pre-execution-screening.md)) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders up to a cap | move assets out; borrow; administer a modifier or the Safe; change its own permissions |
 | `governance` | Easy Track executor | operator | toggle pre-scoped operator role keys; set operator budgets within ceilings | author a permission; name a target; grant a role to another address; touch the emergency role |
 | `emergency` | emergency Safe, two signatures, the committee's signers | safety | zero approvals; exit positions to the Safe; send assets to recovery swap instances or to the Agent; revoke the operator's targets and functions | add a permission; enter a protocol; borrow; change the recovery destination; disable a module |
 | `technical` | Emergency Brakes Safe, three of five | safety | disable the operator modifier; the module argument is pinned | anything else, including disabling the safety modifier |
@@ -79,6 +86,7 @@ The rest of this section is the design that the kit implements [s3]. EM has not 
 
 ## Consequences
 
+- Three Safes share the committee's signers: the committee's Safe, the operator Safe and the emergency Safe. Every rotation must update all three. EM's decision makes this a manual runbook duty.
 - The operator and the emergency role do not fail independently. They are the same people at different quorums. The guarantee that the operator cannot block an emergency action rests on role scoping alone.
 - The compensating controls are one-way emergency powers, transfers pinned to the Agent or to recovery instances, and the DAO's power to replace the whole policy.
 - Disabling the operator modifier leaves the safety modifier working, so recovery survives the technical switch [s4].
@@ -98,5 +106,4 @@ The rest of this section is the design that the kit implements [s3]. EM has not 
 
 ## Open questions
 
-- OD-01: where the screening hook lives. It decides whether the Asset Safe must be v1.5.0.
-- OD-02: the Asset Safe version if the hook moves to the operator's side.
+- OD-17: the incident-history check on Safe v1.5.0, which both new Safes now use.

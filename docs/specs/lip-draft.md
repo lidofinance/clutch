@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-02T11:52:17Z
 verified: []
 sources:
   - id: s1
@@ -22,6 +22,12 @@ sources:
   - id: s4
     resource: "https://github.com/lidofinance/clutch/tree/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test"
     title: Kit test suites at 370e20a
+  - id: s5
+    resource: "https://github.com/safe-global/safe-smart-account/blob/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/contracts/base/ModuleManager.sol#L94-L108"
+    title: Safe v1.5.0 ModuleManager — the module guard is called for every enabled module
+  - id: s6
+    resource: "urn:clutch:restricted:screening-guard-2026-10-02"
+    title: Restricted evidence on the screening vendor's existing guard; held outside the repository until the vendor is announced
 ---
 
 # LIP-XX: Active Treasury Management Vault
@@ -35,7 +41,7 @@ sources:
 | discussions-to | a thread on https://research.lido.fi/, to be created |
 | created | 2026-09-22 |
 
-> **Where this draft stands.** It was written during the design review of 2026-09-10 to 2026-09-22 and moved into this repository on 2026-09-30. The [ADRs](/adr/index.md) record the decisions, and this draft must never contradict them [s2]. The chain facts that the ADRs rely on were re-read at block 26092572 [s3]. Any other chain fact in this draft is a claim from the design review that was not re-run. Open items are in the [open-decisions register](/registers/open-decisions.md).
+> **Where this draft stands.** It was written during the design review of 2026-09-10 to 2026-09-22 and moved into this repository on 2026-09-30. The [ADRs](/adr/index.md) record the decisions, and this draft must never contradict them [s2]. The chain facts that the ADRs rely on were re-read at block 26092572 [s3]. Any other chain fact in this draft is a claim from the design review that was not re-run. EM chose the screening route on 2026-10-02, and section 9.1 records it. Open items are in the [open-decisions register](/registers/open-decisions.md).
 
 > **Draft status.** Sections marked **[Implemented]** are built and covered by tests against deployed mainnet bytecode on a pinned fork. Sections marked **[Specified]** are designed but not built. Sections marked **[Open]** need a decision before this proposal can be finalised. No component has been deployed to mainnet. No audit has been performed.
 
@@ -84,15 +90,17 @@ flowchart TD
     VOTE["LDO vote"] --> DG["Dual Governance<br/>admin executor"]
     DG --> AGENT["Aragon Agent<br/>final authority"]
     AGENT -->|sole owner 1/1| SAFE["Asset Safe<br/>holds all assets"]
-    SAFE -->|owns| ROLES["Operator modifier<br/>default deny, screened"]
+    SAFE -->|owns| ROLES["Operator modifier<br/>default deny"]
     SAFE -->|owns| SAFETY["Safety modifier<br/>default deny, never screened"]
-    GUARD["Module guard<br/>vendor-supplied"] -.->|screens| ROLES
+    GUARD["Screening guard<br/>vendor-supplied"] -.->|screens| OPS
 
     ET["Easy Track"] --> EXEC["EVMScriptExecutor"]
     FACTORY["ET factories<br/>NEW CONTRACTS"] -.->|builds script| ET
     EXEC -->|governance role| ROLES
 
-    TMC["TMC multisig 4/7"] -->|operator role| ROLES
+    TMC["TMC signers"] -.->|same signers| OPS["Operator Safe<br/>holds nothing, screened"]
+    OPS -->|operator role| ROLES
+    OPS -->|trusted caller, creates motions| ET
     EMS["Emergency Safe 2/7<br/>same signers as TMC"] -->|emergency role<br/>financial| SAFETY
     EB["Emergency Brakes 3/5<br/>technical committee"] -->|technical role<br/>disables operator modifier| SAFETY
     EB -.->|global pause| ET
@@ -138,19 +146,20 @@ Template factories remove the problem without forcing a vote for every new proto
 | Finance application | `0xB9E5CBB9CA5b0d659238807E84D0176930753d86` | existing, `vault()` returns the Agent |
 | Easy Track | `0xF0211b7660680B49De1A7E9f25C65660F0a13Fea` | existing |
 | EVMScriptExecutor | `0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977` | existing |
-| TMC multisig (operator) | `0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647` | existing, threshold 4 of 7 |
+| TMC multisig | `0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647` | existing, threshold 4 of 7; its signers also sign the Operator Safe and the Emergency Safe |
 | Emergency Brakes multisig | `0x73b047fe6337183A454c5217241D780a932777bD` | existing, threshold 3 of 5; holds the **technical** role and the global Easy Track pause |
 | **Emergency Safe** | to be deployed | new Safe instance, **threshold 2**, owner set identical to the TMC multisig |
-| Safe singleton v1.5.0 | `0xFf51A5898e281Db6DfC7855790607438dF2ca44b` | reused. `VERSION()` returns `1.5.0`, and the runtime codehash equals `0xdda019cbd7c867a533a2a86e5c53434fdc50b13122b5a5ddb4a8df61b31c20f2`, matching the published deployment record. Released 2025-07-03, audited by Certora and Ackee at pinned commits, covered by the Safe bug-bounty programme. **v1.4.1 cannot host a module guard**: it calls no guard on the module path. Route B in 9.1.2 does not need one. This would be the first v1.5.0 Safe in the Lido estate, which currently runs 1.3.0 and 1.4.1 |
+| Safe singleton v1.5.0 | `0xFf51A5898e281Db6DfC7855790607438dF2ca44b` | reused. `VERSION()` returns `1.5.0`, and the runtime codehash equals `0xdda019cbd7c867a533a2a86e5c53434fdc50b13122b5a5ddb4a8df61b31c20f2`, matching the published deployment record. Released 2025-07-03, audited by Certora and Ackee at pinned commits, covered by the Safe bug-bounty programme. Both new Safes use v1.5.0, by EM's decision of 2026-10-02 [s1]. The screening vendor's guard passed the same fork suite on v1.3.0, v1.4.1 and v1.5.0 [s6]. None of the six Lido Safes checked runs v1.5.0 today |
 | Safe proxy factory v1.5.0 | `0x14F2982D601c9458F93bd70B218933A6f8165e7b` | reused |
 | Zodiac Roles mastercopy | `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5` | reused, `owner()` is `0x…01`, i.e. locked |
 | Zodiac ModuleProxyFactory | `0x000000000000aDdB49795b0f9bA5BC298cDda236` | reused |
-| **Asset Safe** | to be deployed | new instance of the singleton |
-| **Operator modifier** | to be deployed | minimal proxy of the mastercopy. Carries the operator and governance roles. Screened by the module guard |
+| **Asset Safe** | to be deployed | new instance of the singleton. No guard is set on it |
+| **Operator Safe** | to be deployed | new Safe instance with the TMC signers. Holds no assets and no modules. Threshold 4 of 7. Holds the operator role, is the trusted caller of every factory, and carries the screening guard |
+| **Operator modifier** | to be deployed | minimal proxy of the mastercopy. Carries the operator and governance roles. The operator role is held by the Operator Safe, whose transactions are screened |
 | **Safety modifier** | to be deployed | minimal proxy of the mastercopy. Carries the emergency and technical roles. Never screened |
-| **Module guard** | vendor-supplied | the screening service's contract, set on the Safe with `setModuleGuard`. Not written by Lido |
+| **Screening guard** | vendor-supplied | the screening vendor's existing transaction guard, one instance for the Operator Safe, set with `setGuard`. Not written by Lido |
 
-The Emergency Safe is a new instance of the audited Safe singleton, not new contract code. Its owner set must be kept in step with the TMC multisig: a signer rotation on one is a rotation owed on the other, and that reconciliation is an operational duty with no on-chain enforcement.
+The Emergency Safe and the Operator Safe are new instances of the audited Safe singleton, not new contract code. Their owner sets must be kept in step with the TMC multisig: a signer rotation on one is a rotation owed on all three, and that reconciliation is an operational duty with no on-chain enforcement.
 
 **Deployment constraints.**
 
@@ -165,7 +174,7 @@ Four principals. Role keys are `bytes32`; the encoding must match the tooling th
 | Role | Holder | May do | May not do |
 | --- | --- | --- | --- |
 | DAO | Aragon Agent, reached by vote through Dual Governance | Everything: owns the Safe, may replace the whole policy, may add or remove role members | — |
-| `operator` | TMC multisig | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders up to a cap | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
+| `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders up to a cap | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
 | `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; swap to stablecoins through the recovery-family instances; transfer recovered assets to the Agent only; revoke the operator's targets and functions; invalidate outstanding orders | Add any permission; enter any protocol; borrow; change the recovery destination; disable the module |
 | `technical` | Emergency Brakes multisig, three of five. **Safety modifier** | Disable the **operator** modifier, with the module argument pinned to it | Anything else. It cannot touch assets or permissions, and it cannot disable the safety modifier |
 | `governance` | EVMScriptExecutor, driven by Easy Track | Toggle the operator's membership of pre-scoped role keys; set operator budgets within ceilings | Author a permission; name a target; grant a role to any other address; touch the emergency role; administer the Safe |
@@ -345,7 +354,7 @@ Two consequences to accept. A per-payment ceiling is not a per-motion ceiling, s
 
 #### Part 6: Emergency response **[Implemented]**
 
-All permissions in this part are written into the **safety modifier**, which the module guard never screens.
+All permissions in this part are written into the **safety modifier**. Its holders never pass through the screening guard.
 
 The emergency role holds, and nothing else:
 
@@ -489,77 +498,38 @@ Whichever is chosen, the reporting key, the schedule, the behaviour on a stale o
 
 **Response to a ratio breach** is a financial judgement and belongs to the operator committee, working to the mandate's remediation window after the fortnightly review. If a breach worsens rather than resolves, the escalation is the technical role disabling the operator modifier, which stops all operator activity while recovery stays available.
 
-**Blocking a transaction before it executes** is adopted as a requirement, and it drives two structural choices.
+**Blocking a transaction before it executes** is a hard requirement. EM chose the route on 2026-10-02 [s1]: a dedicated operator Safe with its own screening guard, which is also the trusted caller of every factory (ADR 010) [s2].
 
-It is not achievable on the components this proposal originally named. Checked against bytecode rather than documentation: Safe v1.4.1 exposes no `setModuleGuard` and no `checkModuleTransaction`, and the deployed Roles mastercopy contains no guard hook of any kind. The module path therefore invoked nothing, and the only guard available covered the owner path, which is the DAO's own route and the last one that should be blockable.
+##### 9.1.1 The screening guard **[Decided — transaction guard on the Operator Safe]**
 
-**Change one: Safe v1.5.0.** It is the first release that calls `checkModuleTransaction` and `checkAfterModuleExecution` on the module execution path. The canonical singleton and proxy factory are live on Ethereum, and the singleton's runtime codehash matches the published deployment record, which is a stronger provenance check than explorer source. The deployment script asserts that codehash at preflight.
+- The operator role is held by the Operator Safe, a new Safe with the TMC signers. It holds no assets and has no modules.
+- The screening vendor's existing transaction guard is set on the Operator Safe with `setGuard`. It is the vendor's code, already deployed for other Lido multisigs and audited by an external firm. Lido writes nothing here [s6].
+- The guard checks every transaction that the Operator Safe executes. The vendor's key must approve the exact transaction, once, before it executes. A transaction without an approval reverts, so the guard fails closed [s6].
+- The Operator Safe is the trusted caller of every factory, so every motion is created through the guard. Motion enactment is not screened, but the hash check fixes a motion's content at creation.
+- Recovery and the technical role never touch vendor code. The emergency Safe and the Emergency Brakes multisig act through the safety modifier, and no guard is set on the Asset Safe.
+- The Operator Safe's owners can remove the guard only through a fixed 10-day timelock that the vendor cannot block. A vendor outage therefore stops operator activity for at most ten days, and a hostile removal stays visible for ten days [s6].
 
-**Change two: two modifier instances.** The guard is set on the Safe and therefore applies to every module. Its callback receives the calling module but **not** the role key, so a single modifier cannot tell an operator transaction from a recovery, and a guard able to block the operator would also be able to block the emergency role. Splitting the policy gives the guard something to discriminate on:
+Monitoring must alert on: the start of the guard's removal timelock or its bypass timelock; the bypass mode turning on; any approval that is not bound to one transaction; any new approver key; any added policy contract; and any module enabled or guard changed on the Operator Safe. Every operator transaction calls the same modifier function, so one reusable approval of that function would approve all vault activity.
 
-| Modifier | Roles | Screened |
-| --- | --- | --- |
-| Operator | `operator`, `governance` | yes |
-| Safety | `emergency`, `technical` | no, by module address |
+##### 9.1.2 Why not a module guard on the Asset Safe **[Rejected]**
 
-Three properties are tested. A flagged operator transaction is refused before it executes. Recovery is never blocked, even when the identical call is flagged, because the guard recognises the safety modifier. And the owner path can detach a guard with `setModuleGuard(address(0))`, so a failed or malicious screening contract is not a permanent freeze.
+Safe v1.5.0 calls a module guard for every enabled module, the safety modifier included [s5]. Recovery would then pass only because the vendor's code let the safety modifier through, and only a DAO vote, with the Dual Governance delay, could remove a failed guard. A module guard also receives no signatures, so a per-transaction approval needs a separate step on chain. The screening vendor's existing guard is a transaction guard and cannot be set as a module guard [s6].
 
-##### 9.1.1 The guard contract **[Open — vendor dependency]**
-
-The guard must implement the interface Safe v1.5.0 calls, taken from the deployed verified source:
-
-```solidity
-interface IModuleGuard is IERC165 {
-    function checkModuleTransaction(
-        address to, uint256 value, bytes memory data,
-        Enum.Operation operation, address module
-    ) external returns (bytes32 moduleTxHash);
-
-    function checkAfterModuleExecution(bytes32 txHash, bool success) external;
-}
-```
-
-ERC-165 support is part of the interface and the Safe checks it when the guard is set.
-
-**What the vendor investigation found, and what it did not.** The screening vendor's public material describes enforcement in the signing flow: a check that each signed transaction matches authorised intent. No public source repository and no published package were found, and the documentation site returned no readable content.
-
-That description points at enforcement in the **signing flow** rather than an on-chain `IModuleGuard` implementation. It is not proof either way, and it must be settled directly with the vendor.
-
-Two supporting observations. Module guards are a Safe v1.5.0 feature released in July 2025, and a bounded scan of recent mainnet history found no `ChangedModuleGuard` events at all, so this is a thinly used path in practice. And a signing-flow control is advisory for a multisig unless it is a required co-signer, because the signers can proceed without it.
-
-**This opens a second implementation route that does not need the Safe version change at all.** See 9.1.2.
-
-##### 9.1.2 Two places the screening hook can live **[Decision required]**
-
-The operator is a multisig. Its signers call `execTransaction` on their own Safe, which then calls the modifier. That owner path **is** guardable, on every Safe version back to 1.3.0, which the operator committee's Safe runs today. `setGuard`, `checkTransaction` and `checkAfterExecution` are all present in that singleton, and no guard is set on it at present.
-
-| | Route A — module guard on the Asset Safe | Route B — transaction guard on the operator Safe |
-| --- | --- | --- |
-| Hook | `setModuleGuard`, asset boundary | `setGuard`, caller boundary |
-| Safe version needed | **v1.5.0**, first in the Lido estate | works on v1.3.0 and later, already deployed |
-| Screens | operator and governance | operator only |
-| Two-modifier split | required, so the guard can tell recovery apart | not required for the guard, still wanted for the sequencing benefit |
-| Guarded Safe | the one holding the assets | a caller, holding nothing |
-| Maturity | no `ChangedModuleGuard` events found in a recent mainnet scan | the long-standing Safe guard pattern |
-| Caveat | new Safe version, unproven hook | the committee's Safe carries other duties, so it should be a dedicated operator Safe rather than the shared one |
-
-Route B implies one extra deployment: a dedicated Active Treasury operator Safe carrying the committee's signers, so guarding it does not affect the committee's existing responsibilities. That mirrors what is already being done for the emergency role.
-
-Route A screens governance motions as well, because the governance role sits on the guarded modifier. Route B does not, because the Easy Track script executor is shared Lido infrastructure that cannot be guarded for this vault alone.
+##### 9.1.3 Failure behaviour, authority and costs **[Decided]**
 
 **Failure behaviour: fail closed.** A guard that cannot reach a verdict refuses the operator transaction. Recovery is unscreened by construction, so a stuck guard stops new risk being taken while still allowing exit. The trade is a frozen operator during a vendor outage, which is accepted.
 
-**Flagging authority: the vendor, unilaterally.** No Lido co-signature is required to block, because adding one would trade away the response time the control exists to buy. The counterweight is that only the DAO can detach the guard, and the technical role can disable the operator modifier outright.
+**Flagging authority: the vendor, unilaterally.** No Lido co-signature is required to block, because adding one would trade away the response time the control exists to buy. The counterweights are that the Operator Safe's owners can remove the guard after its 10-day timelock, the DAO can give the operator role to another Safe, and the technical role can disable the operator modifier outright.
 
-**The guard is vendor-supplied.** It is the one component in this design that can halt the vault, and Lido does not write it. That makes it a dependency with its own audit, its own liveness risk, and its own upgrade path. Three mitigations are structural rather than contractual: recovery cannot be screened, the DAO can detach the guard, and the technical role can disable the operator modifier outright. This is a deliberate narrowing of the provider-independence property, and it should be stated in those terms rather than presented as cost-free.
+**The guard is vendor-supplied.** It is the one component in this design that can stop operator activity and motion creation, and Lido does not write it. That makes it a dependency with its own audit and its own liveness risk. Three mitigations are structural rather than contractual: recovery never passes through it, the owners can remove it after ten days, and the technical role can disable the operator modifier outright. This is a deliberate narrowing of the provider-independence property, and it should be stated in those terms rather than presented as cost-free.
 
 **The split also removes a sequencing hazard that existed independently.** Previously, disabling the module removed every role at once, so the emergency role had to finish exiting before the technical role acted, and that ordering crossed committee boundaries with nothing enforcing it. Now the technical role disables the operator modifier while the safety modifier keeps working, so recovery survives the kill switch and the ordering constraint disappears.
 
-**Governance stays on the guarded modifier.** It could sit on the safety modifier so that policy changes are never screened, but that is a second arrangement to reason about for no gain: an onboarding motion is precisely where a hostile target would enter, so screening it is wanted, and keeping both operator-facing roles together is the simpler structure. A screening outage therefore delays policy changes as well as operator activity, which is acceptable because motions already carry a three-day window.
+**Governance is screened at creation.** The governance role sits on the operator modifier and is held by the Easy Track executor, which no guard covers. Because the Operator Safe is the trusted caller, every motion is created through the guard, so a hostile onboarding motion meets the screening at creation. A screening outage therefore delays new motions as well as operator activity. This is acceptable because motions already carry a three-day window.
 
 **Modifier replacement is a documented procedure, not an automatic one.** The safety modifier pins the operator modifier's address in the emergency revoke permissions and in the technical disable permission. Replacing the operator modifier therefore invalidates those pins, and the safety policy must be rewritten by DAO vote in the same action. This is accepted and belongs in the runbook; it is the cost of pinning, and pinning is what makes the technical role safe.
 
-Costs: two policy applications, two sets of role keys, two modules enabled on the Safe, and a module argument pinned per instance. Moving off v1.4.1 also invalidates the earlier deployment evidence, which is why the codehash assertion is now part of preflight.
+Costs: a third Safe with the TMC signers, two policy applications, two sets of role keys, two modules enabled on the Asset Safe, a module argument pinned per instance, and the Operator Safe pinned as the immutable trusted caller of every factory.
 
 ### Test Cases
 
@@ -580,7 +550,7 @@ Costs: two policy applications, two sets of role keys, two modules enabled on th
 | Adversarial | 1 | Operator cannot widen, cannot reach administration, cannot act as another role |
 | Known limits recorded as tests | 2 | Order pre-signature is opaque to the modifier; a single-child match leaves trailing parameters unconstrained |
 | Policy shape and funding | 3 | Policy builds within bounds; approvals survive duplicate writes; funding bootstrap |
-| Pre-execution screening | 3 | A flagged operator transaction is refused; recovery is never refused; the owner path removes a failed guard |
+| Pre-execution screening | 3 | A flagged operator transaction is refused; recovery is never refused; the owner path removes a failed guard. These tests cover the rejected module-guard route and must be rewritten for the Operator Safe's guard |
 | **Total** | **40** | |
 
 Reproduce with `forge test` against an archive RPC, fork block 25946643.
@@ -607,8 +577,8 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 
 | Action | Who | Path | Latency |
 | --- | --- | --- | --- |
-| Open or close a position | Operator | Direct through the modifier | Immediate |
-| Toggle an onboarded strategy | Operator proposes, anyone enacts | Easy Track motion, governance role | 72 hours |
+| Open or close a position | Operator Safe, with the vendor's approval | Through the operator modifier | After the approval lands |
+| Toggle an onboarded strategy | Operator Safe proposes with the vendor's approval, anyone enacts | Easy Track motion, governance role | 72 hours |
 | Adjust a budget within ceilings | Operator proposes | Easy Track motion, governance role | 72 hours |
 | Onboard a new protocol or asset | Operator proposes | Easy Track motion, template factory | 72 hours |
 | Revoke the operator | Emergency Safe, two signatures | Direct through the modifier | Minutes |
@@ -657,14 +627,15 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | Budget drains too fast | A motion sets a very short refill period | `GreaterThan` floor on `period` | Budget monitoring |
 | Unlimited approval left standing | Operator approves the maximum | Approvals capped by condition; emergency may revoke the operator's approve permission entirely | Approval inventory monitoring |
 | Exit impossible when it matters | Protocol illiquidity or asynchronous settlement | Receipt-token transfer to the Agent; claim later | Position inventory monitoring |
+| Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity and new motions stop; recovery is unaffected; the owners can remove the guard after ten days | Approval-latency and vendor-heartbeat monitoring |
 | Monitoring unavailable | Service outage | On-chain permissions are the enforcement layer and do not widen when monitoring stops | Heartbeat on the monitor itself |
 
 ## Open Items
 
 The [open-decisions register](/registers/open-decisions.md) tracks every open item. These can change the shape of this proposal:
 
-1. **OD-01, the route for the screening hook.** Route A needs Safe v1.5.0 and screens governance too. Route B works on the Safe versions the Lido estate already runs and screens the operator only.
-2. **OD-07, the vendor's guard contract.** Whether the screening vendor ships a guard for the chosen route could not be confirmed from public sources. EM's direction is that the vendor writes it. Launching with the guard slot empty conflicts with the hard requirement for on-chain blocking unless EM confirms that reading of "we can add it later".
+1. **OD-17, Safe v1.5.0 incident history.** Both new Safes use v1.5.0. Its audits are recorded; its incident history is not.
+2. **OD-07, the vendor agreement.** The vendor's existing guard fits the chosen route and passed the fork check on v1.5.0. The agreement, its announcement, a review of the two changes made after the guard's audit, and the vendor's support for v1.5.0 Safes in its approval service are still open.
 3. **OD-03 and OD-04, two mandate ambiguities.** The yield-bearing cap's denominator share, and whether Lido Lend counts against the per-protocol cap. Both move the budget figures and belong in the mandate text, not in a script.
 
 ## Links

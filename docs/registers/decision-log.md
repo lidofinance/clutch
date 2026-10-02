@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-02T11:52:17Z
 verified: []
 sources:
   - id: s1
@@ -16,15 +16,49 @@ sources:
   - id: s2
     resource: "urn:clutch:interview:2026-09-30"
     title: EM's repository-setup interview on 2026-09-30; the transcript is not in the repository
+  - id: s3
+    resource: "urn:clutch:interview:2026-10-02"
+    title: EM's decision interview on 2026-10-02; the transcript is not in the repository
 ---
 
 # Decision log
 
 Entries quote EM exactly, including typos. An agent copied them from the interview transcripts. EM should confirm each entry by verifying this page. Newest first. Times are UTC.
 
-Square brackets mark a redaction. Redactions keep the screening vendor's identity and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
+Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-02 — OD-02 and OD-19: the two new Safes
+
+> OD-02: 3. let it be v1.5.0 both BUT only if [the screening vendor] guard is compat with v1.5.0, check it deeply
+> OD-19: 1. 4 of 7
+
+Recorded as: OD-02 is closed with a condition. Both new Safes, the Asset Safe and the operator Safe, use Safe v1.5.0 if the screening vendor's guard is compatible with v1.5.0. The agent's check on 2026-10-02 found it compatible, so the condition holds ([research note](/research/safe-v150-guard-compatibility-2026-10-02.md)). OD-19 is closed: the operator Safe's threshold is 4 of 7. [s3]
+
+## 2026-10-02 — OD-01: the screening route
+
+> I pick 'Option 1: dedicated operator Safe with its own guard, also the trusted caller.'
+
+Recorded as: OD-01 is closed. The screening hook is a transaction guard on a dedicated operator Safe. The operator Safe carries the committee's signers, holds the operator role, and is the trusted caller of every factory. The guard is the screening vendor's existing transaction guard ([ADR 010](/adr/010-pre-execution-screening.md), [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 006](/adr/006-governance-through-easy-track-factories.md)). The operator Safe's threshold and Safe version are still open (OD-19, OD-02). [s3]
+
+## 2026-10-02 — the vendor's existing guard
+
+> if we need [the screening vendor] here and existing blocks they have, e.g. attached one to [the address of an existing guard on a Lido multisig], what option would win?
+
+Recorded as: an input to OD-01. The screening vendor's existing guard must be usable as is. [s3]
+
+## 2026-10-02 — criteria for OD-01
+
+> what option has the least code, what option has the least deployed surface, what option has the least audit surface, what option has the lowest overhead and drift sensitivity?
+
+Recorded as: the criteria EM applied to OD-01: least code, least deployed surface, least audit surface, and lowest overhead and drift sensitivity. [s3]
+
+## 2026-10-02 — the request
+
+> interview me about decisions, start with OD-01
+
+[s3]
 
 ## 2026-09-30 — specifications and the permission policy
 

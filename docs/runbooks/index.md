@@ -13,6 +13,7 @@ No runbook is written yet. The table lists the runbooks that the design owes, wi
 | Return assets to the Agent | emergency Safe | `transfer` pinned to the Aragon Agent | No | No |
 | Disable the operator modifier | Emergency Brakes Safe | `disableModule` on the Asset Safe, module argument pinned to the operator modifier | No | No |
 | Pause Easy Track | Emergency Brakes Safe | the existing Easy Track `pause()` | No | No |
-| Detach the screening guard | DAO, owner path | `setModuleGuard(address(0))` on the Asset Safe, or `setGuard(address(0))` on the operator Safe in route B | No | No |
-| Rotate a signer on both Safes | the committee and the emergency Safe | owner management on each Safe; the rotation is complete only when both match | No | No |
+| Remove the screening guard | the operator Safe's owners | start the guard's 10-day removal timelock, then `setGuard` on the operator Safe once it expires | No | No |
+| Replace the operator Safe | DAO | a vote that grants the operator role to a new Safe, updates the governance role's conditions and registers every factory again with the new trusted caller | No | No |
+| Rotate a signer on all three Safes | the committee's Safe, the operator Safe and the emergency Safe | owner management on each Safe; the rotation is complete only when all three match | No | No |
 | Replace the operator modifier | DAO | a vote that deploys the new modifier and rewrites the safety policy in the same action | No | No |
