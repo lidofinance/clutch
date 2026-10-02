@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T13:35:00Z
+  at: 2026-10-02T14:07:21Z
 verified: []
 sources:
   - id: s1
@@ -40,7 +40,10 @@ sources:
 | Order duration, margin, price tolerance | volatile to stable: 1800 s, 110 bp, 550 bp; stable to stable: 1800 s, 30 bp, 150 bp; both families | EM decision of 2026-10-02 [s1], copying the live instances | ADR 007 |
 | Maximum improvement and partial fills | 1000 bp; partial fills on; every instance | EM decision of 2026-10-02 [s1], copying the live Stonks 2.0 instances | ADR 007 |
 | Per-payment ceilings of the shared ACL | stETH 1,000; ETH 1,000; DAI 2,000,000; USDC 2,000,000; USDT 2,000,000; sUSDS 2,000,000; LDO 5,000,000 | Read [s2]; kept unchanged by proposal, OD-11 | [ADR 008](/adr/008-funding-through-existing-payments.md) |
-| Funding registry period and limit | none yet | Open: OD-06 | ADR 008 |
+| Funding registries | two: stablecoins and stETH; the Asset Safe is the only recipient of each | EM decision of 2026-10-02 [s1] | ADR 008 |
+| Funding period | one calendar month | EM decision of 2026-10-02 [s1] | ADR 008 |
+| Funding limit per period | one TM Floor Value in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared; the figures are not in this repository | EM decision of 2026-10-02 [s1]; figures by attested computation, entering when the mandate is approved | ADR 008 |
+| Stablecoin token list of the funding registry | USDC, USDT, DAI, for the vault alone | Proposed; open: OD-11 | ADR 008 |
 | Budget per key | not in this repository | Computed by attested computation on 2026-09-22 and again on 2026-10-02 with the literal yield-bearing base; enters when the mandate is approved | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | Lido Lend cap | the protocol cap for three calendar months from Lido Lend's mainnet launch, then none, as a Lido own product | EM decision of 2026-10-02 [s1]; start reading to confirm, OD-12 | ADR 009 |
 | Yield-bearing cap base | the top-4 stablecoins plus the yield-bearing stablecoins held directly; own-product and protocol positions excluded | EM decision of 2026-10-02 [s1] | ADR 009 |

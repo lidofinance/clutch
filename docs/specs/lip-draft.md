@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T13:35:00Z
+  at: 2026-10-02T14:07:21Z
 verified: []
 sources:
   - id: s1
@@ -28,6 +28,9 @@ sources:
   - id: s6
     resource: "urn:clutch:restricted:screening-guard-2026-10-02"
     title: Restricted evidence on the screening vendor's existing guard; held outside the repository until the vendor is announced
+  - id: s7
+    resource: /research/funding-registries-2026-10-02.md
+    title: Easy Track funding registries, 2026-10-02 — how a registry counts, the fixed payment reference, and the live registries
 ---
 
 # LIP-XX: Active Treasury Management Vault
@@ -41,7 +44,7 @@ sources:
 | discussions-to | a thread on https://research.lido.fi/, to be created |
 | created | 2026-09-22 |
 
-> **Where this draft stands.** It was written during the design review of 2026-09-10 to 2026-09-22 and moved into this repository on 2026-09-30. The [ADRs](/adr/index.md) record the decisions, and this draft must never contradict them [s2]. The chain facts that the ADRs rely on were re-read at block 26092572 [s3]. Any other chain fact in this draft is a claim from the design review that was not re-run. EM chose the screening route on 2026-10-02, and section 9.1 records it. Open items are in the [open-decisions register](/registers/open-decisions.md).
+> **Where this draft stands.** It was written during the design review of 2026-09-10 to 2026-09-22 and moved into this repository on 2026-09-30. The [ADRs](/adr/index.md) record the decisions, and this draft must never contradict them [s2]. The chain facts that the ADRs rely on were re-read at block 26092572 [s3]. Any other chain fact in this draft is a claim from the design review that was not re-run. EM chose the screening route on 2026-10-02, and section 9.1 records it. EM chose the funding period and limit the same day, and section 5.2 records them. Open items are in the [open-decisions register](/registers/open-decisions.md).
 
 > **Draft status.** Sections marked **[Implemented]** are built and covered by tests against deployed mainnet bytecode on a pinned fork. Sections marked **[Specified]** are designed but not built. Sections marked **[Open]** need a decision before this proposal can be finalised. No component has been deployed to mainnet. No audit has been performed.
 
@@ -335,9 +338,9 @@ Per-payment ceilings recorded in the ACL parameter tree, re-read at block 260925
 | sUSDS | 2,000,000 |
 | LDO | 5,000,000 |
 
-Many allowed-recipient setups already run on mainnet, each combining an `AllowedRecipientsRegistry` with period limits, optionally an `AllowedTokensRegistry`, add and remove factories, and a `TopUpAllowedRecipients` factory. The operator multisig is already the trusted caller on at least one of them [s3].
+Many allowed-recipient setups already run on mainnet, each combining an `AllowedRecipientsRegistry` with period limits, optionally an `AllowedTokensRegistry`, add and remove factories, and a `TopUpAllowedRecipients` factory. Twelve top-up registries are live, and the committee's existing Safe is the trusted caller of two of them [s7].
 
-**Proposed setup:** a dedicated registry whose only recipient is the Asset Safe, a token registry for the launch assets, period limits matching the mandate's top-up rule, and a `TopUpAllowedRecipients` factory with the operator multisig as trusted caller, registered by DAO vote.
+**Setup, decided by EM on 2026-10-02 (OD-06):** two dedicated registries, one for stablecoins and one for stETH. The Asset Safe is the only recipient of each, and the Easy Track executor cannot add recipients. Each registry has a period of one calendar month and a limit of one TM Floor Value per period. Two `TopUpAllowedRecipients` factories, the stablecoin one with its own token list (OD-11), take the operator Safe as trusted caller and are registered by DAO vote [s7]. Section 5.2 gives the reasons and the gaps.
 
 ##### 5.1 Scaling the existing caps to the mandate size **[Investigated]**
 
@@ -348,9 +351,22 @@ Findings, first read at block 26017715 and re-read at block 26092572 [s3].
 - **The grant is shared.** The parametrized `CREATE_PAYMENTS_ROLE` is held by the single Easy Track script executor, which every Lido top-up factory routes through. Raising a ceiling raises it for every allowed-recipient setup at once.
 - **The permission manager is Aragon Voting** at `0x2e59A20f205bB85a89C53f1936454680651E618e`, so any parameter change is an Aragon vote, and the whole 22-entry parameter array is rewritten as one unit.
 
-**Recommendation: do not change the ACL parameters.** EM has not accepted this yet (open item OD-11). Seed and top up through several payments inside one motion, and let the real ceiling be the period limit on a dedicated `AllowedRecipientsRegistry`, which is ours alone and is set to the mandate figure. The number of payments follows from the mandate size and the ceilings, and an attested computation must produce it. This keeps the blast radius of the change inside our own registry instead of widening a shared grant.
+**Recommendation: do not change the ACL parameters.** EM has not accepted this yet (open item OD-11). Seed and top up through several payments inside one motion, and let the real ceiling be the period limits on the two dedicated registries, which are ours alone (section 5.2). The number of payments follows from the limits and the ceilings, and an attested computation must produce it. This keeps the blast radius of the change inside our own registry instead of widening a shared grant.
 
-Two consequences to accept. A per-payment ceiling is not a per-motion ceiling, so the registry period limit is the control that actually matters and must be sized deliberately. And **USDS is absent from the ACL token chain**, so it cannot be paid out on this route at all; seeding in USDS would require rewriting the shared parameter array by vote, which the recommendation above avoids. Seed in USDC, USDT, DAI, stETH, or ETH.
+Two consequences to accept. A per-payment ceiling is not a per-motion ceiling, so the registry period limit is the backstop that matters, and section 5.2 sizes it. And **USDS is absent from the ACL token chain**, so it cannot be paid out on this route at all; seeding in USDS would require rewriting the shared parameter array by vote, which the recommendation above avoids. Seed in USDC, USDT, DAI or stETH. The Agent holds less than 8 ETH, so ETH needs no top-up path (OD-11) [s7].
+
+##### 5.2 Period and limit **[Decided, OD-06]**
+
+The mandate puts seeding and top-ups on Easy Track, and it makes the objection the control of a top-up. The registry is the backstop.
+
+- **Period: one calendar month.** The mandate's top-up follows each month-end snapshot, so each month's top-up has its own limit. No live Lido registry uses one month; they use three, six or twelve [s7].
+- **Limit: one TM Floor Value per registry per month.** Stablecoins count at par. The stETH limit is the floor at the Coingecko price pinned when the enabling vote is prepared, set by attested computation. Either asset can carry a full refill, as the mandate allows for the seed and for the runway protection's stETH top-up.
+- **Why two registries.** A registry counts token units after scaling decimals, so 1 stETH counts as 1 USDC. One limit cannot hold both assets to a dollar figure [s7].
+- **Gap 1: more than one floor a month.** Without an objection, the operator Safe can pull one floor per registry each month. Around a month boundary, one registry can pay two full limits within about 72 hours, because a motion that can only be enacted in the next period is checked against that period's full limit [s7]. The mandate's limit on the vault's size is therefore a procedure, not code.
+- **Gap 2: the stETH limit is fixed in tokens.** The mandate values stETH at the Coingecko price at each motion. After an ETH fall, a refill in stETH alone reaches less than the floor in one month; the rest follows the next month or in stablecoins. After an ETH rise, the stETH limit is worth more than a floor. The DAO re-pins the limit by vote when needed.
+- **Compensating controls.** The operator Safe creates every top-up motion, so each one passes the screening guard and the 72-hour objection window. Monitoring flags a top-up motion outside days 1 to 10 of a month, apart from the seed; a month's top-ups above the shortfall posted on the forum; and any top-up motion after an objected one. The screening policy carries a dollar rule per motion, if the vendor supports it (OD-07).
+- **What the registry cannot enforce.** The mandate's rule that, after an objection, a further pull needs a Snapshot vote. A DAO vote can set the limit to zero.
+- **Not chosen.** A three-month period; a stETH limit at a stress price; one floor split between the registries; and one registry with one dollar limit, through a token registry that counts stETH at a DAO-pinned rate, which needs a new contract. That registry could not use a live rate: Easy Track rebuilds the script at enactment and checks its hash, so a rate that moves during the objection window blocks the motion [s7].
 
 #### Part 6: Emergency response **[Implemented]**
 
@@ -485,11 +501,11 @@ Reporting is published so that a third party can check it later without trusting
 
 On the anchor, one finding matters. The DAO's DataBus contract is **not deployed on Ethereum mainnet**. It exists at the same address on Gnosis Chain, Base, Optimism and Polygon PoS. Using it means the anchor lives on a sidechain with that chain's security assumptions, while the assets live on Ethereum. Its `sendMessage` is permissionless, so any consumer must filter by the indexed sender, and the event is anonymous, so an indexer must be configured for it deliberately.
 
-**Decision: IPFS, and no sidechain.** The payload is content-addressed on IPFS. Where a report justifies a funding motion, its content identifier goes in the Aragon payment call's free-text `reference` field, which lands in an Ethereum event and gives a permissionless-to-verify anchor with no new contract.
+**Decision: IPFS, and no sidechain.** The payload is content-addressed on IPFS. An earlier draft put a funding motion's report identifier in the Aragon payment's `reference` field. That does not work: the standard top-up factory writes a fixed reference, "Easy Track: top up recipient" [s7]. The identifier goes in the forum post that the mandate requires before each top-up. Where to anchor it on chain is open (OD-14).
 
 DataBus is **not adopted**, at least for now. It is not deployed on Ethereum, so it would put the anchor on a sidechain while the assets sit on Ethereum, and that is a trust step this proposal does not need to take.
 
-The honest consequence, which must be stated rather than glossed: a periodic report that is not tied to a funding motion has **no on-chain anchor**. Its immutability rests on content addressing plus the forum post that cites the identifier. That is adequate for an informational control and it is not an Ethereum guarantee. If that is later judged insufficient, an anchor can be added without changing anything else in the design.
+The honest consequence, which must be stated rather than glossed: no report has an **on-chain anchor** yet, a funding motion's report included. Its immutability rests on content addressing plus the forum post that cites the identifier. That is adequate for an informational control and it is not an Ethereum guarantee. If that is later judged insufficient, an anchor can be added without changing anything else in the design.
 
 Whichever is chosen, the reporting key, the schedule, the behaviour on a stale or missing price, and who is accountable when a report is late must be named in the mandate.
 
@@ -573,7 +589,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Swap margin | Per-instance immutable, basis points | 110 for volatile pairs, 30 for stablecoin pairs (OD-05) |
 | Swap price tolerance | Per-instance immutable, basis points | 550 for volatile pairs, 150 for stablecoin pairs (OD-05) |
 | Swap maximum improvement and partial fills | Per-instance immutables | 1000 basis points; partial fills on (OD-05) |
-| Recipient period limit | Funding cap per period in the registry | **[Open]** must follow the mandate's top-up rule |
+| Funding period and limit | Funding cap per period, in each of the two registries | One calendar month; one TM Floor Value per period in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared. Set by attested computation; the figures enter with the approved mandate (OD-06, decided) |
 
 ### Roles and Authority
 
@@ -583,6 +599,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Toggle an onboarded strategy | Operator Safe proposes with the vendor's approval, anyone enacts | Easy Track motion, governance role | 72 hours |
 | Adjust a budget within ceilings | Operator proposes | Easy Track motion, governance role | 72 hours |
 | Onboard a new protocol or asset | Operator proposes | Easy Track motion, template factory | 72 hours |
+| Top up the vault | Operator Safe proposes with the vendor's approval, anyone enacts | Easy Track motion, top-up factory, paying the Asset Safe only | 72 hours |
 | Revoke the operator | Emergency Safe, two signatures | Direct through the modifier | Minutes |
 | Disable the operator modifier | Emergency Brakes multisig, three signatures | Direct through the safety modifier, technical role | Minutes |
 | Freeze queued motions | Emergency Brakes multisig, a separate body | Easy Track pause | Minutes, subject to paging them |
@@ -627,6 +644,7 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | Onboarding motion points at a malicious contract | A motion survives its objection window | Template pins receivers and bounds amounts, so loss is capped by the attached budget rather than the balance | Published diligence per motion; position and budget monitoring |
 | Signer sets drift apart | The operator multisig rotates a signer and the emergency Safe does not | Operational reconciliation duty; no on-chain enforcement | Owner-set monitoring on both Safes |
 | Budget drains too fast | A motion sets a very short refill period | `GreaterThan` floor on `period` | Budget monitoring |
+| Top-up above the shortfall | The operator Safe pulls more than the mandate allows, or outside the monthly cycle | A limit of one TM Floor Value per registry per month; the 72-hour objection; the screening guard; the emergency Safe can return funds to the Agent | Alerts on out-of-cycle motions, on a month's top-ups above the posted shortfall, and on a motion after an objected one |
 | Unlimited approval left standing | Operator approves the maximum | Approvals capped by condition; emergency may revoke the operator's approve permission entirely | Approval inventory monitoring |
 | Exit impossible when it matters | Protocol illiquidity or asynchronous settlement | Receipt-token transfer to the Agent; claim later | Position inventory monitoring |
 | Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity and new motions stop; recovery is unaffected; the owners can remove the guard after ten days | Approval-latency and vendor-heartbeat monitoring |
@@ -639,6 +657,7 @@ The [open-decisions register](/registers/open-decisions.md) tracks every open it
 1. **OD-17, Safe v1.5.0 incident history.** Both new Safes use v1.5.0. Its audits are recorded; its incident history is not.
 2. **OD-07, the vendor agreement.** The vendor's existing guard fits the chosen route and passed the fork check on v1.5.0. The agreement, its announcement, a review of the two changes made after the guard's audit, and the vendor's support for v1.5.0 Safes in its approval service are still open.
 3. **Mandate text owed.** The own-product limit and the protocol cap must state that Lido Lend counts against the protocol cap for its first three months (OD-04). The illustrative balance renames its "USD-denominated" heading (OD-03).
+4. **OD-21, the legacy investments.** The mandate carries the legacy investments into the vault, and they reduce the seed. Who holds them, and how they move in, is open.
 
 ## Links
 

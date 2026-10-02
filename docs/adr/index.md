@@ -14,7 +14,7 @@ One global sequence. Every record is agent-drafted and `proposed` until EM accep
 * [ADR 005: Account graph and roles](005-account-graph-and-roles.md) - an Agent-owned Safe, two Roles modifiers, an emergency Safe with the committee's signers at a quorum of two, and a technical role for Emergency Brakes.
 * [ADR 006: Governance through Easy Track factories](006-governance-through-easy-track-factories.md) - factories are the only new contracts; templates fixed at audit time; the committee is the trusted caller.
 * [ADR 007: Swapping through Stonks 2.0](007-swapping-through-stonks.md) - fresh instances managed by the Agent; the receiver separates rebalancing from recovery; USDC hub, USDT second recovery destination.
-* [ADR 008: Funding through the existing payment path](008-funding-through-existing-payments.md) - Finance and a dedicated recipients registry; the shared payment ACL stays unchanged.
+* [ADR 008: Funding through the existing payment path](008-funding-through-existing-payments.md) - Finance and two dedicated recipients registries, stablecoins and stETH, each with a one-month period and a limit of one TM Floor Value; the shared payment ACL stays unchanged.
 * [ADR 009: Budgets, exposure caps, reporting and monitoring](009-budgets-caps-reporting-and-monitoring.md) - detective caps, reports on IPFS, budgets by attested computation, two monitoring estates.
 * [ADR 010: Pre-execution screening](010-pre-execution-screening.md) - on-chain blocking is required, fail closed, recovery never screened; the route for the hook is open.
 * [ADR 011: Launch scope](011-launch-scope.md) - the launch assets and venues; Lido Lend by motion through a Morpho Blue template; no sDAI or third-party lending.

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T13:35:00Z
+  at: 2026-10-02T14:07:21Z
 verified: []
 sources:
   - id: s1
@@ -45,3 +45,4 @@ State "Draft" means the ADR is proposed. State "Pending" means the invariant dep
 | INV-014 | The emergency role swaps only by transfer to a pinned recovery instance, whose receiver and recovery address are the Aragon Agent and whose manager is the emergency Safe. | [ADR 007](/adr/007-swapping-through-stonks.md) | Pending: swap instances | None yet |
 | INV-015 | The operator's permissions cover only the launch scope: no sDAI, no Aave and no other third-party lending market. | [ADR 011](/adr/011-launch-scope.md) | Violated: the kit grants Aave v3 and sDAI [s3] | None yet |
 | INV-016 | The conditions read back from each modifier equal the policy data file. | [ADR 004](/adr/004-specifications-and-policy-as-data.md) | Pending: data file and compiler | None yet |
+| INV-017 | A top-up motion pays only the Asset Safe, only in an allowed token, and never more than its funding registry's remaining limit in the month of enactment. Only the operator Safe can create one. Only the DAO changes a funding registry's limit, period or recipients. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Pending: registries and factories not built | None yet |
