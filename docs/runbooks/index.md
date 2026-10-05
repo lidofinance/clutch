@@ -7,6 +7,7 @@ No runbook is written yet. The table lists the runbooks that the design owes, wi
 | Runbook | Holder | Permission | Written | Drilled |
 |---|---|---|---|---|
 | Revoke the operator | emergency Safe | `revokeTarget` and `revokeFunction` on the operator modifier, role key pinned to `operator` | No | No |
+| Remove a strategy | emergency Safe | `revokeTarget` or `revokeFunction` on the operator modifier for one target or function, role key pinned to `operator`; then a forum post | No | No |
 | Zero the approvals | emergency Safe | `approve(spender, 0)` on each launch token | No | No |
 | Exit positions to the Safe | emergency Safe | redeem, withdraw, cancel and claim on each position, receiver and owner pinned to the avatar | No | No |
 | Recovery swap | emergency Safe | `transfer` pinned to a recovery swap instance, then `placeOrder` by the emergency Safe as the instance's manager | No | No |
@@ -17,6 +18,6 @@ No runbook is written yet. The table lists the runbooks that the design owes, wi
 | Top up the vault | operator Safe | `createMotion` on the vault's top-up factories, as their trusted caller: the seed once, then after a month-end snapshot | No | No |
 | Re-set a funding limit | DAO | `setLimitParameters` on a funding registry, by vote: re-pin the stETH limit, or set a limit to zero after an objected top-up | No | No |
 | Remove the screening guard | the operator Safe's owners | start the guard's 10-day removal timelock, then `setGuard` on the operator Safe once it expires | No | No |
-| Replace the operator Safe | DAO | a vote that grants the operator role to a new Safe, updates the governance role's conditions and registers every factory again with the new trusted caller | No | No |
+| Replace the operator Safe | DAO | a vote that grants the operator role to a new Safe and registers every factory again with the new trusted caller | No | No |
 | Rotate a signer on all three Safes | the committee's Safe, the operator Safe and the emergency Safe | owner management on each Safe; the rotation is complete only when all three match | No | No |
 | Replace the operator modifier | DAO | a vote that deploys the new modifier and rewrites the safety policy in the same action | No | No |

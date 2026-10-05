@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:56:03Z
+  at: 2026-10-05T10:21:49Z
 verified: []
 sources:
   - id: s1
@@ -19,6 +19,9 @@ sources:
   - id: s3
     resource: "urn:clutch:interview:2026-10-02"
     title: EM's decision interview on 2026-10-02; the transcript is not in the repository
+  - id: s4
+    resource: "urn:clutch:interview:2026-10-05"
+    title: EM's decision interview, continued on 2026-10-05; the transcript is not in the repository
 ---
 
 # Decision log
@@ -28,6 +31,26 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-09 Q2: DAO-scoped role keys
+
+> Q2: 3
+
+Recorded as: OD-09 is closed. The design uses no DAO-scoped role keys. The role-toggle factory and the governance role's `assignRoles` permission leave the design. Every operator permission lives under the `operator` role key, so the emergency role's revoke reaches all of it, and no new emergency permission is needed. The agent recommended this option as the one that fits the answer to Q1 ([ADR 006](/adr/006-governance-through-easy-track-factories.md)). [s4]
+
+## 2026-10-05 — OD-09 Q1: the removal path
+
+> 1. Q1: B
+>
+> What makes the most of sense for Q2 given this Q1 answer?
+
+Recorded as: Block B. The two removal templates are dropped. Every removal is the emergency Safe's immediate revoke, posted on the forum afterwards. Easy Track cannot give any motion a window below 48 hours, so no factory could meet the request of 2026-09-22. EM then asked which Q2 option fits this answer. [s4]
+
+## 2026-10-02 — OD-09 asked
+
+> run OD-09 interview
+
+[s3]
 
 ## 2026-10-02 — OD-08: approvals and the refill-period floor
 

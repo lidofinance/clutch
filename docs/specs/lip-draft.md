@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:56:50Z
+  at: 2026-10-05T10:22:21Z
 verified: []
 sources:
   - id: s1
@@ -50,13 +50,13 @@ sources:
 
 ## Simple Summary
 
-Give the Treasury Management Committee a way to put a bounded slice of the DAO treasury to work in approved DeFi protocols, without ever letting it, or any service provider, take the assets. The DAO keeps ownership. An on-chain permission layer decides what the committee may do. An emergency Safe, held by the committee's own signers at a lower quorum, can pull everything back. The Emergency Brakes multisig can switch the operator off. Easy Track motions onboard protocols and switch strategies on and off, inside templates fixed at audit time.
+Give the Treasury Management Committee a way to put a bounded slice of the DAO treasury to work in approved DeFi protocols, without ever letting it, or any service provider, take the assets. The DAO keeps ownership. An on-chain permission layer decides what the committee may do. An emergency Safe, held by the committee's own signers at a lower quorum, can pull everything back. The Emergency Brakes multisig can switch the operator off. Easy Track motions onboard protocols, inside templates fixed at audit time. Every removal is an immediate action of the emergency Safe.
 
 ## Abstract
 
 We propose to deploy a Safe controlled solely by the Aragon Agent, and to attach two Zodiac Roles modifiers to it that enforce default-deny permissions. The **operator modifier** carries an **operator** role held by the Treasury Management Committee multisig and a **governance** role held by the Easy Track script executor. The **safety modifier** carries an **emergency** role held by a new Safe with a threshold of two and the same signer set as that committee, and a **technical** role held by the Emergency Brakes multisig.
 
-All swapping, routine and emergency, runs through the DAO's existing treasury swap contracts, which price orders from an on-chain oracle and settle to a receiver fixed at deployment. Easy Track motions onboard new protocols and assets, switch approved strategies on and off, and adjust budgets within ceilings. Motions never submit a permission tree. Each factory generates the tree itself from a fixed template, so the shape of every permission is decided at audit time and only its parameters arrive by motion.
+All swapping, routine and emergency, runs through the DAO's existing treasury swap contracts, which price orders from an on-chain oracle and settle to a receiver fixed at deployment. Easy Track motions onboard new protocols and assets and adjust budgets within ceilings. Every removal is the emergency Safe's immediate revoke. Motions never submit a permission tree. Each factory generates the tree itself from a fixed template, so the shape of every permission is decided at audit time and only its parameters arrive by motion.
 
 The only new contracts are Easy Track EVM script factories. No bespoke access-control, vault, or accounting contract is introduced. Funding reuses the existing Finance application and allowed-recipients machinery already in production.
 
@@ -178,9 +178,9 @@ Four principals. Role keys are `bytes32`; the encoding must match the tooling th
 | --- | --- | --- | --- |
 | DAO | Aragon Agent, reached by vote through Dual Governance | Everything: owns the Safe, may replace the whole policy, may add or remove role members | — |
 | `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders up to a cap | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
-| `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; swap to stablecoins through the recovery-family instances; transfer recovered assets to the Agent only; revoke the operator's targets and functions; invalidate outstanding orders | Add any permission; enter any protocol; borrow; change the recovery destination; disable the module |
+| `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; swap to stablecoins through the recovery-family instances; transfer recovered assets to the Agent only; revoke the operator's targets and functions, which is how every removal happens; invalidate outstanding orders | Add any permission; enter any protocol; borrow; change the recovery destination; disable the module |
 | `technical` | Emergency Brakes multisig, three of five. **Safety modifier** | Disable the **operator** modifier, with the module argument pinned to it | Anything else. It cannot touch assets or permissions, and it cannot disable the safety modifier |
-| `governance` | EVMScriptExecutor, driven by Easy Track | Toggle the operator's membership of pre-scoped role keys; set operator budgets within ceilings | Author a permission; name a target; grant a role to any other address; touch the emergency role; administer the Safe |
+| `governance` | EVMScriptExecutor, driven by Easy Track | Write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | Submit a condition tree; grant or remove any role; touch the emergency role; target a modifier or the Safe |
 
 The emergency role's ability to revoke the operator works because the Safe owns the modifier: a call through the emergency role executes as the Safe, which the modifier accepts as its owner.
 
@@ -217,59 +217,11 @@ Rules that constrain how policy must be written:
 
 The **only** new contracts are Easy Track EVM script factories. Each is small, holds no assets, and carries no authority of its own: it builds a script, and the modifier decides whether the resulting call is permitted.
 
-##### 4.1 `RoleToggleEVMScriptFactory` **[Implemented]**
+##### 4.1 `RoleToggleEVMScriptFactory` **[Retired, OD-09]**
 
-Switches the operator's membership of a role key the DAO has already scoped.
+The kit builds and tests a factory that switches the operator's membership of role keys that the DAO has scoped. EM retired it on 2026-10-05. The design uses no DAO-scoped role keys: every operator permission lives under the `operator` key, which the emergency role's revoke reaches. The governance role holds no `assignRoles` permission.
 
-```solidity
-interface IRoleToggleEVMScriptFactory {
-    /// @notice The modifier being administered. Immutable: a motion can never
-    ///         redirect administration to another contract.
-    function roles() external view returns (address);
-
-    /// @notice The only address a toggle may ever be applied to.
-    function operatorSafe() external view returns (address);
-
-    /// @notice The role key the emitted script executes under.
-    function policyAdminRoleKey() external view returns (bytes32);
-
-    /// @notice The only address permitted to create motions with this factory.
-    function trustedCaller() external view returns (address);
-
-    /// @notice The DAO, reached by vote. Sets which keys are togglable.
-    function owner() external view returns (address);
-
-    /// @notice Role keys the DAO has pre-scoped and permits toggling.
-    function allowedRoleKey(bytes32 roleKey) external view returns (bool);
-
-    /// @notice DAO vote pre-approves or withdraws a role key.
-    /// @dev Withdrawing also kills any motion already in its objection window
-    ///      for that key, because enactment rebuilds the script through here.
-    function setRoleKeyAllowed(bytes32 roleKey, bool allowed) external;
-
-    /// @notice Builds the CallsScript for one toggle.
-    /// @param _creator Motion creator, checked against trustedCaller.
-    /// @param _evmScriptCallData abi.encode(bytes32 roleKey, bool enable)
-    function createEVMScript(address _creator, bytes memory _evmScriptCallData)
-        external view returns (bytes memory);
-
-    event RoleKeyAllowed(bytes32 indexed roleKey, bool allowed);
-
-    error CallerIsForbidden(address caller);
-    error NotOwner();
-    error RoleKeyNotAllowed(bytes32 roleKey);
-    error ZeroAddress();
-}
-```
-
-The emitted script is a single CallsScript entry targeting the modifier:
-
-```
-0x00000001 ‖ bytes20(roles) ‖ uint32(len) ‖ roles.execTransactionWithRole(
-    roles, 0, assignRoles(operatorSafe, [roleKey], [enable]), Call, policyAdminRoleKey, true)
-```
-
-The wire format is `[specId(4)][to(20)][calldataLength(uint32)][calldata]`, where the length covers the selector and the arguments. This matches `EVMScriptCreator` in the Easy Track source. A 32-byte length field is **not** the production format and must be rejected.
+Every remaining factory emits the production script format, `[specId(4)][to(20)][calldataLength(uint32)][calldata]`, where the length covers the selector and the arguments. This matches `EVMScriptCreator` in the Easy Track source. A 32-byte length field is **not** the production format and must be rejected.
 
 ##### 4.2 Defence in depth in the modifier **[Implemented]**
 
@@ -285,7 +237,7 @@ The target refusal is necessary because pinning the role key alone is insufficie
 
 Not yet built. These let Easy Track onboard a protocol or asset without a DAO vote and without submitting a condition tree. Each factory owns one template. Motion call data carries only typed parameters; the factory constructs the tree.
 
-The catalogue below is the set that EM accepted on 2026-09-22 [s1].
+The catalogue below is the set that EM accepted on 2026-09-22 [s1]. EM dropped its two removal templates on 2026-10-05 (OD-09).
 
 | Factory | Motion parameters | Emits |
 | --- | --- | --- |
@@ -295,18 +247,14 @@ The catalogue below is the set that EM accepted on 2026-09-22 [s1].
 | `AddSpenderApprovalFactory` | token, spender, cap | `approve` scoped to that spender, amount either zero or `LessThan` cap |
 | `AddSwapInstanceFactory` | swap instance | `transfer` scoped with the recipient pinned to that instance, for the rebalancing family only |
 | `AddMorphoBlueMarketFactory` | market parameters, budget key | `supply` with `onBehalf` pinned to the avatar and the amount under `WithinAllowance`; `withdraw` with `onBehalf` and `receiver` pinned to the avatar. **Ships at launch even though no market address exists yet.** Acceptance requires end-to-end tests against the deployed Morpho Blue contract on a fork, so the template is proven before the market it will be pointed at exists |
-| `RemoveTargetFactory` | target | `revokeTarget` for the operator role |
-| `RemoveFunctionFactory` | target, selector | `revokeFunction` for the operator role |
 
 A lending-pool template for markets such as Aave is not in the catalogue, because third-party lending markets are outside the launch scope.
 
 The trusted caller on every factory is the **operator multisig**, matching the pattern already used by the treasury swap factories. Every factory hard-codes the role key to `operator` and refuses the modifier and the Safe as a target.
 
-**Disclosure required with an onboarding motion.** A forum post published before the motion, covering the target, the template applied, the initial budget, and the diligence performed; monitoring and alerting configured for the new target before enactment; and the incident runbook updated. The stop mechanisms are the objection threshold and, failing that, the global Easy Track pause held by the Emergency Brakes multisig. Removal factories carry no allowlist, because revocation is always narrowing and must never be blocked.
+**Disclosure required with an onboarding motion.** A forum post published before the motion, covering the target, the template applied, the initial budget, and the diligence performed; monitoring and alerting configured for the new target before enactment; and the incident runbook updated. The stop mechanisms are the objection threshold and, failing that, the global Easy Track pause held by the Emergency Brakes multisig.
 
-**On shortening the window for removals.** Easy Track stores a motion's duration, but assigns it from a single global setting at creation. There is no per-factory duration. A removal motion therefore carries the same objection window as every other motion, and a zero-delay removal cannot be expressed by writing a different factory.
-
-This does not leave a gap, because the zero-delay path already exists and is held by the right body. The emergency role holds `revokeTarget` and `revokeFunction` pinned to the operator, and acts immediately with two signatures. Immediate de-scoping is an emergency action; Easy Track removal is the routine, reviewable one. EM asked on 2026-09-22 that removal templates skip the objection window [s1]. The only routes to a zero-delay Easy Track removal are changing the global duration, which affects every Lido motion, or deploying a second Easy Track instance, which fragments governance. Neither is recommended. Open item OD-09 holds the choice.
+**Removals do not use Easy Track (OD-09, decided).** Easy Track gives every motion the global window, and that window can never be below 48 hours. EM decided on 2026-10-05 that every removal is the emergency Safe's immediate revoke, `revokeTarget` or `revokeFunction` pinned to the `operator` key, posted on the forum afterwards. A removal only narrows, so a window would protect nothing. Easy Track only expands.
 
 Invariants an audit must confirm for each template: no receiver, owner, or beneficiary field is ever left open; every value-moving amount is either budgeted or capped; no template can emit an administrative selector; and the emitted script parses under the production script format.
 
@@ -560,7 +508,7 @@ Costs: a third Safe with the TMC signers, two policy applications, two sets of r
 | Governance script encoding | 6 | Production CallsScript format accepted; 32-byte length rejected; truncated length rejected; multi-call script; script substituted at enactment rejected; objection rejection |
 | Governance change types | 4 | Asset, target, selector, parameter constraint |
 | Direct DAO path | 1 | The owner path applies the same change without Easy Track |
-| Factory-only governance | 3 | Toggle enacts and grants the pre-scoped role; DAO withdrawal of a key kills a queued motion; unapproved key and foreign creator rejected |
+| Factory-only governance | 3 | Toggle enacts and grants the pre-scoped role; DAO withdrawal of a key kills a queued motion; unapproved key and foreign creator rejected. The toggle factory is retired (OD-09) |
 | Native constraints | 2 | Toggle restricted to pre-approved keys with the member pinned; allowance ceilings and refill-period floor |
 | Escalation guards | 4 | Governance cannot change membership, cannot touch the emergency role, cannot grant the operator an administrative target, cannot raise a foreign allowance key |
 | Operator lifecycle | 3 | Positions opened and closed on real protocol contracts; receiver pinning enforced; asynchronous vault deposit authorised at the policy layer |
@@ -599,7 +547,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Action | Who | Path | Latency |
 | --- | --- | --- | --- |
 | Open or close a position | Operator Safe, with the vendor's approval | Through the operator modifier | After the approval lands |
-| Toggle an onboarded strategy | Operator Safe proposes with the vendor's approval, anyone enacts | Easy Track motion, governance role | 72 hours |
+| Remove a strategy | Emergency Safe, two signatures | Direct through the safety modifier: `revokeTarget` or `revokeFunction` on the `operator` key | Minutes |
 | Adjust a budget within ceilings | Operator proposes | Easy Track motion, governance role | 72 hours |
 | Onboard a new protocol or asset | Operator proposes | Easy Track motion, template factory | 72 hours |
 | Top up the vault | Operator Safe proposes with the vendor's approval, anyone enacts | Easy Track motion, top-up factory, paying the Asset Safe only | 72 hours |
@@ -640,8 +588,8 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | Modifier bricked at deployment | Roles proxy deployed through a Safe proxy rather than a minimal proxy | Mandatory use of the Zodiac ModuleProxyFactory; deployment rehearsal on a fork | Deployment self-test before any funding |
 | Role key mismatch | Deployment tooling and factories derive role keys differently | Pin the derivation and assert it at deployment | Deployment self-test |
 | Operator key compromise | Signer compromise | Default deny, no transfer permission, receivers pinned to the avatar, budgets, capped approvals | Policy-drift and approval monitoring; budget burn-rate alerts |
-| Emergency key compromise | Signer compromise | Emergency cannot add permissions, enter protocols, or change the recovery destination | Any emergency action should page the DAO |
-| Queued motion restores a revoked permission | An expansion motion enacts after an incident | Easy Track pause, held by the Emergency Brakes multisig; withdrawing a key from a factory allowlist kills the motion at enactment because the script is rebuilt there | Motion monitoring; the incident runbook must page the pause holder |
+| Emergency key compromise | Signer compromise | Emergency cannot add permissions, enter protocols, or change the recovery destination | Any emergency action pages the DAO; a revoke-only action pages at a lower severity than a transfer or a swap |
+| Queued motion restores a revoked permission | An expansion motion enacts after an incident | Easy Track pause, held by the Emergency Brakes multisig; the operator Safe can cancel its own motion; after enactment, the emergency Safe revokes the permission again at once | Motion monitoring; the incident runbook must page the pause holder |
 | Operator modifier disabled while positions are open | The technical committee acts during a defect | The safety modifier keeps working, so the emergency role can still exit and return assets | Module-enabled monitoring on the Safe, alert on any change |
 | Technical committee unreachable during a permission-layer defect | Signer availability | The DAO path can replace the policy outright; the financial role can still revoke and exit through the safety modifier | Escalation clock in the runbook |
 | Onboarding motion points at a malicious contract | A motion survives its objection window | Template pins receivers and bounds amounts, so loss is capped by the attached budget rather than the balance | Published diligence per motion; position and budget monitoring |

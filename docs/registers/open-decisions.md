@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:56:24Z
+  at: 2026-10-05T10:22:21Z
 verified: []
 sources:
   - id: s1
@@ -27,7 +27,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
-| OD-09 | How does an immediate removal work? EM asked that the removal templates skip the objection window. Easy Track sets one global duration when a motion is created [s2]. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Immediate de-scoping stays an emergency-role action. Easy Track removal stays the routine path. Do not change the global duration or run a second Easy Track | EM; constrains the operator |
 | OD-10 | Which team owns the repository in CODEOWNERS? | `.github/CODEOWNERS` | Set it before the first external contributor joins | EM |
 | OD-11 | Do the shared payment ACL parameters stay unchanged, with seeding only in USDC, USDT, DAI, stETH or ETH? Which token list does the stablecoin registry use? The shared list also allows sUSDS, and Aragon Voting administers it for every stablecoin setup. The Agent holds less than 8 ETH [s3]. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Yes. Every Easy Track payment setup shares the permission, and a change rewrites all 22 entries by vote [s2]. Give the vault its own token list of USDC, USDT and DAI. Drop ETH from the seeding assets | EM; constrains the operator |
 | OD-12 | Confirm four recorded readings: the vision answer; the answer about the acceptor, which left the rest of the review process unchanged; the start of Lido Lend's three capped months, read as Lido Lend's mainnet launch; and who signs the vendor agreement. Asked who signs, EM named the vendor, which the agent reads as the counterparty, so the Lido-side party is still to name. | [Decision log](/registers/decision-log.md), [ADR 002](/adr/002-decision-and-review-process.md), [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Confirm all four, and name the Lido-side party to the vendor agreement | EM |
@@ -54,3 +53,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-06 | The period and the limit of the funding registry | 2026-10-02 | EM: "1. One month", then "A" after a challenge game: two registries, stablecoins and stETH, each with a limit of one TM Floor Value per month; stETH at a pinned Coingecko price; the objection is the control and the registry is the backstop ([ADR 008](/adr/008-funding-through-existing-payments.md)) [s1] |
 | OD-07 | The screening vendor's guard: the agreement, the build, the confirmations and the announcement | 2026-10-02 | EM: "Q1. 1.", "Q2. A", "Q3. 1.", "Q4. 1, [the screening vendor]": the operator role only after the guard enforces; no standing approvals; the build that the Lido multisigs run, with 10-day timelocks; written v1.5.0 support as a gate, with v1.4.1 as the fallback; the redaction ends when the mandate is posted, with the vendor's consent ([ADR 010](/adr/010-pre-execution-screening.md)) [s1] |
 | OD-08 | The approval ceiling per token and the budget refill-period floor | 2026-10-02 | EM: "Q1. 1. B" and "Q2. 1. 30 days": an approval to a protocol spender spends the budget of the key it serves, and deposits no longer do; the stETH approval to the wstETH contract keeps a fixed ceiling of one TM Floor Value in stETH; the refill-period floor is 30 days ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |
+| OD-09 | How does an immediate removal work? | 2026-10-05 | EM: "1. Q1: B" and "Q2: 3": the two removal templates are dropped, and every removal is the emergency Safe's immediate revoke, posted on the forum afterwards; no DAO-scoped role keys, so the toggle factory leaves the design and the revoke reaches every operator permission ([ADR 006](/adr/006-governance-through-easy-track-factories.md)) [s1] |
