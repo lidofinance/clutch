@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T10:21:49Z
+  at: 2026-10-05T11:33:11Z
 verified: []
 sources:
   - id: s1
@@ -87,6 +87,10 @@ EM decided on 2026-10-02, closing OD-07 [s1]:
 12. Lido's monitoring for this guard adds Safe v1.5.0 and the new instance. A dollar limit per top-up motion is a request to the vendor, not a gate.
 13. The redaction of the vendor's identity ends when the mandate is posted on the forum, after the vendor agrees in writing to be named for this use. Commercial terms never enter this repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
+EM confirmed on 2026-10-05, closing OD-12 [s1]:
+
+14. The Lido-side party to the vendor agreement is the party that already holds the vendor's arrangement for the four guarded Lido multisigs. This repository does not name it.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
@@ -134,5 +138,4 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 ## Open questions
 
-- OD-12: the Lido-side party to the vendor agreement. Asked who signs, EM named the vendor.
 - OD-17: the incident-history check on Safe v1.5.0, which both new Safes now use.
