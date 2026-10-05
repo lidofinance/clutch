@@ -9,7 +9,7 @@ valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:23:52Z
+  at: 2026-10-05T16:07:52Z
 verified: []
 sources:
   - id: s1
@@ -113,7 +113,7 @@ Easy Track lists 52 factories. Twelve are top-up factories, and each has its own
 ## Other reads
 
 - The Aragon Agent holds 7.877196199769308015 ETH: `cast balance $AGENT --block $B --ether` [s10].
-- The Aragon Agent and the committee's Safe `0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647` hold no shares of the current earnETH and earnUSD vaults. On their share managers, `0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4` and `0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981`, `balanceOf` and `sharesOf` return zero for both accounts [s10]. Who holds the legacy positions that the mandate carries over is not known (OD-21).
+- The Aragon Agent and the committee's Safe `0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647` hold no shares of the current earnETH and earnUSD vaults. On their share managers, `0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4` and `0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981`, `balanceOf` and `sharesOf` return zero for both accounts [s10]. Who holds the legacy positions that the mandate carries over was not known on 2026-10-02. The [legacy investments note of 2026-10-05](/research/legacy-investments-2026-10-05.md) found them in a Growth Committee Safe (OD-21).
 
 ## Re-read on 2026-10-05
 

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:39:55Z
+  at: 2026-10-05T16:07:52Z
 verified: []
 sources:
   - id: s1
@@ -22,6 +22,9 @@ sources:
   - id: s4
     resource: /research/stonks-pricing-2026-10-05.md
     title: Stonks 2.0 pricing, 2026-10-05
+  - id: s5
+    resource: /research/legacy-investments-2026-10-05.md
+    title: Legacy investments, 2026-10-05
 ---
 
 # Parameters
@@ -59,6 +62,10 @@ sources:
 | Funding limit per period | one TM Floor Value in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared; the figures are not in this repository | EM decision of 2026-10-02 [s1]; figures by attested computation, entering when the mandate is approved | ADR 008 |
 | Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Funding assets | USDC, USDT, DAI, USDS, sUSDS, stETH; not ETH | EM decision of 2026-10-05 [s1] | ADR 008 |
+| Legacy Earn first-loss shares | the earnETH and earnUSD shares that the Growth Committee Safe `0xf6F0732c1e9971497342C295141566E6F1A31e96` holds, 1,362.84 and 1,998,416.46 at block 26126791; transferred to the Asset Safe after the enabling vote | EM decision of 2026-10-05 [s1]; read [s5] | ADR 008 |
+| First-loss burn | a DAO vote only; the Asset Safe calls `burn` on the share token | EM decision of 2026-10-05 [s1] | ADR 008 |
+| Redemption of the first-loss shares | forbidden to the operator by a written rule; the chain cannot enforce it | EM decision of 2026-10-05 [s1] | ADR 008 |
+| Twyne | not counted against the seed until its holder and form are shown on chain or in a signed record | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Budget per key | not in this repository | Computed by attested computation on 2026-09-22 and again on 2026-10-02 with the literal yield-bearing base; enters when the mandate is approved | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | Lido Lend cap | the protocol cap for three calendar months from Lido Lend's mainnet launch, then none, as a Lido own product | EM decision of 2026-10-02 [s1]; the start was confirmed on 2026-10-05 (OD-12) | ADR 009 |
 | Yield-bearing cap base | the top-4 stablecoins plus the yield-bearing stablecoins held directly; own-product and protocol positions excluded | EM decision of 2026-10-02 [s1] | ADR 009 |

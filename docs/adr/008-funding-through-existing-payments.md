@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 008: Funding through the existing payment path"
-description: The vault is seeded and topped up through Aragon Finance and two dedicated allowed-recipients registries, one for stablecoins and one for stETH, each with a one-month period and a limit of one TM Floor Value; the objection is the control and the registry is the backstop; a DAO vote adds USDS to the shared payment permission and to the shared stablecoin token list; ETH is not a funding asset.
+description: The vault is seeded and topped up through Aragon Finance and two dedicated allowed-recipients registries, one for stablecoins and one for stETH, each with a one-month period and a limit of one TM Floor Value; the objection is the control and the registry is the backstop; a DAO vote adds USDS to the shared payment permission and to the shared stablecoin token list; ETH is not a funding asset; the DAO's first-loss Earn shares move in from the Growth Committee and reduce the seed.
 tags: [funding, finance, easy-track, acl]
 status: draft
 review_status: slop
@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:54:58Z
+  at: 2026-10-05T16:07:52Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the payment ceilings and DAI, 2026-09-22, on OD-06, 2026-10-02, and on the funding assets, 2026-10-05
+    title: Decision log — EM on the payment ceilings and DAI, 2026-09-22, on OD-06, 2026-10-02, and on the funding assets and the legacy investments, 2026-10-05
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Finance, the payment ACL chain, budgets and an existing top-up factory
@@ -27,6 +27,9 @@ sources:
   - id: s5
     resource: "urn:clutch:restricted:mandate-draft-v0.1"
     title: Mandate draft v0.1 — seeding, the monthly top-up, the runway protection and the legacy investments; outside the repository until the mandate is published
+  - id: s6
+    resource: /research/legacy-investments-2026-10-05.md
+    title: Legacy investments, 2026-10-05 — the first-loss Earn shares, their Growth Committee holder, transferability, and the Twyne search
 ---
 
 # ADR 008: Funding through the existing payment path
@@ -46,6 +49,7 @@ Facts from the chain reads were read at block 26092572 [s2]. Facts about the reg
 - Only a registry's admin, the Aragon Agent, sets its limit and its period. A change is a DAO vote [s4].
 - No live registry uses a one-month period. Five use three months, four use six months and three use twelve months. The committee's Safe is already the trusted caller of two of them [s4].
 - The standard top-up factory writes a fixed payment reference. A motion cannot carry a report's identifier in it [s4].
+- The legacy Earn positions are the DAO's first-loss allocation to Lido Earn, approved by Snapshot in March 2026. A Growth Committee Safe holds 1,362.84 earnETH and 1,998,416.46 earnUSD shares. The shares transfer freely today, and their holder executes a burn. No Lido address checked holds a Twyne position [s6].
 - The mandate's funding rules [s5]. A motion seeds the vault in stETH or stablecoins, up to the TM Floor Value. The legacy investments carry over into the vault and reduce the seed. After each month-end snapshot, a top-up may refill the vault to the floor within ten calendar days. Under the runway protection, that top-up may be paid in stETH, up to the floor. A non-stablecoin balance is valued at the motion, at the Coingecko price. The objection is the control of a top-up.
 
 ## Decision
@@ -71,6 +75,14 @@ EM decided on 2026-10-05, closing OD-11 [s1]:
 11. ETH is not a funding asset. stETH covers the mandate's "(st)ETH".
 12. The rewritten permission allows at most 2,000,000 USDS per payment, the same as DAI, USDC, USDT and sUSDS (OD-24).
 
+EM decided on 2026-10-05, closing OD-21 [s1]:
+
+13. After the enabling vote, the Growth Committee transfers the DAO's first-loss shares in EarnETH and EarnUSD from its Safe to the Asset Safe.
+14. The Treasury Management mandate takes over the first-loss terms of the March 2026 Earn allocation.
+15. Each first-loss burn is a DAO vote.
+16. A written rule forbids the operator from redeeming the first-loss shares.
+17. A Twyne position reduces the seed only when its holder and form are shown on chain or in a signed record.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
@@ -80,7 +92,8 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - **Two registries from the standard builder.** Each has the Asset Safe as its only recipient and the Aragon Agent as admin. As on the committee's registries, the Easy Track executor gets no role to add recipients [s4].
 - **Two top-up factories.** The stablecoin factory uses the shared stablecoin token list, after the vote adds USDS to it. The stETH factory is the single-token version. The operator Safe is the trusted caller of both, as of every factory ([ADR 006](/adr/006-governance-through-easy-track-factories.md)). The DAO registers them by vote.
 - **The figures.** The stablecoin limit is the TM Floor Value at par. The stETH limit is the floor divided by the pinned price. An attested computation produces both, and they enter this repository when the mandate is approved.
-- **The seed.** The same registries carry the seed. It is at most one floor, less the legacy investments (OD-21).
+- **The seed.** The same registries carry the seed. It is at most one floor, less the value of the first-loss shares that arrive from the Growth Committee, set by attested computation at the Earn oracle price. Twyne counts only when shown (decision 17). The seed motion follows the share transfer.
+- **The first-loss shares.** The Asset Safe receives them by plain transfer and needs no permission for it. A burn is a DAO vote that has the Asset Safe call `burn` on the share token. The first-loss amount is the shares received, less any burn. In an emergency, the emergency role sends them to the Agent instead of redeeming them, and the Agent can still burn them by vote. Monitoring alerts when the Asset Safe's earnETH or earnUSD balance falls below the first-loss amount ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
 - **The report.** The factory fixes the payment reference, so a top-up's report identifier goes in the forum post that the mandate requires before each top-up. There is no on-chain anchor. No top-up motion starts while the monthly report is late or the snapshot has an unpriced asset ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
 - **Funding assets.** USDC, USDT, DAI, USDS, sUSDS and stETH. ETH is not a funding asset: the Agent holds less than 8 ETH [s4].
 
@@ -96,6 +109,9 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - Keep the shared permission unchanged. Not chosen by EM: USDS could then never fund the vault.
 - A token list for the vault alone, with USDC, USDT and DAI. Not chosen by EM: EM added USDS and sUSDS to the funding assets and kept the shared list.
 - ETH as a funding asset, with a third registry and factory. Not chosen: the Agent holds less than 8 ETH.
+- The first-loss shares stay with the Growth Committee and only count toward the vault. Not chosen by EM. The agent had recommended it, because it keeps the first-loss terms as approved and needs no written rule.
+- The Growth Committee redeems the shares, and the seed is funded in full. Not chosen: it ends the first-loss protection that the DAO approved.
+- Twyne counts against the seed now, as the mandate states. Not chosen by EM: no holder or form has been shown.
 
 ## Consequences
 
@@ -111,18 +127,25 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - sUSDS is a yield-bearing stablecoin. A top-up in sUSDS counts at once against its yield-bearing cap ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). The registry counts it at par, although one sUSDS is worth more than one dollar, so the limit admits slightly more value in sUSDS.
 - The mandate limits funding to stETH and the top-four stablecoins, and sUSDS is not one of them. The mandate text owes a change.
 - The receiver is bound one layer above the ACL, in the registry and the factory. Both layers are needed.
+- The vault holds first-loss capital. Its earnETH and earnUSD shares can then mean two things: the first-loss amount, and any shares the operator buys. The chain cannot tell them apart, so the no-redeem rule is procedural, and monitoring is its only check.
+- Each first-loss burn waits for a DAO vote and the Dual Governance timelock, so it comes later than a burn by the Growth Committee would.
+- A burn lowers the vault's value, and the next monthly top-up refills the vault to the floor from the treasury.
+- The move needs the Earn vaults to keep share transfers open until it happens. Their administrators can restrict transfers [s6].
+- Until a Twyne holder is shown, Twyne does not reduce the seed, so the seed can be larger than the mandate's figure.
 
 ## Confirmation
 
 - INV-017 in the [invariants](/specs/invariants.md).
-- Fork tests owed: a top-up motion pays the Asset Safe and fails for any other recipient; the limit holds at motion start and at enactment; a motion created in the last 72 hours of a month counts against the next month; a stETH motion with several payments, each under the per-payment ceiling; only the operator Safe can create a motion.
+- Fork tests owed: the first-loss shares transfer from the Growth Committee Safe to the Asset Safe, and a DAO-vote path burns them from the Asset Safe; a top-up motion pays the Asset Safe and fails for any other recipient; the limit holds at motion start and at enactment; a motion created in the last 72 hours of a month counts against the next month; a stETH motion with several payments, each under the per-payment ceiling; only the operator Safe can create a motion.
 
 ## Reversal conditions
 
 - The DAO declines to widen USDS payments for every stablecoin setup, so the vote that rewrites the permission fails.
 - The mandate moves the top-up away from a monthly cycle.
 - Top-ups above the shortfall or outside the cycle happen. That would argue for one dollar limit on chain.
+- The Earn vaults block share transfers before the move.
+- The first-loss terms end. The shares then become ordinary vault positions.
 
 ## Open questions
 
-- OD-21: who holds the legacy investments, and how they move into the vault.
+- Twyne: who holds the position, and in what form. The mandate's drafters owe the evidence (decision 17).

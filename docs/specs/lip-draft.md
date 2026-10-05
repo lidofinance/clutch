@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:39:55Z
+  at: 2026-10-05T16:07:52Z
 verified: []
 sources:
   - id: s1
@@ -37,6 +37,9 @@ sources:
   - id: s9
     resource: /research/stonks-pricing-2026-10-05.md
     title: Stonks 2.0 pricing, 2026-10-05 — the converter, the shared router, Chainlink's registry, feed replacements, and the WETH route
+  - id: s10
+    resource: /research/legacy-investments-2026-10-05.md
+    title: Legacy investments, 2026-10-05 — the first-loss Earn shares and their Growth Committee holder
 ---
 
 # LIP-XX: Active Treasury Management Vault
@@ -315,6 +318,8 @@ Two consequences to accept. A per-payment ceiling is not a per-motion ceiling, s
 
 The mandate puts seeding and top-ups on Easy Track, and it makes the objection the control of a top-up. The registry is the backstop.
 
+**The legacy Earn shares (OD-21).** The DAO's first-loss shares in EarnETH and EarnUSD, approved by Snapshot in March 2026, sit in a Growth Committee Safe [s10]. After the enabling vote, the Growth Committee transfers them to the Asset Safe, and the seed is one floor less their value. This proposal takes over the first-loss terms of that allocation: a burn is a DAO vote, and the operator never redeems the first-loss shares. That rule is written, not enforced, because the shares are the same token as any Earn shares the vault buys. Monitoring alerts when the vault's Earn balance falls below the first-loss amount. A Twyne position counts against the seed only when its holder and form are shown.
+
 - **Period: one calendar month.** The mandate's top-up follows each month-end snapshot, so each month's top-up has its own limit. No live Lido registry uses one month; they use three, six or twelve [s7].
 - **Limit: one TM Floor Value per registry per month.** Stablecoins count at par. The stETH limit is the floor at the Coingecko price pinned when the enabling vote is prepared, set by attested computation. Either asset can carry a full refill, as the mandate allows for the seed and for the runway protection's stETH top-up.
 - **Why two registries.** A registry counts token units after scaling decimals, so 1 stETH counts as 1 USDC. One limit cannot hold both assets to a dollar figure [s7].
@@ -567,6 +572,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Freeze queued motions | Emergency Brakes multisig, a separate body | Easy Track pause | Minutes, subject to paging them |
 | Return assets to the DAO | Emergency Safe, two signatures | Direct through the modifier | Minutes to initiate |
 | Replace the whole policy | DAO | Vote through Dual Governance to the Agent | Vote plus Dual Governance timelock |
+| Burn first-loss Earn shares | DAO | Vote through Dual Governance; the Asset Safe calls `burn` on the share token | Vote plus Dual Governance timelock |
 
 Signer-set reconciliation between the operator multisig and the Emergency Safe is a manual runbook duty, handled the same way as consensus-member and committee rotations elsewhere in the protocol. There is no on-chain enforcement, so a rotation is not complete until both Safes are updated.
 
@@ -614,6 +620,7 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | Top-up above the shortfall | The operator Safe pulls more than the mandate allows, or outside the monthly cycle | A limit of one TM Floor Value per registry per month; the 72-hour objection; the screening guard; the emergency Safe can return funds to the Agent | Alerts on out-of-cycle motions, on a month's top-ups above the posted shortfall, and on a motion after an objected one |
 | Spender pulls without a deposit | A protocol spender is upgraded to steal, or an approval stands too long | Each approval spends its key's budget, so approvals per period cannot exceed it; approvals in the same transaction as the deposit; the emergency role zeroes approvals and can revoke the approve permission | Approval inventory and budget burn monitoring |
 | Exit impossible when it matters | Protocol illiquidity or asynchronous settlement | Receipt-token transfer to the Agent; claim later | Position inventory monitoring |
+| First-loss shares redeemed | The operator redeems the Earn shares that carry the first-loss terms | A written rule; the redemption queue's delay; the proceeds stay in the Asset Safe, and a DAO vote can deposit them again | Alert when the vault's earnETH or earnUSD balance falls below the first-loss amount, or a redeem request would cross it |
 | Price feed out of sync | Chainlink replaces an aggregator in its registry, as it did for USDC and USDT twice in September 2026 | The TMC multisig re-syncs the feed as the router's manager; recovery can send assets to the Agent, which needs no price | Alert when a vault token's feed is out of sync, or when the registry confirms a new aggregator for it |
 | Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity and new motions stop; recovery is unaffected; the owners can remove the guard after ten days | Approval-latency and vendor-heartbeat monitoring |
 | Monitoring unavailable | Service outage | On-chain permissions are the enforcement layer and do not widen when monitoring stops | Heartbeat on the monitor itself |
@@ -623,8 +630,8 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 The [open-decisions register](/registers/open-decisions.md) tracks every open item. These can change the shape of this proposal:
 
 1. **The vendor's confirmations (OD-07, decided).** Before deployment the vendor confirms in writing that it accepts the exclusion of standing approvals and agrees to be named. Its support for Safe v1.5.0 is confirmed, as EM reported on 2026-10-05 (OD-17). It is also asked to merge and document the 10-day build, and to refuse delegatecalls from the Operator Safe except to MultiSendCallOnly. The Lido-side party is the one that already holds the vendor's arrangement for the guarded Lido multisigs (OD-12).
-2. **Mandate text owed.** The own-product limit and the protocol cap must state that Lido Lend counts against the protocol cap for its first three months (OD-04). The illustrative balance renames its "USD-denominated" heading (OD-03). The funding rules must allow sUSDS (OD-11). The reporting section must state the price rule and the late-report rule (OD-14).
-3. **OD-21, the legacy investments.** The mandate carries the legacy investments into the vault, and they reduce the seed. Who holds them, and how they move in, is open.
+2. **Mandate text owed.** The own-product limit and the protocol cap must state that Lido Lend counts against the protocol cap for its first three months (OD-04). The illustrative balance renames its "USD-denominated" heading (OD-03). The funding rules must allow sUSDS (OD-11). The reporting section must state the price rule and the late-report rule (OD-14). The legacy section must state that the mandate takes over the first-loss terms of the March 2026 Earn allocation: the Asset Safe holds the shares, a DAO vote executes any burn, and the operator never redeems them (OD-21).
+3. **Twyne.** The mandate lists a Twyne investment. No Lido address checked holds a Twyne position, and its form is not known. It reduces the seed only when its holder and form are shown (OD-21).
 
 ## Links
 
