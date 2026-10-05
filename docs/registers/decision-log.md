@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T12:30:58Z
+  at: 2026-10-05T14:04:03Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,20 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-17: Safe v1.5.0 after the due diligence
+
+> Q1: 1. Keep v1.5.0; [the screening vendor] confirmed they support this version, consider it resolved.
+> Q2: A
+> Q3: 1.
+
+Recorded as: OD-17 is closed. (Q1) The Asset Safe and the operator Safe keep Safe v1.5.0. EM reported that the screening vendor confirmed its support for v1.5.0 and closed that gate, so the operator Safe's v1.4.1 fallback no longer applies. The confirmation itself is outside this repository. (Q2) EM accepted the five conditions of Block A: (a) the Aragon Agent authorizes Asset Safe transactions only by `approveHash` or by sending them itself, never by a contract signature; (b) the Asset Safe has no fallback handler, and a protocol that needs one comes back to EM; (c) before the enabling vote, Safe's releases, the advisory databases and Safe's bug-bounty records are checked again, and a change that touches transaction execution, `approveHash`, module execution, the guard or owner management comes back to EM; (d) the LIP states the short record of v1.5.0 and has a failure-mode row for a defect in Safe or Roles code; (e) the vendor is asked to refuse every delegatecall from the operator Safe except to Safe's MultiSendCallOnly v1.5.0, as a request and not a gate, and monitoring alerts on any change of the singleton of the three new Safes. (Q3) The emergency Safe also uses Safe v1.5.0. The evidence is in the [due-diligence note](/research/safe-v150-due-diligence-2026-10-05.md) ([ADR 005](/adr/005-account-graph-and-roles.md), [ADR 010](/adr/010-pre-execution-screening.md)). [s4]
+
+## 2026-10-05 — OD-17 asked
+
+> do a deep research and run an interview on OD-17 if needed
+
+[s4]
 
 ## 2026-10-05 — OD-16: the policy data format and the compiler
 

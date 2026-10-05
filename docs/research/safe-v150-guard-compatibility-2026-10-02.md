@@ -9,7 +9,7 @@ valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:28:58Z
+  at: 2026-10-05T14:04:03Z
 verified: []
 sources:
   - id: s1
@@ -86,5 +86,5 @@ Result: 5 of 5 tests passed at block 26104388 [s9][s10]. Three deliberate defect
 ## Limits
 
 - The guard has no production history on v1.5.0. Its one enforcing instance runs on v1.4.1 [s10].
-- The vendor's approval service runs off chain. Its support for v1.5.0 Safes is not tested here. EM made the vendor's written confirmation a gate before deployment, with v1.4.1 for the operator Safe as the fallback (OD-07, decided 2026-10-02).
-- The incident-history check on Safe v1.5.0 is still owed (OD-17).
+- The vendor's approval service runs off chain. Its support for v1.5.0 Safes is not tested here. EM made the vendor's written confirmation a gate before deployment, with v1.4.1 for the operator Safe as the fallback (OD-07, decided 2026-10-02). On 2026-10-05, EM reported that the vendor confirmed its support, and closed the gate (OD-17).
+- The audits and the incident history of Safe v1.5.0 are in the [due-diligence note of 2026-10-05](/research/safe-v150-due-diligence-2026-10-05.md) (OD-17).

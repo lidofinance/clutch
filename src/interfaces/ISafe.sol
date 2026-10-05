@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.8.24 <0.9.0;
 
-/// @dev Interface subset of the deployed Gnosis Safe v1.4.1 singleton
-///      (0x41675C099F32341bf84BFc5382aF534df5C7461a). Selectors match the
-///      deployed bytecode; only functions used by the dry-run are declared.
+/// @dev Interface subset of the deployed Safe v1.5.0 singleton
+///      (0xFf51A5898e281Db6DfC7855790607438dF2ca44b), which the fork tests
+///      call; only functions used by the dry-run are declared.
 interface ISafe {
     function setup(
         address[] calldata _owners,
@@ -71,8 +71,8 @@ interface ISafe {
     receive() external payable;
 }
 
-/// @dev Safe proxy factory, v1.4.1 line:
-///      0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67
+/// @dev Safe proxy factory v1.5.0:
+///      0x14F2982D601c9458F93bd70B218933A6f8165e7b
 interface ISafeProxyFactory {
     function createProxyWithNonce(
         address _singleton,

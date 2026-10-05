@@ -15,7 +15,7 @@ import {SafeExec} from "../src/policy/SafeExec.sol";
 
 /// @title DeployDryRun — one-click mainnet dry-run deployment.
 /// @dev Everything downstream of the governance heads is production grade:
-///      the Safe proxy deploys from the v1.4.1 singleton and the Roles proxy
+///      the Safe proxy deploys from the v1.5.0 singleton and the Roles proxy
 ///      from the deployed v4 mastercopy; only Agent/ET are mocks. The policy
 ///      is applied through Agent -> Safe -> Roles, i.e. the exact production
 ///      permission-change path (drill D2 runs through it by construction).
@@ -24,8 +24,8 @@ import {SafeExec} from "../src/policy/SafeExec.sol";
 ///        RPC=... EXECUTOR=0x... forge script script/DeployDryRun.s.sol --broadcast
 contract DeployDryRun is Script {
     // Production singletons (WS-B verified at block 25946643).
-    // Safe v1.5.0: required, because only from this release does the Safe
-    // call a guard on the module execution path.
+    // Safe v1.5.0: EM's choice for the three new Safes (OD-02, OD-17). The
+    // Asset Safe is set up with no fallback handler (OD-17).
     address internal constant SAFE_SINGLETON = 0xFf51A5898e281Db6DfC7855790607438dF2ca44b;
     address internal constant ROLES_MASTERCOPY = 0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5;
     address internal constant SAFE_PROXY_FACTORY = 0x14F2982D601c9458F93bd70B218933A6f8165e7b;
