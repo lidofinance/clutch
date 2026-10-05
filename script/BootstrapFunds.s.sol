@@ -2,22 +2,20 @@
 pragma solidity >=0.8.24 <0.9.0;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {IERC20, IStETH, IWstETH, ISDAI, IUniswapV3Router} from "../src/interfaces/Tokens.sol";
+import {IERC20, IStETH, IWstETH, IERC4626, IDaiUsds, IUniswapV3Router} from "../src/interfaces/Tokens.sol";
 
-/// @title BootstrapFunds — the 0.05 ETH dust splitter (B3, scaled down from
-///        0.5 ETH by principal instruction 2026-09-10).
+/// @title BootstrapFunds — the 0.05 ETH dust splitter.
 /// @dev Assumes the FUNDER EOA (explicit env, never msg.sender) starts with
 ///      ~0.05 ETH and nothing else. Keeps a gas reserve, then acquires dust
-///      of every base launch asset through production paths:
+///      of the launch assets through production paths:
 ///        ETH    -> stETH   via Lido submit (amount tracked by balance delta;
 ///                           submit returns SHARES, not stETH)
 ///        stETH  -> wstETH  via wrap (half)
 ///        ETH    -> USDC/USDT/DAI/LDO via Uniswap V3 single hop
-///        DAI    -> USDS    via the Sky converter 1:1 (0x3225737a9Bbb6473CB4-
-///                          a45b7244ACa2BeFdB276A) — NOT Uniswap; correction
-///                          2026-09-10, the earlier "no venue" finding was an
-///                          artifact of a mis-called quoter and is retracted
-///        DAI    -> sDAI, USDS -> sUSDS via vault deposits (receiver = Safe)
+///        DAI    -> USDS    via Sky's DAI–USDS converter, one to one
+///                          (0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A)
+///        USDS   -> sUSDS   via a vault deposit (receiver = Safe)
+///      sDAI is outside the launch scope (ADR 011), so DAI stays DAI.
 ///      Every swap carries a minimum-out bound derived from the pool's own
 ///      slot0 price with 5% headroom (95% of quote). Legs are independent and
 ///      resumable: a token already held by the funder is not re-acquired, so
@@ -29,7 +27,6 @@ contract BootstrapFunds is Script {
     address internal constant STETH = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
     address internal constant WSTETH = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
     address internal constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address internal constant SDAI = 0x83F20F44975D03b1b09e64809B757c47f942BEeA;
     address internal constant USDS = 0xdC035D45d973E3EC169d2276DDab16f1e407384F;
     address internal constant SUSDS = 0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD;
     address internal constant SKY_CONVERTER = 0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A;
@@ -72,7 +69,6 @@ contract BootstrapFunds is Script {
         uint256 n = 0;
 
         IERC20(STETH).approve(WSTETH, type(uint256).max);
-        IERC20(DAI).approve(SDAI, type(uint256).max);
         IERC20(DAI).approve(SKY_CONVERTER, type(uint256).max);
         IERC20(USDS).approve(SUSDS, type(uint256).max);
 
@@ -105,24 +101,17 @@ contract BootstrapFunds is Script {
             legs[n++] = Leg(dexLabels[i], dexTokens[i], out);
         }
 
-        // USDS via the Sky DaiUsds converter (0x3225737a9Bbb6473CB4a45b7244-
-        // ACA2BeFdB276A), 1 DAI -> 1 USDS, credited to the funder
+        // USDS via Sky's DAI–USDS converter, 1 DAI -> 1 USDS, credited to the funder
         if (IERC20(USDS).balanceOf(funder) == 0) {
             uint256 convertAmt = IERC20(DAI).balanceOf(funder) / 4;
             IDaiUsds(SKY_CONVERTER).daiToUsds(funder, convertAmt);
             legs[n++] = Leg("USDS", USDS, convertAmt);
         }
 
-        // savings vaults, receiver = Safe
-        uint256 daiLeg = _find(legs, "DAI");
-        if (IERC20(SDAI).balanceOf(safe) == 0) {
-            uint256 sdai = ISDAI(SDAI).deposit(legs[daiLeg].acquired / 2, safe);
-            legs[daiLeg].acquired -= legs[daiLeg].acquired / 2;
-            legs[n++] = Leg("sDAI", SDAI, sdai);
-        }
+        // savings vault, receiver = Safe
         uint256 usdsLeg = _find(legs, "USDS");
         if (IERC20(SUSDS).balanceOf(safe) == 0) {
-            uint256 susds = ISDAI(SUSDS).deposit(legs[usdsLeg].acquired / 2, safe);
+            uint256 susds = IERC4626(SUSDS).deposit(legs[usdsLeg].acquired / 2, safe);
             legs[usdsLeg].acquired -= legs[usdsLeg].acquired / 2;
             legs[n++] = Leg("sUSDS", SUSDS, susds);
         }
@@ -225,12 +214,6 @@ contract BootstrapFunds is Script {
         console2.log("BOOTSTRAP manifest written");
         console2.log(json);
     }
-}
-
-interface IDaiUsds {
-    function daiToUsds(address usr, uint256 wad) external;
-
-    function usdsToDai(address usr, uint256 wad) external;
 }
 
 interface IUniFactory {

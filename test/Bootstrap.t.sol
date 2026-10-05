@@ -5,9 +5,10 @@ import {Test} from "forge-std/Test.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {BootstrapFunds} from "../script/BootstrapFunds.s.sol";
 
-/// @title BootstrapDrill — proves the 0.5 ETH splitter on a mainnet fork:
-///        real Lido submit, real wstETH wrap, real Uniswap V3 swaps, real
-///        sDAI/sUSDS deposits, everything landing in the Asset Safe.
+/// @title BootstrapDrill — proves the 0.05 ETH splitter on a mainnet fork:
+///        real Lido submit, real wstETH wrap, real Uniswap V3 swaps, the real
+///        DAI–USDS converter and a real sUSDS deposit, everything landing in
+///        the Asset Safe.
 contract BootstrapDrill is Test {
     function test_bootstrap_from_half_eth() public {
         string memory rpc = vm.envOr("RPC", string("https://ethereum-rpc.publicnode.com"));
@@ -27,7 +28,6 @@ contract BootstrapDrill is Test {
         assertGt(IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F).balanceOf(safe), 0, "DAI");
         assertGt(IERC20(0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32).balanceOf(safe), 0, "LDO");
         assertGt(IERC20(0xdC035D45d973E3EC169d2276DDab16f1e407384F).balanceOf(safe), 0, "USDS");
-        assertGt(IERC20(0x83F20F44975D03b1b09e64809B757c47f942BEeA).balanceOf(safe), 0, "sDAI");
         assertGt(IERC20(0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD).balanceOf(safe), 0, "sUSDS");
         // gas reserve preserved
         assertGe(address(bf).balance, 0.009 ether, "gas reserve");

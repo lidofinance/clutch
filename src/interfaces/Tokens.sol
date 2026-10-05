@@ -19,9 +19,12 @@ interface IERC20 {
 }
 
 interface IStETH {
+    /// @dev Returns shares, not stETH. Read the stETH amount from the balance.
     function submit(address referral) external payable returns (uint256);
 
     function transfer(address to, uint256 amount) external returns (bool);
+
+    function getPooledEthByShares(uint256 sharesAmount) external view returns (uint256);
 }
 
 interface IWstETH {
@@ -30,7 +33,15 @@ interface IWstETH {
     function unwrap(uint256 _wstETHAmount) external returns (uint256);
 }
 
-interface ISDAI {
+interface IWETH {
+    function deposit() external payable;
+
+    /// @dev Pays ETH to the caller with a transfer that forwards 2,300 gas.
+    function withdraw(uint256 wad) external;
+}
+
+/// @dev ERC-4626 subset; sUSDS implements it.
+interface IERC4626 {
     function deposit(uint256 _assets, address _receiver) external returns (uint256);
 
     function redeem(uint256 _shares, address _receiver, address _owner) external returns (uint256);
@@ -38,12 +49,37 @@ interface ISDAI {
     function withdraw(uint256 _assets, address _receiver, address _owner) external returns (uint256);
 }
 
-interface IAaveV3Pool {
-    // Verified: supply is (asset, amount, onBehalfOf, referralCode).
-    function supply(address asset, uint256 amount, address onBehalfOf, uint16 referralCode)
-        external;
+/// @dev Sky's DaiUsds converter, 0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A:
+///      one to one, no fee, pays `usr`.
+interface IDaiUsds {
+    function daiToUsds(address usr, uint256 wad) external;
 
-    function withdraw(address asset, uint256 amount, address to) external returns (uint256);
+    function usdsToDai(address usr, uint256 wad) external;
+}
+
+/// @dev Lido withdrawal queue, 0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1.
+interface IWithdrawalQueue {
+    function requestWithdrawals(uint256[] calldata _amounts, address _owner)
+        external
+        returns (uint256[] memory requestIds);
+
+    /// @dev Pays each request's ETH to the caller, who must own the request.
+    function claimWithdrawals(uint256[] calldata _requestIds, uint256[] calldata _hints) external;
+
+    function finalize(uint256 _lastRequestIdToBeFinalized, uint256 _maxShareRate) external payable;
+
+    function getLastRequestId() external view returns (uint256);
+
+    function getLastCheckpointIndex() external view returns (uint256);
+
+    function unfinalizedStETH() external view returns (uint256);
+
+    function findCheckpointHints(uint256[] calldata _requestIds, uint256 _firstIndex, uint256 _lastIndex)
+        external
+        view
+        returns (uint256[] memory hintIds);
+
+    function ownerOf(uint256 _requestId) external view returns (address);
 }
 
 interface IUniswapV3Router {
@@ -66,9 +102,9 @@ interface IUniswapV3Router {
     function refundETH() external payable;
 }
 
+/// @dev Lido Earn queues. The kit checked these signatures on chain at the
+///      fork block 25946643.
 interface ILidoEarnDepositQueue {
-    // Signatures verified against the constellation ABI set (docs.lido.fi earn
-    // deployment) and cross-checked on-chain in WS-B:
     function deposit(uint224 amount, address referral, bytes32[] calldata proof) external;
 
     function cancelDepositRequest() external;
@@ -80,11 +116,4 @@ interface ILidoEarnRedeemQueue {
     function redeem(uint256 shareAmount) external;
 
     function claim(address receiver, uint32[] calldata redeemIds) external;
-}
-
-interface ICowSettlement {
-    function setPreSignature(bytes calldata orderUid, bool signed) external;
-    /// @dev Marks the order UID filled so it cannot be reused by re-signing.
-    ///      Checks that the caller owns the UID. Selector 0x15337bc0.
-    function invalidateOrder(bytes calldata orderUid) external;
 }

@@ -6,7 +6,7 @@ import {MockEVMScriptExecutor} from "./MockEVMScriptExecutor.sol";
 
 /// @title MockEasyTrack — dry-run stand-in for Lido Easy Track
 ///        (0xF0211b7660680B49De1A7E9f25C65660F0a13Fea).
-/// @dev Fidelity contract (WS-M R17): reproduces the deployed flow:
+/// @dev Fidelity contract: reproduces the deployed flow:
 ///      - only whitelisted EVM script factories can start motions
 ///        (mirrors governance-managed factory allowlist);
 ///      - the script is built by the factory at motion creation
@@ -202,11 +202,11 @@ contract MockEasyTrack {
 }
 
 /// @dev Drill helper: a pass-through EVM script factory. The production
-///      factories are Lido-owned and validate parameter shapes so that a
-///      removal motion cannot widen and an expansion motion cannot make an
-///      arbitrary call (WS-D design constraint). This mock accepts a
-///      prebuilt CallsScript payload in `callData` and returns it verbatim —
-///      the simplification is deliberate and documented (R17).
+///      factories are Lido-owned and validate parameter shapes, so that a
+///      motion cannot make an arbitrary call (ADR 006). This mock accepts a
+///      prebuilt CallsScript payload in `callData` and returns it verbatim.
+///      The simplification is deliberate: the drills test the motion path,
+///      not a factory.
 contract PassThroughEVMScriptFactory is IEVMScriptFactory {
     function createEVMScript(address, bytes calldata _callData)
         external

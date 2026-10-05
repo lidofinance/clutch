@@ -33,11 +33,6 @@ interface ISafe {
 
     function enableModule(address module) external;
 
-    /// @dev Safe v1.5.0. Guards the module execution path, which v1.4.1 does
-    ///      not do at all. The callback receives the calling module, which is
-    ///      why the policy is split across two modifier instances.
-    function setModuleGuard(address moduleGuard) external;
-
     function setGuard(address guard) external;
 
     function disableModule(address prevModule, address module) external;
@@ -81,10 +76,10 @@ interface ISafeProxyFactory {
     ) external returns (address proxy);
 }
 
-/// @dev The CANONICAL deployed ModuleProxyFactory (verified code at the
-///      pinned block): 0x000000000000aDdB49795b0f9bA5BC298cDda236.
-///      The kit previously deployed a local copy, breaking its own
-///      production-components-only rule; corrected 2026-09-10.
+/// @dev The canonical deployed ModuleProxyFactory (verified code at the
+///      fork block): 0x000000000000aDdB49795b0f9bA5BC298cDda236. The kit
+///      uses it rather than a local copy, so that only governance heads are
+///      mocked.
 interface IModuleProxyFactory {
     function deployModule(address masterCopy, bytes memory initializer, uint256 saltNonce)
         external

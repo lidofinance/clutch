@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Balances held by Safes on the v1.5.0 singleton at one block (evidence for OD-17).
 
 Reads the Safe addresses from column 4 of a TSV written by safe_v150_logs.py. At BLOCK, it reads each

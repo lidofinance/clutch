@@ -15,15 +15,15 @@ import {SafeExec} from "../src/policy/SafeExec.sol";
 
 /// @title DeployDryRun — one-click mainnet dry-run deployment.
 /// @dev Everything downstream of the governance heads is production grade:
-///      the Safe proxy deploys from the v1.5.0 singleton and the Roles proxy
+///      the Safe proxy deploys from the v1.5.0 singleton and the Roles proxies
 ///      from the deployed v4 mastercopy; only Agent/ET are mocks. The policy
-///      is applied through Agent -> Safe -> Roles, i.e. the exact production
-///      permission-change path (drill D2 runs through it by construction).
+///      is applied through Agent -> Safe -> Roles, the production
+///      permission-change path that drill D2 also uses.
 ///
 ///      Usage (see Justfile):
-///        RPC=... EXECUTOR=0x... forge script script/DeployDryRun.s.sol --broadcast
+///        RPC=... PRIVATE_KEY=0x... forge script script/DeployDryRun.s.sol --broadcast
 contract DeployDryRun is Script {
-    // Production singletons (WS-B verified at block 25946643).
+    // Production singletons, checked at the fork block 25946643.
     // Safe v1.5.0: EM's choice for the three new Safes (OD-02, OD-17). The
     // Asset Safe is set up with no fallback handler (OD-17).
     address internal constant SAFE_SINGLETON = 0xFf51A5898e281Db6DfC7855790607438dF2ca44b;
@@ -32,7 +32,7 @@ contract DeployDryRun is Script {
     address internal constant MODULE_PROXY_FACTORY = 0x000000000000aDdB49795b0f9bA5BC298cDda236;
     address internal constant LDO = 0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32;
 
-    // Production Easy Track timing (WS-B verified).
+    // Production Easy Track timing, read at the fork block.
     uint256 internal constant MOTION_DURATION = 72 hours;
     uint256 internal constant OBJECTION_THRESHOLD = 5_000_000e18; // 0.5% of 1B LDO
 
@@ -41,12 +41,14 @@ contract DeployDryRun is Script {
         uint256 deployer = executorKey != 0 ? executorKey : vm.envUint("PRIVATE_KEY");
         address operatorStandin = vm.envOr("OPERATOR_STANDIN", address(0));
         address emergencyStandin = vm.envOr("EMERGENCY_STANDIN", address(0));
+        address technicalStandin = vm.envOr("TECHNICAL_STANDIN", address(0));
 
         vm.startBroadcast(deployer);
         address executor = msg.sender;
 
         if (operatorStandin == address(0)) operatorStandin = executor;
         if (emergencyStandin == address(0)) emergencyStandin = executor;
+        if (technicalStandin == address(0)) technicalStandin = executor;
 
         // --- sanity: singletons must carry code -------------------------
         require(SAFE_SINGLETON.code.length > 0, "singleton missing");
@@ -107,9 +109,11 @@ contract DeployDryRun is Script {
         a.agent = address(agent);
         a.operator = operatorStandin;
         a.emergency = emergencyStandin;
+        a.technical = technicalStandin;
+        // motions act through the governance role, held by the script executor
+        a.policyAdmin = address(executor_);
         Policy.fillTokens(a);
         Policy.fillProtocols(a);
-        Policy.fillAtokens(a);
 
         a.rolesOperator = address(roles);
         a.rolesSafety = address(safety);
@@ -125,6 +129,7 @@ contract DeployDryRun is Script {
         vm.stopBroadcast();
 
         // --- manifest -------------------------------------------------------
+        // two parts: one concat with every field is too deep for the stack
         string memory manifest = string.concat(
             '{"dryrun":{"network":"mainnet",',
             '"agent":"',
@@ -139,19 +144,24 @@ contract DeployDryRun is Script {
             vm.toString(address(safe)),
             '","rolesModifier":"',
             vm.toString(address(roles)),
+            '","safetyModifier":"',
+            vm.toString(address(safety))
+        );
+        manifest = string.concat(
+            manifest,
             '","operatorStandin":"',
             vm.toString(operatorStandin),
             '","emergencyStandin":"',
             vm.toString(emergencyStandin),
+            '","technicalStandin":"',
+            vm.toString(technicalStandin),
             '","safeSingleton":"',
             vm.toString(SAFE_SINGLETON),
             '","rolesMastercopy":"',
             vm.toString(ROLES_MASTERCOPY),
             '","policyCalls":',
-            vm.toString(calls.length),
-            ',"constellationSha":"',
-            vm.envOr("CONSTELLATION_SHA", string("02ea37d")),
-            '","rolesV4Sha":"820e5bc",',
+            vm.toString(calls.length + safCalls.length),
+            ',"rolesV4Sha":"820e5bc",',
             '"deployedAt":"',
             vm.toString(block.timestamp),
             '","deployBlock":',
