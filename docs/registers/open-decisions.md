@@ -7,18 +7,12 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:39:55Z
+  at: 2026-10-05T16:07:52Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
     title: Decision log — EM's inputs
-  - id: s2
-    resource: /research/chain-reads-2026-09-30.md
-    title: Chain reads, 2026-09-30
-  - id: s3
-    resource: /research/funding-registries-2026-10-02.md
-    title: Easy Track funding registries, 2026-10-02
 ---
 
 # Open decisions
@@ -27,7 +21,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
-| OD-21 | How do the legacy investments that the mandate carries over move into the vault, and who holds them now? The mandate lists EarnETH, EarnUSD and Twyne, and they reduce the seed. The Agent and the committee's Safe hold no shares of the current earnETH and earnUSD vaults [s3]. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Find the holder first. A position held for the DAO moves in the enabling vote, because the payment permission denies these tokens [s2]. Size the seed after the move | EM |
 | OD-22 | Should DAI earn, or stay idle? DAI can seed the vault, but no operator permission moves it: it is not in the rebalancing set ([ADR 007](/adr/007-swapping-through-stonks.md)), sDAI is out of scope, and no DAI-to-USDS converter is in scope ([ADR 011](/adr/011-launch-scope.md)). Only recovery can move it. | [ADR 011](/adr/011-launch-scope.md) | If DAI should earn, add the DAI-to-USDS converter as a conversion: it needs no price and no swap instance. If DAI is the liquidity buffer, say so in ADR 011 | EM; constrains the operator |
 | OD-23 | When does the agent get its own GitHub identity? Until it does, the agent pushes under the creator's git identity, and another member of the owning team must approve. | [ADR 003](/adr/003-agent-operating-model.md) | Deferred by EM on 2026-10-05: "later". Give it write access to branches only, so that EM can approve agent work as a code owner | EM |
 
@@ -56,3 +49,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-16 | The policy data format and the compiler toolchain | 2026-10-05 | EM: YAML with a strict schema; a Python compiler that emits one JSON artifact, consumed by the tests, the enabling vote and the drift detector, with a round-trip check that rebuilds the trees from the modifier's events ([ADR 004](/adr/004-specifications-and-policy-as-data.md)) [s1] |
 | OD-17 | Does Safe v1.5.0 hold up to due diligence on its audits and incident history? | 2026-10-05 | EM: "Q1: 1. Keep v1.5.0", "Q2: A", "Q3: 1.": the Asset Safe, the operator Safe and the emergency Safe use v1.5.0, and EM reported the vendor's confirmation of v1.5.0 support; the Agent authorizes only by `approveHash` or as the sender; no fallback handler on the Asset Safe; Safe's releases and advisories are checked again before the enabling vote; the LIP states the short record; the vendor is asked to refuse delegatecalls except to MultiSendCallOnly, and monitoring alerts on a singleton change ([research note](/research/safe-v150-due-diligence-2026-10-05.md), [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 010](/adr/010-pre-execution-screening.md)) [s1] |
 | OD-20 | Who configures the swap pricing before launch, and when? | 2026-10-05 | EM: "Q1: 1.", "Q2: A, but support WETH too", "Q3: 1.", then "Q2b: 1.": the committee's Safe adds USDC, USDT, DAI and USDS to the shared price router as its manager; one USD-anchored converter from the factory; a check at vote start; instances cover stETH, LDO, USDC, USDT, USDS and DAI; wstETH is unwrapped and sUSDS redeemed before a sale; WETH goes through stETH by staking and the withdrawal queue; the committee's Safe re-syncs a replaced feed ([research note](/research/stonks-pricing-2026-10-05.md), [ADR 007](/adr/007-swapping-through-stonks.md)) [s1] |
+| OD-21 | How do the legacy investments that the mandate carries over move into the vault, and who holds them now? | 2026-10-05 | EM: "Q1: B", "Q2: 1": the DAO's first-loss shares in EarnETH and EarnUSD, held by a Growth Committee Safe, move to the Asset Safe after the enabling vote; the Treasury Management mandate takes over their first-loss terms; each burn is a DAO vote; a written rule forbids the operator from redeeming them; Twyne reduces the seed only when its holder and form are shown ([research note](/research/legacy-investments-2026-10-05.md), [ADR 008](/adr/008-funding-through-existing-payments.md)) [s1] |

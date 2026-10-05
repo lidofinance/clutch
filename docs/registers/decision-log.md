@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:39:55Z
+  at: 2026-10-05T16:07:52Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,19 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-21: the legacy investments
+
+> Q1: B
+> Q2: 1
+
+Recorded as: OD-21 is closed. (Q1) The legacy Earn positions are the DAO's first-loss shares in EarnETH and EarnUSD, approved by Snapshot in March 2026 and held by a Growth Committee Safe. After the enabling vote, the Growth Committee transfers them to the Asset Safe. The Treasury Management mandate takes over the first-loss terms of that allocation. Each first-loss burn is a DAO vote. A written rule forbids the operator from redeeming the first-loss shares. The agent had recommended that the shares stay with the Growth Committee and only count toward the vault (A). (Q2) A Twyne position reduces the seed only when its holder and form are shown on chain or in a signed record; no Lido address checked holds one. The evidence is in the [legacy investments note](/research/legacy-investments-2026-10-05.md) ([ADR 008](/adr/008-funding-through-existing-payments.md)). [s4]
+
+## 2026-10-05 — OD-21 asked
+
+> continue interview with the next pending decision
+
+[s4]
 
 ## 2026-10-05 — OD-20: swap pricing
 
