@@ -1,16 +1,7 @@
-# The owning team is not set yet (docs/registers/open-decisions.md, OD-10).
-# When it is, replace <team> and remove the leading "# " on each rule.
-# Agent instruction files, trust configuration and the permission policy always
-# need a human owner.
-#
-# *                      @lidofinance/<team>
-# /AGENTS.md             @lidofinance/<team>
-# /CLAUDE.md             @lidofinance/<team>
-# /skills/               @lidofinance/<team>
-# /.github/              @lidofinance/<team>
-# /config/actors.yaml    @lidofinance/<team>
-# /LICENSE               @lidofinance/<team>
-# /SECURITY.md           @lidofinance/<team>
-# /docs/adr/             @lidofinance/<team>
-# /src/policy/           @lidofinance/<team>
-# /src/gov/              @lidofinance/<team>
+# Owners decided by EM on 2026-10-05 (docs/registers/open-decisions.md, OD-10).
+# The last matching line wins. Owners on one line are alternatives.
+# These rules bind only while the branch rule on main requires a code-owner review,
+# and only for teams that have write access to this repository.
+
+*          @lidofinance/defi-tech
+/.github/  @lidofinance/review-gh-workflows

@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-05T11:06:53Z
 verified: []
 sources:
   - id: s1
@@ -77,7 +77,7 @@ The validator does not yet check the verification-procedure output for a policy 
 - EM accepts a decision with one explicit edit, not in conversation.
 - The committee re-ratifies what EM accepted in the interim.
 - Known gap: the validator cannot see an edit that leaves `generated.at` unchanged. A CI step that compares each changed page with the base branch closes it. The step is planned for phase 1.
-- Known gap: the validator cannot tell who wrote a `human:` entry. Human review of the pull request is the control, and CODEOWNERS enforces it once the owning team is set (OD-10).
+- Known gap: the validator cannot tell who wrote a `human:` entry. Human review of the pull request is the control. CODEOWNERS and the branch rule on `main` enforce it (OD-10, decided 2026-10-05).
 
 ## Confirmation
 

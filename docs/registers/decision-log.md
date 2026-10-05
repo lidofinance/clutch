@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T10:21:49Z
+  at: 2026-10-05T11:06:53Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,27 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-10: code owners and the branch rule
+
+> Q1:
+> We must use:
+> - https://github.com/orgs/lidofinance/teams/defi-tech as owning group
+> - review-gh-workflows owns GitHub CI
+> - no new team is needed
+>
+> Q2:
+> - agree on branch rule
+> - agree on at least a single approval by non-creator of PR
+> - later
+
+Recorded as: OD-10 is closed. The `@lidofinance/defi-tech` team owns the repository, and `@lidofinance/review-gh-workflows` owns `/.github/`. No new team is created. A branch rule on `main` requires a pull request and a code-owner review, allows no direct pushes, and dismisses approvals when new commits arrive. Every merge needs at least one approval from someone other than the pull request's creator. The agent's own GitHub identity comes later; OD-23 tracks it ([ADR 003](/adr/003-agent-operating-model.md)). [s4]
+
+## 2026-10-05 — OD-10 asked
+
+> run interview on OD-10
+
+[s4]
 
 ## 2026-10-05 — OD-09 Q2: DAO-scoped role keys
 
