@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:33:11Z
+  at: 2026-10-05T11:54:58Z
 verified: []
 sources:
   - id: s1
@@ -53,6 +53,9 @@ sources:
 | Budget refill-period floor | 30 days | EM decision of 2026-10-02 [s1] | ADR 009 |
 | Approval bound | an approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget; the stETH approval to the wstETH contract has a fixed ceiling of one TM Floor Value in stETH | EM decision of 2026-10-02 [s1] | ADR 009 |
 | Report storage | IPFS; no DataBus | EM decision [s1] | ADR 009 |
+| Report anchor | the report's forum post only; no on-chain anchor | EM decision of 2026-10-05 [s1] | ADR 009 |
+| Price source and staleness limit | Coingecko close at the Snapshot Date; a price older than 24 hours counts as missing | EM decision of 2026-10-05 [s1] | ADR 009 |
+| Late-report flag | day 8 after month-end; no top-up motion while the report is late | EM decision of 2026-10-05 [s1] | ADR 009 |
 | Screening guard | the screening vendor's existing transaction guard, one instance on the operator Safe, of the build that the Lido multisigs run | EM decisions of 2026-10-02 [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
 | Guard removal and bypass timelocks | 10 days each, fixed in the chosen build | EM decision of 2026-10-02 [s1]; a constant in the vendor's code | ADR 010 |
 | Standing approvals on the guard | none, except the guard's two built-in timelock approvals | EM decision of 2026-10-02 [s1] | ADR 010 |

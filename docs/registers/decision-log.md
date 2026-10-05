@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:43:51Z
+  at: 2026-10-05T11:57:38Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,27 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-14: the mandate text
+
+> accept your mandate recommendation; push
+
+Recorded as: the mandate text states the price rule and the late-report rule of OD-14. The mandate text now owes five changes ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). [s4]
+
+## 2026-10-05 — OD-14: reporting operations and the anchor
+
+> Q1:  1.
+> Q2:  1. 
+> Q3:  1.
+> Q4:  B
+
+Recorded as: OD-14 is closed. (Q1) The mandate's publisher and schedule stand. The defi-tech team builds and maintains a report generator in this repository, which reads the chain at a pinned block and the pricing source, so anyone can re-run it. The committee reviews and publishes each report. (Q2) Coingecko's closing price at the Snapshot Date is used. A price that is missing or more than 24 hours old is replaced by the asset's on-chain rate into an underlying that has a price. An asset with neither is listed as unpriced, left out of every ratio and the vault value, and named in the report. An old price is never carried over silently, and no top-up rests on a snapshot with an unpriced asset. (Q3) While the monthly report is late, no top-up motion starts. Monitoring flags a missing report on day 8, and the committee explains the delay on the forum. (Q4) Block B: a report's IPFS identifier is anchored only in its forum post. There is no on-chain anchor ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). [s4]
+
+## 2026-10-05 — OD-14 asked
+
+> run interview on OD-14
+
+[s4]
 
 ## 2026-10-05 — OD-13: who writes and maintains the detectors
 

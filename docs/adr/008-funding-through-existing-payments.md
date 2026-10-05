@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:27:41Z
+  at: 2026-10-05T11:54:58Z
 verified: []
 sources:
   - id: s1
@@ -81,7 +81,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - **Two top-up factories.** The stablecoin factory uses the shared stablecoin token list, after the vote adds USDS to it. The stETH factory is the single-token version. The operator Safe is the trusted caller of both, as of every factory ([ADR 006](/adr/006-governance-through-easy-track-factories.md)). The DAO registers them by vote.
 - **The figures.** The stablecoin limit is the TM Floor Value at par. The stETH limit is the floor divided by the pinned price. An attested computation produces both, and they enter this repository when the mandate is approved.
 - **The seed.** The same registries carry the seed. It is at most one floor, less the legacy investments (OD-21).
-- **The report.** The factory fixes the payment reference, so a top-up's report identifier goes in the forum post that the mandate requires before each top-up. Where to anchor it on chain is part of OD-14.
+- **The report.** The factory fixes the payment reference, so a top-up's report identifier goes in the forum post that the mandate requires before each top-up. There is no on-chain anchor. No top-up motion starts while the monthly report is late or the snapshot has an unpriced asset ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
 - **Funding assets.** USDC, USDT, DAI, USDS, sUSDS and stETH. ETH is not a funding asset: the Agent holds less than 8 ETH [s4].
 
 ## Options considered
@@ -126,4 +126,3 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 ## Open questions
 
 - OD-21: who holds the legacy investments, and how they move into the vault.
-- OD-14: where to anchor a report's identifier on chain.

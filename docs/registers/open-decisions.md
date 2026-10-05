@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:43:51Z
+  at: 2026-10-05T11:54:58Z
 verified: []
 sources:
   - id: s1
@@ -27,7 +27,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
-| OD-14 | Reporting operations: who publishes, on what schedule, what happens when a price is stale or missing, and who answers for a late report? Where is a report's identifier anchored on chain, now that the standard top-up factory fixes the payment reference [s3]? | Mandate text; [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Name the first four in the mandate. Until an on-chain anchor is chosen, the identifier goes in the forum post that precedes each top-up | EM with the committee |
 | OD-15 | How do the committee and the Emergency Brakes multisig record a verification of a page? | [ADR 002](/adr/002-decision-and-review-process.md) | A member commits the `verified` entry through a reviewed pull request, and the entry links the body's decision record | EM |
 | OD-16 | The policy data format and the compiler toolchain. | [ADR 004](/adr/004-specifications-and-policy-as-data.md) | Decide in the phase 1 specification | EM |
 | OD-17 | Incident-history check on Safe v1.5.0. EM asked for "a dd about audits and incident history". Both new Safes now use v1.5.0. The audits are recorded; the incident history is not. If the vendor does not confirm v1.5.0 support, the operator Safe uses v1.4.1, and this check covers the Asset Safe only. | [ADR 010](/adr/010-pre-execution-screening.md) | Record it before ADR 005 and ADR 010 are accepted | Evidence owed; EM decides |
@@ -56,3 +55,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-24 | The ceiling per USDS payment in the rewritten payment permission | 2026-10-05 | EM: "1. OD-24: 2,000,000": the same as DAI, USDC, USDT and sUSDS ([ADR 008](/adr/008-funding-through-existing-payments.md)) [s1] |
 | OD-12 | Confirm four recorded readings: the vision answer, the acceptor answer, the start of Lido Lend's capped months, and who signs the vendor agreement | 2026-10-05 | EM confirmed the first three. The Lido-side signer is the party that already holds the vendor's arrangement for the four guarded Lido multisigs, not named here ([ADR 002](/adr/002-decision-and-review-process.md), [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), [ADR 010](/adr/010-pre-execution-screening.md)) [s1] |
 | OD-13 | Who writes and maintains the vault's detectors in each monitoring estate? | 2026-10-05 | EM: defi-tech writes the detector specification and makes the important updates; the vroom team (`@lidofinance/lido-valset-vroom`) reviews them, runs the platform and maintains the engine and the bot; the committee configures the vendor's rules, with defi-tech supporting ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |
+| OD-14 | Reporting operations: who publishes, on what schedule, what happens on a stale or missing price, who answers for a late report, and where a report's identifier is anchored | 2026-10-05 | EM: the mandate's publisher and schedule, with a re-runnable report generator built by defi-tech; Coingecko with an on-chain-rate fallback and no silent stale price; no top-up while a report is late; the identifier only in the forum post, with no on-chain anchor ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |
