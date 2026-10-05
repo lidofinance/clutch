@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:56:03Z
+  at: 2026-10-05T11:23:52Z
 verified: []
 sources:
   - id: s1
@@ -117,7 +117,8 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - Under the literal base, a yield-bearing stablecoin has room only next to stablecoins that the vault holds directly. The illustrative allocation holds none, so it plans no yield-bearing position.
 - The committee can enlarge the base before a test by holding more stablecoins. The test at deposit time and the published history limit this. They do not prevent it.
 - The policy must hold the Lido Lend budget key, with a ceiling that allows the uncapped budget, from deployment. Otherwise the cap could not lift by motion alone. During the first three months, the allowance set by the onboarding motion and the fortnightly test hold the cap.
-- The mandate text owes two changes: the own-product limit and the protocol cap must state the three-month rule for Lido Lend; and the illustrative balance renames its "USD-denominated" heading.
+- The mandate text owes three changes: the own-product limit and the protocol cap must state the three-month rule for Lido Lend; the illustrative balance renames its "USD-denominated" heading; and the funding rules must allow sUSDS, which EM added on 2026-10-05 ([ADR 008](/adr/008-funding-through-existing-payments.md)).
+- A top-up in sUSDS counts at once against its yield-bearing cap under the literal base.
 
 ## Confirmation
 

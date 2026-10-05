@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T10:22:21Z
+  at: 2026-10-05T11:27:41Z
 verified: []
 sources:
   - id: s1
@@ -274,7 +274,7 @@ Funding reuses production machinery. No new contract class beyond a factory.
 
 The Easy Track script executor already holds `CREATE_PAYMENTS_ROLE` on the Finance application with 22 Aragon ACL parameters attached. Those parameters form a conditional chain binding argument 0 (token) and argument 2 (amount). Argument 1 is the **receiver and is not constrained at the ACL layer**; recipient control lives one layer above, in the registry and factory.
 
-Per-payment ceilings recorded in the ACL parameter tree, re-read at block 26092572 [s3]:
+Per-payment ceilings recorded in the ACL parameter tree, re-read at block 26092572 [s3] and unchanged at block 26125804 [s7]. The enabling vote adds USDS with a ceiling of 2,000,000 per payment (OD-11, OD-24):
 
 | Token | Ceiling per payment |
 | --- | --- |
@@ -284,11 +284,12 @@ Per-payment ceilings recorded in the ACL parameter tree, re-read at block 260925
 | USDC | 2,000,000 |
 | USDT | 2,000,000 |
 | sUSDS | 2,000,000 |
+| USDS | 2,000,000, once the enabling vote adds it |
 | LDO | 5,000,000 |
 
 Many allowed-recipient setups already run on mainnet, each combining an `AllowedRecipientsRegistry` with period limits, optionally an `AllowedTokensRegistry`, add and remove factories, and a `TopUpAllowedRecipients` factory. Twelve top-up registries are live, and the committee's existing Safe is the trusted caller of two of them [s7].
 
-**Setup, decided by EM on 2026-10-02 (OD-06):** two dedicated registries, one for stablecoins and one for stETH. The Asset Safe is the only recipient of each, and the Easy Track executor cannot add recipients. Each registry has a period of one calendar month and a limit of one TM Floor Value per period. Two `TopUpAllowedRecipients` factories, the stablecoin one with its own token list (OD-11), take the operator Safe as trusted caller and are registered by DAO vote [s7]. Section 5.2 gives the reasons and the gaps.
+**Setup, decided by EM on 2026-10-02 (OD-06):** two dedicated registries, one for stablecoins and one for stETH. The Asset Safe is the only recipient of each, and the Easy Track executor cannot add recipients. Each registry has a period of one calendar month and a limit of one TM Floor Value per period. Two `TopUpAllowedRecipients` factories, the stablecoin one with the shared stablecoin token list, to which the vote adds USDS (OD-11), take the operator Safe as trusted caller and are registered by DAO vote [s7]. Section 5.2 gives the reasons and the gaps.
 
 ##### 5.1 Scaling the existing caps to the mandate size **[Investigated]**
 
@@ -299,9 +300,9 @@ Findings, first read at block 26017715 and re-read at block 26092572 [s3].
 - **The grant is shared.** The parametrized `CREATE_PAYMENTS_ROLE` is held by the single Easy Track script executor, which every Lido top-up factory routes through. Raising a ceiling raises it for every allowed-recipient setup at once.
 - **The permission manager is Aragon Voting** at `0x2e59A20f205bB85a89C53f1936454680651E618e`, so any parameter change is an Aragon vote, and the whole 22-entry parameter array is rewritten as one unit.
 
-**Recommendation: do not change the ACL parameters.** EM has not accepted this yet (open item OD-11). Seed and top up through several payments inside one motion, and let the real ceiling be the period limits on the two dedicated registries, which are ours alone (section 5.2). The number of payments follows from the limits and the ceilings, and an attested computation must produce it. This keeps the blast radius of the change inside our own registry instead of widening a shared grant.
+**Decision: add USDS to the shared parameters (OD-11).** EM decided on 2026-10-05 that a DAO vote rewrites the array to add USDS, and that the stablecoin registry uses the shared token list with USDS added. Seed and top up through several payments inside one motion, and let the real ceiling be the period limits on the two dedicated registries (section 5.2). The number of payments follows from the limits and the ceilings, and an attested computation must produce it. The rewrite is DAO-wide: every setup that shares the token list can then pay USDS too, and the vote must say so.
 
-Two consequences to accept. A per-payment ceiling is not a per-motion ceiling, so the registry period limit is the backstop that matters, and section 5.2 sizes it. And **USDS is absent from the ACL token chain**, so it cannot be paid out on this route at all; seeding in USDS would require rewriting the shared parameter array by vote, which the recommendation above avoids. Seed in USDC, USDT, DAI or stETH. The Agent holds less than 8 ETH, so ETH needs no top-up path (OD-11) [s7].
+Two consequences to accept. A per-payment ceiling is not a per-motion ceiling, so the registry period limit is the backstop that matters, and section 5.2 sizes it. And **funding in sUSDS goes beyond the mandate's funding rule**, which names stETH and the top-four stablecoins: the mandate text must add it, and an sUSDS top-up counts at once against its yield-bearing cap. The funding assets are USDC, USDT, DAI, USDS, sUSDS and stETH. ETH is not one: the Agent holds less than 8 ETH (OD-11) [s7].
 
 ##### 5.2 Period and limit **[Decided, OD-06]**
 
@@ -419,15 +420,15 @@ The `Allowance` struct field order in the deployed mastercopy is `refill, maxRef
 
 | Asset | Role in the system | Notes |
 | --- | --- | --- |
-| ETH | Held, funding inbound | In the Aragon payment parameter chain, ceiling 1,000 per payment |
+| ETH | Held | Not a funding asset (OD-11). Still in the payment chain for other setups, ceiling 1,000 per payment |
 | WETH | Held, wrap and unwrap | |
 | stETH | Held, funding inbound | In the payment chain, ceiling 1,000 per payment |
 | wstETH | Held, wrap and unwrap | |
 | USDC | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment |
 | USDT | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment |
 | DAI | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment. Added so the mandate's definition of the top four stablecoins matches the launch set |
-| USDS | Held | **Not in the payment chain — cannot be used to seed the vault** |
-| sUSDS | Held, savings position | Template: tokenized vault |
+| USDS | Held, funding inbound | **Added to the payment chain by the enabling vote (OD-11)**; ceiling 2,000,000 per payment (OD-24) |
+| sUSDS | Held, savings position, funding inbound | Template: tokenized vault. In the payment chain, ceiling 2,000,000 per payment (OD-11) |
 | earnETH | Held, vault position | Asynchronous deposit and redeem queues |
 | earnUSD | Held, vault position | Asynchronous deposit and redeem queues |
 | LDO | Held, in the rebalancing set | |
@@ -436,7 +437,7 @@ The `Allowance` struct field order in the deployed mastercopy is `refill, maxRef
 
 Assets explicitly **not** in the launch set: sDAI and third-party lending markets other than Lido Lend.
 
-One constraint remains after adding DAI. USDS is in the launch set but absent from the Aragon payment parameter chain, so **seeding and top-ups use USDC, USDT, DAI, stETH or ETH**. Acquiring USDS happens inside the vault, not on the way in.
+After OD-11, **seeding and top-ups use USDC, USDT, DAI, USDS, sUSDS or stETH**. USDS needs the enabling vote to add it to the payment chain. ETH is not a funding asset.
 
 #### Part 9: Reporting and detective controls **[Specified]**
 
@@ -608,7 +609,7 @@ The [open-decisions register](/registers/open-decisions.md) tracks every open it
 
 1. **OD-17, Safe v1.5.0 incident history.** Both new Safes use v1.5.0. Its audits are recorded; its incident history is not.
 2. **The vendor's confirmations (OD-07, decided).** Before deployment the vendor confirms in writing that its approval service supports Safe v1.5.0, accepts the exclusion of standing approvals, and agrees to be named. It is also asked to merge and document the 10-day build. The Lido-side party to the agreement is still to be named (OD-12).
-3. **Mandate text owed.** The own-product limit and the protocol cap must state that Lido Lend counts against the protocol cap for its first three months (OD-04). The illustrative balance renames its "USD-denominated" heading (OD-03).
+3. **Mandate text owed.** The own-product limit and the protocol cap must state that Lido Lend counts against the protocol cap for its first three months (OD-04). The illustrative balance renames its "USD-denominated" heading (OD-03). The funding rules must allow sUSDS (OD-11).
 4. **OD-21, the legacy investments.** The mandate carries the legacy investments into the vault, and they reduce the seed. Who holds them, and how they move in, is open.
 
 ## Links

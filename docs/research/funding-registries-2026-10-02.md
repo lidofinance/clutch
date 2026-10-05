@@ -9,7 +9,7 @@ valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:07:21Z
+  at: 2026-10-05T11:23:52Z
 verified: []
 sources:
   - id: s1
@@ -45,6 +45,12 @@ sources:
   - id: s11
     resource: "https://etherscan.io/address/0xF0211b7660680B49De1A7E9f25C65660F0a13Fea#readContract"
     title: Easy Track — the registered factories, the motion duration and the objection threshold
+  - id: s12
+    resource: "https://etherscan.io/block/26125804"
+    title: Ethereum block 26125804, used for the re-read of 2026-10-05
+  - id: s13
+    resource: "https://github.com/lidofinance/easy-track/blob/3183d1f68d47f5713e0183720aacd10a7dd12670/contracts/payouts/multi-token/AllowedTokensRegistry.sol#L101"
+    title: Easy Track AllowedTokensRegistry at 3183d1f — normalizeAmount refuses token 0
 ---
 
 # Easy Track funding registries, 2026-10-02
@@ -108,6 +114,14 @@ Easy Track lists 52 factories. Twelve are top-up factories, and each has its own
 
 - The Aragon Agent holds 7.877196199769308015 ETH: `cast balance $AGENT --block $B --ether` [s10].
 - The Aragon Agent and the committee's Safe `0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647` hold no shares of the current earnETH and earnUSD vaults. On their share managers, `0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4` and `0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981`, `balanceOf` and `sharesOf` return zero for both accounts [s10]. Who holds the legacy positions that the mandate carries over is not known (OD-21).
+
+## Re-read on 2026-10-05
+
+At block 26125804, hash `0x1ecee04c146330422626ea6292efa592d5d1d35e864797dfc987b53fd3a2bf05` [s12]:
+
+- The executor's payment permission on Finance still has 22 parameters, and Aragon Voting still manages it. They decode to the same chain: stETH at most 1,000, DAI 2,000,000, LDO 5,000,000, USDC 2,000,000, USDT 2,000,000, ETH 1,000 and sUSDS 2,000,000 per payment; every other token is refused. The commands are in the [chain-reads note](/research/chain-reads-2026-09-30.md).
+- The Aragon Agent holds no USDS, and it holds 693,020 sUSDS: `cast call <token> 'balanceOf(address)(uint256)' $AGENT --block 26125804` [s12].
+- The multi-token top-up factory cannot pay ETH, because the token registry refuses token 0 [s13]. The single-token factory takes any token, so an ETH factory is possible, but none of the twelve live registries pays ETH.
 
 ## Limits
 
