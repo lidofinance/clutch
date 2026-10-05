@@ -583,6 +583,8 @@ contract Drills is Test {
         vm.deal(address(safe), 1 ether);
         _opValue(a.steth, 1 ether, abi.encodeCall(IStETH.submit, (address(0))));
 
+        // the approval to the queue has a fixed ceiling and no budget key (OD-27)
+        _opRevert(a.steth, _approve(a.withdrawalQueue, FullPolicy.FLOOR_STANDIN_STETH));
         uint256 amount = 0.5 ether;
         _op(a.steth, _approve(a.withdrawalQueue, amount));
         uint256[] memory amounts = new uint256[](1);

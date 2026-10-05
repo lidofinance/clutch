@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:30:52Z
+  at: 2026-10-05T19:58:30Z
 verified: []
 sources:
   - id: s1
@@ -45,6 +45,9 @@ sources:
   - id: s11
     resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/src/policy/Policy.sol#L524-L547"
     title: Kit policy at 7a8c661 — the governance permission on budgets pins the key and a 30-day period floor
+  - id: s12
+    resource: "urn:clutch:restricted:mandate-draft-v0.1"
+    title: Mandate draft v0.1 — the committee rebalances within two working days after each snapshot; outside the repository until the mandate is published
 ---
 
 # ADR 009: Budgets, exposure caps, reporting and monitoring
@@ -103,6 +106,10 @@ EM decided on 2026-10-05, closing OD-14 [s1]:
 22. A report's IPFS identifier is anchored only in its forum post. There is no on-chain anchor.
 23. The mandate text states the price rule of decision 20 and the late-report rule of decision 21.
 
+EM confirmed on 2026-10-05, closing OD-29 [s1]:
+
+24. "A pause of the whole module" in decision 6 means disabling the operator modifier. The Emergency Brakes multisig does it through its technical role, on a fixed trigger: a published cap breach that is still there after the committee's rebalancing window of two working days [s12], and that is larger at the next fortnightly snapshot. A DAO vote can also do it.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
@@ -113,7 +120,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - **Yield-bearing keys.** A yield-bearing key gets the headroom: the cap's share of the stablecoins plus yield-bearing stablecoins held directly, minus the current holding of that token, and never less than zero. Converting a stablecoin into a yield-bearing stablecoin leaves the base unchanged. The headroom depends on what the vault holds, so each fortnightly retune derives it from a holdings snapshot read at a pinned block. Without a snapshot, the key gets no budget.
 - **Lido Lend key.** The protocol cap applies until three calendar months after Lido Lend goes live. From that date the key is bounded by the mandate size, like every own-product key. The months count from Lido Lend's mainnet launch (decision 16).
 - **Budget figures.** The attested computation ran on 2026-09-22 with an independent attester and pinned inputs. It ran again on 2026-10-02 with the literal base. The yield-bearing key now gets no figure until the first retune after seeding, and the other keys are unchanged. The inputs include unapproved mandate terms, so the results enter this repository only after the mandate is approved.
-- **Approvals.** Each approval branch names one spender and spends that spender's key, so a token approved to two spenders draws on two keys. The operator approves only what it deposits, in the same transaction, so no approval stands between transactions. The DAI and USDS approvals to Sky's DAI–USDS converter carry the same fixed ceiling as the stETH approval to the wstETH contract (decision 14; [ADR 011](/adr/011-launch-scope.md)).
+- **Approvals.** Each approval branch names one spender and spends that spender's key, so a token approved to two spenders draws on two keys. The operator approves only what it deposits, in the same transaction, so no approval stands between transactions. The DAI and USDS approvals to Sky's DAI–USDS converter and the stETH approval to Lido's withdrawal queue carry the same fixed ceiling as the stETH approval to the wstETH contract (decision 14; [ADR 011](/adr/011-launch-scope.md); [ADR 007](/adr/007-swapping-through-stonks.md)).
 - **The budget factory.** It builds one branch per key, so each key has its own ceiling on `balance`, `maxRefill` and `refill`, and every branch bounds `period` below by 30 days. The kit test shows one shared ceiling only [s4].
 - **Reports.** The payload is on IPFS and holds balances, positions, exposures, each ratio with its numerator and denominator, and the price source with its timestamp. The standard top-up factory writes a fixed payment reference, so a top-up cannot carry the report's identifier in it [s6]. The identifier goes in the report's forum post, and there is no on-chain anchor (decision 22). Reports show the first-loss Earn shares apart from the vault's other Earn shares ([ADR 008](/adr/008-funding-through-existing-payments.md)).
 - **Monitoring.** The Lido on-chain monitoring carries policy drift, the approval inventory, budget burn, module, owner and singleton changes on the three new Safes, and motion events. For funding it flags a top-up motion outside days 1 to 10 of a month, apart from the seed; a month's top-ups above the posted shortfall; and any top-up motion after an objected one ([ADR 008](/adr/008-funding-through-existing-payments.md)). For budgets it flags a second budget motion on the same key within 14 days. The screening vendor carries depegs, protocol compromise and counterparty anomalies. Findings route into the existing notification and incident channels.
@@ -126,6 +133,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - Budgets entered by hand. Not chosen: a financial figure comes only from an attested computation.
 - A fixed approval ceiling per token, sized to the key's budget ceiling, with deposits still spending the budget. Not chosen by EM: a spender could pull each new approval without a deposit, and the budget would never bound it.
 - A smaller fixed ceiling of one deposit. Not chosen: it adds a figure per token and still lets repeated approvals feed a spender.
+- Only a DAO vote pauses the operator for a cap breach that gets worse. Not chosen by EM (OD-29): a vote and its Dual Governance delay are slower than a fixed trigger.
 - A refill-period floor of 14 days, to match the retune. Not chosen: the conditions cannot compare the refill with the period, so it would double the refill per month.
 
 ## Consequences
@@ -143,7 +151,8 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - Under the literal base, a yield-bearing stablecoin has room only next to stablecoins that the vault holds directly. The illustrative allocation holds none, so it plans no yield-bearing position.
 - The committee can enlarge the base before a test by holding more stablecoins. The test at deposit time and the published history limit this. They do not prevent it.
 - The policy must hold the Lido Lend budget key, with a ceiling that allows the uncapped budget, from deployment. Otherwise the cap could not lift by motion alone. During the first three months, the allowance set by the onboarding motion and the fortnightly test hold the cap.
-- The mandate text owes six changes: the own-product limit and the protocol cap must state the three-month rule for Lido Lend; the illustrative balance renames its "USD-denominated" heading; the funding rules must allow sUSDS, which EM added on 2026-10-05 ([ADR 008](/adr/008-funding-through-existing-payments.md)); the reporting section states the price rule and the late-report rule (decision 23), so that tokenholders can hold the committee to them; and the legacy section takes over the first-loss terms of the March 2026 Earn allocation (OD-21, [ADR 008](/adr/008-funding-through-existing-payments.md)).
+- The mandate text owes eight changes: the own-product limit and the protocol cap must state the three-month rule for Lido Lend; the illustrative balance renames its "USD-denominated" heading; the funding rules must allow sUSDS, which EM added on 2026-10-05 ([ADR 008](/adr/008-funding-through-existing-payments.md)); the reporting section states the price rule and the late-report rule (decision 23), so that tokenholders can hold the committee to them; the legacy section takes over the first-loss terms of the March 2026 Earn allocation, and neither the operator nor the emergency role redeems the first-loss shares (OD-21, OD-28, [ADR 008](/adr/008-funding-through-existing-payments.md)); the emergency section describes the emergency Safe as the committee's signers at two of seven, the technical role of the Emergency Brakes multisig, and a DAO vote as the path that is independent of the committee (OD-30, [ADR 005](/adr/005-account-graph-and-roles.md)); and the emergency swap goes into USDC, or into USDT as the second destination (OD-26, [ADR 007](/adr/007-swapping-through-stonks.md)).
+- The Emergency Brakes multisig acts on a financial signal when a cap breach gets worse (decision 24). The trigger is fixed, so the multisig needs no financial judgment. Monitoring must page it when the trigger is met.
 - Leaving an unpriced asset out understates the vault value, which could open a top-up that the vault does not need. Decision 20 forbids a top-up on such a snapshot.
 - A late monthly report stops top-ups, so the vault cannot be refilled for long without reporting.
 - A top-up in sUSDS counts at once against its yield-bearing cap under the literal base.

@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 007: Swapping through Stonks 2.0"
-description: Every swap, routine or emergency, goes through fresh Stonks 2.0 instances from the standard factory; the operator Safe manages the rebalancing instances and the emergency Safe the recovery instances; the receiver separates the two families; the live parameters are copied by pair class; recovered tokens go to the treasury; the committee's Safe keeps the vault's feeds on the shared price router; only stETH, LDO and the four dollar stablecoins are swapped, and wstETH, sUSDS, WETH and ETH are converted first.
+description: Every swap, routine or emergency, goes through fresh Stonks 2.0 instances from the standard factory; the operator Safe manages the rebalancing instances and the emergency Safe the recovery instances; the receiver separates the two families; the live parameters are copied by pair class; recovered tokens go to the treasury; the committee's Safe keeps the vault's feeds on the shared price router; only stETH, LDO and the four dollar stablecoins are swapped, and wstETH, sUSDS, WETH and ETH are converted first; recovery sells into USDC, and stETH, LDO, USDC, USDS and DAI also into USDT; the withdrawal-queue approval has a fixed ceiling.
 tags: [swaps, stonks, cow, emergency, rebalancing]
 status: draft
 review_status: slop
@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:30:52Z
+  at: 2026-10-05T19:58:30Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the swap engine, recovery pairs and instances, 2026-09-22, on OD-05, 2026-10-02, and on OD-20, 2026-10-05
+    title: Decision log — EM on the swap engine, recovery pairs and instances, 2026-09-22, on OD-05, 2026-10-02, and on OD-20, OD-26 and OD-27, 2026-10-05
   - id: s2
     resource: /research/stonks-instances-2026-10-02.md
     title: Stonks 2.0 instances — roles, order life, factory, funding precedent and price coverage
@@ -36,6 +36,12 @@ sources:
   - id: s8
     resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L699"
     title: Kit test at 7a8c661 — the emergency role unwraps WETH into the Asset Safe through WETH's 2,300-gas transfer, stakes the ETH and sends the stETH to the Agent
+  - id: s9
+    resource: /research/recovery-and-withdrawal-queue-2026-10-05.md
+    title: Recovery into USDT and the withdrawal-queue approval, 2026-10-05 — USDC risk in USDS and DAI, the recovery topology, and the withdrawal queue's upgrader, limits and missing cancel
+  - id: s10
+    resource: "urn:clutch:restricted:mandate-draft-v0.1"
+    title: Mandate draft v0.1 — the emergency path may swap any asset into any of the four main stablecoins; outside the repository until the mandate is published
 ---
 
 # ADR 007: Swapping through Stonks 2.0
@@ -52,6 +58,9 @@ sources:
 - Aragon Voting is the router's admin. Since vote 204, the committee's Safe is its manager. Either can add a token, set the maximum age of its price, turn it off, or re-sync it. Neither can choose the feed [s6].
 - The router takes each feed from Chainlink's Feed Registry. The registry has USD feeds for USDC, USDT, DAI and USDS, and no entry for wstETH, WETH or sUSDS [s6].
 - When Chainlink replaces a feed's aggregator, the router refuses that token until the admin or the manager re-syncs it. Chainlink replaced the USDC and USDT aggregators twice in September 2026 [s6].
+- USDS and DAI carry USDC risk. Sky's USDC peg stability module holds 4,290,965,112.39 USDC, and DAI fell to 88 cents when USDC lost its peg in March 2023 [s9].
+- Only a DAO vote can upgrade Lido's withdrawal queue. A request cannot be cancelled, and one request takes at most 1,000 stETH [s9].
+- The mandate draft lets the emergency path swap any asset into any of the four main stablecoins [s10].
 
 ## Decision
 
@@ -78,6 +87,11 @@ EM decided on 2026-10-05, closing OD-20 [s1]:
 13. WETH is supported through stETH. To sell WETH, the vault unwraps it, stakes the ETH through Lido's `submit` and sells the stETH. To buy WETH, it unstakes stETH through Lido's withdrawal queue and wraps the ETH. The operator and the emergency role may stake ETH. The operator may request and claim withdrawals, pinned to the Asset Safe. The emergency role may unwrap WETH.
 14. The committee's Safe re-syncs a feed after Chainlink replaces it. Monitoring alerts when a vault token's feed is out of sync, and a runbook covers the re-sync. If a feed is broken during an emergency, the emergency Safe sends assets to the Aragon Agent instead of swapping.
 
+EM decided on 2026-10-05, closing OD-26 and OD-27 [s1]:
+
+15. Recovery also sells USDC, USDS and DAI into USDT, so every stablecoin that carries USDC risk can leave USDC. Recovery then has ten instances.
+16. The stETH approval to Lido's withdrawal queue has no budget key. It keeps a fixed ceiling of one TM Floor Value in stETH, as the approval to the wstETH contract does.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4]. EM has not accepted it as text.
@@ -90,9 +104,9 @@ The rest of this section is agent-drafted [s4]. EM has not accepted it as text.
 - **A swap.** The role transfers the asset to an approved instance, with the recipient pinned in the permission. The instance's manager then places the order. The proceeds settle to the receiver.
 - **An unfilled order.** When it expires, anyone can return the unsold tokens to the instance, and the manager places a new order. This is the normal path. Recovering tokens out of an instance is the exception, for an instance that is retired or stuck.
 - **The managers act outside the modifier.** The operator Safe calls its instances directly, so the screening guard checks each order. The emergency Safe calls its instances directly and is never screened.
-- **Topology.** USDC is the hub. Rebalancing routes through USDC. Recovery sells each swappable asset directly into USDC, and stETH and LDO also into USDT, so a USDC depeg does not strand recovery. That is about seven recovery and eight rebalancing instances. Direct pairs can be added later by motion.
+- **Topology.** USDC is the hub. Rebalancing routes through USDC. Recovery sells each swappable asset directly into USDC. stETH, LDO, USDC, USDS and DAI also go into USDT, so a USDC depeg does not strand recovery (decision 15). That is ten recovery and eight rebalancing instances. A rebalancing pair can be added later by motion; a recovery pair needs a DAO vote.
 - **Pricing.** One USD-anchored converter serves every vault instance, so the stablecoin pairs do not depend on the ETH/USD feed. Its lists follow the instance list: sell stETH, LDO, USDC, USDT, USDS and DAI; buy USDC, USDT, stETH, USDS and LDO. The router is shared with the NEST buyback, so a router setting changed for one changes it for the other.
-- **Converted assets.** wstETH, sUSDS, WETH and ETH have no price on the router. The operator converts them before a rebalance. The emergency role converts them before a recovery swap, or sends them to the Agent. Lido's `submit` mints stETH to the caller, the Asset Safe, and its referral argument is pinned to zero. The withdrawal queue's owner and claim recipient are pinned to the Asset Safe. The stETH approval to the queue spends a budget key, as every approval does ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). Claiming a finalized request falls under the emergency role's exits.
+- **Converted assets.** wstETH, sUSDS, WETH and ETH have no price on the router. The operator converts them before a rebalance. The emergency role converts them before a recovery swap, or sends them to the Agent. Lido's `submit` mints stETH to the caller, the Asset Safe, and its referral argument is pinned to zero. The withdrawal queue's owner and claim recipient are pinned to the Asset Safe. The stETH approval to the queue has a fixed ceiling of one TM Floor Value in stETH and no budget key (decision 16). Claiming a finalized request falls under the emergency role's exits.
 
 ## Options considered
 
@@ -107,6 +121,9 @@ The rest of this section is agent-drafted [s4]. EM has not accepted it as text.
 - **WETH and ETH sent only to the Agent.** Not chosen by EM: EM wants WETH supported.
 - **A request to Chainlink to add WETH to its registry.** Not chosen: it depends on Chainlink, with no timeline.
 - **A second router for the vault, with the emergency Safe as manager.** Not chosen by EM: the emergency role would control the operator's price checks.
+- **Seven recovery instances, with the USDC-linked stablecoins sent to the Agent in a USDC depeg.** Not chosen by EM: USDS and DAI carry USDC risk, and a missing recovery instance needs a DAO vote later [s9].
+- **USDC into USDT only.** Not chosen by EM: USDS and DAI could still flee only into USDC.
+- **The withdrawal-queue approval under a budget key.** Not chosen by EM: it needs a new figure from the attested computation. Only the DAO can upgrade the queue, and a claim pays the Asset Safe [s9].
 
 ## Consequences
 
@@ -123,10 +140,13 @@ The rest of this section is agent-drafted [s4]. EM has not accepted it as text.
 - Swap pricing depends on Chainlink's Feed Registry and on the committee's Safe to re-sync it. A replaced USDC feed stops every vault swap until the re-sync. Recovery can still send assets to the Agent, which needs no price.
 - The committee's Safe can turn a vault token off on the router, or loosen its maximum price age. It cannot choose a feed. Monitoring alerts on every router change.
 - Staking converts ETH to stETH one to one. The way back is the withdrawal queue, not a swap.
+- Recovery has ten instances to deploy, pin and monitor. In a real depeg, everyone flees to USDT, so recovery orders may not fill inside the 150 bp band. Whether to use an instance stays the committee's judgment.
+- The mandate text owes a change: the emergency swap goes into USDC, or into USDT as the second destination, not into any of the four main stablecoins [s10] ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+- A fixed ceiling bounds each approval to the withdrawal queue, not each month. An operator error or a captured quorum can put all stETH into requests. A request cannot be cancelled, so that stETH stays illiquid until finalization: days, and longer in bunker mode. The emergency role can claim a request only after finalization [s9].
 
 ## Confirmation
 
-- INV-002, INV-013, INV-014 and INV-020 in the [invariants](/specs/invariants.md).
+- INV-002, INV-008, INV-013, INV-014 and INV-020 in the [invariants](/specs/invariants.md).
 - Kit tests: staking and a withdrawal-queue round trip work with the Asset Safe as owner [s7]; WETH's unwrap pays the Asset Safe, although WETH forwards only 2,300 gas [s8]. The oracle report that finalizes a request is simulated.
 - Fork tests owed: each manager places, re-places and recovers orders; a non-manager cannot; recovered tokens arrive at the treasury; an expired order's tokens return to the instance; the converter prices every instance pair; an instance refuses a token that is turned off or out of sync.
 

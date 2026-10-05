@@ -8,12 +8,12 @@ No runbook is written yet. The table lists the runbooks that the design owes, wi
 |---|---|---|---|---|
 | Revoke the operator | emergency Safe | `revokeTarget` and `revokeFunction` on the operator modifier, role key pinned to `operator` | No | No |
 | Remove a strategy | emergency Safe | `revokeTarget` or `revokeFunction` on the operator modifier for one target or function, role key pinned to `operator`; then a forum post | No | No |
-| Zero the approvals | emergency Safe | `approve(spender, 0)` on each launch token | No | No |
-| Exit positions to the Safe | emergency Safe | redeem, withdraw, cancel and claim on each position, receiver and owner pinned to the avatar | No | No |
+| Zero the approvals | emergency Safe | `approve(spender, 0)` on each token that the operator can approve | No | No |
+| Exit positions to the Safe | emergency Safe | redeem, withdraw, cancel and claim on each position, receiver and owner pinned to the avatar; never a redemption of the first-loss Earn shares, which go to the Agent ([ADR 008](/adr/008-funding-through-existing-payments.md)) | No | No |
 | Recovery swap | emergency Safe | `transfer` pinned to a recovery swap instance, then `placeOrder` by the emergency Safe as the instance's manager | No | No |
 | Clear a stuck recovery order | emergency Safe | after expiry, anyone returns the tokens to the instance; the emergency Safe places a new order, or recovers the tokens to the Aragon Agent | No | No |
 | Return assets to the Agent | emergency Safe | `transfer` pinned to the Aragon Agent | No | No |
-| Disable the operator modifier | Emergency Brakes Safe | `disableModule` on the Asset Safe, module argument pinned to the operator modifier | No | No |
+| Disable the operator modifier | Emergency Brakes Safe | `disableModule` on the Asset Safe, module argument pinned to the operator modifier; for a defect in the permission layer, or on the cap-breach trigger of [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | No | No |
 | Pause Easy Track | Emergency Brakes Safe | the existing Easy Track `pause()` | No | No |
 | Top up the vault | operator Safe | `createMotion` on the vault's top-up factories, as their trusted caller: the seed once, then after a month-end snapshot | No | No |
 | Move the legacy Earn shares | the Growth Committee's Safe | `transfer` of the DAO's first-loss earnETH and earnUSD shares to the Asset Safe, once, after the enabling vote ([ADR 008](/adr/008-funding-through-existing-payments.md)) | No | No |

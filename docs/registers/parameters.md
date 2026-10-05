@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T17:44:03Z
+  at: 2026-10-05T19:58:30Z
 verified: []
 sources:
   - id: s1
@@ -56,7 +56,7 @@ sources:
 | DAI–USDS conversion | Sky's DaiUsds `0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`; the operator converts both ways, one to one; the receiver is pinned to the Asset Safe; DAI stays out of the Stonks rebalancing set | EM decision of 2026-10-05 [s1]; read [s6] | [ADR 011](/adr/011-launch-scope.md) |
 | Tokens converted before a sale | wstETH is unwrapped; sUSDS is redeemed; WETH is unwrapped and ETH staked to stETH through Lido's `submit`. WETH is bought by unstaking stETH through Lido's withdrawal queue and wrapping the ETH | EM decision of 2026-10-05 [s1] | ADR 007 |
 | Rebalancing set | stETH, wstETH, USDC, USDT, USDS, LDO | EM decision [s1] | ADR 007 |
-| Recovery destinations | USDC as the hub; USDT as the mandatory second destination | EM decision on USDT [s1]; the hub is the agent topology that EM's answer built on | ADR 007 |
+| Recovery destinations | USDC as the hub; USDT as the second destination for stETH, LDO, USDC, USDS and DAI; ten recovery instances | EM decision on USDT [s1]; the hub is the agent topology that EM's answer built on; EM decision of 2026-10-05 on the USDC-linked stablecoins (OD-26) [s1] | ADR 007 |
 | Order duration, margin, price tolerance | volatile to stable: 1800 s, 110 bp, 550 bp; stable to stable: 1800 s, 30 bp, 150 bp; both families | EM decision of 2026-10-02 [s1], copying the live instances | ADR 007 |
 | Maximum improvement and partial fills | 1000 bp; partial fills on; every instance | EM decision of 2026-10-02 [s1], copying the live Stonks 2.0 instances | ADR 007 |
 | Per-payment ceilings of the shared ACL | stETH 1,000; ETH 1,000; DAI 2,000,000; USDC 2,000,000; USDT 2,000,000; sUSDS 2,000,000; LDO 5,000,000 | Read [s2]; EM decision of 2026-10-05 [s1]: a DAO vote adds USDS and keeps the other entries | [ADR 008](/adr/008-funding-through-existing-payments.md) |
@@ -68,14 +68,15 @@ sources:
 | Funding assets | USDC, USDT, DAI, USDS, sUSDS, stETH; not ETH | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Legacy Earn first-loss shares | the earnETH and earnUSD shares that the Growth Committee Safe `0xf6F0732c1e9971497342C295141566E6F1A31e96` holds, 1,362.84 and 1,998,416.46 at block 26126791; transferred to the Asset Safe after the enabling vote | EM decision of 2026-10-05 [s1]; read [s5] | ADR 008 |
 | First-loss burn | a DAO vote only; the Asset Safe calls `burn` on the share token | EM decision of 2026-10-05 [s1] | ADR 008 |
-| Redemption of the first-loss shares | forbidden to the operator by a written rule; the chain cannot enforce it | EM decision of 2026-10-05 [s1] | ADR 008 |
+| Redemption of the first-loss shares | forbidden to the operator and to the emergency role by a written rule; in an emergency the shares go to the Aragon Agent; a burn or a redemption is a DAO vote; the chain cannot enforce it | EM decisions of 2026-10-05 (OD-21, OD-28) [s1] | ADR 008 |
 | Twyne | not counted against the seed until its holder and form are shown on chain or in a signed record | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Budget per key | not in this repository | Computed by attested computation on 2026-09-22 and again on 2026-10-02 with the literal yield-bearing base; enters when the mandate is approved | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | Lido Lend cap | the protocol cap for three calendar months from Lido Lend's mainnet launch, then none, as a Lido own product | EM decision of 2026-10-02 [s1]; the start was confirmed on 2026-10-05 (OD-12) | ADR 009 |
 | Yield-bearing cap base | the top-4 stablecoins plus the yield-bearing stablecoins held directly; own-product and protocol positions excluded | EM decision of 2026-10-02 [s1] | ADR 009 |
 | Budget retune cadence | every two weeks | EM decision [s1] | ADR 009 |
 | Budget refill-period floor | 30 days | EM decision of 2026-10-02 [s1] | ADR 009 |
-| Approval bound | an approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget; the stETH approval to the wstETH contract has a fixed ceiling of one TM Floor Value in stETH; the DAI and USDS approvals to Sky's DAI–USDS converter have the same fixed ceiling | EM decisions of 2026-10-02 and 2026-10-05 [s1] | ADR 009, ADR 011 |
+| Escalation of a worsening cap breach | the Emergency Brakes multisig disables the operator modifier through the technical role when a published cap breach is still there after the committee's rebalancing window of two working days and is larger at the next fortnightly snapshot; a DAO vote can also do it | EM decision of 2026-10-05 (OD-29) [s1] | ADR 009 |
+| Approval bound | an approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget; the stETH approval to the wstETH contract has a fixed ceiling of one TM Floor Value in stETH; the DAI and USDS approvals to Sky's DAI–USDS converter and the stETH approval to Lido's withdrawal queue have the same fixed ceiling | EM decisions of 2026-10-02 and 2026-10-05 (OD-08, OD-22, OD-27) [s1] | ADR 007, ADR 009, ADR 011 |
 | Report storage | IPFS; no DataBus | EM decision [s1] | ADR 009 |
 | Report anchor | the report's forum post only; no on-chain anchor | EM decision of 2026-10-05 [s1] | ADR 009 |
 | Price source and staleness limit | Coingecko close at the Snapshot Date; a price older than 24 hours counts as missing | EM decision of 2026-10-05 [s1] | ADR 009 |
