@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T17:44:03Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -19,14 +19,14 @@ sources:
     resource: /specs/lip-draft.md
     title: LIP draft — budgets, reporting and detective controls
   - id: s3
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/Drills.t.sol#L650"
-    title: Kit test at 370e20a — budget consumption, exhaustion and refill
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L782"
+    title: Kit test at 7a8c661 — budget consumption at the approval, exhaustion and refill
   - id: s4
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/NoNewContract.t.sol#L82"
-    title: Kit test at 370e20a — allowance ceilings and the refill-period floor
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/ReviewProbe.t.sol#L226"
+    title: Kit test at 7a8c661 — per-key allowance ceilings and the refill-period floor, with native conditions
   - id: s5
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/ReviewProbe.t.sol#L307"
-    title: Kit test at 370e20a — an unlimited approval is refused
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/ReviewProbe.t.sol#L262"
+    title: Kit test at 7a8c661 — an approval spends its spender's key or stays below a fixed ceiling; an unlimited approval is refused
   - id: s6
     resource: /research/funding-registries-2026-10-02.md
     title: Easy Track funding registries, 2026-10-02 — the top-up factory writes a fixed payment reference
@@ -39,6 +39,12 @@ sources:
   - id: s9
     resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/src/policy/Policy.sol#L688-L705"
     title: Kit policy at 370e20a — the governance permission on budgets pins the key and bounds nothing else
+  - id: s10
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/src/policy/Policy.sol#L259-L280"
+    title: Kit policy at 7a8c661 — each approval branch spends its spender's budget key, or has a fixed ceiling
+  - id: s11
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/src/policy/Policy.sol#L524-L547"
+    title: Kit policy at 7a8c661 — the governance permission on budgets pins the key and a 30-day period floor
 ---
 
 # ADR 009: Budgets, exposure caps, reporting and monitoring
@@ -48,8 +54,8 @@ sources:
 - The permission layer cannot see valuation. It can bound a call, not a portfolio ratio [s2].
 - A budget is a consumable allowance per key. A call consumes it only on success, and it refills per elapsed period up to a maximum [s3].
 - A budget counts token units, so assets with different decimals need different keys [s2].
-- In the kit, an approval is zero or below a fixed cap and spends no budget. The deposit call spends the budget [s7][s8]. A spender can pull what it is approved for without any deposit call, so the budget does not bound what a spender takes.
-- In the kit, the governance permission on budgets pins the key and passes every other value [s9]. Ceilings and a period floor can be expressed with native conditions [s4], but no permission uses them yet.
+- Before OD-08, the kit capped each approval at a fixed amount and spent the budget at the deposit [s7][s8]. A spender can pull what it is approved for without any deposit call, so that budget did not bound what a spender takes.
+- Before OD-08, the kit's governance permission on budgets pinned the key and passed every other value [s9]. Ceilings per key and a period floor can be expressed with native conditions [s4].
 
 ## Decision
 
@@ -132,12 +138,12 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - An approval spends budget even if its deposit then fails or is cancelled. The room on that key comes back at the next refill or retune.
 - One large approval is still a standing exposure up to the budget. The same-transaction practice and the emergency role's power to zero approvals bound it.
 - A budget motion can reset a key's balance to its ceiling. Only the fortnightly procedure and the objection window limit how often, because motions can run in parallel. Monitoring flags a second budget motion on a key within 14 days.
-- The kit meters deposits and caps approvals. The policy migration in [ADR 004](/adr/004-specifications-and-policy-as-data.md) moves the metering to the approval.
+- Since 2026-10-05 the kit meters each approval on its spender's key [s10], and its governance permission bounds the period below by 30 days [s11]. The per-key ceilings wait for the attested figures. The kit's budgets and fixed ceilings are dry-run stand-ins.
 - Budgets drift with price, because caps are ratios and budgets are token units. The two-week retune absorbs the drift.
 - Under the literal base, a yield-bearing stablecoin has room only next to stablecoins that the vault holds directly. The illustrative allocation holds none, so it plans no yield-bearing position.
 - The committee can enlarge the base before a test by holding more stablecoins. The test at deposit time and the published history limit this. They do not prevent it.
 - The policy must hold the Lido Lend budget key, with a ceiling that allows the uncapped budget, from deployment. Otherwise the cap could not lift by motion alone. During the first three months, the allowance set by the onboarding motion and the fortnightly test hold the cap.
-- The mandate text owes five changes: the own-product limit and the protocol cap must state the three-month rule for Lido Lend; the illustrative balance renames its "USD-denominated" heading; the funding rules must allow sUSDS, which EM added on 2026-10-05 ([ADR 008](/adr/008-funding-through-existing-payments.md)); and the reporting section states the price rule and the late-report rule (decision 23), so that tokenholders can hold the committee to them.
+- The mandate text owes six changes: the own-product limit and the protocol cap must state the three-month rule for Lido Lend; the illustrative balance renames its "USD-denominated" heading; the funding rules must allow sUSDS, which EM added on 2026-10-05 ([ADR 008](/adr/008-funding-through-existing-payments.md)); the reporting section states the price rule and the late-report rule (decision 23), so that tokenholders can hold the committee to them; and the legacy section takes over the first-loss terms of the March 2026 Earn allocation (OD-21, [ADR 008](/adr/008-funding-through-existing-payments.md)).
 - Leaving an unpriced asset out understates the vault value, which could open a top-up that the vault does not need. Decision 20 forbids a top-up on such a snapshot.
 - A late monthly report stops top-ups, so the vault cannot be refilled for long without reporting.
 - A top-up in sUSDS counts at once against its yield-bearing cap under the literal base.
@@ -145,7 +151,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 ## Confirmation
 
 - INV-008, INV-011 and INV-012 in the [invariants](/specs/invariants.md).
-- Kit tests: budget consumption and refill [s3]; ceilings and the refill floor [s4]; refused unlimited approval [s5].
+- Kit tests: budget consumption at the approval and refill [s3]; per-key ceilings and the refill floor [s4]; approvals bounded by key or ceiling, and an unlimited approval refused [s5].
 
 ## Reversal conditions
 

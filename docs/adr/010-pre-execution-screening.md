@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:04:03Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -137,7 +137,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - If the vendor accepts the delegatecall request, the operator Safe can batch only through MultiSendCallOnly. Any other delegatecall then fails at screening.
 - The vendor's name enters this repository when the mandate is posted on the forum, with the vendor's written consent. The restricted fork tests then move into the harness.
 - The three new Safes run v1.5.0, the first in the Lido estate as far as the six Lido Safes checked show. The guard has no production history on v1.5.0; the fork check is the evidence [s10].
-- The kit still tests the rejected route A, with a mock module guard on the Asset Safe. The harness must move to a transaction guard on a mock operator Safe, preferably the vendor's deployed bytecode on a fork.
+- The kit's mock module guard and its tests of the rejected route A were removed on 2026-10-05. The harness has no screening test now. It needs a transaction guard on a mock operator Safe, preferably the vendor's deployed bytecode on a fork.
 
 ## Confirmation
 

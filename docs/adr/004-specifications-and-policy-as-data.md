@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T12:30:58Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -19,14 +19,14 @@ sources:
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — lend-markets specification layers
   - id: s3
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/src/policy/FullPolicy.sol"
-    title: Kit policy builders at 370e20a — the current Solidity source of the policy
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/src/policy/FullPolicy.sol"
+    title: Kit policy builders at 7a8c661 — the current Solidity source of the policy
   - id: s4
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/ReviewProbe.t.sol#L197"
-    title: Kit test at 370e20a — a later write to the same role, target and selector replaces the earlier tree
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/ReviewProbe.t.sol#L141"
+    title: Kit test at 7a8c661 — every spender of a token sits in one approve scope, because a later write to the same role, target and selector replaces the earlier tree
   - id: s5
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/README.md"
-    title: Kit harness README at 370e20a — known divergence from the design
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/README.md"
+    title: Kit harness README at 7a8c661 — what the policy follows, and what the kit still lacks
   - id: s6
     resource: "https://github.com/gnosisguild/zodiac-modifier-roles/blob/820e5bc975d1817bdd4bc4a95226f553f7b67b68/packages/evm/contracts/PermissionBuilder.sol#L36-L42"
     title: Zodiac Roles v2 PermissionBuilder at 820e5bc — ScopeFunction emits the full condition array
@@ -41,7 +41,7 @@ sources:
 
 - Today the policy is hand-written Solidity that builds each condition tree [s3].
 - A write to a role, target and selector replaces the stored tree. It does not merge into it. A regression test in the kit guards this [s4].
-- The kit's policy predates the launch scope and the Stonks swap path, so it diverges from the design [s5].
+- Since 2026-10-05 the kit's policy follows the launch scope and the approval rule. It has no swap instances and no factories, and it is still Solidity [s5].
 - Tests read off the implementation inherit its bugs. lido-lend-markets derives tests from requirements and keeps specs in two layers [s2].
 - The Roles modifier emits every applied condition tree in its `ScopeFunction` event [s6]. The last write per role, target and selector wins, and revoke events clear entries, so the live policy can be rebuilt from events without decoding storage. This is not yet checked against the deployed mastercopy's event ABI.
 - The repository already runs Foundry for the fork tests and Python with uv for the docs validator. Lido's DAO vote scripts are Python [s7].

@@ -20,8 +20,7 @@ abstract contract OwnableInline {
 
 /// @title MockAragonAgent — dry-run stand-in for the Lido DAO Aragon Agent
 ///        (0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c).
-/// @dev Fidelity contract (WS-M R17), corrected 2026-09-10 after review:
-///      the real Agent implements the Aragon forwarder with a SINGLE-argument
+/// @dev Fidelity contract: the real Agent implements the Aragon forwarder with a SINGLE-argument
 ///      `forward(bytes)` (selector 0xd948d468; the two-argument form does not
 ///      exist on the deployed implementation), plus `execute(address,
 ///      uint256, bytes)` and `canForward(address,bytes)`. The Agent itself
@@ -60,8 +59,8 @@ contract MockAragonAgent is OwnableInline {
 
     /// @dev Aragon forwarder: parse and execute a CallsScript blob as the
     ///      Agent. Spec 0x00000001, chunks of [to (20)][len (uint32)][calldata]
-    ///      where len covers selector and args. P0-1 fix: the length field was
-    ///      previously read as a 32-byte word, which no production script uses.
+    ///      where len covers selector and args. The length field is a uint32;
+    ///      no production script uses a 32-byte word.
     function forward(bytes memory evmScript) public payable onlyRunner {
         require(evmScript.length >= 4, "AGENT: short script");
         require(bytes4(evmScript) == 0x00000001, "AGENT: unknown spec");

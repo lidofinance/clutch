@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T16:07:52Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -99,9 +99,9 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 ## Options considered
 
-- Raise the shared ceilings by vote. Not recommended: it widens a grant that other setups share, and the whole array must be rewritten.
-- A new payment permission for the vault alone. Not recommended: it adds an ACL grant where configuration is enough.
-- Fund by DAO vote only. Not recommended: every top-up would then carry the vote and the Dual Governance delay, and the mandate puts seeding and top-ups on Easy Track [s5].
+- Raise the shared ceilings by vote. Not chosen by EM: the vote adds USDS and keeps the other ceilings (OD-11). Raising them widens a grant that other setups share.
+- A new payment permission for the vault alone. Not chosen by EM: the vote rewrites the shared permission instead (OD-11). A separate grant adds an ACL entry where configuration is enough.
+- Fund by DAO vote only. Not chosen by EM: the funding runs through two Easy Track registries (OD-06). Every top-up would otherwise carry the vote and the Dual Governance delay, and the mandate puts seeding and top-ups on Easy Track [s5].
 - A period of three months. Not chosen by EM: a refill that the mandate allows in one month could wait for the next quarter.
 - A stETH limit at a stress price. Not chosen: it buys refill speed that the mandate does not require, with capacity beyond one floor.
 - One floor split between the two registries. Not chosen: neither asset could then carry a full refill, which the mandate permits.

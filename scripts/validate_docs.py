@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Validate the docs/ bundle against OKF 0.2 and the Clutch profile.
 
 Run:

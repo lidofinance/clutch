@@ -9,9 +9,10 @@ import {Policy} from "../policy/Policy.sol";
 /// @dev Executes transactions through the Asset Safe *as its owner* (the
 ///      MockAragonAgent in the dry-run; in production the owner is the Aragon
 ///      Agent and authority reaches it through the Dual Governance admin
-///      executor — the only RUN_SCRIPT/EXECUTE holder at the pinned block).
+///      executor — the only RUN_SCRIPT/EXECUTE holder at the fork block).
 ///      Uses the Agent's `execute(address,uint256,bytes)` plus the Safe
-///      approveHash + v=1 signature flow.
+///      approveHash + v=1 signature flow, the only authorization path that
+///      ADR 005 allows the Agent (OD-17).
 library SafeExec {
     address internal constant SENTINEL_MODULES = address(0x0000000000000000000000000000000000000001);
 
@@ -32,15 +33,14 @@ library SafeExec {
 /// @dev Builds Aragon CallsScript payloads (spec 0x00000001) for the
 ///      production wire format: [spec(4)][to(20)][len(uint32)][calldata],
 ///      where len covers selector+args. Matches EVMScriptCreator of the
-///      Easy Track source at commit 3183d1f6. P0-1 fix: the length field was
-///      previously a 32-byte word, which no production executor accepts.
-///      CORRECTED ET governance path: each policy admin call becomes one
-///      chunk targeting the Roles modifier through `execTransactionWithRole`
-///      as the policy-admin role — the same avatar-execution mechanism the
-///      emergency role uses. The mock EVMScript executor is a member of that
-///      role, so enacted motions change policy without any Agent authority.
-///      Easy Track therefore never needs RUN_SCRIPT_ROLE, which the RFP
-///      forbids granting as unrestricted execution.
+///      Easy Track source at commit 3183d1f6. The length field is a uint32;
+///      no production executor accepts a 32-byte word.
+///      Governance path: each policy admin call becomes one chunk targeting
+///      the Roles modifier through `execTransactionWithRole` as the
+///      governance role — the same avatar-execution mechanism the emergency
+///      role uses. The mock EVMScript executor is a member of that role, so
+///      enacted motions change policy without any Agent authority, and Easy
+///      Track never needs RUN_SCRIPT_ROLE on the Agent (docs/specs/lip-draft.md).
 library EVMScriptLib {
     bytes4 internal constant SPEC = 0x00000001;
 

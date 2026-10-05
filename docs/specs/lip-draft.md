@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T17:44:03Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -20,8 +20,8 @@ sources:
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads at block 26092572
   - id: s4
-    resource: "https://github.com/lidofinance/clutch/tree/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test"
-    title: Kit test suites at 370e20a
+    resource: "https://github.com/lidofinance/clutch/tree/7a8c6613602a0078807298b1cebb513af2d74bd5/test"
+    title: Kit test suites at 7a8c661
   - id: s5
     resource: "https://github.com/safe-global/safe-smart-account/blob/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/contracts/base/ModuleManager.sol#L94-L108"
     title: Safe v1.5.0 ModuleManager — the module guard is called for every enabled module
@@ -187,8 +187,8 @@ Four principals. Role keys are `bytes32`; the encoding must match the tooling th
 | Role | Holder | May do | May not do |
 | --- | --- | --- | --- |
 | DAO | Aragon Agent, reached by vote through Dual Governance | Everything: owns the Safe, may replace the whole policy, may add or remove role members | — |
-| `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders up to a cap; stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe; convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
-| `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS so that recovery can sell them; swap to stablecoins through the recovery-family instances; transfer recovered assets to the Agent only; revoke the operator's targets and functions, which is how every removal happens; invalidate outstanding orders | Add any permission; enter any protocol; borrow; change the recovery destination; disable the module |
+| `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below a fixed ceiling (OD-08); stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe; convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
+| `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS so that recovery can sell them; swap to stablecoins through the recovery-family instances; transfer recovered assets to the Agent only; revoke the operator's targets and functions, which is how every removal happens | Add any permission; enter any protocol except by staking ETH; borrow; change the recovery destination; disable the module |
 | `technical` | Emergency Brakes multisig, three of five. **Safety modifier** | Disable the **operator** modifier, with the module argument pinned to it | Anything else. It cannot touch assets or permissions, and it cannot disable the safety modifier |
 | `governance` | EVMScriptExecutor, driven by Easy Track | Write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | Submit a condition tree; grant or remove any role; touch the emergency role; target a modifier or the Safe |
 
@@ -218,7 +218,7 @@ Rules that constrain how policy must be written:
 
 - **A write replaces a slot.** A second `scopeFunction` on the same role, target, and selector discards the previous tree. Policy must therefore be emitted as complete trees, and any tooling that appends permissions per-token must merge them before writing.
 - **`Matches` requires exactly as many children as the call has parameters** at the level being matched. Trailing parameters that need no constraint take `Pass`.
-- **Alternative calldata shapes use `Or` at the root** over full `Matches` branches. This is how per-asset budgets are expressed: one branch per asset group, each with its own `EqualTo` on the asset and its own `WithinAllowance` on the amount. Budget keys are independent across branches.
+- **Alternative calldata shapes use `Or` at the root** over full `Matches` branches. This is how per-spender budgets are expressed on `approve`: one branch per spender, each with its own `EqualTo` on the spender and its own `WithinAllowance` on the amount, or a `LessThan` ceiling for a spender with no key. Budget keys are independent across branches.
 - **A budget key counts token units**, so a key shared across assets of different decimals is a defect. Each decimal class needs its own key.
 - **Array elements are constrained with `ArrayEvery`** over a single child condition.
 - **`Custom=22` invokes an external adapter by `staticcall`.** The adapter address is the leading 20 bytes of the 32-byte comparison value; 12 bytes of caller-defined data follow. Because it is a static call the adapter can read state but cannot write, cannot maintain a ledger, and cannot consume an allowance. No adapter is used in this proposal.
@@ -229,7 +229,7 @@ The **only** new contracts are Easy Track EVM script factories. Each is small, h
 
 ##### 4.1 `RoleToggleEVMScriptFactory` **[Retired, OD-09]**
 
-The kit builds and tests a factory that switches the operator's membership of role keys that the DAO has scoped. EM retired it on 2026-10-05. The design uses no DAO-scoped role keys: every operator permission lives under the `operator` key, which the emergency role's revoke reaches. The governance role holds no `assignRoles` permission.
+The kit built and tested a factory that switched the operator's membership of role keys that the DAO had scoped. EM retired it on 2026-10-05, and the kit no longer contains it. The design uses no DAO-scoped role keys: every operator permission lives under the `operator` key, which the emergency role's revoke reaches. The governance role holds no `assignRoles` permission.
 
 Every remaining factory emits the production script format, `[specId(4)][to(20)][calldataLength(uint32)][calldata]`, where the length covers the selector and the arguments. This matches `EVMScriptCreator` in the Easy Track source. A 32-byte length field is **not** the production format and must be rejected.
 
@@ -237,9 +237,9 @@ Every remaining factory emits the production script format, `[specId(4)][to(20)]
 
 The governance role is separately constrained so that a factory bug cannot widen anything.
 
-- `assignRoles` is scoped with the member pinned by `EqualTo` to the operator multisig, the role-key array constrained by `ArrayEvery` over an `Or` of approved keys, and the boolean array left open.
-- Every other administrative selector granted to the governance role pins the role key to `operator` by `EqualTo`, and refuses the modifier and the Safe as the administered target using `Nor(EqualTo(roles), EqualTo(safe))`.
-- `assignRoles` and `setDefaultRole` as general membership setters are **not** granted. Membership changes beyond the pre-approved key set are a DAO vote.
+- Every administrative selector granted to the governance role pins the role key to `operator` by `EqualTo`, and refuses the modifier and the Safe as the administered target using `Nor(EqualTo(roles), EqualTo(safe))`.
+- `setAllowance` takes only an operator budget key, and a period of at least 30 days (OD-08).
+- `assignRoles` and `setDefaultRole` are **not** granted (OD-09). Membership changes are a DAO vote.
 
 The target refusal is necessary because pinning the role key alone is insufficient: without it, a motion could grant the operator a permission whose target is the modifier, and the operator would then reach owner-only administration through the avatar.
 
@@ -252,11 +252,11 @@ The catalogue below is the set that EM accepted on 2026-09-22 [s1]. EM dropped i
 | Factory | Motion parameters | Emits |
 | --- | --- | --- |
 | `AddWrapFactory` | wrapper, underlying | `wrap` and `unwrap`, or `deposit` and `withdraw` on WETH; the output returns to the avatar |
-| `AddERC4626VaultFactory` | vault, asset, budget key | `deposit` with amount under `WithinAllowance` and receiver `EqualToAvatar`; `redeem` and `withdraw` with receiver and owner `EqualToAvatar` |
-| `AddQueueVaultFactory` | vault, asset, budget key | the asynchronous deposit request with the amount under `WithinAllowance` and the owner pinned to the avatar; the redeem request, cancel and claim with receiver and owner pinned to the avatar |
-| `AddSpenderApprovalFactory` | token, spender, cap | `approve` scoped to that spender, amount either zero or `LessThan` cap |
+| `AddERC4626VaultFactory` | vault, asset, budget key | the asset's `approve` to the vault, spending the budget key; `deposit` with receiver `EqualToAvatar`; `redeem` and `withdraw` with receiver and owner `EqualToAvatar` |
+| `AddQueueVaultFactory` | vault, asset, budget key | the asset's `approve` to the queue, spending the budget key; the asynchronous deposit request with any owner pinned to the avatar; the redeem request, cancel and claim with receiver and owner pinned to the avatar |
+| `AddSpenderApprovalFactory` | token, spender, budget key | a branch of the token's `approve` scope with that spender pinned and the amount spending the budget key; zero spends nothing |
 | `AddSwapInstanceFactory` | swap instance | `transfer` scoped with the recipient pinned to that instance, for the rebalancing family only |
-| `AddMorphoBlueMarketFactory` | market parameters, budget key | `supply` with `onBehalf` pinned to the avatar and the amount under `WithinAllowance`; `withdraw` with `onBehalf` and `receiver` pinned to the avatar. **Ships at launch even though no market address exists yet.** Acceptance requires end-to-end tests against the deployed Morpho Blue contract on a fork, so the template is proven before the market it will be pointed at exists |
+| `AddMorphoBlueMarketFactory` | market parameters, budget key | the loan token's `approve` to Morpho Blue, spending the budget key; `supply` with `onBehalf` pinned to the avatar; `withdraw` with `onBehalf` and `receiver` pinned to the avatar. **Ships at launch even though no market address exists yet.** Acceptance requires end-to-end tests against the deployed Morpho Blue contract on a fork, so the template is proven before the market it will be pointed at exists |
 
 A lending-pool template for markets such as Aave is not in the catalogue, because third-party lending markets are outside the launch scope.
 
@@ -272,7 +272,7 @@ Residual risk to state in the mandate: a motion can point the operator at a cont
 
 ##### 4.4 `BudgetEVMScriptFactory` **[Specified]**
 
-Not yet built. Adjusts an operator budget. The modifier already constrains `setAllowance` natively:
+Not yet built. Adjusts an operator budget. The modifier constrains `setAllowance` natively. The kit's policy already has the key list and the period floor. The per-key ceilings wait for the attested figures; a kit test shows the shape [s4].
 
 - the allowance key must be one of the operator's budget keys, by `Or` of `EqualTo`;
 - `balance`, `maxRefill`, and `refill` are each bounded by `LessThan` the ceiling of their key, in one branch per key;
@@ -335,13 +335,12 @@ All permissions in this part are written into the **safety modifier**. Its holde
 
 The emergency role holds, and nothing else:
 
-- `approve(spender, 0)` on each launch token, spender drawn from the approved-spender list;
-- exits: pool withdraw with the receiver pinned to the avatar, savings-vault redeem and withdraw with receiver and owner pinned to the avatar, asynchronous vault cancel, claim, and redeem;
-- `unwrap` on the wrapped staking token;
+- `approve(spender, 0)` on each token that the operator can approve, spender drawn from the operator's spenders;
+- exits: savings-vault redeem and withdraw with receiver and owner pinned to the avatar; asynchronous vault cancel, claim, and redeem; the claim of a finalized Lido withdrawal, which pays the Safe;
+- conversions before a recovery: `unwrap` on wstETH and on WETH, and `submit` on stETH with the referral pinned to zero (OD-20);
 - `transfer(to, amount)` with `to` pinned by `EqualTo` to the Agent literal, on every asset and receipt token the Safe can hold;
 - `revokeTarget(operator, …)` and `revokeFunction(operator, …)` on the modifier, role key pinned to the operator;
-- `invalidateOrder(bytes)` on the order settlement contract;
-- `transfer(to, amount)` with `to` pinned by `EqualTo` to an approved recovery-family swap instance (see 6.1);
+- `transfer(to, amount)` with `to` pinned by `EqualTo` to an approved recovery-family swap instance (see 6.1). This one is specified, not built: the instances do not exist yet.
 Module disabling is **not** in this role. It belongs to the technical role; see 6.2.
 
 Separately and already deployed: the Emergency Brakes multisig holds the pause role on Easy Track and does not hold unpause. Pausing Easy Track during an incident freezes every queued motion, and only the DAO can resume. This is the durable answer to a queued expansion re-enabling something the emergency role just revoked, and it must be a step in the incident runbook.
@@ -424,7 +423,7 @@ Tested: the emergency role and the operator are both refused; the technical role
 
 #### Part 7: Budgets **[Implemented]**
 
-Budgets are consumable allowances keyed by `bytes32`, drawn by `WithinAllowance` nodes in the operator's permissions. The design draws them at the approval, not at the deposit (OD-08); the kit still draws them at the deposit. Semantics verified against the deployed mastercopy: consumption happens only on success, a reverted call consumes nothing, a key shared across branches draws across them, and refills accrue by elapsed periods capped at the maximum.
+Budgets are consumable allowances keyed by `bytes32`, drawn by `WithinAllowance` nodes in the operator's permissions. They are drawn at the approval, not at the deposit (OD-08), and the kit draws them that way. Semantics verified against the deployed mastercopy: consumption happens only on success, a reverted call consumes nothing, a key shared across branches draws across them, and refills accrue by elapsed periods capped at the maximum.
 
 The `Allowance` struct field order in the deployed mastercopy is `refill, maxRefill, period, balance, timestamp`. Tooling that reads the getter must use this order; transposing balance and timestamp yields a Unix timestamp where a balance is expected.
 
@@ -515,24 +514,24 @@ Costs: a third Safe with the TMC signers, two policy applications, two sets of r
 
 ### Test Cases
 
-40 tests pass against deployed mainnet bytecode on a fork pinned at block 25946643, at commit 370e20a of this repository [s4]. Nothing has been deployed to mainnet. The [invariants](/specs/invariants.md) map these tests to the invariants they check.
+40 tests pass against deployed mainnet bytecode on a fork pinned at block 25946643, at commit 7a8c661 of this repository [s4]. Nothing has been deployed to mainnet. The [invariants](/specs/invariants.md) map these tests to the invariants they check.
 
 | Group | n | Covers |
 | --- | --- | --- |
 | Governance script encoding | 6 | Production CallsScript format accepted; 32-byte length rejected; truncated length rejected; multi-call script; script substituted at enactment rejected; objection rejection |
-| Governance change types | 4 | Asset, target, selector, parameter constraint |
+| Governance change types | 4 | Spender, target, selector, budget |
 | Direct DAO path | 1 | The owner path applies the same change without Easy Track |
-| Factory-only governance | 3 | Toggle enacts and grants the pre-scoped role; DAO withdrawal of a key kills a queued motion; unapproved key and foreign creator rejected. The toggle factory is retired (OD-09) |
-| Native constraints | 2 | Toggle restricted to pre-approved keys with the member pinned; allowance ceilings and refill-period floor |
 | Escalation guards | 4 | Governance cannot change membership, cannot touch the emergency role, cannot grant the operator an administrative target, cannot raise a foreign allowance key |
-| Operator lifecycle | 3 | Positions opened and closed on real protocol contracts; receiver pinning enforced; asynchronous vault deposit authorised at the policy layer |
-| Emergency and module | 2 | Revoke, exit, and return-to-Agent flow; module disabling with owner recovery |
-| Approvals and orders | 3 | Unlimited approval rejected; operator cannot restore an approval after revocation; outstanding order invalidated |
-| Budgets | 3 | Consumption, exhaustion, refill; per-asset keys independent; 18-decimal assets draw their own key |
-| Adversarial | 1 | Operator cannot widen, cannot reach administration, cannot act as another role |
-| Known limits recorded as tests | 2 | Order pre-signature is opaque to the modifier; a single-child match leaves trailing parameters unconstrained |
-| Policy shape and funding | 3 | Policy builds within bounds; approvals survive duplicate writes; funding bootstrap |
-| Pre-execution screening | 3 | A flagged operator transaction is refused; recovery is never refused; the owner path removes a failed guard. These tests cover the rejected module-guard route and must be rewritten for the Operator Safe's guard |
+| Budget motions | 3 | A motion and the governance role cannot set a refill period below 30 days; per-key ceilings are expressible with native conditions |
+| Operator lifecycle | 5 | sUSDS, staking, wstETH and WETH round trips on real contracts; the DAI–USDS converter pays the Safe both ways, with a fixed ceiling on its approvals; a withdrawal-queue round trip buys WETH; receiver pinning enforced; asynchronous vault deposit authorised at the policy layer |
+| Emergency and module | 3 | Revoke, zero approval, exit, and return-to-Agent flow; WETH unwrapped, staked and sent to the Agent, through WETH's 2,300-gas transfer; module disabling with owner recovery |
+| Approvals | 3 | An approval spends its spender's key or stays below a fixed ceiling, and zero is free; the operator cannot restore an approval after revocation; one approve scope per token keeps every spender |
+| Budgets | 2 | Consumption, exhaustion, refill; keys of different assets and decimals are independent |
+| Adversarial and launch scope | 3 | The operator cannot widen, reach administration or act as another role; it holds only the `operator` key; no order pre-signing, CoW relayer approval, Aave or sDAI |
+| Policy shape | 3 | The policy builds; the `operator` key is the only operator key; no out-of-scope target, spender or receiver |
+| Asset Safe shape | 1 | The Agent is the only owner, threshold one; pinned singleton; no fallback handler, guard or module guard; the Safe owns both modifiers |
+| Known limits recorded as tests | 1 | A single-child match leaves trailing parameters unconstrained |
+| Funding bootstrap | 1 | The dry-run funding script |
 | **Total** | **40** | |
 
 Reproduce with `forge test` against an archive RPC, fork block 25946643.
@@ -606,8 +605,8 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | --- | --- | --- | --- |
 | Modifier bricked at deployment | Roles proxy deployed through a Safe proxy rather than a minimal proxy | Mandatory use of the Zodiac ModuleProxyFactory; deployment rehearsal on a fork | Deployment self-test before any funding |
 | Role key mismatch | Deployment tooling and factories derive role keys differently | Pin the derivation and assert it at deployment | Deployment self-test |
-| Operator key compromise | Signer compromise | Default deny, no transfer permission, receivers pinned to the avatar, budgets, capped approvals | Policy-drift and approval monitoring; budget burn-rate alerts |
-| Emergency key compromise | Signer compromise | Emergency cannot add permissions, enter protocols, or change the recovery destination | Any emergency action pages the DAO; a revoke-only action pages at a lower severity than a transfer or a swap |
+| Operator key compromise | Signer compromise | Default deny, no transfer permission, receivers pinned to the avatar, budgets, approvals bounded by each spender's budget | Policy-drift and approval monitoring; budget burn-rate alerts |
+| Emergency key compromise | Signer compromise | Emergency cannot add permissions, enter protocols beyond staking ETH, or change the recovery destination | Any emergency action pages the DAO; a revoke-only action pages at a lower severity than a transfer or a swap |
 | Defect in Safe or Roles code | A bug in the Safe v1.5.0 singleton or in the Roles mastercopy | The vault's main Safe paths are ones that Certora formally verified, and the vault uses no fallback handler and no contract signature; Safe's releases and advisories are checked again before the enabling vote; the technical role can disable the operator modifier; the DAO can replace the policy or move the assets by vote | Safe's advisories and releases; the engineering organisation's watch on technical risk, including bug-bounty submissions; alerts on singleton, module and owner changes |
 | Falsified signing interface | A signer's device or wallet interface shows one transaction and has another signed, as at Bybit in 2025 | The Operator Safe holds no assets, and each of its transactions needs the vendor's approval; the vendor is asked to refuse delegatecalls except to MultiSendCallOnly; the operator's permissions bound what a signing quorum can do; the emergency role's powers are one-way | Alerts on owner, guard, module and singleton changes of the three new Safes |
 | Queued motion restores a revoked permission | An expansion motion enacts after an incident | Easy Track pause, held by the Emergency Brakes multisig; the operator Safe can cancel its own motion; after enactment, the emergency Safe revokes the permission again at once | Motion monitoring; the incident runbook must page the pause holder |

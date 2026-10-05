@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T17:44:03Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -22,14 +22,14 @@ sources:
     resource: /specs/lip-draft.md
     title: LIP draft — account graph, roles and deployment constraints
   - id: s4
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/Drills.t.sol#L611"
-    title: Kit test at 370e20a — module disabling is technical-only, pinned, and leaves recovery working
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L740"
+    title: Kit test at 7a8c661 — module disabling is technical-only, pinned, and leaves recovery working
   - id: s5
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/Drills.t.sol#L562"
-    title: Kit test at 370e20a — emergency flow, with transfers pinned to the Agent
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L669"
+    title: Kit test at 7a8c661 — emergency flow, with transfers pinned to the Agent
   - id: s6
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/Drills.t.sol#L677"
-    title: Kit test at 370e20a — adversarial operator
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L807"
+    title: Kit test at 7a8c661 — adversarial operator
   - id: s7
     resource: /research/safe-v150-due-diligence-2026-10-05.md
     title: Safe v1.5.0 due diligence, 2026-10-05 — audits, advisories, use and value on mainnet, incidents, and the Safe paths the vault uses
@@ -42,6 +42,9 @@ sources:
   - id: s10
     resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/script/DeployDryRun.s.sol#L73-L77"
     title: Kit deployment script at 370e20a — the Asset Safe is set up with no fallback handler
+  - id: s11
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L898"
+    title: Kit test at 7a8c661 — the Asset Safe's owner, threshold, singleton, and missing fallback handler and guards
 ---
 
 # ADR 005: Account graph and roles
@@ -91,7 +94,7 @@ The other conditions of OD-17 are in [ADR 010](/adr/010-pre-execution-screening.
 
 ## Proposed direction
 
-The rest of this section is the design that the kit implements [s3]. EM has not accepted it as text.
+The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 - **Asset Safe.** A new Safe owned one-of-one by the Aragon Agent. It holds every asset. No guard and no fallback handler are set on it. It runs Safe v1.5.0. The Agent approves the hash of each transaction, or sends the transaction itself, so the Safe checks a type-1 signature (decision 14).
 - **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules. It carries the screening guard, holds the operator role and is the trusted caller of every factory. It runs Safe v1.5.0, with a threshold of 4 of 7.
@@ -104,9 +107,9 @@ The rest of this section is the design that the kit implements [s3]. EM has not 
 | Role | Holder | Modifier | May do | May not do |
 |---|---|---|---|---|
 | DAO | Aragon Agent, by vote through Dual Governance | owner path | everything: own the Safe, replace the policy, change membership | — |
-| `operator` | operator Safe, the committee's signers, four of seven, screened ([ADR 010](/adr/010-pre-execution-screening.md)) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders up to a cap; stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe ([ADR 007](/adr/007-swapping-through-stonks.md)); convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md)); as manager of the rebalancing swap instances, place orders and recover unsold tokens to the Aragon Agent ([ADR 007](/adr/007-swapping-through-stonks.md)) | move assets out, except into a rebalancing instance; borrow; administer a modifier or the Safe; change its own permissions |
+| `operator` | operator Safe, the committee's signers, four of seven, screened ([ADR 010](/adr/010-pre-execution-screening.md)) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below a fixed ceiling ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe ([ADR 007](/adr/007-swapping-through-stonks.md)); convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md)); as manager of the rebalancing swap instances, place orders and recover unsold tokens to the Aragon Agent ([ADR 007](/adr/007-swapping-through-stonks.md)) | move assets out, except into a rebalancing instance; borrow; administer a modifier or the Safe; change its own permissions |
 | `governance` | Easy Track executor | operator | write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | submit a condition tree; grant or remove any role; touch the emergency role; target a modifier or the Safe |
-| `emergency` | emergency Safe, two signatures, the committee's signers | safety | zero approvals; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS, so that recovery can sell them; send assets to recovery swap instances or to the Agent; revoke the operator's targets and functions, which is how every removal happens; as manager of the recovery swap instances, place orders and recover tokens to the Aragon Agent | add a permission; enter a protocol; borrow; change the recovery destination; disable a module |
+| `emergency` | emergency Safe, two signatures, the committee's signers | safety | zero approvals; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS, so that recovery can sell them; send assets to recovery swap instances or to the Agent; revoke the operator's targets and functions, which is how every removal happens; as manager of the recovery swap instances, place orders and recover tokens to the Aragon Agent | add a permission; enter a protocol except by staking ETH; borrow; change the recovery destination; disable a module |
 | `technical` | Emergency Brakes Safe, three of five | safety | disable the operator modifier; the module argument is pinned | anything else, including disabling the safety modifier |
 
 ## Options considered
@@ -133,7 +136,7 @@ The rest of this section is the design that the kit implements [s3]. EM has not 
 ## Confirmation
 
 - INV-001, INV-002, INV-003, INV-004, INV-009 and INV-019 in the [invariants](/specs/invariants.md).
-- Kit tests: the technical role is the only one that can disable a module, and only the operator modifier [s4]; the emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6].
+- Kit tests: the technical role is the only one that can disable a module, and only the operator modifier [s4]; the emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6]; the Asset Safe has the Agent as its only owner, the pinned singleton, and no fallback handler or guard [s11].
 
 ## Reversal conditions
 

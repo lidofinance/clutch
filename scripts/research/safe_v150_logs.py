@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Safe v1.5.0 adoption on Ethereum mainnet, read from logs (evidence for OD-17).
 
 Lists two sets of logs between two blocks through the Etherscan v2 logs API:

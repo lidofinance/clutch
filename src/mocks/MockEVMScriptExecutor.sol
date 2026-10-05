@@ -5,7 +5,7 @@ import {MockAragonAgent} from "./MockAragonAgent.sol";
 
 /// @title MockEVMScriptExecutor — dry-run stand-in for the Lido Easy Track
 ///        EVMScriptExecutor (0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977).
-/// @dev Fidelity contract (WS-M R17): reproduces the deployed executor's flow:
+/// @dev Fidelity contract: reproduces the deployed executor's flow:
 ///      - callable only by the (mock) Easy Track, mirroring the deployed
 ///        executor's caller check;
 ///      - decodes the Aragon CallsScript EVM script spec (executor id
