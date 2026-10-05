@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:54:58Z
+  at: 2026-10-05T14:04:03Z
 verified: []
 sources:
   - id: s1
@@ -16,6 +16,9 @@ sources:
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30
+  - id: s3
+    resource: /research/safe-v150-due-diligence-2026-10-05.md
+    title: Safe v1.5.0 due diligence, 2026-10-05
 ---
 
 # Parameters
@@ -26,7 +29,9 @@ sources:
 |---|---|---|---|
 | Operator | the operator Safe, a new Safe with the committee's signers | EM decision of 2026-10-02 [s1] | [ADR 005](/adr/005-account-graph-and-roles.md) |
 | Operator Safe threshold | four of seven | EM decision of 2026-10-02 [s1] | ADR 005 |
-| Safe version of the Asset Safe and the operator Safe | v1.5.0; the operator Safe uses v1.4.1 if the vendor does not confirm v1.5.0 support in writing | EM decisions of 2026-10-02: a condition that the compatibility check met, and the vendor's confirmation as a gate [s1] | ADR 005 |
+| Safe version of the Asset Safe, the operator Safe and the emergency Safe | v1.5.0 | EM decisions of 2026-10-02 and 2026-10-05: the compatibility check met the condition; EM reported the vendor's confirmation of v1.5.0 support, which closed the gate; the due diligence found no blocker (OD-17) [s1][s3] | ADR 005 |
+| Asset Safe fallback handler | none; a protocol that needs one comes back to EM | EM decision of 2026-10-05 [s1] | ADR 005 |
+| How the Aragon Agent authorizes an Asset Safe transaction | `approveHash`, or the Agent sends the transaction itself; never a contract signature | EM decision of 2026-10-05 [s1] | ADR 005 |
 | Emergency Safe | threshold two; owner set equal to the committee's | EM decision [s1] | ADR 005 |
 | Technical role holder | the Emergency Brakes Safe, three of five | EM decision [s1]; quorum read [s2] | ADR 005 |
 | Easy Track objection period | 72 hours, 259,200 seconds, global | Read [s2] | — |
@@ -58,6 +63,7 @@ sources:
 | Late-report flag | day 8 after month-end; no top-up motion while the report is late | EM decision of 2026-10-05 [s1] | ADR 009 |
 | Screening guard | the screening vendor's existing transaction guard, one instance on the operator Safe, of the build that the Lido multisigs run | EM decisions of 2026-10-02 [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
 | Guard removal and bypass timelocks | 10 days each, fixed in the chosen build | EM decision of 2026-10-02 [s1]; a constant in the vendor's code | ADR 010 |
+| Delegatecall target of the operator Safe | only Safe's MultiSendCallOnly v1.5.0, `0xA83c336B20401Af773B6219BA5027174338D1836`; a request to the vendor, not a gate | EM decision of 2026-10-05 [s1]; address and code hash [s3] | ADR 010 |
 | Standing approvals on the guard | none, except the guard's two built-in timelock approvals | EM decision of 2026-10-02 [s1] | ADR 010 |
 | Screening failure mode | fail closed on the operator | EM decision [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
 | Flagging authority | the screening vendor, alone | EM decision [s1] | ADR 010 |

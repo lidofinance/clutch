@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T12:30:58Z
+  at: 2026-10-05T14:04:03Z
 verified: []
 sources:
   - id: s1
@@ -23,13 +23,13 @@ sources:
 
 # Invariants
 
-The invariants below come from ADR 005 to ADR 011 [s1]. The kit's tests predate them. The mapping pairs each invariant with the kit test that checks it, by name and by a read of the test body [s2]. It is not yet a CI check.
+The invariants below come from ADR 004 to ADR 011 [s1]. The kit's tests predate them. The mapping pairs each invariant with the kit test that checks it, by name and by a read of the test body [s2]. It is not yet a CI check.
 
 State "Draft" means the ADR is proposed. State "Pending" means the invariant depends on an open decision or on work that is not built. "Violated" means the kit's policy currently breaks the invariant, as its README records [s3].
 
 | ID | Invariant | Set by | State | Kit test |
 |---|---|---|---|---|
-| INV-001 | The Aragon Agent is the only owner of the Asset Safe, with threshold one. | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | None: the harness sets this up but does not assert it |
+| INV-001 | The Aragon Agent is the only owner of the Asset Safe, with threshold one. It authorizes Asset Safe transactions only by `approveHash` or by sending them itself, never by a contract signature. The Asset Safe has no fallback handler. | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | None: the harness sets this up, executing through `approveHash` and with no fallback handler, but does not assert it |
 | INV-002 | No role except the DAO path can move an asset out of the Asset Safe, with three exceptions: the emergency role to the Aragon Agent or to a recovery swap instance; and the operator to a rebalancing swap instance. A token that enters a rebalancing instance leaves it only as proceeds to the Asset Safe or as a recovery to the Aragon Agent. | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 007](/adr/007-swapping-through-stonks.md) | Pending: swap instances | `test_D4_emergency_flow`, `test_D6_adversarial` cover the Agent-only part |
 | INV-003 | Every receiver, owner and beneficiary argument in an operator permission is pinned to the avatar. | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | `test_D3_operator_cannot_route_around_avatar` |
 | INV-004 | The governance role cannot change role membership, cannot touch the emergency role, cannot give the operator an administrative target, and cannot set an allowance outside the operator's budget keys. It holds no `assignRoles` permission. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Draft | the four `test_p0_policyadmin_cannot_*` tests |
@@ -47,3 +47,4 @@ State "Draft" means the ADR is proposed. State "Pending" means the invariant dep
 | INV-016 | The trees rebuilt from each modifier's events on a fork equal the compiled artifact, and the artifact compiles from the policy data file. | [ADR 004](/adr/004-specifications-and-policy-as-data.md) | Pending: data file and compiler | None yet |
 | INV-017 | A top-up motion pays only the Asset Safe, only in an allowed token, and never more than its funding registry's remaining limit in the month of enactment. Only the operator Safe can create one. Only the DAO changes a funding registry's limit, period or recipients. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Pending: registries and factories not built | None yet |
 | INV-018 | Every operator permission lives under the `operator` role key, and the operator Safe holds no other role key. The emergency role's revoke therefore reaches every operator permission. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Draft | None yet: the kit's launch policy assigns only `operator`, but no test asserts it |
+| INV-019 | The Asset Safe, the operator Safe and the emergency Safe run the Safe v1.5.0 singleton pinned in the LIP. A change of any of their singletons is a critical alert. | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 010](/adr/010-pre-execution-screening.md) | Pending: the Safes are not deployed | None yet: the kit's deployment checks the singleton's code hash, not the deployed proxies |

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T12:30:58Z
+  at: 2026-10-05T14:04:03Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,9 @@ sources:
   - id: s7
     resource: /research/funding-registries-2026-10-02.md
     title: Easy Track funding registries, 2026-10-02 — how a registry counts, the fixed payment reference, and the live registries
+  - id: s8
+    resource: /research/safe-v150-due-diligence-2026-10-05.md
+    title: Safe v1.5.0 due diligence, 2026-10-05 — audits, advisories, use and value on mainnet, incidents, and the Safe paths the vault uses
 ---
 
 # LIP-XX: Active Treasury Management Vault
@@ -151,12 +154,12 @@ Template factories remove the problem without forcing a vote for every new proto
 | EVMScriptExecutor | `0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977` | existing |
 | TMC multisig | `0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647` | existing, threshold 4 of 7; its signers also sign the Operator Safe and the Emergency Safe |
 | Emergency Brakes multisig | `0x73b047fe6337183A454c5217241D780a932777bD` | existing, threshold 3 of 5; holds the **technical** role and the global Easy Track pause |
-| **Emergency Safe** | to be deployed | new Safe instance, **threshold 2**, owner set identical to the TMC multisig |
-| Safe singleton v1.5.0 | `0xFf51A5898e281Db6DfC7855790607438dF2ca44b` | reused. `VERSION()` returns `1.5.0`, and the runtime codehash equals `0xdda019cbd7c867a533a2a86e5c53434fdc50b13122b5a5ddb4a8df61b31c20f2`, matching the published deployment record. Released 2025-07-03, audited by Certora and Ackee at pinned commits, covered by the Safe bug-bounty programme. Both new Safes use v1.5.0, by EM's decision of 2026-10-02 [s1]. The screening vendor's guard passed the same fork suite on v1.3.0, v1.4.1 and v1.5.0 [s6]. None of the six Lido Safes checked runs v1.5.0 today |
+| **Emergency Safe** | to be deployed | new Safe v1.5.0 instance, **threshold 2**, owner set identical to the TMC multisig. No guard |
+| Safe singleton v1.5.0 | `0xFf51A5898e281Db6DfC7855790607438dF2ca44b` | reused. `VERSION()` returns `1.5.0`, and the runtime codehash equals `0xdda019cbd7c867a533a2a86e5c53434fdc50b13122b5a5ddb4a8df61b31c20f2`, matching the published deployment record. Released 2025-07-03, audited by Certora and Ackee at pinned commits, covered by the Safe bug-bounty programme. The Asset Safe, the Operator Safe and the Emergency Safe use v1.5.0, by EM's decisions of 2026-10-02 and 2026-10-05 [s1]. The screening vendor's guard passed the same fork suite on v1.3.0, v1.4.1 and v1.5.0 [s6], and the vendor confirmed its support for v1.5.0, as EM reported on 2026-10-05. None of the six Lido Safes checked runs v1.5.0 today. Its record of holding value is short; see Security Considerations [s8] |
 | Safe proxy factory v1.5.0 | `0x14F2982D601c9458F93bd70B218933A6f8165e7b` | reused |
 | Zodiac Roles mastercopy | `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5` | reused, `owner()` is `0x…01`, i.e. locked |
 | Zodiac ModuleProxyFactory | `0x000000000000aDdB49795b0f9bA5BC298cDda236` | reused |
-| **Asset Safe** | to be deployed | new instance of the singleton. No guard is set on it |
+| **Asset Safe** | to be deployed | new instance of the singleton. No guard and no fallback handler are set on it. The Aragon Agent authorizes its transactions only by `approveHash` or by sending them itself, never by a contract signature (OD-17) |
 | **Operator Safe** | to be deployed | new Safe instance with the TMC signers. Holds no assets and no modules. Threshold 4 of 7. Holds the operator role, is the trusted caller of every factory, and carries the screening guard |
 | **Operator modifier** | to be deployed | minimal proxy of the mastercopy. Carries the operator and governance roles. The operator role is held by the Operator Safe, whose transactions are screened |
 | **Safety modifier** | to be deployed | minimal proxy of the mastercopy. Carries the emergency and technical roles. Never screened |
@@ -169,6 +172,7 @@ The Emergency Safe and the Operator Safe are new instances of the audited Safe s
 1. The Roles mastercopy keeps its own storage from slot 0. Deploying it behind a Safe proxy overwrites the proxy's implementation pointer with the avatar address and bricks the instance. It **must** be deployed through the Zodiac `ModuleProxyFactory`, which produces EIP-1167 minimal proxies that hold the implementation in bytecode.
 2. The deployed mastercopy predates the current upstream source. Its initialiser is `setUp(bytes)` taking `abi.encode(owner, avatar, target)`, not the three-argument form. Audits and deployment tooling must pin the deployed bytecode, not repository HEAD.
 3. `owner`, `avatar`, and `target` are all set to the Asset Safe.
+4. The Asset Safe is set up with no fallback handler. Without one, it refuses ERC-721 and ERC-1155 safe transfers and cannot sign a message by EIP-1271. A protocol that needs either comes back to EM (OD-17).
 
 #### Part 2: Roles and authority **[Implemented]**
 
@@ -460,7 +464,7 @@ Report operations, decided by EM on 2026-10-05 (OD-14): the committee publishes 
 
 ##### 9.1 Detection, response, and the limits of blocking **[Open]**
 
-**Detection** runs in two estates in parallel. The Lido on-chain monitoring suite carries the rules that are cheap to express over block data: policy drift against the intended permission set, approval inventory, budget burn rate, repeated budget motions on one key, module and owner changes on both Safes, and motion lifecycle events. A commercial monitoring service carries the rules that need market and threat context: depegs, protocol compromise signals, and counterparty anomalies. Findings from both route into the existing notification and incident channels. The defi-tech team specifies the on-chain rules and makes the important updates; the team that owns the Lido monitoring bots reviews them and maintains the engine and the bots. The committee configures the vault's rules in the commercial service (OD-13).
+**Detection** runs in two estates in parallel. The Lido on-chain monitoring suite carries the rules that are cheap to express over block data: policy drift against the intended permission set, approval inventory, budget burn rate, repeated budget motions on one key, module, owner and singleton changes on the three new Safes, and motion lifecycle events. A commercial monitoring service carries the rules that need market and threat context: depegs, protocol compromise signals, and counterparty anomalies. Findings from both route into the existing notification and incident channels. The defi-tech team specifies the on-chain rules and makes the important updates; the team that owns the Lido monitoring bots reviews them and maintains the engine and the bots. The committee configures the vault's rules in the commercial service (OD-13).
 
 **Response to a ratio breach** is a financial judgement and belongs to the operator committee, working to the mandate's remediation window after the fortnightly review. If a breach worsens rather than resolves, the escalation is the technical role disabling the operator modifier, which stops all operator activity while recovery stays available.
 
@@ -476,9 +480,10 @@ Report operations, decided by EM on 2026-10-05 (OD-14): the committee publishes 
 - The Operator Safe's owners can remove the guard only through a fixed 10-day timelock that the vendor cannot block. A vendor outage therefore stops operator activity for at most ten days, and a hostile removal stays visible for ten days [s6].
 - The enabling vote grants the operator role only after the guard is set and its bypass mode is off. The owners cannot turn the bypass on again without the vendor's approval and a 10-day timelock (OD-07).
 - The vendor agreement forbids standing approvals on this guard: approvals of one call at any nonce, or of one function with any arguments. Only the guard's two built-in timelock approvals stay (OD-07).
-- The vendor confirms in writing that its approval service supports Safe v1.5.0. Without that confirmation, the Operator Safe uses v1.4.1, the version the guard runs on today (OD-07).
+- The vendor has confirmed that its approval service supports Safe v1.5.0, as EM reported on 2026-10-05, so the Operator Safe runs v1.5.0 (OD-07, OD-17).
+- The vendor is asked to refuse every delegatecall from the Operator Safe except to Safe's MultiSendCallOnly v1.5.0, `0xA83c336B20401Af773B6219BA5027174338D1836`. At Bybit in 2025, one signed delegatecall replaced a Safe's implementation [s8]. On the Operator Safe, such a call could also remove the guard. This is a request, not a gate (OD-17).
 
-Lido's on-chain monitoring already has a detector for this guard. It alerts on the start of the removal or bypass timelock, the bypass mode turning on, any approval that is not bound to one transaction, any keeper change, any added policy contract, and any module, guard or owner change on the guarded Safe. It must add Safe v1.5.0 and the Operator Safe's instance. Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity.
+Lido's on-chain monitoring already has a detector for this guard. It alerts on the start of the removal or bypass timelock, the bypass mode turning on, any approval that is not bound to one transaction, any keeper change, any added policy contract, and any module, guard or owner change on the guarded Safe. It must add Safe v1.5.0 and the Operator Safe's instance. Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity. Lido's monitoring also alerts, as critical, on any change of the singleton of the three new Safes, because a delegatecall can replace a Safe's implementation without any Safe event (OD-17).
 
 ##### 9.1.2 Why not a module guard on the Asset Safe **[Rejected]**
 
@@ -580,6 +585,8 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 
 **Policy encoding.** The policy that the test suite exercises is this team's hand-written encoding. [ADR 004](/adr/004-specifications-and-policy-as-data.md) replaces it with a data file, a compiler and a round-trip check that reads the applied conditions back from the chain: a strict YAML file, a Python compiler that emits one JSON artifact, and a check that rebuilds the trees from the modifier's events (OD-16). Until then, nothing independent checks the encoding.
 
+**Safe v1.5.0 has a short record.** The three new Safes run Safe v1.5.0. Certora and Ackee audited it, Certora's formal verification covers the vault's main Safe paths, no advisory concerns it, and Safe's bug bounty covers it. But it has held little value for a short time. Before March 2026, only 57 Safes were created on it through Safe's factory, and Safe{Wallet} made it the version of new Safes only on 2026-09-22 [s8]. The design keeps the vault off the code that changed most in v1.5.0: the Aragon Agent never signs for the Asset Safe as a contract, and the Asset Safe has no fallback handler. Safe's releases and advisories are checked again before the enabling vote, and a change on the vault's paths goes back to EM (OD-17). The large losses at Safe accounts so far came from falsified signing interfaces, third-party modules and signers' own permission changes, not from Safe's contracts [s8].
+
 **Deployment provenance.** Explorer-verified source is not a build-to-bytecode comparison. Before funding, every reused component should be verified against a locally compiled tagged release.
 
 ## Failure Modes
@@ -590,6 +597,8 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | Role key mismatch | Deployment tooling and factories derive role keys differently | Pin the derivation and assert it at deployment | Deployment self-test |
 | Operator key compromise | Signer compromise | Default deny, no transfer permission, receivers pinned to the avatar, budgets, capped approvals | Policy-drift and approval monitoring; budget burn-rate alerts |
 | Emergency key compromise | Signer compromise | Emergency cannot add permissions, enter protocols, or change the recovery destination | Any emergency action pages the DAO; a revoke-only action pages at a lower severity than a transfer or a swap |
+| Defect in Safe or Roles code | A bug in the Safe v1.5.0 singleton or in the Roles mastercopy | The vault's main Safe paths are ones that Certora formally verified, and the vault uses no fallback handler and no contract signature; Safe's releases and advisories are checked again before the enabling vote; the technical role can disable the operator modifier; the DAO can replace the policy or move the assets by vote | Safe's advisories and releases; the engineering organisation's watch on technical risk, including bug-bounty submissions; alerts on singleton, module and owner changes |
+| Falsified signing interface | A signer's device or wallet interface shows one transaction and has another signed, as at Bybit in 2025 | The Operator Safe holds no assets, and each of its transactions needs the vendor's approval; the vendor is asked to refuse delegatecalls except to MultiSendCallOnly; the operator's permissions bound what a signing quorum can do; the emergency role's powers are one-way | Alerts on owner, guard, module and singleton changes of the three new Safes |
 | Queued motion restores a revoked permission | An expansion motion enacts after an incident | Easy Track pause, held by the Emergency Brakes multisig; the operator Safe can cancel its own motion; after enactment, the emergency Safe revokes the permission again at once | Motion monitoring; the incident runbook must page the pause holder |
 | Operator modifier disabled while positions are open | The technical committee acts during a defect | The safety modifier keeps working, so the emergency role can still exit and return assets | Module-enabled monitoring on the Safe, alert on any change |
 | Technical committee unreachable during a permission-layer defect | Signer availability | The DAO path can replace the policy outright; the financial role can still revoke and exit through the safety modifier | Escalation clock in the runbook |
@@ -607,15 +616,14 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 
 The [open-decisions register](/registers/open-decisions.md) tracks every open item. These can change the shape of this proposal:
 
-1. **OD-17, Safe v1.5.0 incident history.** Both new Safes use v1.5.0. Its audits are recorded; its incident history is not.
-2. **The vendor's confirmations (OD-07, decided).** Before deployment the vendor confirms in writing that its approval service supports Safe v1.5.0, accepts the exclusion of standing approvals, and agrees to be named. It is also asked to merge and document the 10-day build. The Lido-side party is the one that already holds the vendor's arrangement for the guarded Lido multisigs (OD-12).
-3. **Mandate text owed.** The own-product limit and the protocol cap must state that Lido Lend counts against the protocol cap for its first three months (OD-04). The illustrative balance renames its "USD-denominated" heading (OD-03). The funding rules must allow sUSDS (OD-11). The reporting section must state the price rule and the late-report rule (OD-14).
-4. **OD-21, the legacy investments.** The mandate carries the legacy investments into the vault, and they reduce the seed. Who holds them, and how they move in, is open.
+1. **The vendor's confirmations (OD-07, decided).** Before deployment the vendor confirms in writing that it accepts the exclusion of standing approvals and agrees to be named. Its support for Safe v1.5.0 is confirmed, as EM reported on 2026-10-05 (OD-17). It is also asked to merge and document the 10-day build, and to refuse delegatecalls from the Operator Safe except to MultiSendCallOnly. The Lido-side party is the one that already holds the vendor's arrangement for the guarded Lido multisigs (OD-12).
+2. **Mandate text owed.** The own-product limit and the protocol cap must state that Lido Lend counts against the protocol cap for its first three months (OD-04). The illustrative balance renames its "USD-denominated" heading (OD-03). The funding rules must allow sUSDS (OD-11). The reporting section must state the price rule and the late-report rule (OD-14).
+3. **OD-21, the legacy investments.** The mandate carries the legacy investments into the vault, and they reduce the seed. Who holds them, and how they move in, is open.
 
 ## Links
 
 - Zodiac Roles modifier, deployed mastercopy: `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5`
-- Safe v1.4.1 singleton: `0x41675C099F32341bf84BFc5382aF534df5C7461a`
+- Safe smart account v1.5.0 release: https://github.com/safe-fndn/safe-smart-account/releases/tag/v1.5.0
 - Easy Track: https://docs.lido.fi/deployed-contracts/#easy-track
 - Treasury Management Committee: https://docs.lido.fi/multisigs/committees#25-treasury-management-committee
 - Emergency Brakes: https://docs.lido.fi/multisigs/emergency-brakes#12-emergency-brakes-ethereum

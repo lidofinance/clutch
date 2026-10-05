@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 005: Account graph and roles"
-description: A Safe owned only by the Aragon Agent holds the assets; two Roles modifiers split the operator and governance roles from the emergency and technical roles; a dedicated operator Safe with the committee's signers holds the operator role; the emergency Safe carries the same signers at a quorum of two; the Emergency Brakes multisig can disable the operator modifier and nothing else.
+description: A Safe owned only by the Aragon Agent holds the assets; two Roles modifiers split the operator and governance roles from the emergency and technical roles; a dedicated operator Safe with the committee's signers holds the operator role; the emergency Safe carries the same signers at a quorum of two; the Emergency Brakes multisig can disable the operator modifier and nothing else; the three new Safes run Safe v1.5.0, and the Asset Safe has no fallback handler.
 tags: [architecture, roles, safe, zodiac, emergency]
 status: draft
 review_status: slop
@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T10:21:49Z
+  at: 2026-10-05T14:04:03Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM's design answers of 2026-09-22
+    title: Decision log — EM's design answers of 2026-09-22, and later decisions to OD-17 on 2026-10-05
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Agent authority, committee Safes, Roles mastercopy
@@ -30,6 +30,18 @@ sources:
   - id: s6
     resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/Drills.t.sol#L677"
     title: Kit test at 370e20a — adversarial operator
+  - id: s7
+    resource: /research/safe-v150-due-diligence-2026-10-05.md
+    title: Safe v1.5.0 due diligence, 2026-10-05 — audits, advisories, use and value on mainnet, incidents, and the Safe paths the vault uses
+  - id: s8
+    resource: "https://github.com/safe-fndn/safe-smart-account/blob/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/contracts/Safe.sol#L323-L328"
+    title: Safe v1.5.0 checkNSignatures — a type-1 signature passes if the owner sent the transaction or approved its hash
+  - id: s9
+    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/src/policy/SafeExec.sol#L18-L29"
+    title: Kit SafeExec at 370e20a — the owner approves the hash, then the Safe executes on a type-1 signature
+  - id: s10
+    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/script/DeployDryRun.s.sol#L73-L77"
+    title: Kit deployment script at 370e20a — the Asset Safe is set up with no fallback handler
 ---
 
 # ADR 005: Account graph and roles
@@ -40,6 +52,8 @@ sources:
 - The committee's Safe runs v1.3.0 with a quorum of four of seven. The Emergency Brakes Safe runs v1.3.0 with a quorum of three of five, and it holds the Easy Track pause but not the unpause [s2].
 - The Roles mastercopy is locked, with owner `0x…01` [s2]. It keeps its own storage from slot 0, so a Safe-style proxy in front of it bricks the instance. It must be deployed as an EIP-1167 minimal proxy through the Zodiac module proxy factory [s3].
 - A module guard receives the calling module, not the role key. One modifier therefore cannot let a guard block the operator without also blocking recovery [s3]. The screening route chosen in [ADR 010](/adr/010-pre-execution-screening.md) puts no guard on the Asset Safe. The split stays because recovery must survive the technical role's switch.
+- Safe v1.5.0 was released on 2025-07-03 and audited twice, by Certora with formal verification and by Ackee with fuzzing. No advisory and no paid bounty concerns it. Its record of holding value is short: 57 Safes were created on it through Safe's factory before March 2026, and Safe{Wallet} made it the version of new Safes on 2026-09-22 [s7].
+- On a type-1 signature, the Safe accepts an owner that sent the transaction or approved its hash [s8]. The kit executes the Asset Safe's transactions this way [s9], and it sets up the Asset Safe without a fallback handler [s10].
 
 ## Decision
 
@@ -66,12 +80,22 @@ EM decided on 2026-10-05, closing OD-09 [s1]:
 
 11. Every removal of an operator permission is the emergency Safe's immediate revoke. No DAO-scoped role keys exist, so the revoke reaches every operator permission ([ADR 006](/adr/006-governance-through-easy-track-factories.md)).
 
+EM decided on 2026-10-05, closing OD-17 [s1]:
+
+12. The Asset Safe and the operator Safe keep Safe v1.5.0 after the due diligence [s7]. EM reported that the screening vendor confirmed its support for v1.5.0. The gate of decision 10 is therefore met, and the v1.4.1 fallback no longer applies.
+13. The emergency Safe also uses Safe v1.5.0.
+14. The Aragon Agent authorizes Asset Safe transactions only by `approveHash` or by sending them itself. It never uses a contract signature.
+15. The Asset Safe has no fallback handler. A protocol that needs one comes back to EM.
+
+The other conditions of OD-17 are in [ADR 010](/adr/010-pre-execution-screening.md): the check before the enabling vote, the delegatecall request to the vendor and the singleton alert. The LIP states the short record of v1.5.0.
+
 ## Proposed direction
 
 The rest of this section is the design that the kit implements [s3]. EM has not accepted it as text.
 
-- **Asset Safe.** A new Safe owned one-of-one by the Aragon Agent. It holds every asset. No guard is set on it. It runs Safe v1.5.0.
-- **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules. It carries the screening guard, holds the operator role and is the trusted caller of every factory. It runs Safe v1.5.0, or v1.4.1 if the vendor does not confirm v1.5.0 support, with a threshold of 4 of 7.
+- **Asset Safe.** A new Safe owned one-of-one by the Aragon Agent. It holds every asset. No guard and no fallback handler are set on it. It runs Safe v1.5.0. The Agent approves the hash of each transaction, or sends the transaction itself, so the Safe checks a type-1 signature (decision 14).
+- **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules. It carries the screening guard, holds the operator role and is the trusted caller of every factory. It runs Safe v1.5.0, with a threshold of 4 of 7.
+- **Emergency Safe.** A new Safe with the committee's signers and a threshold of two. It holds no assets and has no guard. It holds the emergency role on the safety modifier. It runs Safe v1.5.0.
 - **Operator modifier.** A minimal proxy of the Roles mastercopy. Owner, avatar and target are the Asset Safe. It carries the `operator` and `governance` roles.
 - **Safety modifier.** A second minimal proxy with the same settings. It carries the `emergency` and `technical` roles.
 - The Asset Safe owns both modifiers. A role's call executes as the Safe, so a narrowly scoped role can administer a modifier without any authority over the Agent. This is how the emergency role revokes the operator.
@@ -101,17 +125,22 @@ The rest of this section is the design that the kit implements [s3]. EM has not 
 - The safety policy pins the operator modifier's address. Replacing the operator modifier therefore needs a DAO vote that rewrites the safety policy in the same action. EM accepted this as a documented procedure on 2026-09-22 [s1].
 - Freezing queued motions needs the Emergency Brakes multisig, a different body. The general Lido incident process pages it.
 - Every DAO-path action carries the Dual Governance delay.
+- The three new Safes run Safe v1.5.0, which has a short record of holding value [s7]. The LIP says so.
+- The vault's main Safe paths are ones that Certora formally verified on v1.5.0: transaction execution, `approveHash` and module execution [s7]. The contract-signature path and the fallback handler, where v1.5.0 changed most and where the next release changes again, stay unused.
+- Without a fallback handler, the Asset Safe refuses ERC-721 and ERC-1155 safe transfers, and it cannot sign a message by EIP-1271. A protocol that needs either comes back to EM (decision 15).
+- A later change of the Asset Safe's Safe version needs a DAO vote with a delegatecall to Safe's migration contract.
 
 ## Confirmation
 
-- INV-002, INV-003, INV-004 and INV-009 in the [invariants](/specs/invariants.md).
+- INV-001, INV-002, INV-003, INV-004, INV-009 and INV-019 in the [invariants](/specs/invariants.md).
 - Kit tests: the technical role is the only one that can disable a module, and only the operator modifier [s4]; the emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6].
 
 ## Reversal conditions
 
 - A signer compromise that reaches the emergency quorum.
 - An audit finding that a role can reach an owner-only surface.
+- A Safe release or advisory that touches the Safe paths the vault uses, found by the check before the enabling vote ([ADR 010](/adr/010-pre-execution-screening.md)).
 
 ## Open questions
 
-- OD-17: the incident-history check on Safe v1.5.0, which both new Safes now use.
+None open. OD-17 was decided on 2026-10-05.
