@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-05T16:07:52Z
+  at: 2026-10-05T17:44:03Z
 verified: []
 ---
 
@@ -35,6 +35,7 @@ Review statuses: `slop` means drafted by an agent and not checked by a human. `h
 | [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-10-05 | none |
 | [research/ai-first-practice-2026-09.md](/research/ai-first-practice-2026-09.md) | Research Note | slop |  | 2026-09-30 | none |
 | [research/chain-reads-2026-09-30.md](/research/chain-reads-2026-09-30.md) | Research Note | slop |  | 2026-09-30 | none |
+| [research/dai-usds-conversion-2026-10-05.md](/research/dai-usds-conversion-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/funding-registries-2026-10-02.md](/research/funding-registries-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/legacy-investments-2026-10-05.md](/research/legacy-investments-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |

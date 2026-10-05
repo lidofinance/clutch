@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T16:07:52Z
+  at: 2026-10-05T17:44:03Z
 verified: []
 sources:
   - id: s1
@@ -187,7 +187,7 @@ Four principals. Role keys are `bytes32`; the encoding must match the tooling th
 | Role | Holder | May do | May not do |
 | --- | --- | --- | --- |
 | DAO | Aragon Agent, reached by vote through Dual Governance | Everything: owns the Safe, may replace the whole policy, may add or remove role members | — |
-| `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders up to a cap; stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
+| `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders up to a cap; stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe; convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
 | `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS so that recovery can sell them; swap to stablecoins through the recovery-family instances; transfer recovered assets to the Agent only; revoke the operator's targets and functions, which is how every removal happens; invalidate outstanding orders | Add any permission; enter any protocol; borrow; change the recovery destination; disable the module |
 | `technical` | Emergency Brakes multisig, three of five. **Safety modifier** | Disable the **operator** modifier, with the module argument pinned to it | Anything else. It cannot touch assets or permissions, and it cannot disable the safety modifier |
 | `governance` | EVMScriptExecutor, driven by Easy Track | Write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | Submit a condition tree; grant or remove any role; touch the emergency role; target a modifier or the Safe |
@@ -433,13 +433,13 @@ The `Allowance` struct field order in the deployed mastercopy is `refill, maxRef
 | Asset | Role in the system | Notes |
 | --- | --- | --- |
 | ETH | Held | Not a funding asset (OD-11). Still in the payment chain for other setups, ceiling 1,000 per payment |
-| WETH | Held, wrap and unwrap | |
+| WETH | Held, wrap and unwrap | No price feed: staked to stETH before a sale, and bought back through Lido's withdrawal queue (OD-20) |
 | stETH | Held, funding inbound | In the payment chain, ceiling 1,000 per payment |
-| wstETH | Held, wrap and unwrap | |
+| wstETH | Held, wrap and unwrap | No price feed: unwrapped to stETH before a sale (OD-20) |
 | USDC | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment |
 | USDT | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment |
-| DAI | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment. Added so the mandate's definition of the top four stablecoins matches the launch set |
-| USDS | Held, funding inbound | **Added to the payment chain by the enabling vote (OD-11)**; ceiling 2,000,000 per payment (OD-24) |
+| DAI | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment. Added so the mandate's definition of the top four stablecoins matches the launch set. The operator converts it to USDS and back through Sky's converter, one to one; recovery sells it into USDC (OD-22) |
+| USDS | Held, funding inbound | **Added to the payment chain by the enabling vote (OD-11)**; ceiling 2,000,000 per payment (OD-24). Receives converted DAI (OD-22) |
 | sUSDS | Held, savings position, funding inbound | Template: tokenized vault. In the payment chain, ceiling 2,000,000 per payment (OD-11) |
 | earnETH | Held, vault position | Asynchronous deposit and redeem queues |
 | earnUSD | Held, vault position | Asynchronous deposit and redeem queues |
@@ -545,7 +545,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | --- | --- | --- |
 | Objection period | Easy Track window before a motion may enact | 72 hours, the Easy Track default |
 | Objection threshold | Share of LDO supply that rejects a motion | 0.5 percent, the Easy Track default |
-| Approval bound | How an operator approval is bounded | An approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget. The stETH approval to the wstETH contract keeps a fixed ceiling of one TM Floor Value in stETH. Swapping needs no approval (OD-08, decided) |
+| Approval bound | How an operator approval is bounded | An approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget. The stETH approval to the wstETH contract keeps a fixed ceiling of one TM Floor Value in stETH, and so do the DAI and USDS approvals to Sky's DAI–USDS converter (OD-22). Swapping needs no approval (OD-08, decided) |
 | Budget per key | Monthly token-unit allowance | **Derived, run and attested** on 2026-09-22 outside this repository. Monthly flow equals the stock cap for that key, because exits are unbudgeted and a tighter flow would throttle re-entry after a defensive exit. Yield-bearing keys get the headroom against the literal base, the stablecoins plus yield-bearing stablecoins held directly, from a holdings snapshot at each retune (OD-03). The inputs include unapproved mandate terms, so the computation and its result enter this repository when the mandate is approved |
 | Lido own-product budgets | Monthly allowance for the vault products | The mandate sets no per-product cap and the whole vault may sit in Lido products, so these keys are bounded by the mandate size rather than by a ratio. That is a weak control. The budget exists to bound blast radius per month, not to enforce a ratio |
 | Budget retune cadence | How often unit budgets are re-derived | Fortnightly, riding the existing rebalancing review. Budgets are token units and caps are ratios, so they drift with price |
