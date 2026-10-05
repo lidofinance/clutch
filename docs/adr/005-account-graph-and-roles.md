@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:28:58Z
+  at: 2026-10-05T10:21:49Z
 verified: []
 sources:
   - id: s1
@@ -62,6 +62,10 @@ EM decided on 2026-10-02, closing OD-07 [s1]:
 
 10. The screening vendor confirms in writing that its approval service supports Safe v1.5.0. Without that confirmation, the operator Safe uses Safe v1.4.1 ([ADR 010](/adr/010-pre-execution-screening.md)).
 
+EM decided on 2026-10-05, closing OD-09 [s1]:
+
+11. Every removal of an operator permission is the emergency Safe's immediate revoke. No DAO-scoped role keys exist, so the revoke reaches every operator permission ([ADR 006](/adr/006-governance-through-easy-track-factories.md)).
+
 ## Proposed direction
 
 The rest of this section is the design that the kit implements [s3]. EM has not accepted it as text.
@@ -77,8 +81,8 @@ The rest of this section is the design that the kit implements [s3]. EM has not 
 |---|---|---|---|---|
 | DAO | Aragon Agent, by vote through Dual Governance | owner path | everything: own the Safe, replace the policy, change membership | — |
 | `operator` | operator Safe, the committee's signers, four of seven, screened ([ADR 010](/adr/010-pre-execution-screening.md)) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders up to a cap; as manager of the rebalancing swap instances, place orders and recover unsold tokens to the Aragon Agent ([ADR 007](/adr/007-swapping-through-stonks.md)) | move assets out, except into a rebalancing instance; borrow; administer a modifier or the Safe; change its own permissions |
-| `governance` | Easy Track executor | operator | toggle pre-scoped operator role keys; set operator budgets within ceilings | author a permission; name a target; grant a role to another address; touch the emergency role |
-| `emergency` | emergency Safe, two signatures, the committee's signers | safety | zero approvals; exit positions to the Safe; send assets to recovery swap instances or to the Agent; revoke the operator's targets and functions; as manager of the recovery swap instances, place orders and recover tokens to the Aragon Agent | add a permission; enter a protocol; borrow; change the recovery destination; disable a module |
+| `governance` | Easy Track executor | operator | write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | submit a condition tree; grant or remove any role; touch the emergency role; target a modifier or the Safe |
+| `emergency` | emergency Safe, two signatures, the committee's signers | safety | zero approvals; exit positions to the Safe; send assets to recovery swap instances or to the Agent; revoke the operator's targets and functions, which is how every removal happens; as manager of the recovery swap instances, place orders and recover tokens to the Aragon Agent | add a permission; enter a protocol; borrow; change the recovery destination; disable a module |
 | `technical` | Emergency Brakes Safe, three of five | safety | disable the operator modifier; the module argument is pinned | anything else, including disabling the safety modifier |
 
 ## Options considered

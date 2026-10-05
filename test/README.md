@@ -19,14 +19,15 @@ This harness runs the Clutch permission policy against production contracts on a
 
 ## Known divergence from the accepted design
 
-The harness predates four design decisions and does not yet follow them:
+The harness predates five design decisions and does not yet follow them:
 
 - The launch scope in [ADR 011](../docs/adr/011-launch-scope.md). The policy still grants Aave v3 supply and withdraw and sDAI deposits, which are outside the launch scope.
 - Swapping through Stonks 2.0 in [ADR 007](../docs/adr/007-swapping-through-stonks.md). The policy still grants the operator direct order pre-signing.
 - Approvals in [ADR 009](../docs/adr/009-budgets-caps-reporting-and-monitoring.md). The policy caps each approval and spends the budget at the deposit. The decision spends the budget at the approval, and deposits no longer spend it.
 - Pre-execution screening in [ADR 010](../docs/adr/010-pre-execution-screening.md). The harness tests a module guard on the Asset Safe. The decision is the screening vendor's transaction guard on a dedicated operator Safe, which is also the trusted caller of every factory.
+- Governance in [ADR 006](../docs/adr/006-governance-through-easy-track-factories.md). The harness still has the role-toggle factory and tests of DAO-scoped role keys. The design retired both: every operator permission lives under the `operator` key.
 
-The first three are resolved when the policy moves to a data file under [ADR 004](../docs/adr/004-specifications-and-policy-as-data.md). The fourth needs the guard tests rewritten for a mock operator Safe. Until then, results about these venues and about screening describe the harness, not the design.
+The first three are resolved when the policy moves to a data file under [ADR 004](../docs/adr/004-specifications-and-policy-as-data.md). The fourth needs the guard tests rewritten for a mock operator Safe. The fifth is resolved by removing the toggle factory and its tests. Until then, results about these venues and about screening describe the harness, not the design.
 
 ## Commands
 
@@ -46,7 +47,7 @@ just teardown                            # sweep, disable, write a manifest; not
 | --- | --- |
 | `Drills.t.sol` | governance encoding and enactment, the four change types, operator lifecycle, emergency flow, technical module disabling, budgets, adversarial cases, pre-execution screening |
 | `ReviewProbe.t.sol` | escalation guards, approval bounds, order invalidation, and regression tests for defects found in review |
-| `FactoryOnly.t.sol` | governance through the role-toggle factory, including a queued motion dying when its key is withdrawn |
+| `FactoryOnly.t.sol` | governance through the role-toggle factory, including a queued motion dying when its key is withdrawn; the factory is retired (OD-09) |
 | `NoNewContract.t.sol` | native constraints on role toggles and on allowance changes |
 | `Bootstrap.t.sol` | the funding script |
 | `PolicyShape.t.sol` | the policy builds within bounds |

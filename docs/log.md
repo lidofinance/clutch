@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-05
+
+* **Decision**: Recorded EM's choices for OD-09. The two removal templates are dropped, and every removal is the emergency Safe's immediate revoke, posted on the forum afterwards. The design uses no DAO-scoped role keys, so the role-toggle factory and the governance role's `assignRoles` permission leave it, and the revoke reaches every operator permission. Recorded that Easy Track never allows a window below 48 hours. Updated ADR 005, ADR 006, ADR 010, the LIP, the runbooks and the kit README. Retired INV-007 and added INV-018.
+
 ## 2026-10-02
 
 * **Decision**: Recorded EM's choices for OD-08. An approval to a protocol spender spends the budget of the key it serves, and deposits no longer spend it, because a spender can pull an approval without any deposit call. The stETH approval to the wstETH contract keeps a fixed ceiling of one TM Floor Value in stETH. The refill-period floor is 30 days. Updated ADR 009, the LIP, INV-008, INV-012, the parameters and the kit README's divergence list. Added OD-22 on DAI, which no operator permission moves.
