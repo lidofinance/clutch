@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:06:53Z
+  at: 2026-10-05T19:58:30Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the agent operating model, 2026-09-30, and on code owners, 2026-10-05
+    title: Decision log — EM on the agent operating model, 2026-09-30, and on code owners and the reading of decision 6, 2026-10-05
   - id: s2
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — evidence on instruction files, skills and attacks
@@ -50,6 +50,10 @@ EM decided on 2026-10-05, closing OD-10 [s1]:
 10. A branch rule on `main` requires a pull request and a code-owner review, allows no direct pushes, and dismisses approvals when new commits arrive.
 11. Every merge needs at least one approval from someone other than the pull request's creator.
 12. The agent's own GitHub identity comes later (OD-23).
+
+EM confirmed on 2026-10-05, closing OD-25 [s1]:
+
+13. Decision 6 covers production parameters. The kit's dry-run budgets and fixed ceilings are test values, not parameters.
 
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 

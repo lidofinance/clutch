@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-05T19:30:52Z
+  at: 2026-10-05T19:58:37Z
 verified: []
 ---
 
@@ -18,7 +18,7 @@ Review statuses: `slop` means drafted by an agent and not checked by a human. `h
 
 | Page | Type | Review status | Decision | Last change | Verified by |
 |---|---|---|---|---|---|
-| [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | slop | proposed | 2026-10-02 | none |
+| [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/002-decision-and-review-process.md](/adr/002-decision-and-review-process.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | slop | proposed | 2026-10-05 | none |
@@ -38,6 +38,7 @@ Review statuses: `slop` means drafted by an agent and not checked by a human. `h
 | [research/dai-usds-conversion-2026-10-05.md](/research/dai-usds-conversion-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/funding-registries-2026-10-02.md](/research/funding-registries-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/legacy-investments-2026-10-05.md](/research/legacy-investments-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
+| [research/recovery-and-withdrawal-queue-2026-10-05.md](/research/recovery-and-withdrawal-queue-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/stonks-instances-2026-10-02.md](/research/stonks-instances-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |

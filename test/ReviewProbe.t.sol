@@ -265,6 +265,8 @@ contract ReviewProbe is ReviewBase {
         // a capped spender: the ceiling binds, below it passes
         _opRefused(a.steth, _approve(a.wsteth, FullPolicy.FLOOR_STANDIN_STETH), "the ceiling must bind");
         assertTrue(_op(a.steth, _approve(a.wsteth, FullPolicy.FLOOR_STANDIN_STETH - 1)), "below the ceiling passes");
+        _opRefused(a.steth, _approve(a.withdrawalQueue, FullPolicy.FLOOR_STANDIN_STETH), "the queue ceiling must bind");
+        assertTrue(_op(a.steth, _approve(a.withdrawalQueue, FullPolicy.FLOOR_STANDIN_STETH - 1)), "below the queue ceiling passes");
         // zero is always allowed, even with the key exhausted
         assertTrue(_op(a.usdc, _approve(a.earnUsdDepositQueue, 500e6)), "a bounded approval is allowed");
         assertTrue(_op(a.usdc, _approve(a.earnUsdDepositQueue, 0)), "self-revocation must stay available");

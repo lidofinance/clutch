@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:30:52Z
+  at: 2026-10-05T19:58:30Z
 verified: []
 sources:
   - id: s1
@@ -83,7 +83,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 | DAI | held; converted to USDS and back through Sky's converter, one to one | can seed the vault; recovery sells it into USDC |
 | USDS | held; receives converted DAI | can fund the vault once a DAO vote adds it to the payment permission |
 | sUSDS | savings position | tokenized-vault template; can also fund the vault; redeemed before a sale |
-| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares arrive from the Growth Committee, and the operator never redeems them (OD-21) |
+| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares arrive from the Growth Committee, and neither the operator nor the emergency role redeems them (OD-21, OD-28) |
 | LDO | held | in the rebalancing set |
 | Stonks 2.0 instances | rebalancing and recovery | [ADR 007](/adr/007-swapping-through-stonks.md) |
 | Lido Lend | lending, after launch | one motion through the Morpho Blue template once the market exists; the protocol cap applies for its first three months, then none as a Lido own product (OD-04, decided 2026-10-02) |

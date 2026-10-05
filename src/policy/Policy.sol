@@ -73,7 +73,6 @@ library Policy {
     bytes32 internal constant K_SUSDS = keccak256("sky_savings_usds");
     bytes32 internal constant K_EARN_USD = keccak256("earn_usd_deposit");
     bytes32 internal constant K_EARN_ETH = keccak256("earn_eth_deposit_wsteth");
-    bytes32 internal constant K_WITHDRAWAL_QUEUE = keccak256("lido_withdrawal_queue_steth");
 
     uint64 internal constant MONTH = 30 days;
     /// @dev A budget motion cannot set a refill period below 30 days (OD-08).
@@ -547,10 +546,9 @@ library Policy {
     }
 
     function operatorBudgetKeys() internal pure returns (bytes32[] memory k) {
-        k = new bytes32[](4);
+        k = new bytes32[](3);
         k[0] = K_SUSDS;
         k[1] = K_EARN_USD;
         k[2] = K_EARN_ETH;
-        k[3] = K_WITHDRAWAL_QUEUE;
     }
 }

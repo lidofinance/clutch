@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T17:44:03Z
+  at: 2026-10-05T19:58:37Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,29 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-25 to OD-30: acceptance round 1 and the emergency exit
+
+> Q1: 1
+> Q2: B
+> Q3: A
+> Q4: A
+> Q5: A
+> Q6: A
+
+Recorded as: all six as the agent recommended. (Q1, OD-25) The agent adds `scripts` to the licence check of [ADR 001](/adr/001-repository-scope-visibility-licence-name.md). After that change merges, EM accepts ADR 001 to ADR 004 in one edit. Decision 6 of [ADR 003](/adr/003-agent-operating-model.md) covers production parameters; the kit's dry-run budgets and fixed ceilings are test values. (Q2, OD-26) Recovery also sells USDC, USDS and DAI into USDT, because USDS and DAI carry USDC risk. Recovery then has ten instances, and the mandate text owes a change: the emergency swap goes into USDC, or into USDT as the second destination ([ADR 007](/adr/007-swapping-through-stonks.md)). (Q3, OD-27) The stETH approval to Lido's withdrawal queue has a fixed ceiling of one TM Floor Value in stETH and no budget key ([ADR 007](/adr/007-swapping-through-stonks.md)). (Q4, OD-28) The no-redeem rule for the first-loss Earn shares binds the emergency role too. In an emergency, it sends them to the Aragon Agent, and a burn or a redemption of them is a DAO vote ([ADR 008](/adr/008-funding-through-existing-payments.md)). (Q5, OD-29) "A pause of the whole module" means disabling the operator modifier. The Emergency Brakes multisig does it through the technical role on a fixed trigger: a published cap breach that is still there after the committee's rebalancing window of two working days, and that is larger at the next fortnightly snapshot. A DAO vote can also do it ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). (Q6, OD-30) The emergency Safe stays a subset of the committee's signers. The mandate draft promises an exit that is independent of the committee, so the mandate text owes a change, and the LIP states that the fast exit is not independent of the committee ([ADR 005](/adr/005-account-graph-and-roles.md)). The evidence for Q2 and Q3 is in the [recovery note](/research/recovery-and-withdrawal-queue-2026-10-05.md). [s4]
+
+## 2026-10-05 — the open items asked
+
+> run an interview on the open things
+
+Recorded as: the agent asked the five questions of the acceptance round again, with its positions, and added a sixth question on the mandate's emergency exit. [s4]
+
+## 2026-10-05 — acceptance round 1 asked
+
+> run an interview cycle for clutch
+
+Recorded as: the agent read every ADR and asked five questions before acceptance. [s4]
 
 ## 2026-10-05 — OD-22: DAI
 

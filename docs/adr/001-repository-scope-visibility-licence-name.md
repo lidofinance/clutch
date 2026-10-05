@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:28:58Z
+  at: 2026-10-05T19:58:30Z
 verified: []
 sources:
   - id: s1
@@ -83,7 +83,7 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 ## Confirmation
 
 - The visibility setting of `lidofinance/clutch` on GitHub.
-- `grep -rL "SPDX-License-Identifier: AGPL-3.0-or-later" src script test` lists only files derived from Easy Track. A CI check replaces this command once the factories exist.
+- `grep -rL "SPDX-License-Identifier: AGPL-3.0-or-later" src script scripts test` lists only files derived from Easy Track. A CI check replaces this command once the factories exist.
 
 ## Reversal conditions
 

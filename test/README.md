@@ -24,7 +24,7 @@ The policy in `src/policy` follows the decisions in [ADR 005](../docs/adr/005-ac
 - The launch scope of ADR 011: no Aave, no sDAI and no other third-party lending market. The operator converts DAI to USDS and back through Sky's converter, with the receiver pinned to the Asset Safe (OD-22).
 - No order pre-signing and no CoW relayer approval (ADR 007).
 - Staking and WETH (OD-20): the operator and the emergency role stake ETH through Lido's `submit` with the referral pinned to zero; the operator wraps and unwraps WETH and requests and claims Lido withdrawals pinned to the Asset Safe; the emergency role unwraps WETH and claims withdrawals.
-- Approvals (ADR 009, OD-08): an approval to a protocol spender spends the budget key that the spender serves; zero spends nothing; deposits spend no budget. The stETH approval to the wstETH contract and the DAI and USDS approvals to the converter have a fixed ceiling instead.
+- Approvals (ADR 009, OD-08): an approval to a protocol spender spends the budget key that the spender serves; zero spends nothing; deposits spend no budget. The stETH approvals to the wstETH contract and to the withdrawal queue, and the DAI and USDS approvals to the converter, have a fixed ceiling instead (OD-08, OD-22, OD-27).
 - Governance (ADR 006): every operator permission lives under the `operator` key; the governance role holds no `assignRoles`, and a budget motion cannot set a refill period below 30 days.
 
 Budgets and fixed ceilings are dry-run stand-ins. The production figures come from the attested computation and are not in this repository.
@@ -35,7 +35,6 @@ Budgets and fixed ceilings are dry-run stand-ins. The production figures come fr
 - **Pre-execution screening.** The operator is a plain address, not an operator Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
 - **Factories and registries.** The budget factory, the template factories and the funding registries are not built ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md), [ADR 008](../docs/adr/008-funding-through-existing-payments.md)). The drills drive Easy Track with a pass-through factory.
 - **Per-key budget ceilings.** The governance role's budget permission pins the key and the period floor only. Ceilings per key wait for the attested figures; `test_budget_motion_bounds_are_expressible_per_key` shows the shape.
-- **The withdrawal-queue approval.** It spends its own budget key, as ADR 007 now says. Whether it gets a fixed ceiling instead is an open question to EM.
 - **Policy as data.** The policy is still Solidity, not the YAML file and compiler of [ADR 004](../docs/adr/004-specifications-and-policy-as-data.md).
 
 ## Commands

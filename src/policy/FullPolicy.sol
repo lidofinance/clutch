@@ -41,7 +41,6 @@ library FullPolicy {
         calls[i++] = Policy._setAllowance(roles, Policy.K_SUSDS, 1_000e18);
         calls[i++] = Policy._setAllowance(roles, Policy.K_EARN_USD, 500e6);
         calls[i++] = Policy._setAllowance(roles, Policy.K_EARN_ETH, 1e18);
-        calls[i++] = Policy._setAllowance(roles, Policy.K_WITHDRAWAL_QUEUE, 1e18);
 
         // -- target scoping (required before any function grant) ----------
         calls[i++] = Policy._scopeTarget(roles, Policy.OPERATOR(), a.steth);
@@ -59,14 +58,14 @@ library FullPolicy {
         calls[i++] = Policy._scopeTarget(roles, Policy.OPERATOR(), a.earnEthRedeemQueue);
 
         // -- Lido staking: stake, wrap and unwrap, the withdrawal queue ----
-        // stETH has two spenders: the wstETH contract with a fixed ceiling,
-        // and the withdrawal queue under its own budget key (ADR 007).
+        // stETH has two spenders, the wstETH contract and the withdrawal
+        // queue. Both have a fixed ceiling and no budget key (OD-08, OD-27).
         calls[i++] = Policy._opApprove(
             roles,
             a.steth,
             _spenders(
                 Policy.capped(a.wsteth, FLOOR_STANDIN_STETH),
-                Policy.keyed(a.withdrawalQueue, Policy.K_WITHDRAWAL_QUEUE)
+                Policy.capped(a.withdrawalQueue, FLOOR_STANDIN_STETH)
             )
         );
         calls[i++] = Policy._stake(roles, a.steth, Policy.OPERATOR());
