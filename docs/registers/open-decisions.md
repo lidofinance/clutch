@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:33:11Z
+  at: 2026-10-05T11:43:51Z
 verified: []
 sources:
   - id: s1
@@ -27,7 +27,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
-| OD-13 | Who writes and maintains the vault's detectors in each monitoring estate? Lido's existing detector for the screening guard must add Safe v1.5.0 and the new instance ([ADR 010](/adr/010-pre-execution-screening.md)). | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | The committee specifies the rules. The team that runs each estate implements them | EM |
 | OD-14 | Reporting operations: who publishes, on what schedule, what happens when a price is stale or missing, and who answers for a late report? Where is a report's identifier anchored on chain, now that the standard top-up factory fixes the payment reference [s3]? | Mandate text; [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Name the first four in the mandate. Until an on-chain anchor is chosen, the identifier goes in the forum post that precedes each top-up | EM with the committee |
 | OD-15 | How do the committee and the Emergency Brakes multisig record a verification of a page? | [ADR 002](/adr/002-decision-and-review-process.md) | A member commits the `verified` entry through a reviewed pull request, and the entry links the body's decision record | EM |
 | OD-16 | The policy data format and the compiler toolchain. | [ADR 004](/adr/004-specifications-and-policy-as-data.md) | Decide in the phase 1 specification | EM |
@@ -56,3 +55,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-11 | Do the shared payment ACL parameters stay unchanged, which token list does the stablecoin registry use, and is ETH a funding asset? | 2026-10-05 | EM: "Q1. 2", "Q2. 2 (add USDS and sUSDS)", "Q3. 1": a DAO vote adds USDS to the shared payment permission; the stablecoin registry uses the shared token list with USDS added; ETH is not a funding asset ([ADR 008](/adr/008-funding-through-existing-payments.md)) [s1] |
 | OD-24 | The ceiling per USDS payment in the rewritten payment permission | 2026-10-05 | EM: "1. OD-24: 2,000,000": the same as DAI, USDC, USDT and sUSDS ([ADR 008](/adr/008-funding-through-existing-payments.md)) [s1] |
 | OD-12 | Confirm four recorded readings: the vision answer, the acceptor answer, the start of Lido Lend's capped months, and who signs the vendor agreement | 2026-10-05 | EM confirmed the first three. The Lido-side signer is the party that already holds the vendor's arrangement for the four guarded Lido multisigs, not named here ([ADR 002](/adr/002-decision-and-review-process.md), [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), [ADR 010](/adr/010-pre-execution-screening.md)) [s1] |
+| OD-13 | Who writes and maintains the vault's detectors in each monitoring estate? | 2026-10-05 | EM: defi-tech writes the detector specification and makes the important updates; the vroom team (`@lidofinance/lido-valset-vroom`) reviews them, runs the platform and maintains the engine and the bot; the committee configures the vendor's rules, with defi-tech supporting ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |

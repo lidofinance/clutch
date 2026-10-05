@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:33:11Z
+  at: 2026-10-05T11:43:51Z
 verified: []
 sources:
   - id: s1
@@ -84,6 +84,11 @@ EM confirmed on 2026-10-05, closing OD-12 [s1]:
 
 16. Lido Lend's three capped months count from Lido Lend's mainnet launch.
 
+EM decided on 2026-10-05, closing OD-13 [s1]:
+
+17. The `@lidofinance/defi-tech` team writes the specification of the vault's detectors in the Lido on-chain monitoring and makes the important updates to them. The `@lidofinance/lido-valset-vroom` team reviews them, runs the platform, and maintains the engine and the bot.
+18. The committee configures the vault's rules in the screening vendor's service. The defi-tech team supports it.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
@@ -98,6 +103,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - **The budget factory.** It builds one branch per key, so each key has its own ceiling on `balance`, `maxRefill` and `refill`, and every branch bounds `period` below by 30 days. The kit test shows one shared ceiling only [s4].
 - **Reports.** The payload is on IPFS and holds balances, positions, exposures, each ratio with its numerator and denominator, and the price source with its timestamp. The standard top-up factory writes a fixed payment reference, so a top-up cannot carry the report's identifier in it [s6]. The identifier goes in the forum post that the mandate requires before each top-up. Where to anchor it on chain is open (OD-14).
 - **Monitoring.** The Lido on-chain monitoring carries policy drift, the approval inventory, budget burn, module and owner changes on both Safes, and motion events. For funding it flags a top-up motion outside days 1 to 10 of a month, apart from the seed; a month's top-ups above the posted shortfall; and any top-up motion after an objected one ([ADR 008](/adr/008-funding-through-existing-payments.md)). For budgets it flags a second budget motion on the same key within 14 days. The screening vendor carries depegs, protocol compromise and counterparty anomalies. Findings route into the existing notification and incident channels.
+- **The detector specification.** A monitoring specification in this repository lists each detector with an ID, what it watches, its severity and where it runs (phase 1). A pull request here that changes a watched permission links the matching detector change. The list starts from: policy drift; the approval inventory; budget burn and repeated budget motions; owner, threshold, module and guard changes on the three Safes; motion lifecycle; the funding flags; emergency actions, graded so that a revoke-only action pages lower than a transfer or a swap; the screening guard, extended to Safe v1.5.0 and the new instance; and swap-instance orders and stranded balances.
 
 ## Options considered
 
@@ -112,6 +118,8 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 - No report has an on-chain anchor yet, a top-up's report included, because the top-up factory fixes the payment reference [s6]. A report's immutability rests on content addressing and the forum post that cites it. That is enough for an informational control. It is not an Ethereum guarantee.
 - Every detective control ends at a person. The mandate must name them.
+- Each detector change involves two teams: defi-tech writes it and the monitoring team reviews it. The guard detector's Safe v1.5.0 support must ship before the operator Safe is deployed.
+- The committee keeps the vendor-side rules in step with the vault's positions, because every onboarding motion needs alerting for its new target before it is enacted ([ADR 006](/adr/006-governance-through-easy-track-factories.md)).
 - Approvals per key per period cannot exceed the budget, whatever a spender does. Only a budget motion can add room.
 - An approval spends budget even if its deposit then fails or is cancelled. The room on that key comes back at the next refill or retune.
 - One large approval is still a standing exposure up to the budget. The same-transaction practice and the emergency role's power to zero approvals bound it.
@@ -136,5 +144,4 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 ## Open questions
 
-- OD-13: who writes the detectors.
 - OD-14: who publishes reports, on what schedule, what happens on a stale price, who answers for a late report, and where a report's identifier is anchored on chain.

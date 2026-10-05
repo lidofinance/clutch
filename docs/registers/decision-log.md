@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:33:11Z
+  at: 2026-10-05T11:43:51Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,19 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-13: who writes and maintains the detectors
+
+> Q1: it's like A-ish: defi-tech writes specs and make important updates though vroom team is responsible for the review, platform and maintenance of the engine and bot
+> Q2: 1
+
+Recorded as: OD-13 is closed. (Q1) The `@lidofinance/defi-tech` team writes the specification of the vault's detectors in the Lido on-chain monitoring and makes the important updates to them. The vroom team, read as `@lidofinance/lido-valset-vroom`, the code owner of the monitoring repository, reviews them, runs the platform, and maintains the engine and the bot. (Q2) The committee configures the vault's rules in the screening vendor's service, and the defi-tech team supports it ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). [s4]
+
+## 2026-10-05 — OD-13 asked
+
+> run an interview on OD-13
+
+[s4]
 
 ## 2026-10-05 — OD-12: four recorded readings
 
