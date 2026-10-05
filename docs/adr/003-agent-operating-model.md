@@ -4,13 +4,16 @@ title: "ADR 003: Agent operating model"
 description: AGENTS.md is the single source of truth, at most 60 lines of rules, capped by the validator; skills hold procedures; agents never merge, never touch deployed records and never set parameters.
 tags: [agents, process, security]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
   at: 2026-10-05T19:58:30Z
-verified: []
+verified:
+  - by: human:em
+    at: 2026-10-05T20:27:31Z
 sources:
   - id: s1
     resource: /registers/decision-log.md
