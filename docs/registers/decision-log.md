@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:57:38Z
+  at: 2026-10-05T12:12:12Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,18 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-15: how a body records a verification
+
+> Q1: A
+
+Recorded as: OD-15 is closed with Block A. A member of the committee or of the Emergency Brakes multisig commits that body's verification through a reviewed pull request. The entry carries `ref`, a link to the body's decision record, such as a forum post or minutes, and the validator refuses a body verification without it. The agent had recommended a quorum signature by each body's Safe; EM chose the member's entry ([ADR 002](/adr/002-decision-and-review-process.md)). [s4]
+
+## 2026-10-05 — OD-15 asked
+
+> run an interview on OD-15
+
+[s4]
 
 ## 2026-10-05 — OD-14: the mandate text
 

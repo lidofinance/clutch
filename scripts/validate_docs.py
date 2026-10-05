@@ -28,6 +28,8 @@ Clutch rules on top of the Gaggle profile:
 - Every Runbook names the `permission` it exercises. A Runbook above `slop` needs a
   passing `drill` record, and the drill's time to initiate must not exceed six hours,
   the mandate's ceiling (ADR 002, ROADMAP standing gates).
+- A verification by a body, `human:tmc` or `human:emergency-brakes`, carries `ref`: an
+  https or urn link to the body's decision record (ADR 002, OD-15).
 """
 
 from __future__ import annotations
@@ -62,6 +64,8 @@ TYPES = {
 }
 AGENTS_MAX_LINES = 60
 CO_VERIFIER = "human:emergency-brakes"
+BODY_ACTORS = ("human:tmc", "human:emergency-brakes")
+BODY_REF = re.compile(r"\A(https://\S+|urn:\S+)\Z")
 SIX_HOURS = 6 * 60 * 60
 DRILL_FIELDS = ("at", "network", "block", "time_to_initiate_seconds", "result")
 REGISTER_REL = "registers/document-status.md"
@@ -190,6 +194,9 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
             out.append(f"{where}.at is in the future: {_iso(event_at)}; a future-dated verification would survive later edits")
             continue
         actor = str(event["by"])
+        if actor in BODY_ACTORS and not BODY_REF.match(str(event.get("ref", "")).strip()):
+            out.append(f"{where} by {actor} needs `ref`, an https or urn link to the body's decision record (ADR 002)")
+            continue
         if actor.startswith("human:"):
             human_checks[actor] = max(event_at, human_checks.get(actor, event_at))
 
