@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:37Z
+  at: 2026-10-05T20:27:32Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,12 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — ADR 001 to ADR 004 accepted
+
+> I merged, commit and push human entries for ADR 001-004
+
+Recorded as: EM accepts ADR 001 to ADR 004, as OD-25 planned. At EM's instruction, the agent wrote EM's acceptance fields and EM's `verified` entries in the four records. The acceptance and the verification are EM's; the agent only made the edit. `AGENTS.md` forbids an agent to write a `human:` entry, so this edit is the exception that EM asked for. [s4]
 
 ## 2026-10-05 — OD-25 to OD-30: acceptance round 1 and the emergency exit
 

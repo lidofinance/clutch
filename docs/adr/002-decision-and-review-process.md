@@ -4,13 +4,16 @@ title: "ADR 002: Decision and review process"
 description: EM accepts decisions in the interim and the Treasury Management Committee permanently; the Emergency Brakes multisig also verifies every ADR that constrains the operator; pages carry OKF 0.2 trust fields and a review ladder that an edit resets.
 tags: [process, review, okf, trust]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
   at: 2026-10-05T12:12:12Z
-verified: []
+verified:
+  - by: human:em
+    at: 2026-10-05T20:27:31Z
 sources:
   - id: s1
     resource: /registers/decision-log.md

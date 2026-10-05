@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-05T19:58:37Z
+  at: 2026-10-05T20:27:32Z
 verified: []
 ---
 
@@ -18,10 +18,10 @@ Review statuses: `slop` means drafted by an agent and not checked by a human. `h
 
 | Page | Type | Review status | Decision | Last change | Verified by |
 |---|---|---|---|---|---|
-| [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | slop | proposed | 2026-10-05 | none |
-| [adr/002-decision-and-review-process.md](/adr/002-decision-and-review-process.md) | Decision | slop | proposed | 2026-10-05 | none |
-| [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | slop | proposed | 2026-10-05 | none |
-| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | slop | proposed | 2026-10-05 | none |
+| [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | human-reviewed | accepted | 2026-10-05 | human:em |
+| [adr/002-decision-and-review-process.md](/adr/002-decision-and-review-process.md) | Decision | human-reviewed | accepted | 2026-10-05 | human:em |
+| [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | human-reviewed | accepted | 2026-10-05 | human:em |
+| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-10-05 | human:em |
 | [adr/005-account-graph-and-roles.md](/adr/005-account-graph-and-roles.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/007-swapping-through-stonks.md](/adr/007-swapping-through-stonks.md) | Decision | slop | proposed | 2026-10-05 | none |

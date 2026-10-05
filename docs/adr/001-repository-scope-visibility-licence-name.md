@@ -4,13 +4,16 @@ title: "ADR 001: Repository scope, visibility, licence and name"
 description: One repository for the Active Treasury system, private until deployment at the latest, AGPL-3.0-or-later with GPL-3.0 kept for files derived from Easy Track, named Clutch.
 tags: [repository, licence, visibility, naming]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
   at: 2026-10-05T19:58:30Z
-verified: []
+verified:
+  - by: human:em
+    at: 2026-10-05T20:27:31Z
 sources:
   - id: s1
     resource: /registers/decision-log.md

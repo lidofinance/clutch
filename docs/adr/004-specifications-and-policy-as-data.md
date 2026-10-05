@@ -4,13 +4,16 @@ title: "ADR 004: Specifications and the permission policy as data"
 description: Hand-written conceptual specs, a generated API reference, invariants mapped to tests, the LIP as an external layer, runbooks as their own class, and a permission policy kept as a strict YAML data file that a Python compiler turns into one JSON artifact, which a round-trip check compares with the trees rebuilt from the modifier's events.
 tags: [specs, policy, invariants, testing, runbooks]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
   at: 2026-10-05T19:30:52Z
-verified: []
+verified:
+  - by: human:em
+    at: 2026-10-05T20:27:31Z
 sources:
   - id: s1
     resource: /registers/decision-log.md
