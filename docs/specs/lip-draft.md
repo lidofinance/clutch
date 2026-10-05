@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:57:38Z
+  at: 2026-10-05T12:30:58Z
 verified: []
 sources:
   - id: s1
@@ -578,7 +578,7 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 
 **Template factories are the widening surface.** Onboarding no longer needs a vote, so the audit question moves from "is this tree narrower" to "can this template ever emit something unsafe". Each template must be shown to pin every receiver and owner field, to bound every value-moving amount, and to be incapable of emitting an administrative selector. A template flaw is reachable by any motion that survives its objection window.
 
-**Policy encoding.** The policy that the test suite exercises is this team's hand-written encoding. [ADR 004](/adr/004-specifications-and-policy-as-data.md) replaces it with a data file, a compiler and a round-trip check that reads the applied conditions back from the chain. Until then, nothing independent checks the encoding.
+**Policy encoding.** The policy that the test suite exercises is this team's hand-written encoding. [ADR 004](/adr/004-specifications-and-policy-as-data.md) replaces it with a data file, a compiler and a round-trip check that reads the applied conditions back from the chain: a strict YAML file, a Python compiler that emits one JSON artifact, and a check that rebuilds the trees from the modifier's events (OD-16). Until then, nothing independent checks the encoding.
 
 **Deployment provenance.** Explorer-verified source is not a build-to-bytecode comparison. Before funding, every reused component should be verified against a locally compiled tagged release.
 
