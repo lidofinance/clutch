@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T17:44:03Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -19,8 +19,8 @@ sources:
     resource: /specs/lip-draft.md
     title: LIP draft — launch asset and action matrix
   - id: s3
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/README.md"
-    title: Kit harness README at 370e20a — the policy still grants Aave v3, sDAI and order pre-signing
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/README.md"
+    title: Kit harness README at 7a8c661 — the policy follows the launch scope; what the kit still lacks
   - id: s4
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — USDS is not in the payment ACL chain
@@ -30,6 +30,12 @@ sources:
   - id: s6
     resource: "urn:clutch:restricted:mandate-draft-v0.1"
     title: Mandate draft v0.1 — the four main stablecoins, the per-stablecoin cap and the liquidity buffer; outside the repository until the mandate is published
+  - id: s7
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L553"
+    title: Kit test at 7a8c661 — DAI to USDS and back pays the Asset Safe, any other receiver is refused, and the converter approvals have a fixed ceiling
+  - id: s8
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L875"
+    title: Kit test at 7a8c661 — the operator cannot reach Aave, sDAI or the CoW settlement
 ---
 
 # ADR 011: Launch scope
@@ -38,7 +44,7 @@ sources:
 
 - Lido Lend is expected in October 2026 and is compatible with Morpho Blue [s1].
 - USDS cannot be paid out through the existing payment path [s4]. EM decided on 2026-10-05 that a DAO vote adds it (decision 5).
-- The kit's policy predates this scope [s3].
+- Since 2026-10-05 the kit's policy follows this scope [s3].
 - The mandate names four main stablecoins: USDC, USDT, USDS and DAI. It caps the vault's holding of any one of them at a share of its stablecoins, and it requires a stablecoin buffer of one month of baseline spend [s6].
 - Sky's DAI–USDS converter turns DAI into USDS one to one, and back. It has no admin and no fee, and it pays a receiver that the caller names. USDS is an upgradeable proxy under Sky governance; DAI is not. The Agent holds 4,673,791.03 DAI [s5].
 
@@ -94,7 +100,7 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market.
 ## Consequences
 
 - The Morpho Blue template ships before the market it will point at exists. Its acceptance needs end-to-end tests against the deployed Morpho Blue contract on a fork.
-- The kit still grants Aave v3 supply and withdraw, sDAI deposits and direct order pre-signing [s3]. The policy migration in [ADR 004](/adr/004-specifications-and-policy-as-data.md) removes them.
+- The kit's policy no longer grants Aave v3, sDAI or order pre-signing, and a fork test refuses them [s8].
 - Asynchronous vault deposits are authorised at the policy layer in the kit. Their settlement is not tested.
 - DAI earns only after conversion. Converted value is exposed to USDS, which Sky governance can upgrade [s5].
 - The operator can keep each stablecoin under the mandate's per-stablecoin cap, by converting between DAI and USDS and by rebalancing USDS through Stonks.
@@ -102,9 +108,9 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market.
 
 ## Confirmation
 
-- INV-015 in the [invariants](/specs/invariants.md). It has no test yet.
+- INV-015 in the [invariants](/specs/invariants.md). Kit tests refuse every out-of-scope venue [s8].
 - The end-to-end test of the Morpho Blue template. It does not exist yet.
-- Fork tests owed: a conversion pays the Asset Safe in both directions; a conversion with any other receiver is refused; an approval to the converter at or above one TM Floor Value is refused.
+- Kit test: a conversion pays the Asset Safe in both directions; a conversion with any other receiver is refused; an approval to the converter at or above the ceiling is refused [s7]. The ceiling in the kit is a dry-run stand-in for one TM Floor Value.
 
 ## Reversal conditions
 

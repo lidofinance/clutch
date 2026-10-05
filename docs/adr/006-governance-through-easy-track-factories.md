@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T10:21:49Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -31,8 +31,8 @@ sources:
     resource: "https://github.com/lidofinance/easy-track/blob/3183d1f68d47f5713e0183720aacd10a7dd12670/contracts/TrustedCaller.sol#L13"
     title: Easy Track TrustedCaller — the trusted caller is set once at deployment and cannot change
   - id: s6
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/ReviewProbe.t.sol#L246"
-    title: Kit tests at 370e20a — the governance role cannot change membership, touch the emergency role, grant an administrative target or raise a foreign allowance key
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/ReviewProbe.t.sol#L176"
+    title: Kit tests at 7a8c661 — the governance role cannot change membership, touch the emergency role, grant an administrative target, raise a foreign allowance key or shorten a refill period
   - id: s8
     resource: "https://github.com/lidofinance/easy-track/blob/3183d1f68d47f5713e0183720aacd10a7dd12670/contracts/MotionSettings.sol#L36"
     title: Easy Track MotionSettings at 3183d1f — the minimum motion duration is 48 hours, and setMotionDuration refuses less (L93)
@@ -70,7 +70,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - Each factory owns one template. A motion carries typed parameters only, such as a target, an asset and a budget key. The factory builds the tree.
 - Every factory's trusted caller is the operator Safe. Easy Track fixes the trusted caller at deployment [s7].
 - Every factory hard-codes the `operator` role key and refuses the modifiers and the Safe as a target.
-- The kit's role-toggle factory [s4] leaves the design (decision 8). The budget factory and the template factories are not built.
+- The kit's role-toggle factory [s4] left the design (decision 8) and the kit on 2026-10-05. The budget factory and the template factories are not built.
 - The modifier constrains the governance role again, so a factory bug cannot widen anything. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator an administrative target, and cannot set an allowance outside the operator's budget keys [s6].
 - A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. Once it is enacted, the emergency Safe can revoke the new permission at once.
 - Every removal is an emergency action. The emergency role holds `revokeTarget` and `revokeFunction`, pinned to the `operator` key, and acts at once. Every operator permission lives under that key, so the revoke reaches all of them.
@@ -93,7 +93,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - The committee proposes its own expansions. The objection window, the disclosure rule and the Emergency Brakes pause are the counterweights.
 - Routine removals happen at two of seven, without screening and without notice in advance. The forum post follows the removal. Monitoring pages a revoke-only emergency action at a lower severity than a transfer or a swap.
 - A removed strategy comes back only through an onboarding motion or a DAO vote.
-- The kit's toggle factory and its tests [s4][s5] become legacy. INV-007 retires.
+- The kit's toggle factory and its tests [s4][s5] are removed from the kit. INV-007 retires.
 
 ## Confirmation
 

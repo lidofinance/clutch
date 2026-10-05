@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:39:55Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -25,11 +25,17 @@ sources:
     resource: /specs/lip-draft.md
     title: LIP draft — swapping and the instance matrix
   - id: s5
-    resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/README.md"
-    title: Kit harness README at 370e20a — the policy still grants order pre-signing
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L875"
+    title: Kit test at 7a8c661 — the operator cannot pre-sign an order or approve the CoW relayer
   - id: s6
     resource: /research/stonks-pricing-2026-10-05.md
     title: Stonks 2.0 pricing, 2026-10-05 — the converter, the shared router, Chainlink's registry, feed replacements, and the WETH route
+  - id: s7
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L582"
+    title: Kit test at 7a8c661 — staking, a withdrawal-queue round trip with the Asset Safe as owner, and a wrap into WETH
+  - id: s8
+    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L699"
+    title: Kit test at 7a8c661 — the emergency role unwraps WETH into the Asset Safe through WETH's 2,300-gas transfer, stakes the ETH and sends the stETH to the Agent
 ---
 
 # ADR 007: Swapping through Stonks 2.0
@@ -112,7 +118,7 @@ The rest of this section is agent-drafted [s4]. EM has not accepted it as text.
 - Each instance's values are fixed. A wrong rebalancing value is fixed by a new instance and one motion. A wrong recovery value needs a DAO vote, because the safety policy pins the recovery instances.
 - Swaps are queued, not instant. The emergency service level is time to initiate, not time to fill.
 - Assets sit in an instance between the transfer and the settlement, a short custody excursion out of the Asset Safe. The LIP must say so.
-- The kit still grants the operator direct order pre-signing [s5]. The policy migration in [ADR 004](/adr/004-specifications-and-policy-as-data.md) removes it.
+- Since 2026-10-05 the kit grants no order pre-signing and no CoW relayer approval, and a fork test refuses both [s5]. The kit deploys no instance, so it has no swap path yet.
 - A wstETH sale takes two steps: unwrap, then sell stETH. Buying WETH takes days, because the withdrawal queue finalizes requests over days.
 - Swap pricing depends on Chainlink's Feed Registry and on the committee's Safe to re-sync it. A replaced USDC feed stops every vault swap until the re-sync. Recovery can still send assets to the Agent, which needs no price.
 - The committee's Safe can turn a vault token off on the router, or loosen its maximum price age. It cannot choose a feed. Monitoring alerts on every router change.
@@ -121,7 +127,8 @@ The rest of this section is agent-drafted [s4]. EM has not accepted it as text.
 ## Confirmation
 
 - INV-002, INV-013, INV-014 and INV-020 in the [invariants](/specs/invariants.md).
-- Fork tests owed: each manager places, re-places and recovers orders; a non-manager cannot; recovered tokens arrive at the treasury; an expired order's tokens return to the instance; the converter prices every instance pair; an instance refuses a token that is turned off or out of sync; WETH's unwrap pays the Asset Safe, although WETH forwards only 2,300 gas; staking and a withdrawal-queue round trip work with the Asset Safe as owner.
+- Kit tests: staking and a withdrawal-queue round trip work with the Asset Safe as owner [s7]; WETH's unwrap pays the Asset Safe, although WETH forwards only 2,300 gas [s8]. The oracle report that finalizes a request is simulated.
+- Fork tests owed: each manager places, re-places and recovers orders; a non-manager cannot; recovered tokens arrive at the treasury; an expired order's tokens return to the instance; the converter prices every instance pair; an instance refuses a token that is turned off or out of sync.
 
 ## Reversal conditions
 

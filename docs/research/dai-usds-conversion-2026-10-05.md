@@ -9,7 +9,7 @@ valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T17:44:03Z
+  at: 2026-10-05T19:30:52Z
 verified: []
 sources:
   - id: s1
@@ -48,7 +48,7 @@ At the block, the Aragon Agent holds 4,673,791.03 DAI, 9,606,793.69 USDC, 8,041,
 - Sky's `DaiUsds` contract is at `0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`. Its DAI and USDS addresses and its two joins are fixed at deployment. It has no admin and charges no fee [s1].
 - `daiToUsds(usr, wad)` takes `wad` DAI from the caller and pays `wad` USDS to `usr`. `usdsToDai(usr, wad)` does the reverse. The caller first approves the converter to take the token [s1].
 - The caller names the receiver, so a permission on the converter must pin `usr` to the Asset Safe.
-- The kit grants no permission on the converter [s7].
+- At 370e20a, the kit granted no permission on the converter [s7]. EM's decision added it.
 
 ## The two tokens
 
