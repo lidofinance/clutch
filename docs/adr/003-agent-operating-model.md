@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-05T11:06:53Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the agent operating model, 2026-09-30
+    title: Decision log — EM on the agent operating model, 2026-09-30, and on code owners, 2026-10-05
   - id: s2
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — evidence on instruction files, skills and attacks
@@ -44,6 +44,13 @@ EM accepted the positioned model on 2026-09-30, with the line cap enforced by th
 
 Rejected: the cap of about 100 lines that Gaggle uses. It is too generous against the evidence [s2].
 
+EM decided on 2026-10-05, closing OD-10 [s1]:
+
+9. The `@lidofinance/defi-tech` team owns the repository. `@lidofinance/review-gh-workflows` owns `/.github/`. No new team is created.
+10. A branch rule on `main` requires a pull request and a code-owner review, allows no direct pushes, and dismisses approvals when new commits arrive.
+11. Every merge needs at least one approval from someone other than the pull request's creator.
+12. The agent's own GitHub identity comes later (OD-23).
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Options considered
@@ -58,11 +65,13 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 - The first `AGENTS.md` is agent-written until EM prunes it. The subgoal "human-written instruction files" is unmet until then.
 - A freshness check for instruction files is owed: it must fail on a broken path or on a command that no longer exists. Until it exists, that subgoal is also unmet.
 - Of the four skills, only `skills/adr-draft/` exists. The three Clutch-specific skills arrive with the tools they drive in phase 2.
+- Until the agent has its own GitHub identity, the agent pushes under the creator's git identity, so the creator's own approval never counts. Another member of the owning team approves.
+- The rules bind only while both owner teams have write access and the branch rule is on. Neither can be checked from the agent's environment.
 
 ## Confirmation
 
 - The validator fails when `AGENTS.md` exceeds 60 lines or is missing.
-- `.github/CODEOWNERS` lists the protected paths. It takes effect once the owning team is set (OD-10).
+- `.github/CODEOWNERS` names the owners: `@lidofinance/defi-tech` for everything and `@lidofinance/review-gh-workflows` for `/.github/`. It binds once the branch rule on `main` is on.
 
 ## Reversal conditions
 
@@ -71,4 +80,4 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Open questions
 
-- OD-10: the owning team for CODEOWNERS.
+- OD-23: when the agent gets its own GitHub identity.

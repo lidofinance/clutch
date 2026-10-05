@@ -2,6 +2,7 @@
 
 ## 2026-10-05
 
+* **Decision**: Recorded EM's choices for OD-10. `@lidofinance/defi-tech` owns the repository and `@lidofinance/review-gh-workflows` owns `/.github/`; `.github/CODEOWNERS` now names them. A branch rule on `main` requires a pull request, a code-owner review and at least one approval by someone other than the pull request's creator. The agent's own GitHub identity is deferred as OD-23. Updated ADR 002, ADR 003 and SECURITY.md.
 * **Decision**: Recorded EM's choices for OD-09. The two removal templates are dropped, and every removal is the emergency Safe's immediate revoke, posted on the forum afterwards. The design uses no DAO-scoped role keys, so the role-toggle factory and the governance role's `assignRoles` permission leave it, and the revoke reaches every operator permission. Recorded that Easy Track never allows a window below 48 hours. Updated ADR 005, ADR 006, ADR 010, the LIP, the runbooks and the kit README. Retired INV-007 and added INV-018.
 
 ## 2026-10-02
