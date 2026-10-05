@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:04:03Z
+  at: 2026-10-05T14:39:55Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,24 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-20: swap pricing
+
+> Q1: 1.
+> Q2: A, but support WETH too
+> Q3: 1.
+
+The router cannot price WETH, so the agent asked how to support it (Q2b):
+
+> Q2b: 1.
+
+Recorded as: OD-20 is closed. (Q1) The committee's Safe, as the manager of the shared Stonks 2.0 oracle router, adds USDC, USDT, DAI and USDS once the instance list is final. Each is quoted in USD, with a maximum price age equal to Chainlink's heartbeat for its feed. Lido deploys one USD-anchored converter for the vault through the deployed converter factory. The enabling vote starts only if every vault token is configured on the router and in sync. (Q2) The swap instances cover only the tokens that the router can price: stETH, LDO, USDC, USDT, USDS and DAI. wstETH is unwrapped and sUSDS is redeemed before a sale. EM added WETH. (Q2b) WETH goes through stETH: to sell it, the vault unwraps it, stakes the ETH through Lido's `submit` and sells the stETH; to buy it, the vault unstakes stETH through Lido's withdrawal queue and wraps the ETH. The operator and the emergency role may stake ETH, the operator may request and claim withdrawals pinned to the Asset Safe, and the emergency role may unwrap WETH. (Q3) The committee's Safe re-syncs a feed after Chainlink replaces it. Monitoring alerts when a vault token's feed is out of sync, and a runbook covers the re-sync. If a feed is broken during an emergency, the emergency Safe sends assets to the Aragon Agent instead of swapping. The evidence is in the [pricing note](/research/stonks-pricing-2026-10-05.md) ([ADR 007](/adr/007-swapping-through-stonks.md)). [s4]
+
+## 2026-10-05 — OD-20 asked
+
+> continue interview for the next pending decision, why it's not OD-18 or OD-19 btw, but OD-20?
+
+[s4]
 
 ## 2026-10-05 — OD-17: Safe v1.5.0 after the due diligence
 

@@ -22,7 +22,7 @@ This harness runs the Clutch permission policy against production contracts on a
 The harness predates five design decisions and does not yet follow them:
 
 - The launch scope in [ADR 011](../docs/adr/011-launch-scope.md). The policy still grants Aave v3 supply and withdraw and sDAI deposits, which are outside the launch scope.
-- Swapping through Stonks 2.0 in [ADR 007](../docs/adr/007-swapping-through-stonks.md). The policy still grants the operator direct order pre-signing.
+- Swapping through Stonks 2.0 in [ADR 007](../docs/adr/007-swapping-through-stonks.md). The policy still grants the operator direct order pre-signing. It also lacks the conversions that OD-20 added: staking ETH through Lido's `submit`, the Lido withdrawal queue, and the emergency role's WETH unwrap.
 - Approvals in [ADR 009](../docs/adr/009-budgets-caps-reporting-and-monitoring.md). The policy caps each approval and spends the budget at the deposit. The decision spends the budget at the approval, and deposits no longer spend it.
 - Pre-execution screening in [ADR 010](../docs/adr/010-pre-execution-screening.md). The harness tests a module guard on the Asset Safe. The decision is the screening vendor's transaction guard on a dedicated operator Safe, which is also the trusted caller of every factory.
 - Governance in [ADR 006](../docs/adr/006-governance-through-easy-track-factories.md). The harness still has the role-toggle factory and tests of DAO-scoped role keys. The design retired both: every operator permission lives under the `operator` key.

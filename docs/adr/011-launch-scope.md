@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:23:52Z
+  at: 2026-10-05T14:39:55Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the launch assets, DAI and Lido Lend, 2026-09-22
+    title: Decision log — EM on the launch assets, DAI and Lido Lend, 2026-09-22, and on WETH, 2026-10-05
   - id: s2
     resource: /specs/lip-draft.md
     title: LIP draft — launch asset and action matrix
@@ -47,17 +47,21 @@ EM decided on 2026-10-05, closing OD-11 [s1]:
 
 5. The funding assets are USDC, USDT, DAI, USDS, sUSDS and stETH. ETH is not one ([ADR 008](/adr/008-funding-through-existing-payments.md)).
 
+EM decided on 2026-10-05, closing OD-20 [s1]:
+
+6. WETH is supported through stETH: it is unwrapped and staked to sell, and bought back through Lido's withdrawal queue. Only stETH, LDO, USDC, USDT, USDS and DAI are swapped ([ADR 007](/adr/007-swapping-through-stonks.md)).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 | Asset or venue | Role in the vault | Notes |
 |---|---|---|
-| ETH, WETH | held; wrap and unwrap | not a funding asset |
-| stETH, wstETH | held; wrap and unwrap | stETH can seed the vault |
+| ETH, WETH | held; wrap and unwrap; staked to stETH before a sale, and bought back through Lido's withdrawal queue | not a funding asset; no swap instance |
+| stETH, wstETH | held; wrap and unwrap | stETH can seed the vault; wstETH is unwrapped before a sale |
 | USDC, USDT, DAI | held | can seed the vault |
 | USDS | held | can fund the vault once a DAO vote adds it to the payment permission |
-| sUSDS | savings position | tokenized-vault template; can also fund the vault |
+| sUSDS | savings position | tokenized-vault template; can also fund the vault; redeemed before a sale |
 | earnETH, earnUSD | vault positions | asynchronous deposit and redeem |
 | LDO | held | in the rebalancing set |
 | Stonks 2.0 instances | rebalancing and recovery | [ADR 007](/adr/007-swapping-through-stonks.md) |

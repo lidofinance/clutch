@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-05T14:04:03Z
+  at: 2026-10-05T14:39:55Z
 verified: []
 ---
 
@@ -24,7 +24,7 @@ Review statuses: `slop` means drafted by an agent and not checked by a human. `h
 | [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/005-account-graph-and-roles.md](/adr/005-account-graph-and-roles.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | slop | proposed | 2026-10-05 | none |
-| [adr/007-swapping-through-stonks.md](/adr/007-swapping-through-stonks.md) | Decision | slop | proposed | 2026-10-02 | none |
+| [adr/007-swapping-through-stonks.md](/adr/007-swapping-through-stonks.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/008-funding-through-existing-payments.md](/adr/008-funding-through-existing-payments.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-10-05 | none |
 | [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-10-05 | none |
@@ -38,7 +38,8 @@ Review statuses: `slop` means drafted by an agent and not checked by a human. `h
 | [research/funding-registries-2026-10-02.md](/research/funding-registries-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |
-| [research/stonks-instances-2026-10-02.md](/research/stonks-instances-2026-10-02.md) | Research Note | slop |  | 2026-10-02 | none |
+| [research/stonks-instances-2026-10-02.md](/research/stonks-instances-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |
+| [research/stonks-pricing-2026-10-05.md](/research/stonks-pricing-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-10-05 | none |
 | [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-10-05 | none |
 | [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-09-30 | none |

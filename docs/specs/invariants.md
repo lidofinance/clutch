@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:04:03Z
+  at: 2026-10-05T14:39:55Z
 verified: []
 sources:
   - id: s1
@@ -48,3 +48,4 @@ State "Draft" means the ADR is proposed. State "Pending" means the invariant dep
 | INV-017 | A top-up motion pays only the Asset Safe, only in an allowed token, and never more than its funding registry's remaining limit in the month of enactment. Only the operator Safe can create one. Only the DAO changes a funding registry's limit, period or recipients. | [ADR 008](/adr/008-funding-through-existing-payments.md) | Pending: registries and factories not built | None yet |
 | INV-018 | Every operator permission lives under the `operator` role key, and the operator Safe holds no other role key. The emergency role's revoke therefore reaches every operator permission. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Draft | None yet: the kit's launch policy assigns only `operator`, but no test asserts it |
 | INV-019 | The Asset Safe, the operator Safe and the emergency Safe run the Safe v1.5.0 singleton pinned in the LIP. A change of any of their singletons is a critical alert. | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 010](/adr/010-pre-execution-screening.md) | Pending: the Safes are not deployed | None yet: the kit's deployment checks the singleton's code hash, not the deployed proxies |
+| INV-020 | The vault's converter allows exactly the tokens of the vault's swap instances. Every one of them is configured on the Stonks price router and in sync when the enabling vote starts. | [ADR 007](/adr/007-swapping-through-stonks.md) | Pending: the converter and the feeds are not set | None yet |

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:04:03Z
+  at: 2026-10-05T14:39:55Z
 verified: []
 sources:
   - id: s1
@@ -34,6 +34,9 @@ sources:
   - id: s8
     resource: /research/safe-v150-due-diligence-2026-10-05.md
     title: Safe v1.5.0 due diligence, 2026-10-05 — audits, advisories, use and value on mainnet, incidents, and the Safe paths the vault uses
+  - id: s9
+    resource: /research/stonks-pricing-2026-10-05.md
+    title: Stonks 2.0 pricing, 2026-10-05 — the converter, the shared router, Chainlink's registry, feed replacements, and the WETH route
 ---
 
 # LIP-XX: Active Treasury Management Vault
@@ -181,8 +184,8 @@ Four principals. Role keys are `bytes32`; the encoding must match the tooling th
 | Role | Holder | May do | May not do |
 | --- | --- | --- | --- |
 | DAO | Aragon Agent, reached by vote through Dual Governance | Everything: owns the Safe, may replace the whole policy, may add or remove role members | — |
-| `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders up to a cap | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
-| `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; swap to stablecoins through the recovery-family instances; transfer recovered assets to the Agent only; revoke the operator's targets and functions, which is how every removal happens; invalidate outstanding orders | Add any permission; enter any protocol; borrow; change the recovery destination; disable the module |
+| `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders up to a cap; stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
+| `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS so that recovery can sell them; swap to stablecoins through the recovery-family instances; transfer recovered assets to the Agent only; revoke the operator's targets and functions, which is how every removal happens; invalidate outstanding orders | Add any permission; enter any protocol; borrow; change the recovery destination; disable the module |
 | `technical` | Emergency Brakes multisig, three of five. **Safety modifier** | Disable the **operator** modifier, with the module argument pinned to it | Anything else. It cannot touch assets or permissions, and it cannot disable the safety modifier |
 | `governance` | EVMScriptExecutor, driven by Easy Track | Write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | Submit a condition tree; grant or remove any role; touch the emergency role; target a modifier or the Safe |
 
@@ -366,7 +369,7 @@ What it costs, and what must be planned:
 
 ##### 6.1.1 Instance matrix **[Open — topology]**
 
-Sellable assets are stETH, wstETH, WETH, LDO and the four dollar stablecoins. The savings and queue vault positions are redeemed through their own contracts, not swapped, so they need no instance.
+Sellable assets are stETH, LDO and the four dollar stablecoins: the tokens that the Stonks price router can price (OD-20). wstETH is unwrapped and sUSDS redeemed before a sale. WETH is unwrapped and the ETH staked to stETH through Lido's `submit`; WETH is bought back by unstaking stETH through Lido's withdrawal queue. The savings and queue vault positions are redeemed through their own contracts, not swapped, so they need no instance.
 
 | Family | Receiver | Scope decided so far |
 | --- | --- | --- |
@@ -375,20 +378,20 @@ Sellable assets are stETH, wstETH, WETH, LDO and the four dollar stablecoins. Th
 
 The topology is the remaining decision, and it changes the deployment surface by roughly a factor of three.
 
-- **Full mesh.** Recovery covers four volatile assets into four stablecoins, plus each stablecoin into the other three: 28 instances. Rebalancing covers every ordered pair of the six named assets, less the stETH and wstETH pair which is a wrap rather than a swap: 28 instances. About 56 in total.
+- **Full mesh.** Recovery covers stETH and LDO into four stablecoins, plus each stablecoin into the other three: 20 instances. Rebalancing covers every ordered pair of stETH, LDO, USDC, USDT and USDS, because wstETH is a wrap rather than a swap: 20 instances. About 40 in total.
 - **Hub.** One canonical stablecoin is the hub. Recovery sells everything into it, and a small number of stablecoin pairs cover the rest. Rebalancing routes through the hub in both directions. Roughly 17 in total.
 
 **Decision: hub, with a second recovery destination.** USDC is the hub. Rebalancing routes through it, so every rebalancing pair is one hop and the rare non-hub route costs two. Recovery sells every asset directly into the hub, so nothing needs two hops under stress.
 
 Recovery additionally carries USDT as a **second destination for the volatile assets**. A single hub has one failure mode that matters here: if the asset being fled is the hub itself, recovery into it is exactly wrong, and a hub depeg would strand the recovery path. The second destination removes that dependency for the assets most likely to need a fast exit.
 
-That gives roughly eleven recovery instances and ten rebalancing instances, about twenty-one in total, against about fifty-six for a full mesh. Direct pairs can be added later by motion where a route proves costly in practice. Each instance is an address the transfer permission must pin, so an unused instance still costs deployment, configuration and monitoring surface.
+That gives roughly seven recovery instances and eight rebalancing instances, about fifteen in total, against about forty for a full mesh. Direct pairs can be added later by motion where a route proves costly in practice. Each instance is an address the transfer permission must pin, so an unused instance still costs deployment, configuration and monitoring surface.
 
 Each instance's address is pinned in the transfer permission of the token it sells, so the set is fixed at policy-application time and grows only by a policy change.
 - **Swaps are not instant.** Orders run for a bounded duration with an oracle-derived floor, so a rebalance is a queued action, not an immediate one. The emergency service level remains time-to-initiate.
 - **Assets sit in the instance between transfer and settlement.** This is a short custody excursion out of the Asset Safe and should be stated plainly rather than glossed.
 - **The committee Safes are the managers** (OD-05). The operator Safe manages the rebalancing instances, and its orders pass the screening guard. The emergency Safe manages the recovery instances. A manager cannot take tokens: recovery always pays the Aragon Agent. Tokens recovered from a rebalancing instance therefore leave the vault for the treasury, and a top-up motion brings them back if the mandate allows it.
-- **Pricing must be configured before launch.** The deployed converter prices only stETH and LDO. The vault's pairs need a new converter instance and oracle-router feeds for wstETH, WETH, USDC, USDT, DAI and USDS (OD-20).
+- **Pricing.** Every instance prices through a converter and the Stonks price router that the NEST buyback shares. The router takes its feeds from Chainlink's Feed Registry, which has USD feeds for USDC, USDT, DAI and USDS and no entry for wstETH, WETH or sUSDS [s9]. The TMC multisig, the router's manager since vote 204, adds the four feeds before the enabling vote, and Lido deploys one USD-anchored converter for the vault through the existing converter factory. The vote starts only if every vault token is configured and in sync. When Chainlink replaces a feed, as it did for USDC and USDT twice in September 2026, the router refuses that token until the TMC multisig re-syncs it; during an emergency, recovery can send assets to the Agent instead (OD-20).
 - **No existing instance is reused.** The deployed treasury instances are the earlier revision with the receiver hardcoded, and their manager is the operator committee. Both properties are wrong for this system, and sharing an instance would mix vault flows with ordinary DAO swaps in one balance.
 
 ##### 6.2 Module disabling — the technical role **[Implemented]**
@@ -546,6 +549,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Swap margin | Per-instance immutable, basis points | 110 for volatile pairs, 30 for stablecoin pairs (OD-05) |
 | Swap price tolerance | Per-instance immutable, basis points | 550 for volatile pairs, 150 for stablecoin pairs (OD-05) |
 | Swap maximum improvement and partial fills | Per-instance immutables | 1000 basis points; partial fills on (OD-05) |
+| Price feeds | The vault's tokens on the Stonks price router | USDC, USDT, DAI and USDS added by the TMC multisig, quoted in USD, with a maximum price age equal to Chainlink's heartbeat; stETH and LDO as already configured (OD-20) |
 | Funding period and limit | Funding cap per period, in each of the two registries | One calendar month; one TM Floor Value per period in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared. Set by attested computation; the figures enter with the approved mandate (OD-06, decided) |
 
 ### Roles and Authority
@@ -559,6 +563,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Top up the vault | Operator Safe proposes with the vendor's approval, anyone enacts | Easy Track motion, top-up factory, paying the Asset Safe only | 72 hours |
 | Revoke the operator | Emergency Safe, two signatures | Direct through the modifier | Minutes |
 | Disable the operator modifier | Emergency Brakes multisig, three signatures | Direct through the safety modifier, technical role | Minutes |
+| Re-sync a price feed | TMC multisig, four signatures, as the price router's manager | `syncTokenFeed` on the Stonks price router | Minutes, subject to signer availability |
 | Freeze queued motions | Emergency Brakes multisig, a separate body | Easy Track pause | Minutes, subject to paging them |
 | Return assets to the DAO | Emergency Safe, two signatures | Direct through the modifier | Minutes to initiate |
 | Replace the whole policy | DAO | Vote through Dual Governance to the Agent | Vote plus Dual Governance timelock |
@@ -609,6 +614,7 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | Top-up above the shortfall | The operator Safe pulls more than the mandate allows, or outside the monthly cycle | A limit of one TM Floor Value per registry per month; the 72-hour objection; the screening guard; the emergency Safe can return funds to the Agent | Alerts on out-of-cycle motions, on a month's top-ups above the posted shortfall, and on a motion after an objected one |
 | Spender pulls without a deposit | A protocol spender is upgraded to steal, or an approval stands too long | Each approval spends its key's budget, so approvals per period cannot exceed it; approvals in the same transaction as the deposit; the emergency role zeroes approvals and can revoke the approve permission | Approval inventory and budget burn monitoring |
 | Exit impossible when it matters | Protocol illiquidity or asynchronous settlement | Receipt-token transfer to the Agent; claim later | Position inventory monitoring |
+| Price feed out of sync | Chainlink replaces an aggregator in its registry, as it did for USDC and USDT twice in September 2026 | The TMC multisig re-syncs the feed as the router's manager; recovery can send assets to the Agent, which needs no price | Alert when a vault token's feed is out of sync, or when the registry confirms a new aggregator for it |
 | Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity and new motions stop; recovery is unaffected; the owners can remove the guard after ten days | Approval-latency and vendor-heartbeat monitoring |
 | Monitoring unavailable | Service outage | On-chain permissions are the enforcement layer and do not widen when monitoring stops | Heartbeat on the monitor itself |
 

@@ -9,7 +9,7 @@ valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T13:35:00Z
+  at: 2026-10-05T14:39:55Z
 verified: []
 sources:
   - id: s1
@@ -82,10 +82,10 @@ The committee's stETH top-up registry lists the three Stonks v1 stETH instances 
 ## What the deployed price stack can price
 
 - The deployed converter allows only stETH as a sell token and only LDO as a buy token [s3][s5].
-- The oracle router it reads reports feeds in sync for stETH and LDO only. For wstETH, WETH, USDC, USDT, DAI and USDS it has no feed, and a price request reverts [s4][s5].
+- The oracle router it reads reports feeds in sync for stETH and LDO only. For wstETH, WETH, USDC, USDT, DAI and USDS it has no feed configured, and a price request reverts [s4][s5]. The [pricing note of 2026-10-05](/research/stonks-pricing-2026-10-05.md) shows that Chainlink's registry has feeds for USDC, USDT, DAI and USDS, and none for wstETH, WETH or sUSDS (OD-20).
 - As a positive control, the router priced the stETH and LDO pair, and the live instance quoted it at the same block [s5].
 
 ## Limits
 
-- Every read describes its block. Governance can add feeds and deploy converters.
+- Every read describes its block. Aragon Voting or the router's manager, the committee's Safe, can add feeds, and anyone can deploy a converter through the factory (OD-20).
 - The source review covers the roles and order life above. It is not an audit.

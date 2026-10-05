@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:04:03Z
+  at: 2026-10-05T14:39:55Z
 verified: []
 sources:
   - id: s1
@@ -19,6 +19,9 @@ sources:
   - id: s3
     resource: /research/safe-v150-due-diligence-2026-10-05.md
     title: Safe v1.5.0 due diligence, 2026-10-05
+  - id: s4
+    resource: /research/stonks-pricing-2026-10-05.md
+    title: Stonks 2.0 pricing, 2026-10-05
 ---
 
 # Parameters
@@ -40,6 +43,11 @@ sources:
 | Swap engine | Stonks 2.0, fresh instances only | EM decision [s1] | [ADR 007](/adr/007-swapping-through-stonks.md) |
 | Swap instance manager | the operator Safe for rebalancing instances; the emergency Safe for recovery instances | EM decision of 2026-10-02 [s1], replacing the Aragon Agent of 2026-09-22 | ADR 007 |
 | Swap instance origin | the standard Stonks 2.0 factory; admin Aragon Voting; recovered tokens go to the Aragon Agent | EM decision of 2026-10-02 [s1] | ADR 007 |
+| Swap price router | the shared Stonks 2.0 oracle router `0x79ef3a538200Fe4981D67E7e886bfb36D4Cb5a31`; admin Aragon Voting; manager the committee's Safe, which adds the vault's feeds and re-syncs them | Read [s4]; EM decision of 2026-10-05 [s1] | ADR 007 |
+| Feeds added for the vault | USDC, USDT, DAI and USDS, quoted in USD; maximum price age 82,800 s, 86,400 s, 3,600 s and 82,800 s, Chainlink's heartbeats; stETH and LDO stay as configured | EM decision of 2026-10-05 [s1]; heartbeats read [s4] | ADR 007 |
+| The vault's converter | one USD-anchored converter from the factory `0xD96223670BF73cB191a9F0b526653B7eC99dcf45`; its token lists follow the instance list | EM decision of 2026-10-05 [s1] | ADR 007 |
+| Swappable tokens | stETH, LDO, USDC, USDT, USDS, DAI | EM decision of 2026-10-05 [s1] | ADR 007 |
+| Tokens converted before a sale | wstETH is unwrapped; sUSDS is redeemed; WETH is unwrapped and ETH staked to stETH through Lido's `submit`. WETH is bought by unstaking stETH through Lido's withdrawal queue and wrapping the ETH | EM decision of 2026-10-05 [s1] | ADR 007 |
 | Rebalancing set | stETH, wstETH, USDC, USDT, USDS, LDO | EM decision [s1] | ADR 007 |
 | Recovery destinations | USDC as the hub; USDT as the mandatory second destination | EM decision on USDT [s1]; the hub is the agent topology that EM's answer built on | ADR 007 |
 | Order duration, margin, price tolerance | volatile to stable: 1800 s, 110 bp, 550 bp; stable to stable: 1800 s, 30 bp, 150 bp; both families | EM decision of 2026-10-02 [s1], copying the live instances | ADR 007 |
