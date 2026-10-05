@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T16:07:52Z
+  at: 2026-10-05T17:44:03Z
 verified: []
 sources:
   - id: s1
@@ -107,7 +107,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - **Yield-bearing keys.** A yield-bearing key gets the headroom: the cap's share of the stablecoins plus yield-bearing stablecoins held directly, minus the current holding of that token, and never less than zero. Converting a stablecoin into a yield-bearing stablecoin leaves the base unchanged. The headroom depends on what the vault holds, so each fortnightly retune derives it from a holdings snapshot read at a pinned block. Without a snapshot, the key gets no budget.
 - **Lido Lend key.** The protocol cap applies until three calendar months after Lido Lend goes live. From that date the key is bounded by the mandate size, like every own-product key. The months count from Lido Lend's mainnet launch (decision 16).
 - **Budget figures.** The attested computation ran on 2026-09-22 with an independent attester and pinned inputs. It ran again on 2026-10-02 with the literal base. The yield-bearing key now gets no figure until the first retune after seeding, and the other keys are unchanged. The inputs include unapproved mandate terms, so the results enter this repository only after the mandate is approved.
-- **Approvals.** Each approval branch names one spender and spends that spender's key, so a token approved to two spenders draws on two keys. The operator approves only what it deposits, in the same transaction, so no approval stands between transactions.
+- **Approvals.** Each approval branch names one spender and spends that spender's key, so a token approved to two spenders draws on two keys. The operator approves only what it deposits, in the same transaction, so no approval stands between transactions. The DAI and USDS approvals to Sky's DAI–USDS converter carry the same fixed ceiling as the stETH approval to the wstETH contract (decision 14; [ADR 011](/adr/011-launch-scope.md)).
 - **The budget factory.** It builds one branch per key, so each key has its own ceiling on `balance`, `maxRefill` and `refill`, and every branch bounds `period` below by 30 days. The kit test shows one shared ceiling only [s4].
 - **Reports.** The payload is on IPFS and holds balances, positions, exposures, each ratio with its numerator and denominator, and the price source with its timestamp. The standard top-up factory writes a fixed payment reference, so a top-up cannot carry the report's identifier in it [s6]. The identifier goes in the report's forum post, and there is no on-chain anchor (decision 22). Reports show the first-loss Earn shares apart from the vault's other Earn shares ([ADR 008](/adr/008-funding-through-existing-payments.md)).
 - **Monitoring.** The Lido on-chain monitoring carries policy drift, the approval inventory, budget burn, module, owner and singleton changes on the three new Safes, and motion events. For funding it flags a top-up motion outside days 1 to 10 of a month, apart from the seed; a month's top-ups above the posted shortfall; and any top-up motion after an objected one ([ADR 008](/adr/008-funding-through-existing-payments.md)). For budgets it flags a second budget motion on the same key within 14 days. The screening vendor carries depegs, protocol compromise and counterparty anomalies. Findings route into the existing notification and incident channels.

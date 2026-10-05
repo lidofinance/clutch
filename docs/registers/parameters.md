@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T16:07:52Z
+  at: 2026-10-05T17:44:03Z
 verified: []
 sources:
   - id: s1
@@ -25,6 +25,9 @@ sources:
   - id: s5
     resource: /research/legacy-investments-2026-10-05.md
     title: Legacy investments, 2026-10-05
+  - id: s6
+    resource: /research/dai-usds-conversion-2026-10-05.md
+    title: DAI and the DAI–USDS converter, 2026-10-05
 ---
 
 # Parameters
@@ -50,6 +53,7 @@ sources:
 | Feeds added for the vault | USDC, USDT, DAI and USDS, quoted in USD; maximum price age 82,800 s, 86,400 s, 3,600 s and 82,800 s, Chainlink's heartbeats; stETH and LDO stay as configured | EM decision of 2026-10-05 [s1]; heartbeats read [s4] | ADR 007 |
 | The vault's converter | one USD-anchored converter from the factory `0xD96223670BF73cB191a9F0b526653B7eC99dcf45`; its token lists follow the instance list | EM decision of 2026-10-05 [s1] | ADR 007 |
 | Swappable tokens | stETH, LDO, USDC, USDT, USDS, DAI | EM decision of 2026-10-05 [s1] | ADR 007 |
+| DAI–USDS conversion | Sky's DaiUsds `0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`; the operator converts both ways, one to one; the receiver is pinned to the Asset Safe; DAI stays out of the Stonks rebalancing set | EM decision of 2026-10-05 [s1]; read [s6] | [ADR 011](/adr/011-launch-scope.md) |
 | Tokens converted before a sale | wstETH is unwrapped; sUSDS is redeemed; WETH is unwrapped and ETH staked to stETH through Lido's `submit`. WETH is bought by unstaking stETH through Lido's withdrawal queue and wrapping the ETH | EM decision of 2026-10-05 [s1] | ADR 007 |
 | Rebalancing set | stETH, wstETH, USDC, USDT, USDS, LDO | EM decision [s1] | ADR 007 |
 | Recovery destinations | USDC as the hub; USDT as the mandatory second destination | EM decision on USDT [s1]; the hub is the agent topology that EM's answer built on | ADR 007 |
@@ -71,7 +75,7 @@ sources:
 | Yield-bearing cap base | the top-4 stablecoins plus the yield-bearing stablecoins held directly; own-product and protocol positions excluded | EM decision of 2026-10-02 [s1] | ADR 009 |
 | Budget retune cadence | every two weeks | EM decision [s1] | ADR 009 |
 | Budget refill-period floor | 30 days | EM decision of 2026-10-02 [s1] | ADR 009 |
-| Approval bound | an approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget; the stETH approval to the wstETH contract has a fixed ceiling of one TM Floor Value in stETH | EM decision of 2026-10-02 [s1] | ADR 009 |
+| Approval bound | an approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget; the stETH approval to the wstETH contract has a fixed ceiling of one TM Floor Value in stETH; the DAI and USDS approvals to Sky's DAI–USDS converter have the same fixed ceiling | EM decisions of 2026-10-02 and 2026-10-05 [s1] | ADR 009, ADR 011 |
 | Report storage | IPFS; no DataBus | EM decision [s1] | ADR 009 |
 | Report anchor | the report's forum post only; no on-chain anchor | EM decision of 2026-10-05 [s1] | ADR 009 |
 | Price source and staleness limit | Coingecko close at the Snapshot Date; a price older than 24 hours counts as missing | EM decision of 2026-10-05 [s1] | ADR 009 |

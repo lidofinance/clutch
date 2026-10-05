@@ -17,4 +17,4 @@ One global sequence. Every record is agent-drafted and `proposed` until EM accep
 * [ADR 008: Funding through the existing payment path](008-funding-through-existing-payments.md) - Finance and two dedicated recipients registries, stablecoins and stETH, each with a one-month period and a limit of one TM Floor Value; the shared payment ACL stays unchanged.
 * [ADR 009: Budgets, exposure caps, reporting and monitoring](009-budgets-caps-reporting-and-monitoring.md) - detective caps, reports on IPFS, budgets by attested computation, two monitoring estates.
 * [ADR 010: Pre-execution screening](010-pre-execution-screening.md) - the screening vendor's transaction guard on a dedicated operator Safe that is also the trusted caller; fail closed; recovery never screened.
-* [ADR 011: Launch scope](011-launch-scope.md) - the launch assets and venues; Lido Lend by motion through a Morpho Blue template; no sDAI or third-party lending.
+* [ADR 011: Launch scope](011-launch-scope.md) - the launch assets and venues; Lido Lend by motion through a Morpho Blue template; WETH through stETH; DAI earns through Sky's DAI–USDS converter; no sDAI or third-party lending.

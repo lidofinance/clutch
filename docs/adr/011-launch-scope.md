@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 011: Launch scope"
-description: The launch assets and venues; Lido Lend is onboarded by motion through a Morpho Blue template that ships at launch with end-to-end tests; sDAI and third-party lending markets are out.
+description: The launch assets and venues; Lido Lend is onboarded by motion through a Morpho Blue template that ships at launch with end-to-end tests; DAI earns through Sky's DAI–USDS converter; sDAI and third-party lending markets are out.
 tags: [scope, assets, launch, lido-lend]
 status: draft
 review_status: slop
@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T16:07:52Z
+  at: 2026-10-05T17:44:03Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the launch assets, DAI and Lido Lend, 2026-09-22, and on WETH, 2026-10-05
+    title: Decision log — EM on the launch assets, DAI and Lido Lend, 2026-09-22, and on WETH and DAI, 2026-10-05
   - id: s2
     resource: /specs/lip-draft.md
     title: LIP draft — launch asset and action matrix
@@ -24,6 +24,12 @@ sources:
   - id: s4
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — USDS is not in the payment ACL chain
+  - id: s5
+    resource: /research/dai-usds-conversion-2026-10-05.md
+    title: DAI and the DAI–USDS converter, 2026-10-05 — the treasury's stablecoins, the converter, and the two tokens
+  - id: s6
+    resource: "urn:clutch:restricted:mandate-draft-v0.1"
+    title: Mandate draft v0.1 — the four main stablecoins, the per-stablecoin cap and the liquidity buffer; outside the repository until the mandate is published
 ---
 
 # ADR 011: Launch scope
@@ -33,6 +39,8 @@ sources:
 - Lido Lend is expected in October 2026 and is compatible with Morpho Blue [s1].
 - USDS cannot be paid out through the existing payment path [s4]. EM decided on 2026-10-05 that a DAO vote adds it (decision 5).
 - The kit's policy predates this scope [s3].
+- The mandate names four main stablecoins: USDC, USDT, USDS and DAI. It caps the vault's holding of any one of them at a share of its stablecoins, and it requires a stablecoin buffer of one month of baseline spend [s6].
+- Sky's DAI–USDS converter turns DAI into USDS one to one, and back. It has no admin and no fee, and it pays a receiver that the caller names. USDS is an upgradeable proxy under Sky governance; DAI is not. The Agent holds 4,673,791.03 DAI [s5].
 
 ## Decision
 
@@ -51,6 +59,12 @@ EM decided on 2026-10-05, closing OD-20 [s1]:
 
 6. WETH is supported through stETH: it is unwrapped and staked to sell, and bought back through Lido's withdrawal queue. Only stETH, LDO, USDC, USDT, USDS and DAI are swapped ([ADR 007](/adr/007-swapping-through-stonks.md)).
 
+EM decided on 2026-10-05, closing OD-22 [s1]:
+
+7. DAI earns through Sky's DAI–USDS converter. The operator may convert DAI to USDS and back, one to one, with the receiver pinned to the Asset Safe.
+8. The DAI and USDS approvals to the converter carry a fixed ceiling of one TM Floor Value, as the stETH approval to the wstETH contract does ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+9. DAI stays out of the Stonks rebalancing set. Recovery keeps its DAI→USDC instance.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
@@ -59,8 +73,9 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 |---|---|---|
 | ETH, WETH | held; wrap and unwrap; staked to stETH before a sale, and bought back through Lido's withdrawal queue | not a funding asset; no swap instance |
 | stETH, wstETH | held; wrap and unwrap | stETH can seed the vault; wstETH is unwrapped before a sale |
-| USDC, USDT, DAI | held | can seed the vault |
-| USDS | held | can fund the vault once a DAO vote adds it to the payment permission |
+| USDC, USDT | held | can seed the vault |
+| DAI | held; converted to USDS and back through Sky's converter, one to one | can seed the vault; recovery sells it into USDC |
+| USDS | held; receives converted DAI | can fund the vault once a DAO vote adds it to the payment permission |
 | sUSDS | savings position | tokenized-vault template; can also fund the vault; redeemed before a sale |
 | earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares arrive from the Growth Committee, and the operator never redeems them (OD-21) |
 | LDO | held | in the rebalancing set |
@@ -73,17 +88,23 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market.
 
 - Wait for Lido Lend before launch. Not chosen by EM: it arrives later by motion.
 - Keep Aave v3 and sDAI from the original proposal. Not chosen: they are not in EM's list.
+- DAI in the Stonks rebalancing set. Not chosen by EM: every conversion would pay the stablecoin-pair margin.
+- DAI idle as part of the liquidity buffer. Not chosen by EM: DAI would earn nothing, and a share above the mandate's per-stablecoin cap could only be fixed by recovery or a vote.
 
 ## Consequences
 
 - The Morpho Blue template ships before the market it will point at exists. Its acceptance needs end-to-end tests against the deployed Morpho Blue contract on a fork.
 - The kit still grants Aave v3 supply and withdraw, sDAI deposits and direct order pre-signing [s3]. The policy migration in [ADR 004](/adr/004-specifications-and-policy-as-data.md) removes them.
 - Asynchronous vault deposits are authorised at the policy layer in the kit. Their settlement is not tested.
+- DAI earns only after conversion. Converted value is exposed to USDS, which Sky governance can upgrade [s5].
+- The operator can keep each stablecoin under the mandate's per-stablecoin cap, by converting between DAI and USDS and by rebalancing USDS through Stonks.
+- The converter is one more target in the operator's policy. Its approvals are bounded like the stETH approval to wstETH.
 
 ## Confirmation
 
 - INV-015 in the [invariants](/specs/invariants.md). It has no test yet.
 - The end-to-end test of the Morpho Blue template. It does not exist yet.
+- Fork tests owed: a conversion pays the Asset Safe in both directions; a conversion with any other receiver is refused; an approval to the converter at or above one TM Floor Value is refused.
 
 ## Reversal conditions
 
@@ -92,6 +113,4 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market.
 
 ## Open questions
 
-- OD-22: whether DAI earns or stays idle. No operator permission moves DAI: it is not in the rebalancing set, sDAI is out of scope, and no DAI-to-USDS converter is in scope.
-
-OD-04 was decided on 2026-10-02 ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+None open. OD-22 was decided on 2026-10-05, and OD-04 on 2026-10-02 ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).

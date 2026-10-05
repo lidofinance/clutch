@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T16:07:52Z
+  at: 2026-10-05T17:44:03Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,18 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-22: DAI
+
+> Q1. 1
+
+Recorded as: OD-22 is closed. DAI earns through Sky's DAI–USDS converter. The operator may convert DAI to USDS and back, one to one, with the receiver pinned to the Asset Safe. The DAI and USDS approvals to the converter carry a fixed ceiling of one TM Floor Value, as the stETH approval to the wstETH contract does. DAI stays out of the Stonks rebalancing set, and recovery keeps its DAI→USDC instance. The evidence is in the [DAI note](/research/dai-usds-conversion-2026-10-05.md) ([ADR 011](/adr/011-launch-scope.md)). [s4]
+
+## 2026-10-05 — OD-22 asked
+
+> continue interview with the next pending decision
+
+[s4]
 
 ## 2026-10-05 — OD-21: the legacy investments
 
