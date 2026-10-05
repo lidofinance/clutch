@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:43:51Z
+  at: 2026-10-05T11:57:38Z
 verified: []
 sources:
   - id: s1
@@ -89,6 +89,14 @@ EM decided on 2026-10-05, closing OD-13 [s1]:
 17. The `@lidofinance/defi-tech` team writes the specification of the vault's detectors in the Lido on-chain monitoring and makes the important updates to them. The `@lidofinance/lido-valset-vroom` team reviews them, runs the platform, and maintains the engine and the bot.
 18. The committee configures the vault's rules in the screening vendor's service. The defi-tech team supports it.
 
+EM decided on 2026-10-05, closing OD-14 [s1]:
+
+19. The mandate's publisher and schedule stand: the committee publishes a monthly report within seven calendar days after month-end, a post before each top-up, and an incident report within 72 hours. The defi-tech team builds and maintains a report generator in this repository. It reads the chain at a pinned block and the pricing source, so anyone can re-run it. The committee reviews and publishes each report.
+20. Prices come from Coingecko's closing price at the Snapshot Date. A price that is missing or more than 24 hours old is replaced by the asset's on-chain rate into an underlying that has a price. An asset with neither is listed as unpriced with its balance, left out of every ratio and of the vault value, and named in the report. An old price is never carried over silently. No top-up rests on a snapshot with an unpriced asset.
+21. While the monthly report is late, no top-up motion starts. Monitoring flags a missing report on day 8 after month-end. The committee explains the delay on the forum.
+22. A report's IPFS identifier is anchored only in its forum post. There is no on-chain anchor.
+23. The mandate text states the price rule of decision 20 and the late-report rule of decision 21.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
@@ -101,9 +109,9 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - **Budget figures.** The attested computation ran on 2026-09-22 with an independent attester and pinned inputs. It ran again on 2026-10-02 with the literal base. The yield-bearing key now gets no figure until the first retune after seeding, and the other keys are unchanged. The inputs include unapproved mandate terms, so the results enter this repository only after the mandate is approved.
 - **Approvals.** Each approval branch names one spender and spends that spender's key, so a token approved to two spenders draws on two keys. The operator approves only what it deposits, in the same transaction, so no approval stands between transactions.
 - **The budget factory.** It builds one branch per key, so each key has its own ceiling on `balance`, `maxRefill` and `refill`, and every branch bounds `period` below by 30 days. The kit test shows one shared ceiling only [s4].
-- **Reports.** The payload is on IPFS and holds balances, positions, exposures, each ratio with its numerator and denominator, and the price source with its timestamp. The standard top-up factory writes a fixed payment reference, so a top-up cannot carry the report's identifier in it [s6]. The identifier goes in the forum post that the mandate requires before each top-up. Where to anchor it on chain is open (OD-14).
+- **Reports.** The payload is on IPFS and holds balances, positions, exposures, each ratio with its numerator and denominator, and the price source with its timestamp. The standard top-up factory writes a fixed payment reference, so a top-up cannot carry the report's identifier in it [s6]. The identifier goes in the report's forum post, and there is no on-chain anchor (decision 22).
 - **Monitoring.** The Lido on-chain monitoring carries policy drift, the approval inventory, budget burn, module and owner changes on both Safes, and motion events. For funding it flags a top-up motion outside days 1 to 10 of a month, apart from the seed; a month's top-ups above the posted shortfall; and any top-up motion after an objected one ([ADR 008](/adr/008-funding-through-existing-payments.md)). For budgets it flags a second budget motion on the same key within 14 days. The screening vendor carries depegs, protocol compromise and counterparty anomalies. Findings route into the existing notification and incident channels.
-- **The detector specification.** A monitoring specification in this repository lists each detector with an ID, what it watches, its severity and where it runs (phase 1). A pull request here that changes a watched permission links the matching detector change. The list starts from: policy drift; the approval inventory; budget burn and repeated budget motions; owner, threshold, module and guard changes on the three Safes; motion lifecycle; the funding flags; emergency actions, graded so that a revoke-only action pages lower than a transfer or a swap; the screening guard, extended to Safe v1.5.0 and the new instance; and swap-instance orders and stranded balances.
+- **The detector specification.** A monitoring specification in this repository lists each detector with an ID, what it watches, its severity and where it runs (phase 1). A pull request here that changes a watched permission links the matching detector change. The list starts from: policy drift; the approval inventory; budget burn and repeated budget motions; owner, threshold, module and guard changes on the three Safes; motion lifecycle; the funding flags; emergency actions, graded so that a revoke-only action pages lower than a transfer or a swap; the screening guard, extended to Safe v1.5.0 and the new instance; and swap-instance orders and stranded balances; and a monthly report still missing on day 8.
 
 ## Options considered
 
@@ -116,7 +124,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 ## Consequences
 
-- No report has an on-chain anchor yet, a top-up's report included, because the top-up factory fixes the payment reference [s6]. A report's immutability rests on content addressing and the forum post that cites it. That is enough for an informational control. It is not an Ethereum guarantee.
+- No report has an on-chain anchor, a top-up's report included (decision 22). The top-up factory also fixes the payment reference [s6]. A report's immutability rests on content addressing and the forum post that cites it. That is enough for an informational control. It is not an Ethereum guarantee.
 - Every detective control ends at a person. The mandate must name them.
 - Each detector change involves two teams: defi-tech writes it and the monitoring team reviews it. The guard detector's Safe v1.5.0 support must ship before the operator Safe is deployed.
 - The committee keeps the vendor-side rules in step with the vault's positions, because every onboarding motion needs alerting for its new target before it is enacted ([ADR 006](/adr/006-governance-through-easy-track-factories.md)).
@@ -129,7 +137,9 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - Under the literal base, a yield-bearing stablecoin has room only next to stablecoins that the vault holds directly. The illustrative allocation holds none, so it plans no yield-bearing position.
 - The committee can enlarge the base before a test by holding more stablecoins. The test at deposit time and the published history limit this. They do not prevent it.
 - The policy must hold the Lido Lend budget key, with a ceiling that allows the uncapped budget, from deployment. Otherwise the cap could not lift by motion alone. During the first three months, the allowance set by the onboarding motion and the fortnightly test hold the cap.
-- The mandate text owes three changes: the own-product limit and the protocol cap must state the three-month rule for Lido Lend; the illustrative balance renames its "USD-denominated" heading; and the funding rules must allow sUSDS, which EM added on 2026-10-05 ([ADR 008](/adr/008-funding-through-existing-payments.md)).
+- The mandate text owes five changes: the own-product limit and the protocol cap must state the three-month rule for Lido Lend; the illustrative balance renames its "USD-denominated" heading; the funding rules must allow sUSDS, which EM added on 2026-10-05 ([ADR 008](/adr/008-funding-through-existing-payments.md)); and the reporting section states the price rule and the late-report rule (decision 23), so that tokenholders can hold the committee to them.
+- Leaving an unpriced asset out understates the vault value, which could open a top-up that the vault does not need. Decision 20 forbids a top-up on such a snapshot.
+- A late monthly report stops top-ups, so the vault cannot be refilled for long without reporting.
 - A top-up in sUSDS counts at once against its yield-bearing cap under the literal base.
 
 ## Confirmation
@@ -144,4 +154,4 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 ## Open questions
 
-- OD-14: who publishes reports, on what schedule, what happens on a stale price, who answers for a late report, and where a report's identifier is anchored on chain.
+None open. OD-08, OD-12, OD-13 and OD-14 were decided on 2026-10-02 and 2026-10-05.
