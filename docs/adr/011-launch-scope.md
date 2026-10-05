@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-02T14:57:11Z
+  at: 2026-10-05T11:23:52Z
 verified: []
 sources:
   - id: s1
@@ -31,7 +31,7 @@ sources:
 ## Context
 
 - Lido Lend is expected in October 2026 and is compatible with Morpho Blue [s1].
-- USDS cannot be paid out through the existing payment path [s4].
+- USDS cannot be paid out through the existing payment path [s4]. EM decided on 2026-10-05 that a DAO vote adds it (decision 5).
 - The kit's policy predates this scope [s3].
 
 ## Decision
@@ -43,17 +43,21 @@ EM decided on 2026-09-22 [s1]:
 3. Launch without Lido Lend, but with the Morpho Blue template and end-to-end tests for it. Lido Lend must be ready on the day it deploys, through an Easy Track motion.
 4. CoW access runs through Stonks 2.0, the default swap engine ([ADR 007](/adr/007-swapping-through-stonks.md)).
 
+EM decided on 2026-10-05, closing OD-11 [s1]:
+
+5. The funding assets are USDC, USDT, DAI, USDS, sUSDS and stETH. ETH is not one ([ADR 008](/adr/008-funding-through-existing-payments.md)).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 | Asset or venue | Role in the vault | Notes |
 |---|---|---|
-| ETH, WETH | held; wrap and unwrap | ETH can seed the vault |
+| ETH, WETH | held; wrap and unwrap | not a funding asset |
 | stETH, wstETH | held; wrap and unwrap | stETH can seed the vault |
 | USDC, USDT, DAI | held | can seed the vault |
-| USDS | held | cannot seed the vault; acquired inside it |
-| sUSDS | savings position | tokenized-vault template |
+| USDS | held | can fund the vault once a DAO vote adds it to the payment permission |
+| sUSDS | savings position | tokenized-vault template; can also fund the vault |
 | earnETH, earnUSD | vault positions | asynchronous deposit and redeem |
 | LDO | held | in the rebalancing set |
 | Stonks 2.0 instances | rebalancing and recovery | [ADR 007](/adr/007-swapping-through-stonks.md) |

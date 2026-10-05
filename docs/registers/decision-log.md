@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:06:53Z
+  at: 2026-10-05T11:27:41Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,26 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-24: the USDS ceiling
+
+> 1. OD-24: 2,000,000
+
+Recorded as: OD-24 is closed. The rewritten payment permission allows at most 2,000,000 USDS per payment, the same as DAI, USDC, USDT and sUSDS ([ADR 008](/adr/008-funding-through-existing-payments.md)). [s4]
+
+## 2026-10-05 — OD-11: the payment permission, the token list and ETH
+
+> Q1. 2
+> Q2. 2 (add USDS and sUSDS)
+> Q3. 1
+
+Recorded as: OD-11 is closed. (Q1) A DAO vote rewrites the shared payment permission of the Easy Track executor to add USDS. The other entries stay as they are. The ceiling per USDS payment is still to be set (OD-24). (Q2) The stablecoin registry uses the shared stablecoin token list, with USDS added. The list then allows DAI, USDT, USDC, sUSDS and USDS. (Q3) ETH is not a funding asset; stETH covers the mandate's "(st)ETH". The agent had recommended keeping the permission unchanged and a token list for the vault alone. Two consequences are recorded in [ADR 008](/adr/008-funding-through-existing-payments.md): every stablecoin setup that shares the list can then pay USDS too; and funding in sUSDS goes beyond the mandate's funding rule, which names stETH and the top-four stablecoins, so the mandate text owes a change. [s4]
+
+## 2026-10-05 — OD-11 asked
+
+> run an interview on OD-11
+
+[s4]
 
 ## 2026-10-05 — OD-10: code owners and the branch rule
 
