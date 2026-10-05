@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:27:41Z
+  at: 2026-10-05T11:33:11Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,21 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-05 — OD-12: four recorded readings
+
+> 1. confirm
+> 2. confirm
+> 3. confirm
+> 4. let's do as you suggested: we know the name, no need to make it even more explicit
+
+Recorded as: OD-12 is closed. (1) The vision reading is confirmed: EM accepted the positioned vision ([product brief](/product/brief.md)). (2) The acceptor reading is confirmed: the answer changed only the acceptor, and points 3 to 9 of [ADR 002](/adr/002-decision-and-review-process.md) are accepted as positioned. (3) Lido Lend's three capped months count from Lido Lend's mainnet launch ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). (4) The Lido-side party to the vendor agreement is the party that already holds the vendor's arrangement for the four guarded Lido multisigs. The repository does not name it ([ADR 010](/adr/010-pre-execution-screening.md)). [s4]
+
+## 2026-10-05 — OD-12 asked
+
+> run an interview on OD-12
+
+[s4]
 
 ## 2026-10-05 — OD-24: the USDS ceiling
 

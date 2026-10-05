@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:27:41Z
+  at: 2026-10-05T11:33:11Z
 verified: []
 sources:
   - id: s1
@@ -47,7 +47,7 @@ sources:
 | Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Funding assets | USDC, USDT, DAI, USDS, sUSDS, stETH; not ETH | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Budget per key | not in this repository | Computed by attested computation on 2026-09-22 and again on 2026-10-02 with the literal yield-bearing base; enters when the mandate is approved | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
-| Lido Lend cap | the protocol cap for three calendar months from Lido Lend's mainnet launch, then none, as a Lido own product | EM decision of 2026-10-02 [s1]; start reading to confirm, OD-12 | ADR 009 |
+| Lido Lend cap | the protocol cap for three calendar months from Lido Lend's mainnet launch, then none, as a Lido own product | EM decision of 2026-10-02 [s1]; the start was confirmed on 2026-10-05 (OD-12) | ADR 009 |
 | Yield-bearing cap base | the top-4 stablecoins plus the yield-bearing stablecoins held directly; own-product and protocol positions excluded | EM decision of 2026-10-02 [s1] | ADR 009 |
 | Budget retune cadence | every two weeks | EM decision [s1] | ADR 009 |
 | Budget refill-period floor | 30 days | EM decision of 2026-10-02 [s1] | ADR 009 |

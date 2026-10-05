@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:06:53Z
+  at: 2026-10-05T11:33:11Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the acceptor and on Emergency Brakes verification, 2026-09-30
+    title: Decision log — EM on the acceptor and on Emergency Brakes verification, 2026-09-30, and the confirmed reading, 2026-10-05
   - id: s2
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — the lend-markets review ladder and OKF 0.2
@@ -43,7 +43,7 @@ EM decided on 2026-09-30 [s1]:
 1. EM accepts ADRs in the interim. The Treasury Management Committee is the permanent acceptor.
 2. An ADR that constrains the committee also needs a verification from the Emergency Brakes multisig before it is accepted. The constraining class covers any ADR that changes the operator's permissions, the emergency powers, the technical role or module disabling, the funding path, or budget and approval ceilings.
 
-The answer about the acceptor did not object to the rest of the positioned process, so the rest is read as accepted [s1]. Open item OD-12 asks EM to confirm this reading:
+The answer about the acceptor did not object to the rest of the positioned process, so the rest is read as accepted [s1]. EM confirmed this reading on 2026-10-05, closing OD-12 [s1]:
 
 3. `docs/` is an OKF 0.2 bundle. Every page carries `generated`, `verified`, `sources`, `status` and `review_status` [s3].
 4. `review_status` uses the ladder `slop`, `human-skimmed`, `human-reviewed`, `finalized` [s2]. Agents set only `slop`.
@@ -91,5 +91,4 @@ The validator does not yet check the verification-procedure output for a policy 
 
 ## Open questions
 
-- OD-12: confirm the reading of points 3 to 9.
 - OD-15: how the committee and the Emergency Brakes multisig record a verification.

@@ -9,12 +9,12 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:23:52Z
+  at: 2026-10-05T11:33:11Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on detective enforcement, budgets, reporting and monitoring, 2026-09-22
+    title: Decision log — EM on detective enforcement, budgets, reporting and monitoring, 2026-09-22, and later decisions
   - id: s2
     resource: /specs/lip-draft.md
     title: LIP draft — budgets, reporting and detective controls
@@ -80,6 +80,10 @@ EM decided on 2026-10-02, closing OD-08 [s1]:
 14. The stETH approval to the wstETH contract has no budget key. It keeps a fixed ceiling of one TM Floor Value in stETH, the figure that OD-06 computes.
 15. A budget motion cannot set a refill period below 30 days.
 
+EM confirmed on 2026-10-05, closing OD-12 [s1]:
+
+16. Lido Lend's three capped months count from Lido Lend's mainnet launch.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
@@ -88,7 +92,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - **Which caps need prices.** A cap within one denomination needs balances only. A cap on a liquid staking token or on a yield-bearing asset needs on-chain rates. A cap across classes needs a market oracle.
 - **Budget shape.** Monthly flow equals the stock cap for each key. Exits are unbudgeted, so a tighter flow would throttle re-entry after a defensive exit. Keys for Lido products have no ratio to bound, because the whole vault may sit in them. They bound only the amount that can move in one month, which is the whole mandate. That is a weak control, and the LIP must say so.
 - **Yield-bearing keys.** A yield-bearing key gets the headroom: the cap's share of the stablecoins plus yield-bearing stablecoins held directly, minus the current holding of that token, and never less than zero. Converting a stablecoin into a yield-bearing stablecoin leaves the base unchanged. The headroom depends on what the vault holds, so each fortnightly retune derives it from a holdings snapshot read at a pinned block. Without a snapshot, the key gets no budget.
-- **Lido Lend key.** The protocol cap applies until three calendar months after Lido Lend goes live. From that date the key is bounded by the mandate size, like every own-product key. The months count from Lido Lend's mainnet launch, a reading still to confirm (OD-12).
+- **Lido Lend key.** The protocol cap applies until three calendar months after Lido Lend goes live. From that date the key is bounded by the mandate size, like every own-product key. The months count from Lido Lend's mainnet launch (decision 16).
 - **Budget figures.** The attested computation ran on 2026-09-22 with an independent attester and pinned inputs. It ran again on 2026-10-02 with the literal base. The yield-bearing key now gets no figure until the first retune after seeding, and the other keys are unchanged. The inputs include unapproved mandate terms, so the results enter this repository only after the mandate is approved.
 - **Approvals.** Each approval branch names one spender and spends that spender's key, so a token approved to two spenders draws on two keys. The operator approves only what it deposits, in the same transaction, so no approval stands between transactions.
 - **The budget factory.** It builds one branch per key, so each key has its own ceiling on `balance`, `maxRefill` and `refill`, and every branch bounds `period` below by 30 days. The kit test shows one shared ceiling only [s4].
@@ -132,6 +136,5 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 ## Open questions
 
-- OD-12: confirm when Lido Lend's three months start.
 - OD-13: who writes the detectors.
 - OD-14: who publishes reports, on what schedule, what happens on a stale price, who answers for a late report, and where a report's identifier is anchored on chain.

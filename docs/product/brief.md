@@ -7,12 +7,12 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-05T11:33:11Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM's repository-setup answers of 2026-09-30
+    title: Decision log — EM's repository-setup answers of 2026-09-30, and the confirmed vision reading, 2026-10-05
   - id: s2
     resource: /specs/lip-draft.md
     title: LIP draft — Active Treasury Management Vault
@@ -40,7 +40,7 @@ Three properties must hold together, and no existing Lido component gives all th
 
 ## Vision
 
-EM accepted this vision on 2026-09-30 [s1]:
+EM accepted this vision on 2026-09-30, and confirmed that reading of the answer on 2026-10-05 [s1]:
 
 One repository from which the Active Treasury system is specified, built, verified, deployed and governed. Every permission that can move DAO funds traces back to an approved decision and forward to a passing test.
 
