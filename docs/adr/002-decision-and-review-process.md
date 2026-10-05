@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:33:11Z
+  at: 2026-10-05T12:12:12Z
 verified: []
 sources:
   - id: s1
@@ -53,6 +53,10 @@ The answer about the acceptor did not object to the rest of the positioned proce
 8. Decisions made before the repository existed enter as `proposed` ADRs, and EM accepts each text separately.
 9. A runbook needs a fork drill record, and a permission-policy change needs the output of the verification procedure, before either rises above `slop`.
 
+EM decided on 2026-10-05, closing OD-15 [s1]:
+
+10. A verification by the committee or by the Emergency Brakes multisig is committed by a member of that body through a reviewed pull request. The entry carries `ref`, an https or urn link to the body's decision record, such as a forum post or minutes.
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## How the validator enforces it
@@ -62,12 +66,14 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 - Every ADR declares `constrains_operator: true` or `false`.
 - An accepted ADR with `constrains_operator: true` needs a `human:emergency-brakes` verification at or after `generated.at`, in addition to its acceptor's.
 - A Runbook names the `permission` it exercises. Above `slop`, it needs a `drill` record with `at`, `network`, `block`, `time_to_initiate_seconds` and `result: pass`, and the time to initiate must not exceed six hours.
+- A verification by `human:tmc` or `human:emergency-brakes` needs `ref`, an https or urn link to the body's decision record. Without it, the entry does not count (point 10).
 
 The validator does not yet check the verification-procedure output for a policy change. That check arrives with the procedure in phase 2 of the [roadmap](https://github.com/lidofinance/clutch/blob/main/ROADMAP.md).
 
 ## Options considered
 
 - The committee accepts alone. Not chosen: the constrained party would approve its own limits.
+- A body's quorum signature: each body signs a Safe message over the page, and a script checks it on chain. Not chosen by EM: every verification would need a signing round.
 - The whole DAO accepts every ADR. Not chosen: an ADR authorises nothing on chain, and on-chain changes already need a vote or a motion.
 - OKF fields without a review ladder. Not chosen: there is then no review depth between unverified and reviewed.
 
@@ -77,7 +83,7 @@ The validator does not yet check the verification-procedure output for a policy 
 - EM accepts a decision with one explicit edit, not in conversation.
 - The committee re-ratifies what EM accepted in the interim.
 - Known gap: the validator cannot see an edit that leaves `generated.at` unchanged. A CI step that compares each changed page with the base branch closes it. The step is planned for phase 1.
-- Known gap: the validator cannot tell who wrote a `human:` entry. Human review of the pull request is the control. CODEOWNERS and the branch rule on `main` enforce it (OD-10, decided 2026-10-05).
+- Known gap: the validator cannot tell who wrote a `human:` entry. Human review of the pull request is the control. CODEOWNERS and the branch rule on `main` enforce it (OD-10, decided 2026-10-05). For the two bodies, the `ref` link makes each entry checkable against the body's own record (point 10). The entry is still a member's claim, not a proof.
 
 ## Confirmation
 
@@ -91,4 +97,4 @@ The validator does not yet check the verification-procedure output for a policy 
 
 ## Open questions
 
-- OD-15: how the committee and the Emergency Brakes multisig record a verification.
+None open. OD-12 and OD-15 were decided on 2026-10-05.
