@@ -1,124 +1,89 @@
-import { swap } from "@zodiaceco/sdk/actions";
-import config from "../../../zodiac.config";
+// SPDX-License-Identifier: LGPL-3.0-only
+// Modified for Clutch on 2026-10-06: rewritten to the launch scope of ADR 011
+// and the approval rule of OD-08. See PROVENANCE.md.
+import { c, call, callWithValue } from "../../lib";
+import {
+  DAI,
+  DAI_USDS,
+  EARN_ETH,
+  EARN_USD,
+  STETH,
+  SUSDS,
+  USDC,
+  USDS,
+  WETH,
+  WITHDRAWAL_QUEUE,
+  WSTETH,
+} from "../../addresses";
+import { earn_eth_deposit_wsteth, earn_usd_deposit, sky_savings_usds } from "../../allowances";
+import { FLOOR_STANDIN_STETH, FLOOR_STANDIN_USD } from "../../parameters";
 
-const {
-  steth,
-  wsteth,
-  usdc,
-  usdt,
-  dai,
-  sdai,
-  usds,
-  susds,
-  aave_v3,
-  lido_earn,
-} = config.contracts.eth;
-
-const { earneth, earnusd } = lido_earn;
+const ZERO = "0x0000000000000000000000000000000000000000";
 
 /**
- * What the Treasury Management Committee may do with the Asset Safe.
+ * Every approval the operator may give, one per token and spender (ADR 009,
+ * OD-08). An approval to a spender with a budget key spends that key, so an
+ * approval of zero spends nothing and stays allowed. A spender with no key
+ * has a fixed ceiling, and the amount must stay below it. The SDK merges the
+ * entries of one token into one Or, because a second scope on the same
+ * function would replace the first.
  *
- * Two rules shape every entry below:
- *
- * 1. No debt. The RFP's launch design forbids borrowing and leverage, so
- *    `borrow`, `repay` and the e-mode / collateral switches on the Aave pool
- *    are simply absent — a default-deny modifier needs no explicit negation.
- * 2. Nothing leaves the Asset Safe. Every `receiver`, `owner` and `onBehalfOf`
- *    is pinned to `c.avatar`, and no plain `transfer` is granted, so positions
- *    can be opened and closed but assets cannot be sent anywhere. Returning
- *    assets to the DAO is the emergency role's job.
+ * The emergency role can set each of these approvals to zero, so its list is
+ * built from this one.
+ */
+export const APPROVALS: readonly { token: string; spender: string; budget?: string; ceiling?: bigint }[] = [
+  { token: STETH, spender: WSTETH, ceiling: FLOOR_STANDIN_STETH },
+  { token: STETH, spender: WITHDRAWAL_QUEUE, ceiling: FLOOR_STANDIN_STETH }, // OD-27
+  { token: USDS, spender: SUSDS, budget: sky_savings_usds.key },
+  { token: USDS, spender: DAI_USDS, ceiling: FLOOR_STANDIN_USD }, // OD-22
+  { token: DAI, spender: DAI_USDS, ceiling: FLOOR_STANDIN_USD }, // OD-22
+  { token: USDC, spender: EARN_USD.depositQueue, budget: earn_usd_deposit.key },
+  { token: WSTETH, spender: EARN_ETH.depositQueue, budget: earn_eth_deposit_wsteth.key },
+];
+
+/**
+ * What the operator Safe may do with the Asset Safe. Default deny: anything
+ * absent here is refused. Every receiver and owner is pinned to the Asset
+ * Safe (`c.avatar`), and the operator holds no `transfer`, so assets can
+ * move into and out of the approved venues but not leave the Asset Safe.
  */
 export default [
-  // ── Lido staking ────────────────────────────────────────────────────────
-  // stETH <-> wstETH. Both directions, so the operator can hold whichever form
-  // a protocol below wants.
-  allow.eth.steth.approve(wsteth),
-  allow.eth.wsteth.wrap(),
-  allow.eth.wsteth.unwrap(),
-
-  // ── Aave v3 Core: supply and withdraw, never borrow ──────────────────────
-  allow.eth.usdc.approve(aave_v3.pool),
-  allow.eth.usdt.approve(aave_v3.pool),
-  allow.eth.dai.approve(aave_v3.pool),
-  allow.eth.usds.approve(aave_v3.pool),
-  allow.eth.wsteth.approve(aave_v3.pool),
-
-  // One entry per group of assets that trade roughly one for one, because
-  // each carries its own budget.
-  allow.eth.aave_v3.pool.supply(
-    c.or(usdc, usdt),
-    c.withinAllowance("aave_supply_usdc_usdt"),
-    c.avatar,
-  ),
-  allow.eth.aave_v3.pool.supply(
-    c.or(dai, usds),
-    c.withinAllowance("aave_supply_dai_usds"),
-    c.avatar,
-  ),
-  allow.eth.aave_v3.pool.supply(
-    wsteth,
-    c.withinAllowance("aave_supply_wsteth"),
-    c.avatar,
+  ...APPROVALS.map(({ token, spender, budget, ceiling }) =>
+    call(
+      token,
+      "approve(address,uint256)",
+      spender,
+      budget !== undefined ? c.withinAllowance(budget) : c.lt(ceiling!),
+    ),
   ),
 
-  // Withdrawing is unbudgeted: pulling out of a protocol is the risk-reducing
-  // direction, and a cap on it would be a cap on the operator's own exit.
-  allow.eth.aave_v3.pool.withdraw(
-    c.or(usdc, usdt, dai, usds, wsteth),
-    undefined,
-    c.avatar,
-  ),
+  // Lido staking: stake ETH with no referral, wrap and unwrap, and the
+  // withdrawal queue, which pays a claim to the request's owner (OD-20).
+  callWithValue(STETH, "submit(address)", ZERO),
+  call(WSTETH, "wrap(uint256)"),
+  call(WSTETH, "unwrap(uint256)"),
+  call(WITHDRAWAL_QUEUE, "requestWithdrawals(uint256[],address)", undefined, c.avatar),
+  call(WITHDRAWAL_QUEUE, "claimWithdrawals(uint256[],uint256[])"),
 
-  // ── Sky savings ─────────────────────────────────────────────────────────
-  allow.eth.dai.approve(sdai),
-  allow.eth.usds.approve(susds),
+  // WETH: wrap and unwrap (OD-20).
+  callWithValue(WETH, "deposit()"),
+  call(WETH, "withdraw(uint256)"),
 
-  allow.eth.sdai.deposit(c.withinAllowance("sky_savings_dai_usds"), c.avatar),
+  // Stablecoins: Sky's DAI–USDS converter, one to one, paid to the Asset
+  // Safe (OD-22), and sUSDS savings.
+  call(DAI_USDS, "daiToUsds(address,uint256)", c.avatar),
+  call(DAI_USDS, "usdsToDai(address,uint256)", c.avatar),
+  call(SUSDS, "deposit(uint256,address)", undefined, c.avatar),
+  call(SUSDS, "redeem(uint256,address,address)", undefined, c.avatar, c.avatar),
+  call(SUSDS, "withdraw(uint256,address,address)", undefined, c.avatar, c.avatar),
 
-  // sUSDS overloads `deposit`, so the overload is named by its full signature.
-  allow.eth.susds["deposit(uint256,address)"](
-    c.withinAllowance("sky_savings_dai_usds"),
-    c.avatar,
-  ),
-
-  allow.eth.sdai.redeem(undefined, c.avatar, c.avatar),
-  allow.eth.susds.redeem(undefined, c.avatar, c.avatar),
-  allow.eth.sdai.withdraw(undefined, c.avatar, c.avatar),
-  allow.eth.susds.withdraw(undefined, c.avatar, c.avatar),
-
-  // ── Lido Earn ───────────────────────────────────────────────────────────
-  // earnUSD takes USDC, which is in the launch asset set, so the full deposit
-  // and redeem cycle is available.
-  allow.eth.usdc.approve(earnusd.deposit_queue_usdc),
-  allow.eth.lido_earn.earnusd.deposit_queue_usdc.deposit(
-    c.withinAllowance("earn_usd_deposit"),
-  ),
-  allow.eth.lido_earn.earnusd.deposit_queue_usdc.cancelDepositRequest(),
-  allow.eth.lido_earn.earnusd.deposit_queue_usdc.claim(c.avatar),
-  allow.eth.lido_earn.earnusd.redeem_queue.redeem(),
-  allow.eth.lido_earn.earnusd.redeem_queue.claim(c.avatar),
-
-  // earnETH takes wstETH through its asynchronous deposit queue, so the full
-  // deposit and redeem cycle is available without adding WETH to the launch
-  // asset set.
-  allow.eth.wsteth.approve(earneth.deposit_queue_wsteth),
-  allow.eth.lido_earn.earneth.deposit_queue_wsteth.deposit(
-    c.withinAllowance("earn_eth_deposit_wsteth"),
-  ),
-  allow.eth.lido_earn.earneth.deposit_queue_wsteth.cancelDepositRequest(),
-  allow.eth.lido_earn.earneth.deposit_queue_wsteth.claim(c.avatar),
-  allow.eth.lido_earn.earneth.redeem_queue.redeem(),
-  allow.eth.lido_earn.earneth.redeem_queue.claim(c.avatar),
-
-  // ── Rebalancing via CoW Protocol ────────────────────────────────────────
-  // Orders settle to the avatar. LDO is absent from both sides: selling the
-  // DAO's own governance token is a treasury decision, not a routine rebalance.
-  // TODO: Add sell-amount and approval allowances so a compromised operator
-  // cannot submit an unbounded order within the approved asset set.
-  swap({
-    label: "Rebalance between approved assets",
-    sell: [usdc, usdt, dai, usds, steth, wsteth],
-    buy: [usdc, usdt, dai, usds, wsteth],
-  }),
+  // Lido Earn: asynchronous deposit and redeem. The approval spends the
+  // budget, so the deposit itself is unbudgeted. Claims pay the Asset Safe.
+  ...[EARN_USD, EARN_ETH].flatMap((vault) => [
+    call(vault.depositQueue, "deposit(uint224,address,bytes32[])"),
+    call(vault.depositQueue, "cancelDepositRequest()"),
+    call(vault.depositQueue, "claim(address)", c.avatar),
+    call(vault.redeemQueue, "redeem(uint256)"),
+    call(vault.redeemQueue, "claim(address,uint32[])", c.avatar),
+  ]),
 ] satisfies Permissions;
