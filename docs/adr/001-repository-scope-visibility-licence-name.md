@@ -14,6 +14,8 @@ generated:
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-05--adr-001-to-adr-004-accepted
 sources:
   - id: s1
     resource: /registers/decision-log.md

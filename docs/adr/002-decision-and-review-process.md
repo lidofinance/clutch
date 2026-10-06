@@ -10,14 +10,20 @@ accepted_by: human:em
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T12:12:12Z
+  at: 2026-10-06T06:22:07Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-05--adr-001-to-adr-004-accepted
+  - by: human:em
+    at: 2026-10-06T06:23:50Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-06--adr-002-and-adr-003-verified-again
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the acceptor and on Emergency Brakes verification, 2026-09-30, and the confirmed reading, 2026-10-05
+    title: Decision log — EM on the acceptor and on Emergency Brakes verification, 2026-09-30, and the confirmed reading, 2026-10-05, and on recorded verifications, 2026-10-06
   - id: s2
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — the lend-markets review ladder and OKF 0.2
@@ -60,6 +66,10 @@ EM decided on 2026-10-05, closing OD-15 [s1]:
 
 10. A verification by the committee or by the Emergency Brakes multisig is committed by a member of that body through a reviewed pull request. The entry carries `ref`, an https or urn link to the body's decision record, such as a forum post or minutes.
 
+EM decided on 2026-10-06, closing OD-31 [s1]:
+
+11. Point 4 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry names the agent in `recorded_by` and links, in `ref`, the decision-log heading that quotes the instruction. An agent never records a body's verification ([ADR 003](/adr/003-agent-operating-model.md) decision 14).
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## How the validator enforces it
@@ -70,6 +80,7 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 - An accepted ADR with `constrains_operator: true` needs a `human:emergency-brakes` verification at or after `generated.at`, in addition to its acceptor's.
 - A Runbook names the `permission` it exercises. Above `slop`, it needs a `drill` record with `at`, `network`, `block`, `time_to_initiate_seconds` and `result: pass`, and the time to initiate must not exceed six hours.
 - A verification by `human:tmc` or `human:emergency-brakes` needs `ref`, an https or urn link to the body's decision record. Without it, the entry does not count (point 10).
+- A verification with `recorded_by` must name an agent and must link, in `ref`, a heading of the decision log. The validator refuses it on a body's actor. The status register marks it `(recorded)` (point 11).
 
 The validator does not yet check the verification-procedure output for a policy change. That check arrives with the procedure in phase 2 of the [roadmap](https://github.com/lidofinance/clutch/blob/main/ROADMAP.md).
 
@@ -86,7 +97,7 @@ The validator does not yet check the verification-procedure output for a policy 
 - EM accepts a decision with one explicit edit, not in conversation.
 - The committee re-ratifies what EM accepted in the interim.
 - Known gap: the validator cannot see an edit that leaves `generated.at` unchanged. A CI step that compares each changed page with the base branch closes it. The step is planned for phase 1.
-- Known gap: the validator cannot tell who wrote a `human:` entry. Human review of the pull request is the control. CODEOWNERS and the branch rule on `main` enforce it (OD-10, decided 2026-10-05). For the two bodies, the `ref` link makes each entry checkable against the body's own record (point 10). The entry is still a member's claim, not a proof.
+- Known gap: the validator cannot tell who wrote a `human:` entry. Human review of the pull request is the control. CODEOWNERS and the branch rule on `main` enforce it (OD-10, decided 2026-10-05). For the two bodies, the `ref` link makes each entry checkable against the body's own record (point 10). The entry is still a member's claim, not a proof. An entry that an agent records on instruction says so in `recorded_by` (point 11); an entry that does not say so still depends on that review.
 
 ## Confirmation
 

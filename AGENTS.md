@@ -12,6 +12,7 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 
 - Frontmatter holds `type`, `title`, `description`, `status`, `review_status`, `generated`, `verified` and `sources`. Copy a neighbouring page of the same type.
 - Agents write `review_status: slop` only. Agents never add a `human:` entry to `verified`, and never set an ADR's `decision` to `accepted`.
+- One exception: on a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry carries `recorded_by` and a `ref` to the decision-log heading that quotes the instruction, and the commit message says the agent made the edit. It never covers `human:tmc` or `human:emergency-brakes` (OD-15, OD-31).
 - Every ADR declares `constrains_operator`. An ADR that constrains the operator needs a verification from the Emergency Brakes multisig before it is accepted.
 - A meaningful edit bumps `generated.at`, which resets a reviewed page to `slop`.
 - Cite per claim with inline `[sN]` markers that match `sources`.

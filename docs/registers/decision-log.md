@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T20:27:32Z
+  at: 2026-10-06T06:23:50Z
 verified: []
 sources:
   - id: s1
@@ -22,6 +22,9 @@ sources:
   - id: s4
     resource: "urn:clutch:interview:2026-10-05"
     title: EM's decision interview, continued on 2026-10-05; the transcript is not in the repository
+  - id: s5
+    resource: "urn:clutch:interview:2026-10-06"
+    title: EM's decision interview, continued on 2026-10-06; the transcript is not in the repository
 ---
 
 # Decision log
@@ -31,6 +34,24 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-06 — ADR 002 and ADR 003 verified again
+
+> record my re-verification of ADR 002 and ADR 003; check tests, commit and push
+
+Recorded as: EM verifies ADR 002 and ADR 003 again after the OD-31 edit, so both stay accepted. At this instruction, the agent recorded EM's two `verified` entries under the OD-31 rule: each names the agent in `recorded_by` and links this heading in `ref`. The verification is EM's. [s5]
+
+## 2026-10-06 — OD-31: recording a human's own verification
+
+> C, edit AGENTS.md
+
+Recorded as: OD-31 is closed with option C. `AGENTS.md`, [ADR 002](/adr/002-decision-and-review-process.md) and [ADR 003](/adr/003-agent-operating-model.md) gain one exception: on a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry names the agent in `recorded_by` and links, in `ref`, the decision-log heading that quotes the instruction. The commit message says that the agent made the edit. The validator checks both fields and refuses them on a body's actor, and the status register marks such an entry `(recorded)`. The four entries of 2026-10-05 in ADR 001 to ADR 004 gain `recorded_by` and `ref`. EM's answer is also the explicit request that ADR 003 decision 7 needs before an agent edits `AGENTS.md`. [s5]
+
+## 2026-10-06 — OD-31 asked
+
+> tell me more about 'Clutch's AGENTS.md has no exception yet for human: entries written at your explicit instruction. That file is yours to edit.', what should I do exactly, give some examples?
+
+Recorded as: the agent set out three options. A keeps the rule, and EM types each acceptance. B writes down a narrow exception. C adds to B a `recorded_by` field that the validator checks. [s5]
 
 ## 2026-10-05 — ADR 001 to ADR 004 accepted
 
