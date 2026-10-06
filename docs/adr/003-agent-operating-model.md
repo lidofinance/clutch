@@ -10,14 +10,20 @@ accepted_by: human:em
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:30Z
+  at: 2026-10-06T06:22:07Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-05--adr-001-to-adr-004-accepted
+  - by: human:em
+    at: 2026-10-06T06:23:50Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-06--adr-002-and-adr-003-verified-again
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the agent operating model, 2026-09-30, and on code owners and the reading of decision 6, 2026-10-05
+    title: Decision log — EM on the agent operating model, 2026-09-30, and on code owners and the reading of decision 6, 2026-10-05, and on recorded verifications, 2026-10-06
   - id: s2
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — evidence on instruction files, skills and attacks
@@ -58,6 +64,10 @@ EM confirmed on 2026-10-05, closing OD-25 [s1]:
 
 13. Decision 6 covers production parameters. The kit's dry-run budgets and fixed ceilings are test values, not parameters.
 
+EM decided on 2026-10-06, closing OD-31 [s1]:
+
+14. Decision 6 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The decision log quotes the instruction, the entry names the agent in `recorded_by` and links the quote in `ref`, and the commit message says that the agent made the edit. An agent never records a body's verification ([ADR 002](/adr/002-decision-and-review-process.md) point 10).
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Options considered
@@ -74,10 +84,12 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 - Of the four skills, only `skills/adr-draft/` exists. The three Clutch-specific skills arrive with the tools they drive in phase 2.
 - Until the agent has its own GitHub identity, the agent pushes under the creator's git identity, so the creator's own approval never counts. Another member of the owning team approves.
 - The rules bind only while both owner teams have write access and the branch rule is on. Neither can be checked from the agent's environment.
+- A `human:` entry alone no longer proves that the human typed it. `recorded_by` and the quoted instruction show when an agent did (decision 14), and the status register marks those entries `(recorded)`.
 
 ## Confirmation
 
 - The validator fails when `AGENTS.md` exceeds 60 lines or is missing.
+- The validator refuses a recorded verification without an agent in `recorded_by`, without a `ref` to a decision-log heading, or on a body's actor.
 - `.github/CODEOWNERS` names the owners: `@lidofinance/defi-tech` for everything and `@lidofinance/review-gh-workflows` for `/.github/`. It binds once the branch rule on `main` is on.
 
 ## Reversal conditions

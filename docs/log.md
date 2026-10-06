@@ -1,5 +1,10 @@
 # Log
 
+## 2026-10-06
+
+* **Decision**: EM verified ADR 002 and ADR 003 again after the OD-31 edit. The agent recorded both entries at EM's instruction, with `recorded_by` and a `ref` to the decision-log heading that quotes it.
+* **Decision**: Recorded EM's choice for OD-31. On a human's explicit written instruction, an agent may record that human's own acceptance and verification, marked with `recorded_by` and a `ref` to the decision-log heading that quotes the instruction; never for a body. Updated `AGENTS.md` at EM's request, ADR 002 and ADR 003, and the validator, which checks the new fields and marks such entries `(recorded)` in the status register. Added `recorded_by` and `ref` to the four entries of 2026-10-05 in ADR 001 to ADR 004.
+
 ## 2026-10-05
 
 * **Decision**: EM accepted ADR 001 to ADR 004. At EM's instruction, the agent wrote EM's acceptance fields and `verified` entries; the decision log quotes the instruction. ADR 005 to ADR 011 stay proposed; each also needs a verification from the Emergency Brakes multisig.

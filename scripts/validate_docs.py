@@ -31,11 +31,16 @@ Clutch rules on top of the Gaggle profile:
   the mandate's ceiling (ADR 002, ROADMAP standing gates).
 - A verification by a body, `human:tmc` or `human:emergency-brakes`, carries `ref`: an
   https or urn link to the body's decision record (ADR 002, OD-15).
+- An agent records a human's own verification only on that human's written instruction
+  (ADR 003, OD-31). The entry names the agent in `recorded_by`, and its `ref` links the
+  decision-log heading that quotes the instruction. An agent never records a body's
+  verification.
 """
 
 from __future__ import annotations
 
 import argparse
+import functools
 import re
 import subprocess
 import sys
@@ -67,6 +72,9 @@ AGENTS_MAX_LINES = 60
 CO_VERIFIER = "human:emergency-brakes"
 BODY_ACTORS = ("human:tmc", "human:emergency-brakes")
 BODY_REF = re.compile(r"\A(https://\S+|urn:\S+)\Z")
+# A verification that an agent recorded links the decision-log heading that quotes the
+# human's instruction (ADR 003, OD-31).
+INSTRUCTION_REF = re.compile(r"\A/registers/decision-log\.md#([\w-]+)\Z")
 SIX_HOURS = 6 * 60 * 60
 DRILL_FIELDS = ("at", "network", "block", "time_to_initiate_seconds", "result")
 REGISTER_REL = "registers/document-status.md"
@@ -135,6 +143,32 @@ def _check_actor(actor: Any, allowed: set[str], where: str, out: list[str]) -> N
         out.append(f"{where} {text!r} is not in config/actors.yaml")
 
 
+@functools.lru_cache(maxsize=8)
+def _heading_slugs(path: str) -> frozenset[str]:
+    """GitHub-style anchors of the headings in a Markdown file, outside code fences."""
+    slugs: set[str] = set()
+    seen: dict[str, int] = {}
+    fenced = False
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+            continue
+        match = None if fenced else re.match(r"#{1,6}\s+(.*?)\s*#*\s*$", line)
+        if not match:
+            continue
+        base = re.sub(r"[^\w\- ]", "", match.group(1).strip().lower()).replace(" ", "-")
+        count = seen.get(base, 0)
+        seen[base] = count + 1
+        slugs.add(base if count == 0 else f"{base}-{count}")
+    return frozenset(slugs)
+
+
+def _instruction_ref_ok(ref: str, docs: Path) -> bool:
+    match = INSTRUCTION_REF.match(ref)
+    log = docs / "registers" / "decision-log.md"
+    return bool(match) and log.is_file() and match.group(1) in _heading_slugs(str(log))
+
+
 def _verifications(meta: dict[str, Any]) -> list[dict[str, Any]]:
     verified = meta.get("verified", [])
     if isinstance(verified, dict):  # OKF 0.2 section 5.2: a bare mapping is a one-element list
@@ -195,6 +229,24 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
             out.append(f"{where}.at is in the future: {_iso(event_at)}; a future-dated verification would survive later edits")
             continue
         actor = str(event["by"])
+        if event.get("recorded_by") is not None:
+            recorder = str(event["recorded_by"])
+            if not actor.startswith("human:"):
+                out.append(f"{where}: `recorded_by` applies only to a human's verification")
+                continue
+            if actor in BODY_ACTORS:
+                out.append(f"{where}: an agent never records a body's verification; a member records it (ADR 002, OD-15)")
+                continue
+            if recorder.startswith(("human:", "process:")):
+                out.append(f"{where}.recorded_by must name an agent, not {recorder!r}")
+                continue
+            _check_actor(recorder, allowed, f"{where}.recorded_by", out)
+            if not _instruction_ref_ok(str(event.get("ref", "")).strip(), docs):
+                out.append(
+                    f"{where} recorded by {recorder} needs `ref`, a link to the decision-log heading "
+                    "that quotes the human's instruction (ADR 003)"
+                )
+                continue
         if actor in BODY_ACTORS and not BODY_REF.match(str(event.get("ref", "")).strip()):
             out.append(f"{where} by {actor} needs `ref`, an https or urn link to the body's decision record (ADR 002)")
             continue
@@ -334,8 +386,11 @@ def render_status(root: Path) -> str:
         at = _as_dt(generated.get("at")) if generated else None
         if at and (newest is None or at > newest):
             newest = at
-        humans = sorted({str(e.get("by")) for e in _verifications(meta)
-                         if isinstance(e, dict) and str(e.get("by", "")).startswith("human:")})
+        humans = sorted({
+            str(e.get("by")) + (" (recorded)" if e.get("recorded_by") is not None else "")
+            for e in _verifications(meta)
+            if isinstance(e, dict) and str(e.get("by", "")).startswith("human:")
+        })
         rows.append((
             f"[{rel}](/{rel})",
             str(meta.get("type", "?")),
@@ -363,6 +418,8 @@ def render_status(root: Path) -> str:
         "Generated by `python3 scripts/validate_docs.py --write-status`. Do not edit it by hand. CI fails when it is out of date.",
         "",
         "Review statuses: `slop` means drafted by an agent and not checked by a human. `human-skimmed` means a quick human pass. `human-reviewed` means a substantive human pass. `finalized` means accepted as final for the current stage. None of them means audit, legal review or governance approval.",
+        "",
+        "A verifier marked `(recorded)` did not type the entry: an agent recorded it on that human's written instruction, and the entry's `ref` links the decision-log heading that quotes it (ADR 003).",
         "",
         "| Page | Type | Review status | Decision | Last change | Verified by |",
         "|---|---|---|---|---|---|",
