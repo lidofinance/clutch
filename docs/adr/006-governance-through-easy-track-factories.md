@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:30:52Z
+  at: 2026-10-06T06:59:08Z
 verified: []
 sources:
   - id: s1
@@ -71,7 +71,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - Every factory's trusted caller is the operator Safe. Easy Track fixes the trusted caller at deployment [s7].
 - Every factory hard-codes the `operator` role key and refuses the modifiers and the Safe as a target.
 - The kit's role-toggle factory [s4] left the design (decision 8) and the kit on 2026-10-05. The budget factory and the template factories are not built.
-- The modifier constrains the governance role again, so a factory bug cannot widen anything. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator an administrative target, and cannot set an allowance outside the operator's budget keys [s6].
+- The modifier constrains the governance role again, so a factory bug cannot widen anything. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator an administrative target, cannot set an allowance outside the operator's budget keys, and cannot set a refill period below 30 days [s6].
 - A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. Once it is enacted, the emergency Safe can revoke the new permission at once.
 - Every removal is an emergency action. The emergency role holds `revokeTarget` and `revokeFunction`, pinned to the `operator` key, and acts at once. Every operator permission lives under that key, so the revoke reaches all of them.
 

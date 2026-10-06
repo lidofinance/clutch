@@ -2,6 +2,8 @@
 
 ## 2026-10-06
 
+* **Decision**: Recorded EM's choice for OD-32. Monitoring publishes the cap reading of each fortnightly snapshot to IPFS, from the report generator, and its alert links the reading when it pages the Emergency Brakes multisig.
+* **Update**: Froze ADR 005 to ADR 011 for the verification by the Emergency Brakes multisig, after a final read. Wording fixes in ADR 005, 006, 007, 009 and 011; no decision changed. Added the [verification requests](/registers/verification-requests.md) register: the multisig's duties, what each record asks, and how a member records the verification.
 * **Decision**: EM verified ADR 002 and ADR 003 again after the OD-31 edit. The agent recorded both entries at EM's instruction, with `recorded_by` and a `ref` to the decision-log heading that quotes it.
 * **Decision**: Recorded EM's choice for OD-31. On a human's explicit written instruction, an agent may record that human's own acceptance and verification, marked with `recorded_by` and a `ref` to the decision-log heading that quotes the instruction; never for a body. Updated `AGENTS.md` at EM's request, ADR 002 and ADR 003, and the validator, which checks the new fields and marks such entries `(recorded)` in the status register. Added `recorded_by` and `ref` to the four entries of 2026-10-05 in ADR 001 to ADR 004.
 

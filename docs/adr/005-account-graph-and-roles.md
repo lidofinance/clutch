@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:30Z
+  at: 2026-10-06T06:59:08Z
 verified: []
 sources:
   - id: s1
@@ -142,7 +142,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - Every DAO-path action carries the Dual Governance delay.
 - The three new Safes run Safe v1.5.0, which has a short record of holding value [s7]. The LIP says so.
 - The vault's main Safe paths are ones that Certora formally verified on v1.5.0: transaction execution, `approveHash` and module execution [s7]. The contract-signature path and the fallback handler, where v1.5.0 changed most and where the next release changes again, stay unused.
-- Without a fallback handler, the Asset Safe refuses ERC-721 and ERC-1155 safe transfers, and it cannot sign a message by EIP-1271. A protocol that needs either comes back to EM (decision 15).
+- Without a fallback handler, the Asset Safe refuses ERC-721 and ERC-1155 safe transfers, and it cannot sign a message by EIP-1271. A protocol that needs either comes back to EM (decision 15). Lido's withdrawal queue creates a request without that receiver check, so the Asset Safe can own one ([ADR 007](/adr/007-swapping-through-stonks.md)).
 - A later change of the Asset Safe's Safe version needs a DAO vote with a delegatecall to Safe's migration contract.
 
 ## Confirmation
