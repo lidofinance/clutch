@@ -1,6 +1,7 @@
 # The guided tour: ten short scenes on the system map, for any reader.
 - title: The vault, and who owns it
   text: "Clutch puts a bounded part of the DAO treasury to work in approved protocols. The assets sit in one new [[Safe]], the **Asset Safe**.\n\nThe Asset Safe has exactly one owner: the [[Aragon Agent]], the DAO's treasury. The DAO keeps custody. In an emergency, assets go back to the Agent, a fixed address.\n\nThe Agent also owns two smaller Safes: the [[orders account]], which places swap orders, and the [[first-loss Safe]], which holds the DAO's first-loss shares apart."
+  tech: "The Asset Safe is a Safe v1.5.0 proxy. The Aragon Agent is its only owner, at a threshold of one, and it has no guard and no fallback handler. The Agent approves each transaction by `approveHash`, or sends it itself (INV-001)."
   nodes: [dao, asset-safe, orders, first-loss]
   edges: [own]
   sources: [ADR-005, ADR-007, ADR-008, INV-001, "doc:docs/product/brief.md#the-system"]
@@ -14,6 +15,7 @@
 
 - title: "The operator: the committee at work"
   text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its permissions is the Asset Safe."
+  tech: "The operator Safe calls `execTransactionWithRole` on the operator modifier with the role key `bytes32(\"operator\")`; a batch goes through MultiSendCallOnly v1.5.0. Every receiver, owner and beneficiary is pinned with `EqualToAvatar` (INV-003)."
   nodes: [committee, operator-safe, operator-modifier, asset-safe, protocols]
   edges: [signers-op, op-role, own-op, positions]
   flows: [op-tx, swap-order]
@@ -21,6 +23,7 @@
 
 - title: Every operator transaction is screened
   text: "[the screening vendor]'s [[guard]] sits on the operator Safe. It refuses any transaction that the vendor has not approved, once and exactly.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path."
+  tech: "A transaction guard on the operator Safe. The vendor's key approves each exact transaction on chain, once, before it runs; a transaction without an approval reverts. The owners can remove the guard only through a 10-day timelock. Its bypass mode stays off: turning it on needs the vendor's approval and a 10-day timelock (INV-010)."
   nodes: [screening, operator-safe]
   edges: [screen]
   flows: [vendor-outage]
@@ -28,20 +31,23 @@
 
 - title: Changes by motion, inside templates
   text: "The committee can widen its own permissions only through Easy Track [[motion|motions]], each built by a fixed [[template]]. LDO holders have 72 hours to object, and 0.5% of LDO stops a motion. This window is the timelock for every structural increase of exposure, such as a new target or a higher budget.\n\nAt enactment, the governance role writes the change. The modifier checks that write again: no role change, no [[delegatecall]], and no administrative target. The Asset Safe and its modifiers are refused as targets. The same motion gives the emergency role an exit from what it onboards."
+  tech: "The governance role may call six functions on the operator modifier: `scopeTarget`, `revokeTarget`, `allowFunction`, `revokeFunction`, `scopeFunction` and `setAllowance`. The role key is pinned to `operator`, and a `Nor` condition refuses the Asset Safe and its modules as targets. The execution option must be below 2, so no delegatecall. `setAllowance` takes only the operator's budget keys, with a refill period of at least 30 days (INV-004, INV-012)."
   nodes: [operator-safe, easytrack, dao, operator-modifier]
   edges: [motions, object, gov-role]
   flows: [onboard, budget, unlock]
-  sources: [ADR-006, INV-004, OD-36, OD-38, OD-45]
+  sources: [ADR-006, INV-004, INV-012, OD-36, OD-38, OD-45, "doc:policy/constellation/constellation/roles/governance/permissions.ts"]
 
 - title: Swaps are CoW orders
   text: "Every swap is a [[CoW]] order placed from the [[orders account]]. The operator sends a token there under a budget, then places a market, [[limit order|limit]], [[TWAP]] or [[stop-loss order|stop-loss]] order that pays the Asset Safe. A [[recovery order]] buys USDC or USDT and pays the Aragon Agent.\n\nNothing on chain bounds an order's price. CoW's competition rules, screening, the budgets and monitoring of each fill take its place."
+  tech: "Market and limit orders: a delegatecall from the orders account to CoW's order signer, `signOrder`, with tokens from the lists, the Asset Safe as receiver and a `validDuration` of at most 30 days. TWAP and stop-loss orders go through ComposableCoW, with only those two handlers; a TWAP order is created with `createWithContext`, so it starts at its creation. These permissions are ADR 007's proposed direction (INV-022, INV-024)."
   nodes: [asset-safe, orders]
   edges: [swaps]
   flows: [swap-order, standing-order, recovery-order]
-  sources: [ADR-007, OD-43, INV-013, INV-014, INV-022]
+  sources: [ADR-007, OD-43, INV-013, INV-014, INV-022, INV-024]
 
 - title: "Money in: top-ups"
   text: "Funding comes from the DAO treasury through the existing payment path. Once a month, the operator Safe creates a [[top-up]] motion. LDO holders can object for 72 hours.\n\nTwo funding registries pay only the Asset Safe, each within a monthly limit. The objection is the control; the limit is the backstop."
+  tech: "Two allowed-recipients registries from Easy Track's standard builder, each with the Asset Safe as its only recipient and a one-month period. Two top-up factories create the motions, with the operator Safe as their trusted caller (INV-017)."
   nodes: [operator-safe, easytrack, funding, dao, asset-safe]
   edges: [motions, topup-motion, treasury, topup]
   flows: [topup, seed]
@@ -57,6 +63,7 @@
 
 - title: Caps are watched, not enforced
   text: "No contract reverts on a [[cap]] or on the [[liquidity buffer]]. Monitoring watches the buffer all the time and publishes the cap reading to IPFS every two weeks. Each month, the committee publishes a report that anyone can reproduce.\n\nIf a breach is not fixed within two working days and is larger at the next reading, monitoring pages the Emergency Brakes multisig, which switches the operator off. The [[control matrix]] lists each rule's controls on every layer."
+  tech: "The cap reading is the report generator's output at the fortnightly snapshot's pinned block, published to IPFS. The alert that pages the Emergency Brakes multisig links it (OD-32)."
   nodes: [monitoring, reporting, asset-safe, brakes, committee]
   edges: [watch, report, page]
   flows: [fortnightly, monthly-report, buffer-low, cap-breach]
@@ -64,6 +71,7 @@
 
 - title: Little new code, and where it stands
   text: "Clutch reuses deployed code that already runs: Safe, Zodiac Roles, Easy Track, CoW's order contracts and Lido's monitoring. It adds Easy Track factories, the permission policy with its compiler, the vault's detectors and a report generator.\n\nToday the design is in phase 0. Nothing is deployed, no audit is done and no runbook is written. The **Built or reused** and **Status** tabs show each part."
+  tech: "New code: the Easy Track factories, Clutch's TypeScript policy compiler, the detectors and the report generator. Reused as deployed: Safe v1.5.0, the locked Roles mastercopy, Easy Track and CoW's contracts."
   nodes: [policy, easytrack, reporting, monitoring]
   flows: [policy-change, roadmap, enabling-vote]
   sources: [ADR-006, ADR-004, "doc:ROADMAP.md#roadmap"]
