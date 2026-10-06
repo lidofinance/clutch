@@ -43,7 +43,7 @@ Budgets and fixed ceilings are dry-run stand-ins. The production figures come fr
 1. `policy/constellation/constellation/` holds the policy as a Zodiac constellation in TypeScript.
 2. `bun compiler/compile.ts --manifest manifests/fork-25946643.json` writes `artifacts/fork-25946643.json`: the ordered modifier calls, the expected condition tree for every role, target and selector, and the allowances.
 3. The fork suites apply that artifact and nothing else.
-4. `just policy-check` fails when the committed artifact differs from a fresh compile, and runs the compiler's tests.
+4. `just policy-check` fails when the committed artifact differs from a fresh compile, and runs the compiler's tests. CI runs the same check in `.github/workflows/policy.yml`.
 
 A change to the policy changes the TypeScript and the artifact in the same commit. Reviewers approve the artifact (ADR 004, decision 14).
 

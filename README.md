@@ -31,7 +31,7 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 - Agents draft most text and code. Humans decide, review and merge.
 - Every page in `docs/` records its sources, who produced it, who verified it, and its review status.
 - An accepted ADR is an engineering decision. It authorises nothing on chain. On-chain change still needs the vote, motion or signature that the system defines.
-- CI validates the bundle and checks that the document-status register is current.
+- CI validates the bundle and checks that the document-status register is current. It also checks that the committed policy artifact equals a fresh compile of the constellation.
 
 ## Commands
 
