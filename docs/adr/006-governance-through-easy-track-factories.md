@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T06:59:08Z
+  at: 2026-10-06T08:52:19Z
 verified: []
 sources:
   - id: s1
@@ -62,6 +62,10 @@ EM decided on 2026-10-05, closing OD-09 [s1]:
 
 7. The two removal templates are dropped. Every removal is the emergency Safe's immediate revoke, posted on the forum afterwards. Easy Track only expands.
 8. No DAO-scoped role keys. The role-toggle factory and the governance role's `assignRoles` permission leave the design. Every operator permission lives under the `operator` role key.
+
+EM decided on 2026-10-06, closing OD-36 [s1]:
+
+9. A motion cannot grant the operator delegatecall. The governance role's `allowFunction` and `scopeFunction` permissions take only the execution options None or Send. A delegatecall from the Asset Safe runs foreign code in the Safe's own storage, so delegatecall for the operator needs a DAO vote.
 
 ## Proposed direction
 

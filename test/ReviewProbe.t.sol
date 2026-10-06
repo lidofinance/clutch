@@ -6,6 +6,15 @@ import {IERC20, ILidoEarnDepositQueue} from "../src/interfaces/Tokens.sol";
 import {SafeExec} from "../src/exec/SafeExec.sol";
 import {ClutchFixture} from "./utils/Fixture.sol";
 
+/// @dev Writes slot 4, the Safe's threshold, of whoever delegatecalls it.
+contract SlotWriter {
+    function hit() external {
+        assembly {
+            sstore(4, 7)
+        }
+    }
+}
+
 /// @title ReviewProbe — regression tests for defects found in review, and
 ///        probes of what the deployed Roles mastercopy can express.
 /// @dev Each test decides one claim against the deployed Roles v4
@@ -158,6 +167,29 @@ contract ReviewProbe is ReviewBase {
     function test_policyadmin_cannot_raise_a_foreign_allowance_key() public {
         _paRefused(abi.encodeCall(IRoles.setAllowance,
             (keccak256("not-an-operator-budget"), 1e30, 1e30, 1e30, 30 days, 0)), "allowance key must be one of the operator budgets");
+    }
+
+    // =================================================================
+    // OD-36: a governance motion cannot grant the operator delegatecall. A
+    // delegatecall from the Asset Safe runs foreign code in the Safe's own
+    // storage, as SlotWriter shows on the threshold slot.
+    // =================================================================
+    function test_policyadmin_cannot_grant_operator_delegatecall() public {
+        SlotWriter w = new SlotWriter();
+        bytes4 sel = SlotWriter.hit.selector;
+        assertTrue(_pa(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(w)))), "a new target can be scoped");
+        _paRefused(abi.encodeCall(IRoles.allowFunction, (OPERATOR, address(w), sel, 2)), "DelegateCall must be refused");
+        _paRefused(abi.encodeCall(IRoles.allowFunction, (OPERATOR, address(w), sel, 3)), "Send with DelegateCall must be refused");
+        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](1);
+        c[0] = IRoles.ConditionFlat({parent: 0, paramType: 5, operator_: 5, compValue: ""});
+        _paRefused(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, address(w), sel, c, 2)), "a DelegateCall scope must be refused");
+        assertTrue(_pa(abi.encodeCall(IRoles.allowFunction, (OPERATOR, address(w), sel, 1))), "Send stays grantable");
+
+        vm.prank(operatorSafe);
+        (bool ok,) = address(roles).call(abi.encodeCall(
+            IRoles.execTransactionWithRole, (address(w), 0, abi.encodeCall(SlotWriter.hit, ()), 1, OPERATOR, true)));
+        assertFalse(ok, "the operator's delegatecall must be refused");
+        assertEq(safe.getThreshold(), 1, "the Asset Safe's threshold must not change");
     }
 
     // =================================================================

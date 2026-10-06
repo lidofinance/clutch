@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:43:42Z
+  at: 2026-10-06T08:52:19Z
 verified: []
 sources:
   - id: s1
@@ -22,7 +22,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
 | OD-23 | When does the agent get its own GitHub identity? Until it does, the agent pushes under the creator's git identity, and another member of the owning team must approve. | [ADR 003](/adr/003-agent-operating-model.md) | Deferred by EM on 2026-10-05: "later". Give it write access to branches only, so that EM can approve agent work as a code owner | EM |
-| OD-36 | May a governance motion grant the operator delegatecall? The governance role's `allowFunction` and `scopeFunction` scopes leave the execution options open. A fork probe of 2026-10-06 granted the operator `DelegateCall` on a new target through the governance role, and the operator's delegatecall then rewrote the Asset Safe's threshold slot. The Asset Safe has no guard, so nothing else stops it. The kit had the same gap; the port kept it. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | A: the two scopes pin the options to `None` or `Send`, and a regression test refuses a `DelegateCall` grant; delegatecall for the operator then needs a DAO vote. Not B, which relies on the template factories and the objection window: the factories are not built, and the modifier is the last check before the Asset Safe. ADR 005's roles table gains "grant delegatecall" under the governance role's "may not", before the Emergency Brakes multisig verifies it | EM |
 
 ## Closed
 
@@ -62,3 +61,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-33 | Is the Zodiac constellation the source of the permission policy? | 2026-10-06 | EM: "Q1: We want to work under Zodiac UI, so it's closer to B I believe, though it always a good idea to have local tooling to replicate/verify everything", "Q2: A", "Q3: A", "Q4: B", "Q5: A": the team works in the Zodiac UI and local tooling verifies everything it produces; the constellation and Clutch's TypeScript compiler replace YAML and Python; the artifact is committed and is what the vote consumes; the Solidity builders go now; ADR 004 is amended and verified again ([ADR 004](/adr/004-specifications-and-policy-as-data.md), [research note](/research/zodiac-constellation-2026-10-06.md)) [s1] |
 | OD-34 | May the files copied from the constellation keep LGPL-3.0-only? | 2026-10-06 | EM: "OD-34: A": files derived from the provider's constellation keep LGPL-3.0-only and get an SPDX line when they change; new files use AGPL-3.0-or-later; the licence check covers `policy/`; `AGENTS.md` changed at EM's request ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)) [s1] |
 | OD-35 | Who owns the Lido Zodiac workspace and its API key? | 2026-10-06 | EM: "OD-35: A": the repository-owner team, `@lidofinance/defi-tech`; a member pushes from the merged `main` with the key in a local, ignored `.env`; the committee and the Emergency Brakes multisig can view the workspace; CI holds no key ([ADR 004](/adr/004-specifications-and-policy-as-data.md)) [s1] |
+| OD-36 | May a governance motion grant the operator delegatecall? | 2026-10-06 | EM: "OD-36: A": no. The governance role's `allowFunction` and `scopeFunction` permissions take only the execution options None or Send; a regression test refuses a `DelegateCall` grant; delegatecall for the operator needs a DAO vote ([ADR 006](/adr/006-governance-through-easy-track-factories.md), [ADR 005](/adr/005-account-graph-and-roles.md)) [s1] |

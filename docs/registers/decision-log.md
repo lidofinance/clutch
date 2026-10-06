@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:16:51Z
+  at: 2026-10-06T08:52:19Z
 verified: []
 sources:
   - id: s1
@@ -34,6 +34,14 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-06 — OD-36: no delegatecall through governance, and the policy CI job
+
+> - OD-36: A
+> - add a new job for CI (decision 14)
+> - push then
+
+Recorded as: OD-36 is closed with option A. The governance role's `allowFunction` and `scopeFunction` permissions take only the execution options None or Send, so a motion cannot grant the operator delegatecall; a regression test refuses such a grant, and delegatecall for the operator needs a DAO vote ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 9). ADR 005's roles table adds the limit before the Emergency Brakes multisig verifies it. The second line is EM's explicit request for a new CI job under `.github/`: it fails when the committed policy artifact differs from a fresh compile ([ADR 004](/adr/004-specifications-and-policy-as-data.md) decision 14). [s5]
 
 ## 2026-10-06 — ADR 001 and ADR 004 verified again
 
