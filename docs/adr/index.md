@@ -7,7 +7,7 @@ One global sequence. Every record is agent-drafted and `proposed` until EM accep
 * [ADR 001: Repository scope, visibility, licence and name](001-repository-scope-visibility-licence-name.md) - one repository, private until deployment, AGPL-3.0-or-later with GPL-3.0 kept for Easy Track-derived files, named Clutch.
 * [ADR 002: Decision and review process](002-decision-and-review-process.md) - EM accepts in the interim, the committee permanently, Emergency Brakes verifies constraining records; a review ladder that an edit resets.
 * [ADR 003: Agent operating model](003-agent-operating-model.md) - a 60-line AGENTS.md of rules, skills for procedures, and hard limits on what agents do.
-* [ADR 004: Specifications and the permission policy as data](004-specifications-and-policy-as-data.md) - conceptual specs, invariants mapped to tests, the LIP as an external layer, runbooks, and a policy data file with a round-trip check.
+* [ADR 004: Specifications and the permission policy as data](004-specifications-and-policy-as-data.md) - conceptual specs, invariants mapped to tests, the LIP as an external layer, runbooks, and a policy written as a Zodiac constellation, compiled into a committed artifact, with a round-trip check.
 
 # System design
 

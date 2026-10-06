@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T06:59:08Z
+  at: 2026-10-06T08:16:51Z
 verified: []
 sources:
   - id: s1
@@ -34,6 +34,42 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-06 — ADR 001 and ADR 004 verified again
+
+> - record my re-verification of ADR 001 and ADR 004
+> - push
+
+Recorded as: EM verifies ADR 001 and ADR 004 again after the OD-33, OD-34 and OD-35 amendments, so both stay accepted. At this instruction, the agent recorded EM's two `verified` entries under the OD-31 rule: each names the agent in `recorded_by` and links this heading in `ref`. The verification is EM's. [s5]
+
+## 2026-10-06 — OD-34 and OD-35: the constellation's licence and the Zodiac workspace
+
+> OD-34: A
+> OD-35: A
+
+Recorded as: both as the agent recommended. (OD-34) Files derived from the policy provider's constellation keep LGPL-3.0-only and get `SPDX-License-Identifier: LGPL-3.0-only` when they change. New files use AGPL-3.0-or-later. The licence check of [ADR 001](/adr/001-repository-scope-visibility-licence-name.md) covers `policy/`. Option A included the change to `AGENTS.md`, so the agent made it at this request. (OD-35) The repository-owner team, `@lidofinance/defi-tech`, owns the Lido Zodiac workspace and its API key. A member of that team pushes from the merged `main`, with the key in a local `.env` that git ignores. The committee and the Emergency Brakes multisig can view the workspace, and CI holds no key ([ADR 004](/adr/004-specifications-and-policy-as-data.md)). Both ADRs changed, so EM verifies ADR 001 and ADR 004 again. [s5]
+
+## 2026-10-06 — OD-33: the constellation as the policy source
+
+> Q1: We want to work under Zodiac UI, so it's closer to B I believe, though it always a good idea to have local tooling to replicate/verify everything
+> Q2: A
+> Q3: A
+> Q4: B
+> Q5: A
+
+Recorded as: OD-33 is closed. (Q1) The team works in the Zodiac UI, and local tooling replicates and verifies everything that the UI produces. The agent reads this as two rules: no transaction that the hosted app builds is signed, or enters a vote or a motion, unless Clutch's compiler produces the same calls from the same commit; and the policy changes only in the repository. (Q2) The constellation in TypeScript replaces the YAML file, and Clutch's own TypeScript compiler on the roles SDK replaces the Python compiler. It runs offline from a frozen lockfile and refuses entries that only the hosted app can compile. (Q3) The artifact is committed, CI fails when it differs from a fresh compile, reviewers approve it, and the enabling vote, the Easy Track templates and the drift detector consume it. (Q4) The Solidity builders go now: the port deletes them and rebuilds the fork tests on the artifact, with no equality gate. (Q5) [ADR 004](/adr/004-specifications-and-policy-as-data.md) is amended in place, and EM verifies it again. OD-35 asks who owns the Zodiac workspace and its API key. [s5]
+
+## 2026-10-06 — OD-33 asked
+
+> run an interview on OD-33
+
+Recorded as: the agent asked five questions: what "backbone" means, what replaces decisions 8 and 9 of ADR 004, what reviewers approve and the vote consumes, when the Solidity builders go, and how to record the change. [s5]
+
+## 2026-10-06 — the Zodiac constellation as the backbone asked
+
+> now let's get back to https://github.com/gnosisguild/lido-atm-constellation and analyze whether the same config still works or it needs to be materially improved; if so, do a local copy of the cfg and store it within the repo; basically we want to use zodiac constellation as the project backbone; highlight whether we can do it or not and what's missing
+
+Recorded as: the agent copied the configuration to `policy/constellation/` and wrote the [constellation note](/research/zodiac-constellation-2026-10-06.md). The constellation as the source of the policy would replace decisions 8 and 9 of ADR 004, which EM accepted, so it is OD-33. The copied files are LGPL-3.0-only, which ADR 001 does not allow, so they are OD-34. No decision is recorded yet. [s5]
 
 ## 2026-10-06 — OD-32: the fortnightly cap reading
 

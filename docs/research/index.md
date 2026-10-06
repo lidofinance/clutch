@@ -1,6 +1,7 @@
 # Research
 
 * [Chain reads for the design ADRs, 2026-09-30](chain-reads-2026-09-30.md) - every on-chain fact the design ADRs rely on, read at one pinned block with the exact command.
+* [The Zodiac constellation as the policy backbone, 2026-10-06](zodiac-constellation-2026-10-06.md) - the evidence behind OD-33 and OD-34: whether the provider's configuration still builds and matches the chain, what runs locally and what only the hosted app runs, a compile probe against the kit's condition shapes, the differences from the decided design, and what Clutch must build.
 * [Safe v1.5.0 and the screening guard, 2026-10-02](safe-v150-guard-compatibility-2026-10-02.md) - the check behind OD-02: the v1.5.0 guard path, support and provenance, and the restricted fork test.
 * [Safe v1.5.0 due diligence, 2026-10-05](safe-v150-due-diligence-2026-10-05.md) - the evidence behind OD-17: the audits and what they cover, advisories and bounties, use and value on mainnet, incidents at Safe accounts, and the Safe paths the vault uses.
 * [Recovery into USDT and the withdrawal-queue approval, 2026-10-05](recovery-and-withdrawal-queue-2026-10-05.md) - the evidence behind OD-26 and OD-27: USDS and DAI carry USDC risk through Sky's peg stability module, the recovery topology before the decision, and the withdrawal queue's upgrader, request limits and missing cancel.

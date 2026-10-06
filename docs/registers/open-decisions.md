@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T06:59:08Z
+  at: 2026-10-06T08:12:59Z
 verified: []
 sources:
   - id: s1
@@ -58,3 +58,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-30 | The mandate draft promises an emergency exit that is independent of the committee, but the emergency Safe is a subset of the committee | 2026-10-05 | EM: "Q6: A": the emergency Safe stays a subset; the mandate text owes the change, and the LIP states that the fast exit is not independent of the committee ([ADR 005](/adr/005-account-graph-and-roles.md)) [s1] |
 | OD-31 | May an agent record a human's own acceptance and verification on that human's instruction, and how is such an entry marked? | 2026-10-06 | EM: "C, edit AGENTS.md": yes, only on the human's explicit written instruction and never for a body; the entry carries `recorded_by` and a `ref` to the decision-log heading that quotes the instruction, and the validator checks both ([ADR 002](/adr/002-decision-and-review-process.md), [ADR 003](/adr/003-agent-operating-model.md)) [s1] |
 | OD-32 | Who publishes the fortnightly cap reading that the trigger of OD-29 needs? | 2026-10-06 | EM: "1": monitoring runs the report generator at each fortnightly snapshot and publishes the cap ratios to IPFS; its alert to the Emergency Brakes multisig links the reading ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |
+| OD-33 | Is the Zodiac constellation the source of the permission policy? | 2026-10-06 | EM: "Q1: We want to work under Zodiac UI, so it's closer to B I believe, though it always a good idea to have local tooling to replicate/verify everything", "Q2: A", "Q3: A", "Q4: B", "Q5: A": the team works in the Zodiac UI and local tooling verifies everything it produces; the constellation and Clutch's TypeScript compiler replace YAML and Python; the artifact is committed and is what the vote consumes; the Solidity builders go now; ADR 004 is amended and verified again ([ADR 004](/adr/004-specifications-and-policy-as-data.md), [research note](/research/zodiac-constellation-2026-10-06.md)) [s1] |
+| OD-34 | May the files copied from the constellation keep LGPL-3.0-only? | 2026-10-06 | EM: "OD-34: A": files derived from the provider's constellation keep LGPL-3.0-only and get an SPDX line when they change; new files use AGPL-3.0-or-later; the licence check covers `policy/`; `AGENTS.md` changed at EM's request ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)) [s1] |
+| OD-35 | Who owns the Lido Zodiac workspace and its API key? | 2026-10-06 | EM: "OD-35: A": the repository-owner team, `@lidofinance/defi-tech`; a member pushes from the merged `main` with the key in a local, ignored `.env`; the committee and the Emergency Brakes multisig can view the workspace; CI holds no key ([ADR 004](/adr/004-specifications-and-policy-as-data.md)) [s1] |
