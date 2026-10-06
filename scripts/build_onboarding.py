@@ -610,7 +610,7 @@ def section_flows(c: dict[str, Any], refs: dict[str, dict[str, str]]) -> str:
             f'<a class="chip" href="#flow-{fl["id"]}"><span aria-hidden="true">{LABELS[fl["label"]][1]}</span> {esc(fl["title"])}</a>'
             for fl in c["flows"]["flows"] if fl["group"] == g["id"]
         )
-        rows.append(f'<div><h5>{esc(g["title"])}</h5><p class="chips">{chips}</p></div>')
+        rows.append(f'<div><p class="gname">{esc(g["title"])}</p><p class="chips">{chips}</p></div>')
     legend = " ".join(f'<span aria-hidden="true">{icon}</span> {esc(text)}' for k, (text, icon) in LABELS.items() if k != "existing")
     out = [f'<nav class="jump findex" aria-label="All flows">{"".join(rows)}<p class="lead">{legend}</p></nav>']
     for g in c["flows"]["groups"]:
@@ -658,10 +658,10 @@ def section_assumptions(c: dict[str, Any], refs: dict[str, dict[str, str]]) -> s
             if watched else '<span class="badge st-open"><span aria-hidden="true">○</span> Not checked yet</span>'
         )
         rows.append(
-            f'<article class="card assumption" id="assumption-{i}"><header><h4><span class="rank">{i}</span> {fmt(a["assumption"])}</h4>'
+            f'<article class="card assumption" id="assumption-{i}"><header><h3><span class="rank">{i}</span> {fmt(a["assumption"])}</h3>'
             f'<span class="tag tag-{a["kind"]}">{esc(a["kind"].capitalize())}</span></header>'
             f'{alert(a["alert"]) if a.get("alert") else ""}'
-            f'<div class="cols"><div><h5>Why it matters</h5>{paras(a["why"])}</div><div><h5>If it is false</h5>{paras(a["breaks"])}</div></div>'
+            f'<div class="cols"><div><h4 class="sub">Why it matters</h4>{paras(a["why"])}</div><div><h4 class="sub">If it is false</h4>{paras(a["breaks"])}</div></div>'
             f'<p class="watch"><span>Watched by</span> {watch}{note}</p>'
             f'{source_links(a.get("sources"), refs)}</article>'
         )
@@ -752,6 +752,29 @@ def section_quiz(c: dict[str, Any], refs: dict[str, dict[str, str]]) -> str:
     return f'<p class="lead">{fmt(c["meta"]["quiz_note"])}</p>{"".join(items)}<p class="score" aria-live="polite"></p>'
 
 
+def map_list(m: dict[str, Any]) -> str:
+    """The map's boxes and arrows as two tables, for readers who cannot use the drawing."""
+    nodes = {n["id"]: n for n in m["nodes"]}
+
+    def name(node_id: str) -> str:
+        return nodes[node_id]["label"].replace(chr(10), " ")
+
+    boxes = "".join(
+        f'<tr><th scope="row">{esc(name(n["id"]))}</th><td>{esc(STATUSES[n["status"]])}</td><td>{fmt(n["summary"])}</td></tr>'
+        for n in m["nodes"]
+    )
+    arrows = "".join(
+        f'<tr id="arrow-{e["id"]}"><th scope="row">{esc(name(e["from"]))}</th><td>{esc(name(e["to"]))}</td><td>{fmt(e["label"])}</td></tr>'
+        for e in m["edges"]
+    )
+    return (
+        f'<details class="maplist"><summary>The map as a list</summary>'
+        f'<table><caption>Boxes</caption><thead><tr><th scope="col">Box</th><th scope="col">Status</th><th scope="col">What it is</th></tr></thead><tbody>{boxes}</tbody></table>'
+        f'<table><caption>Arrows</caption><thead><tr><th scope="col">From</th><th scope="col">To</th><th scope="col">What it means</th></tr></thead><tbody>{arrows}</tbody></table>'
+        f'</details>'
+    )
+
+
 def legend(c: dict[str, Any]) -> str:
     dom = "".join(f'<li><span class="sw dom-{k}" aria-hidden="true"></span>{esc(v)}</li>' for k, v in c["meta"]["legend"]["domains"].items())
     st = "".join(f'<li><span class="sw ns-{k}" aria-hidden="true"></span>{esc(v)}</li>' for k, v in c["meta"]["legend"]["statuses"].items())
@@ -790,6 +813,7 @@ def render(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[str, str]]
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
 <meta name="generator" content="scripts/build_onboarding.py">
+<script>document.documentElement.classList.add("js")</script>
 <title>{esc(m["title"])}</title>
 <style>
 {css}
@@ -805,18 +829,19 @@ def render(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[str, str]]
 </div>
 <p class="banner" role="note">{fmt(m["banner"])}</p>
 </header>
-<main id="main">
+<main id="main" tabindex="-1">
 {section_outcomes(c)}
 <section class="stage" aria-label="System map and walkthrough">
 <figure class="mapcard">
 <figcaption><h2>The system on one page</h2><p>{fmt(m["map_caption"])}</p></figcaption>
 <div class="mapwrap">{render_map(c["map"])}</div>
 {legend(c)}
+{map_list(c["map"])}
 </figure>
 <aside class="panel" id="panel" aria-live="polite">
 <div class="player" hidden>
 <p class="kicker" id="player-kicker"></p>
-<h3 id="player-title"></h3>
+<h3 id="player-title" tabindex="-1"></h3>
 <div id="player-body"></div>
 <div class="pnav"><button type="button" id="prev">← Back</button><span id="player-count"></span><button type="button" id="next">Next →</button></div>
 <button type="button" id="player-close" class="linklike">Close</button>

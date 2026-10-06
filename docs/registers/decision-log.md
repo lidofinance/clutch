@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T13:05:14Z
+  at: 2026-10-06T13:38:35Z
 verified: []
 sources:
   - id: s1
@@ -34,6 +34,12 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-06 — browser tests for the onboarding guide
+
+> now add autotests the onboarding guide, including checks that every interactive element works as intended, feel free to use playwrite; update the guide itself wherever and whenever needed
+
+Recorded as: the onboarding guide gets automated browser tests, `scripts/test_onboarding_page.py`, that drive every control of the page in headless Chromium with Playwright, and the agent fixes the guide where the tests find a defect. The agent reads "autotests" as tests that run automatically, so this is EM's request for a new job in the docs CI workflow under `.github/` that runs them on every pull request ([onboarding guide](/onboarding/guide.md)). [s5]
 
 ## 2026-10-06 — OD-38: the governance role refuses every module of the Asset Safe
 
