@@ -9,13 +9,18 @@ const OPERATOR = key("operator");
 
 /**
  * Pinning only the role key leaves an indirect escalation: a motion grants
- * the operator a permission whose target is the modifier or the Asset Safe,
- * and the operator then reaches owner-only administration through the
- * avatar. So every scope below also forbids those two as the administered
- * target, with Nor. This deny-list is necessary and not sufficient: the Easy
- * Track template factories carry the positive rules (ADR 006).
+ * the operator a permission whose target is the Asset Safe or one of its
+ * modules, and the operator then reaches owner-only administration through
+ * the avatar. A fork probe did this with the safety modifier (OD-38). So
+ * every scope below forbids, as the administered target, the Asset Safe and
+ * every module that the manifest lists, with Nor, and the compiler checks
+ * the guard. This deny-list is necessary and not sufficient: the Easy Track
+ * template factories carry the positive rules (ADR 006).
  */
-const NOT_ADMINISTRATION = noneOf(manifest.operatorModifier, manifest.assetSafe);
+if (!Array.isArray(manifest.modules) || manifest.modules.length === 0) {
+  throw new Error("the manifest must list every module of the Asset Safe in `modules` (OD-38)");
+}
+const NOT_ADMINISTRATION = noneOf(manifest.assetSafe, ...manifest.modules);
 
 /**
  * The execution options that a motion may grant: None or Send. DelegateCall

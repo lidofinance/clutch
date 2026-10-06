@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:52:19Z
+  at: 2026-10-06T13:05:14Z
 verified: []
 sources:
   - id: s1
@@ -31,6 +31,9 @@ sources:
   - id: s7
     resource: /specs/lip-draft.md
     title: LIP draft, section 6.2 — the owner path restores the operator modifier by enabling it again
+  - id: s8
+    resource: /registers/decision-log.md
+    title: Decision log — EM on OD-38, 2026-10-06
 ---
 
 # Verification requests
@@ -40,6 +43,7 @@ sources:
 - A record that constrains the operator needs a verification from the Emergency Brakes multisig before EM accepts it [s1].
 - ADR 005 to ADR 011 constrain the operator. On 2026-10-06 all seven are `proposed`, and their text is frozen for this request.
 - After the freeze, EM's decision on OD-36 of 2026-10-06 added one limit to ADR 005 and ADR 006: a motion cannot grant the operator delegatecall. The multisig verifies the text with that limit.
+- EM's decision on OD-38 of 2026-10-06 added a second limit to ADR 005 and ADR 006: a motion cannot give the operator the Asset Safe or any module of the Asset Safe as a target, the safety modifier included. The multisig verifies the text with that limit [s8].
 - A verification means that the multisig read the record, finds its constraints on the operator sound from the view of emergency response and technical risk, and accepts the duties that the record gives it. It is not an audit, a legal review or a governance approval.
 - An edit to a record after the verification resets it. The multisig then verifies the new text again [s1].
 

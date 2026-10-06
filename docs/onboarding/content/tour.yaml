@@ -1,0 +1,69 @@
+# The guided tour: ten short scenes on the system map, for any reader.
+- title: The vault, and who owns it
+  text: "Clutch puts a bounded part of the DAO treasury to work in approved protocols. All the assets sit in one new [[Safe]], the **Asset Safe**.\n\nThe Asset Safe has exactly one owner: the [[Aragon Agent]], the DAO's treasury. The DAO keeps custody. In an emergency, assets go back to the Agent, a fixed address."
+  nodes: [dao, asset-safe]
+  edges: [own]
+  sources: [ADR-005, INV-001, "doc:docs/product/brief.md#the-system"]
+
+- title: Nobody touches the vault directly
+  text: "The Asset Safe switches on two [[Roles modifier|Roles modifiers]] from Zodiac. Each holder of a [[role]] calls a modifier. The modifier checks the call against the policy and, if it is allowed, runs it as the Asset Safe.\n\nThe policy is [[default-deny]]: a call that the policy does not list is refused."
+  tech: "The modifiers are EIP-1167 proxies of the deployed, locked Roles mastercopy. The Asset Safe is their owner, avatar and target."
+  nodes: [asset-safe, operator-modifier, safety-modifier]
+  edges: [own-op, own-sf]
+  sources: [ADR-005, "lip:part-1"]
+
+- title: "The operator: the committee at work"
+  text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its permissions is the Asset Safe."
+  nodes: [committee, operator-safe, operator-modifier, asset-safe, protocols]
+  edges: [signers-op, op-role, own-op, positions]
+  flows: [op-tx, rebalance]
+  sources: [ADR-005, INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
+
+- title: Every operator transaction is screened
+  text: "[the screening vendor]'s [[guard]] sits on the operator Safe. It refuses any transaction that the vendor has not approved, once and exactly.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path."
+  nodes: [screening, operator-safe]
+  edges: [screen]
+  flows: [vendor-outage]
+  sources: [ADR-010, INV-010]
+
+- title: Changes by motion, inside templates
+  text: "The committee can widen its own permissions only through Easy Track [[motion|motions]], each built by a fixed [[template]]. LDO holders have 72 hours to object, and 0.5% of LDO stops a motion.\n\nAt enactment, the governance role writes the change. The modifier checks that write again: no role change, no [[delegatecall]], and no administrative target. The Asset Safe and both modifiers are refused as targets."
+  nodes: [operator-safe, easytrack, dao, operator-modifier]
+  edges: [motions, object, gov-role]
+  flows: [onboard, budget]
+  sources: [ADR-006, INV-004, OD-36, OD-38]
+
+- title: Swaps through Stonks
+  text: "The vault never trades on CoW directly. To swap, it sends a token to a [[Stonks]] swap instance whose receiver is fixed when it is deployed.\n\nA [[rebalancing instance]] pays the Asset Safe. A [[recovery instance]] pays the Aragon Agent."
+  nodes: [asset-safe, stonks]
+  edges: [swaps]
+  flows: [rebalance, recovery-swap]
+  sources: [ADR-007, INV-013, INV-014]
+
+- title: "Money in: top-ups"
+  text: "Funding comes from the DAO treasury through the existing payment path. Once a month, the operator Safe creates a [[top-up]] motion. LDO holders can object for 72 hours.\n\nTwo funding registries pay only the Asset Safe, each within a monthly limit. The objection is the control; the limit is the backstop."
+  nodes: [operator-safe, easytrack, funding, dao, asset-safe]
+  edges: [motions, topup-motion, treasury, topup]
+  flows: [topup, seed]
+  sources: [ADR-008, INV-017]
+
+- title: "Emergencies: two fast stops, one slow exit"
+  text: "The **emergency Safe** has the committee's signers at 2 of 7. Through the safety modifier it revokes the operator, exits positions and sends assets to the Aragon Agent. It is fast, but it is not independent of the committee.\n\nThe **Emergency Brakes multisig**, outside the committee, can switch the operator modifier off and pause Easy Track. Only the DAO is fully independent, and a DAO vote takes days."
+  tech: "Target: initiate any emergency action within six hours. Drills on a fork must prove it before launch."
+  nodes: [emergency-safe, safety-modifier, operator-modifier, brakes, dao, asset-safe]
+  edges: [signers-em, em-role, revoke, tech-role, pause, own]
+  flows: [financial-incident, technical-defect, unsafe-motion]
+  sources: [ADR-005, INV-002, INV-009, "lip:part-6"]
+
+- title: Caps are watched, not enforced
+  text: "No transaction reverts on a [[cap]]. Every two weeks, monitoring publishes the cap reading to IPFS. Each month, the committee publishes a report that anyone can reproduce.\n\nIf a breach is not fixed within two working days and is larger at the next reading, monitoring pages the Emergency Brakes multisig, which switches the operator off."
+  nodes: [monitoring, reporting, asset-safe, brakes, committee]
+  edges: [watch, report, page]
+  flows: [fortnightly, monthly-report, cap-breach]
+  sources: [ADR-009, OD-29, OD-32]
+
+- title: Little new code, and where it stands
+  text: "Clutch reuses audited code that already runs: Safe, Zodiac Roles, Easy Track, Stonks and Lido's monitoring. It adds Easy Track factories, the permission policy with its compiler, the vault's detectors and a report generator.\n\nToday the design is in phase 0. Nothing is deployed, no audit is done and no runbook is written. The **Built or reused** and **Status** tabs show each part."
+  nodes: [policy, easytrack, reporting, monitoring]
+  flows: [policy-change, roadmap, enabling-vote]
+  sources: [ADR-006, ADR-004, "doc:ROADMAP.md#roadmap"]

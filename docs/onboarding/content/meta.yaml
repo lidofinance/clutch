@@ -1,0 +1,71 @@
+# The page frame: titles, the reader outcomes (OD-37, Q2), legends and notes.
+title: "Clutch: how the DAO's active treasury vault works"
+subtitle: "An onboarding guide for signers, engineers, reviewers and everyone who needs the picture."
+banner: >-
+  **Design stage. Nothing is deployed.** This guide shows the system as the decision records define it.
+  Every element carries its status. Every claim links to its source in the repository.
+outcomes:
+  - "Name who can move the vault's funds, and who can stop them."
+  - "Walk any emergency to its first action, and say how long it takes."
+  - "Tell what Clutch reuses from audited code and platforms, what it adds, and why."
+  - "Find the source of any claim on this page."
+map_caption: >-
+  Arrows point from the account that acts to the account it acts on. Colour shows who it is,
+  the border shows whether it is new, and the icon shows its kind. Select a box to see its actors,
+  or play a flow to watch it move.
+panel_default: >-
+  **Start here.** The guided tour explains the system in ten short scenes, on this map.
+  To explore on your own, select a box on the map, or open a tab below.
+current_phase: "0."
+phase_note: >-
+  The roadmap is gated, not dated. A phase starts when the gates of the one before it close.
+legend:
+  domains:
+    gov: "Lido DAO governance"
+    ops: "Multisigs held by people"
+    vault: "The vault's contracts"
+    ext: "External protocols and services"
+  statuses:
+    existing: "Solid border: exists today"
+    instance: "Dashed border: new, or partly new"
+  kinds:
+    body: "Governance body"
+    multisig: "Multisig Safe"
+    contract: "Contract"
+    service: "Off-chain service"
+    external: "External protocol"
+  edges:
+    owns: "Owns or holds a role (solid)"
+    screens: "Screens or watches (dotted)"
+    safety: "Safety action (dash-dot)"
+    signers: "Same signers (round dots)"
+reuse_columns:
+  reused:
+    title: "Reused as it is"
+    text: "Deployed, audited code and existing platforms. Clutch configures or calls them and changes no line of them."
+  instance:
+    title: "New instance of existing code"
+    text: "Fresh deployments of audited contracts, such as new Safes from the Safe singleton. The code is old; the instance and its settings are new."
+  new:
+    title: "New code or configuration"
+    text: "What Lido writes for Clutch. This is where review and audit effort goes."
+tab_intros:
+  actors: "Every account, body and service, grouped as on the map. The roles also show their exact permissions, read from the compiled policy when this page is built."
+  flows: "What happens, step by step. Each flow can play on the map. The badge shows whether the flow is built and tested on a fork, specified, or still open."
+  reuse: "What Clutch takes from audited code and existing platforms, and what it adds. New things carry the review and audit risk."
+  assumptions: "What must stay true for the design to hold, ranked by impact. Each one says what breaks if it is false and what watches it."
+  status: "Where the work stands. These tables are read from the repository when the page is built."
+  glossary: "Plain definitions. A dotted underline anywhere on the page links to a term here."
+  selfcheck: "Eight questions to check what you learned. Nothing is stored or sent."
+quiz_note: "Pick an answer to see whether it is right and why. Nothing leaves this page."
+owed:
+  - "The Emergency Brakes multisig verifies ADR 005 to ADR 011, then EM accepts them."
+  - "[the screening vendor] confirms in writing that it accepts no standing approvals and agrees to be named."
+  - "The mandate text owes eight changes before the Snapshot vote."
+  - "Phase 2 builds the template factories, the swap instances, the funding path, the report generator, the round-trip check and the monitoring detectors."
+  - "No runbook is written yet. Each needs a fork drill before it counts."
+  - "No document describes the deployment sequence step by step yet."
+footer: |-
+  **How this page is made.** A script builds it from the repository: `uv run --with pyyaml python scripts/build_onboarding.py`. The text lives in `docs/onboarding/content/`. The tables of decisions, invariants, runbooks and permissions are read from the repository at build time. CI fails when the page differs from a fresh build, or when a link to a decision, invariant, test or page does not resolve. A change to a decision, a role or a flow updates this page in the same pull request.
+
+  **What it leaves out.** No person's name, no unannounced counterparty, and no financial figure. Budgets and ceilings come from an attested computation that enters the repository with the approved mandate. The page makes no network request.

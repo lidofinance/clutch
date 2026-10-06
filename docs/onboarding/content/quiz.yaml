@@ -1,0 +1,80 @@
+# The optional self-check (OD-37, Q2). `answer` is the index of the right option.
+- question: "Who owns the Asset Safe?"
+  options:
+    - "The Treasury Management Committee"
+    - "The Aragon Agent, for the DAO"
+    - "The operator Safe"
+    - "[the screening vendor]"
+  answer: 1
+  why: "The Aragon Agent is the only owner, at 1 of 1. The committee acts on the vault only through roles on the two modifiers."
+  sources: [ADR-005, INV-001]
+
+- question: "The operator Safe tries to send USDC from the Asset Safe to an outside address. What stops it?"
+  options:
+    - "Nothing, if 4 of 7 signers sign"
+    - "Only [the screening vendor]"
+    - "The operator modifier: the policy has no such transfer, and every receiver is pinned to the Asset Safe"
+    - "The objection window"
+  answer: 2
+  why: "The operator role holds no transfer at all, and every receiver, owner and beneficiary in its permissions is the Asset Safe. The screening guard is a second, independent check."
+  sources: [INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
+
+- question: "A stablecoin depegs. Who acts first, and how fast must they start?"
+  options:
+    - "The DAO, by vote, within days"
+    - "The emergency Safe, at 2 of 7, within six hours"
+    - "The Emergency Brakes multisig, by swapping the assets"
+    - "[the screening vendor], by freezing the vault"
+  answer: 1
+  why: "Financial emergencies go to the committee's signers at the lower threshold. They revoke the operator, exit and send assets to the Agent. Six hours is the mandate's ceiling to start, and drills must prove it."
+  sources: [ADR-005, "lip:part-6"]
+
+- question: "What can the Emergency Brakes multisig do?"
+  options:
+    - "Send the vault's assets to the Aragon Agent"
+    - "Switch off the operator modifier, and pause Easy Track"
+    - "Revoke one permission at a time"
+    - "Unpause Easy Track after an incident"
+  answer: 1
+  why: "Its technical role can only disable the operator modifier. It also holds the Easy Track pause. It cannot touch assets, and only the DAO can unpause Easy Track."
+  sources: [ADR-005, INV-009]
+
+- question: "[the screening vendor] goes offline. What still works?"
+  options:
+    - "Nothing, until the vendor returns"
+    - "Only the operator"
+    - "The emergency Safe, the Emergency Brakes multisig and the DAO; the operator stops"
+    - "Everything: the guard lets transactions through"
+  answer: 2
+  why: "The guard fails closed, so the operator and new motions stop. No guard sits on the emergency path or the DAO path, so recovery does not change."
+  sources: [ADR-010]
+
+- question: "Which of these is new code that Lido writes for Clutch?"
+  options:
+    - "The Safe v1.5.0 singleton"
+    - "The Easy Track template factories"
+    - "The Zodiac Roles mastercopy"
+    - "The Stonks 2.0 factory"
+  answer: 1
+  why: "Easy Track factories are the only new contracts allowed. Safe, the Roles mastercopy and the Stonks factory are audited code that already runs."
+  sources: [ADR-006]
+
+- question: "A cap ratio is above its limit. Does the next operator transaction revert?"
+  options:
+    - "Yes, the modifier checks every cap"
+    - "No: caps are detective. Monitoring publishes the breach and the committee fixes it within two working days"
+    - "Yes, but only for stablecoins"
+    - "Only if the screening vendor sees it"
+  answer: 1
+  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the Emergency Brakes multisig to switch the operator off."
+  sources: [ADR-009, OD-29]
+
+- question: "A colleague says that the operator Safe signs at 3 of 5. Where do you check?"
+  options:
+    - "Ask the committee in a chat"
+    - "The source link on the operator Safe's card: ADR 005 and the parameters register"
+    - "The Zodiac app"
+    - "The forum"
+  answer: 1
+  why: "Every claim on this page links to its source. The operator Safe is 4 of 7 (ADR 005). The Emergency Brakes multisig is the one at 3 of 5."
+  sources: [ADR-005, "doc:docs/registers/parameters.md#parameters"]

@@ -1,0 +1,920 @@
+# Actor cards, grouped under the map node in `node`. Status: existing, instance, new or mixed.
+# Label (optional): built, specified, open, existing or planned. `role` attaches the role's exact
+# permissions from the compiled artifact. Addresses must already be recorded in the repository.
+
+# --- Committee -------------------------------------------------------------------------------
+- id: committee
+  node: committee
+  name: Treasury Management Committee and its Safe
+  status: existing
+  label: existing
+  what: "The people who run the [[mandate]] day to day. The committee's own Safe stays as it is. Its seven signers also sign the two new Safes: the operator Safe and the emergency Safe."
+  controlled_by: "Seven signers. The committee's Safe runs Safe v1.3.0 at 4 of 7."
+  can:
+    - "Operate the vault through the operator Safe, at 4 of 7."
+    - "Act in an emergency through the emergency Safe, at 2 of 7."
+    - "Manage the Stonks [[price router]]: add the vault's tokens, set a price age, turn a token off and re-sync a replaced feed."
+    - "Configure the vault's rules in [the screening vendor]'s monitoring service."
+    - "Review and publish the monthly report, and fix a [[cap]] breach within two working days."
+    - "Accept decision records as the permanent acceptor, after EM's interim period."
+  cannot:
+    - "Hold the operator role on its own Safe. A dedicated operator Safe holds it."
+    - "Choose a price feed. Chainlink's Feed Registry supplies every feed."
+    - "Accept a record that constrains the operator without a verification by the Emergency Brakes multisig."
+    - "Give an exit that is independent of itself. The emergency Safe has the same people."
+  numbers: ["Safe v1.3.0", "4 of 7", "rebalancing window: 2 working days"]
+  address: "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647"
+  sources: [ADR-005, ADR-007, ADR-009, ADR-002, "doc:docs/research/chain-reads-2026-09-30.md#committees"]
+
+# --- Lido DAO ----------------------------------------------------------------------------------
+- id: ldo-holders
+  node: dao
+  name: LDO holders
+  status: existing
+  what: "The owners of Lido DAO governance. They vote on every change that only the DAO may make, and they can stop any Easy Track [[motion]]."
+  controlled_by: "Token holders."
+  can:
+    - "Vote in Aragon Voting: the [[enabling vote]], a policy replacement, a role membership change, a first-loss burn, a registry limit."
+    - "Object to any Easy Track motion in its [[objection window]]. An objection of 0.5% of LDO stops it."
+    - "Approve the mandate in a [[Snapshot vote]] before the on-chain vote."
+  cannot:
+    - "Act on the vault directly. Every DAO action goes through [[Dual Governance]] to the Aragon Agent."
+    - "Shorten a motion's objection window."
+  numbers: ["objection threshold: 0.5% of LDO", "objection window: 72 h"]
+  sources: [ADR-006, ADR-005, "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap"]
+
+- id: aragon-voting
+  node: dao
+  name: Aragon Voting
+  status: existing
+  label: existing
+  what: "The DAO's on-chain voting contract. A passed vote goes through Dual Governance before the Aragon Agent executes it."
+  controlled_by: "LDO holders."
+  can:
+    - "Act as the fixed admin of every swap instance that the Stonks factory makes. The admin sets the manager."
+    - "Administer the shared Stonks price router: appoint its manager, add or turn off a token, set a price age, re-sync a feed."
+    - "Manage the shared payment permission of the Easy Track executor, and rewrite it as one unit."
+    - "Administer the shared stablecoin token list."
+  cannot:
+    - "Choose a router feed."
+    - "Reach the Asset Safe except through Dual Governance and the Aragon Agent."
+  address: "0x2e59A20f205bB85a89C53f1936454680651E618e"
+  sources: [ADR-007, ADR-008, "doc:docs/research/stonks-instances-2026-10-02.md#what-the-factory-fixes", "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
+
+- id: dual-governance
+  node: dao
+  name: Dual Governance and its admin executor
+  status: existing
+  label: existing
+  what: "The layer between a DAO vote and the Aragon Agent. It adds a delay, so every DAO action takes days."
+  controlled_by: "The results of Aragon Voting, through the Dual Governance timelock."
+  can:
+    - "Run scripts as the Aragon Agent. Its admin executor is the only holder of the Agent's `RUN_SCRIPT_ROLE` and `EXECUTE_ROLE`."
+  cannot:
+    - "Skip its own delay."
+  address: "0x23E0B465633FF5178808F4A75186E2F2F9537021"
+  sources: [ADR-005, "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
+
+- id: aragon-agent
+  node: dao
+  name: Aragon Agent
+  status: existing
+  label: existing
+  what: "The DAO treasury and its final authority. It is the only owner of the Asset Safe, and every recovered asset comes back to it."
+  controlled_by: "The Dual Governance admin executor."
+  can:
+    - "Do anything on the Asset Safe as its only owner: replace the policy, change a role's members, turn a [[module]] on or off, move any asset."
+    - "Have the Asset Safe burn the [[first-loss shares]], by vote."
+    - "Grant the operator [[delegatecall]]. Only a DAO vote can do this (OD-36)."
+    - "Receive recovered assets. It is the fixed recovery address of every swap instance and the receiver of the recovery instances."
+    - "Pay funding through Aragon Finance, and administer both funding registries."
+  cannot:
+    - "Approve an Asset Safe transaction with a contract signature. It uses only `approveHash`, or it sends the transaction itself."
+    - "Be reached by an Easy Track motion. Easy Track has no authority over it."
+  numbers: ["owns the Asset Safe at 1 of 1"]
+  address: "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
+  sources: [ADR-005, ADR-006, ADR-007, ADR-008, INV-001]
+
+# --- Funding path ------------------------------------------------------------------------------
+- id: finance
+  node: funding
+  name: Aragon Finance and the shared payment permission
+  status: existing
+  label: existing
+  what: "The DAO's payment app. Easy Track pays from the treasury through it. One shared permission sets which tokens the Easy Track executor may pay, with a ceiling per payment for each token."
+  controlled_by: "Aragon Voting manages the permission. The Easy Track executor holds it."
+  can:
+    - "Pay out of the Aragon Agent. The permission binds the token and the amount of each payment."
+    - "Pay USDS after a DAO vote rewrites the permission. The vote keeps every other entry as it is."
+  cannot:
+    - "Bind the receiver. The funding registry and the factory do that."
+    - "Cap a whole motion. A ceiling applies to one payment, so one motion can carry several payments."
+  addresses:
+    - {name: "Aragon Finance", address: "0xB9E5CBB9CA5b0d659238807E84D0176930753d86"}
+    - {name: "Aragon ACL", address: "0x9895F0F17cc1d1891b6f18ee0b483B6f221b37Bb"}
+  sources: [ADR-008, "lip:part-5", "doc:docs/research/chain-reads-2026-09-30.md#funding-path"]
+
+- id: token-list
+  node: funding
+  name: Shared stablecoin token list
+  status: existing
+  label: existing
+  what: "The list of stablecoins that Easy Track top-ups may pay. Other Lido setups use the same list."
+  controlled_by: "Aragon Voting."
+  can:
+    - "Allow DAI, USDT, USDC and sUSDS today. The DAO vote adds USDS."
+  cannot:
+    - "Keep the vault apart from other setups. A change made for another setup also changes the vault's funding assets."
+  address: "0x4AC40c34f8992bb1e5E856A448792158022551ca"
+  sources: [ADR-008, "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries"]
+
+- id: registries
+  node: funding
+  name: Funding registries (two)
+  status: instance
+  label: specified
+  what: "Two new registries from Easy Track's standard builder, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a monthly limit."
+  controlled_by: "The Aragon Agent is the admin. The Easy Track executor spends the limit."
+  can:
+    - "Pay only the Asset Safe."
+    - "Check the remaining limit when a motion starts, and again at enactment."
+  cannot:
+    - "Take a new recipient from the executor. Only the DAO changes a recipient, a limit or a period."
+    - "Enforce the mandate's rule that a Snapshot vote follows an objection."
+    - "Stop two full monthly limits within about 72 hours around a month boundary."
+  numbers: ["period: one calendar month", "limit: one TM Floor Value each, from the attested computation"]
+  address: "To be deployed"
+  sources: [ADR-008, INV-017, "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts"]
+
+- id: topup-factories
+  node: funding
+  name: Top-up factories (two)
+  status: instance
+  label: specified
+  what: "Two new instances of Easy Track's top-up factory, one for stablecoins and one for stETH. They create the [[top-up]] motions that fund the vault."
+  controlled_by: "The operator Safe is the [[trusted caller]] of both. The DAO registers them by vote."
+  can:
+    - "Create a top-up motion that pays the Asset Safe, with several payments in one motion."
+  cannot:
+    - "Pay any other recipient."
+    - "Carry a report identifier. The payment reference is fixed, so the forum post carries the identifier."
+  numbers: ["top-ups expected on days 1–10 of a month", "objection window: 72 h"]
+  address: "To be deployed"
+  sources: [ADR-008, "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries"]
+
+- id: growth-committee
+  node: funding
+  name: Growth Committee Safe
+  status: existing
+  label: existing
+  what: "The Safe that holds the DAO's first-loss shares in earnETH and earnUSD, from the March 2026 Earn allocation."
+  controlled_by: "Nine owners, at 5 of 9. Safe v1.4.1, with no modules and no guard."
+  can:
+    - "Transfer the first-loss shares to the Asset Safe once, after the enabling vote. The [[seed]] motion follows."
+  cannot:
+    - "Decide a burn after the move. A burn is then a DAO vote."
+  numbers: ["Safe v1.4.1", "5 of 9"]
+  address: "0xf6F0732c1e9971497342C295141566E6F1A31e96"
+  sources: [ADR-008, "runbook:Move the legacy Earn shares", "doc:docs/research/legacy-investments-2026-10-05.md#the-earn-positions"]
+
+# --- Easy Track ---------------------------------------------------------------------------------
+- id: easy-track
+  node: easytrack
+  name: Easy Track
+  status: existing
+  label: existing
+  what: "Lido's optimistic governance. A motion enacts after its window unless LDO holders object. Clutch adds factories to it and changes none of its settings."
+  controlled_by: "The DAO sets its settings and its factory list. The Emergency Brakes multisig can pause it. Only the DAO can unpause it."
+  can:
+    - "Run a motion from a registered factory, with the global objection window."
+    - "Rebuild the motion's script at enactment and require the hash stored at creation."
+    - "Let anyone enact a motion when its window ends without an objection."
+  cannot:
+    - "Shorten a motion's window. The global window can never go below 48 hours."
+    - "Reach the Aragon Agent."
+  numbers: ["window: 72 h", "objection: 0.5% of LDO", "window floor: 48 h"]
+  address: "0xF0211b7660680B49De1A7E9f25C65660F0a13Fea"
+  sources: [ADR-006, INV-005, "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
+
+- id: evmscript-executor
+  node: easytrack
+  name: Easy Track script executor
+  status: existing
+  label: existing
+  what: "The contract that runs an enacted motion's script. In Clutch it holds the governance role on the operator modifier."
+  controlled_by: "Easy Track. Only an enacted motion makes it act."
+  can:
+    - "Act as the governance role: write the operator's permissions and budgets, inside the limits that the policy sets."
+    - "Make payments through Aragon Finance, under the shared payment permission."
+    - "Spend the funding registries' limits."
+  cannot:
+    - "Run scripts as the Aragon Agent. It holds neither `RUN_SCRIPT_ROLE` nor `EXECUTE_ROLE`."
+    - "Add a recipient to the vault's registries, or change their limit or period."
+  address: "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977"
+  sources: [ADR-005, ADR-006, ADR-008, "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
+
+- id: template-factories
+  node: easytrack
+  name: Template factories (six)
+  status: new
+  label: specified
+  what: "The only new contracts that Clutch may add. Each factory owns one fixed [[template]]. A motion gives it typed values, such as a target, an asset and a budget key, and the factory builds the permission."
+  controlled_by: "The operator Safe is the trusted caller, fixed at deployment. The DAO registers each factory by vote."
+  can:
+    - "Onboard a protocol without a DAO vote: wrap and unwrap, a tokenized vault, a queue vault, a spender approval, a swap instance or a Morpho Blue market."
+    - "Onboard Lido Lend in one motion through the Morpho Blue template, once its market exists."
+  cannot:
+    - "Accept a condition tree from a motion."
+    - "Remove a permission. Every removal is the emergency Safe's revoke (OD-09)."
+    - "Add a recovery swap pair. The swap-instance template is for rebalancing only."
+  numbers: ["6 templates", "external audit in phase 3"]
+  sources: [ADR-006, ADR-011, OD-09, "lip:part-4"]
+
+- id: budget-factory
+  node: easytrack
+  name: Budget factory
+  status: new
+  label: specified
+  what: "A new Easy Track factory that sets an operator [[budget key]]. Each key has its own ceilings."
+  controlled_by: "The operator Safe is the trusted caller. The DAO registers it by vote."
+  can:
+    - "Set the balance, the maximum and the refill of one of the operator's keys, below that key's ceilings."
+  cannot:
+    - "Set a refill period below 30 days."
+    - "Touch a key that is not the operator's."
+    - "Use ceilings before the attested figures enter the repository."
+  numbers: ["refill period: 30 days or more", "retune: every 2 weeks", "a second motion on one key within 14 days alerts"]
+  sources: [ADR-009, INV-012, "lip:part-7"]
+
+# --- Operator Safe ------------------------------------------------------------------------------
+- id: operator-safe
+  node: operator-safe
+  name: Operator Safe
+  status: instance
+  label: specified
+  what: "A new Safe with the committee's signers. It holds no assets and has no modules. Every transaction that it makes needs [the screening vendor]'s approval first."
+  controlled_by: "The committee's seven signers, at 4 of 7. Safe v1.5.0."
+  can:
+    - "Hold the operator role: change positions in approved protocols, within budgets."
+    - "Create motions as the trusted caller of every Clutch factory, and cancel its own motions."
+    - "Manage the eight [[rebalancing instance|rebalancing instances]]: place orders, and recover unsold tokens to the Aragon Agent."
+    - "Remove the screening guard, but only through a fixed 10-day timelock."
+  cannot:
+    - "Run a transaction without [the screening vendor]'s single-use approval. The guard [[fail closed|fails closed]]."
+    - "Hold assets or modules."
+    - "Be replaced without a DAO vote. A new operator Safe also needs every factory deployed and registered again."
+  numbers: ["Safe v1.5.0", "4 of 7", "guard removal: 10-day timelock"]
+  address: "To be deployed"
+  sources: [ADR-005, ADR-010, ADR-006, ADR-007, INV-010]
+
+# --- Emergency Safe -----------------------------------------------------------------------------
+- id: emergency-safe
+  node: emergency-safe
+  name: Emergency Safe
+  status: instance
+  label: specified
+  what: "A new Safe with the same seven signers as the committee, at a lower threshold, so that it can act in minutes. It holds no assets, and no guard screens it."
+  controlled_by: "The committee's signers, at 2 of 7. Safe v1.5.0."
+  can:
+    - "Hold the emergency role: revoke the operator, zero approvals, exit positions and send assets to the Aragon Agent."
+    - "Make every removal of an operator permission. A forum post follows."
+    - "Manage the ten [[recovery instance|recovery instances]]: place orders, and recover tokens to the Aragon Agent."
+  cannot:
+    - "Add a permission or give a non-zero approval."
+    - "Enter a protocol, except to stake ETH, or borrow."
+    - "Redeem the first-loss shares. A written rule forbids it; the chain cannot enforce it."
+    - "Disable a module, or change where recovered assets go."
+    - "Fail apart from the operator. The same people sign both Safes."
+  numbers: ["Safe v1.5.0", "2 of 7", "initiate within 6 h"]
+  address: "To be deployed"
+  sources: [ADR-005, ADR-007, ADR-008, "lip:part-6", "doc:docs/registers/parameters.md#parameters"]
+
+# --- Emergency Brakes ---------------------------------------------------------------------------
+- id: emergency-brakes
+  node: brakes
+  name: Emergency Brakes multisig
+  status: existing
+  label: existing
+  what: "An existing Lido multisig with technical members, outside the committee. It is the independent stop in Clutch, and it checks the committee's decisions."
+  controlled_by: "Five owners, at 3 of 5. Safe v1.3.0. A chain read found no owner address that it shares with the committee's Safe."
+  can:
+    - "Hold the technical role: disable the operator modifier for a defect in the permission layer, or on the fixed cap-breach trigger."
+    - "Pause Easy Track. This stops every DAO motion, not only Clutch's."
+    - "Verify every decision record that constrains the operator, before it is accepted."
+    - "View the Lido Zodiac workspace."
+  cannot:
+    - "Unpause Easy Track. Only the DAO can."
+    - "Disable the safety modifier, or enable the operator modifier again."
+    - "Touch assets or permissions, or send assets anywhere."
+  numbers: ["Safe v1.3.0", "3 of 5"]
+  address: "0x73b047fe6337183A454c5217241D780a932777bD"
+  sources: [ADR-005, ADR-009, ADR-002, "doc:docs/registers/verification-requests.md#the-duties-that-the-records-give-the-multisig", "doc:docs/research/chain-reads-2026-09-30.md#committees"]
+
+# --- Screening ----------------------------------------------------------------------------------
+- id: vendor-guard
+  node: screening
+  name: "[the screening vendor]'s transaction guard"
+  status: instance
+  label: specified
+  what: "A [[guard]] contract on the operator Safe. The Safe consults it before every transaction. It refuses a transaction that the vendor has not approved, once and exactly."
+  controlled_by: "The vendor's key approves transactions. Only the operator Safe's owners can remove the guard, through a 10-day timelock."
+  can:
+    - "Check every operator Safe transaction: each operator action, each order on a rebalancing instance and each new motion."
+    - "Fail closed: with no approval, the transaction reverts."
+  cannot:
+    - "Touch the Asset Safe, the emergency Safe, the Emergency Brakes multisig or the DAO path. Recovery never waits for the vendor."
+    - "Act as a module guard. Safe v1.5.0 refuses it as one."
+    - "Hold a standing approval under the agreement, except its two built-in timelock approvals. The code allows them, so monitoring alerts on one, and the vendor's written acceptance is still owed."
+  numbers: ["removal timelock: 10 days", "bypass timelock: 10 days", "bypass off before the vote"]
+  address: "To be deployed"
+  sources: [ADR-010, INV-010, "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
+
+- id: vendor-service
+  node: screening
+  name: "[the screening vendor]'s approval service"
+  status: existing
+  label: existing
+  what: "The vendor's off-chain service. It reviews each operator Safe transaction and approves it on chain, once."
+  controlled_by: "[the screening vendor]. The committee configures the vault's rules in it, with support from `@lidofinance/defi-tech`."
+  can:
+    - "Approve or refuse each exact transaction on its own, with no Lido co-signature."
+  cannot:
+    - "Remove or relax the guard."
+    - "Sit on the recovery path."
+  sources: [ADR-010, ADR-009]
+
+# --- Operator modifier --------------------------------------------------------------------------
+- id: operator-modifier
+  node: operator-modifier
+  name: Operator modifier
+  status: instance
+  label: built
+  what: "A Zodiac [[Roles modifier]], enabled as a module on the Asset Safe. It checks each call of the operator and governance roles against the policy, and runs only what the policy allows, as the Asset Safe."
+  controlled_by: "Its owner, the Asset Safe, so in the end the DAO."
+  can:
+    - "Carry the operator role, the governance role and the operator's budget keys."
+    - "Refuse any call that the policy does not list. It is [[default-deny]]."
+  cannot:
+    - "Be replaced without a DAO vote. The safety policy names its address, so the vote also rewrites the safety policy."
+  numbers: ["budget period: 30 days"]
+  address: "To be deployed"
+  sources: [ADR-005, "lip:part-1", "test:test_D3_operator_lifecycle", "runbook:Replace the operator modifier"]
+
+- id: roles-mastercopy
+  node: operator-modifier
+  name: Zodiac Roles mastercopy and module proxy factory
+  status: existing
+  label: existing
+  what: "The audited Zodiac code behind both modifiers. Each modifier is a small proxy of this mastercopy, made by the Zodiac module proxy factory."
+  controlled_by: "Nobody. The mastercopy is locked."
+  can:
+    - "Serve as the code of both modifiers, through EIP-1167 minimal proxies."
+  cannot:
+    - "Work behind a Safe-style proxy. Such a proxy bricks the modifier, so only the Zodiac factory deploys it."
+  numbers: ["locked: owner 0x…01"]
+  addresses:
+    - {name: "Roles mastercopy", address: "0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5"}
+    - {name: "Module proxy factory", address: "0x000000000000aDdB49795b0f9bA5BC298cDda236"}
+  sources: [ADR-005, "doc:docs/research/chain-reads-2026-09-30.md#safe-and-zodiac"]
+
+- id: role-operator
+  node: operator-modifier
+  name: The operator role
+  status: new
+  label: built
+  role: operator
+  what: "The permissions of the operator Safe on the operator modifier. Every receiver, owner and beneficiary is pinned to the Asset Safe, so the operator can change positions but cannot move assets out."
+  controlled_by: "Held by the operator Safe. The DAO writes it at the enabling vote. Only motions can widen it later."
+  can:
+    - "Stake ETH, wrap and unwrap stETH and WETH, and use Lido's withdrawal queue with the Asset Safe as owner."
+    - "Deposit into and redeem from earnETH, earnUSD and sUSDS. Claims pay the Asset Safe."
+    - "Convert DAI to USDS and back through Sky's converter, paid to the Asset Safe."
+    - "Approve a protocol spender. The [[approval]] spends that spender's budget key, or stays under a fixed ceiling."
+  cannot:
+    - "Transfer a token. The transfer to a rebalancing instance is specified but not yet in the policy."
+    - "Borrow, or use a venue outside the launch scope."
+    - "Administer a modifier or the Safe, or change its own permissions."
+    - "Use delegatecall."
+    - "Redeem the first-loss shares. Only a written rule forbids it: `redeem` is open on both Earn redeem queues."
+  numbers: ["one role key: `operator`"]
+  sources: [ADR-005, ADR-009, INV-003, INV-008, INV-018, "test:test_D3_operator_cannot_route_around_avatar"]
+
+- id: role-governance
+  node: operator-modifier
+  name: The governance role
+  status: new
+  label: built
+  role: governance
+  what: "The permissions that an enacted Easy Track motion uses on the operator modifier. A motion can widen what the operator may do, but only in bounded ways."
+  controlled_by: "Held by the Easy Track script executor, so only an enacted motion uses it."
+  can:
+    - "Write operator permissions for a target that a motion names, under the `operator` key only."
+    - "Set the operator's budgets, with a refill period of at least 30 days."
+    - "Revoke an operator target or function. No factory plans to use this."
+  cannot:
+    - "Grant or remove a role, or touch the emergency or technical role."
+    - "Make the Asset Safe or any of its modules an operator target, the safety modifier included (OD-38). The compiler refuses a policy without this guard."
+    - "Grant the operator delegatecall (OD-36)."
+    - "Submit its own condition tree. The factory builds the tree from a fixed template."
+  numbers: ["refill period: 30 days or more"]
+  sources: [ADR-006, ADR-005, INV-004, OD-36, OD-38, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe"]
+
+- id: budget-keys
+  node: operator-modifier
+  name: Budget keys
+  status: new
+  label: built
+  what: "Refillable quotas on the operator modifier, counted in token units. An approval to a protocol spends the key of that spender. An approval of zero is always free."
+  controlled_by: "The DAO sets them first. The budget factory retunes them by motion."
+  can:
+    - "Refill each period up to a maximum. Each successful call draws them down."
+    - "Stay apart: the key of one asset never pays for another asset."
+  cannot:
+    - "See value. A key counts token units, so it drifts with price between retunes."
+  numbers: ["amounts in the repository: dry-run stand-ins", "production figures: from the attested computation, after the mandate is approved"]
+  sources: [ADR-009, INV-011, "test:test_D5_budget_enforcement_and_refill", "test:test_budget_keys_of_different_assets_are_independent"]
+
+# --- Safety modifier ----------------------------------------------------------------------------
+- id: safety-modifier
+  node: safety-modifier
+  name: Safety modifier
+  status: instance
+  label: built
+  what: "A second Roles modifier on the Asset Safe, for the emergency and technical roles. No guard screens it, so recovery never waits for the vendor."
+  controlled_by: "Its owner, the Asset Safe, so in the end the DAO."
+  can:
+    - "Carry the emergency role and the technical role. It has no budget keys."
+    - "Keep working after the technical role disables the operator modifier."
+  cannot:
+    - "Be disabled by the technical role. If it has a defect, the fix is a DAO vote."
+  address: "To be deployed"
+  sources: [ADR-005, INV-009, "test:test_D4_module_disabling_is_technical_only_and_pinned"]
+
+- id: role-emergency
+  node: safety-modifier
+  name: The emergency role
+  status: new
+  label: built
+  role: emergency
+  what: "The permissions of the emergency Safe on the safety modifier. They only reduce exposure. Every asset that it moves goes to the Aragon Agent."
+  controlled_by: "Held by the emergency Safe, at 2 of 7."
+  can:
+    - "Revoke any operator target or function. One revoke reaches every operator permission."
+    - "Set any operator spender's approval to zero."
+    - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, redeem sUSDS, claim from the withdrawal queue."
+    - "Unwrap wstETH and WETH, and stake ETH, so that recovery can sell them."
+    - "Transfer the vault's tokens and Earn shares, but only to the Aragon Agent."
+  cannot:
+    - "Add a permission or give a non-zero approval."
+    - "Send an asset anywhere except the Aragon Agent. The transfer to a recovery instance is specified but not built."
+    - "Disable a module."
+    - "Redeem the first-loss shares. Only a written rule forbids it: `redeem` is open."
+  sources: [ADR-005, ADR-008, INV-002, "test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval", "test:test_emergency_can_durably_stop_operator_reapproval"]
+
+- id: role-technical
+  node: safety-modifier
+  name: The technical role
+  status: new
+  label: built
+  role: technical
+  what: "One permission for the Emergency Brakes multisig: switch off the operator modifier."
+  controlled_by: "Held by the Emergency Brakes multisig, at 3 of 5."
+  can:
+    - "Call `disableModule` on the Asset Safe, with the module pinned to the operator modifier. The operator and governance roles stop at once."
+  cannot:
+    - "Disable the safety modifier or any later module."
+    - "Do anything else."
+  sources: [ADR-005, ADR-009, INV-009, "test:test_D4_module_disabling_is_technical_only_and_pinned"]
+
+# --- Policy pipeline and repository -------------------------------------------------------------
+- id: constellation
+  node: policy
+  name: The constellation
+  status: mixed
+  label: built
+  what: "The permission policy, written as a Zodiac [[constellation]] in TypeScript under `policy/constellation/`. It names the Safes, the modifiers, the roles, the permissions and the budget keys."
+  controlled_by: "The repository. A change is a reviewed pull request. `@lidofinance/defi-tech` owns it."
+  can:
+    - "State every permission of the four roles in one place."
+    - "Go to the Lido Zodiac workspace, so that the UI can show it."
+  cannot:
+    - "Change the chain by itself. Only a vote or a motion applies a policy."
+  numbers: ["copied from the policy provider's constellation at `02ea37d`", "copied files keep LGPL-3.0-only (OD-34)"]
+  sources: [ADR-004, OD-33, OD-34, "doc:policy/constellation/PROVENANCE.md#changes-from-upstream"]
+
+- id: compiler
+  node: policy
+  name: Clutch's policy compiler
+  status: new
+  label: built
+  what: "Clutch's own TypeScript program on the Zodiac roles SDK. It turns the constellation into the [[artifact]], offline, with the same result every time."
+  controlled_by: "`@lidofinance/defi-tech`."
+  can:
+    - "Compile the modifier calls in order, the expected condition trees and the budget keys."
+    - "Run offline from a frozen lockfile with pinned versions."
+  cannot:
+    - "Compile an entry that only the hosted app can compile, such as an action or a DeFi Kit preset. It refuses one."
+  sources: [ADR-004, "doc:policy/constellation/PROVENANCE.md#build"]
+
+- id: artifact
+  node: policy
+  name: The policy artifact
+  status: new
+  label: built
+  what: "The committed JSON file that reviewers approve. It holds every modifier call in order, the expected condition tree for each role, target and function, and the budget keys."
+  controlled_by: "Reviewers approve it in each policy pull request. CI checks that it equals a fresh compile."
+  can:
+    - "Feed the fork tests now, and later the enabling vote, the Easy Track templates and the [[drift detector]]."
+  cannot:
+    - "Describe mainnet yet. The committed artifact is for the fork tests: stand-in holders and dry-run amounts."
+  numbers: ["format `clutch.policy-artifact/1`"]
+  sources: [ADR-004, INV-016, "doc:test/README.md#the-policy-pipeline", "doc:.github/workflows/policy.yml"]
+
+- id: round-trip
+  node: policy
+  name: Round-trip check
+  status: new
+  label: specified
+  what: "A planned check that reads the applied permissions back from the modifier's events on a fork, and compares them with the artifact. The chain then checks the compiler."
+  controlled_by: "`@lidofinance/defi-tech`, in phase 2."
+  can:
+    - "Catch a compiler or SDK bug before it reaches the chain."
+  cannot:
+    - "Run yet. A decode of real modifier events must be checked first."
+  sources: [ADR-004, INV-016, "doc:ROADMAP.md#roadmap"]
+
+- id: zodiac-app
+  node: policy
+  name: Zodiac app and the Lido workspace
+  status: mixed
+  label: planned
+  what: "The policy provider's hosted app. The team pushes the constellation to a Lido workspace there. The app shows the account graph, the policy, the difference from the chain and the transactions that a change needs."
+  controlled_by: "The app: the policy provider. The workspace and its key: `@lidofinance/defi-tech` (OD-35). The committee and the Emergency Brakes multisig can view it."
+  can:
+    - "Show the system and its drift in a UI."
+    - "Take a push from a team member, from the merged `main`, with the key in a local file that git ignores."
+  cannot:
+    - "Change the policy. A change made in the UI is drift."
+    - "Give signers, a vote or a motion a transaction, unless Clutch's compiler makes the same calls from the same commit."
+    - "Set a Safe's version, guard or fallback handler."
+    - "Be used by CI or by an agent. Neither holds the key."
+  sources: [ADR-004, OD-33, OD-35, "doc:docs/research/zodiac-constellation-2026-10-06.md#2-what-runs-locally-and-what-only-the-hosted-app-runs"]
+
+- id: repository
+  node: policy
+  name: The Clutch repository
+  status: new
+  label: built
+  what: "`lidofinance/clutch`, the single record of the system. It holds the decisions, specifications, policy, tests, runbooks and this guide."
+  controlled_by: "`@lidofinance/defi-tech` owns it. `@lidofinance/review-gh-workflows` owns `.github/`."
+  can:
+    - "Merge a change only through a pull request, with a code-owner review and an approval from someone other than its creator."
+    - "Run CI on every pull request: the docs bundle, the policy artifact and this guide."
+  cannot:
+    - "Hold a key, a seed or an RPC credential."
+    - "Go public before deployment. Nothing enters it that could not be published at that point."
+  sources: [ADR-001, ADR-002, ADR-003, "doc:SECURITY.md#repository-rules"]
+
+- id: em
+  node: policy
+  name: EM, the interim acceptor
+  status: existing
+  what: "The CTO role. EM decides the open items and accepts decision records until the committee takes over as the permanent acceptor."
+  controlled_by: "A role, not an account."
+  can:
+    - "Accept a decision record. An acceptance is an engineering decision. It authorises nothing on chain."
+    - "Close an [[open decision]]."
+  cannot:
+    - "Accept a record that constrains the operator without the Emergency Brakes multisig's verification."
+  sources: [ADR-002, "doc:docs/registers/open-decisions.md#open-decisions"]
+
+- id: ai-agents
+  node: policy
+  name: AI agents
+  status: new
+  what: "Coding agents draft most text, code and tests, and open pull requests. Humans decide, review and merge."
+  controlled_by: "Humans: EM and the code-owner reviewers."
+  can:
+    - "Branch, draft, write code and tests, and open pull requests."
+    - "Record a human's own acceptance, only on that human's explicit written instruction, marked as recorded (OD-31)."
+  cannot:
+    - "Merge, deploy, or touch `deployed/`."
+    - "Mark a page reviewed, or record a body's verification."
+    - "Set a parameter: budgets, ceilings, instance settings, funding limits, allowlists or membership."
+    - "Use the Zodiac key."
+  sources: [ADR-003, OD-31, "doc:AGENTS.md#out-of-scope-for-agents"]
+
+# --- Asset Safe ---------------------------------------------------------------------------------
+- id: asset-safe
+  node: asset-safe
+  name: Asset Safe
+  status: instance
+  label: built
+  what: "The vault. A new Safe that holds every asset. The Aragon Agent is its only owner. The roles act on it only through its two modifiers."
+  controlled_by: "The Aragon Agent, at 1 of 1. Safe v1.5.0."
+  can:
+    - "Own both modifiers, and run their permitted calls as itself: it is their [[avatar]]."
+    - "Own a withdrawal-queue request."
+    - "Receive the first-loss shares by plain transfer."
+  cannot:
+    - "Take an ERC-721 or ERC-1155 safe transfer, or sign by EIP-1271. It has no [[fallback handler]], on purpose."
+    - "Have a guard or a module guard. Recovery never passes through vendor code."
+    - "Change its Safe version without a DAO vote."
+  numbers: ["Safe v1.5.0", "1 of 1", "no guard", "no fallback handler"]
+  address: "To be deployed"
+  sources: [ADR-005, INV-001, "test:test_asset_safe_shape"]
+
+- id: safe-contracts
+  node: asset-safe
+  name: Safe v1.5.0 contracts
+  status: existing
+  label: existing
+  what: "The audited Safe code that all three new Safes run, and Safe's batching contract."
+  controlled_by: "Safe. The deployed code cannot change. A Safe changes its version only by its owners' action."
+  can:
+    - "Give each new Safe the same audited code: the singleton, through Safe's proxy factory."
+    - "Batch the operator Safe's calls through MultiSendCallOnly, the only delegatecall target that the vendor is asked to allow."
+  cannot:
+    - "Show a long record. v1.5.0 became the version of new Safes in Safe{Wallet} on 2026-09-22."
+  numbers: ["audited by Certora, with formal verification, and by Ackee"]
+  addresses:
+    - {name: "Safe v1.5.0 singleton", address: "0xFf51A5898e281Db6DfC7855790607438dF2ca44b"}
+    - {name: "Safe proxy factory", address: "0x14F2982D601c9458F93bd70B218933A6f8165e7b"}
+    - {name: "MultiSendCallOnly v1.5.0", address: "0xA83c336B20401Af773B6219BA5027174338D1836"}
+  sources: [ADR-005, ADR-010, INV-019, "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
+
+# --- Approved protocols -------------------------------------------------------------------------
+- id: lido-staking
+  node: protocols
+  name: stETH, wstETH and WETH
+  status: existing
+  label: existing
+  what: "Lido's staked ether and its wrapped form, and wrapped ether. The vault stakes ETH for stETH, wraps stETH into wstETH, and wraps ETH into WETH."
+  controlled_by: "Their own governance."
+  can:
+    - "Mint stETH to the Asset Safe on `submit`, with the referral pinned to zero."
+    - "Wrap and unwrap: stETH and wstETH, ETH and WETH."
+  cannot:
+    - "Price wstETH or WETH on the swap router. The vault converts them to stETH before a sale."
+  addresses:
+    - {name: "stETH", address: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"}
+    - {name: "wstETH", address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"}
+    - {name: "WETH", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"}
+  sources: [ADR-007, ADR-011, "test:test_D4_emergency_weth_route_to_agent"]
+
+- id: withdrawal-queue
+  node: protocols
+  name: Lido withdrawal queue
+  status: existing
+  label: existing
+  what: "Lido's contract that turns stETH back into ETH. The vault uses it to unstake, and to buy WETH."
+  controlled_by: "Its proxy admin is the Aragon Agent, so only a DAO vote upgrades it."
+  can:
+    - "Take a request from the operator, with the Asset Safe as owner, and pay the Asset Safe on claim."
+    - "Let the emergency role claim a finalized request."
+  cannot:
+    - "Cancel a request. A request takes days to finalize."
+  numbers: ["stETH approval: a fixed ceiling, no budget key (OD-27)"]
+  address: "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
+  sources: [ADR-007, OD-27, "test:test_D3_withdrawal_queue_round_trip_buys_weth", "doc:docs/research/recovery-and-withdrawal-queue-2026-10-05.md#the-withdrawal-queue"]
+
+- id: lido-earn
+  node: protocols
+  name: "Lido Earn: earnETH and earnUSD"
+  status: existing
+  label: existing
+  what: "Lido's Earn vaults. The vault deposits wstETH into earnETH and USDC into earnUSD through queues, and redeems through queues."
+  controlled_by: "Each Earn vault's administrators and curators."
+  can:
+    - "Take deposits and redemptions from the operator. Claims pay the Asset Safe."
+    - "Let the emergency role cancel, claim and redeem, and send shares to the Aragon Agent."
+  cannot:
+    - "Tell the DAO's first-loss shares from other shares. The no-redeem rule is written, not enforced."
+    - "Promise that shares stay transferable. Their administrators can add a pause, whitelist, lockup or blacklist."
+  addresses:
+    - {name: "earnETH wstETH deposit queue", address: "0xe39EED9A454C4918F8d0682062777cB251cd513F"}
+    - {name: "earnETH redeem queue", address: "0x095bFAca9f1c6F2B063Cd67C6d6bfcd0c3aaB7b4"}
+    - {name: "earnETH share", address: "0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4"}
+    - {name: "earnUSD USDC deposit queue", address: "0xC75E7E73B25fEa8bB23EB55CC48BA55067b5be76"}
+    - {name: "earnUSD redeem queue", address: "0x9e36A74FE278906a76e7615263e46a83fC40c47F"}
+    - {name: "earnUSD share", address: "0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981"}
+  sources: [ADR-011, ADR-008, "test:test_D3b_earn_deposit_policy_layer", "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move"]
+
+- id: sky
+  node: protocols
+  name: "Sky: sUSDS and the DAI–USDS converter"
+  status: existing
+  label: existing
+  what: "Sky's savings token, [[sUSDS]], and Sky's converter that turns DAI into USDS one to one, and back. DAI earns only through this conversion."
+  controlled_by: "Sky governance. The converter has no admin and no fee. USDS is an upgradeable proxy under Sky governance."
+  can:
+    - "Take sUSDS deposits and redemptions, with the receiver and the owner pinned to the Asset Safe."
+    - "Convert DAI and USDS one to one, and pay the Asset Safe."
+  cannot:
+    - "Price sUSDS on the swap router. The vault redeems sUSDS before a sale."
+  addresses:
+    - {name: "sUSDS", address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"}
+    - {name: "DAI–USDS converter", address: "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A"}
+  sources: [ADR-011, OD-22, "test:test_D3_dai_usds_conversion_pays_the_asset_safe", "doc:docs/research/dai-usds-conversion-2026-10-05.md#the-converter"]
+
+# --- Swap instances -----------------------------------------------------------------------------
+- id: stonks-factory
+  node: stonks
+  name: Stonks 2.0 factory
+  status: existing
+  label: existing
+  what: "Lido's audited factory for swap instances. Every instance that it makes has Aragon Voting as admin and the Aragon Agent as its recovery address."
+  controlled_by: "Nobody. Anyone can deploy an instance."
+  can:
+    - "Deploy fresh instances, each with a manager, a token pair, a converter, order settings and a receiver."
+  cannot:
+    - "Give an instance another admin or recovery address. Both are fixed."
+  numbers: ["audited by Ackee in December 2025"]
+  address: "0x632C0CCDca849eeD780FC685BBa9AbC3c7407Cb2"
+  sources: [ADR-007, "doc:docs/research/stonks-instances-2026-10-02.md#what-the-factory-fixes", "doc:docs/research/stonks-pricing-2026-10-05.md#how-an-instance-gets-a-price"]
+
+- id: rebalancing-instances
+  node: stonks
+  name: Rebalancing swap instances (eight)
+  status: instance
+  label: specified
+  what: "Fresh [[Stonks]] 2.0 instances for routine trades. The operator sends a token in, and the operator Safe places the order. Proceeds return to the Asset Safe."
+  controlled_by: "Admin: Aragon Voting. Manager: the operator Safe, which the guard screens."
+  can:
+    - "Sell one token for another through [[CoW]], at a minimum price from the oracle."
+    - "Pay proceeds only to the Asset Safe."
+    - "Take back unsold tokens after an order expires. Tokens recovered out of an instance go to the Aragon Agent."
+  cannot:
+    - "Pay anywhere else. The receiver is fixed at deployment."
+    - "Take orders from the emergency Safe."
+  numbers: ["hub: USDC", "volatile pairs: 1800 s, 110 bp margin, 550 bp tolerance", "stable pairs: 1800 s, 30 bp, 150 bp"]
+  address: "To be deployed"
+  sources: [ADR-007, INV-013, "doc:docs/registers/parameters.md#parameters"]
+
+- id: recovery-instances
+  node: stonks
+  name: Recovery swap instances (ten)
+  status: instance
+  label: specified
+  what: "Fresh Stonks 2.0 instances for emergency sales. The emergency Safe manages them, and their proceeds go to the Aragon Agent."
+  controlled_by: "Admin: Aragon Voting. Manager: the emergency Safe, which no guard screens."
+  can:
+    - "Sell each swappable asset into USDC, and stETH, LDO, USDC, USDS and DAI into USDT too. A USDC depeg then does not strand recovery."
+    - "Pay proceeds and recovered tokens to the Aragon Agent only."
+  cannot:
+    - "Change their destination. A new recovery pair needs a DAO vote."
+  numbers: ["hub: USDC", "second destination: USDT"]
+  address: "To be deployed"
+  sources: [ADR-007, OD-26, INV-014, "runbook:Recovery swap"]
+
+- id: price-router
+  node: stonks
+  name: Stonks price router
+  status: existing
+  label: existing
+  what: "The shared oracle router that prices every swap instance. It takes each price from Chainlink's Feed Registry. The NEST buyback uses the same router."
+  controlled_by: "Admin: Aragon Voting. Manager: the committee's Safe, since vote 204."
+  can:
+    - "Price a vault token after the committee's Safe adds it: USDC, USDT, DAI and USDS, in USD."
+    - "Refuse a token whose feed Chainlink replaced, until someone re-syncs it."
+  cannot:
+    - "Let anyone choose a feed."
+    - "Price wstETH, WETH or sUSDS."
+    - "Keep the vault apart from the NEST buyback. A setting changed for one changes it for the other."
+  numbers: ["maximum price age: Chainlink's heartbeat for each feed"]
+  address: "0x79ef3a538200Fe4981D67E7e886bfb36D4Cb5a31"
+  sources: [ADR-007, OD-20, INV-020, "doc:docs/research/stonks-pricing-2026-10-05.md#the-router-today"]
+
+- id: vault-converter
+  node: stonks
+  name: The vault's price converter
+  status: instance
+  label: specified
+  what: "One USD-anchored converter for all the vault's instances, made by the deployed converter factory. The stablecoin pairs then do not depend on the ETH/USD feed."
+  controlled_by: "Nobody. It has no admin."
+  can:
+    - "Price sales of stETH, LDO, USDC, USDT, USDS and DAI, and purchases of USDC, USDT, stETH, USDS and LDO."
+  cannot:
+    - "Change its token lists after deployment."
+  addresses:
+    - {name: "Converter factory", address: "0xD96223670BF73cB191a9F0b526653B7eC99dcf45"}
+  sources: [ADR-007, INV-020, "doc:docs/registers/parameters.md#parameters"]
+
+- id: chainlink
+  node: stonks
+  name: Chainlink Feed Registry
+  status: existing
+  label: existing
+  what: "The source of every price on the router."
+  controlled_by: "Chainlink."
+  can:
+    - "Give USD feeds for USDC, USDT, DAI and USDS."
+  cannot:
+    - "Price wstETH, WETH or sUSDS."
+    - "Keep a token priced across a feed replacement. The token stops until the committee's Safe re-syncs it. Chainlink replaced the USDC and USDT feeds twice each in September 2026."
+  address: "0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf"
+  sources: [ADR-007, "runbook:Re-sync a price feed", "doc:docs/research/stonks-pricing-2026-10-05.md#how-often-chainlink-replaced-the-vaults-feeds"]
+
+- id: cow
+  node: stonks
+  name: CoW Protocol
+  status: existing
+  label: existing
+  what: "The order-based exchange that settles Stonks orders."
+  controlled_by: "External."
+  can:
+    - "Settle an order that a swap instance places, inside the instance's price bands."
+  cannot:
+    - "Take an order straight from the vault. The vault never pre-signs a CoW order and never approves the CoW relayer, because a pre-signed order hides its terms from the modifier."
+  sources: [ADR-007, INV-013, "test:test_D6_out_of_scope_venues_are_refused"]
+
+# --- Monitoring ---------------------------------------------------------------------------------
+- id: lido-monitoring
+  node: monitoring
+  name: Lido on-chain monitoring
+  status: mixed
+  label: specified
+  what: "Lido's existing monitoring platform, with new detectors for the vault. It watches and alerts. It blocks nothing."
+  controlled_by: "`@lidofinance/defi-tech` writes the detector specification. `@lidofinance/lido-valset-vroom` reviews it and runs the platform (OD-13)."
+  can:
+    - "Alert on [[drift]] from the artifact, on approvals and budget burn, and on owner, module, guard and singleton changes of the three new Safes."
+    - "Follow every motion, flag odd top-ups and repeated budget motions, and grade emergency actions."
+    - "Publish the cap reading of each [[fortnightly snapshot]] to IPFS, and page the Emergency Brakes multisig on the cap-breach trigger."
+    - "Flag a monthly report that is still missing on day 8."
+  cannot:
+    - "Block a transaction. If it stops, no permission widens."
+  numbers: ["detector specification: phase 1", "vault detectors built: none yet"]
+  sources: [ADR-009, ADR-010, OD-13, OD-32, "doc:ROADMAP.md#roadmap"]
+
+- id: vendor-monitoring
+  node: monitoring
+  name: "[the screening vendor]'s monitoring"
+  status: mixed
+  label: specified
+  what: "The vendor's own detectors, for risks that a permission cannot see."
+  controlled_by: "[the screening vendor]. The committee configures the vault's rules, with support from `@lidofinance/defi-tech` (OD-13)."
+  can:
+    - "Watch for depegs, protocol compromise and counterparty anomalies."
+  cannot:
+    - "Replace Lido's own monitoring of the vault's permissions."
+  sources: [ADR-009]
+
+- id: incident-process
+  node: monitoring
+  name: Lido incident process
+  status: existing
+  label: existing
+  what: "The general Lido process for paging and escalation. Clutch's alerts go into it."
+  controlled_by: "Lido's existing incident responders."
+  can:
+    - "Send every vault alert to the people who act on it."
+    - "Page the Emergency Brakes multisig for the Easy Track pause and for the technical role."
+  cannot:
+    - "Act on the vault. It only reaches the people who can."
+  sources: [ADR-009, ADR-005, "lip:part-6"]
+
+# --- Reporting ----------------------------------------------------------------------------------
+- id: report-generator
+  node: reporting
+  name: Report generator
+  status: new
+  label: specified
+  what: "A program in the Clutch repository that builds each report from the chain at a pinned block. Anyone can run it again and get the same result."
+  controlled_by: "`@lidofinance/defi-tech` builds it. The committee reviews and publishes each report. Monitoring runs it every fortnight."
+  can:
+    - "Show balances, positions, exposures, each ratio with its numerator and denominator, and each price with its source and time."
+    - "Show the first-loss shares apart from the other Earn shares."
+  cannot:
+    - "Carry an old price over silently. A price older than 24 hours counts as missing."
+    - "Anchor a report on chain."
+  numbers: ["monthly report: within 7 days after month-end", "incident report: within 72 h", "build: phase 2"]
+  sources: [ADR-009, OD-14, OD-32, "lip:part-9"]
+
+- id: ipfs-forum
+  node: reporting
+  name: IPFS and the research forum
+  status: existing
+  label: existing
+  what: "Where reports and readings live. IPFS stores each report by its content. The forum post is the only anchor of a report's identifier."
+  controlled_by: "IPFS: content addressing. The forum: Lido's research forum."
+  can:
+    - "Hold the monthly reports and the fortnightly cap readings."
+    - "Carry the disclosure before each motion, the post after each revoke, the post before each top-up, and the mandate."
+  cannot:
+    - "Give the guarantee of a chain. No report is anchored on chain."
+  sources: [ADR-009, ADR-006, ADR-008]
+
+- id: coingecko
+  node: reporting
+  name: Coingecko prices
+  status: existing
+  label: existing
+  what: "The price source for reports: the closing price at the Snapshot Date."
+  controlled_by: "External."
+  can:
+    - "Price each asset in a report. A missing or stale price falls back to the asset's on-chain rate into an underlying that has a price."
+    - "Give the stETH price that is pinned when the enabling vote is prepared, for the stETH registry limit."
+  cannot:
+    - "Price an asset that has neither source. The report then lists it as unpriced, and no top-up rests on that snapshot."
+  numbers: ["a price older than 24 h counts as missing"]
+  sources: [ADR-009, ADR-008]

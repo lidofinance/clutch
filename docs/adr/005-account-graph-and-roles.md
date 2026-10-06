@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:52:19Z
+  at: 2026-10-06T13:05:14Z
 verified: []
 sources:
   - id: s1
@@ -118,7 +118,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 |---|---|---|---|---|
 | DAO | Aragon Agent, by vote through Dual Governance | owner path | everything: own the Safe, replace the policy, change membership | — |
 | `operator` | operator Safe, the committee's signers, four of seven, screened ([ADR 010](/adr/010-pre-execution-screening.md)) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below a fixed ceiling ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe ([ADR 007](/adr/007-swapping-through-stonks.md)); convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md)); as manager of the rebalancing swap instances, place orders and recover unsold tokens to the Aragon Agent ([ADR 007](/adr/007-swapping-through-stonks.md)) | move assets out, except into a rebalancing instance; borrow; administer a modifier or the Safe; change its own permissions |
-| `governance` | Easy Track executor | operator | write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | submit a condition tree; grant or remove any role; touch the emergency role; target a modifier or the Safe; grant delegatecall (OD-36) |
+| `governance` | Easy Track executor | operator | write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | submit a condition tree; grant or remove any role; touch the emergency role; target the Asset Safe or any of its modules (OD-38); grant delegatecall (OD-36) |
 | `emergency` | emergency Safe, two signatures, the committee's signers | safety | zero approvals; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS, so that recovery can sell them; send assets to recovery swap instances or to the Agent; revoke the operator's targets and functions, which is how every removal happens; as manager of the recovery swap instances, place orders and recover tokens to the Aragon Agent | add a permission; enter a protocol except by staking ETH; borrow; redeem the first-loss Earn shares ([ADR 008](/adr/008-funding-through-existing-payments.md)); change the recovery destination; disable a module |
 | `technical` | Emergency Brakes Safe, three of five | safety | disable the operator modifier, for a defect in the permission layer or for a cap breach that gets worse (decision 18); the module argument is pinned | anything else, including disabling the safety modifier |
 
@@ -136,6 +136,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - The operator and the emergency role do not fail independently. They are the same people at different quorums. The guarantee that the operator cannot block an emergency action rests on role scoping alone.
 - No body independent of the committee can return assets within six hours. The Emergency Brakes multisig can only stop the operator, and a DAO vote takes days. The mandate text and the LIP say so (decisions 16 and 17).
 - The compensating controls are one-way emergency powers, transfers pinned to the Agent or to recovery instances, and the DAO's power to replace the whole policy.
+- The governance role refuses every module of the Asset Safe as an administered target, so a DAO vote that enables another module on the Asset Safe must also apply a policy compiled with that module in the manifest (OD-38, [ADR 006](/adr/006-governance-through-easy-track-factories.md)). [s1]
 - Disabling the operator modifier leaves the safety modifier working, so recovery survives the technical switch [s4].
 - The safety policy pins the operator modifier's address. Replacing the operator modifier therefore needs a DAO vote that rewrites the safety policy in the same action. EM accepted this as a documented procedure on 2026-09-22 [s1].
 - Freezing queued motions needs the Emergency Brakes multisig, a different body. The general Lido incident process pages it.

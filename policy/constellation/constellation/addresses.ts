@@ -21,6 +21,14 @@ export type Manifest = {
   operatorModifier: string;
   /** The modifier with the `emergency` and `technical` roles. */
   safetyModifier: string;
+  /**
+   * Every module that the Asset Safe enables, both modifiers included. The
+   * governance role refuses each of them as an administered target, and the
+   * compiler refuses a manifest that misses a compiled modifier (OD-38). A DAO
+   * vote that enables another module lists it here and applies the policy
+   * compiled again.
+   */
+  modules: string[];
   /** The operator Safe: the committee's signers, 4 of 7, with the screening guard. */
   operatorSafe: string;
   /** The emergency Safe: the committee's signers, 2 of 7. */

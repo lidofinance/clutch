@@ -9,12 +9,14 @@
  *
  * The compiler runs offline. It refuses an entry that only the hosted app can
  * compile, such as an action or a DeFi Kit preset, because local tooling
- * cannot verify it (ADR 004, decision 11). Its output is deterministic, so CI
- * can compare the committed artifact with a fresh compile.
+ * cannot verify it (ADR 004, decision 11). It also refuses a policy that lets
+ * a role reach the Asset Safe or one of its modules beyond a fixed set of
+ * calls (OD-38). Its output is deterministic, so CI can compare the committed
+ * artifact with a fresh compile.
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { getAddress, id, Interface } from "ethers";
+import { getAddress, id, Interface, zeroPadValue } from "ethers";
 import { Clearance, encodeKey, flattenCondition, processPermissions, rolesAbi } from "zodiac-roles-sdk";
 
 export const FORMAT = "clutch.policy-artifact/1";
@@ -133,7 +135,89 @@ export function compile(nodes: Record<string, Node>, manifest: Record<string, an
     };
   });
 
+  checkProtected(modifiers, manifest);
   return { format: FORMAT, manifest, sdk: sdkVersions(), modifiers, calls };
+}
+
+/** The Roles operators that the checks below read, as the deployed mastercopy numbers them. */
+const NOR = 3;
+const EQUAL_TO = 16;
+const selector = (signature: string) => id(signature).slice(0, 10);
+
+/**
+ * What a role may call on the Asset Safe or on one of its modules (OD-38).
+ * A `narrow` call only removes authority. A `grant` call gives the operator a
+ * permission, so it must refuse every protected account as the target that
+ * it administers. A `budget` call must carry a condition.
+ */
+const ON_ASSET_SAFE = new Map([[selector("disableModule(address,address)"), "narrow"]]);
+const ON_MODULE = new Map([
+  [selector("revokeTarget(bytes32,address)"), "narrow"],
+  [selector("revokeFunction(bytes32,address,bytes4)"), "narrow"],
+  [selector("allowTarget(bytes32,address,uint8)"), "grant"],
+  [selector("scopeTarget(bytes32,address)"), "grant"],
+  [selector("allowFunction(bytes32,address,bytes4,uint8)"), "grant"],
+  [selector("scopeFunction(bytes32,address,bytes4,(uint8,uint8,uint8,bytes)[],uint8)"), "grant"],
+  [selector("setAllowance(bytes32,uint128,uint128,uint128,uint64,uint64)"), "budget"],
+]);
+
+/**
+ * Refuses a policy in which a role reaches the Asset Safe or one of its
+ * modules beyond the calls above, or grants a permission without refusing
+ * every one of them as the administered target. The manifest's `modules`
+ * must list every compiled modifier that acts for the Asset Safe (OD-38).
+ */
+export function checkProtected(modifiers: Artifact["modifiers"], manifest: Record<string, any>) {
+  const safe = getAddress(manifest.assetSafe);
+  if (!Array.isArray(manifest.modules) || manifest.modules.length === 0) {
+    throw new Error("the manifest must list every module of the Asset Safe in `modules` (OD-38)");
+  }
+  const modules = manifest.modules.map((m: string) => getAddress(m));
+  if (new Set(modules).size !== modules.length) throw new Error("the manifest lists a module twice (OD-38)");
+  for (const m of modifiers) {
+    if (m.avatar === safe && !modules.includes(m.address)) {
+      throw new Error(`the manifest's modules must list ${m.ref} ${m.address}, a module of the Asset Safe (OD-38)`);
+    }
+  }
+  const protectedAccounts = [safe, ...modules];
+  for (const m of modifiers) {
+    for (const role of m.roles) {
+      for (const target of role.targets) {
+        const allowed = target.address === safe ? ON_ASSET_SAFE : modules.includes(target.address) ? ON_MODULE : null;
+        if (!allowed) continue;
+        const where = `${m.ref}.${role.name} on ${target.name ?? target.address}`;
+        if (target.clearance !== Clearance.Function) {
+          throw new Error(`${where}: a role may not call every function of the Asset Safe or of one of its modules (OD-38)`);
+        }
+        for (const fn of target.functions) {
+          const kind = allowed.get(fn.selector);
+          const name = fn.signature ?? fn.selector;
+          if (!kind) throw new Error(`${where}: ${name} is not allowed on the Asset Safe or one of its modules (OD-38)`);
+          if (kind !== "narrow" && fn.wildcarded) throw new Error(`${where}: ${name} needs a condition (OD-38)`);
+          const missing = kind === "grant" ? unguarded(fn.conditions, protectedAccounts) : [];
+          if (missing.length > 0) {
+            throw new Error(`${where}: ${name} must refuse ${missing.join(", ")} as the administered target (OD-38)`);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * The accounts that a grant's second parameter, the administered target,
+ * does not refuse with Nor. The tree is flat: the root is 0, and its
+ * children are the parameters in order.
+ */
+export function unguarded(conditions: { parent: number; operator: number; compValue: string }[], accounts: string[]) {
+  const params = conditions.flatMap((n, i) => (i !== 0 && n.parent === 0 ? [i] : []));
+  const target = params[1];
+  const refused = new Set(
+    target !== undefined && conditions[target].operator === NOR
+      ? conditions.filter((n, i) => i !== 0 && n.parent === target && n.operator === EQUAL_TO).map((n) => n.compValue.toLowerCase())
+      : [],
+  );
+  return accounts.filter((account) => !refused.has(zeroPadValue(account, 32).toLowerCase()));
 }
 
 /** An entry that only the hosted app can compile has no target, or carries an action or an annotation. */

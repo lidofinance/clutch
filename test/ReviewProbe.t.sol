@@ -164,6 +164,54 @@ contract ReviewProbe is ReviewBase {
             "emergency must remain armed");
     }
 
+    // =================================================================
+    // OD-38: the governance role refuses, as the administered target, the
+    // Asset Safe and every module that it enables. Before the fix, a motion
+    // could scope the safety modifier for the operator. The operator then,
+    // as the Asset Safe, gave its own Safe a new role on the safety modifier
+    // and moved USDC out through it. This test replays that probe.
+    // =================================================================
+    function test_policyadmin_cannot_grant_operator_the_safety_modifier() public {
+        address s = address(safety);
+        _paRefused(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, s)), "the safety modifier must be refused as an administered target");
+        _paRefused(abi.encodeCall(IRoles.allowFunction, (OPERATOR, s, IRoles.allowTarget.selector, 0)),
+            "allowTarget on the safety modifier must not be granted");
+        _paRefused(abi.encodeCall(IRoles.allowFunction, (OPERATOR, s, IRoles.assignRoles.selector, 0)),
+            "assignRoles on the safety modifier must not be granted");
+        IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](1);
+        c[0] = IRoles.ConditionFlat({parent: 0, paramType: 5, operator_: 5, compValue: ""});
+        _paRefused(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, s, IRoles.assignRoles.selector, c, 0)),
+            "a scoped assignRoles on the safety modifier must not be granted");
+
+        // The probe's next steps stay out of reach.
+        bytes32 x = bytes32("x");
+        bytes32[] memory keys = new bytes32[](1);
+        keys[0] = x;
+        bool[] memory yes = new bool[](1);
+        yes[0] = true;
+        assertFalse(_op(s, abi.encodeCall(IRoles.allowTarget, (x, a.usdc, 0))), "the operator must not administer the safety modifier");
+        assertFalse(_op(s, abi.encodeCall(IRoles.assignRoles, (operatorSafe, keys, yes))), "the operator must not take a safety role");
+        deal(a.usdc, address(safe), 1_000e6);
+        vm.prank(operatorSafe);
+        (bool moved,) = s.call(abi.encodeCall(IRoles.execTransactionWithRole,
+            (a.usdc, 0, abi.encodeCall(IERC20.transfer, (attacker, 1_000e6)), 0, x, true)));
+        assertFalse(moved, "the operator must not move USDC through the safety modifier");
+        assertEq(IERC20(a.usdc).balanceOf(attacker), 0, "no USDC may leave the Asset Safe");
+    }
+
+    /// @dev Reads the Asset Safe's modules from the chain, so a module that is
+    ///      enabled but missing from the policy's guard fails here (OD-38).
+    function test_policyadmin_refuses_every_module_of_the_asset_safe() public {
+        (address[] memory modules,) = safe.getModulesPaginated(SENTINEL, 16);
+        assertEq(modules.length, 2, "the Asset Safe enables both modifiers");
+        for (uint256 i = 0; i < modules.length; i++) {
+            _paRefused(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, modules[i])), "every module must be refused as an administered target");
+            _paRefused(abi.encodeCall(IRoles.allowFunction, (OPERATOR, modules[i], IRoles.assignRoles.selector, 0)),
+                "no function of a module may be granted");
+        }
+        _paRefused(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(safe))), "the Asset Safe must be refused as an administered target");
+    }
+
     function test_policyadmin_cannot_raise_a_foreign_allowance_key() public {
         _paRefused(abi.encodeCall(IRoles.setAllowance,
             (keccak256("not-an-operator-budget"), 1e30, 1e30, 1e30, 30 days, 0)), "allowance key must be one of the operator budgets");
