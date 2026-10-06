@@ -117,7 +117,12 @@ contract DeployDryRun is Script {
             vm.toString(address(roles)),
             '","safetyModifier":"',
             vm.toString(address(safety)),
-            '","operatorSafe":"',
+            // every module of the Asset Safe: the governance role refuses each (OD-38)
+            '","modules":["',
+            vm.toString(address(roles)),
+            '","',
+            vm.toString(address(safety)),
+            '"],"operatorSafe":"',
             vm.toString(operatorStandin)
         );
         m = string.concat(

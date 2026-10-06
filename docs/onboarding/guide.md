@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T12:32:01Z
+  at: 2026-10-06T13:05:14Z
 verified: []
 sources:
   - id: s1
@@ -46,7 +46,7 @@ The onboarding guide is one interactive page that explains Clutch to everyone wh
 
 - The text lives in `docs/onboarding/content/`, the style and the script in `docs/onboarding/src/`. The script `scripts/build_onboarding.py` writes the page [s2].
 - The build reads the facts that the repository already states: the titles and states of the decision records, the open decisions, the invariants, the runbooks, the status labels of the LIP, the roadmap, the review state of every page, and the roles and permissions of the committed policy artifact [s4].
-- The build fails when a reference to a decision, an invariant, a test, a runbook, a LIP part, a file or a heading does not resolve. It also fails when a glossary link has no term, when an address is not already recorded in `docs/`, in the constellation or in `script/`, or when a fork-test stand-in address reaches the page.
+- The build fails when a reference to a decision, an invariant, a test, a runbook, a LIP part, a file or a heading does not resolve. It also fails when a content file repeats a key, when a glossary link has no term, when an address is not already recorded in `docs/`, in the constellation or in `script/`, or when a fork-test stand-in address reaches the page.
 - CI fails when the committed page differs from a fresh build [s2].
 
 ```sh

@@ -37,7 +37,6 @@ contract Drills is ClutchFixture {
     bytes32 internal constant GUARD_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
     bytes32 internal constant MODULE_GUARD_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
 
-    address internal constant SENTINEL = address(0x0000000000000000000000000000000000000001);
 
     // Errors of the deployed Roles modifier: a refused permission; a member
     // that does not hold the role key; a caller that holds no role there.

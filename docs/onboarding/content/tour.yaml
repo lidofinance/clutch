@@ -27,9 +27,8 @@
   sources: [ADR-010, INV-010]
 
 - title: Changes by motion, inside templates
-  text: "The committee can widen its own permissions only through Easy Track [[motion|motions]], each built by a fixed [[template]]. LDO holders have 72 hours to object, and 0.5% of LDO stops a motion.\n\nAt enactment, the governance role writes the change. The modifier checks that write again: no role change, no [[delegatecall]], and no administrative target."
-  alert: "**OD-38 is open.** The check misses one administrative target: the safety modifier. A fork probe used that gap to move USDC out of the Asset Safe. Nothing is deployed; the recommended fix closes the gap before the Emergency Brakes multisig verifies the design."
-  nodes: [operator-safe, easytrack, dao, operator-modifier, safety-modifier]
+  text: "The committee can widen its own permissions only through Easy Track [[motion|motions]], each built by a fixed [[template]]. LDO holders have 72 hours to object, and 0.5% of LDO stops a motion.\n\nAt enactment, the governance role writes the change. The modifier checks that write again: no role change, no [[delegatecall]], and no administrative target. The Asset Safe and both modifiers are refused as targets."
+  nodes: [operator-safe, easytrack, dao, operator-modifier]
   edges: [motions, object, gov-role]
   flows: [onboard, budget]
   sources: [ADR-006, INV-004, OD-36, OD-38]

@@ -28,6 +28,8 @@ abstract contract ClutchFixture is Test {
     address internal constant SAFE_PROXY_FACTORY = 0x14F2982D601c9458F93bd70B218933A6f8165e7b;
     address internal constant MODULE_PROXY_FACTORY = 0x000000000000aDdB49795b0f9bA5BC298cDda236;
     address internal constant LDO = 0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32;
+    // The head of a Safe's module list.
+    address internal constant SENTINEL = address(0x0000000000000000000000000000000000000001);
 
     // Role and budget keys: the label as bytes32, which is how the Zodiac
     // app and the roles SDK encode a key (ADR 004, decisions 10 and 13).
@@ -178,6 +180,16 @@ abstract contract ClutchFixture is Test {
         assertEq(vm.parseJsonAddress(m, ".emergencySafe"), a.emergency, "manifest: emergency Safe");
         assertEq(vm.parseJsonAddress(m, ".emergencyBrakes"), a.technical, "manifest: Emergency Brakes");
         assertEq(vm.parseJsonAddress(m, ".easyTrackExecutor"), a.governance, "manifest: script executor");
+
+        // The governance role refuses every listed module as an administered
+        // target (OD-38), so the list must be exactly the Asset Safe's modules.
+        address[] memory listed = vm.parseJsonAddressArray(m, ".modules");
+        (address[] memory live,) = safe.getModulesPaginated(SENTINEL, 16);
+        assertEq(listed.length, live.length, "manifest: every module of the Asset Safe");
+        for (uint256 i = 0; i < listed.length; i++) {
+            assertTrue(safe.isModuleEnabled(listed[i]), "manifest: a listed module is not enabled");
+            for (uint256 j = 0; j < i; j++) assertTrue(listed[i] != listed[j], "manifest: a module is listed twice");
+        }
     }
 
     /// @dev Applies the committed artifact's calls in order, each through the

@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T12:32:01Z
+  at: 2026-10-06T13:05:14Z
 verified: []
 sources:
   - id: s1
@@ -34,6 +34,12 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-06 — OD-38: the governance role refuses every module of the Asset Safe
+
+> OD-38: B, push
+
+Recorded as: OD-38 is closed with option B. The governance role refuses, as the administered target, the Asset Safe and every module that the Asset Safe enables, the safety modifier included. The deployment manifest lists those modules. The compiler refuses a policy that lets a role reach the Asset Safe or one of its modules beyond a fixed set of calls, a grant that does not refuse every one of them, and a manifest that misses a compiled modifier. A DAO vote that enables another module on the Asset Safe also lists it in the manifest and applies the policy compiled again ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 10, [ADR 005](/adr/005-account-graph-and-roles.md)). The agent found the gap on 2026-10-06 while it wrote the onboarding guide. A fork probe granted the operator `scopeTarget` and `allowFunction` on the safety modifier through the governance role. The operator then gave its own Safe a new role on the safety modifier and moved USDC out of the Asset Safe through it. A regression test replays the probe. "push" is EM's instruction to push the branch. [s5]
 
 ## 2026-10-06 — OD-37: the onboarding guide
 

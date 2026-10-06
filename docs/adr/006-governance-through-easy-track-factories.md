@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T12:32:01Z
+  at: 2026-10-06T13:05:14Z
 verified: []
 sources:
   - id: s1
@@ -36,9 +36,6 @@ sources:
   - id: s8
     resource: "https://github.com/lidofinance/easy-track/blob/3183d1f68d47f5713e0183720aacd10a7dd12670/contracts/MotionSettings.sol#L36"
     title: Easy Track MotionSettings at 3183d1f — the minimum motion duration is 48 hours, and setMotionDuration refuses less (L93)
-  - id: s9
-    resource: /registers/open-decisions.md
-    title: Open decisions — OD-38, the safety modifier as an administered target of the governance role
 ---
 
 # ADR 006: Governance through Easy Track factories
@@ -70,15 +67,19 @@ EM decided on 2026-10-06, closing OD-36 [s1]:
 
 9. A motion cannot grant the operator delegatecall. The governance role's `allowFunction` and `scopeFunction` permissions take only the execution options None or Send. A delegatecall from the Asset Safe runs foreign code in the Safe's own storage, so delegatecall for the operator needs a DAO vote.
 
+EM decided on 2026-10-06, closing OD-38 [s1]:
+
+10. A motion cannot give the operator the Asset Safe or any module of the Asset Safe as a target. The governance role refuses each of them as the administered target, the safety modifier included. The deployment manifest lists every module that the Asset Safe enables. The compiler refuses a policy that lets a role reach the Asset Safe or one of its modules beyond a fixed set of calls, a grant that does not refuse every one of them, and a manifest that misses a compiled modifier. A DAO vote that enables another module on the Asset Safe also lists it in the manifest and applies the policy compiled again.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
 
 - Each factory owns one template. A motion carries typed parameters only, such as a target, an asset and a budget key. The factory builds the tree.
 - Every factory's trusted caller is the operator Safe. Easy Track fixes the trusted caller at deployment [s7].
-- Every factory hard-codes the `operator` role key and refuses the modifiers and the Safe as a target.
+- Every factory hard-codes the `operator` role key and refuses the Asset Safe and its modules as a target.
 - The kit's role-toggle factory [s4] left the design (decision 8) and the kit on 2026-10-05. The budget factory and the template factories are not built.
-- The modifier constrains the governance role again, so a factory bug cannot widen anything. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator an administrative target, cannot set an allowance outside the operator's budget keys, and cannot set a refill period below 30 days [s6].
+- The modifier constrains the governance role again, so a factory bug cannot reach administration. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator the Asset Safe or one of its modules as a target (decision 10), cannot set an allowance outside the operator's budget keys, and cannot set a refill period below 30 days [s6]. A factory bug can still grant the operator a call on an ordinary target, such as a token transfer; the template and the objection window are the controls for that.
 - A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. Once it is enacted, the emergency Safe can revoke the new permission at once.
 - Every removal is an emergency action. The emergency role holds `revokeTarget` and `revokeFunction`, pinned to the `operator` key, and acts at once. Every operator permission lives under that key, so the revoke reaches all of them.
 
@@ -106,6 +107,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 - INV-004, INV-005, INV-006 and INV-018 in the [invariants](/specs/invariants.md).
 - Kit tests for the governance-role guards [s6]. The factory-path tests ran on the retired toggle factory, so the template factories need their own.
+- For decision 10, a fork test replays the probe that found the gap and shows each step refused, and another refuses every module that the Asset Safe enables on chain. The compiler's own tests refuse a policy without the guard and a manifest that misses a module.
 - Each template factory, when built, needs its own tests for the four audit properties above.
 
 ## Reversal conditions
@@ -115,6 +117,4 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 ## Open questions
 
-- OD-38. The governance role refuses the operator modifier and the Asset Safe as administered targets, but not the safety modifier, which the Asset Safe also owns. A fork probe on 2026-10-06 showed that an enacted motion can then let the operator administer the safety modifier as the Asset Safe and move a token out of it. Until OD-38 closes, the claim above that a factory bug cannot widen anything does not hold [s9].
-
-OD-09 was decided on 2026-10-05.
+None open. OD-38 was decided on 2026-10-06.

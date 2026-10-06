@@ -3,10 +3,9 @@
 - assumption: "No role can reach an owner-only function of the Asset Safe or of a modifier."
   kind: design
   why: "The Asset Safe owns both modifiers, and every role call runs as the Asset Safe. The emergency revoke and the governance writes work only because a narrow role may administer a modifier. The LIP calls this composition the primary risk."
-  breaks: "An operator, a motion or a factory bug gets administration of the vault. A fork probe found the first known path: a motion could grant the operator delegatecall. OD-36 closed it."
-  alert: "**OD-38 is open.** A second path exists: the governance role can still make the safety modifier an operator target, and a fork probe used it to move USDC out of the Asset Safe. The recommended fix refuses the safety modifier too."
-  watched_by: [INV-004, INV-009, INV-018, "test:test_policyadmin_cannot_grant_operator_admin_targets", "test:test_policyadmin_cannot_grant_operator_delegatecall", "test:test_D6_adversarial"]
-  watch_note: "The tests cover the operator modifier and the Asset Safe as targets, not the safety modifier. An external audit is due in phase 3."
+  breaks: "An operator, a motion or a factory bug gets administration of the vault. Fork probes found two such paths, and both are closed: a motion could grant the operator delegatecall (OD-36), or give it the safety modifier as a target (OD-38)."
+  watched_by: [INV-004, INV-009, INV-018, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe", "test:test_policyadmin_cannot_grant_operator_delegatecall", "test:test_D6_adversarial"]
+  watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. An external audit is due in phase 3."
   sources: [ADR-005, ADR-006, OD-36, OD-38, "lip:part-2"]
 
 - assumption: "The Aragon Agent is the only owner of the Asset Safe, which has no guard, no module guard and no fallback handler."
@@ -70,7 +69,7 @@
   why: "Motions onboard protocols without a DAO vote. The audit question becomes: can this template ever emit something unsafe?"
   breaks: "Any motion that survives its objection window can use a template flaw. A sound template can still point the operator at an unaudited contract; then only the attached budget bounds the loss."
   watched_by: []
-  watch_note: "No factory is built. Each needs tests for the four properties. The governance role's limits (INV-004) are a second layer, with the gap of OD-38."
+  watch_note: "No factory is built. Each needs tests for the four properties. The governance role's limits (INV-004) are a second layer."
   sources: [ADR-006, "lip:part-4"]
 
 - assumption: "Easy Track gives every motion an objection window of at least 48 hours, and rebuilds and hash-checks each script at enactment."

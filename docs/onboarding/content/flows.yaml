@@ -118,7 +118,7 @@ flows:
         text: "The script executor writes the new operator permission through the governance role. The modifier checks this write too: the operator key only, no role change, no delegatecall and no administrative target."
         nodes: [easytrack, operator-modifier]
         edges: [gov-role]
-        alert: "**OD-38:** the check refuses the operator modifier and the Asset Safe as targets, but not the safety modifier."
+        check: "INV-004: the Asset Safe and every module of it are refused as targets (OD-38)."
       - who: "Operator, and the emergency Safe if needed"
         text: "The operator can use the new permission. The emergency Safe can revoke it at once."
         nodes: [operator-safe, operator-modifier, emergency-safe, safety-modifier]

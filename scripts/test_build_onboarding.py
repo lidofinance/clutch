@@ -85,6 +85,13 @@ def main() -> int:
         else:
             report(expected is None, name, "accepted")
 
+    try:
+        b.parse_yaml("check: one\ncheck: two\n")
+    except b.BuildError as exc:
+        report("the key 'check' appears twice" in str(exc), "a repeated key in a content file", str(exc))
+    else:
+        report(False, "a repeated key in a content file", "accepted")
+
     refs = b.check(content, facts)
     page = b.render(content, facts, refs)
 
@@ -104,7 +111,7 @@ def main() -> int:
     f["policy"][0]["members"] = [stand_in]
     report(b.stand_in_leaks(b.render(content, f, refs)) == [stand_in], "a stand-in address from the artifact is caught")
 
-    total = len(CONTENT_CASES) + 5
+    total = len(CONTENT_CASES) + 6
     print(f"{total - failures} passed, {failures} failed")
     return 1 if failures else 0
 

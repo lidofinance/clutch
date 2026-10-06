@@ -243,11 +243,35 @@ def resolve(ref: str, f: dict[str, Any]) -> dict[str, str]:
 # Content
 # --------------------------------------------------------------------------
 
+class _StrictLoader(yaml.SafeLoader):
+    """A safe loader that refuses a repeated key, which plain YAML drops silently."""
+
+
+def _mapping(loader: _StrictLoader, node: yaml.MappingNode, deep: bool = False) -> dict[Any, Any]:
+    seen = set()
+    for key_node, _ in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in seen:
+            raise BuildError(f"line {key_node.start_mark.line + 1}: the key {key!r} appears twice")
+        seen.add(key)
+    return yaml.SafeLoader.construct_mapping(loader, node, deep)
+
+
+_StrictLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _mapping)
+
+
+def parse_yaml(text: str) -> Any:
+    return yaml.load(text, Loader=_StrictLoader)
+
+
 def load() -> dict[str, Any]:
     content = {}
     for name in ("meta", "map", "actors", "flows", "assumptions", "reuse", "glossary", "tour", "quiz"):
         path = CONTENT / f"{name}.yaml"
-        content[name] = yaml.safe_load(path.read_text(encoding="utf-8"))
+        try:
+            content[name] = parse_yaml(path.read_text(encoding="utf-8"))
+        except BuildError as exc:
+            raise BuildError(f"{path.relative_to(ROOT)}: {exc}") from None
     return content
 
 

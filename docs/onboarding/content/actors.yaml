@@ -413,12 +413,11 @@
     - "Revoke an operator target or function. No factory plans to use this."
   cannot:
     - "Grant or remove a role, or touch the emergency or technical role."
-    - "Make the operator modifier or the Asset Safe an operator target."
+    - "Make the Asset Safe or any of its modules an operator target, the safety modifier included (OD-38). The compiler refuses a policy without this guard."
     - "Grant the operator delegatecall (OD-36)."
     - "Submit its own condition tree. The factory builds the tree from a fixed template."
-  alert: "**OD-38 is open.** The policy does not stop a motion from making the **safety modifier** an operator target. A fork probe showed that the operator could then give itself a new role on the safety modifier and move USDC out of the Asset Safe. The recommended fix refuses the safety modifier too, with a regression test. Nothing is deployed, so no asset is at risk today."
   numbers: ["refill period: 30 days or more"]
-  sources: [ADR-006, ADR-005, INV-004, OD-36, OD-38, "test:test_policyadmin_cannot_grant_operator_admin_targets"]
+  sources: [ADR-006, ADR-005, INV-004, OD-36, OD-38, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe"]
 
 - id: budget-keys
   node: operator-modifier

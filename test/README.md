@@ -16,7 +16,7 @@ This harness runs the Clutch permission policy against production contracts on a
 | `MockEVMScriptExecutor` | the Easy Track script executor: parses the production CallsScript format |
 | `MockEasyTrack` | Easy Track: re-invokes the factory at enactment and requires a matching script hash |
 | Operator Safe, emergency Safe, Emergency Brakes multisig | plain addresses that stand in for them |
-| The policy | `policy/constellation/artifacts/fork-25946643.json`, compiled from the constellation against `manifests/fork-25946643.json`; `utils/Fixture.sol` deploys at the manifest's addresses, checks each, and applies the artifact's calls through the Agent and the Asset Safe |
+| The policy | `policy/constellation/artifacts/fork-25946643.json`, compiled from the constellation against `manifests/fork-25946643.json`; `utils/Fixture.sol` deploys at the manifest's addresses, checks each, checks that the manifest's `modules` are exactly the Asset Safe's modules (OD-38), and applies the artifact's calls through the Agent and the Asset Safe |
 
 ## What the policy follows
 
@@ -59,7 +59,7 @@ just fund                                # fund from a throwaway EOA with 0.05 E
 just teardown                            # sweep, disable both modifiers, write a manifest; not run
 ```
 
-The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy, compile against the written manifest, apply 105 calls, then a permitted and a refused operator call.
+The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy, compile against the written manifest, apply 105 calls, then a permitted and a refused operator call. It was rehearsed again after OD-38, at block 26133512: the written manifest lists both modules, and the governance role is refused the safety modifier, the operator modifier and the Asset Safe as targets.
 
 `RPC` must be an archive node, because the suite forks block 25946643. Never commit a key or an RPC URL that contains one; keep them in a local `.env`.
 
