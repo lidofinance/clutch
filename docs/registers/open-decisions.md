@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T06:22:07Z
+  at: 2026-10-06T06:59:08Z
 verified: []
 sources:
   - id: s1
@@ -57,3 +57,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-29 | What does "a pause of the whole module" in decision 6 of ADR 009 mean? | 2026-10-05 | EM: "Q5: A": the Emergency Brakes multisig disables the operator modifier through the technical role on a fixed trigger; a DAO vote can also do it ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |
 | OD-30 | The mandate draft promises an emergency exit that is independent of the committee, but the emergency Safe is a subset of the committee | 2026-10-05 | EM: "Q6: A": the emergency Safe stays a subset; the mandate text owes the change, and the LIP states that the fast exit is not independent of the committee ([ADR 005](/adr/005-account-graph-and-roles.md)) [s1] |
 | OD-31 | May an agent record a human's own acceptance and verification on that human's instruction, and how is such an entry marked? | 2026-10-06 | EM: "C, edit AGENTS.md": yes, only on the human's explicit written instruction and never for a body; the entry carries `recorded_by` and a `ref` to the decision-log heading that quotes the instruction, and the validator checks both ([ADR 002](/adr/002-decision-and-review-process.md), [ADR 003](/adr/003-agent-operating-model.md)) [s1] |
+| OD-32 | Who publishes the fortnightly cap reading that the trigger of OD-29 needs? | 2026-10-06 | EM: "1": monitoring runs the report generator at each fortnightly snapshot and publishes the cap ratios to IPFS; its alert to the Emergency Brakes multisig links the reading ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) [s1] |

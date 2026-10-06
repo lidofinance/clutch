@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:30Z
+  at: 2026-10-06T06:59:08Z
 verified: []
 sources:
   - id: s1
@@ -473,7 +473,7 @@ Report operations, decided by EM on 2026-10-05 (OD-14): the committee publishes 
 
 **Detection** runs in two estates in parallel. The Lido on-chain monitoring suite carries the rules that are cheap to express over block data: policy drift against the intended permission set, approval inventory, budget burn rate, repeated budget motions on one key, module, owner and singleton changes on the three new Safes, and motion lifecycle events. A commercial monitoring service carries the rules that need market and threat context: depegs, protocol compromise signals, and counterparty anomalies. Findings from both route into the existing notification and incident channels. The defi-tech team specifies the on-chain rules and makes the important updates; the team that owns the Lido monitoring bots reviews them and maintains the engine and the bots. The committee configures the vault's rules in the commercial service (OD-13).
 
-**Response to a ratio breach** is a financial judgement and belongs to the operator committee, working to the mandate's remediation window after the fortnightly review. If a breach worsens rather than resolves, the escalation is the technical role disabling the operator modifier, which stops all operator activity while recovery stays available. The trigger is fixed (OD-29): a published cap breach that is still there after the committee's rebalancing window of two working days, and that is larger at the next fortnightly snapshot. A DAO vote can also disable the modifier. Monitoring pages the Emergency Brakes multisig when the trigger is met.
+**Response to a ratio breach** is a financial judgement and belongs to the operator committee, working to the mandate's remediation window after the fortnightly review. If a breach worsens rather than resolves, the escalation is the technical role disabling the operator modifier, which stops all operator activity while recovery stays available. The trigger is fixed (OD-29): a published cap breach that is still there after the committee's rebalancing window of two working days, and that is larger at the next fortnightly snapshot. A DAO vote can also disable the modifier. Monitoring publishes the cap reading of each fortnightly snapshot to IPFS, from the report generator at the snapshot's pinned block, so the trigger does not depend on the committee in breach (OD-32). Its alert pages the Emergency Brakes multisig when the trigger is met.
 
 **Blocking a transaction before it executes** is a hard requirement. EM chose the route on 2026-10-02 [s1]: a dedicated operator Safe with its own screening guard, which is also the trusted caller of every factory (ADR 010) [s2].
 
@@ -622,7 +622,7 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | First-loss shares redeemed | The operator or the emergency role redeems the Earn shares that carry the first-loss terms | A written rule; the redemption queue's delay; the proceeds stay in the Asset Safe, and a DAO vote can deposit them again | Alert when the vault's earnETH or earnUSD balance falls below the first-loss amount, or a redeem request would cross it |
 | Price feed out of sync | Chainlink replaces an aggregator in its registry, as it did for USDC and USDT twice in September 2026 | The TMC multisig re-syncs the feed as the router's manager; recovery can send assets to the Agent, which needs no price | Alert when a vault token's feed is out of sync, or when the registry confirms a new aggregator for it |
 | Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity and new motions stop; recovery is unaffected; the owners can remove the guard after ten days | Approval-latency and vendor-heartbeat monitoring |
-| Cap breach gets worse | The committee does not rebalance within its window | The Emergency Brakes multisig disables the operator modifier on the fixed trigger; the safety modifier keeps working, so recovery stays available | The fortnightly and monthly reports; monitoring pages the Emergency Brakes multisig when the trigger is met |
+| Cap breach gets worse | The committee does not rebalance within its window | The Emergency Brakes multisig disables the operator modifier on the fixed trigger; the safety modifier keeps working, so recovery stays available | Monitoring's fortnightly cap reading on IPFS; its alert pages the Emergency Brakes multisig when the trigger is met |
 | Monitoring unavailable | Service outage | On-chain permissions are the enforcement layer and do not widen when monitoring stops | Heartbeat on the monitor itself |
 
 ## Open Items

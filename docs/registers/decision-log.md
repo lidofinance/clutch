@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T06:23:50Z
+  at: 2026-10-06T06:59:08Z
 verified: []
 sources:
   - id: s1
@@ -34,6 +34,18 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-06 — OD-32: the fortnightly cap reading
+
+> 1, push
+
+Recorded as: OD-32 is closed with option 1. Monitoring runs the report generator at the pinned block of each fortnightly snapshot and publishes the cap ratios to IPFS. A breach in that reading is the published cap breach of the OD-29 trigger, and the alert that pages the Emergency Brakes multisig links the reading. The committee in breach does not publish its own breach ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). [s5]
+
+## 2026-10-06 — OD-32 asked
+
+> do a and b
+
+Recorded as: the agent froze the text of ADR 005 to ADR 011 for the verification by the Emergency Brakes multisig, and wrote the multisig's brief. The read found that the OD-29 trigger needs a published cap breach at a fortnightly snapshot, but only monthly reports are published. [s5]
 
 ## 2026-10-06 — ADR 002 and ADR 003 verified again
 

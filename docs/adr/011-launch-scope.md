@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:30Z
+  at: 2026-10-06T06:59:08Z
 verified: []
 sources:
   - id: s1
@@ -80,7 +80,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 | ETH, WETH | held; wrap and unwrap; staked to stETH before a sale, and bought back through Lido's withdrawal queue | not a funding asset; no swap instance |
 | stETH, wstETH | held; wrap and unwrap | stETH can seed the vault; wstETH is unwrapped before a sale |
 | USDC, USDT | held | can seed the vault |
-| DAI | held; converted to USDS and back through Sky's converter, one to one | can seed the vault; recovery sells it into USDC |
+| DAI | held; converted to USDS and back through Sky's converter, one to one | can seed the vault; recovery sells it into USDC or USDT (OD-26) |
 | USDS | held; receives converted DAI | can fund the vault once a DAO vote adds it to the payment permission |
 | sUSDS | savings position | tokenized-vault template; can also fund the vault; redeemed before a sale |
 | earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares arrive from the Growth Committee, and neither the operator nor the emergency role redeems them (OD-21, OD-28) |

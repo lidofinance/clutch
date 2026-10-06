@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:30Z
+  at: 2026-10-06T06:59:08Z
 verified: []
 sources:
   - id: s1
@@ -156,9 +156,9 @@ The rest of this section is agent-drafted [s4]. EM has not accepted it as text.
 - Fill rates under stress break the six-hour time to initiate.
 - Recoveries from rebalancing instances become frequent enough that the treasury round trip shrinks the vault.
 - Chainlink deprecates its Feed Registry, or removes a vault token from it.
-- Chainlink adds wstETH or WETH to its registry. Direct instances can then be added by motion.
+- Chainlink adds wstETH or WETH to its registry. Direct rebalancing instances can then be added by motion, and recovery instances by a DAO vote.
 - Feed replacements stop recovery swaps often enough to threaten the six-hour target.
 
 ## Open questions
 
-- The exact instance list is a phase 1 deliverable.
+- None on the pairs: the recovery pairs follow decisions 2, 5 and 15, and the rebalancing pairs follow the hub topology above. The deployment of the instances, with their addresses and parameters, is a phase 1 deliverable.

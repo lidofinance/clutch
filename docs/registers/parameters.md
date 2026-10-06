@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:30Z
+  at: 2026-10-06T06:59:08Z
 verified: []
 sources:
   - id: s1
@@ -75,7 +75,7 @@ sources:
 | Yield-bearing cap base | the top-4 stablecoins plus the yield-bearing stablecoins held directly; own-product and protocol positions excluded | EM decision of 2026-10-02 [s1] | ADR 009 |
 | Budget retune cadence | every two weeks | EM decision [s1] | ADR 009 |
 | Budget refill-period floor | 30 days | EM decision of 2026-10-02 [s1] | ADR 009 |
-| Escalation of a worsening cap breach | the Emergency Brakes multisig disables the operator modifier through the technical role when a published cap breach is still there after the committee's rebalancing window of two working days and is larger at the next fortnightly snapshot; a DAO vote can also do it | EM decision of 2026-10-05 (OD-29) [s1] | ADR 009 |
+| Escalation of a worsening cap breach | the Emergency Brakes multisig disables the operator modifier through the technical role when a published cap breach is still there after the committee's rebalancing window of two working days and is larger at the next fortnightly snapshot; monitoring publishes each fortnightly cap reading to IPFS, from the report generator at the snapshot's pinned block; a DAO vote can also do it | EM decisions of 2026-10-05 and 2026-10-06 (OD-29, OD-32) [s1] | ADR 009 |
 | Approval bound | an approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget; the stETH approval to the wstETH contract has a fixed ceiling of one TM Floor Value in stETH; the DAI and USDS approvals to Sky's DAI–USDS converter and the stETH approval to Lido's withdrawal queue have the same fixed ceiling | EM decisions of 2026-10-02 and 2026-10-05 (OD-08, OD-22, OD-27) [s1] | ADR 007, ADR 009, ADR 011 |
 | Report storage | IPFS; no DataBus | EM decision [s1] | ADR 009 |
 | Report anchor | the report's forum post only; no on-chain anchor | EM decision of 2026-10-05 [s1] | ADR 009 |
