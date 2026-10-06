@@ -38,6 +38,7 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 python3 scripts/validate_docs.py                  # validate the docs bundle; errors exit 1
 python3 scripts/validate_docs.py --write-status   # regenerate docs/registers/document-status.md
 python3 scripts/validate_docs.py --check-status   # fail if the register is out of date
+python3 scripts/test_validate_docs.py             # test the validator's recorded-verification rule
 RPC=<archive mainnet RPC> forge test              # the fork suite
 ```
 

@@ -24,3 +24,5 @@ jobs:
         run: .venv/bin/python scripts/validate_docs.py
       - name: check document-status register
         run: .venv/bin/python scripts/validate_docs.py --check-status
+      - name: test the validator
+        run: .venv/bin/python scripts/test_validate_docs.py
