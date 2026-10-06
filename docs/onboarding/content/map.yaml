@@ -316,7 +316,7 @@ edges:
   short: approves each transaction
   label: The vendor's guard on the operator Safe refuses a transaction that the vendor has not approved, once and exactly.
   label_at:
-  - 182
+  - 170
   - 330
 - id: revoke
   from: safety-modifier

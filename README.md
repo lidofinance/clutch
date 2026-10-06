@@ -32,7 +32,7 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 - Agents draft most text and code. Humans decide, review and merge.
 - Every page in `docs/` records its sources, who produced it, who verified it, and its review status.
 - An accepted ADR is an engineering decision. It authorises nothing on chain. On-chain change still needs the vote, motion or signature that the system defines.
-- CI validates the bundle and checks that the document-status register is current. It also checks that the committed policy artifact equals a fresh compile of the constellation, and that the onboarding guide equals a fresh build.
+- CI validates the bundle and checks that the document-status register is current. It also checks that the committed policy artifact equals a fresh compile of the constellation, that the onboarding guide equals a fresh build, and that every control of the guide works in a browser.
 
 ## Commands
 
@@ -43,6 +43,8 @@ python3 scripts/validate_docs.py --check-status   # fail if the register is out 
 python3 scripts/test_validate_docs.py             # test the validator's recorded-verification rule
 python3 scripts/build_onboarding.py --check        # fail if the onboarding guide differs from a fresh build
 python3 scripts/test_build_onboarding.py           # test the guide build's reference and redaction checks
+uv run --with pyyaml==6.0.2 --with playwright==1.63.0 --with axe-playwright-python==0.1.8 python scripts/test_onboarding_page.py
+                                                  # drive every control of the guide in a browser
 RPC=<archive mainnet RPC> forge test              # the fork suite, on the committed policy artifact
 (cd policy/constellation && bun install --frozen-lockfile && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun test compiler)
                                                   # fail if the artifact differs from a fresh compile

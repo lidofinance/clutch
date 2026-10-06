@@ -71,6 +71,12 @@
     target.scrollIntoView({ block: "start" });
     return true;
   }
+  // The skip link also moves focus, so the next Tab starts in the content.
+  $(".skip").addEventListener("click", (ev) => {
+    ev.preventDefault();
+    $("#main").focus({ preventScroll: true });
+    $("#main").scrollIntoView({ block: "start" });
+  });
   showTab(panelIds[0]);
   reveal(location.hash.slice(1));
   window.addEventListener("hashchange", () => reveal(location.hash.slice(1)));
@@ -100,21 +106,29 @@
     $("#next").disabled = at === seq.length - 1;
     highlight(s.nodes, s.edges);
   }
-  function play(items) {
+  // Shows a sequence in the panel. `fromMap` keeps the map where it is and
+  // brings the panel into view; `byKeyboard` moves focus to the panel title.
+  function play(items, { fromMap = false, byKeyboard = false } = {}) {
     seq = items;
     at = 0;
     player.hidden = false;
     resting.hidden = true;
     draw();
-    const stage = $(".stage");
-    if (stage.getBoundingClientRect().top < 0 || stage.getBoundingClientRect().top > window.innerHeight * 0.5) {
-      stage.scrollIntoView({ block: "start" });
+    const panel = $("#panel").getBoundingClientRect();
+    const stage = $(".stage").getBoundingClientRect();
+    if (fromMap) {
+      if (panel.top > window.innerHeight || panel.bottom < 0) $("#panel").scrollIntoView({ block: "nearest" });
+    } else if (stage.top < 0 || stage.top > window.innerHeight * 0.5) {
+      $(".stage").scrollIntoView({ block: "start" });
     }
+    if (byKeyboard) $("#player-title").focus();
   }
   function stop() {
+    const hadFocus = player.contains(document.activeElement);
     player.hidden = true;
     resting.hidden = false;
     highlight([], []);
+    if (hadFocus) $("#start-tour").focus();
   }
   $("#prev").addEventListener("click", () => { if (at > 0) { at -= 1; draw(); } });
   $("#next").addEventListener("click", () => { if (at < seq.length - 1) { at += 1; draw(); } });
@@ -126,14 +140,14 @@
     if (ev.key === "Escape") stop();
   });
 
-  $("#start-tour").addEventListener("click", () => {
+  $("#start-tour").addEventListener("click", (ev) => {
     play($$(".scene").map((scene) => ({
       kicker: $(".kicker", scene).textContent,
       title: $("h3", scene).textContent,
       body: cleanCopy(scene, ".kicker, h3"),
       nodes: words(scene.dataset.nodes),
       edges: words(scene.dataset.edges),
-    })));
+    })), { byKeyboard: ev.detail === 0 });
   });
   // A "Play" chip, also inside the panel's copy of a scene, starts its flow.
   document.addEventListener("click", (ev) => {
@@ -143,7 +157,7 @@
     ev.preventDefault();
     button.click();
   });
-  $$(".play").forEach((button) => button.addEventListener("click", () => {
+  $$(".play").forEach((button) => button.addEventListener("click", (ev) => {
     const flow = button.closest(".flow");
     const title = $("h4", flow).textContent;
     const steps = $$(".step", flow);
@@ -153,9 +167,9 @@
       body: cleanCopy(step),
       nodes: words(step.dataset.nodes),
       edges: words(step.dataset.edges),
-    })));
+    })), { byKeyboard: ev.detail === 0 });
   }));
-  function openNode(id) {
+  function openNode(id, byKeyboard) {
     const group = document.getElementById("group-" + id);
     if (!group) return;
     const heading = $("h3", group).cloneNode(true);
@@ -167,12 +181,12 @@
       body: cleanCopy(group, "h3"),
       nodes: [id],
       edges: edgesOf(id),
-    }]);
+    }], { fromMap: true, byKeyboard });
   }
   $$(".node", map).forEach((g) => {
-    g.addEventListener("click", () => openNode(g.dataset.node));
+    g.addEventListener("click", () => openNode(g.dataset.node, false));
     g.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openNode(g.dataset.node); }
+      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openNode(g.dataset.node, true); }
     });
   });
 
@@ -197,16 +211,26 @@
     const def = document.querySelector(`#term-${el.dataset.term} .gdef`);
     return def ? def.textContent : "";
   };
-  $$("[data-tip], .term").forEach((el) => {
-    el.addEventListener("pointerenter", (ev) => show(tipFor(el), ev.clientX, ev.clientY));
-    el.addEventListener("pointermove", (ev) => { if (!tip.hidden) place(ev.clientX, ev.clientY); });
-    el.addEventListener("pointerleave", hide);
-    el.addEventListener("focus", () => {
-      const r = el.getBoundingClientRect();
-      show(tipFor(el), r.left + r.width / 2, r.bottom);
-    });
-    el.addEventListener("blur", hide);
+  // Delegated, so that the copies of the page in the panel get tooltips too.
+  const tipped = (target) => (target instanceof Element ? target.closest("[data-tip], .term") : null);
+  // A touch has no hover: a tooltip would only cover the panel it opens.
+  document.addEventListener("pointerover", (ev) => {
+    const el = tipped(ev.target);
+    if (el && ev.pointerType !== "touch" && !el.contains(ev.relatedTarget)) show(tipFor(el), ev.clientX, ev.clientY);
   });
+  document.addEventListener("pointerout", (ev) => {
+    const el = tipped(ev.target);
+    if (el && !el.contains(ev.relatedTarget)) hide();
+  });
+  document.addEventListener("pointermove", (ev) => { if (!tip.hidden) place(ev.clientX, ev.clientY); });
+  // Keyboard focus only: a tap or a click also focuses a box.
+  document.addEventListener("focusin", (ev) => {
+    const el = tipped(ev.target);
+    if (!el || !el.matches(":focus-visible")) return;
+    const r = el.getBoundingClientRect();
+    show(tipFor(el), r.left + r.width / 2, r.bottom);
+  });
+  document.addEventListener("focusout", (ev) => { if (tipped(ev.target)) hide(); });
   document.addEventListener("click", (ev) => {
     const term = ev.target.closest(".term");
     if (term && !term.closest("#tab-glossary")) {
@@ -214,6 +238,17 @@
       reveal("term-" + term.dataset.term);
       hide();
     }
+  });
+
+  // --- print: every collapsed section opens, and closes again afterwards -----------
+  let closedForPrint = [];
+  window.addEventListener("beforeprint", () => {
+    closedForPrint = $$("details:not([open])");
+    closedForPrint.forEach((d) => { d.open = true; });
+  });
+  window.addEventListener("afterprint", () => {
+    closedForPrint.forEach((d) => { d.open = false; });
+    closedForPrint = [];
   });
 
   // --- self-check -----------------------------------------------------------------

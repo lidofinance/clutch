@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T12:32:01Z
+  at: 2026-10-06T13:38:35Z
 verified: []
 sources:
   - id: s1
@@ -21,7 +21,7 @@ sources:
     title: ADR 002 — the runbook and policy-change gates
   - id: s4
     resource: /registers/decision-log.md
-    title: Decision log — EM on the onboarding guide (OD-37), 2026-10-06
+    title: Decision log — EM on the onboarding guide (OD-37) and its browser tests, 2026-10-06
 ---
 
 # Specification policy
@@ -72,3 +72,4 @@ Behaviour is written as "WHEN a condition, THEN an expected result". A scenario 
 - The [onboarding guide](/onboarding/guide.md) is generated from the repository, like the policy artifact. Its text lives in `docs/onboarding/content/`, and the build reads the decisions, invariants, runbooks, LIP labels, roadmap and compiled policy [s4].
 - A pull request that changes a decision, a role, a permission, a flow or a runbook updates the guide's content and commits the rebuilt page in the same pull request.
 - CI fails when the committed page differs from a fresh build, or when a reference in the guide does not resolve [s4].
+- Browser tests drive every control of the page, and CI runs them on every pull request [s4].

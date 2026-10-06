@@ -30,3 +30,18 @@ jobs:
         run: .venv/bin/python scripts/build_onboarding.py --check
       - name: test the onboarding guide's build checks
         run: .venv/bin/python scripts/test_build_onboarding.py
+
+  browser:
+    name: onboarding guide in a browser
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: install the test dependencies and headless Chromium
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet pyyaml==6.0.2 playwright==1.63.0 axe-playwright-python==0.1.8
+          .venv/bin/python -m playwright install --with-deps --only-shell chromium
+      - name: test every control of the onboarding guide
+        run: .venv/bin/python scripts/test_onboarding_page.py

@@ -21,6 +21,7 @@
   --serious: #ec835a;
   --critical: #d03b3b;
   --focus: #2a78d6;
+  --link: #1f63bb;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
@@ -38,6 +39,7 @@
     --vault: #199e70;
     --ext: #898781;
     --focus: #3987e5;
+    --link: #4a93ea;
   }
 }
 :root[data-theme="dark"] {
@@ -55,6 +57,7 @@
   --vault: #199e70;
   --ext: #898781;
   --focus: #3987e5;
+  --link: #4a93ea;
 }
 
 * { box-sizing: border-box; }
@@ -66,13 +69,13 @@ body {
   color: var(--ink);
   font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
-a { color: var(--gov); }
+a { color: var(--link); }
 code { font: 0.88em/1.4 ui-monospace, "SFMono-Regular", Menlo, monospace; overflow-wrap: anywhere; }
 h1, h2, h3, h4, h5 { line-height: 1.25; margin: 0 0 0.4em; }
 h2 { font-size: 1.45rem; }
 h3 { font-size: 1.15rem; }
 h4 { font-size: 1rem; }
-h5 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-2); margin-top: 0.6em; }
+h5, h4.sub { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-2); margin: 0.6em 0 0.4em; }
 p { margin: 0 0 0.6em; }
 ul, ol { margin: 0.2em 0 0.6em; padding-left: 1.3em; }
 button { font: inherit; color: inherit; }
@@ -97,7 +100,11 @@ button { font: inherit; color: inherit; }
 
 /* Stage: the map and the panel */
 .stage { display: grid; grid-template-columns: minmax(0, 3fr) minmax(290px, 1fr); gap: 18px; align-items: start; }
-@media (max-width: 1000px) { .stage { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .top { grid-template-columns: minmax(0, 1fr); }
+  .controls { justify-content: flex-start; }
+}
 .mapcard { margin: 0; padding: 14px 16px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
 .mapcard figcaption h2 { font-size: 1.15rem; margin-bottom: 0.2em; }
 .mapcard figcaption p { color: var(--ink-2); font-size: 0.92rem; }
@@ -109,7 +116,7 @@ button { font: inherit; color: inherit; }
 .pnav button, .primary, .play { border: 1px solid var(--border); background: var(--page); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
 .primary { background: var(--ink); color: var(--surface); border-color: var(--ink); padding: 8px 14px; }
 .pnav button:disabled { opacity: 0.4; cursor: default; }
-.linklike { border: 0; background: none; color: var(--gov); text-decoration: underline; cursor: pointer; padding: 6px 0 0; }
+.linklike { border: 0; background: none; color: var(--link); text-decoration: underline; cursor: pointer; padding: 6px 0 0; }
 
 /* The map */
 .map { width: 100%; min-width: 760px; height: auto; display: block; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -174,15 +181,16 @@ button { font: inherit; color: inherit; }
 .intro, .lead { color: var(--ink-2); }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin: 10px 0; }
 .card header { display: flex; align-items: baseline; gap: 8px 10px; flex-wrap: wrap; }
-.card h4 { margin: 0 auto 0 0; }
+.card h4, .card.assumption h3 { margin: 0 auto 0 0; font-size: 1rem; }
+.findex .gname { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-2); margin: 0.6em 0 0.2em; font-weight: 600; }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 22px; }
-@media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .cols { grid-template-columns: minmax(0, 1fr); } }
 .ctl span, .numbers span, .addr span, .sources span, .meta span, .check span, .why span, .owner span, .watch span {
   font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2); margin-right: 6px;
 }
 .meta span + span, .meta span { margin-left: 0; }
 .sources { font-size: 0.85rem; margin-top: 0.6em; }
-.src { display: inline-block; margin: 2px 6px 2px 0; padding: 0 7px; border: 1px solid var(--border); border-radius: 999px; text-decoration: none; font-size: 0.82rem; }
+.src { display: inline-block; max-width: 100%; overflow-wrap: anywhere; margin: 2px 6px 2px 0; padding: 0 7px; border: 1px solid var(--border); border-radius: 999px; text-decoration: none; font-size: 0.82rem; }
 .group { margin: 18px 0 26px; }
 .group h3 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
@@ -216,7 +224,7 @@ button { font: inherit; color: inherit; }
 .rank { display: inline-block; min-width: 1.8em; color: var(--ink-2); }
 #tab-reuse.tabpanel:not([hidden]) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 16px; }
 #tab-reuse > h2, #tab-reuse > .intro { grid-column: 1 / -1; }
-@media (max-width: 1000px) { #tab-reuse.tabpanel:not([hidden]) { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { #tab-reuse.tabpanel:not([hidden]) { grid-template-columns: minmax(0, 1fr); } }
 .count { font-size: 0.85rem; color: var(--ink-2); font-weight: 400; }
 .panel .cols { grid-template-columns: 1fr; }
 .jump { margin: 4px 0 14px; }
@@ -234,7 +242,9 @@ button { font: inherit; color: inherit; }
 .gterm dt { font-weight: 650; }
 .gterm dd { margin: 0.2em 0 0; }
 .term { color: inherit; text-decoration: underline dotted var(--ink-2); text-underline-offset: 3px; cursor: help; }
-.lens-plain .tech { display: none; }
+.js .lens-plain .tech { display: none; }
+html:not(.js) .controls, html:not(.js) .panel, html:not(.js) .play { display: none; }
+html:not(.js) .stage { grid-template-columns: minmax(0, 1fr); }
 .lens-tech .tech { display: block; }
 .tech { border-left: 3px solid var(--gov); padding: 4px 0 4px 10px; margin: 6px 0; color: var(--ink-2); font-size: 0.93rem; }
 details.tech { border-left: 0; padding: 0; }
@@ -243,11 +253,11 @@ table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 6px 
 th, td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
 thead th { color: var(--ink-2); font-weight: 600; border-bottom: 1px solid var(--axis); }
 .statusgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-@media (max-width: 900px) { .statusgrid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .statusgrid { grid-template-columns: minmax(0, 1fr); } }
 .phases { list-style: none; padding: 0; }
 .phases li { display: grid; gap: 2px; padding: 8px 12px; border-left: 4px solid var(--axis); margin-bottom: 6px; background: var(--surface); border-radius: 0 8px 8px 0; }
 .phases li.now { border-left-color: var(--gov); }
-.phases li.now strong::after { content: "  ← we are here"; color: var(--gov); font-weight: 600; }
+.phases li.now strong::after { content: "  ← we are here"; color: var(--link); font-weight: 600; }
 .phases .gate { color: var(--ink-2); font-size: 0.88rem; }
 fieldset.q { border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; margin: 10px 0; background: var(--surface); }
 fieldset.q legend { font-weight: 600; padding: 0 4px; }
@@ -259,6 +269,10 @@ fieldset.q.wrong { border-color: var(--serious); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font-size: 0.85rem; padding: 2px 10px; border: 1px solid var(--border); border-radius: 999px; text-decoration: none; }
 .foot { color: var(--ink-2); font-size: 0.88rem; border-top: 1px solid var(--axis); padding-top: 14px; padding-bottom: 40px; }
+main:focus:not(:focus-visible), #player-title:focus:not(:focus-visible) { outline: none; }
+.maplist { margin-top: 8px; font-size: 0.88rem; }
+.maplist summary { cursor: pointer; color: var(--ink-2); }
+.maplist caption { text-align: left; font-weight: 600; padding: 8px 0 2px; }
 
 #tip {
   position: fixed; z-index: 20; max-width: 340px; padding: 7px 10px; border-radius: 8px;
