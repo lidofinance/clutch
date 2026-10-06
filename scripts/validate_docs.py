@@ -65,7 +65,7 @@ STATUSES = {"draft", "stable", "deprecated"}
 REVIEW_STATUSES = ("slop", "human-skimmed", "human-reviewed", "finalized")
 DECISIONS = {"proposed", "accepted", "superseded", "rejected"}
 TYPES = {
-    "Attested Computation", "Decision", "Policy", "Product Brief", "Register",
+    "Attested Computation", "Decision", "Guide", "Policy", "Product Brief", "Register",
     "Research Note", "Runbook", "Specification",
 }
 AGENTS_MAX_LINES = 60

@@ -26,3 +26,7 @@ jobs:
         run: .venv/bin/python scripts/validate_docs.py --check-status
       - name: test the validator
         run: .venv/bin/python scripts/test_validate_docs.py
+      - name: check the onboarding guide is a fresh build
+        run: .venv/bin/python scripts/build_onboarding.py --check
+      - name: test the onboarding guide's build checks
+        run: .venv/bin/python scripts/test_build_onboarding.py

@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:52:19Z
+  at: 2026-10-06T12:32:01Z
 verified: []
 sources:
   - id: s1
@@ -34,6 +34,35 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-06 — OD-37: the onboarding guide
+
+> now we need to make a huge effort on education and onboarding
+>
+> let's build an interactive html page which contains:
+> - all actors
+> - all flows
+> - highlights key assumptions
+> - highlights how deployment happens, how it's operated, how it handles emergencies, how it handles reporting, etc.
+> - everything must be visual and easy to onboard tech and non-tech folks
+> - highlight what we use from the existing code, platforms (e.g. Zodiac) and what we introduce and why
+>
+> we need to maintain it within repo as a durable artifact
+>
+> do a deep research and run an interview with me before implementing
+
+After the research, the agent asked eight questions. EM answered:
+
+> Q1: A
+> Q2: A
+> Q3: A
+> Q4: A
+> Q5: A
+> Q6: A
+> Q7: A
+> Q8: A
+
+Recorded as: OD-37 is closed with option A on every question. (1) The page is for internal readers first: the committee's signers, the Emergency Brakes multisig, Lido engineers, and the product, legal and operations teams. It is written to the publication standard, so it can go public with the repository at deployment. (2) After the guide, a reader can name who can move the vault's funds and who can stop them, walk any emergency to its first action with its time, tell what is reused from audited code and what is new and why, and find the source of any claim. An optional self-check of about eight questions follows, and nothing is tracked. (3) One page, with a guided tour and an explorer on the same system map. (4) Twelve groups on the map with 47 drill-down actor cards, the research's count; a status on every element, Implemented, Specified or Open; existing mainnet addresses only, "to be deployed" for new contracts, and never a fork-test address; thresholds and time windows, but no financial figure, with dry-run stand-ins labelled as such; the screening vendor redacted; a panel of what is open and owed, and a roadmap tracker. (5) Flows play as steps that highlight the actors and arrows on the map. (6) The page is generated from data files that cite IDs, with the repository's facts read at build time. CI fails when the committed page differs from a fresh build or when a cited ID or path does not exist, and a pull request that changes a decision, a role or a flow updates the page. Option A included the CI check, so this answer is EM's request for the new steps under `.github/`. (7) A Python build run with uv, plain JavaScript and inline SVG, under `docs/onboarding/`, with a new page type, Guide, in the validator. Readers open the file locally until deployment. EM did not say whether the organisation has private GitHub Pages, so the page stays a local file. (8) `@lidofinance/defi-tech` owns the guide and agents regenerate it. EM accepts the first version. The committee and the Emergency Brakes multisig review the sections that describe their duties ([onboarding guide](/onboarding/guide.md), [specification policy](/specs/specification-policy.md)). [s5]
 
 ## 2026-10-06 — OD-36: no delegatecall through governance, and the policy CI job
 

@@ -18,6 +18,7 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 ## Where to start
 
 - [AGENTS.md](AGENTS.md) — the rules for agents and humans. `CLAUDE.md` is a symlink to it.
+- [docs/onboarding/clutch-onboarding.html](docs/onboarding/clutch-onboarding.html) — the interactive onboarding guide. Download it and open it in a browser; GitHub shows it as source. How it is built: [docs/onboarding/guide.md](docs/onboarding/guide.md).
 - [docs/index.md](docs/index.md) — the map, and the knowledge bundle in Open Knowledge Format 0.2.
 - [docs/product/brief.md](docs/product/brief.md) — vision, goals, North Star Metric, readers and users.
 - [docs/adr/](docs/adr/index.md) — decision records. What is still open is in [docs/registers/open-decisions.md](docs/registers/open-decisions.md).
@@ -31,7 +32,7 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 - Agents draft most text and code. Humans decide, review and merge.
 - Every page in `docs/` records its sources, who produced it, who verified it, and its review status.
 - An accepted ADR is an engineering decision. It authorises nothing on chain. On-chain change still needs the vote, motion or signature that the system defines.
-- CI validates the bundle and checks that the document-status register is current. It also checks that the committed policy artifact equals a fresh compile of the constellation.
+- CI validates the bundle and checks that the document-status register is current. It also checks that the committed policy artifact equals a fresh compile of the constellation, and that the onboarding guide equals a fresh build.
 
 ## Commands
 
@@ -40,6 +41,8 @@ python3 scripts/validate_docs.py                  # validate the docs bundle; er
 python3 scripts/validate_docs.py --write-status   # regenerate docs/registers/document-status.md
 python3 scripts/validate_docs.py --check-status   # fail if the register is out of date
 python3 scripts/test_validate_docs.py             # test the validator's recorded-verification rule
+python3 scripts/build_onboarding.py --check        # fail if the onboarding guide differs from a fresh build
+python3 scripts/test_build_onboarding.py           # test the guide build's reference and redaction checks
 RPC=<archive mainnet RPC> forge test              # the fork suite, on the committed policy artifact
 (cd policy/constellation && bun install --frozen-lockfile && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun test compiler)
                                                   # fail if the artifact differs from a fresh compile

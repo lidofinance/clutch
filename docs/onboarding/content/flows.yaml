@@ -1,0 +1,583 @@
+# Flows, step by step. Each step highlights map nodes and edges when the flow plays.
+# Label: built (built and tested on a fork), specified, open, existing or planned.
+groups:
+  - id: operations
+    title: Everyday operations
+    summary: "What the committee does on a normal day. The screening guard and the policy check every operator transaction before it runs."
+  - id: governance
+    title: Changing what the operator may do
+    summary: "Motions widen the operator's permissions only through fixed templates, with 72 hours for LDO holders to object. Everything else is a DAO vote."
+  - id: funding
+    title: Funding the vault
+    summary: "Money comes from the DAO treasury through Easy Track top-ups. The objection window is the control; the registry limit is the backstop."
+  - id: reporting
+    title: Reporting and monitoring
+    summary: "Caps are detective. Monitoring and reports measure the vault, publish the numbers and start the fix. No transaction reverts on a cap."
+  - id: emergencies
+    title: Emergencies
+    summary: "Two fast stops and one slow exit. The emergency Safe pulls assets back; the Emergency Brakes multisig switches the operator off; the DAO can do anything, in days."
+  - id: deployment
+    title: Building, deploying and changing the system
+    summary: "How the policy changes, how the system goes live, and the duties that keep it in step."
+
+flows:
+  # --- Everyday operations ----------------------------------------------------------------------
+  - id: op-tx
+    group: operations
+    title: An operator transaction
+    label: built
+    summary: "How the committee changes a position, for example a USDC deposit into earnUSD. The screening guard and the policy both check the transaction before it runs."
+    trigger: "The committee decides to change a position within the mandate."
+    time: "Minutes, after [the screening vendor] approves."
+    steps:
+      - who: "Operator Safe signers, 4 of 7"
+        text: "The signers build the transaction in the Zodiac UI or with local tooling. It calls the operator modifier with the operator role."
+        nodes: [committee, operator-safe]
+        edges: [signers-op]
+        tech: "The call is `execTransactionWithRole` on the operator modifier, with the role key `bytes32(\"operator\")`. A batch goes through MultiSendCallOnly v1.5.0."
+      - who: "[the screening vendor]"
+        text: "The vendor reviews the exact transaction and approves it on chain, once. Without the approval, the guard makes the operator Safe refuse it."
+        nodes: [screening, operator-safe]
+        edges: [screen]
+        check: "The guard fails closed. INV-010 is pending: the harness has no guard yet."
+      - who: "Operator modifier"
+        text: "The modifier checks the call against the operator's permissions and refuses anything that the policy does not list. An approval spends its spender's budget key."
+        nodes: [operator-safe, operator-modifier]
+        edges: [op-role]
+      - who: "Asset Safe"
+        text: "The modifier runs the call as the Asset Safe. The protocol pays any proceeds or claims to the Asset Safe, because every receiver is pinned to it."
+        nodes: [operator-modifier, asset-safe, protocols]
+        edges: [own-op, positions]
+        check: "INV-003: every receiver, owner and beneficiary is the Asset Safe."
+      - who: "Monitoring"
+        text: "Monitoring records the change: approvals, budget burn and positions."
+        nodes: [monitoring, asset-safe]
+        edges: [watch]
+    escapes:
+      - "The vendor refuses: nothing runs. The committee fixes the transaction or asks again."
+      - "The policy refuses: the call reverts and nothing changes."
+      - "A problem shows after the call: the emergency Safe revokes the operator at once."
+    sources: [ADR-005, ADR-010, ADR-009, INV-003, "test:test_D3_operator_lifecycle", "test:test_D3b_earn_deposit_policy_layer"]
+
+  - id: rebalance
+    group: operations
+    title: A rebalancing swap
+    label: specified
+    summary: "How the vault swaps one token for another. It never trades on CoW directly. It sends the token to a swap instance whose receiver is fixed to the Asset Safe."
+    trigger: "The committee wants a different mix of assets, for example less stETH and more USDC."
+    time: "One order lasts up to 1800 seconds."
+    steps:
+      - who: "Operator"
+        text: "If the token has no price on the router, the operator converts it first: it unwraps wstETH, redeems sUSDS, or unwraps WETH and stakes the ETH."
+        nodes: [operator-safe, operator-modifier, asset-safe, protocols]
+        edges: [op-role, own-op, positions]
+      - who: "Operator"
+        text: "The operator transfers the token from the Asset Safe to the rebalancing instance for that pair. The policy pins the recipient."
+        nodes: [operator-modifier, asset-safe, stonks]
+        edges: [own-op, swaps]
+        check: "This transfer is specified. It is not in the policy yet."
+      - who: "Operator Safe, as manager"
+        text: "The operator Safe places the order on the instance. The screening guard checks this call too."
+        nodes: [operator-safe, screening, stonks]
+        edges: [screen]
+        tech: "The minimum output is the oracle quote less the margin: 110 bp for a volatile pair, 30 bp for a stable pair. The manager can raise it, never lower it."
+      - who: "CoW Protocol"
+        text: "CoW settles the order. The proceeds go to the Asset Safe, the instance's fixed receiver."
+        nodes: [stonks, asset-safe]
+        edges: [swaps]
+      - who: "Anyone, then the manager"
+        text: "If the order does not fill, anyone returns the unsold tokens to the instance after expiry, and the manager places a new order. Tokens recovered out of an instance go to the Aragon Agent, and a top-up brings them back."
+        nodes: [stonks, dao]
+    sources: [ADR-007, INV-013, INV-002, "doc:docs/research/stonks-instances-2026-10-02.md#how-an-order-lives-and-ends"]
+
+  # --- Governance ---------------------------------------------------------------------------------
+  - id: onboard
+    group: governance
+    title: Onboarding a new protocol by motion
+    label: specified
+    summary: "How the committee adds a protocol without a full DAO vote. It creates an Easy Track motion through a fixed template, and LDO holders have 72 hours to object. The policy's limits on the governance role are built and tested on a fork; the template factories are not built."
+    trigger: "The committee wants a new target, for example Lido Lend after its launch."
+    time: "At least 72 hours, then enactment."
+    steps:
+      - who: "Committee"
+        text: "The committee posts a disclosure on the forum. It sets up monitoring for the new target and updates the runbooks."
+        nodes: [committee, reporting, monitoring]
+      - who: "Operator Safe"
+        text: "The operator Safe creates the motion on the template factory, with typed values only: a target, an asset and a budget key. The screening guard checks this transaction."
+        nodes: [operator-safe, screening, easytrack]
+        edges: [motions, screen]
+      - who: "LDO holders"
+        text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails. The Emergency Brakes multisig can also pause Easy Track."
+        nodes: [dao, easytrack, brakes]
+        edges: [object, pause]
+      - who: "Easy Track"
+        text: "At enactment, Easy Track rebuilds the script and requires the hash stored at creation. A changed script fails."
+        nodes: [easytrack]
+        check: "INV-005, tested on a mock Easy Track."
+      - who: "Governance role"
+        text: "The script executor writes the new operator permission through the governance role. The modifier checks this write too: the operator key only, no role change, no delegatecall and no administrative target."
+        nodes: [easytrack, operator-modifier]
+        edges: [gov-role]
+        alert: "**OD-38:** the check refuses the operator modifier and the Asset Safe as targets, but not the safety modifier."
+      - who: "Operator, and the emergency Safe if needed"
+        text: "The operator can use the new permission. The emergency Safe can revoke it at once."
+        nodes: [operator-safe, operator-modifier, emergency-safe, safety-modifier]
+        edges: [op-role, em-role, revoke]
+    escapes:
+      - "An objection of 0.5% of LDO stops the motion."
+      - "The Emergency Brakes multisig pauses Easy Track. Only the DAO can unpause it."
+      - "The operator Safe cancels its own motion."
+      - "After enactment, the emergency Safe revokes the new permission at once."
+    sources: [ADR-006, INV-004, INV-005, OD-36, OD-38, "lip:part-4", "test:test_D1_substituted_script_rejected_at_enactment"]
+
+  - id: budget
+    group: governance
+    title: A budget motion
+    label: specified
+    summary: "How budgets follow the mandate. Every two weeks, the committee can retune the operator's budget keys by motion, from a holdings snapshot."
+    trigger: "The fortnightly snapshot shows that a budget no longer fits the mandate's caps."
+    time: "72 hours."
+    steps:
+      - who: "Committee"
+        text: "The committee reads the holdings at a pinned block and derives each key's new budget, under that key's ceiling."
+        nodes: [committee, asset-safe]
+      - who: "Operator Safe"
+        text: "The operator Safe creates a motion on the budget factory. The guard screens it."
+        nodes: [operator-safe, screening, easytrack]
+        edges: [motions, screen]
+      - who: "Easy Track"
+        text: "After 72 hours without an objection, the executor sets the budget through the governance role. The refill period stays at 30 days or more."
+        nodes: [easytrack, operator-modifier, dao]
+        edges: [gov-role, object]
+        check: "INV-012: the 30-day floor is tested; the per-key ceilings wait for the attested figures."
+      - who: "Monitoring"
+        text: "Monitoring flags a second budget motion on the same key within 14 days."
+        nodes: [monitoring]
+    sources: [ADR-009, INV-011, INV-012, "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period"]
+
+  - id: dao-change
+    group: governance
+    title: A change that only the DAO can make
+    label: built
+    summary: "The owner path. The DAO can do anything to the Asset Safe: replace the policy, change who holds a role, enable a module again, burn first-loss shares or replace the operator Safe. Each such change takes days."
+    trigger: "A change outside the motions' limits, or a repair after a defect in the safety modifier."
+    time: "Days: the vote, then the Dual Governance delay."
+    steps:
+      - who: "LDO holders"
+        text: "LDO holders vote in Aragon Voting."
+        nodes: [dao]
+      - who: "Dual Governance"
+        text: "Dual Governance holds the result for its delay. Then its admin executor runs the script as the Aragon Agent."
+        nodes: [dao]
+      - who: "Aragon Agent"
+        text: "The Agent approves the Asset Safe transaction by hash, or sends it itself, as the only owner."
+        nodes: [dao, asset-safe]
+        edges: [own]
+      - who: "Asset Safe"
+        text: "The Asset Safe runs the change, for example a new policy on both modifiers."
+        nodes: [asset-safe, operator-modifier, safety-modifier]
+        edges: [own-op, own-sf]
+    sources: [ADR-005, INV-001, "test:test_D2_direct_DAO_path", "runbook:Replace the operator Safe", "runbook:Replace the operator modifier"]
+
+  # --- Funding ------------------------------------------------------------------------------------
+  - id: topup
+    group: funding
+    title: The monthly top-up
+    label: specified
+    summary: "How money moves from the DAO treasury to the vault. After the monthly report, the operator Safe creates an Easy Track top-up motion."
+    trigger: "Month-end, when the vault is below its floor."
+    time: "72 hours, on days 1–10 of the month."
+    steps:
+      - who: "Committee"
+        text: "The committee publishes the monthly report, then posts the shortfall on the forum before the top-up."
+        nodes: [committee, reporting]
+        check: "No top-up starts while the report is late, or while the snapshot has an unpriced asset."
+      - who: "Operator Safe"
+        text: "The operator Safe creates a top-up motion. The guard screens it."
+        nodes: [operator-safe, screening, easytrack]
+        edges: [motions, screen]
+      - who: "LDO holders"
+        text: "LDO holders have 72 hours to object."
+        nodes: [dao, easytrack]
+        edges: [object]
+      - who: "Easy Track and Aragon Finance"
+        text: "At enactment, the registry checks the monthly limit again, and Aragon Finance pays the Asset Safe from the treasury."
+        nodes: [easytrack, funding, dao, asset-safe]
+        edges: [topup-motion, treasury, topup]
+        check: "INV-017: only the Asset Safe, only allowed tokens, within the limit. Pending: nothing is built yet."
+      - who: "Monitoring"
+        text: "Monitoring flags a top-up outside days 1–10, a month's top-ups above the posted shortfall, and any top-up after an objected one."
+        nodes: [monitoring]
+    escapes:
+      - "An objection stops the top-up. The mandate then asks for a Snapshot vote."
+      - "The registry refuses a payment above its remaining limit."
+    sources: [ADR-008, ADR-009, INV-017, "runbook:Top up the vault", "lip:part-5"]
+
+  - id: seed
+    group: funding
+    title: Launch funding and the first-loss shares
+    label: specified
+    summary: "How the vault gets its first assets. After the enabling vote, the Growth Committee moves the DAO's first-loss Earn shares in. Then one seed motion funds the rest."
+    trigger: "The enabling vote has executed and the Safes exist."
+    steps:
+      - who: "Growth Committee Safe"
+        text: "The Growth Committee Safe transfers the first-loss earnETH and earnUSD shares to the Asset Safe. The Asset Safe needs no permission to receive them."
+        nodes: [funding, asset-safe]
+        edges: [topup]
+      - who: "Operator Safe"
+        text: "The operator Safe creates the seed motion. It is at most one TM Floor Value, less the value of the first-loss shares."
+        nodes: [operator-safe, easytrack, funding]
+        edges: [motions, topup-motion]
+      - who: "Easy Track and Aragon Finance"
+        text: "After 72 hours, Aragon Finance pays the Asset Safe through the funding registries."
+        nodes: [easytrack, funding, asset-safe, dao]
+        edges: [treasury, topup]
+      - who: "The DAO"
+        text: "From then on, only a DAO vote can burn or redeem the first-loss shares. Monitoring alerts if the Earn balance falls below the first-loss amount."
+        nodes: [dao, asset-safe, monitoring]
+        edges: [own, watch]
+    sources: [ADR-008, OD-21, OD-28, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
+
+  # --- Reporting and monitoring -------------------------------------------------------------------
+  - id: fortnightly
+    group: reporting
+    title: The fortnightly snapshot
+    label: specified
+    summary: "Every two weeks, a reading of the vault at a pinned block drives two things: the budget retune, and the published cap reading."
+    trigger: "Every two weeks."
+    steps:
+      - who: "Monitoring"
+        text: "Monitoring runs the report generator at the snapshot's pinned block."
+        nodes: [monitoring, reporting, asset-safe]
+        edges: [report]
+      - who: "Monitoring"
+        text: "It publishes the cap ratios to IPFS."
+        nodes: [monitoring, reporting]
+      - who: "Committee"
+        text: "If a cap is breached, the committee rebalances within two working days."
+        nodes: [committee, operator-safe]
+        edges: [signers-op]
+      - who: "Committee"
+        text: "Where a budget no longer fits, the committee retunes it by motion."
+        nodes: [operator-safe, easytrack]
+        edges: [motions]
+    sources: [ADR-009, OD-32, "lip:part-9"]
+
+  - id: monthly-report
+    group: reporting
+    title: The monthly report
+    label: specified
+    summary: "The committee publishes a report within seven calendar days after month-end. Anyone can run the generator again and check it."
+    trigger: "Month-end."
+    time: "Within 7 calendar days."
+    steps:
+      - who: "Report generator"
+        text: "The generator reads the chain at a pinned block, with Coingecko prices at the Snapshot Date."
+        nodes: [reporting, asset-safe]
+        edges: [report]
+      - who: "Committee"
+        text: "The committee reviews the report and publishes it on IPFS."
+        nodes: [committee, reporting]
+      - who: "Committee"
+        text: "The forum post cites the report's IPFS identifier. It is the report's only anchor."
+        nodes: [reporting]
+      - who: "Monitoring"
+        text: "If the report is late, no top-up starts. Monitoring flags it on day 8, and the committee explains the delay on the forum."
+        nodes: [monitoring, funding]
+    sources: [ADR-009, OD-14, "lip:part-9"]
+
+  # --- Emergencies --------------------------------------------------------------------------------
+  - id: financial-incident
+    group: emergencies
+    title: "A financial incident: stop and pull back"
+    label: built
+    summary: "A depeg, a curator failure or a protocol compromise. The emergency Safe acts through the safety modifier at 2 of 7, and no guard screens it. Each step only reduces exposure."
+    trigger: "An alert, or a signer sees the risk."
+    time: "Initiate within 6 hours: the mandate's ceiling. Drills must prove it."
+    steps:
+      - who: "Lido incident process"
+        text: "The alert pages the signers."
+        nodes: [monitoring, committee]
+      - who: "Emergency Safe, 2 of 7"
+        text: "Revoke the operator's targets or functions. One revoke reaches every operator permission."
+        nodes: [emergency-safe, safety-modifier, operator-modifier]
+        edges: [em-role, revoke]
+        check: "INV-018: every operator permission is under one key."
+      - who: "Emergency Safe"
+        text: "Set the operator's approvals to zero."
+        nodes: [emergency-safe, safety-modifier, asset-safe, protocols]
+        edges: [em-role, own-sf, positions]
+      - who: "Emergency Safe"
+        text: "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, redeem sUSDS, claim finalized withdrawals."
+        nodes: [safety-modifier, asset-safe, protocols]
+        edges: [own-sf, positions]
+      - who: "Emergency Safe"
+        text: "Send assets home to the Aragon Agent. The transfer goes only to this fixed address."
+        nodes: [safety-modifier, asset-safe, dao]
+        edges: [own-sf, own]
+        check: "INV-002: assets leave only for the Agent, or for a recovery instance once those exist."
+      - who: "Committee"
+        text: "Post on the forum after the revoke."
+        nodes: [committee, reporting]
+    escapes:
+      - "A queued motion would restore a revoked permission: the Emergency Brakes multisig pauses Easy Track."
+      - "A price feed is broken: send assets to the Agent instead of swapping."
+    sources: [ADR-005, ADR-007, INV-002, INV-018, "test:test_D4_emergency_flow", "test:test_emergency_can_durably_stop_operator_reapproval", "runbook:Revoke the operator", "runbook:Zero the approvals", "runbook:Exit positions to the Safe", "runbook:Return assets to the Agent"]
+
+  - id: recovery-swap
+    group: emergencies
+    title: A recovery swap
+    label: specified
+    summary: "When an asset must become a stablecoin in an emergency. The emergency Safe sends it to a recovery instance, whose proceeds go to the Aragon Agent."
+    trigger: "An incident where holding the asset is the risk, for example a depeg."
+    steps:
+      - who: "Emergency Safe"
+        text: "Convert first if needed: unwrap wstETH, or unwrap WETH and stake the ETH, or redeem sUSDS."
+        nodes: [emergency-safe, safety-modifier, asset-safe, protocols]
+        edges: [em-role, own-sf, positions]
+      - who: "Emergency Safe"
+        text: "Transfer the asset to the pinned recovery instance."
+        nodes: [safety-modifier, asset-safe, stonks]
+        edges: [own-sf, swaps]
+        check: "This transfer is specified. It is not in the policy yet."
+      - who: "Emergency Safe, as manager"
+        text: "Place the order. No guard screens it."
+        nodes: [emergency-safe, stonks]
+      - who: "CoW Protocol"
+        text: "CoW settles, and the proceeds go to the Aragon Agent. If an order is stuck, the manager clears it and recovers the tokens to the Agent."
+        nodes: [stonks, dao]
+        check: "USDC is the hub. stETH, LDO, USDC, USDS and DAI can also go into USDT, so a USDC depeg does not strand recovery."
+    sources: [ADR-007, OD-26, INV-014, "runbook:Recovery swap", "runbook:Clear a stuck recovery order"]
+
+  - id: technical-defect
+    group: emergencies
+    title: A defect in the permission layer
+    label: built
+    summary: "If the operator's permissions themselves are wrong, the Emergency Brakes multisig switches the operator modifier off. The safety modifier keeps working."
+    trigger: "A defect in the policy, the modifier or a factory, for example a bug-bounty report."
+    time: "Initiate within 6 hours."
+    steps:
+      - who: "Lido incident process"
+        text: "The incident process pages the Emergency Brakes multisig."
+        nodes: [monitoring, brakes]
+        edges: [page]
+      - who: "Emergency Brakes multisig, 3 of 5"
+        text: "The multisig calls `disableModule` on the Asset Safe through the technical role. The module argument is pinned to the operator modifier."
+        nodes: [brakes, safety-modifier, asset-safe]
+        edges: [tech-role, own-sf]
+      - who: "Operator modifier"
+        text: "The operator and governance roles stop at once."
+        nodes: [operator-modifier, operator-safe, easytrack]
+      - who: "Emergency Safe"
+        text: "The emergency Safe can still act through the safety modifier."
+        nodes: [emergency-safe, safety-modifier]
+        edges: [em-role]
+      - who: "LDO holders"
+        text: "Only the DAO can enable the operator modifier again."
+        nodes: [dao, asset-safe]
+        edges: [own]
+    sources: [ADR-005, INV-009, "test:test_D4_module_disabling_is_technical_only_and_pinned", "runbook:Disable the operator modifier"]
+
+  - id: cap-breach
+    group: emergencies
+    title: A cap breach that gets worse
+    label: specified
+    summary: "No transaction reverts on a cap. Monitoring publishes the breach, the committee fixes it, and the Emergency Brakes multisig stops the operator if the breach gets worse."
+    trigger: "A fortnightly cap reading shows a breach."
+    time: "Two working days to fix, then the next fortnightly snapshot."
+    steps:
+      - who: "Monitoring"
+        text: "Monitoring publishes the cap reading to IPFS. The reading shows a breach."
+        nodes: [monitoring, reporting]
+      - who: "Committee"
+        text: "The committee has two working days to rebalance."
+        nodes: [committee, operator-safe]
+        edges: [signers-op]
+      - who: "Monitoring"
+        text: "At the next fortnightly snapshot, the breach is still there and larger. Monitoring pages the Emergency Brakes multisig and links the reading."
+        nodes: [monitoring, brakes]
+        edges: [page]
+      - who: "Emergency Brakes multisig"
+        text: "The multisig disables the operator modifier. The trigger is fixed, so no financial judgment is needed."
+        nodes: [brakes, safety-modifier, asset-safe, operator-modifier]
+        edges: [tech-role, own-sf]
+    sources: [ADR-009, ADR-005, OD-29, OD-32]
+
+  - id: vendor-outage
+    group: emergencies
+    title: "[the screening vendor] stops approving"
+    label: specified
+    summary: "The guard fails closed. The operator stops, and no new motion can start. Recovery does not change."
+    trigger: "The vendor's service is down or refuses everything."
+    time: "Up to 10 days, the guard's removal timelock."
+    steps:
+      - who: "Guard"
+        text: "Operator transactions and new motions revert, because no approval arrives."
+        nodes: [screening, operator-safe]
+        edges: [screen]
+      - who: "Emergency Safe and Emergency Brakes multisig"
+        text: "Both act as before. Nothing screens them."
+        nodes: [emergency-safe, brakes, safety-modifier]
+        edges: [em-role, tech-role]
+      - who: "Operator Safe owners"
+        text: "The owners can start the guard's removal. It takes 10 days, and monitoring sees it."
+        nodes: [operator-safe, screening, monitoring]
+      - who: "LDO holders"
+        text: "The DAO can also give the operator role to another Safe by vote."
+        nodes: [dao, asset-safe]
+        edges: [own]
+    sources: [ADR-010, "runbook:Remove the screening guard", "runbook:Replace the operator Safe"]
+
+  - id: unsafe-motion
+    group: emergencies
+    title: An unsafe motion in the queue
+    label: specified
+    summary: "Three stops before a motion enacts, and one after."
+    trigger: "A motion looks wrong: a bad target, a wrong amount or a missing disclosure."
+    time: "Before the 72-hour window ends."
+    steps:
+      - who: "Monitoring and the forum"
+        text: "The motion-lifecycle alert and the forum disclosure show the motion."
+        nodes: [monitoring, easytrack, reporting]
+      - who: "LDO holders"
+        text: "LDO holders object within 72 hours. An objection of 0.5% of LDO stops the motion."
+        nodes: [dao, easytrack]
+        edges: [object]
+      - who: "Emergency Brakes multisig"
+        text: "If time is short, the multisig pauses Easy Track. This stops every DAO motion, and only the DAO can unpause it."
+        nodes: [brakes, easytrack]
+        edges: [pause]
+      - who: "Emergency Safe"
+        text: "If the motion enacts, the emergency Safe revokes the new permission at once."
+        nodes: [emergency-safe, safety-modifier, operator-modifier]
+        edges: [em-role, revoke]
+    sources: [ADR-006, ADR-005, "test:test_D1_objection_rejection", "runbook:Pause Easy Track"]
+
+  - id: feed-out-of-sync
+    group: emergencies
+    title: A price feed goes out of sync
+    label: specified
+    summary: "When Chainlink replaces a feed, the router stops pricing that token until a re-sync. Swaps in that token wait."
+    trigger: "Chainlink replaces a feed's aggregator."
+    steps:
+      - who: "Price router"
+        text: "The router refuses the token until someone re-syncs it."
+        nodes: [stonks]
+      - who: "Monitoring"
+        text: "Monitoring alerts on the out-of-sync feed."
+        nodes: [monitoring]
+      - who: "Committee's Safe"
+        text: "The committee's Safe, as the router's manager, re-syncs the feed."
+        nodes: [committee, stonks]
+      - who: "Emergency Safe"
+        text: "If an emergency comes while a feed is broken, the emergency Safe sends assets to the Aragon Agent instead of swapping."
+        nodes: [emergency-safe, safety-modifier, asset-safe, dao]
+        edges: [em-role, own-sf, own]
+    sources: [ADR-007, INV-020, "runbook:Re-sync a price feed"]
+
+  # --- Building, deploying and changing ------------------------------------------------------------
+  - id: policy-change
+    group: deployment
+    title: A policy change, from code to chain
+    label: built
+    summary: "How a permission changes. The repository is the only place where the policy changes, and a reviewer can run every check again."
+    trigger: "A decision that changes a permission."
+    steps:
+      - who: "An engineer or an agent"
+        text: "The author changes the constellation in a pull request."
+        nodes: [policy]
+      - who: "Compiler and CI"
+        text: "The compiler builds the artifact, and the pull request carries both. CI fails when the artifact differs from a fresh compile."
+        nodes: [policy]
+        tech: "`bun compiler/compile.ts --manifest manifests/fork-25946643.json --check`, in the `policy` CI job."
+      - who: "Reviewers"
+        text: "Reviewers approve the artifact. The fork tests apply it and check what each role can and cannot do."
+        nodes: [policy]
+      - who: "`@lidofinance/defi-tech`"
+        text: "After the merge, a team member pushes the policy to the Lido Zodiac workspace. The UI shows the difference from the chain."
+        nodes: [policy]
+        check: "The workspace is planned (OD-35)."
+      - who: "The DAO or a motion"
+        text: "The change reaches the chain only through the enabling vote, a DAO vote or a bounded motion."
+        nodes: [dao, easytrack, operator-modifier, safety-modifier, asset-safe]
+        edges: [own, own-op, own-sf, gov-role]
+      - who: "Monitoring"
+        text: "Later, the round-trip check and the drift detector compare the chain with the artifact."
+        nodes: [policy, monitoring, asset-safe]
+        edges: [watch]
+        check: "INV-016 is pending."
+    sources: [ADR-004, OD-33, OD-35, INV-016, "doc:.github/workflows/policy.yml", "doc:docs/specs/specification-policy.md#the-permission-policy"]
+
+  - id: roadmap
+    group: deployment
+    title: From decisions to deployment
+    label: planned
+    summary: "The roadmap's phases, in order. A phase starts when the gates of the phase before it close. The Status tab shows where the work is now."
+    trigger: "The roadmap."
+    steps:
+      - who: "Phase 0: decisions"
+        text: "The Emergency Brakes multisig verifies ADR 005 to ADR 011, and EM accepts them. [the screening vendor] confirms its terms in writing."
+        nodes: [brakes, committee, screening]
+      - who: "Phase 1: specification"
+        text: "The specifications, the runbook drafts, the detector specification and the Lido Zodiac workspace."
+        nodes: [policy, monitoring]
+      - who: "Phase 2: build"
+        text: "The factories, the swap instances, the funding path, the report generator and the round-trip check."
+        nodes: [easytrack, funding, stonks, reporting, policy]
+      - who: "Phase 3: assurance"
+        text: "An external audit, Lido's review of the guard change, and fork drills that initiate within 6 hours."
+        nodes: [policy, screening]
+      - who: "Phase 4: governance and deployment"
+        text: "The mandate's Snapshot vote, the LIP, the enabling vote and deployment, the share transfer and the seed motion."
+        nodes: [dao, asset-safe, funding]
+      - who: "Phase 5: operation"
+        text: "Fortnightly retunes, monthly reports and recurring drills."
+        nodes: [committee, reporting, monitoring]
+    sources: ["doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates"]
+
+  - id: enabling-vote
+    group: deployment
+    title: The enabling vote
+    label: open
+    summary: "One DAO vote turns the system on. No document gives the full sequence of deployment and vote yet. These steps collect what the decisions already fix."
+    trigger: "The mandate is approved and phase 3 is done."
+    steps:
+      - who: "Committee's Safe"
+        text: "Before the vote, the committee's Safe adds the vault's tokens to the price router. The vote starts only if every vault token is in sync."
+        nodes: [committee, stonks]
+        check: "INV-020 is pending."
+      - who: "[the screening vendor]"
+        text: "The guard is set on the operator Safe, with bypass mode off. This is checked when the vote starts and watched until it executes."
+        nodes: [screening, operator-safe]
+        edges: [screen]
+      - who: "Lido"
+        text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
+        nodes: [asset-safe, operator-safe, emergency-safe]
+      - who: "LDO holders"
+        text: "The vote applies the committed artifact, grants the roles, registers the factories and adds USDS to the payment permission."
+        nodes: [dao, asset-safe, operator-modifier, safety-modifier, easytrack, funding]
+        edges: [own, own-op, own-sf]
+      - who: "Growth Committee, then the operator Safe"
+        text: "After the vote, the Growth Committee moves the first-loss shares, and the seed motion funds the vault."
+        nodes: [funding, asset-safe, operator-safe, easytrack]
+        edges: [topup, motions]
+    sources: [ADR-004, ADR-007, ADR-008, ADR-010, INV-020, "doc:ROADMAP.md#roadmap"]
+
+  - id: signer-rotation
+    group: deployment
+    title: Rotating a signer
+    label: specified
+    summary: "Three Safes carry the committee's signers. Nothing on chain keeps them in step, so a rotation is a manual duty."
+    trigger: "A signer joins or leaves the committee."
+    steps:
+      - who: "Committee"
+        text: "The committee's Safe changes its owner."
+        nodes: [committee]
+      - who: "Committee"
+        text: "The same change goes to the operator Safe and to the emergency Safe."
+        nodes: [committee, operator-safe, emergency-safe]
+        edges: [signers-op, signers-em]
+      - who: "Monitoring"
+        text: "Monitoring alerts on each owner change of the new Safes."
+        nodes: [monitoring, operator-safe, emergency-safe]
+    sources: [ADR-005, "runbook:Rotate a signer on all three Safes"]

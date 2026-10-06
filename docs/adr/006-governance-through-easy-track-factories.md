@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:52:19Z
+  at: 2026-10-06T12:32:01Z
 verified: []
 sources:
   - id: s1
@@ -36,6 +36,9 @@ sources:
   - id: s8
     resource: "https://github.com/lidofinance/easy-track/blob/3183d1f68d47f5713e0183720aacd10a7dd12670/contracts/MotionSettings.sol#L36"
     title: Easy Track MotionSettings at 3183d1f — the minimum motion duration is 48 hours, and setMotionDuration refuses less (L93)
+  - id: s9
+    resource: /registers/open-decisions.md
+    title: Open decisions — OD-38, the safety modifier as an administered target of the governance role
 ---
 
 # ADR 006: Governance through Easy Track factories
@@ -112,4 +115,6 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 ## Open questions
 
-None open. OD-09 was decided on 2026-10-05.
+- OD-38. The governance role refuses the operator modifier and the Asset Safe as administered targets, but not the safety modifier, which the Asset Safe also owns. A fork probe on 2026-10-06 showed that an enacted motion can then let the operator administer the safety modifier as the Asset Safe and move a token out of it. Until OD-38 closes, the claim above that a factory bug cannot widen anything does not hold [s9].
+
+OD-09 was decided on 2026-10-05.

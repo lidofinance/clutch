@@ -1,13 +1,13 @@
 ---
 type: Policy
 title: Specification policy
-description: How Clutch specifications are written and kept true — three layers, invariant IDs that map to tests, when-then scenarios, runbooks with drill records, the policy data file with a round-trip check, and the same-commit rule.
+description: How Clutch specifications are written and kept true — three layers, invariant IDs that map to tests, when-then scenarios, runbooks with drill records, the policy data file with a round-trip check, the same-commit rule, and the generated onboarding guide.
 tags: [specs, invariants, testing, runbooks, policy]
 status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:05:00Z
+  at: 2026-10-06T12:32:01Z
 verified: []
 sources:
   - id: s1
@@ -19,6 +19,9 @@ sources:
   - id: s3
     resource: /adr/002-decision-and-review-process.md
     title: ADR 002 — the runbook and policy-change gates
+  - id: s4
+    resource: /registers/decision-log.md
+    title: Decision log — EM on the onboarding guide (OD-37), 2026-10-06
 ---
 
 # Specification policy
@@ -63,3 +66,9 @@ Behaviour is written as "WHEN a condition, THEN an expected result". A scenario 
 - Tests derive from the specifications, never from the implementation. Expected values are recomputed independently [s1][s2].
 - A pull request that changes behaviour changes the affected specification and invariants in the same commit [s1].
 - Specifications reference the code. Contract NatSpec never references specifications, ADRs or tests.
+
+## The onboarding guide
+
+- The [onboarding guide](/onboarding/guide.md) is generated from the repository, like the policy artifact. Its text lives in `docs/onboarding/content/`, and the build reads the decisions, invariants, runbooks, LIP labels, roadmap and compiled policy [s4].
+- A pull request that changes a decision, a role, a permission, a flow or a runbook updates the guide's content and commits the rebuilt page in the same pull request.
+- CI fails when the committed page differs from a fresh build, or when a reference in the guide does not resolve [s4].

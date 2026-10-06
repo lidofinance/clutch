@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:52:19Z
+  at: 2026-10-06T12:32:01Z
 verified: []
 sources:
   - id: s1
@@ -22,6 +22,7 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
 | OD-23 | When does the agent get its own GitHub identity? Until it does, the agent pushes under the creator's git identity, and another member of the owning team must approve. | [ADR 003](/adr/003-agent-operating-model.md) | Deferred by EM on 2026-10-05: "later". Give it write access to branches only, so that EM can approve agent work as a code owner | EM |
+| OD-38 | The governance role can let a motion give the operator the safety modifier as a target. Its guard refuses the operator modifier and the Asset Safe as administered targets, but not the safety modifier, which the Asset Safe also owns. A fork probe on 2026-10-06 granted the operator `scopeTarget` and `allowFunction` on the safety modifier through the governance role. The operator then gave its own Safe a new role there and moved USDC from the Asset Safe to an outside address. ADR 005 says the governance role may not target a modifier or the Safe. How does the policy close this? | [ADR 006](/adr/006-governance-through-easy-track-factories.md), [ADR 005](/adr/005-account-graph-and-roles.md) | A (recommended): the guard refuses the operator modifier, the safety modifier and the Asset Safe as administered targets; a regression test makes the probe's grant fail, and INV-004 names the safety modifier. Nothing is deployed, so the fix lands before the Emergency Brakes multisig verifies ADR 005 and ADR 006. B: A, and the compiler also refuses every module that the Asset Safe enables later | EM |
 
 ## Closed
 
@@ -62,3 +63,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-34 | May the files copied from the constellation keep LGPL-3.0-only? | 2026-10-06 | EM: "OD-34: A": files derived from the provider's constellation keep LGPL-3.0-only and get an SPDX line when they change; new files use AGPL-3.0-or-later; the licence check covers `policy/`; `AGENTS.md` changed at EM's request ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)) [s1] |
 | OD-35 | Who owns the Lido Zodiac workspace and its API key? | 2026-10-06 | EM: "OD-35: A": the repository-owner team, `@lidofinance/defi-tech`; a member pushes from the merged `main` with the key in a local, ignored `.env`; the committee and the Emergency Brakes multisig can view the workspace; CI holds no key ([ADR 004](/adr/004-specifications-and-policy-as-data.md)) [s1] |
 | OD-36 | May a governance motion grant the operator delegatecall? | 2026-10-06 | EM: "OD-36: A": no. The governance role's `allowFunction` and `scopeFunction` permissions take only the execution options None or Send; a regression test refuses a `DelegateCall` grant; delegatecall for the operator needs a DAO vote ([ADR 006](/adr/006-governance-through-easy-track-factories.md), [ADR 005](/adr/005-account-graph-and-roles.md)) [s1] |
+| OD-37 | How does Clutch teach the system to new readers, and keep that material true? | 2026-10-06 | EM: "Q1: A" to "Q8: A": one self-contained interactive page, internal first and written to the publication standard; four reader outcomes and an optional self-check; a guided tour and an explorer on one system map; a status on every element, existing mainnet addresses only, no financial figure, and the screening vendor redacted; flows play as step highlights on the map; the page is generated from the repository, and CI fails when it is stale or a reference does not resolve; a Python build under `docs/onboarding/` with a new page type, Guide; `@lidofinance/defi-tech` owns it, EM accepts the first version, and the committee and the Emergency Brakes multisig review the sections on their duties ([onboarding guide](/onboarding/guide.md), [specification policy](/specs/specification-policy.md)) [s1] |
