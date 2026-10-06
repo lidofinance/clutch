@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: LGPL-3.0-only
 import { createRequire } from "node:module";
 import path from "node:path";
 import { constellation as sdkConstellation } from "@zodiaceco/sdk";
@@ -6,7 +7,9 @@ import { constellation as sdkConstellation } from "@zodiaceco/sdk";
 // stub so `push` still works for constellations that don't reference
 // existing workspace vaults or users. Referenced entries will throw at use.
 const requireCodegen = createRequire(import.meta.url);
-const emptyCodegen = { users: {}, vaults: {} } as const;
+// Modified for Clutch on 2026-10-06: the stub gains `accounts`, which
+// @zodiaceco/sdk 2.1.2 reads. See PROVENANCE.md.
+const emptyCodegen = { users: {}, vaults: {}, accounts: {} } as const;
 let cached: unknown;
 const loadCodegen = () => {
   if (cached !== undefined) return cached;
