@@ -24,6 +24,7 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 - [docs/specs/](docs/specs/index.md) — the specification policy, the invariants and the LIP draft.
 - [ROADMAP.md](ROADMAP.md) — phases and the gates between them.
 - [test/README.md](test/README.md) — the dry-run harness on a pinned mainnet fork.
+- [policy/constellation/](policy/constellation/PROVENANCE.md) — the permission policy as a Zodiac constellation, its compiler and the committed artifact.
 
 ## How this repository works
 
@@ -39,7 +40,9 @@ python3 scripts/validate_docs.py                  # validate the docs bundle; er
 python3 scripts/validate_docs.py --write-status   # regenerate docs/registers/document-status.md
 python3 scripts/validate_docs.py --check-status   # fail if the register is out of date
 python3 scripts/test_validate_docs.py             # test the validator's recorded-verification rule
-RPC=<archive mainnet RPC> forge test              # the fork suite
+RPC=<archive mainnet RPC> forge test              # the fork suite, on the committed policy artifact
+(cd policy/constellation && bun install --frozen-lockfile && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun test compiler)
+                                                  # fail if the artifact differs from a fresh compile
 ```
 
 The validator needs Python 3.10 or later and PyYAML. Without a local PyYAML, run it through uv: `uv run --with pyyaml python scripts/validate_docs.py`.

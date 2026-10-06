@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:12:59Z
+  at: 2026-10-06T08:43:42Z
 verified: []
 sources:
   - id: s1
@@ -22,6 +22,7 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
 | OD-23 | When does the agent get its own GitHub identity? Until it does, the agent pushes under the creator's git identity, and another member of the owning team must approve. | [ADR 003](/adr/003-agent-operating-model.md) | Deferred by EM on 2026-10-05: "later". Give it write access to branches only, so that EM can approve agent work as a code owner | EM |
+| OD-36 | May a governance motion grant the operator delegatecall? The governance role's `allowFunction` and `scopeFunction` scopes leave the execution options open. A fork probe of 2026-10-06 granted the operator `DelegateCall` on a new target through the governance role, and the operator's delegatecall then rewrote the Asset Safe's threshold slot. The Asset Safe has no guard, so nothing else stops it. The kit had the same gap; the port kept it. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | A: the two scopes pin the options to `None` or `Send`, and a regression test refuses a `DelegateCall` grant; delegatecall for the operator then needs a DAO vote. Not B, which relies on the template factories and the objection window: the factories are not built, and the modifier is the last check before the Asset Safe. ADR 005's roles table gains "grant delegatecall" under the governance role's "may not", before the Emergency Brakes multisig verifies it | EM |
 
 ## Closed
 

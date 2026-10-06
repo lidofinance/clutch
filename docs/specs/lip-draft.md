@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:05:00Z
+  at: 2026-10-06T08:42:46Z
 verified: []
 sources:
   - id: s1
@@ -593,7 +593,7 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 
 **Template factories are the widening surface.** Onboarding no longer needs a vote, so the audit question moves from "is this tree narrower" to "can this template ever emit something unsafe". Each template must be shown to pin every receiver and owner field, to bound every value-moving amount, and to be incapable of emitting an administrative selector. A template flaw is reachable by any motion that survives its objection window.
 
-**Policy encoding.** The policy that the test suite exercises is this team's hand-written encoding. [ADR 004](/adr/004-specifications-and-policy-as-data.md) replaces it with a Zodiac constellation, a compiler and a round-trip check that reads the applied conditions back from the chain: the constellation in TypeScript, Clutch's own compiler that emits one committed JSON artifact, and a check that rebuilds the trees from the modifier's events (OD-33). The team works in the Zodiac UI, and local tooling verifies every transaction that the UI builds. Until the port lands, nothing independent checks the encoding.
+**Policy encoding.** The policy that the test suite exercises is this team's hand-written encoding. [ADR 004](/adr/004-specifications-and-policy-as-data.md) replaces it with a Zodiac constellation, a compiler and a round-trip check that reads the applied conditions back from the chain: the constellation in TypeScript, Clutch's own compiler that emits one committed JSON artifact, and a check that rebuilds the trees from the modifier's events (OD-33). The team works in the Zodiac UI, and local tooling verifies every transaction that the UI builds. The fork tests run on the compiled artifact. The round-trip check is phase 2 work; until it exists, nothing independent checks the encoding.
 
 **Safe v1.5.0 has a short record.** The three new Safes run Safe v1.5.0. Certora and Ackee audited it, Certora's formal verification covers the vault's main Safe paths, no advisory concerns it, and Safe's bug bounty covers it. But it has held little value for a short time. Before March 2026, only 57 Safes were created on it through Safe's factory, and Safe{Wallet} made it the version of new Safes only on 2026-09-22 [s8]. The design keeps the vault off the code that changed most in v1.5.0: the Aragon Agent never signs for the Asset Safe as a contract, and the Asset Safe has no fallback handler. Safe's releases and advisories are checked again before the enabling vote, and a change on the vault's paths goes back to EM (OD-17). The large losses at Safe accounts so far came from falsified signing interfaces, third-party modules and signers' own permission changes, not from Safe's contracts [s8].
 
