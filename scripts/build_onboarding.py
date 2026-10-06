@@ -52,6 +52,13 @@ LABELS = {
     "existing": ("Existing on mainnet", "●"),
     "planned": ("Planned", "◌"),
 }
+# How a change to the mandate stands, and how the constellation differs from the provider's.
+CHANGE_STATES = {
+    "owed": ("Mandate text owed", "✎"),
+    "design": ("Design choice", "◆"),
+    "proposed": ("Proposed", "◌"),
+}
+CHANGE_KINDS = {"changed": ("Changed", "↻"), "added": ("Added", "+"), "removed": ("Removed", "−")}
 EDGE_KINDS = {"owns", "role", "executes", "screens", "governs", "funds", "recovers", "safety", "watches", "signers", "reports"}
 
 
@@ -266,7 +273,7 @@ def parse_yaml(text: str) -> Any:
 
 def load() -> dict[str, Any]:
     content = {}
-    for name in ("meta", "map", "actors", "flows", "assumptions", "reuse", "glossary", "tour", "quiz"):
+    for name in ("meta", "map", "actors", "flows", "assumptions", "reuse", "glossary", "tour", "quiz", "mandate", "constellation"):
         path = CONTENT / f"{name}.yaml"
         try:
             content[name] = parse_yaml(path.read_text(encoding="utf-8"))
@@ -364,6 +371,30 @@ def check(c: dict[str, Any], f: dict[str, Any]) -> dict[str, dict[str, str]]:
             errors.append(f"quiz {q['question']}: answer out of range")
         sources(f"quiz {q['question'][:30]}", q.get("sources"))
 
+    block_ids = set()
+    for b in c["mandate"]["blocks"]:
+        if b["id"] in block_ids:
+            errors.append(f"mandate {b['id']}: duplicate id")
+        block_ids.add(b["id"])
+        sources(f"mandate {b['id']}", b.get("sources"))
+        for line in b["kept"]:
+            head, sep, _ = line.partition(": ")
+            if sep and len(head) <= 20 and head not in LAYERS:
+                errors.append(f"mandate {b['id']}: unknown layer {head}")
+        for i, ch in enumerate(b.get("changes", []), 1):
+            if ch.get("state") not in CHANGE_STATES:
+                errors.append(f"mandate {b['id']} change {i}: bad state {ch.get('state')}")
+            sources(f"mandate {b['id']} change {i}", ch.get("sources"))
+    # The mandate is not approved: no figure from it reaches the page.
+    if re.search(r"[$€£%]", json.dumps(c["mandate"], ensure_ascii=False)):
+        errors.append("mandate: a currency sign or a percentage must not appear; the draft's figures stay out")
+    for item in c["constellation"]["planned"]:
+        sources(f"constellation planned {item['name']}", item.get("sources"))
+    for ch in c["constellation"]["changes"]:
+        if ch.get("kind") not in CHANGE_KINDS:
+            errors.append(f"constellation {ch.get('area')}: bad kind {ch.get('kind')}")
+        sources(f"constellation {ch.get('area')}", ch.get("sources"))
+
     # Every [[term]] in the text must be a glossary term.
     blob = json.dumps(c, ensure_ascii=False)
     for term in re.findall(r"\[\[([^\]]+)\]\]", blob):
@@ -408,6 +439,11 @@ def fmt(text: str) -> str:
 
 def paras(text: str) -> str:
     return "".join(f"<p>{fmt(p.strip())}</p>" for p in str(text).split("\n\n") if p.strip())
+
+
+def count(n: int, noun: str) -> str:
+    """A number with its noun: "1 target", "3 targets", "no budget keys"."""
+    return f"{n} {noun}" if n == 1 else f"{n or 'no'} {noun}s"
 
 
 def source_links(items: list[str], refs: dict[str, dict[str, str]]) -> str:
@@ -564,10 +600,10 @@ def section_actors(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[st
             address = ""
             if a.get("address"):
                 shown = f'<code>{esc(a["address"])}</code>' if re.fullmatch(r"0x[0-9a-fA-F]{40}", a["address"]) else esc(a["address"])
-                address = f'<p class="addr"><span>Address</span> {shown}</p>'
+                address = f'<p class="addr tech"><span>Address</span> {shown}</p>'
             elif a.get("addresses"):
                 rows = "".join(f"<li>{esc(x['name'])} <code>{esc(x['address'])}</code></li>" for x in a["addresses"])
-                address = f'<div class="addr"><span>Addresses</span><ul>{rows}</ul></div>'
+                address = f'<div class="addr tech"><span>Addresses</span><ul>{rows}</ul></div>'
             perms = ""
             if a.get("role") in policy:
                 p = policy[a["role"]]
@@ -581,7 +617,7 @@ def section_actors(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[st
                     if p["keys"] and a["role"] == "operator" else ""
                 )
                 perms = (
-                    f'<details class="tech perms"><summary>Exact permissions in the compiled policy ({len(p["targets"])} targets)</summary>{keys}'
+                    f'<details class="tech perms"><summary>Exact permissions in the compiled policy ({count(len(p["targets"]), "target")})</summary>{keys}'
                     f'<p>Held by: {esc(", ".join(p["members"]))}. On the {esc(p["modifier"])}. Read at build time from the committed fork-test artifact. '
                     f'Its holders are stand-ins, and its budgets and ceilings are dry-run values, not mainnet figures.</p>'
                     f'<table><thead><tr><th>Target</th><th>Calls</th></tr></thead><tbody>{rows}</tbody></table></details>'
@@ -601,6 +637,115 @@ def section_actors(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[st
             f'<p class="lead">{fmt(n["summary"])}</p>{"".join(cards)}</section>'
         )
     return "".join(groups)
+
+
+LAYERS = ("On chain", "Before execution", "Detection", "Display", "Drills")
+
+
+def _layer(line: str) -> str:
+    """A control line, with its layer as a tag when it starts with one."""
+    head, sep, rest = line.partition(": ")
+    if sep and head in LAYERS:
+        return f'<li><span class="layer">{esc(head)}</span> {fmt(rest)}</li>'
+    return f"<li>{fmt(line)}</li>"
+
+
+def change_badge(state: str) -> str:
+    text, icon = CHANGE_STATES[state]
+    return f'<span class="badge ms-{state}"><span aria-hidden="true">{icon}</span> {esc(text)}</span>'
+
+
+def section_mandate(c: dict[str, Any], refs: dict[str, dict[str, str]]) -> str:
+    m = c["mandate"]
+    blocks = m["blocks"]
+    changes = [ch for b in blocks for ch in b.get("changes", [])]
+    counts = {s: sum(ch["state"] == s for ch in changes) for s in CHANGE_STATES}
+    stats = "".join(
+        f'<li class="ms-{s}"><strong>{counts[s]}</strong> {change_badge(s)}</li>' for s in CHANGE_STATES
+    )
+
+    def change_count(b: dict[str, Any]) -> str:
+        n = len(b.get("changes", []))
+        return f' <span class="count">{n}</span>' if n else ""
+
+    jump = "".join(f'<a class="chip" href="#mandate-{esc(b["id"])}">{esc(b["title"])}{change_count(b)}</a>' for b in blocks)
+    cards = []
+    for b in blocks:
+        kept = "".join(_layer(k) for k in b["kept"])
+        tech = f'<div class="tech">{paras(b["tech"])}</div>' if b.get("tech") else ""
+        items = "".join(
+            f'<li class="mchange ms-{ch["state"]}">{change_badge(ch["state"])} {fmt(ch["text"])}'
+            f'<p class="why"><span>Why</span> {fmt(ch["why"])}</p>{source_links(ch.get("sources"), refs)}</li>'
+            for ch in b.get("changes", [])
+        )
+        changed = (
+            f'<div class="mchanges"><h4 class="sub">Changed by Clutch</h4><ul>{items}</ul></div>' if items
+            else '<p class="munchanged">Clutch keeps this as the draft writes it.</p>'
+        )
+        cards.append(
+            f'<article class="card mblock" id="mandate-{esc(b["id"])}"><header><h3>{esc(b["title"])}</h3></header>'
+            f'<blockquote class="msays"><p><span class="mlabel">The draft says</span> {fmt(b["says"])}</p></blockquote>'
+            f'<div class="mkept"><h4 class="sub">How Clutch keeps it</h4><ul>{kept}</ul>{tech}</div>'
+            f'{changed}{source_links(b.get("sources"), refs)}</article>'
+        )
+    return (
+        f'<p class="lead">{fmt(m["intro"])}</p>'
+        f'<ul class="mstats" aria-label="Changes by state">{stats}</ul>'
+        f'<nav class="jump chips" aria-label="Mandate blocks">{jump}</nav>'
+        f'<div class="mgrid">{"".join(cards)}</div>'
+    )
+
+
+def section_constellation(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[str, str]]) -> str:
+    k = c["constellation"]
+    modifiers: dict[str, list[dict[str, Any]]] = {}
+    for role in f["policy"]:
+        modifiers.setdefault(role["modifier"], []).append(role)
+    mods = []
+    for name, roles in modifiers.items():
+        keys = len(roles[0]["keys"]) if roles else 0
+        role_boxes = []
+        for r in roles:
+            calls = sum(len(t["calls"]) for t in r["targets"])
+            targets = "".join(f'<li>{esc(tg["name"])} <span class="count">{len(tg["calls"])}</span></li>' for tg in r["targets"])
+            role_boxes.append(
+                f'<div class="cnode crole" id="crole-{slug(r["modifier"])}-{slug(r["role"])}"><span class="ckind">Role</span><strong>{esc(r["role"])}</strong>'
+                f'<small>held by {esc(", ".join(r["members"]))}</small>'
+                f'<small>{count(len(r["targets"]), "target")} · {count(calls, "call")}</small>'
+                f'<details class="tech"><summary>Targets and calls</summary><ul>{targets}</ul></details></div>'
+            )
+        mods.append(
+            f'<div class="cmod"><div class="cnode cmodifier"><span class="ckind">Roles modifier</span><strong>{esc(name)}</strong>'
+            f'<small>{count(len(roles), "role")} · {count(keys, "budget key")}</small></div>'
+            f'<div class="croles">{"".join(role_boxes)}</div></div>'
+        )
+    graph = (
+        f'<div class="cgraph" role="group" aria-label="The constellation as built">'
+        f'<div class="cnode cavatar"><span class="ckind">Avatar and owner</span><strong>Asset Safe</strong>'
+        f'<small>The Aragon Agent owns it; every permitted call runs as it</small></div>'
+        f'<div class="cmods">{"".join(mods)}</div></div>'
+    )
+    planned = "".join(
+        f'<article class="card cplan"><header><h4>{esc(p["name"])}</h4>{badge("specified")}</header>'
+        f'<p class="meta"><span>Where</span> {fmt(p["where"])}</p><p>{fmt(p["what"])}</p>{source_links(p.get("sources"), refs)}</article>'
+        for p in k["planned"]
+    )
+    rows = "".join(
+        f'<tr id="cchange-{slug(ch["area"])}"><th scope="row">{esc(ch["area"])}<br>'
+        f'<span class="badge ck-{ch["kind"]}"><span aria-hidden="true">{CHANGE_KINDS[ch["kind"]][1]}</span> {CHANGE_KINDS[ch["kind"]][0]}</span></th>'
+        f'<td class="cwas" data-label="Provider\'s constellation">{fmt(ch["provider"])}</td>'
+        f'<td class="cnow" data-label="Clutch">{fmt(ch["clutch"])}</td>'
+        f'<td data-label="Why">{fmt(ch["why"])}{source_links(ch.get("sources"), refs)}</td></tr>'
+        for ch in k["changes"]
+    )
+    return (
+        f'<p class="lead">{fmt(k["intro"])}</p>'
+        f'<h3>As built, from the committed artifact</h3>{graph}'
+        f'<h3>Specified, not in the constellation yet</h3><div class="cplans">{planned}</div>'
+        f'<h3>What Clutch changed from the provider\'s constellation, and why <span class="count">{len(k["changes"])}</span></h3>'
+        f'<div class="tablewrap"><table class="cdiff"><thead><tr><th scope="col">Area</th><th scope="col">Provider\'s constellation</th>'
+        f'<th scope="col">Clutch</th><th scope="col">Why</th></tr></thead><tbody>{rows}</tbody></table></div>'
+    )
 
 
 def section_flows(c: dict[str, Any], refs: dict[str, dict[str, str]]) -> str:
@@ -792,6 +937,8 @@ def render(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[str, str]]
     tabs = [
         ("actors", "Actors", section_actors(c, f, refs)),
         ("flows", "Flows", section_flows(c, refs)),
+        ("mandate", "Mandate", section_mandate(c, refs)),
+        ("constellation", "Constellation", section_constellation(c, f, refs)),
         ("reuse", "Built or reused", section_reuse(c, refs)),
         ("assumptions", "Assumptions", section_assumptions(c, refs)),
         ("status", "Status", section_status(c, f, refs)),
@@ -824,8 +971,9 @@ def render(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[str, str]]
 <header class="top">
 <div class="brand"><h1>{esc(m["title"])}</h1><p class="subtitle">{fmt(m["subtitle"])}</p></div>
 <div class="controls">
-<div class="seg" role="group" aria-label="Detail"><button type="button" data-lens="plain" aria-pressed="true">Plain</button><button type="button" data-lens="tech" aria-pressed="false">Technical</button></div>
+<div class="seg" role="group" aria-label="Detail" aria-describedby="lens-note"><button type="button" data-lens="plain" aria-pressed="true">Plain</button><button type="button" data-lens="tech" aria-pressed="false">Technical</button></div>
 <div class="seg" role="group" aria-label="Theme"><button type="button" data-theme-set="auto" aria-pressed="true">Auto</button><button type="button" data-theme-set="light" aria-pressed="false">Light</button><button type="button" data-theme-set="dark" aria-pressed="false">Dark</button></div>
+<p class="lensnote" id="lens-note">{fmt(m["lens_note"])}</p>
 </div>
 <p class="banner" role="note">{fmt(m["banner"])}</p>
 </header>

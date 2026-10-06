@@ -104,6 +104,7 @@ button { font: inherit; color: inherit; }
 @media (max-width: 640px) {
   .top { grid-template-columns: minmax(0, 1fr); }
   .controls { justify-content: flex-start; }
+  .lensnote { text-align: left; }
 }
 .mapcard { margin: 0; padding: 14px 16px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
 .mapcard figcaption h2 { font-size: 1.15rem; margin-bottom: 0.2em; }
@@ -279,6 +280,68 @@ main:focus:not(:focus-visible), #player-title:focus:not(:focus-visible) { outlin
   position: fixed; z-index: 20; max-width: 340px; padding: 7px 10px; border-radius: 8px;
   background: var(--ink); color: var(--surface); font-size: 0.84rem; line-height: 1.4; pointer-events: none;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+
+/* The Plain / Technical switch: what Technical adds. */
+.lensnote { flex-basis: 100%; margin: 0; font-size: 0.8rem; color: var(--ink-2); text-align: right; }
+.addr.tech { border-left: 0; padding: 0; color: inherit; font-size: inherit; }
+
+/* The mandate: what the draft says, how it is kept, and what Clutch changed.
+   A change is marked by its badge's icon and label, never by colour alone. */
+.mstats { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 0; margin: 8px 0 12px; }
+.mstats li { display: flex; align-items: center; gap: 8px; }
+.mstats strong { font-size: 1.3rem; }
+.mgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 0 16px; }
+.mblock h3 { margin: 0; font-size: 1.05rem; }
+.msays { margin: 10px 0; padding: 8px 12px; border-left: 4px solid var(--axis); background: var(--page); border-radius: 0 8px 8px 0; }
+.msays p { margin: 0; }
+.mlabel, .ckind { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2); margin-bottom: 2px; }
+.mkept ul, .mchanges ul { margin: 4px 0 0; padding-left: 1.1em; }
+.mkept li { margin: 3px 0; }
+.layer { font-size: 0.74rem; padding: 0 7px; margin-right: 4px; border: 1px solid var(--axis); border-radius: 999px; color: var(--ink-2); white-space: nowrap; }
+.mchanges ul { list-style: none; padding: 0; }
+.mchange { margin: 8px 0; padding: 8px 12px; border-left: 4px solid var(--axis); border-radius: 0 8px 8px 0; background: var(--page); }
+.mchange .why { margin: 4px 0 0; }
+.mchange.ms-owed { border-left-color: var(--ops); background: color-mix(in srgb, var(--ops) 9%, var(--surface)); }
+.mchange.ms-design { border-left-color: var(--gov); background: color-mix(in srgb, var(--gov) 8%, var(--surface)); }
+.mchange.ms-proposed { border-left-style: dashed; }
+.badge.ms-owed { border-color: var(--ops); background: color-mix(in srgb, var(--ops) 14%, var(--surface)); }
+.badge.ms-design { border-color: var(--gov); background: color-mix(in srgb, var(--gov) 12%, var(--surface)); }
+.badge.ms-proposed { border-color: var(--axis); border-style: dashed; background: var(--page); }
+.munchanged { color: var(--ink-2); font-size: 0.9rem; }
+
+/* The constellation: the built policy from the artifact, the planned parts, and the changes. */
+.cgraph { display: grid; gap: 10px; justify-items: stretch; margin: 8px 0 18px; }
+.cnode { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.cnode small { color: var(--ink-2); font-size: 0.84rem; }
+.cavatar { border: 2px solid var(--vault); background: color-mix(in srgb, var(--vault) 8%, var(--surface)); justify-self: center; min-width: min(100%, 360px); text-align: center; }
+.cmods { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 12px; }
+.cmod { display: grid; gap: 8px; padding: 10px; border: 1px dashed var(--axis); border-radius: 10px; }
+.cmodifier { border: 2px solid var(--vault); }
+.croles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 8px; }
+.crole details ul { margin: 4px 0 0; padding-left: 1.1em; font-size: 0.85rem; }
+.cplans { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 0 14px; }
+.cplan { border-style: dashed; }
+.tablewrap { overflow-x: auto; }
+.cdiff { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.cdiff th, .cdiff td { text-align: left; vertical-align: top; padding: 8px 10px; border-top: 1px solid var(--grid); }
+.cdiff thead th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-2); }
+.cdiff tbody th { min-width: 8em; }
+.cdiff tbody th .badge { display: inline-block; margin-top: 4px; font-weight: 400; }
+.cwas { color: var(--ink-2); }
+.cnow { border-left: 4px solid var(--vault); background: color-mix(in srgb, var(--vault) 8%, var(--surface)); }
+.badge.ck-changed { border-color: var(--gov); background: color-mix(in srgb, var(--gov) 12%, var(--surface)); }
+.badge.ck-added { border-color: var(--vault); background: color-mix(in srgb, var(--vault) 12%, var(--surface)); }
+.badge.ck-removed { border-color: var(--serious); background: color-mix(in srgb, var(--serious) 14%, var(--surface)); }
+/* On a phone each change stacks. The table keeps its roles; the column names stay
+   for screen readers, and each cell shows its column's name, which they skip. */
+@media (max-width: 640px) {
+  .cdiff thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .cdiff, .cdiff tbody, .cdiff tr, .cdiff th, .cdiff td { display: block; }
+  .cdiff tr { border-top: 1px solid var(--grid); padding: 6px 0; }
+  .cdiff th, .cdiff td { border-top: 0; padding: 4px 10px; }
+  .cdiff td::before { content: attr(data-label) / ""; display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2); }
 }
 
 @media print {

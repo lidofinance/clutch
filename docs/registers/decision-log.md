@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T21:22:14Z
+  at: 2026-10-06T22:32:10Z
 verified: []
 sources:
   - id: s1
@@ -31,9 +31,19 @@ sources:
 
 Entries quote EM exactly, including typos. An agent copied them from the interview transcripts. EM should confirm each entry by verifying this page. Newest first. Times are UTC.
 
-Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
+Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, and a local file path out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-06 — the mandate and the constellation in the onboarding guide
+
+> let's add two new items for onboarding:
+> - the mandate visual blocks with texts and explainers, also visually highlight what we changed in this repo and why
+> - the constellation config represented visually (maybe a bit high-level to not burden the doc), also visually highlight what we changed in this repo and why
+> - also I am not sure if 'Plain / Technical' toggle works at all
+> - also I see this console error: 'clutch-onboarding.html:1 Unsafe attempt to load URL file:///[local path]/clutch/docs/onboarding/clutch-onboarding.html from frame with URL file:///[local path]/clutch/docs/onboarding/clutch-onboarding.html. 'file:' URLs are treated as unique security origins'
+
+Recorded as: the onboarding guide gets a Mandate tab and a Constellation tab ([onboarding guide](/onboarding/guide.md)). The agent reads "the mandate visual blocks" as one card for each part of the mandate draft: what the draft says, how Clutch keeps the rule, and each change that Clutch made, with its reason and its state: mandate text owed, design choice or proposed. The draft is not public, so a card paraphrases only what this repository records about it and shows no figure from it ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)). The agent reads "a bit high-level" as the modifiers and roles of the committed artifact with their holders and counts, each role's exact targets only in the Technical view, and a table of the changes from the policy provider's constellation. The doubt about the detail switch and the console error are reports of defects, which the agent checks and fixes where it finds a cause. [s5]
 
 ## 2026-10-06 — OD-49: emergency exits for positions that a motion onboards
 

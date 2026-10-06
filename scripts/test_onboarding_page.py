@@ -50,7 +50,10 @@ FACTS = B.facts()
 NODES = {n["id"]: n for n in CONTENT["map"]["nodes"]}
 EDGES = CONTENT["map"]["edges"]
 FLOWS = CONTENT["flows"]["flows"]
-TABS = ["tab-actors", "tab-flows", "tab-reuse", "tab-assumptions", "tab-status", "tab-glossary", "tab-selfcheck"]
+TABS = ["tab-actors", "tab-flows", "tab-mandate", "tab-constellation", "tab-reuse", "tab-assumptions", "tab-status", "tab-glossary",
+        "tab-selfcheck"]
+BLOCKS = CONTENT["mandate"]["blocks"]
+CHANGES = [ch for b in BLOCKS for ch in b.get("changes", [])]
 
 
 def plain(text: str) -> str:
@@ -214,6 +217,11 @@ def test_structure(browser: Browser, run: Run) -> None:
             "reuse cards": (page.locator(".card.reuse").count(), len(CONTENT["reuse"])),
             "glossary terms": (page.locator(".gterm").count(), len(CONTENT["glossary"])),
             "questions": (page.locator("fieldset.q").count(), len(CONTENT["quiz"])),
+            "mandate blocks": (page.locator(".card.mblock").count(), len(BLOCKS)),
+            "mandate changes": (page.locator(".mchange").count(), len(CHANGES)),
+            "roles in the constellation": (page.locator(".crole").count(), len(FACTS["policy"])),
+            "specified parts": (page.locator(".card.cplan").count(), len(CONTENT["constellation"]["planned"])),
+            "constellation changes": (page.locator("table.cdiff tbody tr").count(), len(CONTENT["constellation"]["changes"])),
         }
         run.check(all(a == b for a, b in counts_on_page.values()), "the page shows every item of the content", counts_on_page)
 
@@ -237,19 +245,53 @@ def test_theme(browser: Browser, run: Run) -> None:
 
 def test_lens(browser: Browser, run: Run) -> None:
     with opened(browser, run, "lens") as page:
-        page.click("#tablink-flows")
-        total = page.locator("#tab-flows .tech").count()
-        run.check(total > 0 and not any(displayed(page, "#tab-flows .tech")) and pressed(page, "data-lens") == ["plain"],
-                  f"Plain hides every technical note ({total} in the flows)")
+        caption = " ".join(page.inner_text("#lens-note").split())
+        run.check(page.get_attribute(".seg[aria-label=Detail]", "aria-describedby") == "lens-note" and caption == plain(CONTENT["meta"]["lens_note"]),
+                  "the Detail switch says what Technical adds", caption)
+        notes, shown = {}, []
+        for tab in TABS:
+            page.click(f".tab[aria-controls={tab}]")
+            notes[tab] = page.locator(f"#{tab} .tech").count()
+            if any(displayed(page, f"#{tab} .tech")):
+                shown.append(tab)
+        run.check(not shown and pressed(page, "data-lens") == ["plain"],
+                  f"Plain hides every technical note in every tab ({sum(notes.values())} notes)", shown)
+        bare = [t for t in ("tab-actors", "tab-flows", "tab-mandate", "tab-constellation") if not notes[t]]
+        run.check(not bare, "the actors, flows, mandate and constellation tabs carry technical notes", notes)
+        addresses = sum(bool(a.get("address") or a.get("addresses")) for a in CONTENT["actors"])
+        run.check(page.locator("#tab-actors .addr.tech").count() == addresses and page.locator("#tab-actors .addr:not(.tech)").count() == 0,
+                  f"every address is a technical note ({addresses} cards)")
         page.click("[data-lens=tech]")
-        run.check(all(displayed(page, "#tab-flows .tech")) and pressed(page, "data-lens") == ["tech"]
-                  and page.evaluate("document.body.className") == "lens-tech", "Technical shows every technical note")
+        hidden = []
+        for tab in TABS:
+            page.click(f".tab[aria-controls={tab}]")
+            if not all(displayed(page, f"#{tab} .tech")):
+                hidden.append(tab)
+        run.check(not hidden and pressed(page, "data-lens") == ["tech"] and page.evaluate("document.body.className") == "lens-tech",
+                  "Technical shows every technical note in every tab", hidden)
+        page.click("#tablink-flows")
         flow = next(f for f in FLOWS if f["steps"][0].get("tech"))
         page.click(f"#flow-{flow['id']} .play")
         run.check(all(displayed(page, "#player-body .tech")), f"the panel shows the technical note of {flow['id']} in Technical")
         page.click("[data-lens=plain]")
         run.check(not any(displayed(page, "#player-body .tech")) and not any(displayed(page, "#tab-flows .tech")),
                   "Plain hides the technical notes again, in the panel too")
+        page.keyboard.press("Escape")
+
+        scenes = CONTENT["tour"]
+        page.click("[data-lens=tech]")
+        page.click("#start-tour")
+        wrong = []
+        for i, scene in enumerate(scenes, 1):
+            if scene.get("tech"):
+                text = " ".join(" ".join(page.locator("#player-body .tech").all_inner_texts()).split())
+                if not (all(displayed(page, "#player-body .tech")) and plain(scene["tech"])[:80] in text):
+                    wrong.append((i, text[:60]))
+            if i < len(scenes):
+                page.click("#next")
+        run.check(not wrong, f"Technical shows each scene's technical note in the panel ({sum(bool(s.get('tech')) for s in scenes)} notes)", wrong[:2])
+        page.click("[data-lens=plain]")
+        run.check(not any(displayed(page, "#player-body .tech")), "Plain hides the scene's technical note in the panel")
 
 
 def test_tabs(browser: Browser, run: Run) -> None:
@@ -287,6 +329,8 @@ def test_links(browser: Browser, run: Run) -> None:
         f"assumption-{len(CONTENT['assumptions'])}": "tab-assumptions",
         f"term-{B.slug(sorted(t['term'] for t in CONTENT['glossary'])[-1])}": "tab-glossary",
         f"scene-{len(CONTENT['tour'])}": None,
+        f"mandate-{BLOCKS[-1]['id']}": "tab-mandate",
+        f"cchange-{B.slug(CONTENT['constellation']['changes'][-1]['area'])}": "tab-constellation",
     }
     for target, tab in targets.items():
         with opened(browser, run, "links", fragment=f"#{target}") as page:
@@ -482,7 +526,9 @@ def test_terms(browser: Browser, run: Run) -> None:
 
 def test_jumps(browser: Browser, run: Run) -> None:
     with opened(browser, run, "jump lists") as page:
-        for tab, selector, count in (("tab-actors", "#tab-actors nav.jump a", len(NODES)), ("tab-flows", "#tab-flows nav.jump a", len(FLOWS))):
+        lists = (("tab-actors", len(NODES)), ("tab-flows", len(FLOWS)), ("tab-mandate", len(BLOCKS)))
+        for tab, count in lists:
+            selector = f"#{tab} nav.jump a"
             page.click(f"#tablink-{tab[4:]}")
             hrefs = page.eval_on_selector_all(selector, "els => els.map((e) => e.getAttribute('href'))")
             wrong = []
@@ -505,10 +551,80 @@ def test_permissions(browser: Browser, run: Run) -> None:
             box = page.locator(f"#actor-{actor['id']} details.perms")
             box.locator("summary").click()
             role = roles[actor["role"]]
-            got = (box.evaluate("d => d.open"), box.locator("tbody tr").count(), all(m in box.inner_text() for m in role["members"]))
-            if got != (True, len(role["targets"]), True):
+            got = (box.evaluate("d => d.open"), box.locator("tbody tr").count(), all(m in box.inner_text() for m in role["members"]),
+                   f'({B.count(len(role["targets"]), "target")})' in box.locator("summary").inner_text())
+            if got != (True, len(role["targets"]), True, True):
                 wrong.append((actor["id"], got))
         run.check(bool(cards) and not wrong, f"every role card opens the role's exact permissions from the artifact ({len(cards)} roles)", wrong)
+
+
+def test_mandate(browser: Browser, run: Run) -> None:
+    with opened(browser, run, "mandate", fragment="#tab-mandate") as page:
+        stats = page.eval_on_selector_all(".mstats li", "els => els.map((e) => [e.className, e.querySelector('strong').textContent])")
+        want = [[f"ms-{s}", str(sum(ch["state"] == s for ch in CHANGES))] for s in B.CHANGE_STATES]
+        run.check(stats == want, "the counts by state add up the changes of every block", stats)
+        chips = page.eval_on_selector_all("#tab-mandate nav.jump a", "els => els.map((e) => e.querySelector('.count')?.textContent || '')")
+        run.check(chips == [str(len(b["changes"])) if b.get("changes") else "" for b in BLOCKS], "each block's link counts its changes", chips)
+        wrong = []
+        for b in BLOCKS:
+            card = page.locator(f"#mandate-{b['id']}")
+            got = {
+                "says": plain(b["says"]) in " ".join(card.locator(".msays").inner_text().split()),
+                "controls": card.locator(".mkept > ul > li").count(),
+                "layers": card.locator(".mkept .layer").evaluate_all("els => els.map((e) => e.textContent)"),
+                "states": card.locator(".mchange").evaluate_all("els => els.map((e) => [...e.classList].find((c) => c.startsWith('ms-')))"),
+                "reasons": card.locator(".mchange .why").count(),
+                "unchanged": card.locator(".munchanged").count(),
+            }
+            want = {
+                "says": True,
+                "controls": len(b["kept"]),
+                "layers": [k.partition(": ")[0] for k in b["kept"] if k.partition(": ")[0] in B.LAYERS],
+                "states": [f"ms-{ch['state']}" for ch in b.get("changes", [])],
+                "reasons": len(b.get("changes", [])),
+                "unchanged": 0 if b.get("changes") else 1,
+            }
+            if got != want:
+                wrong.append((b["id"], {k: got[k] for k in want if got[k] != want[k]}))
+        run.check(not wrong, f"every block shows the draft's text, each control with its layer, and each change with its state and "
+                  f"reason ({len(BLOCKS)} blocks, {len(CHANGES)} changes)", wrong[:2])
+        text = page.inner_text("#tab-mandate")
+        run.check(not re.search(r"[$€£%]", text), "the mandate tab shows no currency sign and no percentage", re.findall(r".{0,20}[$€£%]", text)[:2])
+
+
+def test_constellation(browser: Browser, run: Run) -> None:
+    roles = FACTS["policy"]
+    modifiers = list(dict.fromkeys(r["modifier"] for r in roles))
+    k = CONTENT["constellation"]
+    with opened(browser, run, "constellation", fragment="#tab-constellation") as page:
+        graph = page.eval_on_selector_all(
+            ".cmod", "ms => ms.map((m) => [m.querySelector('.cmodifier strong').textContent, [...m.querySelectorAll('.crole strong')].map((r) => r.textContent)])")
+        want = [[m, [r["role"] for r in roles if r["modifier"] == m]] for m in modifiers]
+        run.check(graph == want, f"the graph shows each modifier of the artifact with its roles ({len(modifiers)} modifiers, {len(roles)} roles)", graph)
+        wrong = []
+        for r in roles:
+            text = " ".join(page.inner_text(f"#crole-{B.slug(r['modifier'])}-{B.slug(r['role'])}").split())
+            calls = sum(len(t["calls"]) for t in r["targets"])
+            if not (all(m in text for m in r["members"]) and f'{B.count(len(r["targets"]), "target")} · {B.count(calls, "call")}' in text):
+                wrong.append((r["role"], text[:100]))
+        run.check(not wrong, "every role box names its holder and counts its targets and calls from the artifact", wrong[:2])
+        run.check(not any(displayed(page, "#tab-constellation details.tech")), "Plain hides each role's list of targets")
+        page.click("[data-lens=tech]")
+        wrong = []
+        for r in roles:
+            box = page.locator(f"#crole-{B.slug(r['modifier'])}-{B.slug(r['role'])} details.tech")
+            box.locator("summary").click()
+            names = box.locator("li").evaluate_all("els => els.map((e) => e.firstChild.textContent.trim())")
+            if not (box.evaluate("d => d.open") and names == [t["name"] for t in r["targets"]]):
+                wrong.append((r["role"], names[:3]))
+        run.check(not wrong, "Technical opens each role's targets, as the artifact lists them", wrong[:2])
+        plans = page.eval_on_selector_all(".cplan h4", "els => els.map((e) => e.textContent)")
+        run.check(plans == [p["name"] for p in k["planned"]], f"the specified parts show apart from the built ones ({len(plans)})", plans)
+        rows = page.eval_on_selector_all(
+            "table.cdiff tbody tr",
+            "rs => rs.map((r) => [r.id, r.querySelector('th').firstChild.textContent, [...r.querySelector('th .badge').classList].find((c) => c.startsWith('ck-'))])")
+        want = [[f"cchange-{B.slug(ch['area'])}", ch["area"], f"ck-{ch['kind']}"] for ch in k["changes"]]
+        run.check(rows == want, f"the change table shows every change with its kind ({len(want)} rows)", [r for r in rows if r not in want][:2])
 
 
 def test_selfcheck(browser: Browser, run: Run) -> None:
@@ -580,6 +696,14 @@ def test_phone(browser: Browser, run: Run) -> None:
         page.locator("#node-asset-safe").tap()
         run.check(player(page)["title"] == label("asset-safe") and in_view(page, "#player-title"), "a tapped box opens its actors in view")
         run.check(not tip(page)[0], "a tap shows no tooltip over the panel")
+        wide = []
+        for tab in TABS:
+            page.click(f".tab[aria-controls={tab}]")
+            if page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth") > 0:
+                wide.append(tab)
+        run.check(not wide, "no tab makes the page scroll sideways on a phone", wide)
+        page.click("#tablink-constellation")
+        run.check(page.eval_on_selector(".tablewrap", "w => w.scrollWidth <= w.clientWidth"), "the table of changes stacks within a phone's width")
 
 
 def test_motion(browser: Browser, run: Run) -> None:
@@ -663,6 +787,8 @@ GROUPS: dict[str, Callable[[Browser, Run], None]] = {
     "terms": test_terms,
     "jumps": test_jumps,
     "permissions": test_permissions,
+    "mandate": test_mandate,
+    "constellation": test_constellation,
     "selfcheck": test_selfcheck,
     "skip": test_skip_link,
     "nojs": test_without_javascript,

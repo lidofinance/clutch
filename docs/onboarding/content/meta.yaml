@@ -14,6 +14,7 @@ map_caption: >-
   the border shows whether it is new, and the icon shows its kind. The Aragon Agent also owns the boxes
   marked "Agent owns it"; only the Asset Safe's ownership has an arrow. Select a box to see its actors,
   or play a flow to watch it move.
+lens_note: "Technical adds contract addresses, exact permissions, function signatures and implementation notes."
 panel_default: >-
   **Start here.** The guided tour explains the system in ten short scenes, on this map.
   To explore on your own, select a box on the map, or open a tab below.
@@ -54,6 +55,8 @@ reuse_columns:
 tab_intros:
   actors: "Every account, body and service, grouped as on the map. The roles also show their exact permissions, read from the compiled policy when this page is built."
   flows: "What happens, step by step. Each flow can play on the map. The badge shows whether the flow is built and tested on a fork, specified, or still open."
+  mandate: "The committee's rulebook, block by block: what the draft says, how Clutch keeps each rule, and what Clutch changed and why. Highlighted notes mark each change."
+  constellation: "The permission policy as code: the accounts, modifiers and roles that the committed artifact builds, what is specified but not built, and what Clutch changed from the policy provider's version."
   reuse: "What Clutch takes from audited code and existing platforms, and what it adds. New things carry the review and audit risk."
   assumptions: "What must stay true for the design to hold, ranked by impact. Each one says what breaks if it is false and what watches it."
   status: "Where the work stands. These tables are read from the repository when the page is built."

@@ -1,0 +1,188 @@
+# The Treasury Management mandate, block by block: what the draft says, how Clutch keeps each
+# rule, and what Clutch changed and why. Only what the repository already records about the draft;
+# the draft itself is restricted, and no figure from it enters this page.
+# Change state: owed (EM decided; the mandate text owes the change), design (Clutch's design
+# choice; no text change is needed), proposed (agent-drafted, not yet decided).
+intro: >-
+  LDO holders approve the mandate in a Snapshot vote. Its draft is not public yet, so this tab paraphrases only what
+  the repository records about it, and shows no figure from it.
+blocks:
+  - id: custody
+    title: Purpose and custody
+    says: "The committee puts a bounded part of the DAO treasury to work in approved protocols. The DAO keeps the assets, and no committee or service provider can take them."
+    kept:
+      - "On chain: the Aragon Agent is the only owner of the Asset Safe, the orders account and the first-loss Safe."
+      - "On chain: every receiver, owner and beneficiary in the operator's permissions is the vault."
+      - "Detection: alerts on any change of the owners, modules or singleton of every new Safe."
+    tech: "INV-001, INV-021 and INV-023 fix the owners; INV-003 and INV-022 fix the receivers."
+    changes: []
+    sources: [ADR-005, INV-001, INV-003, "doc:docs/product/brief.md#the-system", "doc:docs/specs/lip-draft.md#simple-summary", "doc:docs/specs/control-matrix.md#the-matrix"]
+
+  - id: assets
+    title: Assets and venues
+    says: "A launch list of assets and venues: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access, Lido Lend access and LDO. It names four main stablecoins: USDC, USDT, USDS and DAI."
+    kept:
+      - "On chain: default deny. A new target needs a template motion with a 72-hour objection window, or a DAO vote."
+      - "Before execution: the screening vendor checks every operator transaction and every new motion."
+      - "Detection: drift of the chain from the committed policy."
+    tech: "INV-004 and INV-005 bound what a motion can add. INV-015 keeps the operator inside the launch scope."
+    changes:
+      - text: "DAI joins the launch list, so the vault holds all four main stablecoins. DAI earns through Sky's DAI–USDS converter, one to one, and not through swaps."
+        why: "The mandate's four main stablecoins include DAI, and converting is cheaper than swapping."
+        state: design
+        sources: [ADR-011, OD-22]
+      - text: "Lido Lend joins by one motion after launch. It is a separate deployment that is compatible with Morpho Blue, and the same motion adds its emergency exit."
+        why: "Lido Lend does not exist yet, so its address cannot be in the enabling vote."
+        state: design
+        sources: [ADR-011, OD-49]
+    sources: [ADR-011, ADR-006, INV-004, INV-015, "doc:docs/specs/control-matrix.md#the-matrix"]
+
+  - id: caps
+    title: Exposure caps
+    says: "Caps on exposure, each a share of a defined base: per protocol or counterparty, per stablecoin, and for yield-bearing assets. The whole vault may sit in Lido's own products."
+    kept:
+      - "On chain: none. The policy cannot see value; budgets per protocol spender bound how much can move each month."
+      - "Before execution: a screening rule is requested that refuses an operator transaction that breaches a cap."
+      - "Detection: monitoring publishes the cap reading of each fortnightly snapshot. If a breach is not fixed within two working days and is larger at the next reading, the Emergency Brakes multisig stops the operator."
+      - "Display: each cap against its limit, in the Zodiac UI."
+    tech: "Budget keys count token units and refill no more often than every 30 days. Caps are ratios, so the committee retunes the budgets every two weeks."
+    changes:
+      - text: "A new Lido product, Lido Lend first, stays in the protocol cap until it meets the maturity criteria and a budget motion with a forum post unlocks it. earnETH and earnUSD are not new."
+        why: "A product without a track record should not take the whole vault on its first day."
+        state: owed
+        sources: [ADR-009, OD-41]
+      - text: "The illustrative balance renames its \"USD-denominated\" heading."
+        why: "The heading read like the base of the yield-bearing cap, which it is not."
+        state: owed
+        sources: [ADR-009, OD-03]
+      - text: "The mandate says that caps are kept by measurement, publication and remediation, not by reverting a transaction."
+        why: "The permission layer cannot see value, so no contract reverts on a cap."
+        state: proposed
+        sources: [ADR-009, "lip:part-9"]
+    sources: [ADR-009, ADR-011, OD-29, OD-32, "doc:docs/specs/control-matrix.md#the-matrix"]
+
+  - id: buffer
+    title: Liquidity buffer
+    says: "A stablecoin buffer of one month of baseline spend."
+    kept:
+      - "On chain: none."
+      - "Before execution: a screening rule is requested that refuses an operator transaction that takes the buffer below its floor."
+      - "Detection: a continuous detector with an early warning, and a line in every report."
+      - "Display: the buffer against its floor, in the Zodiac UI."
+    tech: "The buffer counts the stablecoins that the Asset Safe holds directly, and sUSDS. Its figure comes from the attested computation."
+    changes:
+      - text: "The buffer section states the buffer's controls: the detector, the report line, screening where the vendor can check it, the display, and the committee's window to restore it."
+        why: "Nothing on chain can hold a buffer, so monitoring, reports, screening and the display must keep it."
+        state: owed
+        sources: [ADR-009, OD-40]
+    sources: [ADR-011, ADR-009, OD-40, "runbook:Restore the liquidity buffer"]
+
+  - id: funding
+    title: Funding and top-ups
+    says: "A motion seeds the vault in stETH or stablecoins, up to the TM Floor Value, and later top-ups refill it to the floor. After an objection, a further pull needs a Snapshot vote. The legacy investments reduce the seed."
+    kept:
+      - "On chain: two funding registries pay only the Asset Safe, within a monthly limit each."
+      - "Before execution: the screening vendor checks every top-up motion when the operator Safe creates it."
+      - "Detection: alerts on a top-up motion outside days 1 to 10 of a month, on top-ups above the posted shortfall, and on any top-up after an objected one."
+    tech: "INV-017 fixes the registries' recipient. A registry cannot enforce the Snapshot-vote rule after an objection; monitoring and a DAO vote that sets the limit to zero cover it."
+    changes:
+      - text: "The funding rules allow sUSDS."
+        why: "A DAO vote adds USDS to the shared payment permission, and the stablecoin registry pays sUSDS too."
+        state: owed
+        sources: [ADR-008, OD-11]
+      - text: "ETH is not a funding asset; stETH covers the mandate's \"(st)ETH\"."
+        why: "EM decided that stETH covers the mandate's \"(st)ETH\", so the funding registries need no ETH path."
+        state: design
+        sources: [ADR-008, OD-11]
+    sources: [ADR-008, OD-06, OD-11, INV-017, "runbook:Top up the vault"]
+
+  - id: swaps
+    title: Swaps
+    says: "The emergency path may swap any asset into any of the four main stablecoins."
+    kept:
+      - "On chain: every swap is a CoW order from the orders account, and each role's permissions pin the receiver: the Asset Safe for the operator, the Aragon Agent for recovery."
+      - "Before execution: the screening vendor checks every operator order. Recovery orders are never screened."
+      - "Detection: each fill against a market price, open orders, and a page on every emergency swap."
+    tech: "Orders live at most 30 days, recovery orders 1 day (INV-024). Nothing on chain bounds an order's price; CoW's competition and EBBO rule hold a fill to the on-chain market."
+    changes:
+      - text: "The emergency swap goes into USDC, or USDT as the second destination, and not into any of the four main stablecoins."
+        why: "USDS and DAI carry USDC risk through Sky's peg stability module, so they are no escape from a USDC depeg."
+        state: owed
+        sources: [ADR-007, OD-26]
+      - text: "The swap section names CoW's market, limit, TWAP and stop-loss orders through the orders account, says that nothing on chain bounds their price, and makes Uniswap and 1inch wait for a screening check of the output."
+        why: "The committee needs those order types, and a router swap without a bounded output loses value to front-running."
+        state: owed
+        sources: [ADR-007, OD-43, OD-48]
+    sources: [ADR-007, OD-26, OD-43, OD-47, OD-48, INV-024, "runbook:Recovery order"]
+
+  - id: emergency
+    title: Emergency exit
+    says: "A dual-access emergency exit: the DAO, and an emergency committee independent of the Treasury Management Committee, can each return every asset to the treasury within six hours."
+    kept:
+      - "On chain: the emergency Safe revokes, exits and sends assets to the Agent through the safety modifier, which nothing screens."
+      - "On chain: the Emergency Brakes multisig can switch the operator off; a DAO vote can do anything."
+      - "Drills: fork drills must show every emergency action initiated within six hours."
+    tech: "INV-002 and INV-009 fix the emergency and technical powers. A motion that onboards a protocol also adds its emergency exit through the exit-governance role (INV-025)."
+    changes:
+      - text: "The emergency section describes the emergency Safe as the committee's signers at two of seven, the technical role of the Emergency Brakes multisig, and a DAO vote as the path that is independent of the committee."
+        why: "Speed comes from the committee's own signers. The Emergency Brakes multisig is independent but only stops the operator, and only the DAO is fully independent, in days."
+        state: owed
+        sources: [ADR-005, OD-30]
+    sources: [ADR-005, OD-30, OD-49, "lip:part-6", "runbook:Return assets to the Agent"]
+
+  - id: reporting
+    title: Reporting
+    says: "The committee publishes a monthly report within seven calendar days after month-end, a post before each top-up, and an incident report."
+    kept:
+      - "A report generator in this repository that anyone can run again at a pinned block."
+      - "No top-up starts while the monthly report is late; monitoring flags it on day 8."
+      - "Monitoring publishes the cap reading of each fortnightly snapshot to IPFS."
+    tech: "Prices come from Coingecko's close at the Snapshot Date, with the asset's on-chain rate as the fallback. Reports have no on-chain anchor; the forum post carries the report's identifier."
+    changes:
+      - text: "The reporting section states the price rule."
+        why: "Tokenholders can then hold the committee to how each figure was priced."
+        state: owed
+        sources: [ADR-009, OD-14]
+      - text: "The reporting section states the late-report rule: no top-up while the report is late."
+        why: "The report is the evidence for every top-up."
+        state: owed
+        sources: [ADR-009, OD-14]
+    sources: [ADR-009, OD-14, OD-32]
+
+  - id: legacy
+    title: Legacy investments
+    says: "Legacy DAO investments carry over into the vault and reduce the initial funding request."
+    kept:
+      - "On chain: the DAO's first-loss Earn shares sit in a first-loss Safe with no module, so no role can reach them."
+      - "A burn or a redemption of the first-loss shares is a DAO vote."
+      - "Detection: alerts on any change of the first-loss Safe's balance, owners or modules."
+    tech: "INV-021 fixes the first-loss Safe's shape. The Growth Committee's Safe moves the shares once, after the enabling vote."
+    changes:
+      - text: "The legacy section takes over the first-loss terms of the March 2026 Earn allocation, and the shares sit in a first-loss Safe that no role can reach."
+        why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart."
+        state: owed
+        sources: [ADR-008, OD-21, OD-28, OD-42]
+      - text: "Twyne reduces the seed only when its holder and form are shown."
+        why: "No Lido address checked holds a Twyne position."
+        state: design
+        sources: [ADR-008, OD-21]
+    sources: [ADR-008, OD-21, OD-42, INV-021, "runbook:Move the legacy Earn shares"]
+
+  - id: controls
+    title: How each rule is kept
+    says: "LDO holders approve the mandate in a Snapshot vote, before the enabling vote."
+    kept:
+      - "Every rule gets a control on each layer that can carry it: on chain, before execution, detection and display."
+      - "Motions are the timelock for every structural increase of exposure."
+      - "A relaxation of a screening rule gets a notice to the Emergency Brakes multisig and the forum, and the vendor's own delay if it has one."
+    tech: "The control matrix maps each rule to its controls, owner and status."
+    changes:
+      - text: "The control section says how each rule is kept, by reference to the control matrix."
+        why: "Much of the mandate cannot be enforced on chain, so each rule needs a named control and owner."
+        state: owed
+        sources: [ADR-009, OD-39]
+      - text: "Easy Track motions are the timelock for structural increases of exposure, and screening rules get change control."
+        why: "A wider target list or a looser screening rule must not take effect without notice."
+        state: design
+        sources: [ADR-009, ADR-010, OD-45]
+    sources: [ADR-009, OD-39, OD-45, "doc:docs/specs/control-matrix.md#control-matrix", "doc:ROADMAP.md#roadmap"]

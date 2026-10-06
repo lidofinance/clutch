@@ -34,6 +34,10 @@ def _source(ref: str):
     return lambda c: c["actors"][0]["sources"].append(ref)
 
 
+def _first_change(c):
+    return next(ch for b in c["mandate"]["blocks"] for ch in b.get("changes", []))
+
+
 CONTENT_CASES = [
     ("the committed content passes", lambda c: None, None),
     ("an unknown ADR", _source("ADR-999"), "unknown ADR ADR-999"),
@@ -61,6 +65,16 @@ CONTENT_CASES = [
     ("a quiz answer out of range", lambda c: c["quiz"][0].update(answer=9), "answer out of range"),
     ("a reuse row in an unknown column", lambda c: c["reuse"][0].update(column="other"), "bad column"),
     ("an unknown watched-by reference", lambda c: c["assumptions"][0].setdefault("watched_by", []).append("INV-999"), "unknown invariant INV-999"),
+    ("a duplicate mandate block", lambda c: c["mandate"]["blocks"].append(copy.deepcopy(c["mandate"]["blocks"][0])), "duplicate id"),
+    ("a mandate block without sources", lambda c: c["mandate"]["blocks"][0].update(sources=[]), "no sources"),
+    ("a mandate change without sources", lambda c: _first_change(c).update(sources=[]), "no sources"),
+    ("a mandate change in an unknown state", lambda c: _first_change(c).update(state="done"), "bad state done"),
+    ("a control line on an unknown layer", lambda c: c["mandate"]["blocks"][0]["kept"].append("Onchain: a typo."), "unknown layer Onchain"),
+    ("a percentage from the mandate draft", lambda c: c["mandate"]["blocks"][0].update(says="Up to 10 % each."), "must not appear"),
+    ("a dollar figure from the mandate draft", lambda c: _first_change(c).update(why="It frees $1."), "must not appear"),
+    ("a constellation change of an unknown kind", lambda c: c["constellation"]["changes"][0].update(kind="moved"), "bad kind moved"),
+    ("an unknown source in the constellation", lambda c: c["constellation"]["changes"][0]["sources"].append("OD-99"), "unknown open decision OD-99"),
+    ("a planned part without sources", lambda c: c["constellation"]["planned"][0].update(sources=[]), "no sources"),
 ]
 
 

@@ -286,8 +286,8 @@ edges:
   short: can object
   label: LDO holders can object to any motion within 72 hours. An objection of 0.5% of the supply stops it.
   label_at:
-  - 440
-  - 140
+  - 388
+  - 141
 - id: pause
   from: brakes
   to: easytrack
