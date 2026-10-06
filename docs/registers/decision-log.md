@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T13:38:35Z
+  at: 2026-10-06T21:22:14Z
 verified: []
 sources:
   - id: s1
@@ -34,6 +34,97 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, and the unapproved mandate size out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-06 — OD-49: emergency exits for positions that a motion onboards
+
+> run OD-49 interview
+
+The agent asked two questions. Q1: how does the emergency role exit a position that a motion onboarded, given that the governance role cannot touch the emergency role? A: the enabling vote grants every emergency exit whose contract exists by then, and for anything onboarded later the operator exits until a DAO vote adds the emergency exit; B: an exit-only template role on the safety modifier, so the motion that onboards a protocol also adds its emergency exit; C: onboard any protocol that holds value by DAO vote. The agent recommended A. Q2, an input: will Lido Lend's markets live on Morpho Blue's own contract? A: yes; B: no, a separate deployment; C: not known yet. EM answered:
+
+> Q1: B
+> Q2: B
+
+Recorded as:
+
+- (1, OD-49) A motion that onboards a protocol also adds its emergency exit. A new role on the safety modifier, the exit-governance role, held by the Easy Track script executor, writes exits for the emergency role through the same templates. It cannot write anything but an exit shape, grant delegatecall, touch the technical role or membership, set an allowance, or target the Asset Safe or a module of it ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13, [ADR 005](/adr/005-account-graph-and-roles.md)).
+- (2, OD-49) Lido Lend is a separate deployment that is compatible with Morpho Blue, not markets on Morpho Blue's own contract. Its address enters with the onboarding motion, and that motion also adds its emergency exit ([ADR 011](/adr/011-launch-scope.md) decision 13).
+
+## 2026-10-06 — OD-48: the price risk of recovery orders
+
+> run an interview on OD-48
+
+The agent asked one question: how is the price risk of recovery orders handled, given that no guard screens them? A: an on-chain floor through ComposableCoW's GoodAfterTime order type and a Chainlink price checker; B: no on-chain floor, relying on CoW's competition and EBBO rule, with paging on every emergency swap and an alert on a recovery order whose limit sits far below a market price; C: B plus a daily budget on the emergency role's transfers into the orders account. EM answered:
+
+> Q1: B
+
+Recorded as:
+
+- (1, OD-48) Recovery orders have no on-chain price floor. CoW's solver competition and its EBBO rule hold a fill to at least the on-chain market, and a solver that breaks the rule must refund the user or lose its bond. Every emergency swap pages at high severity, and monitoring alerts on a recovery order whose limit sits far below a market price. The GoodAfterTime floor stays a research item ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 26, [research note](/research/cow-orders-account-2026-10-06.md)).
+
+## 2026-10-06 — OD-47: the maximum order life
+
+> do OD-47 interview
+
+The agent asked three questions. Q1: how long can the operator's market and limit orders live? A: 14 days; B: 30 days; C: 90 days. Q2: how are TWAP and stop-loss orders bounded? A: a TWAP order starts at its creation and ends within 30 days, a screening rule refuses a stop-loss expiry more than 30 days ahead, and monitoring alerts on any open order older than 30 days; B: monitoring and cancelling only. Q3: how long can a recovery order live? A: 1 day; B: as long as the operator's orders. EM answered:
+
+> Q1: B
+> Q2: A
+> Q3: A
+
+Recorded as:
+
+- (1, OD-47) The operator's market and limit orders live at most 30 days. The policy pins the order signer's `validDuration` to at most 30 days ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 23).
+- (2, OD-47) A TWAP order starts at its creation and has at most 30 parts at most a day apart, or at most 4 parts at most 7 days apart, so it ends within 30 days. A stop-loss order's expiry is at most 30 days ahead, through a screening rule requested from the vendor, because no condition can compare the expiry with the current time. Monitoring alerts on any open order older than 30 days, and the emergency Safe can cancel it (decision 24).
+- (3, OD-47) A recovery order lives at most 1 day. The policy pins the order signer's `validDuration` for the emergency role to at most 1 day (decision 25).
+
+## 2026-10-06 — OD-46: how a new token joins the orders account's lists
+
+> run an interview on the next pending decision
+
+The agent asked two questions. Q1: how does a token join the lists, given that the order signer's permission is a delegatecall and a motion cannot write one (OD-36)? A: a DAO vote; B: a narrow exception to OD-36 for the order signer; C: no token pins. Q2: which tokens start on the operator's lists? A: the set of 2026-09-22; B: that set plus WETH; C: B plus sUSDS. EM answered:
+
+> Q1: A
+> Q2: B
+
+Recorded as:
+
+- (1, OD-46) A DAO vote adds a token to the orders account's lists, for the operator and for recovery. The same vote adds the token's approval of CoW's vault relayer, its emergency transfer and its recovery orders. The swap-instance template leaves the catalogue, and five templates remain. OD-36 keeps no exception ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 12, [ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 21).
+- (2, OD-46) The operator's lists start with stETH, wstETH, WETH, USDC, USDT, USDS and LDO. DAI and sUSDS stay off. The operator trades WETH in CoW orders, and staking and Lido's withdrawal queue stay available ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 22, [ADR 011](/adr/011-launch-scope.md) decision 12).
+
+## 2026-10-06 — OD-39 to OD-45: the committee's meeting on controls, buffer, product tiers, first-loss, swaps, NAV and timelocks
+
+> we had a meeting today with TMC members, key points:
+> - we want to maintain liquidity buffer for >= 1 month of baseline monthly spend; not enforceable on-chain, but can be covered with monitoring and alerting, should be visible in Zodiac UI ideally
+> - agreed that new Lido products like Lido Lend stay within the risk tier of "Protocol / counterparty cap, 25% of total assets" till maturation happens and "no limit" unlocks
+> - in general what's not enforceable on-chain should be covered with internal monitoring and alerts, [the screening vendor]'s guard that we added, zodiac UI to display and warn
+> - we need to mark first-loss funds somehow, maybe even suballocation or?
+> - swaps are too limited now: folks want to have DCA and long-standing limit orders (like sell if ETH breaks [a price level]), on top of that they wanted to have 1inch and uniswap available; so probably stonks 2.0 is not the right fit or it can be primary day-to-day path and other things as backup? but is it worth having stonks 2.0 then? bc it's pretty complex and verbose deployment-wise
+> - we will insist on having NAV data in Zodiac UI (at the very least they can integrated Debank API)
+> - structural risk exposure increase changes must be timelocked (i.e., changing whitelist), which works pretty well with ET factories I guess, but check
+>
+> Digest all of this and suggest what we must update and why, scan the whole set of decisions made, APRs and repo contents, don't rush
+
+The agent asked seven questions. EM answered:
+
+> Q1: A
+> Q2: A
+> Q3: A, earnETH and earnUSD are not new
+> Q4: A
+> Q5: A
+> Q6: A
+> Q7: A
+
+Recorded as, by question:
+
+- (1, OD-39) Every mandate rule gets a control on each layer that can carry it: the on-chain policy, screening before execution, monitoring with alerts, and display in the Zodiac UI. A control matrix in the specifications maps each rule to its controls, owners and status. The screening vendor's rules become a written list in this repository ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 26).
+- (2, OD-40) The liquidity buffer of at least one month of baseline spend gets a continuous detector, a line in every report, a screening rule if the vendor can check it before execution, and a display in the Zodiac UI. The committee restores it within the mandate's window. Its figure comes from the attested computation ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 27).
+- (3, OD-41) A new Lido product, Lido Lend first, counts against the protocol and counterparty cap until it matures. The mandate states the criteria for maturity. A budget motion and a forum post unlock it, so the objection window is its timelock. earnETH and earnUSD are not new. This replaces the three-month rule of OD-04 and OD-12 ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28).
+- (4, OD-42) The DAO's first-loss Earn shares go to a dedicated first-loss Safe, owned by the Aragon Agent at one of one, with no modules. No role can reach them. This replaces the destination of OD-21, and the no-redeem rule becomes structural ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 19, [ADR 005](/adr/005-account-graph-and-roles.md)).
+- (5, OD-43) A dedicated orders account replaces the Stonks 2.0 instances for both roles. It is a Safe owned by the Aragon Agent, with CoW's fallback handler and its own modifiers. The operator funds it by pinned transfers under budgets, and places CoW market, limit, TWAP and stop-loss orders whose proceeds go to the Asset Safe. The emergency role places orders whose proceeds go to the Aragon Agent, and can always send assets to the Agent. The launch uses CoW only. Uniswap and 1inch come only if the screening vendor can bound a swap's minimum output before execution ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 17, [research note](/research/cow-orders-account-2026-10-06.md)).
+- (6, OD-44) A written requirement list goes to the policy provider: the Zodiac UI shows Lido's own readings as the canonical figures, a live value labelled as indicative, and warnings before signing. If the provider declines, Lido builds the display from the same readings ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 29).
+- (7, OD-45) Easy Track motions are the timelock for every structural increase of exposure. A relaxation of the screening vendor's rules gets change control: the written list, a notice to the Emergency Brakes multisig and the forum, and the vendor's own delay if it has one. The unlock of a matured product is a motion ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 30, [ADR 010](/adr/010-pre-execution-screening.md) decision 19).
+
+Square brackets mark two redactions: the screening vendor's name, and the example price level of a stop-loss order, which the repository does not publish. [s5]
 
 ## 2026-10-06 — browser tests for the onboarding guide
 
@@ -165,7 +256,7 @@ Recorded as: EM accepts ADR 001 to ADR 004, as OD-25 planned. At EM's instructio
 > Q5: A
 > Q6: A
 
-Recorded as: all six as the agent recommended. (Q1, OD-25) The agent adds `scripts` to the licence check of [ADR 001](/adr/001-repository-scope-visibility-licence-name.md). After that change merges, EM accepts ADR 001 to ADR 004 in one edit. Decision 6 of [ADR 003](/adr/003-agent-operating-model.md) covers production parameters; the kit's dry-run budgets and fixed ceilings are test values. (Q2, OD-26) Recovery also sells USDC, USDS and DAI into USDT, because USDS and DAI carry USDC risk. Recovery then has ten instances, and the mandate text owes a change: the emergency swap goes into USDC, or into USDT as the second destination ([ADR 007](/adr/007-swapping-through-stonks.md)). (Q3, OD-27) The stETH approval to Lido's withdrawal queue has a fixed ceiling of one TM Floor Value in stETH and no budget key ([ADR 007](/adr/007-swapping-through-stonks.md)). (Q4, OD-28) The no-redeem rule for the first-loss Earn shares binds the emergency role too. In an emergency, it sends them to the Aragon Agent, and a burn or a redemption of them is a DAO vote ([ADR 008](/adr/008-funding-through-existing-payments.md)). (Q5, OD-29) "A pause of the whole module" means disabling the operator modifier. The Emergency Brakes multisig does it through the technical role on a fixed trigger: a published cap breach that is still there after the committee's rebalancing window of two working days, and that is larger at the next fortnightly snapshot. A DAO vote can also do it ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). (Q6, OD-30) The emergency Safe stays a subset of the committee's signers. The mandate draft promises an exit that is independent of the committee, so the mandate text owes a change, and the LIP states that the fast exit is not independent of the committee ([ADR 005](/adr/005-account-graph-and-roles.md)). The evidence for Q2 and Q3 is in the [recovery note](/research/recovery-and-withdrawal-queue-2026-10-05.md). [s4]
+Recorded as: all six as the agent recommended. (Q1, OD-25) The agent adds `scripts` to the licence check of [ADR 001](/adr/001-repository-scope-visibility-licence-name.md). After that change merges, EM accepts ADR 001 to ADR 004 in one edit. Decision 6 of [ADR 003](/adr/003-agent-operating-model.md) covers production parameters; the kit's dry-run budgets and fixed ceilings are test values. (Q2, OD-26) Recovery also sells USDC, USDS and DAI into USDT, because USDS and DAI carry USDC risk. Recovery then has ten instances, and the mandate text owes a change: the emergency swap goes into USDC, or into USDT as the second destination ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). (Q3, OD-27) The stETH approval to Lido's withdrawal queue has a fixed ceiling of one TM Floor Value in stETH and no budget key ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). (Q4, OD-28) The no-redeem rule for the first-loss Earn shares binds the emergency role too. In an emergency, it sends them to the Aragon Agent, and a burn or a redemption of them is a DAO vote ([ADR 008](/adr/008-funding-through-existing-payments.md)). (Q5, OD-29) "A pause of the whole module" means disabling the operator modifier. The Emergency Brakes multisig does it through the technical role on a fixed trigger: a published cap breach that is still there after the committee's rebalancing window of two working days, and that is larger at the next fortnightly snapshot. A DAO vote can also do it ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). (Q6, OD-30) The emergency Safe stays a subset of the committee's signers. The mandate draft promises an exit that is independent of the committee, so the mandate text owes a change, and the LIP states that the fast exit is not independent of the committee ([ADR 005](/adr/005-account-graph-and-roles.md)). The evidence for Q2 and Q3 is in the [recovery note](/research/recovery-and-withdrawal-queue-2026-10-05.md). [s4]
 
 ## 2026-10-05 — the open items asked
 
@@ -214,7 +305,7 @@ The router cannot price WETH, so the agent asked how to support it (Q2b):
 
 > Q2b: 1.
 
-Recorded as: OD-20 is closed. (Q1) The committee's Safe, as the manager of the shared Stonks 2.0 oracle router, adds USDC, USDT, DAI and USDS once the instance list is final. Each is quoted in USD, with a maximum price age equal to Chainlink's heartbeat for its feed. Lido deploys one USD-anchored converter for the vault through the deployed converter factory. The enabling vote starts only if every vault token is configured on the router and in sync. (Q2) The swap instances cover only the tokens that the router can price: stETH, LDO, USDC, USDT, USDS and DAI. wstETH is unwrapped and sUSDS is redeemed before a sale. EM added WETH. (Q2b) WETH goes through stETH: to sell it, the vault unwraps it, stakes the ETH through Lido's `submit` and sells the stETH; to buy it, the vault unstakes stETH through Lido's withdrawal queue and wraps the ETH. The operator and the emergency role may stake ETH, the operator may request and claim withdrawals pinned to the Asset Safe, and the emergency role may unwrap WETH. (Q3) The committee's Safe re-syncs a feed after Chainlink replaces it. Monitoring alerts when a vault token's feed is out of sync, and a runbook covers the re-sync. If a feed is broken during an emergency, the emergency Safe sends assets to the Aragon Agent instead of swapping. The evidence is in the [pricing note](/research/stonks-pricing-2026-10-05.md) ([ADR 007](/adr/007-swapping-through-stonks.md)). [s4]
+Recorded as: OD-20 is closed. (Q1) The committee's Safe, as the manager of the shared Stonks 2.0 oracle router, adds USDC, USDT, DAI and USDS once the instance list is final. Each is quoted in USD, with a maximum price age equal to Chainlink's heartbeat for its feed. Lido deploys one USD-anchored converter for the vault through the deployed converter factory. The enabling vote starts only if every vault token is configured on the router and in sync. (Q2) The swap instances cover only the tokens that the router can price: stETH, LDO, USDC, USDT, USDS and DAI. wstETH is unwrapped and sUSDS is redeemed before a sale. EM added WETH. (Q2b) WETH goes through stETH: to sell it, the vault unwraps it, stakes the ETH through Lido's `submit` and sells the stETH; to buy it, the vault unstakes stETH through Lido's withdrawal queue and wraps the ETH. The operator and the emergency role may stake ETH, the operator may request and claim withdrawals pinned to the Asset Safe, and the emergency role may unwrap WETH. (Q3) The committee's Safe re-syncs a feed after Chainlink replaces it. Monitoring alerts when a vault token's feed is out of sync, and a runbook covers the re-sync. If a feed is broken during an emergency, the emergency Safe sends assets to the Aragon Agent instead of swapping. The evidence is in the [pricing note](/research/stonks-pricing-2026-10-05.md) ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). [s4]
 
 ## 2026-10-05 — OD-20 asked
 
@@ -423,7 +514,7 @@ Recorded as: the registry period is one calendar month ([ADR 008](/adr/008-fundi
 
 > 1.
 
-Recorded as: option 1 of the Q3 walkthrough. Instances come from the standard factory, whose recovery address is the treasury. Tokens recovered from a rebalancing instance therefore go to the treasury, not back to the vault. The agent had recommended deploying rebalancing instances outside the factory, so that they recover to the Asset Safe; EM chose the factory ([ADR 007](/adr/007-swapping-through-stonks.md)). [s3]
+Recorded as: option 1 of the Q3 walkthrough. Instances come from the standard factory, whose recovery address is the treasury. Tokens recovered from a rebalancing instance therefore go to the treasury, not back to the vault. The agent had recommended deploying rebalancing instances outside the factory, so that they recover to the Asset Safe; EM chose the factory ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). [s3]
 
 ## 2026-10-02 — OD-05 Q1 and Q2: instance managers and parameters
 
@@ -585,7 +676,7 @@ Recorded as: (1) blocking a suspicious transaction on chain, before it executes,
 > Operator committee own ratio-breach remediation; if it gets worse, there can be a pause of the whole module
 > detectors both in Lido on-chain monitoring and in [the screening vendor]
 
-Recorded as, by question: (1) budget sizing: the whole vault may sit in Lido products, and budgets retune every two weeks ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (2) swap topology: recovery has a mandatory second destination, USDT ([ADR 007](/adr/007-swapping-through-stonks.md)); (3) monitoring: screening can block suspicious transactions ([ADR 010](/adr/010-pre-execution-screening.md)), the committee owns ratio-breach remediation, a pause of the whole module is the escalation, and detectors run in both monitoring estates ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). [s1]
+Recorded as, by question: (1) budget sizing: the whole vault may sit in Lido products, and budgets retune every two weeks ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (2) swap topology: recovery has a mandatory second destination, USDT ([ADR 007](/adr/007-swapping-through-an-orders-account.md)); (3) monitoring: screening can block suspicious transactions ([ADR 010](/adr/010-pre-execution-screening.md)), the committee owns ratio-breach remediation, a pause of the whole module is the escalation, and detectors run in both monitoring estates ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). [s1]
 
 ## 2026-09-22 12:32 — eight open items
 
@@ -598,7 +689,7 @@ Recorded as, by question: (1) budget sizing: the whole vault may sit in Lido pro
 > 7. It's solved via general incident response process built in Lido
 > 10. Agent it must be
 
-Recorded as, by question: (1) budgets and approval ceilings derive from the mandate ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (2) Lido Lend is not in the launch, and the Morpho Blue template ships with end-to-end tests ([ADR 011](/adr/011-launch-scope.md)); (3) DAI joins the launch set ([ADR 011](/adr/011-launch-scope.md)); (4 and 9) the swap instance matrix: stablecoin-to-stablecoin recovery, the missing recovery pairs, no reuse of existing instances, and the rebalancing set ([ADR 007](/adr/007-swapping-through-stonks.md)); (5) reports go to IPFS, not DataBus ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (6) the template catalogue is accepted, and removal should skip the objection window, which Easy Track cannot do per factory (open item OD-09); (7) paging runs through the general Lido incident process ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (10) the Aragon Agent manages every swap instance ([ADR 007](/adr/007-swapping-through-stonks.md)). [s1]
+Recorded as, by question: (1) budgets and approval ceilings derive from the mandate ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (2) Lido Lend is not in the launch, and the Morpho Blue template ships with end-to-end tests ([ADR 011](/adr/011-launch-scope.md)); (3) DAI joins the launch set ([ADR 011](/adr/011-launch-scope.md)); (4 and 9) the swap instance matrix: stablecoin-to-stablecoin recovery, the missing recovery pairs, no reuse of existing instances, and the rebalancing set ([ADR 007](/adr/007-swapping-through-an-orders-account.md)); (5) reports go to IPFS, not DataBus ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (6) the template catalogue is accepted, and removal should skip the objection window, which Easy Track cannot do per factory (open item OD-09); (7) paging runs through the general Lido incident process ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (10) the Aragon Agent manages every swap instance ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). [s1]
 
 ## 2026-09-22 12:16 — technical role
 
@@ -614,7 +705,7 @@ Recorded as: the Emergency Brakes multisig holds a technical role that can disab
 >    - emergency has financial risks and there are most of them: depegs, dependency failure, curator misbehavior, etc. so that we want to have TMC with lower quorum to swap/exit/claim
 >    - technical risks requiring pause of the whole module might have connected with Emergency Brakes, but it's overkill given ET is pausable itself and it's fine; the risks are monitored by the tech team including immunefi submissions, and Emergency Brakes indeed have tech folks inside
 
-Recorded as: (1) Stonks 2.0 is the default swap engine ([ADR 007](/adr/007-swapping-through-stonks.md)); (2) Lido Lend is onboarded by an Easy Track motion and must be ready on the day it deploys ([ADR 011](/adr/011-launch-scope.md)); (3) financial emergencies go to the committee's signers at a lower quorum, and the engineering organisation watches technical risk ([ADR 005](/adr/005-account-graph-and-roles.md)). [s1]
+Recorded as: (1) Stonks 2.0 is the default swap engine ([ADR 007](/adr/007-swapping-through-an-orders-account.md)); (2) Lido Lend is onboarded by an Easy Track motion and must be ready on the day it deploys ([ADR 011](/adr/011-launch-scope.md)); (3) financial emergencies go to the committee's signers at a lower quorum, and the engineering organisation watches technical risk ([ADR 005](/adr/005-account-graph-and-roles.md)). [s1]
 
 ## 2026-09-22 11:39 — seven open questions
 
@@ -626,7 +717,7 @@ Recorded as: (1) Stonks 2.0 is the default swap engine ([ADR 007](/adr/007-swapp
 > 6. ETH, WETH, stETH, wstETH, EarnETH, EarnUSD, USDC, USDT, USDS, sUSDS, CowSwap access, Lido Lend access (which is basically Morpho Blue compat), LDO
 > 7. It does not; it holds ET global pause and it's fine
 
-Recorded as, by question: (1) signer-set drift: keeping the emergency Safe's signers equal to the committee's is a manual runbook duty ([ADR 005](/adr/005-account-graph-and-roles.md)); (2) the committee is the trusted caller of the onboarding factories ([ADR 006](/adr/006-governance-through-easy-track-factories.md)); (3) the minimum per motion is forum disclosure, alerting and runbook discipline, and the stops are an objection or the Easy Track pause ([ADR 006](/adr/006-governance-through-easy-track-factories.md)); (4) exposure caps are enforced by detection and reporting on immutable storage ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (5) the emergency swap runs through CoW, with Stonks 2.0 as the candidate ([ADR 007](/adr/007-swapping-through-stonks.md)); (6) the launch assets and venues ([ADR 011](/adr/011-launch-scope.md)); (7) the Emergency Brakes multisig keeps only the Easy Track pause. EM changed (7) at 12:16 and gave it the technical role. [s1]
+Recorded as, by question: (1) signer-set drift: keeping the emergency Safe's signers equal to the committee's is a manual runbook duty ([ADR 005](/adr/005-account-graph-and-roles.md)); (2) the committee is the trusted caller of the onboarding factories ([ADR 006](/adr/006-governance-through-easy-track-factories.md)); (3) the minimum per motion is forum disclosure, alerting and runbook discipline, and the stops are an objection or the Easy Track pause ([ADR 006](/adr/006-governance-through-easy-track-factories.md)); (4) exposure caps are enforced by detection and reporting on immutable storage ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); (5) the emergency swap runs through CoW, with Stonks 2.0 as the candidate ([ADR 007](/adr/007-swapping-through-an-orders-account.md)); (6) the launch assets and venues ([ADR 011](/adr/011-launch-scope.md)); (7) the Emergency Brakes multisig keeps only the Easy Track pause. EM changed (7) at 12:16 and gave it the technical role. [s1]
 
 ## 2026-09-22 11:24 — four changes
 

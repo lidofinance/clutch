@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 006: Governance through Easy Track factories"
-description: Easy Track factories are the only new contracts, and they only expand; the committee's dedicated operator Safe is their trusted caller; each factory builds a permission tree from a template fixed at audit time, so a motion carries parameters, never a tree; every removal is the emergency Safe's immediate revoke.
+description: Easy Track factories are the only new contracts, and they only expand; the committee's dedicated operator Safe is their trusted caller; each factory builds a permission tree from a template fixed at audit time, so a motion carries parameters, never a tree; the motion that onboards a protocol also adds its emergency exit through an exit-governance role on the safety modifier; every removal is the emergency Safe's immediate revoke.
 tags: [governance, easy-track, factories, templates]
 status: draft
 review_status: slop
@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T13:05:14Z
+  at: 2026-10-06T21:22:14Z
 verified: []
 sources:
   - id: s1
@@ -71,19 +71,36 @@ EM decided on 2026-10-06, closing OD-38 [s1]:
 
 10. A motion cannot give the operator the Asset Safe or any module of the Asset Safe as a target. The governance role refuses each of them as the administered target, the safety modifier included. The deployment manifest lists every module that the Asset Safe enables. The compiler refuses a policy that lets a role reach the Asset Safe or one of its modules beyond a fixed set of calls, a grant that does not refuse every one of them, and a manifest that misses a compiled modifier. A DAO vote that enables another module on the Asset Safe also lists it in the manifest and applies the policy compiled again.
 
+EM decided on 2026-10-06, closing OD-41 and OD-45 [s1]:
+
+11. Easy Track motions are the timelock for every structural increase of exposure in the policy: a new target and a higher budget each wait for the objection window. The unlock of a matured Lido product is a budget motion with a forum post ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 28 and 30).
+
+EM decided on 2026-10-06, closing OD-46 [s1]:
+
+12. A DAO vote adds a token to the orders account's lists, with its relayer approval, its emergency transfer and its recovery orders. No template adds one: the order signer's permission is a delegatecall, and decision 9 keeps no exception. The swap-instance template leaves the catalogue, so five templates remain ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
+
+EM decided on 2026-10-06, closing OD-49 [s1]:
+
+13. A motion that onboards a protocol also adds its emergency exit. A new role on the safety modifier, the exit-governance role, held by the Easy Track script executor, writes exits for the emergency role through the same templates ([ADR 005](/adr/005-account-graph-and-roles.md)).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
 
 - Each factory owns one template. A motion carries typed parameters only, such as a target, an asset and a budget key. The factory builds the tree.
 - Every factory's trusted caller is the operator Safe. Easy Track fixes the trusted caller at deployment [s7].
-- Every factory hard-codes the `operator` role key and refuses the Asset Safe and its modules as a target.
+- Every factory hard-codes the `operator` role key and refuses the Asset Safe, the orders account and their modules as a target.
 - The kit's role-toggle factory [s4] left the design (decision 8) and the kit on 2026-10-05. The budget factory and the template factories are not built.
-- The modifier constrains the governance role again, so a factory bug cannot reach administration. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator the Asset Safe or one of its modules as a target (decision 10), cannot set an allowance outside the operator's budget keys, and cannot set a refill period below 30 days [s6]. A factory bug can still grant the operator a call on an ordinary target, such as a token transfer; the template and the objection window are the controls for that.
+- The modifier constrains the governance role again, so a factory bug cannot reach administration. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator the Asset Safe or one of its modules as a target (decision 10), nor the orders account or one of its modules, cannot set an allowance outside the operator's budget keys, and cannot set a refill period below 30 days [s6]. A factory bug can still grant the operator a call on an ordinary target, such as a token transfer; the template and the objection window are the controls for that.
 - A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. Once it is enacted, the emergency Safe can revoke the new permission at once.
-- Every removal is an emergency action. The emergency role holds `revokeTarget` and `revokeFunction`, pinned to the `operator` key, and acts at once. Every operator permission lives under that key, so the revoke reaches all of them.
+- **The exit-governance role.** It writes permissions only under the `emergency` key, through `scopeTarget`, `scopeFunction` and `allowFunction`, with the execution options None or Send (decision 9). It refuses the Asset Safe and every module of it as a target, the safety modifier included (decision 10). It holds no `assignRoles`, cannot touch the technical role, and sets no allowance.
+- **Exit templates.** Each onboarding template also builds the emergency exit for its target: redeem, withdraw, claim and cancel with the receiver and owner pinned to the Asset Safe; a transfer of the new receipt token pinned to the Aragon Agent; and an approval of the new spender set to zero. It emits no entry, no deposit and no non-zero approval. The modifier cannot check that a tree is an exit, so the template's code, its tests and its audit carry that.
+- Every removal is an emergency action. The emergency role holds `revokeTarget` and `revokeFunction`, pinned to the `operator` key, and acts at once. Every operator permission lives under that key, so one revoke on each operator modifier reaches all of them.
 
 ## Options considered
+
+- The enabling vote grants every emergency exit whose contract exists by then, and the operator exits a later position until a DAO vote adds its emergency exit. Not chosen by EM (OD-49): Lido Lend's own contract does not exist before the enabling vote, so it would have no emergency exit on its first day.
+- Any protocol that holds value is onboarded by DAO vote, with its emergency exit. Not chosen by EM: Lido Lend must be ready on its first day through a motion ([ADR 011](/adr/011-launch-scope.md) decision 3).
 
 - The DAO pre-scopes one role key per strategy by vote, and motions toggle them. Not chosen by EM: every new protocol would need a vote.
 - Motions submit condition trees. Not chosen: the narrowing proof is a tree comparison that no one should solve under an objection window.
@@ -95,6 +112,8 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 ## Consequences
 
+- The unscreened emergency path gets a motion writer for the first time. A template flaw can widen the emergency role, and only the objection window, the Easy Track pause and a DAO vote stop it. The audit covers every exit template, and the drift detector watches the safety policy too.
+- A position that a motion onboards has an emergency exit from the day the motion enacts, and the exit survives the technical switch, because it lives on the safety modifier.
 - The audit question becomes "can this template ever emit something unsafe". Each template must pin every receiver, owner and beneficiary field, bound every value-moving amount, never emit an administrative selector, and produce a script in the production format.
 - A motion can point the operator at a contract that no one has audited. The template bounds how the vault interacts with it, so the loss ceiling is the attached budget. The controls are the objection window, the disclosure and monitoring. The LIP must say so plainly.
 - Replacing the operator Safe means redeploying every factory with the new trusted caller and registering each one again by DAO vote [s7].
@@ -117,4 +136,4 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 ## Open questions
 
-None open. OD-38 was decided on 2026-10-06.
+None open. OD-38, OD-41, OD-43, OD-45, OD-46 and OD-49 were decided on 2026-10-06.

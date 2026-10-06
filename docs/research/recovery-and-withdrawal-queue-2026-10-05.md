@@ -22,7 +22,7 @@ sources:
     resource: "https://www.coindesk.com/markets/2023/03/11/dai-depegs-as-stablecoin-rout-plagues-crypto"
     title: CoinDesk, 2023-03-11 — DAI hits an all-time low of 88 cents as USDC loses its peg; DAI's collateral includes USDC
   - id: s4
-    resource: /adr/007-swapping-through-stonks.md
+    resource: /adr/007-swapping-through-an-orders-account.md
     title: ADR 007 — the recovery topology before OD-26, and the recovery instances pinned by the safety policy
   - id: s5
     resource: "https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1#readProxyContract"

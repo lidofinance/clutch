@@ -3,11 +3,12 @@
 # Statuses: existing, instance (new instance of existing code), new (new code), mixed.
 width: 1180
 height: 750
-description: The Lido DAO owns the Asset Safe. The Asset Safe owns two Roles modifiers. The operator Safe holds the operator
-  role and Easy Track holds the governance role on the operator modifier. The emergency Safe holds the emergency role and
-  the Emergency Brakes multisig holds the technical role on the safety modifier. The screening guard approves each operator
-  Safe transaction. The Asset Safe uses approved protocols and swap instances. Monitoring watches the vault and pages the
-  Emergency Brakes multisig. Reporting publishes from the vault's snapshots.
+description: The Lido DAO owns the Asset Safe; it also owns the orders account and the first-loss Safe, which the map
+  shows without an arrow. The Asset Safe owns two Roles modifiers. The operator Safe holds the operator role and Easy Track holds the governance role on the operator modifier.
+  The emergency Safe holds the emergency role and the Emergency Brakes multisig holds the technical role on the safety
+  modifier. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
+  through CoW orders from the orders account. The first-loss Safe holds the DAO's first-loss Earn shares. Monitoring
+  watches the vault and pages the Emergency Brakes multisig. Reporting publishes from the vault's snapshots.
 nodes:
 - id: committee
   label: Committee
@@ -68,7 +69,7 @@ nodes:
 - id: emergency-safe
   label: Emergency Safe
   sub: 2 of 7 · same signers
-  summary: 'Holds the emergency role. It can only reduce exposure: revoke, exit and send assets home.'
+  summary: 'Holds the emergency role. It can only reduce exposure: revoke, exit, sell into stablecoins and send assets home.'
   domain: ops
   kind: multisig
   status: instance
@@ -113,7 +114,7 @@ nodes:
   label: Safety modifier
   sub: 'roles: emergency, technical'
   summary: A second Roles modifier for the emergency and technical roles. Nothing screens it, so recovery never waits on a
-    vendor.
+    vendor. A motion that onboards a protocol adds its emergency exit here.
   domain: vault
   kind: contract
   status: instance
@@ -135,8 +136,8 @@ nodes:
   h: 84
 - id: asset-safe
   label: Asset Safe
-  sub: holds every asset · Agent owns it
-  summary: The vault. A Safe that holds all the assets. Only the Aragon Agent owns it; the roles act through the two modifiers.
+  sub: holds the assets · Agent owns it
+  summary: The vault. A Safe that holds the assets. Only the Aragon Agent owns it; the roles act through the two modifiers.
   domain: vault
   kind: contract
   status: instance
@@ -144,6 +145,18 @@ nodes:
   y: 486
   w: 320
   h: 88
+- id: first-loss
+  label: First-loss Safe
+  sub: no modules · Agent owns it
+  summary: A Safe that the Aragon Agent owns, with no modules. It holds only the DAO's first-loss Earn shares, so no role
+    can reach them. Only a DAO vote can burn or redeem them.
+  domain: vault
+  kind: contract
+  status: instance
+  x: 60
+  y: 470
+  w: 240
+  h: 84
 - id: protocols
   label: Approved protocols
   sub: Lido staking · Lido Earn · Sky
@@ -156,13 +169,13 @@ nodes:
   y: 646
   w: 280
   h: 84
-- id: stonks
-  label: Swap instances
-  sub: Stonks 2.0 · CoW · price router
-  summary: 'Every swap goes through a Stonks 2.0 instance with a fixed receiver: rebalancing pays the Asset Safe, recovery
-    pays the Aragon Agent.'
-  domain: ext
-  kind: external
+- id: orders
+  label: Orders account
+  sub: CoW orders · Agent owns it
+  summary: 'A Safe that the Aragon Agent owns, with its own two modifiers. The roles place CoW orders from it: the operator''s
+    orders pay the Asset Safe, and recovery orders pay the Aragon Agent.'
+  domain: vault
+  kind: contract
   status: mixed
   x: 370
   y: 646
@@ -171,7 +184,8 @@ nodes:
 - id: monitoring
   label: Monitoring
   sub: two estates · alerts
-  summary: Watches the vault, the motions and the Safes, and pages the right body when something is wrong.
+  summary: Watches the vault, the liquidity buffer, the orders, the motions and the Safes, and pages the right body when
+    something is wrong.
   domain: ext
   kind: service
   status: mixed
@@ -182,8 +196,8 @@ nodes:
 - id: reporting
   label: Reporting
   sub: IPFS · forum
-  summary: Monthly reports and fortnightly cap readings, published on IPFS and cited on the forum. Caps are checked here,
-    not in the contracts.
+  summary: Monthly reports and fortnightly cap readings, published on IPFS and cited on the forum. Each report shows the
+    caps and the liquidity buffer; no contract checks them.
   domain: ext
   kind: service
   status: new
@@ -336,11 +350,18 @@ edges:
     Safe.
 - id: swaps
   from: asset-safe
-  to: stonks
+  to: orders
   kind: owns
   short: swaps
-  label: To swap, the vault sends a token to a pinned swap instance. A rebalancing instance pays the Asset Safe; a recovery
-    instance pays the Aragon Agent.
+  label: To swap, the vault sends a token to the orders account under a budget, and a role places a CoW order there. The
+    operator's orders pay the Asset Safe; recovery orders pay the Aragon Agent.
+  both: true
+- id: first-loss-shares
+  from: first-loss
+  to: protocols
+  kind: owns
+  short: Earn shares
+  label: The first-loss Safe holds the DAO's first-loss shares in earnETH and earnUSD. No role can move them.
 - id: topup-motion
   from: easytrack
   to: funding
@@ -382,7 +403,8 @@ edges:
   to: asset-safe
   kind: screens
   short: watches
-  label: 'Monitoring watches the vault: drift from the policy, approvals, budget burn, owners, modules and motions.'
+  label: 'Monitoring watches the vault: drift from the policy, approvals, budget burn, the liquidity buffer, orders and
+    fills, owners, modules and motions.'
 - id: page
   from: monitoring
   to: brakes

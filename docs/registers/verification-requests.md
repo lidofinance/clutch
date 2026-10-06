@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T13:05:14Z
+  at: 2026-10-06T21:22:14Z
 verified: []
 sources:
   - id: s1
@@ -33,7 +33,7 @@ sources:
     title: LIP draft, section 6.2 — the owner path restores the operator modifier by enabling it again
   - id: s8
     resource: /registers/decision-log.md
-    title: Decision log — EM on OD-38, 2026-10-06
+    title: Decision log — EM on OD-38 and on OD-39 to OD-45, 2026-10-06
 ---
 
 # Verification requests
@@ -44,6 +44,7 @@ sources:
 - ADR 005 to ADR 011 constrain the operator. On 2026-10-06 all seven are `proposed`, and their text is frozen for this request.
 - After the freeze, EM's decision on OD-36 of 2026-10-06 added one limit to ADR 005 and ADR 006: a motion cannot grant the operator delegatecall. The multisig verifies the text with that limit.
 - EM's decision on OD-38 of 2026-10-06 added a second limit to ADR 005 and ADR 006: a motion cannot give the operator the Asset Safe or any module of the Asset Safe as a target, the safety modifier included. The multisig verifies the text with that limit [s8].
+- EM's decisions on OD-39 to OD-45 of 2026-10-06, after a meeting with the committee, changed ADR 005 to ADR 011 again: an orders account replaces the Stonks instances, a first-loss Safe holds the first-loss shares, a new Lido product stays in the protocol cap until it matures, and the buffer, the control matrix, the Zodiac UI's display and the change control of screening rules are new. The multisig verifies the text with these changes [s8]. The technical role now also covers the orders account's operator modifier. OD-46 then added decisions to ADR 006, ADR 007 and ADR 011: only a DAO vote adds a token to the orders account's lists, and WETH starts on them. OD-47 bounded the life of every order: 30 days for the operator, 1 day for a recovery order. OD-48 kept recovery orders without an on-chain price floor, under CoW's rules, paging and a limit alert. OD-49 gave the safety modifier an exit-governance role: the motion that onboards a protocol also adds its emergency exit. That role is the first motion writer on the emergency path, so the multisig verifies its guards (INV-025).
 - A verification means that the multisig read the record, finds its constraints on the operator sound from the view of emergency response and technical risk, and accepts the duties that the record gives it. It is not an audit, a legal review or a governance approval.
 - An edit to a record after the verification resets it. The multisig then verifies the new text again [s1].
 
@@ -51,7 +52,7 @@ sources:
 
 Read these first. A verification of ADR 005 and ADR 009 accepts them.
 
-1. **Disable the operator modifier for a defect in the permission layer.** The technical role calls `disableModule` on the Asset Safe, for the operator modifier only: the module argument is pinned. The safety modifier keeps working, so the emergency Safe can still exit and return assets to the Aragon Agent. Only the Safe's owner, the Aragon Agent through a DAO vote, enables it again [s2][s7].
+1. **Disable the operator modifier for a defect in the permission layer.** The technical role calls `disableModule` on the Asset Safe, for the operator modifier only: the module argument is pinned. It can do the same on the orders account, for the orders operator modifier ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). The safety modifier keeps working, so the emergency Safe can still exit and return assets to the Aragon Agent. Only the Safe's owner, the Aragon Agent through a DAO vote, enables it again [s2][s7].
 2. **Disable the operator modifier when a cap breach gets worse (OD-29).** The trigger is fixed: a published cap breach that is still there after the committee's rebalancing window of two working days, and that is larger at the next fortnightly snapshot. Monitoring publishes the cap reading of each fortnightly snapshot to IPFS, and its alert links that reading when it pages the multisig (OD-32). The multisig needs no financial judgment. A DAO vote can also disable the modifier [s3][s5].
 3. **Pause Easy Track.** The multisig keeps the global Easy Track pause. It is the final stop for a motion that survives its objection window, and it freezes queued motions during an incident [s2][s4]. The pause stops every Easy Track motion of the DAO, not only the vault's, and the multisig cannot unpause: only the DAO resumes Easy Track [s2][s7].
 4. **Be the independent stop, not the exit (OD-30).** The fast exit is the emergency Safe: the committee's signers at two of seven. No body that is independent of the committee can return assets within six hours. The multisig can only stop the operator, and the independent way to move assets is a DAO vote, which takes days [s2][s5].
@@ -62,13 +63,13 @@ The multisig gets no power over assets or permissions, and it cannot disable the
 
 | Record | What it requires of the operator | What it asks of the multisig | Read closely |
 |---|---|---|---|
-| [ADR 005](/adr/005-account-graph-and-roles.md): account graph and roles | The operator Safe, four of seven and screened, holds only the operator role. The emergency Safe, two of seven, holds the emergency role. Apart from positions that pay back to the Asset Safe, an asset leaves it only to the Aragon Agent or to a swap instance. | Duties 1, 2, 3 and 4 | The roles table, and decisions 16 to 18 |
-| [ADR 006](/adr/006-governance-through-easy-track-factories.md): governance through Easy Track factories | The operator Safe creates every motion. A motion only expands the policy. Every removal is the emergency Safe's immediate revoke. | Duty 3 | Decision 4, and the consequence on queued motions |
-| [ADR 007](/adr/007-swapping-through-stonks.md): swapping through Stonks 2.0 | Every swap goes through a pinned instance. The operator Safe manages the rebalancing instances. Recovery has ten instances. | None | The recovery set, and what happens when a price feed breaks |
-| [ADR 008](/adr/008-funding-through-existing-payments.md): funding | Top-ups pay only the Asset Safe, within two monthly registry limits. Neither role redeems the first-loss Earn shares. | Duty 3 applies to top-up motions | The two gaps of the registries |
-| [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md): budgets, caps, reporting and monitoring | Each approval spends its spender's budget or stays below a fixed ceiling. Caps are detective, and reports go to IPFS. | Duty 2 | Decision 24, and the monitoring list |
-| [ADR 010](/adr/010-pre-execution-screening.md): pre-execution screening | Every operator Safe transaction needs the screening vendor's approval, and the guard fails closed. | None: the multisig and recovery are never screened | Failure behaviour |
-| [ADR 011](/adr/011-launch-scope.md): launch scope | Only the launch assets and venues. No third-party lending market. | None | The asset table |
+| [ADR 005](/adr/005-account-graph-and-roles.md): account graph and roles | The operator Safe, four of seven and screened, holds only the operator role. The emergency Safe, two of seven, holds the emergency role. Apart from positions that pay back to the Asset Safe, an asset leaves it only to the Aragon Agent or to the orders account. The orders account and the first-loss Safe are owned by the Aragon Agent. | Duties 1, 2, 3 and 4, with duty 1 on the orders account too | The roles table, and decisions 16 to 20 |
+| [ADR 006](/adr/006-governance-through-easy-track-factories.md): governance through Easy Track factories | The operator Safe creates every motion. A motion only expands the policy, and every structural increase of exposure waits for its objection window. Every removal is the emergency Safe's immediate revoke. | Duty 3 | Decisions 4, 10, 11 and 13, and the consequence on queued motions |
+| [ADR 007](/adr/007-swapping-through-an-orders-account.md): swapping through an orders account | Every swap is a CoW order from the orders account. The operator's orders pay the Asset Safe; recovery orders buy USDC or USDT and pay the Aragon Agent. No price bound exists on chain. | Duty 1 on the orders account's operator modifier | Decisions 17 to 20, and the consequences on price protection |
+| [ADR 008](/adr/008-funding-through-existing-payments.md): funding | Top-ups pay only the Asset Safe, within two monthly registry limits. The first-loss Earn shares sit in a first-loss Safe that no role can reach. | Duty 3 applies to top-up motions | The two gaps of the registries, and decision 19 |
+| [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md): budgets, caps, reporting and monitoring | Each approval spends its spender's budget or stays below a fixed ceiling. Caps and the liquidity buffer are detected, screened where the vendor can check them, and shown in the Zodiac UI. A new Lido product stays in the protocol cap until a motion unlocks it. | Duty 2 | Decisions 24 and 26 to 30, and the monitoring list |
+| [ADR 010](/adr/010-pre-execution-screening.md): pre-execution screening | Every operator Safe transaction needs the screening vendor's approval, and the guard fails closed. The vendor's rules are a written list, and a relaxation reaches the multisig as a notice. | None: the multisig and recovery are never screened. The multisig receives the notices of rule relaxations | Failure behaviour, and decision 19 |
+| [ADR 011](/adr/011-launch-scope.md): launch scope | Only the launch assets and venues. No third-party lending market, and no router swap at launch. | None | The asset table |
 
 ## How a member records the verification
 

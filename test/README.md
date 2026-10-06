@@ -23,7 +23,7 @@ This harness runs the Clutch permission policy against production contracts on a
 The constellation in `policy/constellation/constellation` follows the decisions in [ADR 005](../docs/adr/005-account-graph-and-roles.md) to [ADR 011](../docs/adr/011-launch-scope.md):
 
 - The launch scope of ADR 011: no Aave, no sDAI and no other third-party lending market. The operator converts DAI to USDS and back through Sky's converter, with the receiver pinned to the Asset Safe (OD-22).
-- No order pre-signing and no CoW relayer approval (ADR 007).
+- No order pre-signing and no CoW relayer approval on the Asset Safe (ADR 007).
 - Staking and WETH (OD-20): the operator and the emergency role stake ETH through Lido's `submit` with the referral pinned to zero; the operator wraps and unwraps WETH and requests and claims Lido withdrawals pinned to the Asset Safe; the emergency role unwraps WETH and claims withdrawals.
 - Approvals (ADR 009, OD-08): an approval to a protocol spender spends the budget key that the spender serves; zero spends nothing; deposits spend no budget. The stETH approvals to the wstETH contract and to the withdrawal queue, and the DAI and USDS approvals to the converter, have a fixed ceiling instead (OD-08, OD-22, OD-27).
 - Governance (ADR 006): every operator permission lives under the `operator` key; the governance role holds no `assignRoles`, and a budget motion cannot set a refill period below 30 days.
@@ -33,7 +33,8 @@ Budgets and fixed ceilings are dry-run stand-ins. The production figures come fr
 
 ## Known divergence from the design
 
-- **Swap instances.** The harness deploys no Stonks 2.0 instance, so neither role has a swap path yet ([ADR 007](../docs/adr/007-swapping-through-stonks.md)). The instance list is a phase 1 deliverable.
+- **Swaps.** The harness deploys no orders account, so neither role has a swap path yet ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The fork tests of the CoW order signer and ComposableCoW are phase 1 work; the orders account enters the policy in phase 2.
+- **First-loss Safe.** The harness deploys no first-loss Safe ([ADR 008](../docs/adr/008-funding-through-existing-payments.md)). It enters the deployment in phase 2.
 - **Pre-execution screening.** The operator is a plain address, not an operator Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
 - **Factories and registries.** The budget factory, the template factories and the funding registries are not built ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md), [ADR 008](../docs/adr/008-funding-through-existing-payments.md)). The drills drive Easy Track with a pass-through factory.
 - **Per-key budget ceilings.** The governance role's budget permission pins the key and the period floor only. Ceilings per key wait for the attested figures; `test_budget_motion_bounds_are_expressible_per_key` shows the shape.

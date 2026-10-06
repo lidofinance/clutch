@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 008: Funding through the existing payment path"
-description: The vault is seeded and topped up through Aragon Finance and two dedicated allowed-recipients registries, one for stablecoins and one for stETH, each with a one-month period and a limit of one TM Floor Value; the objection is the control and the registry is the backstop; a DAO vote adds USDS to the shared payment permission and to the shared stablecoin token list; ETH is not a funding asset; the DAO's first-loss Earn shares move in from the Growth Committee and reduce the seed.
+description: The vault is seeded and topped up through Aragon Finance and two dedicated allowed-recipients registries, one for stablecoins and one for stETH, each with a one-month period and a limit of one TM Floor Value; the objection is the control and the registry is the backstop; a DAO vote adds USDS to the shared payment permission and to the shared stablecoin token list; ETH is not a funding asset; the DAO's first-loss Earn shares move from the Growth Committee into a dedicated first-loss Safe, out of reach of every role, and reduce the seed.
 tags: [funding, finance, easy-track, acl]
 status: draft
 review_status: slop
@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:30Z
+  at: 2026-10-06T17:59:00Z
 verified: []
 sources:
   - id: s1
@@ -87,6 +87,10 @@ EM decided on 2026-10-05, closing OD-28 [s1]:
 
 18. The no-redeem rule binds the emergency role too. In an emergency, the emergency role sends the first-loss shares to the Aragon Agent. It never redeems below the first-loss amount. A burn or a redemption of the first-loss shares is a DAO vote.
 
+EM decided on 2026-10-06, closing OD-42 [s1]:
+
+19. The Growth Committee transfers the first-loss shares to a dedicated first-loss Safe, not to the Asset Safe. The first-loss Safe is owned by the Aragon Agent at one of one and has no modules, so no role can reach the shares. A burn or a redemption is a DAO vote that has the first-loss Safe act. This replaces the destination of decision 13. Decisions 14, 15 and 17 stand. Decisions 16 and 18 give way to the structure: no role can reach the shares, so no written rule is needed and the emergency role has nothing to send.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
@@ -97,7 +101,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - **Two top-up factories.** The stablecoin factory uses the shared stablecoin token list, after the vote adds USDS to it. The stETH factory is the single-token version. The operator Safe is the trusted caller of both, as of every factory ([ADR 006](/adr/006-governance-through-easy-track-factories.md)). The DAO registers them by vote.
 - **The figures.** The stablecoin limit is the TM Floor Value at par. The stETH limit is the floor divided by the pinned price. An attested computation produces both, and they enter this repository when the mandate is approved.
 - **The seed.** The same registries carry the seed. It is at most one floor, less the value of the first-loss shares that arrive from the Growth Committee, set by attested computation at the Earn oracle price. Twyne counts only when shown (decision 17). The seed motion follows the share transfer.
-- **The first-loss shares.** The Asset Safe receives them by plain transfer and needs no permission for it. A burn is a DAO vote that has the Asset Safe call `burn` on the share token. The first-loss amount is the shares received, less any burn. In an emergency, the emergency role sends them to the Agent instead of redeeming them, and the Agent can still burn them by vote (decision 18). Monitoring alerts when the Asset Safe's earnETH or earnUSD balance falls below the first-loss amount ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+- **The first-loss shares.** The first-loss Safe receives them by plain transfer and needs no permission for it. A burn is a DAO vote that has the first-loss Safe call `burn` on the share token. The first-loss amount is the shares received, less any burn. Reports show the first-loss Safe as a sub-allocation of the vault. Monitoring alerts on any change of the first-loss Safe's balance, owners, modules or singleton ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
 - **The report.** The factory fixes the payment reference, so a top-up's report identifier goes in the forum post that the mandate requires before each top-up. There is no on-chain anchor. No top-up motion starts while the monthly report is late or the snapshot has an unpriced asset ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
 - **Funding assets.** USDC, USDT, DAI, USDS, sUSDS and stETH. ETH is not a funding asset: the Agent holds less than 8 ETH [s4].
 
@@ -114,6 +118,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - A token list for the vault alone, with USDC, USDT and DAI. Not chosen by EM: EM added USDS and sUSDS to the funding assets and kept the shared list.
 - ETH as a funding asset, with a third registry and factory. Not chosen: the Agent holds less than 8 ETH.
 - The first-loss shares stay with the Growth Committee and only count toward the vault. Not chosen by EM. The agent had recommended it, because it keeps the first-loss terms as approved and needs no written rule.
+- The first-loss shares in the Asset Safe under a written no-redeem rule, the design until 2026-10-06. Replaced by EM (OD-42): the chain could not tell them apart from shares that the operator buys, so monitoring was the rule's only check.
 - The Growth Committee redeems the shares, and the seed is funded in full. Not chosen: it ends the first-loss protection that the DAO approved.
 - The emergency role may redeem the first-loss shares in an incident. Not chosen by EM: a redemption ahead of a flagged loss would front-run the depositors that the first-loss terms protect.
 - Twyne counts against the seed now, as the mandate states. Not chosen by EM: no holder or form has been shown.
@@ -132,8 +137,8 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - sUSDS is a yield-bearing stablecoin. A top-up in sUSDS counts at once against its yield-bearing cap ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). The registry counts it at par, although one sUSDS is worth more than one dollar, so the limit admits slightly more value in sUSDS.
 - The mandate limits funding to stETH and the top-four stablecoins, and sUSDS is not one of them. The mandate text owes a change.
 - The receiver is bound one layer above the ACL, in the registry and the factory. Both layers are needed.
-- The vault holds first-loss capital. Its earnETH and earnUSD shares can then mean two things: the first-loss amount, and any shares the operator buys. The chain cannot tell them apart, so the no-redeem rule is procedural, and monitoring is its only check.
-- The no-redeem rule binds both roles (decision 18). In an Earn incident, the first-loss capital stays at risk while a DAO vote decides. A transfer to the Agent changes the holder, not the exposure.
+- The first-loss capital sits apart from every other share the vault holds. Any earnETH or earnUSD share in the Asset Safe is the vault's own, and the no-redeem rule needs no written check, because no role can reach the first-loss Safe (decision 19).
+- In an Earn incident, the first-loss capital stays at risk while a DAO vote decides. That is the first-loss terms working as approved: the capital takes losses first.
 - Each first-loss burn waits for a DAO vote and the Dual Governance timelock, so it comes later than a burn by the Growth Committee would.
 - A burn lowers the vault's value, and the next monthly top-up refills the vault to the floor from the treasury.
 - The move needs the Earn vaults to keep share transfers open until it happens. Their administrators can restrict transfers [s6].
@@ -141,8 +146,8 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 ## Confirmation
 
-- INV-017 in the [invariants](/specs/invariants.md).
-- Fork tests owed: the first-loss shares transfer from the Growth Committee Safe to the Asset Safe, and a DAO-vote path burns them from the Asset Safe; a top-up motion pays the Asset Safe and fails for any other recipient; the limit holds at motion start and at enactment; a motion created in the last 72 hours of a month counts against the next month; a stETH motion with several payments, each under the per-payment ceiling; only the operator Safe can create a motion.
+- INV-017 and INV-021 in the [invariants](/specs/invariants.md).
+- Fork tests owed: the first-loss shares transfer from the Growth Committee Safe to the first-loss Safe, a DAO-vote path burns them from it, and no role of either modifier can reach it; a top-up motion pays the Asset Safe and fails for any other recipient; the limit holds at motion start and at enactment; a motion created in the last 72 hours of a month counts against the next month; a stETH motion with several payments, each under the per-payment ceiling; only the operator Safe can create a motion.
 
 ## Reversal conditions
 
@@ -150,7 +155,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - The mandate moves the top-up away from a monthly cycle.
 - Top-ups above the shortfall or outside the cycle happen. That would argue for one dollar limit on chain.
 - The Earn vaults block share transfers before the move.
-- The first-loss terms end. The shares then become ordinary vault positions.
+- The first-loss terms end. A DAO vote then moves the shares to the Asset Safe as ordinary positions.
 
 ## Open questions
 

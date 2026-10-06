@@ -109,7 +109,7 @@ An agent read the Stonks source at the audited commit `0669c4a` and ran every ch
 ## How often Chainlink replaced the vault's feeds
 
 - From block 23,500,000 (2025-10-07) to the block, the registry confirmed 40 feed changes. For the vault's tokens, it replaced only the USDC and USDT aggregators, each twice: on 2026-09-16 and on 2026-09-21 [s10].
-- With a token configured, each replacement stops that token's pricing until a re-sync [s4]. USDC is the vault's hub ([ADR 007](/adr/007-swapping-through-stonks.md)).
+- With a token configured, each replacement stops that token's pricing until a re-sync [s4]. USDC is the vault's hub ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
 
 ## The WETH route
 

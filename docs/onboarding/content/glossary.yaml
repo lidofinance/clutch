@@ -13,7 +13,7 @@
   sources: [ADR-009, INV-008]
 
 - term: Aragon Agent
-  plain: "The DAO's treasury contract and its final authority. It executes what DAO votes decide, and it is the only owner of the Asset Safe."
+  plain: "The DAO's treasury contract and its final authority. It executes what DAO votes decide, and it is the only owner of the Asset Safe, the orders account and the first-loss Safe."
   sources: [ADR-005]
 
 - term: Artifact
@@ -35,7 +35,7 @@
   sources: [ADR-009, INV-011]
 
 - term: Cap
-  plain: "A mandate limit on exposure, written as a share of a defined base. Measurement, publication and remediation keep it. No transaction reverts on a cap."
+  plain: "A mandate limit on exposure, written as a share of a defined base. Measurement, publication and remediation keep it. No contract reverts on a cap."
   sources: [ADR-009]
 
 - term: Compiler
@@ -46,9 +46,17 @@
   plain: "The Zodiac description of the Safes, the modifiers, the roles, the permissions and the budget keys, written in TypeScript under `policy/constellation/`. It is the source of Clutch's permission policy."
   sources: [ADR-004, OD-33]
 
+- term: Conditional order
+  plain: "A CoW order that ComposableCoW holds and checks, such as a TWAP or a stop-loss order. CoW's watch-tower posts it to the order book when it is due."
+  sources: [ADR-007, "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
+
+- term: Control matrix
+  plain: "The specification that maps every mandate rule to its controls on each layer: the on-chain policy, screening before execution, monitoring with alerts, and display in the Zodiac UI."
+  sources: [OD-39, "doc:docs/specs/control-matrix.md#the-matrix"]
+
 - term: CoW
-  plain: "CoW Protocol, an order-based exchange. Stonks places its orders there. The vault never pre-signs a CoW order itself, because the modifier cannot read the order's terms."
-  sources: [ADR-007]
+  plain: "CoW Protocol, an order-based exchange. Every vault swap is a CoW order from the orders account. Solvers compete to fill an order at its limit or better, and the [[EBBO]] rule holds a fill to the on-chain market; nothing on chain bounds the price."
+  sources: [ADR-007, OD-43]
 
 - term: Default-deny
   plain: "Everything is refused unless the policy lists it. A new protocol, function or argument value needs an explicit permission."
@@ -78,6 +86,10 @@
   plain: "Lido's optimistic governance. A proposal passes after a fixed window unless LDO holders object above a threshold of 0.5% of LDO."
   sources: [ADR-006]
 
+- term: EBBO
+  plain: "Ethereum best bid and offer: CoW's rule that solvers must fill an order at least as well as on-chain AMM routing would. A solver that breaks it must refund the user, or its bond is slashed."
+  sources: [OD-48, "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
+
 - term: Enabling vote
   plain: "The DAO vote that turns the system on. It applies the committed artifact, grants the roles, registers the factories and adds USDS to the payment permission."
   sources: [ADR-004, ADR-010, ADR-008]
@@ -87,12 +99,16 @@
   sources: [ADR-010]
 
 - term: Fallback handler
-  plain: "A contract that a Safe forwards unknown calls to, for example to accept NFT safe transfers or to sign messages. The Asset Safe has none, on purpose."
-  sources: [ADR-005]
+  plain: "A contract that a Safe forwards unknown calls to, for example to accept NFT safe transfers or to sign messages. The Asset Safe has none, on purpose. The orders account uses CoW's, because conditional orders need it."
+  sources: [ADR-005, ADR-007]
 
 - term: First-loss shares
-  plain: "The DAO's earnETH and earnUSD shares from the March 2026 Earn allocation. They take losses first, to protect other depositors. They move to the Asset Safe, and only a DAO vote may burn or redeem them."
-  sources: [ADR-008, OD-21, OD-28]
+  plain: "The DAO's earnETH and earnUSD shares from the March 2026 Earn allocation. They take losses first, to protect other depositors. They move to the first-loss Safe, and only a DAO vote may burn or redeem them."
+  sources: [ADR-008, OD-21, OD-28, OD-42]
+
+- term: First-loss Safe
+  plain: "A Safe that the Aragon Agent owns, with no modules, that holds only the first-loss shares. No role can reach it."
+  sources: [ADR-008, OD-42, INV-021]
 
 - term: Fortnightly snapshot
   plain: "A reading of the vault's holdings at a pinned block every two weeks. It drives the budget retune and the published cap reading."
@@ -105,6 +121,14 @@
 - term: Invariant
   plain: "A property that must always hold, stated so that a test can check it. Each has an ID, `INV-NNN`, that is never reused."
   sources: ["doc:docs/specs/specification-policy.md#invariants"]
+
+- term: Limit order
+  plain: "A CoW order that sells only at a set price or better. It can stand for up to 30 days. A sale when a price rises to a target is a limit order."
+  sources: [ADR-007, OD-43]
+
+- term: Liquidity buffer
+  plain: "The stablecoins that the Asset Safe holds directly, and sUSDS, kept at or above one month of baseline spend. Monitoring watches it, every report shows it, and the committee restores it within the mandate's window."
+  sources: [ADR-009, OD-40]
 
 - term: LIP
   plain: "A Lido Improvement Proposal: the summary for DAO voters and delegates. It cites the internal specifications and must never contradict them."
@@ -130,25 +154,25 @@
   plain: "The time that a motion must wait before enactment: 72 hours today, the same for every motion, and never less than 48 hours."
   sources: [ADR-006]
 
+- term: New Lido product
+  plain: "A Lido product, such as Lido Lend, that counts against the protocol cap until it meets the mandate's maturity criteria and a motion unlocks it. earnETH and earnUSD are not new."
+  sources: [ADR-009, OD-41]
+
 - term: Open decision
   plain: "A numbered question, `OD-NN`, that a human must decide. The register lists the open ones with the agent's recommendation."
   sources: ["doc:docs/registers/open-decisions.md#open-decisions"]
+
+- term: Orders account
+  plain: "A Safe that the Aragon Agent owns, with CoW's fallback handler and its own two modifiers. The roles place CoW orders from it. It holds only tokens in transit."
+  sources: [ADR-007, OD-43, INV-023]
 
 - term: Permission
   plain: "The rule stored for one role, contract and function. It says which argument values are allowed. A new write replaces the old rule; it does not add to it."
   sources: [ADR-004, "lip:part-3"]
 
-- term: Price router
-  plain: "The shared Stonks oracle router. It prices every swap from Chainlink's Feed Registry. Aragon Voting is its admin, and the committee's Safe is its manager."
-  sources: [ADR-007]
-
-- term: Rebalancing instance
-  plain: "A swap instance for routine trades. The operator sends tokens in, the operator Safe manages it, and the proceeds return to the Asset Safe."
-  sources: [ADR-007]
-
-- term: Recovery instance
-  plain: "A swap instance for emergency sales. The emergency Safe manages it, and the proceeds go to the Aragon Agent."
-  sources: [ADR-007]
+- term: Recovery order
+  plain: "An order that the emergency role places from the orders account. It sells an asset for USDC, or USDT as the second destination, and pays the Aragon Agent. No guard screens it."
+  sources: [ADR-007, OD-26, INV-014]
 
 - term: Role
   plain: "A named set of permissions on a modifier: operator, governance, emergency or technical. A Safe or contract that holds the role can make the calls that it allows."
@@ -180,11 +204,15 @@
   sources: ["doc:ROADMAP.md#roadmap"]
 
 - term: Stonks
-  plain: "Lido's treasury swap contracts, Stonks 2.0. Each instance sells one token for one other through CoW, at a minimum price from an oracle, and pays a receiver that is fixed at deployment."
-  sources: [ADR-007]
+  plain: "Lido's treasury swap contracts. The design used Stonks 2.0 instances until 2026-10-06, when the orders account replaced them: they offered no limit, TWAP or stop-loss orders (OD-43)."
+  sources: [ADR-007, OD-43]
+
+- term: Stop-loss order
+  plain: "A CoW order that becomes valid when the sell token's price falls to a set strike, read from Chainlink feeds that the policy pins. For example: sell stETH if its price falls to a set level."
+  sources: [ADR-007, INV-022]
 
 - term: sUSDS
-  plain: "Sky's savings token for USDS. The vault holds it as a savings position and redeems it before a sale."
+  plain: "Sky's savings token for USDS. The vault holds it as a savings position, and it counts toward the liquidity buffer."
   sources: [ADR-011]
 
 - term: Template
@@ -202,6 +230,14 @@
 - term: Trusted caller
   plain: "The only address that may create motions on an Easy Track factory, fixed when the factory is deployed. For every Clutch factory it is the operator Safe."
   sources: [ADR-006]
+
+- term: TWAP
+  plain: "Time-weighted average price: a CoW order in equal parts at a fixed spacing. It buys or sells a position over time, which is how the vault averages its cost."
+  sources: [ADR-007, "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
+
+- term: Watch-tower
+  plain: "CoW's off-chain service that posts conditional orders to the order book. If it stops, the orders wait and no funds move."
+  sources: [ADR-007, "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
 - term: Withdrawal queue
   plain: "Lido's contract that turns stETH back into ETH. A request cannot be cancelled and takes days to finalize."
