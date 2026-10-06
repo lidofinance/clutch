@@ -7,7 +7,13 @@ solc_version = "0.8.24"
 optimizer = true
 via_ir = true
 optimizer_runs = 200
-fs_permissions = [{ access = "write", path = "./"}]
+# Read: the policy manifests and artifacts (ADR 004), and the dry run's local artifact.
+fs_permissions = [
+    { access = "write", path = "./" },
+    { access = "read", path = "./policy/constellation/manifests" },
+    { access = "read", path = "./policy/constellation/artifacts" },
+    { access = "read", path = "./dryrun-artifact.json" },
+]
 
 [profile.default.fuzz]
 runs = 8

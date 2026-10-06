@@ -1,67 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.8.24 <0.9.0;
 
-import {Test} from "forge-std/Test.sol";
-import {ISafe, ISafeProxyFactory} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {IERC20, ILidoEarnDepositQueue} from "../src/interfaces/Tokens.sol";
-import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
-import {IModuleProxyFactory} from "../src/interfaces/ISafe.sol";
-import {Policy} from "../src/policy/Policy.sol";
-import {FullPolicy} from "../src/policy/FullPolicy.sol";
-import {SafeExec} from "../src/policy/SafeExec.sol";
+import {SafeExec} from "../src/exec/SafeExec.sol";
+import {ClutchFixture} from "./utils/Fixture.sol";
 
 /// @title ReviewProbe — regression tests for defects found in review, and
 ///        probes of what the deployed Roles mastercopy can express.
 /// @dev Each test decides one claim against the deployed Roles v4
 ///      mastercopy on the pinned fork.
-abstract contract ReviewBase is Test {
-    uint256 internal constant FORK_BLOCK = 25946643;
-    // Safe v1.5.0: EM's choice for the three new Safes (OD-02, OD-17).
-    address internal constant SAFE_SINGLETON = 0xFf51A5898e281Db6DfC7855790607438dF2ca44b;
-    address internal constant ROLES_MASTERCOPY = 0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5;
-    address internal constant SAFE_PROXY_FACTORY = 0x14F2982D601c9458F93bd70B218933A6f8165e7b;
-
-    MockAragonAgent internal agent;
-    ISafe internal safe;
-    IRoles internal roles; // operator + governance
-    IRoles internal safety; // emergency + technical
-    address internal operatorSafe = makeAddr("operator-safe-standin");
-    address internal attacker = makeAddr("attacker");
-    address internal principal;
-    Policy.Addresses internal a;
-
-    function setUp() public {
-        vm.createSelectFork(vm.envString("RPC"), FORK_BLOCK);
-        principal = makeAddr("executor-eoa");
-        vm.startPrank(principal);
-        agent = new MockAragonAgent();
-        ISafeProxyFactory pf = ISafeProxyFactory(SAFE_PROXY_FACTORY);
-        address[] memory owners = new address[](1);
-        owners[0] = address(agent);
-        safe = ISafe(payable(pf.createProxyWithNonce(SAFE_SINGLETON,
-            abi.encodeCall(ISafe.setup, (owners, 1, address(0), "", address(0), address(0), 0, payable(address(0)))), 0x77)));
-        IModuleProxyFactory mpf = IModuleProxyFactory(0x000000000000aDdB49795b0f9bA5BC298cDda236);
-        bytes memory init = abi.encodeCall(IRoles.setUp, (abi.encode(address(safe), address(safe), address(safe))));
-        roles = IRoles(mpf.deployModule(ROLES_MASTERCOPY, init, 0x11d1));
-        safety = IRoles(mpf.deployModule(ROLES_MASTERCOPY, init, 0x11d2));
-        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
-        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety))));
-
-        Policy.Addresses memory m;
-        m.safe = address(safe); m.agent = address(agent); m.operator = operatorSafe;
-        m.emergency = makeAddr("emergency-safe-standin");
-        m.technical = makeAddr("emergency-brakes-standin"); m.policyAdmin = makeAddr("policy-admin");
-        m.rolesOperator = address(roles); m.rolesSafety = address(safety);
-        Policy.fillTokens(m); Policy.fillProtocols(m);
-        a = m;
-        Policy.Call[] memory ops = FullPolicy.buildOperator(m, address(roles));
-        for (uint256 i = 0; i < ops.length; i++) SafeExec.execAsOwner(agent, safe, ops[i].to, ops[i].data);
-        Policy.Call[] memory saf = FullPolicy.buildSafety(m, address(safety), address(roles));
-        for (uint256 i = 0; i < saf.length; i++) SafeExec.execAsOwner(agent, safe, saf[i].to, saf[i].data);
-        vm.stopPrank();
-    }
-
+abstract contract ReviewBase is ClutchFixture {
     function _own(address to, bytes memory data) internal {
         vm.startPrank(principal);
         SafeExec.execAsOwner(agent, safe, to, data);
@@ -74,7 +23,7 @@ abstract contract ReviewBase is Test {
     function _opCall(address to, bytes memory data) internal returns (bool ok, bytes memory ret) {
         vm.prank(operatorSafe);
         (ok, ret) = address(roles).call(abi.encodeCall(
-            IRoles.execTransactionWithRole, (to, 0, data, 0, Policy.OPERATOR(), true)));
+            IRoles.execTransactionWithRole, (to, 0, data, 0, OPERATOR, true)));
     }
 
     function _op(address to, bytes memory data) internal returns (bool ok) {
@@ -89,9 +38,9 @@ abstract contract ReviewBase is Test {
     }
 
     function _paCall(bytes memory data) internal returns (bool ok, bytes memory ret) {
-        vm.prank(a.policyAdmin);
+        vm.prank(a.governance);
         (ok, ret) = address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole,
-            (address(roles), 0, data, 0, Policy.POLICY_ADMIN(), true)));
+            (address(roles), 0, data, 0, GOVERNANCE, true)));
     }
 
     function _pa(bytes memory data) internal returns (bool ok) {
@@ -102,6 +51,11 @@ abstract contract ReviewBase is Test {
         (bool ok, bytes memory ret) = _paCall(data);
         assertFalse(ok, why);
         assertEq(bytes4(ret), CONDITION_VIOLATION, why);
+    }
+
+    function _emCall(address to, bytes memory data) internal returns (bool ok, bytes memory ret) {
+        vm.prank(a.emergency);
+        (ok, ret) = address(safety).call(abi.encodeCall(IRoles.execTransactionWithRole, (to, 0, data, 0, EMERGENCY, true)));
     }
 
     function _approve(address spender, uint256 amount) internal pure returns (bytes memory) {
@@ -128,9 +82,9 @@ contract ReviewProbe is ReviewBase {
         assertTrue(_op(a.wsteth, _approve(a.earnEthDepositQueue, 9e17)), "wsteth within its key");
         _opRefused(a.wsteth, _approve(a.earnEthDepositQueue, 2e17), "wsteth must exhaust its key");
 
-        assertEq(_balance(Policy.K_EARN_USD), 0, "earnUSD key consumed only by usdc");
-        assertEq(_balance(Policy.K_SUSDS), 100e18, "sUSDS key consumed only by usds");
-        assertEq(_balance(Policy.K_EARN_ETH), 1e17, "earnETH key consumed only by wsteth");
+        assertEq(_balance(K_EARN_USD), 0, "earnUSD key consumed only by usdc");
+        assertEq(_balance(K_SUSDS), 100e18, "sUSDS key consumed only by usds");
+        assertEq(_balance(K_EARN_ETH), 1e17, "earnETH key consumed only by wsteth");
     }
 
     // =================================================================
@@ -154,10 +108,10 @@ contract ReviewProbe is ReviewBase {
     function test_single_child_matches_leaves_trailing_parameters_unconstrained() public {
         IRoles.ConditionFlat[] memory c = new IRoles.ConditionFlat[](2);
         c[0] = IRoles.ConditionFlat({parent: 0, paramType: 5, operator_: 5, compValue: ""});
-        c[1] = IRoles.ConditionFlat({parent: 0, paramType: 1, operator_: 28, compValue: abi.encodePacked(Policy.K_EARN_USD)});
+        c[1] = IRoles.ConditionFlat({parent: 0, paramType: 1, operator_: 28, compValue: abi.encodePacked(K_EARN_USD)});
         // Integrity accepts it at write time
         _own(address(roles), abi.encodeCall(IRoles.scopeFunction,
-            (Policy.OPERATOR(), a.earnUsdDepositQueue, ILidoEarnDepositQueue.deposit.selector, c, 0)));
+            (OPERATOR, a.earnUsdDepositQueue, ILidoEarnDepositQueue.deposit.selector, c, 0)));
         emit log("Integrity ACCEPTED a 1-child Matches on a 3-param function");
         deal(a.usdc, address(safe), 1_000e6);
         assertTrue(_op(a.usdc, _approve(a.earnUsdDepositQueue, 100e6)), "approve within the key");
@@ -175,29 +129,29 @@ contract ReviewProbe is ReviewBase {
     // =================================================================
     function test_policyadmin_cannot_change_role_membership() public {
         bytes32[] memory keys = new bytes32[](1);
-        keys[0] = Policy.OPERATOR();
+        keys[0] = OPERATOR;
         bool[] memory yes = new bool[](1);
         yes[0] = true;
         _paRefused(abi.encodeCall(IRoles.assignRoles, (attacker, keys, yes)), "membership setters must not be reachable from governance");
     }
 
     function test_policyadmin_cannot_touch_the_emergency_role() public {
-        _paRefused(abi.encodeCall(IRoles.revokeTarget, (Policy.EMERGENCY(), a.usdc)), "role key must be pinned to the operator");
+        _paRefused(abi.encodeCall(IRoles.revokeTarget, (EMERGENCY, a.usdc)), "role key must be pinned to the operator");
     }
 
     /// @dev The indirect route: grant the operator a permission whose target
     ///      is the modifier itself, then reach owner-only administration
     ///      through the avatar.
     function test_policyadmin_cannot_grant_operator_admin_targets() public {
-        _paRefused(abi.encodeCall(IRoles.scopeTarget, (Policy.OPERATOR(), address(roles))), "the modifier must be refused as an administered target");
-        _paRefused(abi.encodeCall(IRoles.scopeTarget, (Policy.OPERATOR(), address(safe))), "the Safe must be refused as an administered target");
+        _paRefused(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(roles))), "the modifier must be refused as an administered target");
+        _paRefused(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(safe))), "the Safe must be refused as an administered target");
         _paRefused(abi.encodeCall(IRoles.allowFunction,
-            (Policy.OPERATOR(), address(roles), IRoles.revokeTarget.selector, 0)), "granting an admin selector to the operator must fail");
+            (OPERATOR, address(roles), IRoles.revokeTarget.selector, 0)), "granting an admin selector to the operator must fail");
         // and the emergency role still works afterwards
         deal(a.usdc, address(safe), 10e6);
         vm.prank(a.emergency);
         assertTrue(safety.execTransactionWithRole(a.usdc, 0,
-            abi.encodeCall(IERC20.transfer, (a.agent, 1e6)), 0, Policy.EMERGENCY(), true),
+            abi.encodeCall(IERC20.transfer, (a.agent, 1e6)), 0, EMERGENCY, true),
             "emergency must remain armed");
     }
 
@@ -212,11 +166,11 @@ contract ReviewProbe is ReviewBase {
     // =================================================================
     function test_policyadmin_cannot_set_a_refill_period_below_30_days() public {
         _paRefused(abi.encodeCall(IRoles.setAllowance,
-            (Policy.K_SUSDS, 1e18, 1e18, 1e18, 30 days - 1, 0)), "a period below the floor must be refused");
+            (K_SUSDS, 1e18, 1e18, 1e18, 30 days - 1, 0)), "a period below the floor must be refused");
         _paRefused(abi.encodeCall(IRoles.setAllowance,
-            (Policy.K_SUSDS, 1e18, 1e18, 1e18, 1, 0)), "a one-second period must be refused");
+            (K_SUSDS, 1e18, 1e18, 1e18, 1, 0)), "a one-second period must be refused");
         assertTrue(_pa(abi.encodeCall(IRoles.setAllowance,
-            (Policy.K_SUSDS, 1e18, 1e18, 1e18, 30 days, 0))), "the floor itself must pass");
+            (K_SUSDS, 1e18, 1e18, 1e18, 30 days, 0))), "the floor itself must pass");
     }
 
     /// @dev PROBE for the budget factory: native conditions can give each key
@@ -228,7 +182,7 @@ contract ReviewProbe is ReviewBase {
         c[0] = IRoles.ConditionFlat(0, 0, 2, "");  // Or over the keys
         c[1] = IRoles.ConditionFlat(0, 5, 5, "");  // branch: earnUSD key (6 decimals)
         c[2] = IRoles.ConditionFlat(0, 5, 5, "");  // branch: sUSDS key (18 decimals)
-        bytes32[2] memory keys = [Policy.K_EARN_USD, Policy.K_SUSDS];
+        bytes32[2] memory keys = [K_EARN_USD, K_SUSDS];
         uint256[2] memory ceilings = [uint256(2_000e6), uint256(2_000e18)];
         for (uint256 b = 0; b < 2; b++) {
             uint8 parent = uint8(1 + b);
@@ -241,18 +195,18 @@ contract ReviewProbe is ReviewBase {
             c[k + 5] = IRoles.ConditionFlat(parent, 1, 0, "");                                    // timestamp
         }
         _own(address(roles), abi.encodeCall(IRoles.scopeFunction,
-            (Policy.POLICY_ADMIN(), address(roles), IRoles.setAllowance.selector, c, 0)));
+            (GOVERNANCE, address(roles), IRoles.setAllowance.selector, c, 0)));
 
         assertTrue(_pa(abi.encodeCall(IRoles.setAllowance,
-            (Policy.K_EARN_USD, 1_500e6, 1_500e6, 1_500e6, 30 days, 0))), "a 6-decimal key within its ceiling");
+            (K_EARN_USD, 1_500e6, 1_500e6, 1_500e6, 30 days, 0))), "a 6-decimal key within its ceiling");
         _paRefused(abi.encodeCall(IRoles.setAllowance,
-            (Policy.K_EARN_USD, 9_000e6, 9_000e6, 9_000e6, 30 days, 0)), "the 6-decimal ceiling must bind");
+            (K_EARN_USD, 9_000e6, 9_000e6, 9_000e6, 30 days, 0)), "the 6-decimal ceiling must bind");
         assertTrue(_pa(abi.encodeCall(IRoles.setAllowance,
-            (Policy.K_SUSDS, 1_500e18, 1_500e18, 1_500e18, 30 days, 0))), "an 18-decimal key within its own ceiling");
+            (K_SUSDS, 1_500e18, 1_500e18, 1_500e18, 30 days, 0))), "an 18-decimal key within its own ceiling");
         _paRefused(abi.encodeCall(IRoles.setAllowance,
-            (Policy.K_SUSDS, 9_000e18, 9_000e18, 9_000e18, 30 days, 0)), "the 18-decimal ceiling must bind");
+            (K_SUSDS, 9_000e18, 9_000e18, 9_000e18, 30 days, 0)), "the 18-decimal ceiling must bind");
         _paRefused(abi.encodeCall(IRoles.setAllowance,
-            (Policy.K_EARN_USD, 1_500e6, 1_500e6, 1_500e6, 1, 0)), "the period floor must bind");
+            (K_EARN_USD, 1_500e6, 1_500e6, 1_500e6, 1, 0)), "the period floor must bind");
     }
 
     // =================================================================
@@ -263,13 +217,27 @@ contract ReviewProbe is ReviewBase {
         // a keyed spender: an unlimited approval exceeds any budget
         _opRefused(a.usdc, _approve(a.earnUsdDepositQueue, type(uint256).max), "unlimited approval must be rejected");
         // a capped spender: the ceiling binds, below it passes
-        _opRefused(a.steth, _approve(a.wsteth, FullPolicy.FLOOR_STANDIN_STETH), "the ceiling must bind");
-        assertTrue(_op(a.steth, _approve(a.wsteth, FullPolicy.FLOOR_STANDIN_STETH - 1)), "below the ceiling passes");
-        _opRefused(a.steth, _approve(a.withdrawalQueue, FullPolicy.FLOOR_STANDIN_STETH), "the queue ceiling must bind");
-        assertTrue(_op(a.steth, _approve(a.withdrawalQueue, FullPolicy.FLOOR_STANDIN_STETH - 1)), "below the queue ceiling passes");
+        _opRefused(a.steth, _approve(a.wsteth, FLOOR_STANDIN_STETH), "the ceiling must bind");
+        assertTrue(_op(a.steth, _approve(a.wsteth, FLOOR_STANDIN_STETH - 1)), "below the ceiling passes");
+        _opRefused(a.steth, _approve(a.withdrawalQueue, FLOOR_STANDIN_STETH), "the queue ceiling must bind");
+        assertTrue(_op(a.steth, _approve(a.withdrawalQueue, FLOOR_STANDIN_STETH - 1)), "below the queue ceiling passes");
         // zero is always allowed, even with the key exhausted
         assertTrue(_op(a.usdc, _approve(a.earnUsdDepositQueue, 500e6)), "a bounded approval is allowed");
         assertTrue(_op(a.usdc, _approve(a.earnUsdDepositQueue, 0)), "self-revocation must stay available");
+    }
+
+    /// @dev ADR 005: the emergency role zeroes approvals and cannot give one.
+    ///      Found by the mutation check of the constellation port: no test
+    ///      refused a non-zero emergency approval.
+    function test_emergency_cannot_give_a_non_zero_approval() public {
+        (bool ok, bytes memory ret) = _emCall(a.usds, _approve(a.susds, 1));
+        assertFalse(ok, "a non-zero approval must be refused");
+        assertEq(bytes4(ret), CONDITION_VIOLATION, "the modifier, not the token, must refuse it");
+        (ok, ret) = _emCall(a.usds, _approve(attacker, 0));
+        assertFalse(ok, "a spender outside the operator's list must be refused");
+        assertEq(bytes4(ret), CONDITION_VIOLATION, "the modifier, not the token, must refuse it");
+        (ok,) = _emCall(a.usds, _approve(a.susds, 0));
+        assertTrue(ok, "zeroing an approved spender must pass");
     }
 
     function test_emergency_can_durably_stop_operator_reapproval() public {
@@ -277,10 +245,10 @@ contract ReviewProbe is ReviewBase {
         // incident: zero the approval AND remove the operator's ability to set it
         vm.startPrank(a.emergency);
         assertTrue(safety.execTransactionWithRole(a.usdc, 0,
-            _approve(a.earnUsdDepositQueue, 0), 0, Policy.EMERGENCY(), true));
+            _approve(a.earnUsdDepositQueue, 0), 0, EMERGENCY, true));
         assertTrue(safety.execTransactionWithRole(address(roles), 0,
-            abi.encodeCall(IRoles.revokeFunction, (Policy.OPERATOR(), a.usdc, IERC20.approve.selector)),
-            0, Policy.EMERGENCY(), true), "emergency must be able to revoke the operator's approve");
+            abi.encodeCall(IRoles.revokeFunction, (OPERATOR, a.usdc, IERC20.approve.selector)),
+            0, EMERGENCY, true), "emergency must be able to revoke the operator's approve");
         vm.stopPrank();
         assertEq(IERC20(a.usdc).allowance(address(safe), a.earnUsdDepositQueue), 0);
         _opRefused(a.usdc, _approve(a.earnUsdDepositQueue, 1e6), "operator must not be able to restore the approval after the incident");

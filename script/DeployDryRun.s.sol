@@ -9,18 +9,18 @@ import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 import {MockEasyTrack, PassThroughEVMScriptFactory} from "../src/mocks/MockEasyTrack.sol";
 
 import {IERC20} from "../src/interfaces/Tokens.sol";
-import {Policy} from "../src/policy/Policy.sol";
-import {FullPolicy} from "../src/policy/FullPolicy.sol";
-import {SafeExec} from "../src/policy/SafeExec.sol";
+import {SafeExec} from "../src/exec/SafeExec.sol";
 
-/// @title DeployDryRun — one-click mainnet dry-run deployment.
+/// @title DeployDryRun — the deployment half of the mainnet dry run.
 /// @dev Everything downstream of the governance heads is production grade:
 ///      the Safe proxy deploys from the v1.5.0 singleton and the Roles proxies
-///      from the deployed v4 mastercopy; only Agent/ET are mocks. The policy
-///      is applied through Agent -> Safe -> Roles, the production
-///      permission-change path that drill D2 also uses.
+///      from the deployed v4 mastercopy; only Agent/ET are mocks. The script
+///      writes the deployment manifest that the policy compiler reads. The
+///      policy is not applied here: compile the constellation against the
+///      manifest, then apply the artifact with ApplyPolicy, through
+///      Agent -> Safe -> Roles, the path that drill D2 also uses (ADR 004).
 ///
-///      Usage (see Justfile):
+///      Usage (see Justfile, `just dry-run`):
 ///        RPC=... PRIVATE_KEY=0x... forge script script/DeployDryRun.s.sol --broadcast
 contract DeployDryRun is Script {
     // Production singletons, checked at the fork block 25946643.
@@ -44,7 +44,9 @@ contract DeployDryRun is Script {
         address technicalStandin = vm.envOr("TECHNICAL_STANDIN", address(0));
 
         vm.startBroadcast(deployer);
-        address executor = msg.sender;
+        // The broadcaster, not msg.sender: in a forge script msg.sender is
+        // Foundry's default sender, whose key is public.
+        address executor = vm.addr(deployer);
 
         if (operatorStandin == address(0)) operatorStandin = executor;
         if (emergencyStandin == address(0)) emergencyStandin = executor;
@@ -103,74 +105,40 @@ contract DeployDryRun is Script {
             agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety)))
         );
 
-        // --- apply the full policy through the production change path ------
-        Policy.Addresses memory a;
-        a.safe = address(safe);
-        a.agent = address(agent);
-        a.operator = operatorStandin;
-        a.emergency = emergencyStandin;
-        a.technical = technicalStandin;
-        // motions act through the governance role, held by the script executor
-        a.policyAdmin = address(executor_);
-        Policy.fillTokens(a);
-        Policy.fillProtocols(a);
-
-        a.rolesOperator = address(roles);
-        a.rolesSafety = address(safety);
-        Policy.Call[] memory calls = FullPolicy.buildOperator(a, address(roles));
-        for (uint256 i = 0; i < calls.length; i++) {
-            SafeExec.execAsOwner(agent, safe, calls[i].to, calls[i].data);
-        }
-        Policy.Call[] memory safCalls = FullPolicy.buildSafety(a, address(safety), address(roles));
-        for (uint256 i = 0; i < safCalls.length; i++) {
-            SafeExec.execAsOwner(agent, safe, safCalls[i].to, safCalls[i].data);
-        }
-
         vm.stopBroadcast();
 
-        // --- manifest -------------------------------------------------------
-        // two parts: one concat with every field is too deep for the stack
-        string memory manifest = string.concat(
-            '{"dryrun":{"network":"mainnet",',
-            '"agent":"',
+        // --- manifest, in the format the policy compiler reads -------------
+        string memory m = string.concat(
+            '{"network":"dryrun-mainnet","chainId":1,"agent":"',
             vm.toString(address(agent)),
-            '","evmScriptExecutor":"',
+            '","assetSafe":"',
+            vm.toString(address(safe)),
+            '","operatorModifier":"',
+            vm.toString(address(roles)),
+            '","safetyModifier":"',
+            vm.toString(address(safety)),
+            '","operatorSafe":"',
+            vm.toString(operatorStandin)
+        );
+        m = string.concat(
+            m,
+            '","emergencySafe":"',
+            vm.toString(emergencyStandin),
+            '","emergencyBrakes":"',
+            vm.toString(technicalStandin),
+            '","easyTrackExecutor":"',
             vm.toString(address(executor_)),
             '","easyTrack":"',
             vm.toString(address(easyTrack)),
             '","passThroughFactory":"',
             vm.toString(address(factory)),
-            '","assetSafe":"',
-            vm.toString(address(safe)),
-            '","rolesModifier":"',
-            vm.toString(address(roles)),
-            '","safetyModifier":"',
-            vm.toString(address(safety))
-        );
-        manifest = string.concat(
-            manifest,
-            '","operatorStandin":"',
-            vm.toString(operatorStandin),
-            '","emergencyStandin":"',
-            vm.toString(emergencyStandin),
-            '","technicalStandin":"',
-            vm.toString(technicalStandin),
-            '","safeSingleton":"',
-            vm.toString(SAFE_SINGLETON),
-            '","rolesMastercopy":"',
-            vm.toString(ROLES_MASTERCOPY),
-            '","policyCalls":',
-            vm.toString(calls.length + safCalls.length),
-            ',"rolesV4Sha":"820e5bc",',
-            '"deployedAt":"',
-            vm.toString(block.timestamp),
             '","deployBlock":',
             vm.toString(block.number),
-            "}}"
+            "}"
         );
-        vm.writeFile("dryrun-manifest.json", manifest);
+        vm.writeFile("dryrun-manifest.json", m);
         console2.log("MANIFEST written: dryrun-manifest.json");
-        console2.log(manifest);
+        console2.log(m);
     }
 }
 

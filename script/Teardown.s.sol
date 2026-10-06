@@ -5,7 +5,7 @@ import {Script, console2} from "forge-std/Script.sol";
 import {ISafe} from "../src/interfaces/ISafe.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
-import {SafeExec} from "../src/policy/SafeExec.sol";
+import {SafeExec} from "../src/exec/SafeExec.sol";
 
 /// @title Teardown — reverses a dry-run.
 /// @dev Sweeps every tracked token from the Asset Safe back to the funder
@@ -35,7 +35,9 @@ contract Teardown is Script {
         address rolesAddr = vm.envAddress("ROLES");
         address safetyAddr = vm.envOr("SAFETY", address(0));
         vm.startBroadcast(deployer);
-        address beneficiary = msg.sender;
+        // The broadcaster, not msg.sender: in a forge script msg.sender is
+        // Foundry's default sender, whose key is public.
+        address beneficiary = vm.addr(deployer);
 
         MockAragonAgent agent = MockAragonAgent(agentAddr);
         ISafe safe = ISafe(payable(safeAddr));
