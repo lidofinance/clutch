@@ -27,7 +27,7 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 - A behaviour change updates its spec and invariants in the same commit.
 - Every invariant `INV-NNN` maps to a named test.
 - Easy Track factories are the only new contracts allowed. Everything else reuses audited, deployed contracts.
-- Source files carry `SPDX-License-Identifier: AGPL-3.0-or-later`. Files derived from Easy Track keep GPL-3.0.
+- Source files carry `SPDX-License-Identifier: AGPL-3.0-or-later`. Files derived from Easy Track keep GPL-3.0. Files derived from the policy provider's Zodiac constellation keep LGPL-3.0-only and get `SPDX-License-Identifier: LGPL-3.0-only` when they change (OD-34).
 
 ## Out of scope for agents
 

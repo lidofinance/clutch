@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-06T08:05:00Z
 verified: []
 sources:
   - id: s1
@@ -50,9 +50,11 @@ Behaviour is written as "WHEN a condition, THEN an expected result". A scenario 
 
 ## The permission policy
 
-- The policy is a data file. A compiler turns it into modifier calls [s1].
+- The policy is written as a Zodiac constellation in TypeScript. Clutch's compiler turns it into one committed artifact: the modifier calls, the expected trees and the allowances [s1].
 - The compiler emits one complete tree per role, target and selector, because a write replaces the slot.
-- A round-trip check reads the applied conditions back from the modifier on a fork and compares them with the data file.
+- CI fails when the committed artifact differs from a fresh compile. Reviewers approve the artifact.
+- The team works in the Zodiac UI. Local tooling verifies everything that the UI produces before anything is signed.
+- A round-trip check reads the applied conditions back from the modifier on a fork and compares them with the committed artifact.
 - Behaviour tests assert what each role can and cannot do, independent of the encoding.
 - A policy change rises above `slop` only with the output of the verification procedure [s3].
 

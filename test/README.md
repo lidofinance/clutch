@@ -35,7 +35,7 @@ Budgets and fixed ceilings are dry-run stand-ins. The production figures come fr
 - **Pre-execution screening.** The operator is a plain address, not an operator Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
 - **Factories and registries.** The budget factory, the template factories and the funding registries are not built ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md), [ADR 008](../docs/adr/008-funding-through-existing-payments.md)). The drills drive Easy Track with a pass-through factory.
 - **Per-key budget ceilings.** The governance role's budget permission pins the key and the period floor only. Ceilings per key wait for the attested figures; `test_budget_motion_bounds_are_expressible_per_key` shows the shape.
-- **Policy as data.** The policy is still Solidity, not the YAML file and compiler of [ADR 004](../docs/adr/004-specifications-and-policy-as-data.md).
+- **Policy source.** The policy is still Solidity. OD-33 moves it to the Zodiac constellation and a TypeScript compiler, and the port deletes these builders ([ADR 004](../docs/adr/004-specifications-and-policy-as-data.md)).
 
 ## Commands
 

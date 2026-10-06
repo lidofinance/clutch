@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-06T06:59:08Z
+  at: 2026-10-06T08:16:51Z
 verified: []
 ---
 
@@ -20,10 +20,10 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 
 | Page | Type | Review status | Decision | Last change | Verified by |
 |---|---|---|---|---|---|
-| [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | human-reviewed | accepted | 2026-10-05 | human:em (recorded) |
+| [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | human-reviewed | accepted | 2026-10-06 | human:em (recorded) |
 | [adr/002-decision-and-review-process.md](/adr/002-decision-and-review-process.md) | Decision | human-reviewed | accepted | 2026-10-06 | human:em (recorded) |
 | [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | human-reviewed | accepted | 2026-10-06 | human:em (recorded) |
-| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-10-05 | human:em (recorded) |
+| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-10-06 | human:em (recorded) |
 | [adr/005-account-graph-and-roles.md](/adr/005-account-graph-and-roles.md) | Decision | slop | proposed | 2026-10-06 | none |
 | [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | slop | proposed | 2026-10-06 | none |
 | [adr/007-swapping-through-stonks.md](/adr/007-swapping-through-stonks.md) | Decision | slop | proposed | 2026-10-06 | none |
@@ -46,6 +46,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/stonks-instances-2026-10-02.md](/research/stonks-instances-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/stonks-pricing-2026-10-05.md](/research/stonks-pricing-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
-| [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-10-05 | none |
+| [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-10-06 | none |
+| [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-10-06 | none |
 | [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-10-06 | none |
-| [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-09-30 | none |
+| [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-10-06 | none |

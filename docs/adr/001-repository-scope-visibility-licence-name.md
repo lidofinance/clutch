@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 001: Repository scope, visibility, licence and name"
-description: One repository for the Active Treasury system, private until deployment at the latest, AGPL-3.0-or-later with GPL-3.0 kept for files derived from Easy Track, named Clutch.
+description: One repository for the Active Treasury system, private until deployment at the latest, AGPL-3.0-or-later with GPL-3.0 kept for files derived from Easy Track and LGPL-3.0-only for files derived from the policy provider's constellation, named Clutch.
 tags: [repository, licence, visibility, naming]
 status: draft
 review_status: human-reviewed
@@ -10,16 +10,20 @@ accepted_by: human:em
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:30Z
+  at: 2026-10-06T08:12:59Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-05--adr-001-to-adr-004-accepted
+  - by: human:em
+    at: 2026-10-06T08:16:51Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-06--adr-001-and-adr-004-verified-again
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM's setup answers of 2026-09-30, and the vendor's announcement, 2026-10-02
+    title: Decision log — EM's setup answers of 2026-09-30, the vendor's announcement, 2026-10-02, and the constellation's licence, 2026-10-06
   - id: s2
     resource: "https://www.gnu.org/licenses/gpl-3.0.html"
     title: GNU General Public License, version 3, section 13
@@ -41,6 +45,9 @@ sources:
   - id: s8
     resource: "https://research.lido.fi/t/nest-network-economic-support-tokenomics/10648"
     title: NEST — Network Economic Support Tokenomics
+  - id: s9
+    resource: "https://www.gnu.org/licenses/lgpl-3.0.html"
+    title: GNU Lesser General Public License, version 3 — the GNU GPL, version 3, with added permissions
 ---
 
 # ADR 001: Repository scope, visibility, licence and name
@@ -68,6 +75,10 @@ EM decided on 2026-10-02, closing OD-07 [s1]:
 
 8. **The vendor's name.** The redaction of the screening vendor's identity ends when the mandate is posted on the forum, after the vendor agrees in writing to be named for this use. Commercial terms never enter the repository.
 
+EM decided on 2026-10-06, closing OD-34 [s1]:
+
+9. **The constellation's licence.** Files derived from the policy provider's Zodiac constellation keep LGPL-3.0-only. A derived file gets `SPDX-License-Identifier: LGPL-3.0-only` when it changes. New files use AGPL-3.0-or-later, the policy compiler among them. LGPL-3.0 is GPL-3.0 with added permissions [s9], so the reasoning of decision 5 applies.
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Options considered
@@ -76,11 +87,13 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 - Import the kit without its history. Not chosen: the commit messages record why each correction was made.
 - GPL-3.0 for the whole repository. Not chosen: AGPL-3.0-or-later matches Gaggle, and GPL-3.0 section 13 lets the Easy Track-derived files keep their licence [s2].
 - Other names: roost, aerie and active-treasury. EM chose Clutch.
+- Write every file of the policy port fresh under AGPL-3.0-or-later and delete the copied constellation. Not chosen by EM: a file that follows the copy can still count as derived.
 
 ## Consequences
 
 - The publication test applies to every file and to every commit message.
-- Every source file carries `SPDX-License-Identifier: AGPL-3.0-or-later`, except files derived from Easy Track, which keep `GPL-3.0`.
+- Every source file carries `SPDX-License-Identifier: AGPL-3.0-or-later`, except files derived from Easy Track, which keep `GPL-3.0`, and files derived from the provider's constellation, which keep `LGPL-3.0-only` (decision 9).
+- `policy/constellation/LICENSE` carries the LGPL text, which must travel with the derived files. The reading in decision 9 is not a legal review.
 - The kit's history names the policy provider of the original proposal. The provider's own proposal repository is public, so the history passes the publication test.
 - AGPL-3.0 section 13 requires that users who interact with a modified version over a network can receive its source [s4]. Public source at deployment, with explorer verification, is the planned answer.
 - The decision log redacts the screening vendor's name and the mandate size. The vendor's name enters when the mandate is posted on the forum (decision 8).
@@ -88,7 +101,7 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 ## Confirmation
 
 - The visibility setting of `lidofinance/clutch` on GitHub.
-- `grep -rL "SPDX-License-Identifier: AGPL-3.0-or-later" src script scripts test` lists only files derived from Easy Track. A CI check replaces this command once the factories exist.
+- `grep -rL --include='*.sol' --include='*.py' --include='*.ts' --exclude-dir=node_modules "SPDX-License-Identifier: AGPL-3.0-or-later" src script scripts test policy` lists only files derived from Easy Track or from the provider's constellation. A CI check replaces this command once the factories exist.
 
 ## Reversal conditions
 
