@@ -1,12 +1,12 @@
 # What must stay true, ranked by impact (highest first). Kind: trust, design or operational.
 # `watched_by` lists the checks that exist; an empty list shows "Not checked yet".
-- assumption: "No role can reach an owner-only function of the Asset Safe or of a modifier."
+- assumption: "No role can reach an owner-only function of the Asset Safe, the orders account or a modifier."
   kind: design
   why: "The Asset Safe owns both modifiers, and every role call runs as the Asset Safe. The emergency revoke and the governance writes work only because a narrow role may administer a modifier. The LIP calls this composition the primary risk."
   breaks: "An operator, a motion or a factory bug gets administration of the vault. Fork probes found two such paths, and both are closed: a motion could grant the operator delegatecall (OD-36), or give it the safety modifier as a target (OD-38)."
   watched_by: [INV-004, INV-009, INV-018, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe", "test:test_policyadmin_cannot_grant_operator_delegatecall", "test:test_D6_adversarial"]
-  watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. An external audit is due in phase 3."
-  sources: [ADR-005, ADR-006, OD-36, OD-38, "lip:part-2"]
+  watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. Since OD-49 a motion can also write the emergency role's exits on the safety modifier, through the exit-governance role; INV-025 has no test yet. An external audit is due in phase 3."
+  sources: [ADR-005, ADR-006, OD-36, OD-38, OD-49, INV-025, "lip:part-2"]
 
 - assumption: "The Aragon Agent is the only owner of the Asset Safe, which has no guard, no module guard and no fallback handler."
   kind: design
@@ -30,7 +30,7 @@
   breaks: "The operator and the emergency role do not fail apart. Two compromised keys reach the emergency role. Only role scoping stops the operator from blocking an emergency action. The committee also proposes its own expansions."
   watched_by: ["test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval"]
   watch_note: "INV-002 and INV-014 are pending. Paging on every emergency action is not built."
-  sources: [ADR-005, ADR-006]
+  sources: [ADR-005, ADR-006, INV-002, INV-014]
 
 - assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
   kind: trust
@@ -58,19 +58,19 @@
 
 - assumption: "Safe v1.5.0 has no defect on the paths that the vault uses."
   kind: trust
-  why: "All three new Safes run it: execution, `approveHash`, module execution, the guard and owner management. Its record of holding value is short."
+  why: "The new Safes run it: execution, `approveHash`, module execution, the guard and owner management. The orders account also uses a fallback handler and contract signatures. Its record of holding value is short."
   breaks: "Custody or screening could fail. A delegatecall can replace a Safe's code without any Safe event."
   watched_by: [INV-019, "test:test_asset_safe_shape"]
   watch_note: "Safe's releases, advisories and bug-bounty records are checked again before the enabling vote. The critical alert on a singleton change is not built."
   sources: [ADR-005, ADR-010, INV-019, "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
-- assumption: "Every template pins each receiver, owner and beneficiary, bounds each amount that moves value, and never emits an administrative function."
+- assumption: "Every template pins each receiver, owner and beneficiary, bounds each amount that moves value, never emits an administrative function, and gives the emergency role only exits."
   kind: design
   why: "Motions onboard protocols without a DAO vote. The audit question becomes: can this template ever emit something unsafe?"
   breaks: "Any motion that survives its objection window can use a template flaw. A sound template can still point the operator at an unaudited contract; then only the attached budget bounds the loss."
   watched_by: []
   watch_note: "No factory is built. Each needs tests for the four properties. The governance role's limits (INV-004) are a second layer."
-  sources: [ADR-006, "lip:part-4"]
+  sources: [ADR-006, INV-004, OD-49, "lip:part-4"]
 
 - assumption: "Easy Track gives every motion an objection window of at least 48 hours, and rebuilds and hash-checks each script at enactment."
   kind: trust
@@ -98,27 +98,43 @@
 
 - assumption: "Monitoring detects a cap breach, and the committee fixes it within two working days."
   kind: design
-  why: "The permission layer cannot see value, so no transaction reverts on a cap."
+  why: "The permission layer cannot see value, so no contract reverts on a cap."
   breaks: "A breach goes unseen or unfixed. Every detective control ends at a person, whom the mandate must name."
   watched_by: []
   watch_note: "The detector specification is phase 1 work. The fortnightly cap reading and its paging alert are decided, not built. Permissions do not widen when monitoring stops."
   sources: [ADR-009, OD-29, OD-32, "lip:part-9"]
 
-- assumption: "Fresh Stonks 2.0 instances price through one USD-anchored converter and the shared router, and settle only to their fixed receiver."
-  kind: trust
-  why: "Every swap runs through them. The fixed receiver keeps operator proceeds in the vault and recovery proceeds at the Agent."
-  breaks: "In a real depeg, recovery orders may not fill inside their bands. A router change made for the NEST buyback also changes the vault."
+- assumption: "CoW's order signer, ComposableCoW and CoW's fallback handler work on Safe v1.5.0 behind a Roles modifier, and each role's orders pay only their pinned receiver."
+  kind: design
+  why: "Every swap runs through the orders account. The pinned receiver keeps the operator's proceeds in the vault and recovery proceeds at the Agent."
+  breaks: "If the fallback handler or the order signer fails on Safe v1.5.0, the vault has no limit, TWAP or stop-loss orders. If a receiver pin fails, an order could pay another account."
   watched_by: []
-  watch_note: "INV-013, INV-014 and INV-020 are pending: no instance, converter or feed exists yet. Alerts on router changes and stranded balances are not built."
-  sources: [ADR-007, INV-013, INV-014, INV-020]
+  watch_note: "INV-022 and INV-023 are pending. The fork tests are owed before the design is relied on."
+  sources: [ADR-007, OD-43, INV-022, INV-023, "doc:docs/research/cow-orders-account-2026-10-06.md#limits"]
 
-- assumption: "Chainlink keeps correct USD feeds for USDC, USDT, DAI and USDS, and the committee's Safe re-syncs a replaced feed at once."
+- assumption: "CoW's solver competition and EBBO rule, screening, the orders budgets and monitoring of each fill keep order prices close to the market."
+  kind: trust
+  why: "Nothing on chain bounds a CoW order's price. Its limit is a number that the caller chooses, and recovery orders have no on-chain floor (OD-48)."
+  breaks: "A careless or hostile limit sells below the market when solvers fail to compete or break the EBBO rule beyond what a bond repays, or when liquidity is thin. The budgets bound the operator's transfers; the emergency role's orders are neither budgeted nor screened."
+  watched_by: []
+  watch_note: "CoW DAO enforces the EBBO rule after the fact. [the screening vendor] has not confirmed a price check. The fill-price and recovery-limit alerts are not built."
+  sources: [ADR-007, ADR-010, OD-43, OD-48, "doc:docs/specs/control-matrix.md#the-matrix", "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
+
+- assumption: "CoW's watch-tower posts conditional orders on time."
+  kind: trust
+  why: "TWAP and stop-loss orders reach the order book only through it."
+  breaks: "The orders wait, and a stop-loss order may not fill when the price falls. No funds move."
+  watched_by: []
+  watch_note: "The alert on a late part is not built. The committee can remove the orders and place ordinary ones."
+  sources: [ADR-007, "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
+
+- assumption: "The liquidity buffer stays at or above one month of baseline spend."
   kind: operational
-  why: "The router takes every price from Chainlink's registry."
-  breaks: "A replaced USDC feed stops every vault swap in USDC until the re-sync. Recovery then falls back to sending assets to the Agent."
-  watched_by: ["runbook:Re-sync a price feed"]
-  watch_note: "The runbook is listed, not written. The out-of-sync alert is not built. The enabling vote starts only if every vault token is in sync (INV-020)."
-  sources: [ADR-007, INV-020, "doc:docs/research/stonks-pricing-2026-10-05.md#how-often-chainlink-replaced-the-vaults-feeds"]
+  why: "The committee requires it. Nothing on chain enforces it."
+  breaks: "The vault cannot meet a month of baseline spend from liquid stablecoins."
+  watched_by: []
+  watch_note: "The detector is specified, not built, and the runbook to restore the buffer is not written. The screening rule is requested from the vendor. The figure comes from the attested computation with the approved mandate."
+  sources: [ADR-009, OD-40]
 
 - assumption: "The 72-hour objection on each top-up keeps funding inside the mandate. The registry limit is only the backstop."
   kind: design
@@ -146,7 +162,7 @@
 
 - assumption: "Lido's withdrawal queue finalizes requests in days, pays the Asset Safe, and changes only by DAO vote."
   kind: trust
-  why: "It is the only way from stETH back to ETH, and how the vault buys WETH."
+  why: "It is how the vault unstakes stETH. Since OD-46 the operator can also buy WETH in a CoW order, in minutes instead of days."
   breaks: "A request cannot be cancelled. An operator error can lock stETH in requests for days. The emergency role can claim only after finalization."
   watched_by: ["test:test_D3_withdrawal_queue_round_trip_buys_weth"]
   watch_note: "The test uses a simulated finalizing report."
@@ -162,11 +178,11 @@
 
 - assumption: "Lido Earn's curators act in the vault's interest, and Earn shares stay transferable until the first-loss shares move."
   kind: trust
-  why: "earnETH and earnUSD are launch positions, and the first-loss shares move in after the enabling vote."
-  breaks: "Curator misbehaviour becomes a financial emergency. A pause, whitelist, lockup or blacklist on the shares is a reversal condition. The no-redeem rule is written, not enforced."
+  why: "earnETH and earnUSD are launch positions, and the first-loss shares move to the first-loss Safe after the enabling vote."
+  breaks: "Curator misbehaviour becomes a financial emergency. A pause, whitelist, lockup or blacklist on the shares is a reversal condition."
   watched_by: ["test:test_D3b_earn_deposit_policy_layer"]
   watch_note: "Fork tests of the share transfer and the DAO burn are owed. The first-loss balance alert is not built."
-  sources: [ADR-008, ADR-011, "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move"]
+  sources: [ADR-008, ADR-011, OD-42, "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move"]
 
 - assumption: "The committee publishes each monthly report within seven days, from a generator that anyone can re-run."
   kind: operational
@@ -180,8 +196,8 @@
   kind: operational
   why: "Nothing on chain keeps the committee's Safe, the operator Safe and the emergency Safe in step."
   breaks: "A departed signer keeps operator or emergency power, or a quorum becomes unreachable."
-  watched_by: ["runbook:Rotate a signer on all three Safes"]
-  watch_note: "The runbook is listed, not written. Owner-change alerts are not built."
+  watched_by: []
+  watch_note: "The runbook to rotate a signer on all three Safes is listed, not written. Owner-change alerts are not built."
   sources: [ADR-005]
 
 - assumption: "The test harness behaves like the real system for what the tests claim."

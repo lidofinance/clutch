@@ -12,7 +12,7 @@ groups:
     summary: "Money comes from the DAO treasury through Easy Track top-ups. The objection window is the control; the registry limit is the backstop."
   - id: reporting
     title: Reporting and monitoring
-    summary: "Caps are detective. Monitoring and reports measure the vault, publish the numbers and start the fix. No transaction reverts on a cap."
+    summary: "Caps are detective. Monitoring and reports measure the vault, publish the numbers and start the fix. No contract reverts on a cap."
   - id: emergencies
     title: Emergencies
     summary: "Two fast stops and one slow exit. The emergency Safe pulls assets back; the Emergency Brakes multisig switches the operator off; the DAO can do anything, in days."
@@ -26,7 +26,7 @@ flows:
     group: operations
     title: An operator transaction
     label: built
-    summary: "How the committee changes a position, for example a USDC deposit into earnUSD. The screening guard and the policy both check the transaction before it runs."
+    summary: "How the committee changes a position, for example a USDS deposit into sUSDS. The screening guard and the policy both check the transaction before it runs."
     trigger: "The committee decides to change a position within the mandate."
     time: "Minutes, after [the screening vendor] approves."
     steps:
@@ -53,42 +53,80 @@ flows:
         text: "Monitoring records the change: approvals, budget burn and positions."
         nodes: [monitoring, asset-safe]
         edges: [watch]
+        check: "Specified: the vault's detectors are not built."
     escapes:
       - "The vendor refuses: nothing runs. The committee fixes the transaction or asks again."
       - "The policy refuses: the call reverts and nothing changes."
       - "A problem shows after the call: the emergency Safe revokes the operator at once."
-    sources: [ADR-005, ADR-010, ADR-009, INV-003, "test:test_D3_operator_lifecycle", "test:test_D3b_earn_deposit_policy_layer"]
+    sources: [ADR-005, ADR-010, ADR-009, INV-003, INV-010, "test:test_D3_operator_lifecycle", "test:test_D3b_earn_deposit_policy_layer"]
 
-  - id: rebalance
+  - id: swap-order
     group: operations
-    title: A rebalancing swap
+    title: A market or limit order
     label: specified
-    summary: "How the vault swaps one token for another. It never trades on CoW directly. It sends the token to a swap instance whose receiver is fixed to the Asset Safe."
-    trigger: "The committee wants a different mix of assets, for example less stETH and more USDC."
-    time: "One order lasts up to 1800 seconds."
+    summary: "How the vault swaps one token for another. The operator sends the token to the orders account and places a CoW order there. The order pays the Asset Safe, because the policy pins the receiver."
+    trigger: "The committee wants a different mix of assets, for example less stETH and more USDC, now or at a set price."
+    time: "A market order fills in minutes. A limit order can stand for up to 30 days (OD-47)."
     steps:
       - who: "Operator"
-        text: "If the token has no price on the router, the operator converts it first: it unwraps wstETH, redeems sUSDS, or unwraps WETH and stakes the ETH."
-        nodes: [operator-safe, operator-modifier, asset-safe, protocols]
-        edges: [op-role, own-op, positions]
-      - who: "Operator"
-        text: "The operator transfers the token from the Asset Safe to the rebalancing instance for that pair. The policy pins the recipient."
-        nodes: [operator-modifier, asset-safe, stonks]
-        edges: [own-op, swaps]
-        check: "This transfer is specified. It is not in the policy yet."
-      - who: "Operator Safe, as manager"
-        text: "The operator Safe places the order on the instance. The screening guard checks this call too."
-        nodes: [operator-safe, screening, stonks]
+        text: "The operator transfers the token from the Asset Safe to the [[orders account]]. The transfer spends that token's orders budget, and the policy pins the recipient."
+        nodes: [operator-safe, operator-modifier, asset-safe, orders]
+        edges: [op-role, own-op, swaps]
+        check: "Specified: the orders account and its permissions are not in the policy yet."
+      - who: "Operator Safe"
+        text: "On the orders account, the operator Safe signs a market or [[limit order]] through CoW's order signer. The screening guard checks this transaction too."
+        nodes: [operator-safe, screening, orders]
         edges: [screen]
-        tech: "The minimum output is the oracle quote less the margin: 110 bp for a volatile pair, 30 bp for a stable pair. The manager can raise it, never lower it."
+        check: "INV-022: the order's receiver is the Asset Safe."
+        tech: "A delegatecall to `signOrder(order, validDuration, feeAmountBP)` on the order signer. The policy pins the sell and buy tokens to the operator's lists, the receiver to the Asset Safe, `validDuration` to the maximum order life, and the fee bound. The enabling vote has already approved CoW's vault relayer for each listed token."
       - who: "CoW Protocol"
-        text: "CoW settles the order. The proceeds go to the Asset Safe, the instance's fixed receiver."
-        nodes: [stonks, asset-safe]
+        text: "CoW's solvers compete to fill the order at its limit or better. The settlement pays the Asset Safe directly."
+        nodes: [orders, asset-safe]
         edges: [swaps]
-      - who: "Anyone, then the manager"
-        text: "If the order does not fill, anyone returns the unsold tokens to the instance after expiry, and the manager places a new order. Tokens recovered out of an instance go to the Aragon Agent, and a top-up brings them back."
-        nodes: [stonks, dao]
-    sources: [ADR-007, INV-013, INV-002, "doc:docs/research/stonks-instances-2026-10-02.md#how-an-order-lives-and-ends"]
+      - who: "Monitoring"
+        text: "Monitoring checks the fill against a market price, and alerts on open orders and on tokens left in the orders account."
+        nodes: [monitoring, orders]
+      - who: "Operator"
+        text: "An order that has not filled can be cancelled with `unsignOrder`. Unused tokens go back to the Asset Safe."
+        nodes: [orders, asset-safe]
+        edges: [swaps]
+    escapes:
+      - "The vendor refuses the order: nothing runs."
+      - "A fill comes in far below the market: monitoring alerts, and the emergency Safe can cancel the open orders and sweep the account."
+    sources: [ADR-007, OD-43, OD-47, INV-013, INV-022, INV-024, "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer"]
+
+  - id: standing-order
+    group: operations
+    title: A TWAP or stop-loss order
+    label: specified
+    summary: "How the vault buys or sells over time, or sells when a price falls. ComposableCoW holds the order, and CoW's watch-tower posts it to the order book."
+    trigger: "The committee wants to average into a position over weeks, or to sell stETH if its price falls to a set level."
+    time: "Until the last part fills or the order expires."
+    steps:
+      - who: "Operator"
+        text: "The operator funds the orders account from the Asset Safe, under the orders budget."
+        nodes: [operator-safe, operator-modifier, asset-safe, orders]
+        edges: [op-role, own-op, swaps]
+      - who: "Operator Safe"
+        text: "The operator Safe creates the order on ComposableCoW: a [[TWAP]] order in equal parts, or a [[stop-loss order]] with a strike. A TWAP order starts at once and ends within 30 days. The screening guard checks it, and is asked to refuse a stop-loss order that expires more than 30 days ahead."
+        nodes: [operator-safe, screening, orders]
+        edges: [screen]
+        check: "INV-022: the receiver is the Asset Safe, and a stop-loss order's oracles are Chainlink feeds that the policy pins."
+        tech: "`ComposableCoW.createWithContext` with a start of zero and CoW's current-timestamp value factory, so the order starts at its creation, and the handler pinned to the deployed TWAP or StopLoss handler. A TWAP order has at most 30 parts at most a day apart, or 4 parts at most 7 days apart (INV-024). The orders account's fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it (INV-023)."
+      - who: "CoW's watch-tower"
+        text: "The [[watch-tower]] posts each part of a TWAP order when it is due, or a stop-loss order once its price is met."
+        nodes: [orders]
+      - who: "CoW Protocol"
+        text: "Each part fills at its minimum or better, and pays the Asset Safe directly."
+        nodes: [orders, asset-safe]
+        edges: [swaps]
+      - who: "Monitoring"
+        text: "Monitoring checks each fill, and alerts when a part is not posted on time."
+        nodes: [monitoring, orders]
+    escapes:
+      - "The watch-tower stops: the orders wait and no funds move. The committee can remove them with `remove` and place ordinary orders."
+      - "The emergency Safe can cancel every open order and sweep the orders account."
+    sources: [ADR-007, OD-43, OD-47, INV-022, INV-023, INV-024, "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
   # --- Governance ---------------------------------------------------------------------------------
   - id: onboard
@@ -107,7 +145,7 @@ flows:
         nodes: [operator-safe, screening, easytrack]
         edges: [motions, screen]
       - who: "LDO holders"
-        text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails. The Emergency Brakes multisig can also pause Easy Track."
+        text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails. This window is the timelock for every structural increase of exposure. The Emergency Brakes multisig can also pause Easy Track."
         nodes: [dao, easytrack, brakes]
         edges: [object, pause]
       - who: "Easy Track"
@@ -119,6 +157,10 @@ flows:
         nodes: [easytrack, operator-modifier]
         edges: [gov-role]
         check: "INV-004: the Asset Safe and every module of it are refused as targets (OD-38)."
+      - who: "Exit-governance role"
+        text: "The same script gives the emergency role the new target's exits on the safety modifier: redeem, withdraw, claim and cancel pinned to the Asset Safe, a transfer pinned to the Agent, and an approval set to zero."
+        nodes: [easytrack, safety-modifier]
+        check: "INV-025: this role writes only under the emergency key, with no delegatecall, allowance or administrative target. Specified, not built (OD-49)."
       - who: "Operator, and the emergency Safe if needed"
         text: "The operator can use the new permission. The emergency Safe can revoke it at once."
         nodes: [operator-safe, operator-modifier, emergency-safe, safety-modifier]
@@ -127,8 +169,8 @@ flows:
       - "An objection of 0.5% of LDO stops the motion."
       - "The Emergency Brakes multisig pauses Easy Track. Only the DAO can unpause it."
       - "The operator Safe cancels its own motion."
-      - "After enactment, the emergency Safe revokes the new permission at once."
-    sources: [ADR-006, INV-004, INV-005, OD-36, OD-38, "lip:part-4", "test:test_D1_substituted_script_rejected_at_enactment"]
+      - "After enactment, the emergency Safe revokes the new operator permission at once. A write to the safety modifier cannot be revoked that way: only an objection, the Easy Track pause or a DAO vote stops it (OD-49)."
+    sources: [ADR-006, INV-004, INV-005, INV-025, OD-36, OD-38, OD-45, OD-49, "lip:part-4", "test:test_D1_substituted_script_rejected_at_enactment"]
 
   - id: budget
     group: governance
@@ -159,7 +201,7 @@ flows:
     group: governance
     title: A change that only the DAO can make
     label: built
-    summary: "The owner path. The DAO can do anything to the Asset Safe: replace the policy, change who holds a role, enable a module again, burn first-loss shares or replace the operator Safe. Each such change takes days."
+    summary: "The owner path. The DAO can do anything to the Asset Safe: replace the policy, change who holds a role, enable a module again or replace the operator Safe. It can also have the first-loss Safe burn the first-loss shares, which is specified. Each such change takes days."
     trigger: "A change outside the motions' limits, or a repair after a defect in the safety modifier."
     time: "Days: the vote, then the Dual Governance delay."
     steps:
@@ -177,7 +219,50 @@ flows:
         text: "The Asset Safe runs the change, for example a new policy on both modifiers."
         nodes: [asset-safe, operator-modifier, safety-modifier]
         edges: [own-op, own-sf]
-    sources: [ADR-005, INV-001, "test:test_D2_direct_DAO_path", "runbook:Replace the operator Safe", "runbook:Replace the operator modifier"]
+    sources: [ADR-005, ADR-008, INV-001, "test:test_D2_direct_DAO_path", "runbook:Replace the operator Safe", "runbook:Replace the operator modifier", "runbook:Burn first-loss Earn shares"]
+
+  - id: unlock
+    group: governance
+    title: Unlocking a matured Lido product
+    label: specified
+    summary: "A new Lido product, Lido Lend first, counts against the protocol cap until it matures. A budget motion with a forum post unlocks it, so LDO holders can object."
+    trigger: "The product meets the maturity criteria in the mandate. earnETH and earnUSD are not new products."
+    time: "72 hours."
+    steps:
+      - who: "Committee"
+        text: "The committee posts on the forum which maturity criteria the product meets."
+        nodes: [committee, reporting]
+      - who: "Operator Safe"
+        text: "The operator Safe creates a budget motion that raises the product's budget key. The screening guard checks it."
+        nodes: [operator-safe, screening, easytrack]
+        edges: [motions, screen]
+      - who: "LDO holders"
+        text: "LDO holders have 72 hours to object. An objection of 0.5% of LDO stops the unlock."
+        nodes: [dao, easytrack]
+        edges: [object]
+      - who: "Easy Track"
+        text: "The motion enacts through the governance role. From then on, reports count the product as a Lido product, outside the protocol cap."
+        nodes: [easytrack, operator-modifier, reporting]
+        edges: [gov-role]
+    sources: [ADR-009, ADR-006, OD-41, OD-45, "runbook:Unlock a matured product"]
+
+  - id: rule-change
+    group: governance
+    title: Relaxing a screening rule
+    label: specified
+    summary: "What the chain cannot enforce, screening checks before execution. A rule that gets weaker gets change control, so it cannot loosen quietly."
+    trigger: "The committee wants to relax a rule in [the screening vendor]'s service."
+    steps:
+      - who: "Committee and `@lidofinance/defi-tech`"
+        text: "A pull request changes the written list of the vendor's rules in the control matrix. Reviewers approve it."
+        nodes: [committee, policy]
+      - who: "Committee"
+        text: "The committee gives notice to the Emergency Brakes multisig and on the forum."
+        nodes: [committee, brakes, reporting]
+      - who: "[the screening vendor]"
+        text: "The vendor applies the change, after its own delay if it has one."
+        nodes: [screening]
+    sources: [ADR-010, OD-39, OD-45, "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
 
   # --- Funding ------------------------------------------------------------------------------------
   - id: topup
@@ -217,13 +302,12 @@ flows:
     group: funding
     title: Launch funding and the first-loss shares
     label: specified
-    summary: "How the vault gets its first assets. After the enabling vote, the Growth Committee moves the DAO's first-loss Earn shares in. Then one seed motion funds the rest."
+    summary: "How the vault gets its first assets. After the enabling vote, the Growth Committee moves the DAO's first-loss Earn shares to the first-loss Safe. Then one seed motion funds the rest."
     trigger: "The enabling vote has executed and the Safes exist."
     steps:
       - who: "Growth Committee Safe"
-        text: "The Growth Committee Safe transfers the first-loss earnETH and earnUSD shares to the Asset Safe. The Asset Safe needs no permission to receive them."
-        nodes: [funding, asset-safe]
-        edges: [topup]
+        text: "The Growth Committee Safe transfers the first-loss earnETH and earnUSD shares to the [[first-loss Safe]]. That Safe needs no permission to receive them."
+        nodes: [funding, first-loss]
       - who: "Operator Safe"
         text: "The operator Safe creates the seed motion. It is at most one TM Floor Value, less the value of the first-loss shares."
         nodes: [operator-safe, easytrack, funding]
@@ -233,10 +317,11 @@ flows:
         nodes: [easytrack, funding, asset-safe, dao]
         edges: [treasury, topup]
       - who: "The DAO"
-        text: "From then on, only a DAO vote can burn or redeem the first-loss shares. Monitoring alerts if the Earn balance falls below the first-loss amount."
-        nodes: [dao, asset-safe, monitoring]
-        edges: [own, watch]
-    sources: [ADR-008, OD-21, OD-28, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
+        text: "From then on, only a DAO vote can burn or redeem the first-loss shares. No role can reach the first-loss Safe, and monitoring alerts on any change of its balance."
+        nodes: [dao, first-loss, monitoring]
+        edges: [first-loss-shares]
+        check: "INV-021: the first-loss Safe has the Agent as its only owner and no module."
+    sources: [ADR-008, OD-21, OD-28, OD-42, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
 
   # --- Reporting and monitoring -------------------------------------------------------------------
   - id: fortnightly
@@ -286,6 +371,32 @@ flows:
         nodes: [monitoring, funding]
     sources: [ADR-009, OD-14, "lip:part-9"]
 
+  - id: buffer-low
+    group: reporting
+    title: The liquidity buffer runs low
+    label: specified
+    summary: "The vault keeps at least one month of baseline spend in stablecoins and sUSDS. A detector watches it all the time, and the committee restores it within the mandate's window."
+    trigger: "The buffer falls toward its floor, for example after a large deposit or a missed top-up."
+    time: "The mandate's window."
+    steps:
+      - who: "Monitoring"
+        text: "The buffer detector warns at a margin above the floor, and alerts at the floor."
+        nodes: [monitoring, asset-safe]
+        edges: [watch]
+      - who: "[the screening vendor]"
+        text: "If the vendor can check it, screening refuses an operator transaction that would take the buffer below its floor."
+        nodes: [screening, operator-safe]
+        edges: [screen]
+        check: "Requested from the vendor, not confirmed."
+      - who: "Committee"
+        text: "The committee restores the buffer: it exits a position, or sells through a CoW order into a stablecoin."
+        nodes: [committee, operator-safe, operator-modifier, asset-safe, protocols, orders]
+        edges: [signers-op, op-role, own-op, positions, swaps]
+      - who: "Reporting"
+        text: "Every report shows the buffer against its floor, and the Zodiac UI is asked to show it too."
+        nodes: [reporting, policy]
+    sources: [ADR-009, OD-40, OD-44, "runbook:Restore the liquidity buffer", "doc:docs/specs/control-matrix.md#the-matrix"]
+
   # --- Emergencies --------------------------------------------------------------------------------
   - id: financial-incident
     group: emergencies
@@ -299,10 +410,14 @@ flows:
         text: "The alert pages the signers."
         nodes: [monitoring, committee]
       - who: "Emergency Safe, 2 of 7"
-        text: "Revoke the operator's targets or functions. One revoke reaches every operator permission."
+        text: "Revoke the operator's targets or functions. One revoke reaches every operator permission on the operator modifier; the orders operator modifier needs one more, once it exists."
         nodes: [emergency-safe, safety-modifier, operator-modifier]
         edges: [em-role, revoke]
         check: "INV-018: every operator permission is under one key."
+      - who: "Emergency Safe"
+        text: "On the orders account, cancel the open orders and send its tokens to the Agent or the Asset Safe. Setting a relayer approval to zero also stops recovery orders in that token until a DAO vote."
+        nodes: [emergency-safe, orders, dao]
+        check: "Specified: the orders account does not exist yet."
       - who: "Emergency Safe"
         text: "Set the operator's approvals to zero."
         nodes: [emergency-safe, safety-modifier, asset-safe, protocols]
@@ -311,43 +426,46 @@ flows:
         text: "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, redeem sUSDS, claim finalized withdrawals."
         nodes: [safety-modifier, asset-safe, protocols]
         edges: [own-sf, positions]
+        check: "Tested on a fork for sUSDS and WETH. The Earn and withdrawal-queue exits are in the policy but not yet tested."
       - who: "Emergency Safe"
         text: "Send assets home to the Aragon Agent. The transfer goes only to this fixed address."
         nodes: [safety-modifier, asset-safe, dao]
         edges: [own-sf, own]
-        check: "INV-002: assets leave only for the Agent, or for a recovery instance once those exist."
+        check: "INV-002: assets leave only for the Agent, or for the orders account once it exists."
       - who: "Committee"
         text: "Post on the forum after the revoke."
         nodes: [committee, reporting]
     escapes:
       - "A queued motion would restore a revoked permission: the Emergency Brakes multisig pauses Easy Track."
-      - "A price feed is broken: send assets to the Agent instead of swapping."
+      - "No recovery order can fill at a price that the signers accept: send the assets to the Agent instead."
     sources: [ADR-005, ADR-007, INV-002, INV-018, "test:test_D4_emergency_flow", "test:test_emergency_can_durably_stop_operator_reapproval", "runbook:Revoke the operator", "runbook:Zero the approvals", "runbook:Exit positions to the Safe", "runbook:Return assets to the Agent"]
 
-  - id: recovery-swap
+  - id: recovery-order
     group: emergencies
-    title: A recovery swap
+    title: A recovery order
     label: specified
-    summary: "When an asset must become a stablecoin in an emergency. The emergency Safe sends it to a recovery instance, whose proceeds go to the Aragon Agent."
+    summary: "When an asset must become a stablecoin in an emergency. The emergency Safe sends it to the orders account and places an order that buys USDC or USDT and pays the Aragon Agent."
     trigger: "An incident where holding the asset is the risk, for example a depeg."
+    time: "Initiate within 6 hours. A recovery order lives at most 1 day, and the emergency Safe signs a new one if it does not fill. The order names its own limit, so it can fill in a depeg at a price that the signers accept."
     steps:
       - who: "Emergency Safe"
-        text: "Convert first if needed: unwrap wstETH, or unwrap WETH and stake the ETH, or redeem sUSDS."
+        text: "Exit the position into the Asset Safe if needed. Native ETH is staked first; wstETH, WETH and sUSDS can be sold as they are."
         nodes: [emergency-safe, safety-modifier, asset-safe, protocols]
         edges: [em-role, own-sf, positions]
       - who: "Emergency Safe"
-        text: "Transfer the asset to the pinned recovery instance."
-        nodes: [safety-modifier, asset-safe, stonks]
+        text: "Transfer the asset to the orders account. The policy pins the recipient."
+        nodes: [safety-modifier, asset-safe, orders]
         edges: [own-sf, swaps]
-        check: "This transfer is specified. It is not in the policy yet."
-      - who: "Emergency Safe, as manager"
-        text: "Place the order. No guard screens it."
-        nodes: [emergency-safe, stonks]
+        check: "Specified: the orders account is not in the policy yet."
+      - who: "Emergency Safe"
+        text: "Place a [[recovery order]] that buys USDC, or USDT as the second destination, and pays the Aragon Agent. No guard screens it, and nothing on chain bounds its price, so every emergency swap pages at high severity."
+        nodes: [emergency-safe, orders]
+        check: "INV-014: the emergency role's orders buy only USDC or USDT and pay only the Aragon Agent. CoW's EBBO rule holds the fill to the on-chain market, and monitoring alerts on a limit far below a market price (OD-48)."
       - who: "CoW Protocol"
-        text: "CoW settles, and the proceeds go to the Aragon Agent. If an order is stuck, the manager clears it and recovers the tokens to the Agent."
-        nodes: [stonks, dao]
-        check: "USDC is the hub. stETH, LDO, USDC, USDS and DAI can also go into USDT, so a USDC depeg does not strand recovery."
-    sources: [ADR-007, OD-26, INV-014, "runbook:Recovery swap", "runbook:Clear a stuck recovery order"]
+        text: "CoW settles, and the proceeds go straight to the Aragon Agent. If the order does not fill, the emergency Safe signs a new one, or cancels it and sends the tokens to the Agent."
+        nodes: [orders, dao]
+        check: "USDS and DAI carry USDC risk, so recovery can buy USDT when USDC is the problem."
+    sources: [ADR-007, OD-26, OD-43, OD-47, OD-48, INV-014, INV-024, "runbook:Recovery order", "runbook:Cancel orders and sweep the orders account"]
 
   - id: technical-defect
     group: emergencies
@@ -362,12 +480,14 @@ flows:
         nodes: [monitoring, brakes]
         edges: [page]
       - who: "Emergency Brakes multisig, 3 of 5"
-        text: "The multisig calls `disableModule` on the Asset Safe through the technical role. The module argument is pinned to the operator modifier."
-        nodes: [brakes, safety-modifier, asset-safe]
+        text: "The multisig calls `disableModule` on the Asset Safe through the technical role. The module argument is pinned to the operator modifier. It does the same on the orders account for the orders operator modifier."
+        nodes: [brakes, safety-modifier, asset-safe, orders]
         edges: [tech-role, own-sf]
+        check: "Built for the Asset Safe. Specified for the orders account."
       - who: "Operator modifier"
         text: "The operator and governance roles stop at once."
         nodes: [operator-modifier, operator-safe, easytrack]
+        check: "The switch does not stop the exit-governance role on the safety modifier. A motion that writes there stops only by an objection, the Easy Track pause or a DAO vote (OD-49)."
       - who: "Emergency Safe"
         text: "The emergency Safe can still act through the safety modifier."
         nodes: [emergency-safe, safety-modifier]
@@ -382,7 +502,7 @@ flows:
     group: emergencies
     title: A cap breach that gets worse
     label: specified
-    summary: "No transaction reverts on a cap. Monitoring publishes the breach, the committee fixes it, and the Emergency Brakes multisig stops the operator if the breach gets worse."
+    summary: "No contract reverts on a cap. Monitoring publishes the breach, the committee fixes it, and the Emergency Brakes multisig stops the operator if the breach gets worse."
     trigger: "A fortnightly cap reading shows a breach."
     time: "Two working days to fix, then the next fortnightly snapshot."
     steps:
@@ -398,7 +518,7 @@ flows:
         nodes: [monitoring, brakes]
         edges: [page]
       - who: "Emergency Brakes multisig"
-        text: "The multisig disables the operator modifier. The trigger is fixed, so no financial judgment is needed."
+        text: "The multisig disables the operator modifiers: the Asset Safe's, and the orders account's once it exists. The trigger is fixed, so no financial judgment is needed."
         nodes: [brakes, safety-modifier, asset-safe, operator-modifier]
         edges: [tech-role, own-sf]
     sources: [ADR-009, ADR-005, OD-29, OD-32]
@@ -447,33 +567,15 @@ flows:
         text: "If time is short, the multisig pauses Easy Track. This stops every DAO motion, and only the DAO can unpause it."
         nodes: [brakes, easytrack]
         edges: [pause]
+      - who: "Operator Safe"
+        text: "The operator Safe can cancel its own motion before it enacts."
+        nodes: [operator-safe, easytrack]
+        edges: [motions]
       - who: "Emergency Safe"
-        text: "If the motion enacts, the emergency Safe revokes the new permission at once."
+        text: "If the motion enacts, the emergency Safe revokes the new operator permission at once. An exit written to the safety modifier cannot be revoked that way; a DAO vote replaces it (OD-49)."
         nodes: [emergency-safe, safety-modifier, operator-modifier]
         edges: [em-role, revoke]
-    sources: [ADR-006, ADR-005, "test:test_D1_objection_rejection", "runbook:Pause Easy Track"]
-
-  - id: feed-out-of-sync
-    group: emergencies
-    title: A price feed goes out of sync
-    label: specified
-    summary: "When Chainlink replaces a feed, the router stops pricing that token until a re-sync. Swaps in that token wait."
-    trigger: "Chainlink replaces a feed's aggregator."
-    steps:
-      - who: "Price router"
-        text: "The router refuses the token until someone re-syncs it."
-        nodes: [stonks]
-      - who: "Monitoring"
-        text: "Monitoring alerts on the out-of-sync feed."
-        nodes: [monitoring]
-      - who: "Committee's Safe"
-        text: "The committee's Safe, as the router's manager, re-syncs the feed."
-        nodes: [committee, stonks]
-      - who: "Emergency Safe"
-        text: "If an emergency comes while a feed is broken, the emergency Safe sends assets to the Aragon Agent instead of swapping."
-        nodes: [emergency-safe, safety-modifier, asset-safe, dao]
-        edges: [em-role, own-sf, own]
-    sources: [ADR-007, INV-020, "runbook:Re-sync a price feed"]
+    sources: [ADR-006, ADR-005, OD-49, "test:test_D1_objection_rejection", "runbook:Pause Easy Track"]
 
   # --- Building, deploying and changing ------------------------------------------------------------
   - id: policy-change
@@ -519,17 +621,17 @@ flows:
         text: "The Emergency Brakes multisig verifies ADR 005 to ADR 011, and EM accepts them. [the screening vendor] confirms its terms in writing."
         nodes: [brakes, committee, screening]
       - who: "Phase 1: specification"
-        text: "The specifications, the runbook drafts, the detector specification and the Lido Zodiac workspace."
-        nodes: [policy, monitoring]
+        text: "The specifications and the detector specification, the control matrix and the screening rule list with the vendor's questions, the Zodiac UI requirement list, the orders account's fork tests, the runbook drafts and the Lido Zodiac workspace."
+        nodes: [policy, monitoring, screening, orders]
       - who: "Phase 2: build"
-        text: "The factories, the swap instances, the funding path, the report generator and the round-trip check."
-        nodes: [easytrack, funding, stonks, reporting, policy]
+        text: "The round-trip check, the orders account and its permissions, the first-loss Safe, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the readings that the Zodiac UI shows, and the invariant-to-test check."
+        nodes: [policy, orders, first-loss, easytrack, funding, reporting, monitoring]
       - who: "Phase 3: assurance"
-        text: "An external audit, Lido's review of the guard change, and fork drills that initiate within 6 hours."
-        nodes: [policy, screening]
+        text: "An external audit, Lido's review of the guard change and of CoW's order signer, and fork drills that initiate within 6 hours."
+        nodes: [policy, screening, orders]
       - who: "Phase 4: governance and deployment"
-        text: "The mandate's Snapshot vote, the LIP, the enabling vote and deployment, the share transfer and the seed motion."
-        nodes: [dao, asset-safe, funding]
+        text: "The mandate's Snapshot vote, the LIP, the enabling vote and deployment, the share transfer to the first-loss Safe and the seed motion."
+        nodes: [dao, asset-safe, first-loss, funding]
       - who: "Phase 5: operation"
         text: "Fortnightly retunes, monthly reports and recurring drills."
         nodes: [committee, reporting, monitoring]
@@ -542,10 +644,10 @@ flows:
     summary: "One DAO vote turns the system on. No document gives the full sequence of deployment and vote yet. These steps collect what the decisions already fix."
     trigger: "The mandate is approved and phase 3 is done."
     steps:
-      - who: "Committee's Safe"
-        text: "Before the vote, the committee's Safe adds the vault's tokens to the price router. The vote starts only if every vault token is in sync."
-        nodes: [committee, stonks]
-        check: "INV-020 is pending."
+      - who: "Lido"
+        text: "Before the vote, fork tests show that CoW's order signer and fallback handler work on Safe v1.5.0 behind a Roles modifier."
+        nodes: [orders]
+        check: "INV-022 and INV-023 are pending."
       - who: "[the screening vendor]"
         text: "The guard is set on the operator Safe, with bypass mode off. This is checked when the vote starts and watched until it executes."
         nodes: [screening, operator-safe]
@@ -554,14 +656,14 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, operator-safe, emergency-safe]
       - who: "LDO holders"
-        text: "The vote applies the committed artifact, grants the roles, registers the factories and adds USDS to the payment permission."
-        nodes: [dao, asset-safe, operator-modifier, safety-modifier, easytrack, funding]
+        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role included, sets up the orders account with its order lists and relayer approvals, registers the factories and adds USDS to the payment permission."
+        nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, easytrack, funding]
         edges: [own, own-op, own-sf]
       - who: "Growth Committee, then the operator Safe"
-        text: "After the vote, the Growth Committee moves the first-loss shares, and the seed motion funds the vault."
-        nodes: [funding, asset-safe, operator-safe, easytrack]
+        text: "After the vote, the Growth Committee moves the first-loss shares to the first-loss Safe, and the seed motion funds the vault."
+        nodes: [funding, first-loss, asset-safe, operator-safe, easytrack]
         edges: [topup, motions]
-    sources: [ADR-004, ADR-007, ADR-008, ADR-010, INV-020, "doc:ROADMAP.md#roadmap"]
+    sources: [ADR-004, ADR-007, ADR-008, ADR-010, INV-022, INV-023, "doc:ROADMAP.md#roadmap"]
 
   - id: signer-rotation
     group: deployment

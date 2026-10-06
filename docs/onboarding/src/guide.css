@@ -165,6 +165,7 @@ button { font: inherit; color: inherit; }
 .ln.ek-screens, .ln.ek-watches { border-top-style: dotted; border-color: var(--muted); }
 .ln.ek-signers { border-top-style: dotted; border-top-width: 3px; }
 .ln.ek-safety { border-top-style: dashed; }
+.ln.ek-governs { border-top-width: 1.6px; border-color: var(--muted); }
 .kg { width: 18px; height: 16px; fill: none; stroke: var(--ink-2); stroke-width: 1.4; }
 
 /* Sections and cards */

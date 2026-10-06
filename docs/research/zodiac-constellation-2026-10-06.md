@@ -9,7 +9,7 @@ valid_as_of: 2026-10-06
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:12:59Z
+  at: 2026-10-06T17:59:00Z
 verified: []
 sources:
   - id: s1
@@ -88,7 +88,7 @@ sources:
     resource: "https://github.com/gnosisguild/lido-atm-constellation/blob/02ea37d44efb324a7be395726618d5e76da490bc/README.md#L6-L7"
     title: The provider's README at 02ea37d — the graph is pushed to Zodiac, which diffs it against on-chain state and produces the transactions to sign
   - id: s26
-    resource: /adr/007-swapping-through-stonks.md
+    resource: /adr/007-swapping-through-an-orders-account.md
     title: ADR 007 — swaps through Stonks 2.0 instances; no order pre-signing and no CoW relayer approval
   - id: s27
     resource: "https://etherscan.io/address/0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5#code"
@@ -107,7 +107,7 @@ EM asked on 2026-10-06 whether the policy provider's constellation still works, 
 
 - **The configuration still builds after a one-line fix, and the addresses that the agent checked still match the chain.** Without the fix, the offline build stops. Its comment on Easy Track is false (section 1).
 - **It does not match the Clutch design.** The roles, the role holders, the protocols, the approval rule and the governance path all differ (section 4). The change is a rewrite of `constellation/`, not an edit.
-- **Clutch can use the constellation as the source of the policy.** The `allow` kit and the condition builders express the condition shapes that the kit's Solidity policy uses. A probe compiled three of them to the same flat condition arrays (section 3). The constellation describes Safes, modifiers, roles, permissions and allowances only [s9]. The Easy Track factories ([ADR 006](/adr/006-governance-through-easy-track-factories.md)), the swap instances ([ADR 007](/adr/007-swapping-through-stonks.md)), the funding registries ([ADR 008](/adr/008-funding-through-existing-payments.md)), monitoring and reporting ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) and the screening guard ([ADR 010](/adr/010-pre-execution-screening.md)) stay outside it.
+- **Clutch can use the constellation as the source of the policy.** The `allow` kit and the condition builders express the condition shapes that the kit's Solidity policy uses. A probe compiled three of them to the same flat condition arrays (section 3). The constellation describes Safes, modifiers, roles, permissions and allowances only [s9]. The Easy Track factories ([ADR 006](/adr/006-governance-through-easy-track-factories.md)), the swap instances ([ADR 007](/adr/007-swapping-through-an-orders-account.md)), the funding registries ([ADR 008](/adr/008-funding-through-existing-payments.md)), monitoring and reporting ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) and the screening guard ([ADR 010](/adr/010-pre-execution-screening.md)) stay outside it.
 - **Clutch cannot use the hosted path today.** `push` sends the specification to the hosted app. The app compiles some entries, builds the transactions and compares the specification with the chain. That path needs an API key and has no hand-off to an Aragon vote or an Easy Track motion. Its Safe node cannot set the Safe version, a guard or the fallback handler. Clutch must compile, apply and check the policy with its own code (section 5).
 - **Two decisions followed.** On 2026-10-06, EM decided OD-33, which amends ADR 004: the constellation and a TypeScript compiler replace the YAML file and the Python compiler. EM also decided OD-34, which adds an ADR 001 exception for the copied LGPL-3.0-only files. See the [open decisions](/registers/open-decisions.md).
 
@@ -206,6 +206,8 @@ Other findings:
 | Recovery | The emergency role sends assets to the recovery swap instances or to the Agent (OD-26) [s18] | Transfers to the Agent only |
 | First-loss Earn shares | Neither the operator nor the emergency role redeems them; in an emergency they go to the Agent (OD-21, OD-28) [s21] | Both roles can redeem Earn shares |
 | LDO | In the rebalancing set [s19] | Out of both sides of the swap |
+
+Later on 2026-10-06, EM's decisions changed several rows of Clutch's column. An orders account places CoW orders for both roles instead of the Stonks instances, and the emergency role sends assets to it or to the Agent (OD-43, [ADR 007](/adr/007-swapping-through-an-orders-account.md)). The orders account has its own two modifiers, so the modifier, technical-role and governance rows extend to it. The first-loss shares move to a first-loss Safe that no role can reach (OD-42, [ADR 008](/adr/008-funding-through-existing-payments.md)).
 
 ## 5. What Clutch must build to use the constellation as the backbone
 

@@ -16,7 +16,7 @@
     - "The operator modifier: the policy has no such transfer, and every receiver is pinned to the Asset Safe"
     - "The objection window"
   answer: 2
-  why: "The operator role holds no transfer at all, and every receiver, owner and beneficiary in its permissions is the Asset Safe. The screening guard is a second, independent check."
+  why: "The operator role holds no transfer to an outside address: its one planned transfer goes to the orders account, and every receiver, owner and beneficiary in its permissions is the Asset Safe. The screening guard is a second, independent check."
   sources: [INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
 
 - question: "A stablecoin depegs. Who acts first, and how fast must they start?"
@@ -36,7 +36,7 @@
     - "Revoke one permission at a time"
     - "Unpause Easy Track after an incident"
   answer: 1
-  why: "Its technical role can only disable the operator modifier. It also holds the Easy Track pause. It cannot touch assets, and only the DAO can unpause Easy Track."
+  why: "Its technical role can only disable an operator modifier: the Asset Safe's, and the orders account's once it exists. It also holds the Easy Track pause. It cannot touch assets, and only the DAO can unpause Easy Track."
   sources: [ADR-005, INV-009]
 
 - question: "[the screening vendor] goes offline. What still works?"
@@ -54,19 +54,29 @@
     - "The Safe v1.5.0 singleton"
     - "The Easy Track template factories"
     - "The Zodiac Roles mastercopy"
-    - "The Stonks 2.0 factory"
+    - "The CoW order signer"
   answer: 1
-  why: "Easy Track factories are the only new contracts allowed. Safe, the Roles mastercopy and the Stonks factory are audited code that already runs."
-  sources: [ADR-006]
+  why: "Easy Track factories are the only new contracts allowed. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses."
+  sources: [ADR-006, ADR-007]
+
+- question: "The operator places a limit order far below the market price. What limits the loss?"
+  options:
+    - "The modifier refuses an order below the market price"
+    - "Nothing at all"
+    - "The orders budget on what enters the orders account, the screening of the order, and monitoring of the fill"
+    - "CoW refuses the order"
+  answer: 2
+  why: "Nothing on chain bounds a CoW order's price: its limit is a number that the caller chooses. The orders budgets bound what the operator can move into the orders account, screening checks every operator order, and monitoring alerts on a fill below the market. CoW's EBBO rule also holds the fill to the on-chain market."
+  sources: [ADR-007, OD-43, "doc:docs/specs/control-matrix.md#the-matrix"]
 
 - question: "A cap ratio is above its limit. Does the next operator transaction revert?"
   options:
     - "Yes, the modifier checks every cap"
     - "No: caps are detective. Monitoring publishes the breach and the committee fixes it within two working days"
     - "Yes, but only for stablecoins"
-    - "Only if the screening vendor sees it"
+    - "Yes, Easy Track checks it"
   answer: 1
-  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the Emergency Brakes multisig to switch the operator off."
+  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the Emergency Brakes multisig to switch the operator off. Screening may also refuse an operator transaction that breaches a cap, if the vendor confirms that it can check that."
   sources: [ADR-009, OD-29]
 
 - question: "A colleague says that the operator Safe signs at 3 of 5. Where do you check?"

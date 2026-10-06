@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:30:52Z
+  at: 2026-10-06T18:18:12Z
 verified: []
 sources:
   - id: s1
@@ -104,19 +104,25 @@ EM decided on 2026-10-05, closing OD-17 [s1]:
 
 The other OD-17 decisions, on the Asset Safe and the emergency Safe, are in [ADR 005](/adr/005-account-graph-and-roles.md).
 
+EM decided on 2026-10-06, closing OD-39 and OD-45 [s1]:
+
+19. The screening vendor's rules for the vault are a written list in this repository, in the [control matrix](/specs/control-matrix.md). A relaxation of a rule is a change under control: the Emergency Brakes multisig and the forum get a notice, and the vendor's own delay applies if it has one ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 26 and 30).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules, ever. It holds the operator role on the operator modifier, and it is the trusted caller of every factory. It runs Safe v1.5.0, with a threshold of 4 of 7.
 - **Guard.** One instance of the vendor's guard, of the build that the Lido multisigs run, set on the operator Safe with `setGuard`. The vendor's key then turns the bypass mode off. The owners cannot turn it on again without the vendor's approval and the 10-day bypass timelock [s11]. Only then does the enabling vote grant the operator role (decision 8).
-- **What it screens.** Every transaction of the operator Safe: every operator action and the creation of every motion. Motion enactment is not screened, but Easy Track's hash check fixes a motion's content at creation.
+- **What it screens.** Every transaction of the operator Safe: every operator action, on the Asset Safe and on the orders account, and the creation of every motion. Motion enactment is not screened, but Easy Track's hash check fixes a motion's content at creation.
 - **What it never touches.** The emergency Safe, the Emergency Brakes multisig and the DAO path act through the safety modifier or the owner path, and no guard is set on the Asset Safe. Recovery is therefore unscreened by construction.
 - **Removal.** Only the operator Safe's owners can remove the guard, through the 10-day timelock. A vendor outage therefore stops the operator for at most ten days, and a hostile removal stays visible for ten days.
-- **Monitoring.** Lido's existing detector for this guard carries the alerts the vault needs: the start of either timelock, the bypass mode turning on, a standing approval, a keeper change, an added policy contract, and module, guard or owner changes on the operator Safe [s11]. It must add Safe v1.5.0 and the new instance (decision 12). Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity. The agreement forbids such approvals (decision 9). Lido's monitoring also needs a critical alert on any change of the singleton of the three new Safes (decision 18), because a delegatecall can replace a Safe's implementation without any Safe event [s12].
+- **Monitoring.** Lido's existing detector for this guard carries the alerts the vault needs: the start of either timelock, the bypass mode turning on, a standing approval, a keeper change, an added policy contract, and module, guard or owner changes on the operator Safe [s11]. It must add Safe v1.5.0 and the new instance (decision 12). Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity. The agreement forbids such approvals (decision 9). Lido's monitoring also needs a critical alert on any change of the singleton of the new Safes (decision 18), because a delegatecall can replace a Safe's implementation without any Safe event [s12].
 - **Delegatecalls.** The operator Safe needs a delegatecall only to batch calls through Safe's MultiSendCallOnly v1.5.0 [s12]. The vendor is asked to refuse every other delegatecall (decision 17). One approved delegatecall to another target could replace the operator Safe's implementation and remove the guard.
 - **The check before the vote.** The advisory, release and bug-bounty reads of the due-diligence note [s12] run again shortly before the enabling vote starts. A change on the vault's Safe paths goes to EM (decision 16).
 - **Tooling.** Add the new instance to the estate's existing bytecode-verification and state-check configurations for this guard.
+- **The rule list.** The list changes in a reviewed pull request, as the permission policy does, and the vendor's name stays redacted until it is announced.
+- **Rules requested from the vendor** (OD-39, OD-40, OD-43, OD-47): refuse an operator transaction that would take the liquidity buffer below its floor; refuse one that would breach a cap at the post-transaction state; refuse an order whose limit price, or a router swap whose minimum output, lies too far below a market price; refuse a stop-loss order whose expiry is more than 30 days ahead. The written list shows each one as requested until the vendor confirms that it can check it before execution. The vendor is also asked whether it records rule changes and whether it can delay a relaxation.
 
 ## Options considered
 
@@ -136,7 +142,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The vendor's support for Safe v1.5.0 rests on EM's report of 2026-10-05. The confirmation itself is outside this repository.
 - If the vendor accepts the delegatecall request, the operator Safe can batch only through MultiSendCallOnly. Any other delegatecall then fails at screening.
 - The vendor's name enters this repository when the mandate is posted on the forum, with the vendor's written consent. The restricted fork tests then move into the harness.
-- The three new Safes run v1.5.0, the first in the Lido estate as far as the six Lido Safes checked show. The guard has no production history on v1.5.0; the fork check is the evidence [s10].
+- The Asset Safe, the operator Safe and the emergency Safe run v1.5.0, the first in the Lido estate as far as the six Lido Safes checked show. The guard has no production history on v1.5.0; the fork check is the evidence [s10].
 - The kit's mock module guard and its tests of the rejected route A were removed on 2026-10-05. The harness has no screening test now. It needs a transaction guard on a mock operator Safe, preferably the vendor's deployed bytecode on a fork.
 
 ## Confirmation
@@ -144,7 +150,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - INV-010 in the [invariants](/specs/invariants.md). It has no test for this route yet.
 - Fork tests against the vendor's guard bytecode passed on 2026-10-02 on v1.3.0, v1.4.1 and v1.5.0: approved, unapproved and replayed transactions, in-band approvals, the 10-day removal path, and the path from the operator Safe through the Roles modifier [s10]. The tests identify the vendor, so they are restricted. They move into the harness when the vendor is announced.
 - The estate's state checks on the new guard instance and on the operator Safe: no modules, and the Safe is not its own approver.
-- INV-019 in the [invariants](/specs/invariants.md): the three new Safes run the pinned Safe v1.5.0 singleton.
+- INV-019 in the [invariants](/specs/invariants.md): the Asset Safe, the operator Safe and the emergency Safe run the pinned Safe v1.5.0 singleton.
 
 ## Reversal conditions
 
@@ -157,4 +163,4 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 ## Open questions
 
-None open. OD-17 was decided on 2026-10-05.
+None open. OD-17 was decided on 2026-10-05, and OD-39 and OD-45 on 2026-10-06. Owed: the vendor's answers on the requested rules and on rule-change records and delays.

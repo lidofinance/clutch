@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T13:38:35Z
+  at: 2026-10-06T17:59:00Z
 verified: []
 sources:
   - id: s1
@@ -37,7 +37,7 @@ The onboarding guide is one interactive page that explains Clutch to everyone wh
 ## What it holds
 
 - A map of the system. A guided tour of ten scenes plays on the map for readers who are new to it.
-- Seven tabs: the actors, the flows, what Clutch reuses and what it adds, the assumptions, the status, a glossary and an optional self-check of eight questions. Each flow can play on the map step by step.
+- Seven tabs: the actors, the flows, what Clutch reuses and what it adds, the assumptions, the status, a glossary and an optional self-check of nine questions. Each flow can play on the map step by step.
 - Each element shows its status: whether it exists today, is built and tested on a fork, is specified, is open or is planned. Each claim links to its source in the repository.
 - A Plain and a Technical detail level, and a light and a dark theme. The map is also a list of its boxes and arrows, so no tooltip holds the only copy of a fact. The page reads in full without JavaScript, works on a phone, and prints with every section open.
 - It leaves out the names of people, any unannounced counterparty, every financial figure and the fork tests' stand-in addresses. The screening vendor stays "[the screening vendor]".

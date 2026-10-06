@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T13:05:14Z
+  at: 2026-10-06T21:22:14Z
 verified: []
 sources:
   - id: s1
@@ -37,6 +37,12 @@ sources:
   - id: s9
     resource: /research/stonks-pricing-2026-10-05.md
     title: Stonks 2.0 pricing, 2026-10-05 — the converter, the shared router, Chainlink's registry, feed replacements, and the WETH route
+  - id: s11
+    resource: /research/cow-orders-account-2026-10-06.md
+    title: CoW orders from a dedicated orders account, 2026-10-06 — the order signer, ComposableCoW, the fallback-handler requirement, the watch-tower and router swaps
+  - id: s12
+    resource: /specs/control-matrix.md
+    title: Control matrix — every mandate rule with its controls on each layer, and the screening vendor's rules
   - id: s10
     resource: /research/legacy-investments-2026-10-05.md
     title: Legacy investments, 2026-10-05 — the first-loss Earn shares and their Growth Committee holder
@@ -65,7 +71,7 @@ Give the Treasury Management Committee a way to put a bounded slice of the DAO t
 
 We propose to deploy a Safe controlled solely by the Aragon Agent, and to attach two Zodiac Roles modifiers to it that enforce default-deny permissions. The **operator modifier** carries an **operator** role held by the Treasury Management Committee multisig and a **governance** role held by the Easy Track script executor. The **safety modifier** carries an **emergency** role held by a new Safe with a threshold of two and the same signer set as that committee, and a **technical** role held by the Emergency Brakes multisig.
 
-All swapping, routine and emergency, runs through the DAO's existing treasury swap contracts, which price orders from an on-chain oracle and settle to a receiver fixed at deployment. Easy Track motions onboard new protocols and assets and adjust budgets within ceilings. Every removal is the emergency Safe's immediate revoke. Motions never submit a permission tree. Each factory generates the tree itself from a fixed template, so the shape of every permission is decided at audit time and only its parameters arrive by motion.
+All swapping, routine and emergency, is CoW orders placed from a dedicated orders account that the Aragon Agent owns. Each role's permissions pin the receiver: the Asset Safe for the operator, the Agent for recovery. Nothing on chain bounds an order's price; CoW's competition rules, screening, budgets and monitoring of each fill take its place. Easy Track motions onboard new protocols and assets and adjust budgets within ceilings. Every removal is the emergency Safe's immediate revoke. Motions never submit a permission tree. Each factory generates the tree itself from a fixed template, so the shape of every permission is decided at audit time and only its parameters arrive by motion.
 
 The only new contracts are Easy Track EVM script factories. No bespoke access-control, vault, or accounting contract is introduced. Funding reuses the existing Finance application and allowed-recipients machinery already in production.
 
@@ -101,7 +107,12 @@ Separate **custody**, **authority**, and **change control** into three layers th
 flowchart TD
     VOTE["LDO vote"] --> DG["Dual Governance<br/>admin executor"]
     DG --> AGENT["Aragon Agent<br/>final authority"]
-    AGENT -->|sole owner 1/1| SAFE["Asset Safe<br/>holds all assets"]
+    AGENT -->|sole owner 1/1| SAFE["Asset Safe<br/>holds the assets"]
+    AGENT -->|sole owner 1/1| ORD["Orders account<br/>tokens in transit"]
+    AGENT -->|sole owner 1/1| FL["First-loss Safe<br/>no modules"]
+    SAFE -->|transfers for orders| ORD
+    ORD -->|owns| OMODS["Orders operator and<br/>orders safety modifiers"]
+    ORD -->|CoW orders| COW["CoW Protocol"]
     SAFE -->|owns| ROLES["Operator modifier<br/>default deny"]
     SAFE -->|owns| SAFETY["Safety modifier<br/>default deny, never screened"]
     GUARD["Screening guard<br/>vendor-supplied"] -.->|screens| OPS
@@ -112,8 +123,10 @@ flowchart TD
 
     TMC["TMC signers"] -.->|same signers| OPS["Operator Safe<br/>holds nothing, screened"]
     OPS -->|operator role| ROLES
+    OPS -->|operator role| OMODS
     OPS -->|trusted caller, creates motions| ET
     EMS["Emergency Safe 2/7<br/>same signers as TMC"] -->|emergency role<br/>financial| SAFETY
+    EMS -->|emergency role| OMODS
     EB["Emergency Brakes 3/5<br/>technical committee"] -->|technical role<br/>disables operator modifier| SAFETY
     EB -.->|global pause| ET
 
@@ -136,11 +149,11 @@ Every role executes **as the Safe**. The modifier checks the call against that r
 
 Template factories remove the problem without forcing a vote for every new protocol. A factory accepts a small, typed parameter set — a target address, an asset, a budget key — and builds the condition tree itself from a shape fixed in its own code. The operator can therefore onboard a protocol through an ordinary motion, and still cannot express a permission the template does not describe. What an audit reviews is the finite set of templates, not an open-ended space of trees.
 
-**Why the emergency role is easier to reach than the operator role.** The emergency role can only reduce exposure: revoke, exit, and return assets to the Agent. Its powers point one way. A lower quorum on a one-way power shortens response time without widening what can be done with it.
+**Why the emergency role is easier to reach than the operator role.** The emergency role can only reduce exposure: revoke, exit, and return assets to the Agent. Its powers point one way. A lower quorum on a one-way power shortens response time without widening what can be done with it. Since OD-43 one of these powers can also lose value: a recovery order has no on-chain price floor, and only CoW's rules hold its fill to the on-chain market (OD-48).
 
 **Why no bespoke controller.** An earlier design used a purpose-built controller contract to hold an allowlist, a stale-motion counter, and budget ceilings. Each of those jobs turned out to be available without new code. Easy Track re-invokes the factory at enactment and requires the regenerated script to hash-match, so the factory's own allowlist doubles as the stale-motion rule. Budget ceilings and a refill-rate floor are expressible as native conditions. Escalation guards belong in the modifier. The controller was removed.
 
-**Why every swap goes through the treasury swap contracts.** A pre-signed exchange order is opaque to the permission layer: the sell token, buy token, amounts and receiver are committed inside a hash the modifier cannot read, so neither price nor destination can be constrained there, and the only bound left is a standing approval. Routing every swap through the DAO's existing treasury swap contracts moves both guarantees into audited code already in production. The minimum output is computed on-chain from an oracle rather than supplied by the caller, and the settlement receiver is fixed in the instance at deployment rather than chosen per order. The permission the vault needs then shrinks to a transfer with the recipient pinned, and no role needs a standing approval to an exchange relayer at all.
+**Why every swap is a CoW order from a separate account.** A pre-signed exchange order is opaque to the permission layer: the sell token, buy token, amounts and receiver are committed inside a hash the modifier cannot read. CoW's order signer takes the typed order instead and computes the hash itself, so a permission can pin the tokens, the receiver and the order's life. TWAP and stop-loss orders need their owner to carry CoW's fallback handler, which the Asset Safe does not have, so a separate account owned by the Agent places them and holds only tokens in transit. The cost is the price bound: an order's limit is a number that the caller chooses, so the bound moves from the chain to screening, budgets and monitoring of each fill. The committee needs limit, TWAP and stop-loss orders, and the treasury swap contracts that this design used until 2026-10-06 offered none of them (OD-43).
 
 **Why approvals spend the budget.** An approval snapshot is not a loss bound if the operator can restore it, and a spender can pull what it is approved for without any deposit call. Each approval to a protocol spender therefore spends the budget of the key that the spender serves, so approvals per key per period cannot exceed the budget, whatever the spender does (OD-08).
 
@@ -148,7 +161,7 @@ Template factories remove the problem without forcing a vote for every new proto
 
 ---
 
-#### Part 1: Account graph **[Implemented]**
+#### Part 1: Account graph **[Implemented in part]**
 
 | Component | Address | Source |
 | --- | --- | --- |
@@ -168,10 +181,14 @@ Template factories remove the problem without forcing a vote for every new proto
 | **Asset Safe** | to be deployed | new instance of the singleton. No guard and no fallback handler are set on it. The Aragon Agent authorizes its transactions only by `approveHash` or by sending them itself, never by a contract signature (OD-17) |
 | **Operator Safe** | to be deployed | new Safe instance with the TMC signers. Holds no assets and no modules. Threshold 4 of 7. Holds the operator role, is the trusted caller of every factory, and carries the screening guard |
 | **Operator modifier** | to be deployed | minimal proxy of the mastercopy. Carries the operator and governance roles. The operator role is held by the Operator Safe, whose transactions are screened |
-| **Safety modifier** | to be deployed | minimal proxy of the mastercopy. Carries the emergency and technical roles. Never screened |
+| **Safety modifier** | to be deployed | minimal proxy of the mastercopy. Carries the emergency and technical roles, and the exit-governance role through which a motion adds an emergency exit (OD-49). Never screened |
 | **Screening guard** | vendor-supplied | the screening vendor's existing transaction guard, one instance for the Operator Safe, set with `setGuard`. Not written by Lido |
+| **Orders account** | to be deployed | new Safe instance owned by the Aragon Agent, one of one, with CoW's `ExtensibleFallbackHandler` at `0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5` and ComposableCoW as the verifier of CoW's settlement domain. Holds only tokens in transit between a transfer and a fill. Its two modifiers split the roles as the Asset Safe's do (OD-43) [s11] |
+| **First-loss Safe** | to be deployed | new Safe instance owned by the Aragon Agent, one of one, with no module, guard or fallback handler. Holds only the DAO's first-loss Earn shares; no role can reach them (OD-42) |
+| CoW order signer | `0x23dA9AdE38E4477b23770DeD512fD37b12381FAB` | reused, verified `CowswapOrderSigner`; called by delegatecall from the orders account [s11] |
+| ComposableCoW, TWAP and StopLoss handlers | `0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74`, `0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5`, `0x412c36e5011cd2517016d243a2dfb37f73a242e7` | reused; Ackee audited ComposableCoW and CoW's fallback handler, and Gnosis reviewed ComposableCoW; whether the two handlers are in those reports' scope is not checked [s11] |
 
-The Emergency Safe and the Operator Safe are new instances of the audited Safe singleton, not new contract code. Their owner sets must be kept in step with the TMC multisig: a signer rotation on one is a rotation owed on all three, and that reconciliation is an operational duty with no on-chain enforcement.
+The Emergency Safe, the Operator Safe, the orders account and the first-loss Safe are new instances of the audited Safe singleton, not new contract code. The Agent owns the orders account and the first-loss Safe. The Emergency Safe's and the Operator Safe's owner sets must be kept in step with the TMC multisig: a signer rotation on one is a rotation owed on all three, and that reconciliation is an operational duty with no on-chain enforcement.
 
 **Deployment constraints.**
 
@@ -179,18 +196,20 @@ The Emergency Safe and the Operator Safe are new instances of the audited Safe s
 2. The deployed mastercopy predates the current upstream source. Its initialiser is `setUp(bytes)` taking `abi.encode(owner, avatar, target)`, not the three-argument form. Audits and deployment tooling must pin the deployed bytecode, not repository HEAD.
 3. `owner`, `avatar`, and `target` are all set to the Asset Safe.
 4. The Asset Safe is set up with no fallback handler. Without one, it refuses ERC-721 and ERC-1155 safe transfers and cannot sign a message by EIP-1271. A protocol that needs either comes back to EM (OD-17).
+5. The orders account is set up with CoW's fallback handler, and its domain verifier for CoW's settlement domain is ComposableCoW. Whether CoW's fallback handler works on Safe v1.5.0 is not checked yet; a fork test must show it before the account is relied on [s11].
 
-#### Part 2: Roles and authority **[Implemented]**
+#### Part 2: Roles and authority **[Implemented in part]**
 
 Four principals. Role keys are `bytes32`; the encoding must match the tooling that applies the policy and is a deployment-time check.
 
 | Role | Holder | May do | May not do |
 | --- | --- | --- | --- |
 | DAO | Aragon Agent, reached by vote through Dual Governance | Everything: owns the Safe, may replace the whole policy, may add or remove role members | — |
-| `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below a fixed ceiling (OD-08); stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe; convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe | Transfer any asset out; borrow; create debt; administer the modifier or the Safe; change its own permissions |
-| `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS so that recovery can sell them; swap to stablecoins through the recovery-family instances; transfer recovered assets to the Agent only; revoke the operator's targets and functions, which is how every removal happens | Add any permission; enter any protocol except by staking ETH; borrow; redeem the first-loss Earn shares (OD-28); change the recovery destination; disable the module |
-| `technical` | Emergency Brakes multisig, three of five. **Safety modifier** | Disable the **operator** modifier, with the module argument pinned to it, for a defect in the permission layer or for a cap breach that gets worse (OD-29) | Anything else. It cannot touch assets or permissions, and it cannot disable the safety modifier |
-| `governance` | EVMScriptExecutor, driven by Easy Track | Write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | Submit a condition tree; grant or remove any role; touch the emergency role; target the Asset Safe or any of its modules; grant delegatecall |
+| `operator` | Operator Safe, the TMC signers, screened | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below a fixed ceiling (OD-08); stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe; convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe; fund the orders account under budgets and place CoW orders there that pay the Asset Safe (OD-43) | Transfer any asset out, except into the orders account; borrow; create debt; administer a modifier or a Safe; change its own permissions |
+| `emergency` | Emergency Safe, two of seven, same signers as the operator. **Safety modifier** | Set approvals to zero; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS; transfer assets to the Agent or to the orders account; on the orders account, cancel orders, send tokens to the Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent; revoke the operator's targets and functions, which is how every removal happens | Add any permission; enter any protocol except by staking ETH; borrow; reach the first-loss Safe (OD-42); change the recovery destination; disable a module |
+| `technical` | Emergency Brakes multisig, three of five. **Safety modifier**, and the orders account's safety modifier | Disable the **operator** modifier, or the orders account's operator modifier, with the module argument pinned, for a defect in the permission layer or for a cap breach that gets worse (OD-29) | Anything else. It cannot touch assets or permissions, and it cannot disable a safety modifier |
+| `governance` | EVMScriptExecutor, driven by Easy Track | Write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | Submit a condition tree; grant or remove any role; touch the emergency role; target the modifier's avatar or any of its modules; grant delegatecall |
+| exit governance | EVMScriptExecutor, driven by Easy Track. **Safety modifier** | Write the emergency role's exit for a target that an onboarding motion names, from the same template: redeem, withdraw, claim and cancel pinned to the avatar, a transfer pinned to the Agent, an approval set to zero (OD-49) | Write anything but an exit; grant delegatecall; touch the technical role or membership; set an allowance; target the Asset Safe or any of its modules |
 
 The emergency role's ability to revoke the operator works because the Safe owns the modifier: a call through the emergency role executes as the Safe, which the modifier accepts as its owner.
 
@@ -241,6 +260,7 @@ The governance role is separately constrained so that a factory bug cannot reach
 - `setAllowance` takes only an operator budget key, and a period of at least 30 days (OD-08).
 - `allowFunction` and `scopeFunction` take only the execution options None or Send. A motion cannot grant delegatecall (OD-36).
 - `assignRoles` and `setDefaultRole` are **not** granted (OD-09). Membership changes are a DAO vote.
+- The exit-governance role on the safety modifier carries the same guards, with the role key pinned to `emergency`, and no `setAllowance` at all (OD-49).
 
 The target refusal is necessary because pinning the role key alone is insufficient: without it, a motion could grant the operator a permission whose target is a modifier, and the operator would then reach owner-only administration through the avatar. Before OD-38 the guard refused only the operator modifier and the Safe, and a fork probe used the safety modifier this way to move USDC out of the Asset Safe. [s1] A factory bug can still grant the operator a call on an ordinary target; the template and the objection window control that.
 
@@ -248,7 +268,7 @@ The target refusal is necessary because pinning the role key alone is insufficie
 
 Not yet built. These let Easy Track onboard a protocol or asset without a DAO vote and without submitting a condition tree. Each factory owns one template. Motion call data carries only typed parameters; the factory constructs the tree.
 
-The catalogue below is the set that EM accepted on 2026-09-22 [s1]. EM dropped its two removal templates on 2026-10-05 (OD-09).
+The catalogue below is the set that EM accepted on 2026-09-22 [s1]. EM dropped its two removal templates on 2026-10-05 (OD-09). The swap-instance template left with the Stonks instances on 2026-10-06 (OD-43). A new token on the orders account's lists needs a DAO vote, because the order signer's permission is a delegatecall and a motion cannot write one (OD-36, OD-46, decided).
 
 | Factory | Motion parameters | Emits |
 | --- | --- | --- |
@@ -256,12 +276,13 @@ The catalogue below is the set that EM accepted on 2026-09-22 [s1]. EM dropped i
 | `AddERC4626VaultFactory` | vault, asset, budget key | the asset's `approve` to the vault, spending the budget key; `deposit` with receiver `EqualToAvatar`; `redeem` and `withdraw` with receiver and owner `EqualToAvatar` |
 | `AddQueueVaultFactory` | vault, asset, budget key | the asset's `approve` to the queue, spending the budget key; the asynchronous deposit request with any owner pinned to the avatar; the redeem request, cancel and claim with receiver and owner pinned to the avatar |
 | `AddSpenderApprovalFactory` | token, spender, budget key | a branch of the token's `approve` scope with that spender pinned and the amount spending the budget key; zero spends nothing |
-| `AddSwapInstanceFactory` | swap instance | `transfer` scoped with the recipient pinned to that instance, for the rebalancing family only |
-| `AddMorphoBlueMarketFactory` | market parameters, budget key | the loan token's `approve` to Morpho Blue, spending the budget key; `supply` with `onBehalf` pinned to the avatar; `withdraw` with `onBehalf` and `receiver` pinned to the avatar. **Ships at launch even though no market address exists yet.** Acceptance requires end-to-end tests against the deployed Morpho Blue contract on a fork, so the template is proven before the market it will be pointed at exists |
+| `AddMorphoBlueMarketFactory` | Morpho-Blue-compatible contract, market parameters, budget key | the loan token's `approve` to that contract, spending the budget key; `supply` with `onBehalf` pinned to the avatar; `withdraw` with `onBehalf` and `receiver` pinned to the avatar. Lido Lend is its own deployment, so its address arrives with the motion (OD-49). **Ships at launch even though no market address exists yet.** Acceptance requires end-to-end tests against the deployed Morpho Blue contract on a fork, so the template is proven before the market it will be pointed at exists |
 
 A lending-pool template for markets such as Aave is not in the catalogue, because third-party lending markets are outside the launch scope.
 
-The trusted caller on every factory is the **operator multisig**, matching the pattern already used by the treasury swap factories. Every factory hard-codes the role key to `operator` and refuses the modifier and the Safe as a target.
+**Each template also writes the emergency exit (OD-49).** Through the exit-governance role on the safety modifier, the same script gives the emergency role the target's exits: redeem, withdraw, claim and cancel with the receiver and owner pinned to the avatar, a transfer of the new receipt token pinned to the Agent, and an approval of the new spender set to zero. No entry, deposit or non-zero approval. A position onboarded by motion therefore has an emergency exit from the day the motion enacts, and the exit survives the technical switch.
+
+The trusted caller on every factory is the **operator multisig**, matching the pattern already used by the treasury swap factories. Every factory hard-codes the role key to `operator` and refuses the Asset Safe, the orders account and their modules as a target.
 
 **Disclosure required with an onboarding motion.** A forum post published before the motion, covering the target, the template applied, the initial budget, and the diligence performed; monitoring and alerting configured for the new target before enactment; and the incident runbook updated. The stop mechanisms are the objection threshold and, failing that, the global Easy Track pause held by the Emergency Brakes multisig.
 
@@ -319,7 +340,7 @@ Two consequences to accept. A per-payment ceiling is not a per-motion ceiling, s
 
 The mandate puts seeding and top-ups on Easy Track, and it makes the objection the control of a top-up. The registry is the backstop.
 
-**The legacy Earn shares (OD-21).** The DAO's first-loss shares in EarnETH and EarnUSD, approved by Snapshot in March 2026, sit in a Growth Committee Safe [s10]. After the enabling vote, the Growth Committee transfers them to the Asset Safe, and the seed is one floor less their value. This proposal takes over the first-loss terms of that allocation: a burn is a DAO vote, and neither the operator nor the emergency role redeems the first-loss shares. In an emergency they go to the Agent (OD-28). That rule is written, not enforced, because the shares are the same token as any Earn shares the vault buys. Monitoring alerts when the vault's Earn balance falls below the first-loss amount. A Twyne position counts against the seed only when its holder and form are shown.
+**The legacy Earn shares (OD-21).** The DAO's first-loss shares in EarnETH and EarnUSD, approved by Snapshot in March 2026, sit in a Growth Committee Safe [s10]. After the enabling vote, the Growth Committee transfers them to a dedicated first-loss Safe, owned by the Aragon Agent with no modules, and the seed is one floor less their value (OD-42). This proposal takes over the first-loss terms of that allocation: a burn or a redemption is a DAO vote. No role can reach the first-loss Safe, so the no-redeem rule is structural, not written. Reports show the first-loss Safe as a sub-allocation of the vault, and monitoring alerts on any change of its balance, owners or modules. A Twyne position counts against the seed only when its holder and form are shown.
 
 - **Period: one calendar month.** The mandate's top-up follows each month-end snapshot, so each month's top-up has its own limit. No live Lido registry uses one month; they use three, six or twelve [s7].
 - **Limit: one TM Floor Value per registry per month.** Stablecoins count at par. The stETH limit is the floor at the Coingecko price pinned when the enabling vote is prepared, set by attested computation. Either asset can carry a full refill, as the mandate allows for the seed and for the runway protection's stETH top-up.
@@ -330,74 +351,55 @@ The mandate puts seeding and top-ups on Easy Track, and it makes the objection t
 - **What the registry cannot enforce.** The mandate's rule that, after an objection, a further pull needs a Snapshot vote. A DAO vote can set the limit to zero.
 - **Not chosen.** A three-month period; a stETH limit at a stress price; one floor split between the registries; and one registry with one dollar limit, through a token registry that counts stETH at a DAO-pinned rate, which needs a new contract. That registry could not use a live rate: Easy Track rebuilds the script at enactment and checks its hash, so a rate that moves during the objection window blocks the motion [s7].
 
-#### Part 6: Emergency response **[Implemented]**
+#### Part 6: Emergency response **[Implemented in part]**
 
 All permissions in this part are written into the **safety modifier**. Its holders never pass through the screening guard.
 
 The emergency role holds, and nothing else:
 
 - `approve(spender, 0)` on each token that the operator can approve, spender drawn from the operator's spenders;
-- exits: savings-vault redeem and withdraw with receiver and owner pinned to the avatar; asynchronous vault cancel, claim, and redeem, but never a redemption of the first-loss Earn shares, which go to the Agent instead (OD-28, a written rule); the claim of a finalized Lido withdrawal, which pays the Safe;
-- conversions before a recovery: `unwrap` on wstETH and on WETH, and `submit` on stETH with the referral pinned to zero (OD-20);
+- exits: savings-vault redeem and withdraw with receiver and owner pinned to the avatar; asynchronous vault cancel, claim, and redeem; the claim of a finalized Lido withdrawal, which pays the Safe. The first-loss shares sit in the first-loss Safe, out of every role's reach (OD-42);
+- conversions: `unwrap` on wstETH and on WETH, and `submit` on stETH with the referral pinned to zero (OD-20);
 - `transfer(to, amount)` with `to` pinned by `EqualTo` to the Agent literal, on every asset and receipt token the Safe can hold;
-- `revokeTarget(operator, …)` and `revokeFunction(operator, …)` on the modifier, role key pinned to the operator;
-- `transfer(to, amount)` with `to` pinned by `EqualTo` to an approved recovery-family swap instance (see 6.1). This one is specified, not built: the instances do not exist yet.
+- `revokeTarget(operator, …)` and `revokeFunction(operator, …)` on the operator modifier, and on the orders operator modifier once it exists, role key pinned to the operator;
+- `transfer(to, amount)` with `to` pinned by `EqualTo` to the orders account, and on the orders account: cancel any order, revoke the operator's targets and functions, set a relayer approval to zero, send any listed token to the Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent (see 6.1). These are specified, not built: the orders account does not exist yet.
+- the exits that an onboarding motion adds through the exit-governance role: redeem, withdraw, claim and cancel pinned to the avatar, a transfer pinned to the Agent, and an approval set to zero (OD-49). Specified, not built.
+
 Module disabling is **not** in this role. It belongs to the technical role; see 6.2.
 
 Separately and already deployed: the Emergency Brakes multisig holds the pause role on Easy Track and does not hold unpause. Pausing Easy Track during an incident freezes every queued motion, and only the DAO can resume. This is the durable answer to a queued expansion re-enabling something the emergency role just revoked, and it must be a step in the incident runbook.
 
-##### 6.1 Swapping — the default engine for both roles **[Specified]**
+##### 6.1 Swapping — CoW orders from the orders account **[Specified]**
 
-Neither role receives a direct exchange permission. Every swap, routine or emergency, goes through the DAO's treasury swap contracts.
+Neither role receives an exchange permission on the Asset Safe. Every swap, routine or emergency, is a CoW order placed from the orders account: a Safe owned by the Aragon Agent, with CoW's fallback handler and its own two modifiers (OD-43) [s1][s11].
 
-The path is two steps and only the first needs a permission:
+The path:
 
-1. The role calls `transfer` on the asset, with the recipient pinned by `EqualTo` to an approved swap instance.
-2. The instance's manager calls `placeOrder`. The operator Safe manages the rebalancing instances and the emergency Safe the recovery instances (OD-05). The order's minimum output is the oracle quote less the instance's margin; the manager can raise it, never lower it. Its settlement receiver is fixed in the instance.
+1. The role transfers the asset from the Asset Safe to the orders account, with the recipient pinned by `EqualTo`. For the operator, the transfer spends that token's orders budget.
+2. On the orders account, the role places an order. A market or limit order goes through a delegatecall to the deployed CoW order signer, which computes the order identifier from the typed order and sets the pre-signature. The permission pins the sell and buy tokens, the receiver, the order's maximum life and the fee bound. A TWAP or stop-loss order goes through ComposableCoW, with the handler, the receiver, the tokens and a stop-loss's Chainlink oracles pinned.
+3. CoW settles the order and pays the receiver directly.
 
-**The receiver is what separates the two roles.** It is an immutable set at deployment, so the destination of proceeds is structural rather than chosen per order. Two families of instances are deployed:
+**The receiver is what separates the two roles.** It is pinned in each role's permissions:
 
-| Family | Used by | `RECEIVER` | Effect |
+| Role | Orders | Receiver | Effect |
 | --- | --- | --- | --- |
-| Rebalancing | `operator` | Asset Safe | Proceeds return to the vault, so the operator can trade but cannot move value out |
-| Recovery | `emergency` | Aragon Agent | Proceeds go to the DAO treasury, matching the mandate's fixed recovery destination |
+| `operator` | Market, limit, TWAP and stop-loss, between the operator's listed tokens | Asset Safe | The operator can trade but cannot move value out |
+| `emergency` | Market and limit orders that buy USDC, or USDT as the second destination, and live at most 1 day | Aragon Agent | Proceeds go to the DAO treasury, the mandate's fixed recovery destination |
 
-The operator therefore cannot route proceeds anywhere but the vault, and the emergency role cannot route them anywhere but the Agent, without either constraint being expressed as a condition.
+**Why a separate account.** Conditional orders need their owner to use CoW's fallback handler and to name ComposableCoW as the verifier of CoW's settlement domain. The Asset Safe has no fallback handler (OD-17), so a separate account carries it. The account holds only tokens in transit. The budgets bound the operator's transfers into it; the emergency role's transfers have no budget. The enabling vote has the account approve CoW's vault relayer for the maximum amount of every token on the lists, and no role can raise an approval there, so a recovery order settles even when the operator is revoked. If the emergency role sets an approval to zero, every order in that token stops, recovery orders included, until a DAO vote sets it again; sending the token to the Agent stays open. A change of its fallback handler or domain verifier is a critical alert.
 
-Properties confirmed on the deployed instances: `RECEIVER()` is a per-instance immutable and the two live instances differ, one settling to the Agent and one to another contract; `estimateTradeOutput` returns a live oracle quote; `ORDER_DURATION_IN_SECONDS`, `MARGIN_IN_BASIS_POINTS` and `PRICE_TOLERANCE_IN_BASIS_POINTS` are per-instance immutables, currently 1800, 110 and 550 on the live instances; and `recoverERC20`, `recoverEther` and `recoverERC721` exist, so assets are not stranded when an order does not fill. Only an instance's admin or manager can place an order or recover tokens, and recovered tokens always go to the instance's fixed recovery address. Every instance from the standard factory has Aragon Voting as admin and the Aragon Agent as recovery address. The Stonks 2.0 instances also fix a maximum improvement and allow partial fills.
+**Price protection.** Nothing on chain bounds the price of the vault's orders: the order signer, TWAP and stop-loss orders leave the amounts to the caller, and the modifier can compare a parameter only with fixed values. ComposableCoW's GoodAfterTime order type can check a price checker's expected output, but it needs an order poster of Lido's own and a checker that ignores stale feeds, so the design does not use it (OD-48) [s11]. CoW's rules hold every fill to at least the on-chain market: bonded solvers compete on the surplus for users, and a solver that fills worse than on-chain AMM routing must refund the user or loses its bond [s11]. The bound is the order's own terms, with CoW's solvers competing to fill above the limit; the screening of every operator transaction, with a price check requested from the vendor; the budgets on the operator's transfers into the account; and monitoring of each fill against a market price [s12]. The emergency role's orders are not screened, so for them only paging and monitoring remain.
 
-What this removes from the design: the operator needs no order pre-signing permission, and no role needs a standing approval to an exchange relayer. The unbounded-approval exposure and the opaque-order problem both disappear for swapping.
+**Routers.** None at launch. A router swap pins its recipient but not its price, because its minimum output is an absolute number. Uniswap and 1inch wait until the screening vendor can bound a swap's minimum output before execution (OD-43).
 
 What it costs, and what must be planned:
 
-- **An instance is one `(tokenFrom, tokenTo, receiver)` triple, fixed at deployment.** Every instance in this system is deployed fresh from the existing factory. None of the nine existing treasury instances is reused: they are the earlier revision with the receiver hardcoded, and their manager is the operator committee.
-
-##### 6.1.1 Instance matrix **[Open — topology]**
-
-Sellable assets are stETH, LDO and the four dollar stablecoins: the tokens that the Stonks price router can price (OD-20). wstETH is unwrapped and sUSDS redeemed before a sale. WETH is unwrapped and the ETH staked to stETH through Lido's `submit`; WETH is bought back by unstaking stETH through Lido's withdrawal queue. The savings and queue vault positions are redeemed through their own contracts, not swapped, so they need no instance.
-
-| Family | Receiver | Scope decided so far |
-| --- | --- | --- |
-| Recovery | Aragon Agent | Any sellable asset into a dollar stablecoin, **including stablecoin to stablecoin** |
-| Rebalancing | Asset Safe | Among stETH, wstETH, USDC, USDT, USDS and LDO |
-
-The topology is the remaining decision, and it changes the deployment surface by roughly a factor of three.
-
-- **Full mesh.** Recovery covers stETH and LDO into four stablecoins, plus each stablecoin into the other three: 20 instances. Rebalancing covers every ordered pair of stETH, LDO, USDC, USDT and USDS, because wstETH is a wrap rather than a swap: 20 instances. About 40 in total.
-- **Hub.** One canonical stablecoin is the hub. Recovery sells everything into it, and a small number of stablecoin pairs cover the rest. Rebalancing routes through the hub in both directions. Roughly 17 in total.
-
-**Decision: hub, with a second recovery destination.** USDC is the hub. Rebalancing routes through it, so every rebalancing pair is one hop and the rare non-hub route costs two. Recovery sells every asset directly into the hub, so nothing needs two hops under stress.
-
-Recovery additionally carries USDT as a **second destination** for stETH, LDO and the stablecoins that carry USDC risk: USDC itself, USDS and DAI (OD-26). A single hub has one failure mode that matters here: if the asset being fled is the hub itself, recovery into it is exactly wrong, and a hub depeg would strand the recovery path. USDS and DAI share the risk, because Sky's peg stability module holds USDC, and DAI lost its peg together with USDC in March 2023. The second destination removes that dependency.
-
-That gives ten recovery instances and eight rebalancing instances, eighteen in total, against about forty for a full mesh. A rebalancing pair can be added later by motion where a route proves costly in practice; a recovery pair needs a DAO vote, because the safety policy pins it. Each instance is an address the transfer permission must pin, so an unused instance still costs deployment, configuration and monitoring surface.
-
-Each instance's address is pinned in the transfer permission of the token it sells, so the set is fixed at policy-application time and grows only by a policy change.
-- **Swaps are not instant.** Orders run for a bounded duration with an oracle-derived floor, so a rebalance is a queued action, not an immediate one. The emergency service level remains time-to-initiate.
-- **Assets sit in the instance between transfer and settlement.** This is a short custody excursion out of the Asset Safe and should be stated plainly rather than glossed.
-- **The committee Safes are the managers** (OD-05). The operator Safe manages the rebalancing instances, and its orders pass the screening guard. The emergency Safe manages the recovery instances. A manager cannot take tokens: recovery always pays the Aragon Agent. Tokens recovered from a rebalancing instance therefore leave the vault for the treasury, and a top-up motion brings them back if the mandate allows it.
-- **Pricing.** Every instance prices through a converter and the Stonks price router that the NEST buyback shares. The router takes its feeds from Chainlink's Feed Registry, which has USD feeds for USDC, USDT, DAI and USDS and no entry for wstETH, WETH or sUSDS [s9]. The TMC multisig, the router's manager since vote 204, adds the four feeds before the enabling vote, and Lido deploys one USD-anchored converter for the vault through the existing converter factory. The vote starts only if every vault token is configured and in sync. When Chainlink replaces a feed, as it did for USDC and USDT twice in September 2026, the router refuses that token until the TMC multisig re-syncs it; during an emergency, recovery can send assets to the Agent instead (OD-20).
-- **No existing instance is reused.** The deployed treasury instances are the earlier revision with the receiver hardcoded, and their manager is the operator committee. Both properties are wrong for this system, and sharing an instance would mix vault flows with ordinary DAO swaps in one balance.
+- **Conditional orders need a watch-tower.** CoW's watch-tower posts them to the order book. If it stops, the orders wait and no funds move.
+- **Assets sit in the orders account between transfer and fill.** This is a short custody excursion out of the Asset Safe and should be stated plainly rather than glossed.
+- **A recovery order names its own limit,** so it can fill in a depeg at a price that the emergency signers accept. The emergency service level remains time to initiate. Nothing on chain stops a bad limit either: two emergency signers, unscreened, choose the limit. CoW's rules hold the fill to the on-chain market, every emergency swap pages at high severity, and monitoring alerts on a limit far below a market price (OD-48).
+- **The order signer has no known audit.** It is 40 lines long and in the scope of Lido's phase-3 review. Ackee audited ComposableCoW and CoW's fallback handler, and Gnosis reviewed ComposableCoW. Whether the TWAP and StopLoss handlers are in those reports' scope is not checked, so they join the phase-3 review [s11].
+- **Tokens.** The operator's lists start with stETH, wstETH, WETH, USDC, USDT, USDS and LDO; DAI and sUSDS stay off (OD-22, OD-46). Recovery sells every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues. A DAO vote adds a token, for the operator or for recovery, with its relayer approval, emergency transfer and recovery orders, because the order signer's permission is a delegatecall (OD-36, OD-46). Staking and the withdrawal queue stay for unstaking (OD-20).
+- **What it replaced.** Until 2026-10-06 the design used eighteen Stonks 2.0 instances, a converter, and four feeds on the shared Stonks price router [s9]. That bounded the price on chain, but it offered no limit, TWAP or stop-loss order, and its band could stop a recovery order in a real depeg (OD-43).
 
 ##### 6.2 Module disabling — the technical role **[Implemented]**
 
@@ -416,6 +418,8 @@ The module argument is pinned, so the power cannot be turned on a future second 
 
 Disabling switches off the operator and governance roles at once. The safety modifier stays enabled, so the emergency role can still revoke, exit and return assets. The owner path restores service by re-enabling the module. Because recovery survives the switch, the technical committee does not need to wait for the financial committee to finish, and no cross-committee sequencing rule is needed.
 
+The orders account gets the same switch on its own safety modifier, pinned to the orders operator modifier. That part is specified, not built (OD-43).
+
 If the defect is in the safety modifier itself, the technical role cannot help: its pin is exact. Recovery then runs through a DAO vote acting as the Safe's owner, which carries the Dual Governance delay.
 
 Tested: the emergency role and the operator are both refused; the technical role cannot point the call at another module address; it can disable the operator modifier; the operator then stops working while the safety modifier stays enabled and the emergency role still moves assets to the Agent; the technical role cannot disable the safety modifier; and the owner path restores the operator modifier [s4].
@@ -433,27 +437,35 @@ The `Allowance` struct field order in the deployed mastercopy is `refill, maxRef
 | Asset | Role in the system | Notes |
 | --- | --- | --- |
 | ETH | Held | Not a funding asset (OD-11). Still in the payment chain for other setups, ceiling 1,000 per payment |
-| WETH | Held, wrap and unwrap | No price feed: staked to stETH before a sale, and bought back through Lido's withdrawal queue (OD-20) |
+| WETH | Held, wrap and unwrap | Bought and sold in CoW orders by the operator, and sold by recovery (OD-46); staking and Lido's withdrawal queue stay available (OD-20) |
 | stETH | Held, funding inbound | In the payment chain, ceiling 1,000 per payment |
-| wstETH | Held, wrap and unwrap | No price feed: unwrapped to stETH before a sale (OD-20) |
+| wstETH | Held, wrap and unwrap | Sold through CoW orders, or unwrapped to stETH (OD-43) |
 | USDC | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment |
 | USDT | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment |
-| DAI | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment. Added so the mandate's definition of the top four stablecoins matches the launch set. The operator converts it to USDS and back through Sky's converter, one to one; recovery sells it into USDC (OD-22) |
+| DAI | Held, funding inbound | In the payment chain, ceiling 2,000,000 per payment. Added so the mandate's definition of the top four stablecoins matches the launch set. The operator converts it to USDS and back through Sky's converter, one to one; recovery sells it into USDC or USDT (OD-22, OD-26) |
 | USDS | Held, funding inbound | **Added to the payment chain by the enabling vote (OD-11)**; ceiling 2,000,000 per payment (OD-24). Receives converted DAI (OD-22) |
 | sUSDS | Held, savings position, funding inbound | Template: tokenized vault. In the payment chain, ceiling 2,000,000 per payment (OD-11) |
 | earnETH | Held, vault position | Asynchronous deposit and redeem queues |
 | earnUSD | Held, vault position | Asynchronous deposit and redeem queues |
-| LDO | Held, in the rebalancing set | |
-| Swap instances | Rebalancing and recovery venue | Both roles, through the treasury swap contracts. Price is oracle-bounded and the destination is fixed per instance; no direct exchange permission and no standing relayer approval exists |
-| Lido Lend | Lending venue | Expected October 2026, Morpho-Blue-compatible. **Zero-day ready by design:** the Morpho-Blue template ships at launch with end-to-end tests against the live Morpho Blue deployment, so onboarding is one Easy Track motion carrying the market address once it exists. No vote, no new contract, no policy migration. The protocol cap applies for its first three months, then none as a Lido own product (OD-04) |
+| LDO | Held, on the operator's order lists | |
+| Orders account | Swap venue | CoW market, limit, TWAP and stop-loss orders. The operator's orders pay the Asset Safe; recovery orders buy USDC or USDT and pay the Agent. No price bound exists on chain, and no router swap at launch (OD-43) |
+| Lido Lend | Lending venue | Expected October 2026, Morpho-Blue-compatible. **Zero-day ready by design:** the Morpho-Blue template ships at launch with end-to-end tests against the live Morpho Blue deployment, so onboarding is one Easy Track motion carrying the market address once it exists. No vote, no new contract, no policy migration. The protocol cap applies until it matures and a budget motion with a forum post unlocks it (OD-41) |
 
-Assets explicitly **not** in the launch set: sDAI and third-party lending markets other than Lido Lend.
+Assets explicitly **not** in the launch set: sDAI and third-party lending markets other than Lido Lend. Router swaps on Uniswap and 1inch wait until the screening vendor can bound a swap's minimum output (OD-43).
 
 After OD-11, **seeding and top-ups use USDC, USDT, DAI, USDS, sUSDS or stETH**. USDS needs the enabling vote to add it to the payment chain. ETH is not a funding asset.
 
 #### Part 9: Reporting and detective controls **[Specified]**
 
 Exposure ratios are **detective** controls. The permission layer cannot see valuation, so the caps in the mandate are enforced by measurement, publication and remediation, not by reverting a transaction. This must be stated in the mandate in exactly those words.
+
+**Layered controls** (OD-39). Every mandate rule gets a control on each layer that can carry it: the on-chain policy, screening before execution, monitoring with alerts, and display in the Zodiac UI. The [control matrix](/specs/control-matrix.md) maps each rule to its controls, owners and status [s12]. Where the screening vendor can check a rule before execution, it refuses an operator transaction that breaks it; the rule stays detective for the emergency path and for moves in price.
+
+**The liquidity buffer** (OD-40). The vault keeps at least one month of baseline spend in stablecoins held directly and sUSDS. A detector watches it continuously, every report shows it, the Zodiac UI shows it, and screening refuses an operator transaction that would take it below its floor if the vendor can check that. The committee restores it within the mandate's window. The figure comes from the attested computation.
+
+**New Lido products** (OD-41). A new Lido product, Lido Lend first, counts against the protocol and counterparty cap until it matures. The mandate states the criteria. A budget motion with a forum post unlocks it, so LDO holders can object to each unlock. earnETH and earnUSD are not new.
+
+**The Zodiac UI** (OD-44). The UI shows Lido's readings as the canonical figures: the value per account, asset and protocol, the buffer against its floor, each cap against its limit, the budget left on each key, open orders and pending motions, with warnings before signing. A live value from a third party is labelled as indicative and never feeds a cap, a top-up or a report. If the policy provider cannot show this, Lido builds the display from the same readings.
 
 Reporting is published so that a third party can check it later without trusting the publisher's own website.
 
@@ -472,7 +484,7 @@ Report operations, decided by EM on 2026-10-05 (OD-14): the committee publishes 
 
 ##### 9.1 Detection, response, and the limits of blocking **[Open]**
 
-**Detection** runs in two estates in parallel. The Lido on-chain monitoring suite carries the rules that are cheap to express over block data: policy drift against the intended permission set, approval inventory, budget burn rate, repeated budget motions on one key, module, owner and singleton changes on the three new Safes, and motion lifecycle events. A commercial monitoring service carries the rules that need market and threat context: depegs, protocol compromise signals, and counterparty anomalies. Findings from both route into the existing notification and incident channels. The defi-tech team specifies the on-chain rules and makes the important updates; the team that owns the Lido monitoring bots reviews them and maintains the engine and the bots. The committee configures the vault's rules in the commercial service (OD-13).
+**Detection** runs in two estates in parallel. The Lido on-chain monitoring suite carries the rules that are cheap to express over block data: policy drift against the intended permission set, approval inventory, budget burn rate, repeated budget motions on one key, module, owner and singleton changes on the new Safes, the orders account's fallback handler and domain verifier, open orders and fill prices, the liquidity buffer, and motion lifecycle events. A commercial monitoring service carries the rules that need market and threat context: depegs, protocol compromise signals, and counterparty anomalies. Findings from both route into the existing notification and incident channels. The defi-tech team specifies the on-chain rules and makes the important updates; the team that owns the Lido monitoring bots reviews them and maintains the engine and the bots. The committee configures the vault's rules in the commercial service (OD-13).
 
 **Response to a ratio breach** is a financial judgement and belongs to the operator committee, working to the mandate's remediation window after the fortnightly review. If a breach worsens rather than resolves, the escalation is the technical role disabling the operator modifier, which stops all operator activity while recovery stays available. The trigger is fixed (OD-29): a published cap breach that is still there after the committee's rebalancing window of two working days, and that is larger at the next fortnightly snapshot. A DAO vote can also disable the modifier. Monitoring publishes the cap reading of each fortnightly snapshot to IPFS, from the report generator at the snapshot's pinned block, so the trigger does not depend on the committee in breach (OD-32). Its alert pages the Emergency Brakes multisig when the trigger is met.
 
@@ -491,7 +503,7 @@ Report operations, decided by EM on 2026-10-05 (OD-14): the committee publishes 
 - The vendor has confirmed that its approval service supports Safe v1.5.0, as EM reported on 2026-10-05, so the Operator Safe runs v1.5.0 (OD-07, OD-17).
 - The vendor is asked to refuse every delegatecall from the Operator Safe except to Safe's MultiSendCallOnly v1.5.0, `0xA83c336B20401Af773B6219BA5027174338D1836`. At Bybit in 2025, one signed delegatecall replaced a Safe's implementation [s8]. On the Operator Safe, such a call could also remove the guard. This is a request, not a gate (OD-17).
 
-Lido's on-chain monitoring already has a detector for this guard. It alerts on the start of the removal or bypass timelock, the bypass mode turning on, any approval that is not bound to one transaction, any keeper change, any added policy contract, and any module, guard or owner change on the guarded Safe. It must add Safe v1.5.0 and the Operator Safe's instance. Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity. Lido's monitoring also alerts, as critical, on any change of the singleton of the three new Safes, because a delegatecall can replace a Safe's implementation without any Safe event (OD-17).
+Lido's on-chain monitoring already has a detector for this guard. It alerts on the start of the removal or bypass timelock, the bypass mode turning on, any approval that is not bound to one transaction, any keeper change, any added policy contract, and any module, guard or owner change on the guarded Safe. It must add Safe v1.5.0 and the Operator Safe's instance. Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity. Lido's monitoring also alerts, as critical, on any change of the singleton of the new Safes, because a delegatecall can replace a Safe's implementation without any Safe event (OD-17).
 
 ##### 9.1.2 Why not a module guard on the Asset Safe **[Rejected]**
 
@@ -545,16 +557,14 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | --- | --- | --- |
 | Objection period | Easy Track window before a motion may enact | 72 hours, the Easy Track default |
 | Objection threshold | Share of LDO supply that rejects a motion | 0.5 percent, the Easy Track default |
-| Approval bound | How an operator approval is bounded | An approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget. The stETH approval to the wstETH contract keeps a fixed ceiling of one TM Floor Value in stETH, and so do the DAI and USDS approvals to Sky's DAI–USDS converter (OD-22) and the stETH approval to Lido's withdrawal queue (OD-27). Swapping needs no approval (OD-08, decided) |
+| Approval bound | How an operator approval is bounded | An approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget. The stETH approval to the wstETH contract keeps a fixed ceiling of one TM Floor Value in stETH, and so do the DAI and USDS approvals to Sky's DAI–USDS converter (OD-22) and the stETH approval to Lido's withdrawal queue (OD-27). On the orders account, a DAO vote sets the approvals of CoW's vault relayer for the listed tokens, and no role can raise one (OD-08, OD-43, OD-46) |
 | Budget per key | Monthly token-unit allowance | **Derived, run and attested** on 2026-09-22 outside this repository. Monthly flow equals the stock cap for that key, because exits are unbudgeted and a tighter flow would throttle re-entry after a defensive exit. Yield-bearing keys get the headroom against the literal base, the stablecoins plus yield-bearing stablecoins held directly, from a holdings snapshot at each retune (OD-03). The inputs include unapproved mandate terms, so the computation and its result enter this repository when the mandate is approved |
-| Lido own-product budgets | Monthly allowance for the vault products | The mandate sets no per-product cap and the whole vault may sit in Lido products, so these keys are bounded by the mandate size rather than by a ratio. That is a weak control. The budget exists to bound blast radius per month, not to enforce a ratio |
+| Lido own-product budgets | Monthly allowance for the vault products | The mandate sets no per-product cap and the whole vault may sit in Lido products, so these keys are bounded by the mandate size rather than by a ratio. That is a weak control. The budget exists to bound blast radius per month, not to enforce a ratio. A new Lido product counts against the protocol cap until a motion unlocks it (OD-41) |
 | Budget retune cadence | How often unit budgets are re-derived | Fortnightly, riding the existing rebalancing review. Budgets are token units and caps are ratios, so they drift with price |
 | Budget refill period floor | Lower bound enforced on `period` | 30 days (OD-08, decided) |
-| Swap order duration | Per-instance immutable on each swap instance | 1800 seconds, as on the live instances (OD-05) |
-| Swap margin | Per-instance immutable, basis points | 110 for volatile pairs, 30 for stablecoin pairs (OD-05) |
-| Swap price tolerance | Per-instance immutable, basis points | 550 for volatile pairs, 150 for stablecoin pairs (OD-05) |
-| Swap maximum improvement and partial fills | Per-instance immutables | 1000 basis points; partial fills on (OD-05) |
-| Price feeds | The vault's tokens on the Stonks price router | USDC, USDT, DAI and USDS added by the TMC multisig, quoted in USD, with a maximum price age equal to Chainlink's heartbeat; stETH and LDO as already configured (OD-20) |
+| Maximum order life | The longest life of an order from the orders account | 30 days for the operator's market and limit orders, through the order signer's `validDuration`; a TWAP order starts at its creation and ends within 30 days, with at most 30 daily or 4 weekly parts; a stop-loss expiry at most 30 days ahead, by a requested screening rule; 1 day for a recovery order (OD-47) |
+| Orders budgets | One budget key per listed token on transfers into the orders account | Set by attested computation; the figures enter with the approved mandate (OD-43) |
+| Liquidity buffer | The vault's floor of liquid stablecoins | At least one month of baseline spend; the figure by attested computation, entering with the approved mandate (OD-40) |
 | Funding period and limit | Funding cap per period, in each of the two registries | One calendar month; one TM Floor Value per period in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared. Set by attested computation; the figures enter with the approved mandate (OD-06, decided) |
 
 ### Roles and Authority
@@ -566,13 +576,13 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Adjust a budget within ceilings | Operator proposes | Easy Track motion, governance role | 72 hours |
 | Onboard a new protocol or asset | Operator proposes | Easy Track motion, template factory | 72 hours |
 | Top up the vault | Operator Safe proposes with the vendor's approval, anyone enacts | Easy Track motion, top-up factory, paying the Asset Safe only | 72 hours |
-| Revoke the operator | Emergency Safe, two signatures | Direct through the modifier | Minutes |
+| Revoke the operator | Emergency Safe, two signatures | Direct through both operator modifiers | Minutes |
 | Disable the operator modifier | Emergency Brakes multisig, three signatures | Direct through the safety modifier, technical role | Minutes |
-| Re-sync a price feed | TMC multisig, four signatures, as the price router's manager | `syncTokenFeed` on the Stonks price router | Minutes, subject to signer availability |
+| Cancel orders and sweep the orders account | Emergency Safe, two signatures | `unsignOrder` and ComposableCoW `remove` for each open order, then `transfer` of each token to the Agent or the Asset Safe | Minutes, subject to signer availability |
 | Freeze queued motions | Emergency Brakes multisig, a separate body | Easy Track pause | Minutes, subject to paging them |
 | Return assets to the DAO | Emergency Safe, two signatures | Direct through the modifier | Minutes to initiate |
 | Replace the whole policy | DAO | Vote through Dual Governance to the Agent | Vote plus Dual Governance timelock |
-| Burn first-loss Earn shares | DAO | Vote through Dual Governance; the Asset Safe calls `burn` on the share token | Vote plus Dual Governance timelock |
+| Burn first-loss Earn shares | DAO | Vote through Dual Governance; the first-loss Safe calls `burn` on the share token | Vote plus Dual Governance timelock |
 
 Signer-set reconciliation between the operator multisig and the Emergency Safe is a manual runbook duty, handled the same way as consensus-member and committee rotations elsewhere in the protocol. There is no on-chain enforcement, so a rotation is not complete until both Safes are updated.
 
@@ -588,17 +598,17 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 
 **Replacement semantics.** Because a write replaces a permission slot rather than merging, an additive-looking change can silently drop earlier constraints. This design avoids the hazard by never letting a motion write a tree, but any future tooling that applies policy directly must emit complete trees.
 
-**Order pre-signing is opaque.** The settlement contract's pre-signature call carries only an order identifier and a boolean. Sell token, buy token, amounts, and receiver are committed inside a hash the modifier cannot read. No parameter condition can cap a sell amount or pin a receiver on that path. Exposure is bounded only by the standing approval and by monitoring. This design removes the path: no role needs a pre-signing permission, because every swap runs through Stonks instances (ADR 007). A router path, where destination token and recipient are ordinary calldata, is enforceable for destination but not for price, because a minimum-output argument is an absolute number.
+**Order pre-signing is opaque.** The settlement contract's pre-signature call carries only an order identifier and a boolean. Sell token, buy token, amounts, and receiver are committed inside a hash the modifier cannot read. No parameter condition can cap a sell amount or pin a receiver on that path. Exposure is bounded only by the standing approval and by monitoring. This design avoids that path: the orders account pre-signs only through the CoW order signer, which computes the identifier from a typed order whose tokens, receiver and life the permission pins (ADR 007). The price stays unbounded on chain: a router path, where destination token and recipient are ordinary calldata, is enforceable for destination but not for price, because a minimum-output argument is an absolute number, and a CoW order's limit is the same kind of number [s11].
 
-**The operator and the emergency role do not fail independently.** They are the same people at different quorums. Two consequences. A signer-set compromise that reaches two keys reaches the emergency role, whose powers are one-way. And the requirement that the operator cannot veto an emergency action is now carried entirely by role scoping, since it is no longer supported by separation of persons. The compensating controls are that the emergency role can only reduce exposure, that its transfers are pinned to the Agent literal, and that the DAO can replace the whole policy. A third consequence: the fast exit is not independent of the committee. The path that is independent of it is a DAO vote, which takes days (OD-30).
+**The operator and the emergency role do not fail independently.** They are the same people at different quorums. Two consequences. A signer-set compromise that reaches two keys reaches the emergency role, whose powers only reduce exposure but include recovery orders with no price floor (OD-48). And the requirement that the operator cannot veto an emergency action is now carried entirely by role scoping, since it is no longer supported by separation of persons. The compensating controls are that the emergency role can only reduce exposure, that its transfers are pinned to the Agent literal or to the orders account, whose recovery orders pay the Agent, and that the DAO can replace the whole policy. Recovery orders have no on-chain price floor, so a compromised emergency quorum can sell at a bad price if CoW's rules fail; CoW's EBBO rule, paging and a limit alert are the controls (OD-48). A third consequence: the fast exit is not independent of the committee. The path that is independent of it is a DAO vote, which takes days (OD-30).
 
 **The technical and financial remedies are separated by design.** The global Easy Track pause stops a pending governance change from enacting; it does not stop an operator transaction or a defect in the permission layer from being exercised. Only module disabling does that. Both remedies are held by the technical committee, so the people who recognise a technical defect hold the switch that answers it. Because the switch disables only the operator modifier, the financial emergency role keeps its powers, and the two bodies do not need to coordinate on sequencing.
 
-**Template factories are the widening surface.** Onboarding no longer needs a vote, so the audit question moves from "is this tree narrower" to "can this template ever emit something unsafe". Each template must be shown to pin every receiver and owner field, to bound every value-moving amount, and to be incapable of emitting an administrative selector. A template flaw is reachable by any motion that survives its objection window.
+**Template factories are the widening surface.** Onboarding no longer needs a vote, so the audit question moves from "is this tree narrower" to "can this template ever emit something unsafe". Each template must be shown to pin every receiver and owner field, to bound every value-moving amount, and to be incapable of emitting an administrative selector. A template flaw is reachable by any motion that survives its objection window. Since OD-49 the templates also write the emergency role's exits on the safety modifier, so a flaw there widens the unscreened two-of-seven path; each exit template must be shown to emit only exits.
 
 **Policy encoding.** The policy that the test suite exercises is this team's hand-written encoding. [ADR 004](/adr/004-specifications-and-policy-as-data.md) replaces it with a Zodiac constellation, a compiler and a round-trip check that reads the applied conditions back from the chain: the constellation in TypeScript, Clutch's own compiler that emits one committed JSON artifact, and a check that rebuilds the trees from the modifier's events (OD-33). The team works in the Zodiac UI, and local tooling verifies every transaction that the UI builds. The fork tests run on the compiled artifact. The round-trip check is phase 2 work; until it exists, nothing independent checks the encoding.
 
-**Safe v1.5.0 has a short record.** The three new Safes run Safe v1.5.0. Certora and Ackee audited it, Certora's formal verification covers the vault's main Safe paths, no advisory concerns it, and Safe's bug bounty covers it. But it has held little value for a short time. Before March 2026, only 57 Safes were created on it through Safe's factory, and Safe{Wallet} made it the version of new Safes only on 2026-09-22 [s8]. The design keeps the vault off the code that changed most in v1.5.0: the Aragon Agent never signs for the Asset Safe as a contract, and the Asset Safe has no fallback handler. Safe's releases and advisories are checked again before the enabling vote, and a change on the vault's paths goes back to EM (OD-17). The large losses at Safe accounts so far came from falsified signing interfaces, third-party modules and signers' own permission changes, not from Safe's contracts [s8].
+**Safe v1.5.0 has a short record.** The Asset Safe, the Operator Safe, the Emergency Safe and the first-loss Safe run Safe v1.5.0, and so does the orders account if a fork test shows that CoW's fallback handler works on it. Certora and Ackee audited it, Certora's formal verification covers the vault's main Safe paths, no advisory concerns it, and Safe's bug bounty covers it. But it has held little value for a short time. Before March 2026, only 57 Safes were created on it through Safe's factory, and Safe{Wallet} made it the version of new Safes only on 2026-09-22 [s8]. The design keeps the vault off the code that changed most in v1.5.0: the Aragon Agent never signs for the Asset Safe as a contract, and the Asset Safe has no fallback handler. The orders account does use a fallback handler and contract signatures. It holds only tokens in transit, but the emergency role's transfers into it have no budget. Safe's releases and advisories are checked again before the enabling vote, and a change on the vault's paths goes back to EM (OD-17). The large losses at Safe accounts so far came from falsified signing interfaces, third-party modules and signers' own permission changes, not from Safe's contracts [s8].
 
 **Deployment provenance.** Explorer-verified source is not a build-to-bytecode comparison. Before funding, every reused component should be verified against a locally compiled tagged release.
 
@@ -609,9 +619,9 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | Modifier bricked at deployment | Roles proxy deployed through a Safe proxy rather than a minimal proxy | Mandatory use of the Zodiac ModuleProxyFactory; deployment rehearsal on a fork | Deployment self-test before any funding |
 | Role key mismatch | Deployment tooling and factories derive role keys differently | Pin the derivation and assert it at deployment | Deployment self-test |
 | Operator key compromise | Signer compromise | Default deny, no transfer permission, receivers pinned to the avatar, budgets, approvals bounded by each spender's budget | Policy-drift and approval monitoring; budget burn-rate alerts |
-| Emergency key compromise | Signer compromise | Emergency cannot add permissions, enter protocols beyond staking ETH, or change the recovery destination | Any emergency action pages the DAO; a revoke-only action pages at a lower severity than a transfer or a swap |
-| Defect in Safe or Roles code | A bug in the Safe v1.5.0 singleton or in the Roles mastercopy | The vault's main Safe paths are ones that Certora formally verified, and the vault uses no fallback handler and no contract signature; Safe's releases and advisories are checked again before the enabling vote; the technical role can disable the operator modifier; the DAO can replace the policy or move the assets by vote | Safe's advisories and releases; the engineering organisation's watch on technical risk, including bug-bounty submissions; alerts on singleton, module and owner changes |
-| Falsified signing interface | A signer's device or wallet interface shows one transaction and has another signed, as at Bybit in 2025 | The Operator Safe holds no assets, and each of its transactions needs the vendor's approval; the vendor is asked to refuse delegatecalls except to MultiSendCallOnly; the operator's permissions bound what a signing quorum can do; the emergency role's powers are one-way | Alerts on owner, guard, module and singleton changes of the three new Safes |
+| Emergency key compromise | Signer compromise | Emergency cannot add permissions, enter protocols beyond staking ETH, or change the recovery destination. It can choose a bad limit for a recovery order: nothing on chain bounds the price, and CoW's EBBO rule bounds it in practice (OD-48) | Any emergency action pages the DAO; a revoke-only action pages at a lower severity than a transfer or a swap; an alert on a recovery limit far below a market price |
+| Defect in Safe or Roles code | A bug in the Safe v1.5.0 singleton or in the Roles mastercopy | The vault's main Safe paths are ones that Certora formally verified, and the Asset Safe uses no fallback handler and no contract signature, while the orders account, which does, holds only tokens in transit; Safe's releases and advisories are checked again before the enabling vote; the technical role can disable the operator modifier; the DAO can replace the policy or move the assets by vote | Safe's advisories and releases; the engineering organisation's watch on technical risk, including bug-bounty submissions; alerts on singleton, module and owner changes |
+| Falsified signing interface | A signer's device or wallet interface shows one transaction and has another signed, as at Bybit in 2025 | The Operator Safe holds no assets, and each of its transactions needs the vendor's approval; the vendor is asked to refuse delegatecalls except to MultiSendCallOnly; the operator's permissions bound what a signing quorum can do; the emergency role's powers only reduce exposure, though a recovery order has no price floor (OD-48) | Alerts on owner, guard, module and singleton changes of the new Safes |
 | Queued motion restores a revoked permission | An expansion motion enacts after an incident | Easy Track pause, held by the Emergency Brakes multisig; the operator Safe can cancel its own motion; after enactment, the emergency Safe revokes the permission again at once | Motion monitoring; the incident runbook must page the pause holder |
 | Operator modifier disabled while positions are open | The technical committee acts during a defect | The safety modifier keeps working, so the emergency role can still exit and return assets | Module-enabled monitoring on the Safe, alert on any change |
 | Technical committee unreachable during a permission-layer defect | Signer availability | The DAO path can replace the policy outright; the financial role can still revoke and exit through the safety modifier | Escalation clock in the runbook |
@@ -621,9 +631,11 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 | Budget reset by repeated motions | Budget motions run in parallel, and each one resets a balance | The ceiling of each key; the objection window | A second budget motion on the same key within 14 days |
 | Top-up above the shortfall | The operator Safe pulls more than the mandate allows, or outside the monthly cycle | A limit of one TM Floor Value per registry per month; the 72-hour objection; the screening guard; the emergency Safe can return funds to the Agent | Alerts on out-of-cycle motions, on a month's top-ups above the posted shortfall, and on a motion after an objected one |
 | Spender pulls without a deposit | A protocol spender is upgraded to steal, or an approval stands too long | Each approval spends its key's budget, so approvals per period cannot exceed it; approvals in the same transaction as the deposit; the emergency role zeroes approvals and can revoke the approve permission | Approval inventory and budget burn monitoring |
-| Exit impossible when it matters | Protocol illiquidity or asynchronous settlement | Receipt-token transfer to the Agent; claim later | Position inventory monitoring |
-| First-loss shares redeemed | The operator or the emergency role redeems the Earn shares that carry the first-loss terms | A written rule; the redemption queue's delay; the proceeds stay in the Asset Safe, and a DAO vote can deposit them again | Alert when the vault's earnETH or earnUSD balance falls below the first-loss amount, or a redeem request would cross it |
-| Price feed out of sync | Chainlink replaces an aggregator in its registry, as it did for USDC and USDT twice in September 2026 | The TMC multisig re-syncs the feed as the router's manager; recovery can send assets to the Agent, which needs no price | Alert when a vault token's feed is out of sync, or when the registry confirms a new aggregator for it |
+| Exit impossible when it matters | Protocol illiquidity or asynchronous settlement | Receipt-token transfer to the Agent; claim later. A position that a motion onboarded gets its emergency exit from that motion (OD-49) | Position inventory monitoring |
+| An exit template grants more than an exit | A flaw in an onboarding template's exit part | The template's tests and audit; the objection window; the Easy Track pause; a DAO vote replaces the safety policy | Drift detection on the safety policy |
+| First-loss shares moved | A role reaches the first-loss shares | None needed: the first-loss Safe has no module, so no role can act on it (OD-42) | Alert on any change of the first-loss Safe's balance, owners, modules or singleton |
+| An order fills far below the market | An order with a poor limit, or a solver that fills at the limit while the market is better | The order's own limit; CoW's solver competition; screening of operator orders; the orders budgets | Alert on each fill below a market price, and on open orders and tokens left in the orders account |
+| CoW's watch-tower stops | Conditional orders are not posted to the order book | The orders wait and no funds move; the committee can cancel them and place ordinary orders | Alert when a conditional order's part is not posted on time |
 | Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity and new motions stop; recovery is unaffected; the owners can remove the guard after ten days | Approval-latency and vendor-heartbeat monitoring |
 | Cap breach gets worse | The committee does not rebalance within its window | The Emergency Brakes multisig disables the operator modifier on the fixed trigger; the safety modifier keeps working, so recovery stays available | Monitoring's fortnightly cap reading on IPFS; its alert pages the Emergency Brakes multisig when the trigger is met |
 | Monitoring unavailable | Service outage | On-chain permissions are the enforcement layer and do not widen when monitoring stops | Heartbeat on the monitor itself |
@@ -633,14 +645,16 @@ Note that the direct DAO path runs through Dual Governance, because the Dual Gov
 The [open-decisions register](/registers/open-decisions.md) tracks every open item. These can change the shape of this proposal:
 
 1. **The vendor's confirmations (OD-07, decided).** Before deployment the vendor confirms in writing that it accepts the exclusion of standing approvals and agrees to be named. Its support for Safe v1.5.0 is confirmed, as EM reported on 2026-10-05 (OD-17). It is also asked to merge and document the 10-day build, and to refuse delegatecalls from the Operator Safe except to MultiSendCallOnly. The Lido-side party is the one that already holds the vendor's arrangement for the guarded Lido multisigs (OD-12).
-2. **Mandate text owed.** The own-product limit and the protocol cap must state that Lido Lend counts against the protocol cap for its first three months (OD-04). The illustrative balance renames its "USD-denominated" heading (OD-03). The funding rules must allow sUSDS (OD-11). The reporting section must state the price rule and the late-report rule (OD-14). The legacy section must state that the mandate takes over the first-loss terms of the March 2026 Earn allocation: the Asset Safe holds the shares, a DAO vote executes any burn, and neither the operator nor the emergency role redeems them (OD-21, OD-28). The emergency section must describe the emergency Safe as the committee's signers at two of seven, the technical role of the Emergency Brakes multisig, and a DAO vote as the path that is independent of the committee (OD-30). The emergency swap goes into USDC, or into USDT as the second destination, not into any of the four main stablecoins (OD-26).
+2. **Mandate text owed.** The own-product limit and the protocol cap must state that a new Lido product, Lido Lend first, stays in the protocol cap until it meets the maturity criteria and a motion unlocks it, and that earnETH and earnUSD are not new (OD-41). The illustrative balance renames its "USD-denominated" heading (OD-03). The funding rules must allow sUSDS (OD-11). The reporting section must state the price rule and the late-report rule (OD-14). The legacy section must state that the mandate takes over the first-loss terms of the March 2026 Earn allocation: the first-loss Safe holds the shares, out of every role's reach, and a DAO vote executes any burn (OD-21, OD-28, OD-42). The emergency section must describe the emergency Safe as the committee's signers at two of seven, the technical role of the Emergency Brakes multisig, and a DAO vote as the path that is independent of the committee (OD-30). The emergency swap goes into USDC, or into USDT as the second destination, not into any of the four main stablecoins (OD-26). The buffer section states the buffer's controls (OD-40). The swap section names CoW's market, limit, TWAP and stop-loss orders through the orders account, states that nothing on chain bounds their price, and makes Uniswap and 1inch wait for a screening check of the output (OD-43). The control section says how each rule is kept, by reference to the control matrix (OD-39).
 3. **Twyne.** The mandate lists a Twyne investment. No Lido address checked holds a Twyne position, and its form is not known. It reduces the seed only when its holder and form are shown (OD-21).
+4. **The orders account.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 come before the design is relied on.
 
 ## Links
 
 - Zodiac Roles modifier, deployed mastercopy: `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5`
 - Safe smart account v1.5.0 release: https://github.com/safe-fndn/safe-smart-account/releases/tag/v1.5.0
 - Easy Track: https://docs.lido.fi/deployed-contracts/#easy-track
+- CoW Protocol, ComposableCoW: https://docs.cow.fi/cow-protocol/reference/contracts/periphery/composable-cow
 - Treasury Management Committee: https://docs.lido.fi/multisigs/committees#25-treasury-management-committee
 - Emergency Brakes: https://docs.lido.fi/multisigs/emergency-brakes#12-emergency-brakes-ethereum
 
