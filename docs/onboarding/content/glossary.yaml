@@ -91,7 +91,7 @@
   sources: [OD-48, "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
 
 - term: Enabling vote
-  plain: "The DAO vote that turns the system on. It applies the committed artifact, grants the roles, registers the factories and adds USDS to the payment permission."
+  plain: "The DAO vote that turns the system on. It applies the policy compiled for mainnet from the reviewed constellation, grants the roles, sets up the orders account and the first-loss Safe, registers the factories and adds USDS to the payment permission."
   sources: [ADR-004, ADR-010, ADR-008]
 
 - term: Fail closed
@@ -175,12 +175,12 @@
   sources: [ADR-007, OD-26, INV-014]
 
 - term: Role
-  plain: "A named set of permissions on a modifier: operator, governance, emergency or technical. A Safe or contract that holds the role can make the calls that it allows."
+  plain: "A named set of permissions on a modifier: operator, governance, emergency, technical or exit governance. A Safe or contract that holds the role can make the calls that it allows."
   tech: "On chain, a 32-byte key names the role. In Clutch the key is the label in bytes, such as `bytes32(\"operator\")`."
   sources: [ADR-005, "lip:part-2"]
 
 - term: Roles modifier
-  plain: "A Zodiac module that checks each call against the caller's role, refuses anything not explicitly allowed, and runs the rest as the Safe. Clutch has two: the operator modifier and the safety modifier."
+  plain: "A Zodiac module that checks each call against the caller's role, refuses anything not explicitly allowed, and runs the rest as the Safe. Clutch has four: an operator modifier and a safety modifier on the Asset Safe, and the same pair on the orders account."
   sources: [ADR-005]
 
 - term: Round-trip check

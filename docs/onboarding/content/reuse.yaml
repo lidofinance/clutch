@@ -125,7 +125,7 @@
 # --- New code or configuration -------------------------------------------------------------------
 - name: The permission policy
   column: new
-  what: "The four roles and their permissions: what the operator, governance, emergency and technical roles may call, and with which arguments."
+  what: "The five roles and their permissions: what the operator, governance, emergency, technical and exit-governance roles may call, and with which arguments. Four are built; the exit-governance role is specified (OD-49)."
   why: "This is the heart of Clutch. Every permission traces back to a decision and forward to a test."
   owner: "`@lidofinance/defi-tech`; reviewers approve each change"
   sources: [ADR-005, ADR-004, INV-004, INV-018]

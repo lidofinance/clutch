@@ -22,7 +22,7 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 - [docs/index.md](docs/index.md) — the map, and the knowledge bundle in Open Knowledge Format 0.2.
 - [docs/product/brief.md](docs/product/brief.md) — vision, goals, North Star Metric, readers and users.
 - [docs/adr/](docs/adr/index.md) — decision records. What is still open is in [docs/registers/open-decisions.md](docs/registers/open-decisions.md).
-- [docs/specs/](docs/specs/index.md) — the specification policy, the invariants and the LIP draft.
+- [docs/specs/](docs/specs/index.md) — the specification policy, the invariants, the control matrix and the LIP draft.
 - [ROADMAP.md](ROADMAP.md) — phases and the gates between them.
 - [test/README.md](test/README.md) — the dry-run harness on a pinned mainnet fork.
 - [policy/constellation/](policy/constellation/PROVENANCE.md) — the permission policy as a Zodiac constellation, its compiler and the committed artifact.

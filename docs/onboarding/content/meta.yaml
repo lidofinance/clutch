@@ -37,6 +37,7 @@ legend:
     external: "External protocol"
   edges:
     owns: "Owns, holds, uses or has a role (solid)"
+    governs: "Governs, pays or creates motions (thin grey)"
     screens: "Screens or watches (dotted)"
     safety: "Safety action (dash-dot)"
     signers: "Same signers (round dots)"
@@ -62,11 +63,14 @@ quiz_note: "Pick an answer to see whether it is right and why. Nothing leaves th
 owed:
   - "The Emergency Brakes multisig verifies ADR 005 to ADR 011, then EM accepts them."
   - "[the screening vendor] confirms in writing that it accepts no standing approvals and agrees to be named."
-  - "[the screening vendor] says which rules it can check before execution: the liquidity buffer, the caps, an order's limit and a router swap's minimum output."
+  - "[the screening vendor] says which rules it can check before execution: the liquidity buffer, the caps, an order's limit, a stop-loss order's expiry and a router swap's minimum output."
   - "The policy provider answers the list of what the Zodiac UI must show (OD-44)."
+  - "[the screening vendor] also says whether it records rule changes and whether it can delay a relaxation."
   - "The mandate text owes eleven changes before the Snapshot vote."
-  - "Fork tests must show that CoW's order signer and fallback handler work on Safe v1.5.0 behind a Roles modifier before the orders account is relied on."
-  - "Phase 2 builds the orders account, the template factories, the funding path, the report generator, the round-trip check and the monitoring detectors."
+  - "Fork tests owed: CoW's order signer and fallback handler on Safe v1.5.0 behind a Roles modifier, before the orders account is relied on; the Morpho Blue template end to end; the rewritten payment permission; the first-loss share move and the DAO burn."
+  - "Figures owed from the attested computation once the mandate is approved: the budgets, the orders budgets, the funding limits and the liquidity buffer."
+  - "The mandate's drafters owe the holder and the form of the Twyne position."
+  - "Phase 2 builds the round-trip check, the orders account and its permissions, the first-loss Safe, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the readings that the Zodiac UI shows, and the invariant-to-test check."
   - "No runbook is written yet. Each needs a fork drill before it counts."
   - "No document describes the deployment sequence step by step yet."
 footer: |-

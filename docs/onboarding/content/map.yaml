@@ -6,7 +6,8 @@ height: 750
 description: The Lido DAO owns the Asset Safe; it also owns the orders account and the first-loss Safe, which the map
   shows without an arrow. The Asset Safe owns two Roles modifiers. The operator Safe holds the operator role and Easy Track holds the governance role on the operator modifier.
   The emergency Safe holds the emergency role and the Emergency Brakes multisig holds the technical role on the safety
-  modifier. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
+  modifier. Easy Track also holds the exit-governance role there, and every role acts on the orders account through its
+  own two modifiers; the map draws no arrow for these. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
   through CoW orders from the orders account. The first-loss Safe holds the DAO's first-loss Earn shares. Monitoring
   watches the vault and pages the Emergency Brakes multisig. Reporting publishes from the vault's snapshots.
 nodes:
@@ -101,7 +102,7 @@ nodes:
   h: 84
 - id: operator-modifier
   label: Operator modifier
-  sub: 'roles: operator, governance'
+  sub: 'operator, governance'
   summary: A Zodiac Roles modifier. It lets the operator do only what the policy lists, within budgets.
   domain: vault
   kind: contract
@@ -112,9 +113,10 @@ nodes:
   h: 84
 - id: safety-modifier
   label: Safety modifier
-  sub: 'roles: emergency, technical'
+  sub: 'emergency, technical, exits'
   summary: A second Roles modifier for the emergency and technical roles. Nothing screens it, so recovery never waits on a
-    vendor. A motion that onboards a protocol adds its emergency exit here.
+    vendor. Its exit-governance role, which is specified, lets the motion that onboards a protocol add its emergency exit
+    here.
   domain: vault
   kind: contract
   status: instance
@@ -200,7 +202,7 @@ nodes:
     caps and the liquidity buffer; no contract checks them.
   domain: ext
   kind: service
-  status: new
+  status: mixed
   x: 940
   y: 646
   w: 200
@@ -410,7 +412,8 @@ edges:
   to: brakes
   kind: screens
   short: pages
-  label: Monitoring pages the Emergency Brakes multisig when the cap-breach trigger is met.
+  label: Monitoring pages the Emergency Brakes multisig when the cap-breach trigger is met, or for a defect in the permission
+    layer.
   via:
   - - 875
     - 600

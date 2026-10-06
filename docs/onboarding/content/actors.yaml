@@ -85,14 +85,14 @@
     - "Have the first-loss Safe burn or redeem the [[first-loss shares]], by vote."
     - "Add a token to the orders account's lists, for the operator or for [[recovery order|recovery orders]], by vote. No motion can write the order signer's permission (OD-36, OD-46)."
     - "Grant the operator [[delegatecall]]. Only a DAO vote can do this (OD-36)."
-    - "Receive recovered assets. It is the pinned receiver of every emergency transfer and every recovery order."
+    - "Receive recovered assets: every emergency transfer out of the vault's accounts, and every recovery order, pays it."
     - "Pay funding through Aragon Finance, and administer both funding registries."
   cannot:
     - "Approve an Asset Safe transaction with a contract signature. It uses only `approveHash`, or it sends the transaction itself."
     - "Be reached by an Easy Track motion. Easy Track has no authority over it."
   numbers: ["owns the Asset Safe, the orders account and the first-loss Safe, each at 1 of 1"]
   address: "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
-  sources: [ADR-005, ADR-006, ADR-007, ADR-008, INV-001, INV-021, INV-023]
+  sources: [ADR-005, ADR-006, ADR-007, ADR-008, OD-36, OD-46, INV-001, INV-021, INV-023]
 
 # --- Funding path ------------------------------------------------------------------------------
 - id: finance
@@ -212,7 +212,7 @@
     - "Run scripts as the Aragon Agent. It holds neither `RUN_SCRIPT_ROLE` nor `EXECUTE_ROLE`."
     - "Add a recipient to the vault's registries, or change their limit or period."
   address: "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977"
-  sources: [ADR-005, ADR-006, ADR-008, "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
+  sources: [ADR-005, ADR-006, ADR-008, OD-49, "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
 
 - id: template-factories
   node: easytrack
@@ -229,7 +229,7 @@
     - "Remove a permission. Every removal is the emergency Safe's revoke (OD-09)."
     - "Add a token to the orders account's lists. The order signer's permission is a delegatecall, which no motion can write (OD-36, OD-46)."
   numbers: ["5 templates", "external audit in phase 3"]
-  sources: [ADR-006, ADR-011, OD-09, OD-43, OD-46, "lip:part-4"]
+  sources: [ADR-006, ADR-011, OD-09, OD-36, OD-43, OD-46, OD-49, "lip:part-4"]
 
 - id: budget-factory
   node: easytrack
@@ -267,7 +267,7 @@
     - "Be replaced without a DAO vote. A new operator Safe also needs every factory deployed and registered again."
   numbers: ["Safe v1.5.0", "4 of 7", "guard removal: 10-day timelock"]
   address: "To be deployed"
-  sources: [ADR-005, ADR-010, ADR-006, ADR-007, INV-010]
+  sources: [ADR-005, ADR-010, ADR-006, ADR-007, INV-010, "doc:docs/registers/parameters.md#parameters"]
 
 # --- Emergency Safe -----------------------------------------------------------------------------
 - id: emergency-safe
@@ -389,7 +389,7 @@
   label: built
   role: operator
   what: "The permissions of the operator Safe on the operator modifier. Every receiver, owner and beneficiary is pinned to the Asset Safe, so the operator can change positions but cannot move assets out."
-  controlled_by: "Held by the operator Safe. The DAO writes it at the enabling vote. Only motions can widen it later."
+  controlled_by: "Held by the operator Safe. The DAO writes it at the enabling vote. Motions widen it inside templates; a DAO vote can change it in any way."
   can:
     - "Stake ETH, wrap and unwrap stETH and WETH, and use Lido's withdrawal queue with the Asset Safe as owner."
     - "Deposit into and redeem from earnETH, earnUSD and sUSDS. Claims pay the Asset Safe."
@@ -399,7 +399,7 @@
     - "Transfer a token. The transfer to the orders account is specified but not yet in the policy."
     - "Borrow, or use a venue outside the launch scope."
     - "Administer a modifier or the Safe, or change its own permissions."
-    - "Use delegatecall."
+    - "Use delegatecall on the Asset Safe. Its one planned delegatecall, to CoW's order signer, is on the orders account and is specified (OD-43)."
     - "Reach the first-loss shares. They sit in the first-loss Safe, which has no module (OD-42)."
   numbers: ["one role key: `operator`"]
   sources: [ADR-005, ADR-009, OD-42, INV-003, INV-008, INV-018, "test:test_D3_operator_cannot_route_around_avatar"]
@@ -420,7 +420,7 @@
     - "Grant or remove a role, or touch the emergency or technical role."
     - "Make the Asset Safe or any of its modules an operator target, the safety modifier included (OD-38). The compiler refuses a policy without this guard."
     - "Grant the operator delegatecall (OD-36)."
-    - "Submit its own condition tree. The factory builds the tree from a fixed template."
+    - "Take a condition tree from a motion: the factories build every tree. This is specified, and the modifier does not check it."
   numbers: ["refill period: 30 days or more"]
   sources: [ADR-006, ADR-005, INV-004, OD-36, OD-38, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe"]
 
@@ -448,12 +448,12 @@
   what: "A second Roles modifier on the Asset Safe, for the emergency and technical roles. No guard screens it, so recovery never waits for the vendor."
   controlled_by: "Its owner, the Asset Safe, so in the end the DAO."
   can:
-    - "Carry the emergency role, the technical role and the exit-governance role. It has no budget keys."
+    - "Carry the emergency role and the technical role. It has no budget keys. The exit-governance role is specified, not built (OD-49)."
     - "Keep working after the technical role disables the operator modifier."
   cannot:
     - "Be disabled by the technical role. If it has a defect, the fix is a DAO vote."
   address: "To be deployed"
-  sources: [ADR-005, INV-009, "test:test_D4_module_disabling_is_technical_only_and_pinned"]
+  sources: [ADR-005, INV-009, OD-49, "test:test_D4_module_disabling_is_technical_only_and_pinned"]
 
 - id: role-emergency
   node: safety-modifier
@@ -461,7 +461,7 @@
   status: new
   label: built
   role: emergency
-  what: "The permissions of the emergency Safe on the safety modifier. They only reduce exposure. Every asset that it moves goes to the Aragon Agent, directly or through a recovery order. A recovery order, which is specified, has no on-chain price floor; CoW's rules hold its fill to the on-chain market (OD-48)."
+  what: "The permissions of the emergency Safe on the safety modifier. They only reduce exposure. It moves assets only to the Aragon Agent or into the orders account, and a recovery order pays only the Agent. A recovery order, which is specified, has no on-chain price floor; CoW's rules hold its fill to the on-chain market (OD-48)."
   controlled_by: "Held by the emergency Safe, at 2 of 7."
   can:
     - "Revoke any operator target or function. One revoke reaches every operator permission on the modifier; the orders operator modifier needs its own, which is specified."
@@ -515,7 +515,7 @@
   what: "The permission policy, written as a Zodiac [[constellation]] in TypeScript under `policy/constellation/`. It names the Safes, the modifiers, the roles, the permissions and the budget keys."
   controlled_by: "The repository. A change is a reviewed pull request. `@lidofinance/defi-tech` owns it."
   can:
-    - "State every permission of the four roles in one place."
+    - "State every permission of the four built roles in one place. The exit-governance role joins when it is built (OD-49)."
     - "Go to the Lido Zodiac workspace, so that the UI can show it."
   cannot:
     - "Change the chain by itself. Only a vote or a motion applies a policy."
@@ -665,6 +665,26 @@
     - {name: "MultiSendCallOnly v1.5.0", address: "0xA83c336B20401Af773B6219BA5027174338D1836"}
   sources: [ADR-005, ADR-010, INV-019, "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
+- id: vault-tokens
+  node: asset-safe
+  name: The tokens that the vault holds
+  status: existing
+  label: existing
+  what: "The launch list: ETH, WETH, stETH, wstETH, USDC, USDT, DAI, USDS, sUSDS, LDO, and the earnETH and earnUSD shares. The Asset Safe holds them; the stablecoins, sUSDS and stETH also fund the vault."
+  controlled_by: "Each token's own issuer and governance."
+  can:
+    - "Be sold and bought in CoW orders by the operator, if on its lists: stETH, wstETH, WETH, USDC, USDT, USDS and LDO (OD-46)."
+    - "Be sold by a [[recovery order]] into USDC, or into USDT: every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues."
+  cannot:
+    - "Be traded by the operator if off its lists. DAI earns through Sky's converter and sUSDS through deposit and redeem, so both stay off (OD-22, OD-46). A new token needs a DAO vote."
+  addresses:
+    - {name: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}
+    - {name: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7"}
+    - {name: "DAI", address: "0x6B175474E89094C44Da98b954EedeAC495271d0F"}
+    - {name: "USDS", address: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"}
+    - {name: "LDO", address: "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32"}
+  sources: [ADR-011, ADR-007, OD-22, OD-26, OD-46, "doc:docs/registers/parameters.md#parameters"]
+
 # --- First-loss Safe ----------------------------------------------------------------------------
 - id: first-loss-safe
   node: first-loss
@@ -715,7 +735,7 @@
     - "Cancel a request. A request takes days to finalize."
   numbers: ["stETH approval: a fixed ceiling, no budget key (OD-27)"]
   address: "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
-  sources: [ADR-007, OD-27, "test:test_D3_withdrawal_queue_round_trip_buys_weth", "doc:docs/research/recovery-and-withdrawal-queue-2026-10-05.md#the-withdrawal-queue"]
+  sources: [ADR-007, OD-27, OD-46, "test:test_D3_withdrawal_queue_round_trip_buys_weth", "doc:docs/research/recovery-and-withdrawal-queue-2026-10-05.md#the-withdrawal-queue"]
 
 - id: lido-earn
   node: protocols
@@ -755,6 +775,21 @@
     - {name: "sUSDS", address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"}
     - {name: "DAI–USDS converter", address: "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A"}
   sources: [ADR-011, OD-22, OD-26, "test:test_D3_dai_usds_conversion_pays_the_asset_safe", "doc:docs/research/dai-usds-conversion-2026-10-05.md#the-converter", "doc:docs/research/recovery-and-withdrawal-queue-2026-10-05.md#usds-and-dai-carry-usdc-risk"]
+
+- id: lido-lend
+  node: protocols
+  name: Lido Lend
+  status: new
+  label: planned
+  what: "Lido's lending product, a separate deployment that is compatible with Morpho Blue. It is not deployed yet. The vault onboards it after launch, by one motion."
+  controlled_by: "Its own governance."
+  can:
+    - "Join the vault through one motion on the Morpho Blue template, once its own contract exists. The motion names that contract, and it also adds the emergency exit (OD-49)."
+  cannot:
+    - "Leave the protocol cap before it matures and a budget motion with a forum post unlocks it (OD-41)."
+    - "Be granted an exit at the enabling vote: its address is not known before it deploys."
+  numbers: ["the Morpho Blue template's end-to-end test: owed", "budget key: from the attested computation"]
+  sources: [ADR-011, ADR-006, ADR-009, OD-41, OD-49, "doc:docs/registers/parameters.md#parameters"]
 
 # --- Orders account -----------------------------------------------------------------------------
 - id: orders-account
@@ -846,7 +881,7 @@
   cannot:
     - "Take an order from the Asset Safe. The Asset Safe never pre-signs an order and never approves CoW's relayer."
     - "Bound an order's price on chain. The order's own limit is the only bound."
-  sources: [ADR-007, INV-013, "test:test_D6_out_of_scope_venues_are_refused", "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
+  sources: [ADR-007, INV-013, "test:test_D6_out_of_scope_venues_are_refused", "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss", "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
 
 - id: routers
   node: orders
@@ -870,17 +905,19 @@
   what: "Lido's existing monitoring platform, with new detectors for the vault. It watches and alerts. It blocks nothing."
   controlled_by: "`@lidofinance/defi-tech` writes the detector specification. `@lidofinance/lido-valset-vroom` reviews it and runs the platform (OD-13)."
   can:
-    - "Alert on [[drift]] from the artifact, on approvals and budget burn, on owner, module, guard and singleton changes of the new Safes, and on the orders account's fallback handler and domain verifier."
+    - "Alert on [[drift]] from the artifact on every modifier, the safety policy included, since motions can write exits there (OD-49); on approvals and budget burn; on owner, threshold, module, guard and singleton changes of the new Safes; and on the orders account's fallback handler, domain verifier and relayer approvals."
     - "Watch the [[liquidity buffer]] all the time, and warn before it reaches its floor (OD-40)."
     - "Check each fill against a market price, and alert on open orders older than 30 days, on a recovery order whose limit sits far below a market price, on tokens left in the orders account and on late parts of conditional orders (OD-43, OD-47, OD-48)."
     - "Alert on any change of the first-loss Safe's balance, owners or modules (OD-42)."
+    - "Page at high severity on every emergency swap (OD-48)."
+    - "Follow a new Lido product's exposure against the protocol cap until a motion unlocks it, and record the changes of the screening rules that the vendor reports (OD-41, OD-45)."
     - "Follow every motion, flag odd top-ups and repeated budget motions, and grade emergency actions."
     - "Publish the cap reading of each [[fortnightly snapshot]] to IPFS, and page the Emergency Brakes multisig on the cap-breach trigger."
     - "Flag a monthly report that is still missing on day 8."
   cannot:
     - "Block a transaction. If it stops, no permission widens."
   numbers: ["detector specification: phase 1", "vault detectors built: none yet"]
-  sources: [ADR-009, ADR-010, OD-13, OD-32, OD-40, OD-42, OD-43, "doc:ROADMAP.md#roadmap"]
+  sources: [ADR-009, ADR-010, ADR-007, OD-13, OD-32, OD-40, OD-41, OD-42, OD-43, OD-45, OD-47, OD-48, OD-49, "doc:ROADMAP.md#roadmap"]
 
 - id: vendor-monitoring
   node: monitoring
@@ -893,7 +930,7 @@
     - "Watch for depegs, protocol compromise and counterparty anomalies."
   cannot:
     - "Replace Lido's own monitoring of the vault's permissions."
-  sources: [ADR-009]
+  sources: [ADR-009, OD-13]
 
 - id: incident-process
   node: monitoring

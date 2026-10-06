@@ -35,6 +35,7 @@ Budgets and fixed ceilings are dry-run stand-ins. The production figures come fr
 
 - **Swaps.** The harness deploys no orders account, so neither role has a swap path yet ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The fork tests of the CoW order signer and ComposableCoW are phase 1 work; the orders account enters the policy in phase 2.
 - **First-loss Safe.** The harness deploys no first-loss Safe ([ADR 008](../docs/adr/008-funding-through-existing-payments.md)). It enters the deployment in phase 2.
+- **Exit-governance role.** The safety modifier has no exit-governance role yet, so no motion can add an emergency exit ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md) decision 13). It comes with the template factories in phase 2.
 - **Pre-execution screening.** The operator is a plain address, not an operator Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
 - **Factories and registries.** The budget factory, the template factories and the funding registries are not built ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md), [ADR 008](../docs/adr/008-funding-through-existing-payments.md)). The drills drive Easy Track with a pass-through factory.
 - **Per-key budget ceilings.** The governance role's budget permission pins the key and the period floor only. Ceilings per key wait for the attested figures; `test_budget_motion_bounds_are_expressible_per_key` shows the shape.

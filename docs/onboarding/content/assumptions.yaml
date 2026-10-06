@@ -5,8 +5,8 @@
   why: "The Asset Safe owns both modifiers, and every role call runs as the Asset Safe. The emergency revoke and the governance writes work only because a narrow role may administer a modifier. The LIP calls this composition the primary risk."
   breaks: "An operator, a motion or a factory bug gets administration of the vault. Fork probes found two such paths, and both are closed: a motion could grant the operator delegatecall (OD-36), or give it the safety modifier as a target (OD-38)."
   watched_by: [INV-004, INV-009, INV-018, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe", "test:test_policyadmin_cannot_grant_operator_delegatecall", "test:test_D6_adversarial"]
-  watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. An external audit is due in phase 3."
-  sources: [ADR-005, ADR-006, OD-36, OD-38, "lip:part-2"]
+  watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. Since OD-49 a motion can also write the emergency role's exits on the safety modifier, through the exit-governance role; INV-025 has no test yet. An external audit is due in phase 3."
+  sources: [ADR-005, ADR-006, OD-36, OD-38, OD-49, INV-025, "lip:part-2"]
 
 - assumption: "The Aragon Agent is the only owner of the Asset Safe, which has no guard, no module guard and no fallback handler."
   kind: design
@@ -30,7 +30,7 @@
   breaks: "The operator and the emergency role do not fail apart. Two compromised keys reach the emergency role. Only role scoping stops the operator from blocking an emergency action. The committee also proposes its own expansions."
   watched_by: ["test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval"]
   watch_note: "INV-002 and INV-014 are pending. Paging on every emergency action is not built."
-  sources: [ADR-005, ADR-006]
+  sources: [ADR-005, ADR-006, INV-002, INV-014]
 
 - assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
   kind: trust
@@ -70,7 +70,7 @@
   breaks: "Any motion that survives its objection window can use a template flaw. A sound template can still point the operator at an unaudited contract; then only the attached budget bounds the loss."
   watched_by: []
   watch_note: "No factory is built. Each needs tests for the four properties. The governance role's limits (INV-004) are a second layer."
-  sources: [ADR-006, "lip:part-4"]
+  sources: [ADR-006, INV-004, OD-49, "lip:part-4"]
 
 - assumption: "Easy Track gives every motion an objection window of at least 48 hours, and rebuilds and hash-checks each script at enactment."
   kind: trust
@@ -132,8 +132,8 @@
   kind: operational
   why: "The committee requires it. Nothing on chain enforces it."
   breaks: "The vault cannot meet a month of baseline spend from liquid stablecoins."
-  watched_by: ["runbook:Restore the liquidity buffer"]
-  watch_note: "The detector is specified, not built, and the runbook is not written. The screening rule is requested from the vendor. The figure comes from the attested computation with the approved mandate."
+  watched_by: []
+  watch_note: "The detector is specified, not built, and the runbook to restore the buffer is not written. The screening rule is requested from the vendor. The figure comes from the attested computation with the approved mandate."
   sources: [ADR-009, OD-40]
 
 - assumption: "The 72-hour objection on each top-up keeps funding inside the mandate. The registry limit is only the backstop."
@@ -162,7 +162,7 @@
 
 - assumption: "Lido's withdrawal queue finalizes requests in days, pays the Asset Safe, and changes only by DAO vote."
   kind: trust
-  why: "It is the only way from stETH back to ETH, and how the vault buys WETH."
+  why: "It is how the vault unstakes stETH. Since OD-46 the operator can also buy WETH in a CoW order, in minutes instead of days."
   breaks: "A request cannot be cancelled. An operator error can lock stETH in requests for days. The emergency role can claim only after finalization."
   watched_by: ["test:test_D3_withdrawal_queue_round_trip_buys_weth"]
   watch_note: "The test uses a simulated finalizing report."
@@ -196,8 +196,8 @@
   kind: operational
   why: "Nothing on chain keeps the committee's Safe, the operator Safe and the emergency Safe in step."
   breaks: "A departed signer keeps operator or emergency power, or a quorum becomes unreachable."
-  watched_by: ["runbook:Rotate a signer on all three Safes"]
-  watch_note: "The runbook is listed, not written. Owner-change alerts are not built."
+  watched_by: []
+  watch_note: "The runbook to rotate a signer on all three Safes is listed, not written. Owner-change alerts are not built."
   sources: [ADR-005]
 
 - assumption: "The test harness behaves like the real system for what the tests claim."

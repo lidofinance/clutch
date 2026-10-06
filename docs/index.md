@@ -20,7 +20,7 @@ The system of record for Clutch, the Lido Active Treasury system. Every page car
 
 # Specifications
 
-* [Specifications](specs/) - the specification policy, the invariants and the LIP draft.
+* [Specifications](specs/) - the specification policy, the invariants, the control matrix and the LIP draft.
 
 # Runbooks
 
@@ -28,7 +28,7 @@ The system of record for Clutch, the Lido Active Treasury system. Every page car
 
 # Registers
 
-* [Registers](registers/) - decision log, open decisions, parameters and the generated document-status table.
+* [Registers](registers/) - decision log, open decisions, parameters, verification requests and the generated document-status table.
 
 # Research
 
