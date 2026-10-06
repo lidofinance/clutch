@@ -1,168 +1,68 @@
-import { encodeKey } from "@zodiaceco/sdk";
-import config from "../../../zodiac.config";
-import { assetSafeNode, treasuryRolesNode } from "../../nodes";
-import { ARAGON_AGENT, COW_VAULT_RELAYER } from "../../addresses";
+// SPDX-License-Identifier: LGPL-3.0-only
+// Modified for Clutch on 2026-10-06: rewritten to the emergency role of
+// ADR 005 on the safety modifier, held by the emergency Safe. See PROVENANCE.md.
+import { anyOf, c, call, callWithValue, key, unique } from "../../lib";
+import {
+  DAI,
+  EARN_ETH,
+  EARN_USD,
+  LDO,
+  manifest,
+  STETH,
+  SUSDS,
+  USDC,
+  USDS,
+  USDT,
+  WETH,
+  WITHDRAWAL_QUEUE,
+  WSTETH,
+} from "../../addresses";
+import { APPROVALS } from "../operator/permissions";
 
-const {
-  steth,
-  wsteth,
-  ldo,
-  usdc,
-  usdt,
-  dai,
-  sdai,
-  usds,
-  susds,
-  aave_v3,
-  lido_earn,
-} = config.contracts.eth;
+const ZERO = "0x0000000000000000000000000000000000000000";
 
-const { earneth, earnusd } = lido_earn;
+/** Every spender the operator can approve. The emergency role can set each approval back to zero. */
+const SPENDERS = unique(APPROVALS.map((approval) => approval.spender));
+const APPROVED_TOKENS = unique(APPROVALS.map((approval) => approval.token));
 
-/**
- * What the Emergency Brakes multisig may do, within hours and without a
- * governance motion: cut approvals, unwind positions, narrow the operator, and
- * send what it recovers to the DAO.
- *
- * The RFP's constraints on this role all hold by omission:
- *
- * - It cannot widen permissions. The only calls it holds on the modifier are
- *   `revokeTarget` and `revokeFunction`, the revoke-only half of its admin
- *   surface, with `roleKey` pinned to the operator. They work because the Safe
- *   owns the modifier and a call through a role executes as the Safe.
- * - It cannot enter a protocol. No `supply`, no vault `deposit`, no non-zero
- *   `approve` appears below.
- * - It cannot create debt. No `borrow`, as for the operator.
- * - It cannot change the recovery destination. Every `transfer` pins the
- *   recipient to `ARAGON_AGENT` as a literal, so the destination is fixed at
- *   the permission level rather than chosen at call time.
- */
-
-/** Every spender the operator role can approve. Revoking is the first move in
- * the emergency flow, so this list must stay in step with that role. */
-const APPROVED_SPENDERS = [
-  aave_v3.pool,
-  sdai,
-  susds,
-  wsteth,
-  earnusd.deposit_queue_usdc,
-  earneth.deposit_queue_wsteth,
-  COW_VAULT_RELAYER,
-] as const;
-
-const revokeApprovals = [
-  allow.eth.steth.approve(c.or(...APPROVED_SPENDERS), c.eq(0)),
-  allow.eth.wsteth.approve(c.or(...APPROVED_SPENDERS), c.eq(0)),
-  allow.eth.usdc.approve(c.or(...APPROVED_SPENDERS), c.eq(0)),
-  allow.eth.usdt.approve(c.or(...APPROVED_SPENDERS), c.eq(0)),
-  allow.eth.dai.approve(c.or(...APPROVED_SPENDERS), c.eq(0)),
-  allow.eth.usds.approve(c.or(...APPROVED_SPENDERS), c.eq(0)),
-];
-
-/** Assets the recovered position ends up denominated in, all of which may be
- * returned to the DAO. LDO is included because the Asset Safe can hold it, not
- * because a position unwinds into it. */
-const returnToTreasury = [
-  allow.eth.steth.transfer(ARAGON_AGENT),
-  allow.eth.wsteth.transfer(ARAGON_AGENT),
-  allow.eth.ldo.transfer(ARAGON_AGENT),
-  allow.eth.usdc.transfer(ARAGON_AGENT),
-  allow.eth.usdt.transfer(ARAGON_AGENT),
-  allow.eth.dai.transfer(ARAGON_AGENT),
-  allow.eth.sdai.transfer(ARAGON_AGENT),
-  allow.eth.usds.transfer(ARAGON_AGENT),
-  allow.eth.susds.transfer(ARAGON_AGENT),
-  allow.eth.lido_earn.earnusd.share.transfer(ARAGON_AGENT),
-  allow.eth.lido_earn.earneth.share.transfer(ARAGON_AGENT),
-
-  // Aave receipts. `withdraw` reverts when a reserve has no liquidity, and
-  // that is exactly when an exit matters most; the aToken stays transferable,
-  // so the DAO's claim can move to the Agent and be withdrawn once liquidity
-  // returns. Every other position token is already covered above.
-  allow.eth.aave_v3.atoken_usdc.transfer(ARAGON_AGENT),
-  allow.eth.aave_v3.atoken_usdt.transfer(ARAGON_AGENT),
-  allow.eth.aave_v3.atoken_dai.transfer(ARAGON_AGENT),
-  allow.eth.aave_v3.atoken_usds.transfer(ARAGON_AGENT),
-  allow.eth.aave_v3.atoken_wsteth.transfer(ARAGON_AGENT),
-];
+/** Assets the Asset Safe can hold, which the emergency role may return to the Agent. */
+const RETURNABLE = [STETH, WSTETH, WETH, LDO, USDC, USDT, DAI, USDS, SUSDS, EARN_USD.share, EARN_ETH.share];
 
 /**
- * Cutting the operator off, which the RFP's emergency flow opens with and
- * leaves the mechanism of open.
- *
- * These name nodes this same push creates, which works because the Safe owns
- * the modifier: a call through a role executes as the Safe, so the modifier
- * accepts it from its owner. `revokeTarget` and `revokeFunction` are the whole
- * revoking half of that admin surface, with no widening counterpart among them,
- * so this scope can only narrow. `roleKey` is pinned so it narrows the operator
- * and not the role holding it.
+ * What the emergency Safe may do, without a governance motion (ADR 005): zero
+ * approvals, exit positions into the Asset Safe, and send assets to the
+ * Agent, whose address is a literal. It may also revoke the operator's
+ * targets and functions, which is how every removal happens (OD-09). It
+ * cannot add a permission, give a non-zero approval, enter a venue except by
+ * staking ETH, or choose a recipient.
  */
-const blockTheOperator = [
-  // Built from the typed `allow` kit against the mastercopy each account runs
-  // as a proxy, then pointed at the node: the kit is keyed by address and these
-  // two have none until they deploy.
-  {
-    ...allow.eth.zodiac.roles_mastercopy.revokeTarget(encodeKey("operator")),
-    targetAddress: treasuryRolesNode,
-  },
-  {
-    ...allow.eth.zodiac.roles_mastercopy.revokeFunction(encodeKey("operator")),
-    targetAddress: treasuryRolesNode,
-  },
-  {
-    // A Safe administers itself through its own module, so this turns the
-    // policy off wholesale and leaves the assets under the Agent alone.
-    //
-    // Both parameters are left open. Pinning `module` would mean putting a node
-    // reference inside a condition's compValue, which is resolved for a
-    // permission's target but not there. The Asset Safe has exactly one module
-    // today, so the scope is the same; if a second is ever enabled, this should
-    // be pinned to an address by then.
-    ...allow.eth.zodiac.safe_mastercopy.disableModule(),
-    targetAddress: assetSafeNode,
-  },
-] satisfies Permissions;
-
 export default [
-  ...revokeApprovals,
+  ...APPROVED_TOKENS.map((token) => call(token, "approve(address,uint256)", anyOf(SPENDERS), 0n)),
 
-  // ── Exit positions ──────────────────────────────────────────────────────
-  // Withdrawal targets are pinned to the avatar: recovered assets land back in
-  // the Asset Safe first, and only then move to the DAO through the transfers
-  // below. That keeps the two steps separately auditable.
-  allow.eth.aave_v3.pool.withdraw(
-    c.or(usdc, usdt, dai, usds, wsteth),
-    undefined,
-    c.avatar,
-  ),
+  // Exits and conversions, paid to the Asset Safe.
+  call(SUSDS, "redeem(uint256,address,address)", undefined, c.avatar, c.avatar),
+  call(SUSDS, "withdraw(uint256,address,address)", undefined, c.avatar, c.avatar),
+  call(WSTETH, "unwrap(uint256)"),
+  // WETH goes through stETH: unwrap, stake, then send or swap (OD-20).
+  call(WETH, "withdraw(uint256)"),
+  callWithValue(STETH, "submit(address)", ZERO),
+  call(WITHDRAWAL_QUEUE, "claimWithdrawals(uint256[],uint256[])"),
 
-  allow.eth.sdai.redeem(undefined, c.avatar, c.avatar),
-  allow.eth.susds.redeem(undefined, c.avatar, c.avatar),
-  allow.eth.sdai.withdraw(undefined, c.avatar, c.avatar),
-  allow.eth.susds.withdraw(undefined, c.avatar, c.avatar),
+  // Lido Earn exits. A pending deposit is cancelled; a priced one is claimed
+  // so that its shares can be redeemed. Claims pay the Asset Safe.
+  ...[EARN_USD, EARN_ETH].flatMap((vault) => [
+    call(vault.depositQueue, "cancelDepositRequest()"),
+    call(vault.depositQueue, "claim(address)", c.avatar),
+    call(vault.redeemQueue, "redeem(uint256)"),
+    call(vault.redeemQueue, "claim(address,uint32[])", c.avatar),
+  ]),
 
-  // Lido Earn redemptions settle asynchronously, so an exit is `redeem` now and
-  // `claim` once the batch is handled — the emergency role needs both halves or
-  // it can start an exit it cannot finish.
-  allow.eth.lido_earn.earnusd.redeem_queue.redeem(),
-  allow.eth.lido_earn.earnusd.redeem_queue.claim(c.avatar),
-  allow.eth.lido_earn.earneth.redeem_queue.redeem(),
-  allow.eth.lido_earn.earneth.redeem_queue.claim(c.avatar),
+  // Block the operator: the revoking half of the operator modifier's admin
+  // surface, with the role key pinned to the operator. The Asset Safe owns
+  // that modifier, and a call through a role executes as the Asset Safe.
+  call(manifest.operatorModifier, "revokeTarget(bytes32,address)", key("operator")),
+  call(manifest.operatorModifier, "revokeFunction(bytes32,address,bytes4)", key("operator")),
 
-  // An Earn deposit is cancelled while it is still pending. Once the oracle has
-  // priced it, cancelling reverts and the shares are allocated but not yet
-  // active, so claiming is the only way to reach a state `redeem` accepts.
-  // Both legs are granted for both queues or the unwind stalls mid-settlement.
-  allow.eth.lido_earn.earnusd.deposit_queue_usdc.cancelDepositRequest(),
-  allow.eth.lido_earn.earnusd.deposit_queue_usdc.claim(c.avatar),
-  allow.eth.lido_earn.earneth.deposit_queue_wsteth.cancelDepositRequest(),
-  allow.eth.lido_earn.earneth.deposit_queue_wsteth.claim(c.avatar),
-
-  // wstETH unwraps to stETH, which is liquid. Wrapping is not granted: it is a
-  // position change, not an exit.
-  allow.eth.wsteth.unwrap(),
-
-  ...blockTheOperator,
-
-  ...returnToTreasury,
+  // Return to the treasury: every transfer is pinned to the Agent.
+  ...RETURNABLE.map((token) => call(token, "transfer(address,uint256)", manifest.agent)),
 ] satisfies Permissions;

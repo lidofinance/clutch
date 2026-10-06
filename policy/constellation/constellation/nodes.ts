@@ -1,17 +1,18 @@
+// SPDX-License-Identifier: LGPL-3.0-only
+// Modified for Clutch on 2026-10-06: two Roles modifiers, bound by address,
+// and no Safe node. See PROVENANCE.md.
 /**
- * The accounts, named apart from what they hold.
- *
- * A role's permissions may target the Safe or the modifier, and the modifier is
- * declared with those roles — so the two files would import each other. An
- * uninvoked accessor is a forward reference to the same node, which breaks the
- * cycle: permissions point at these, `index.ts` is the only place that fills
- * them in, and `push()` resolves both to one account by label.
+ * The two modifiers of ADR 005. Clutch's own script deploys the Safes and the
+ * modifiers, because the Safe node cannot set the Safe version, a guard or
+ * the fallback handler (ADR 004). So the constellation binds each modifier
+ * by address and declares no Safe. `index.ts` is the only place that fills
+ * them in.
  */
 const eth = constellation({
   workspace: "Default workspace",
-  label: "Lido Active Treasury Management",
+  label: "Clutch",
   chain: 1, // ethereum
 });
 
-export const assetSafeNode = eth.safe["Lido Asset Safe"];
-export const treasuryRolesNode = eth.roles["Lido Treasury Roles"];
+export const operatorRolesNode = eth.roles["Clutch operator modifier"];
+export const safetyRolesNode = eth.roles["Clutch safety modifier"];

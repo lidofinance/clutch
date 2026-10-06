@@ -32,9 +32,9 @@ abstract contract OwnableInline {
 ///      0x23E0B465633FF5178808F4A75186E2F2F9537021; the Easy Track EVM script
 ///      executor holds NEITHER. The mock mirrors that: `permittedRunners`
 ///      starts EMPTY. The dry-run must not paper over the missing Easy Track
-///      grant — ET-driven policy changes run through the policy-admin role on
-///      the Roles modifier instead (see FullPolicy / Drills D1), which needs
-///      no Agent authority at all.
+///      grant — ET-driven policy changes run through the governance role on
+///      the Roles modifier instead (see the policy artifact and Drills D1),
+///      which needs no Agent authority at all.
 contract MockAragonAgent is OwnableInline {
     event Forwarded(bytes evmScript);
     event Executed(address indexed to, uint256 value, bytes data);

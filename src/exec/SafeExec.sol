@@ -4,7 +4,13 @@ pragma solidity >=0.8.24 <0.9.0;
 import {ISafe} from "../interfaces/ISafe.sol";
 import {IRoles} from "../interfaces/IRoles.sol";
 import {MockAragonAgent} from "../mocks/MockAragonAgent.sol";
-import {Policy} from "../policy/Policy.sol";
+
+/// @dev One admin call: the target and its calldata. The policy artifact
+///      (policy/constellation/artifacts) lists the policy as such calls.
+struct Call {
+    address to;
+    bytes data;
+}
 
 /// @dev Executes transactions through the Asset Safe *as its owner* (the
 ///      MockAragonAgent in the dry-run; in production the owner is the Aragon
@@ -44,16 +50,16 @@ library SafeExec {
 library EVMScriptLib {
     bytes4 internal constant SPEC = 0x00000001;
 
-    function buildAsPolicyAdmin(IRoles roles, Policy.Call[] memory calls)
+    function buildAsGovernance(IRoles roles, bytes32 governanceKey, Call[] memory calls)
         internal
-        view
+        pure
         returns (bytes memory script)
     {
         script = abi.encodePacked(SPEC);
         for (uint256 i = 0; i < calls.length; i++) {
             bytes memory chunkData = abi.encodeCall(
                 IRoles.execTransactionWithRole,
-                (calls[i].to, 0, calls[i].data, 0, Policy.POLICY_ADMIN(), true)
+                (calls[i].to, 0, calls[i].data, 0, governanceKey, true)
             );
             script = abi.encodePacked(
                 script, bytes20(address(roles)), uint32(chunkData.length), chunkData
@@ -65,7 +71,7 @@ library EVMScriptLib {
     ///      directly — the shape a production ET factory emits for scripts
     ///      that execute as the Agent. Used by the parity test against
     ///      MockAragonAgent.forward(bytes).
-    function buildDirect(Policy.Call[] memory calls)
+    function buildDirect(Call[] memory calls)
         internal
         pure
         returns (bytes memory script)

@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:12:59Z
+  at: 2026-10-06T08:52:19Z
 verified: []
 sources:
   - id: s1
@@ -61,3 +61,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-33 | Is the Zodiac constellation the source of the permission policy? | 2026-10-06 | EM: "Q1: We want to work under Zodiac UI, so it's closer to B I believe, though it always a good idea to have local tooling to replicate/verify everything", "Q2: A", "Q3: A", "Q4: B", "Q5: A": the team works in the Zodiac UI and local tooling verifies everything it produces; the constellation and Clutch's TypeScript compiler replace YAML and Python; the artifact is committed and is what the vote consumes; the Solidity builders go now; ADR 004 is amended and verified again ([ADR 004](/adr/004-specifications-and-policy-as-data.md), [research note](/research/zodiac-constellation-2026-10-06.md)) [s1] |
 | OD-34 | May the files copied from the constellation keep LGPL-3.0-only? | 2026-10-06 | EM: "OD-34: A": files derived from the provider's constellation keep LGPL-3.0-only and get an SPDX line when they change; new files use AGPL-3.0-or-later; the licence check covers `policy/`; `AGENTS.md` changed at EM's request ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)) [s1] |
 | OD-35 | Who owns the Lido Zodiac workspace and its API key? | 2026-10-06 | EM: "OD-35: A": the repository-owner team, `@lidofinance/defi-tech`; a member pushes from the merged `main` with the key in a local, ignored `.env`; the committee and the Emergency Brakes multisig can view the workspace; CI holds no key ([ADR 004](/adr/004-specifications-and-policy-as-data.md)) [s1] |
+| OD-36 | May a governance motion grant the operator delegatecall? | 2026-10-06 | EM: "OD-36: A": no. The governance role's `allowFunction` and `scopeFunction` permissions take only the execution options None or Send; a regression test refuses a `DelegateCall` grant; delegatecall for the operator needs a DAO vote ([ADR 006](/adr/006-governance-through-easy-track-factories.md), [ADR 005](/adr/005-account-graph-and-roles.md)) [s1] |

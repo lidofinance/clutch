@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.8.24 <0.9.0;
 
-import {Test} from "forge-std/Test.sol";
-import {ISafe, ISafeProxyFactory, IModuleProxyFactory} from "../src/interfaces/ISafe.sol";
+import {ISafe} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {
     IERC20,
@@ -15,26 +14,17 @@ import {
     ILidoEarnDepositQueue
 } from "../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
-import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
-import {MockEasyTrack, PassThroughEVMScriptFactory} from "../src/mocks/MockEasyTrack.sol";
+import {MockEasyTrack} from "../src/mocks/MockEasyTrack.sol";
 
-import {Policy} from "../src/policy/Policy.sol";
-import {FullPolicy} from "../src/policy/FullPolicy.sol";
-import {SafeExec, EVMScriptLib} from "../src/policy/SafeExec.sol";
+import {Call, SafeExec, EVMScriptLib} from "../src/exec/SafeExec.sol";
+import {ClutchFixture} from "./utils/Fixture.sol";
+import {MotionCalls} from "./utils/MotionCalls.sol";
 
 /// @title Drills — the dry-run drill suite, executed against a pinned
 ///        mainnet fork. D1 governance through the mock Easy Track; D2 the
 ///        direct DAO path; D3 operator lifecycle; D4 emergency and technical
 ///        roles; D5 budgets; D6 adversarial cases and the launch scope.
-contract Drills is Test {
-    uint256 internal constant FORK_BLOCK = 25946643;
-    // Safe v1.5.0: EM's choice for the three new Safes (OD-02, OD-17).
-    address internal constant SAFE_SINGLETON = 0xFf51A5898e281Db6DfC7855790607438dF2ca44b;
-    address internal constant ROLES_MASTERCOPY = 0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5;
-    address internal constant SAFE_PROXY_FACTORY = 0x14F2982D601c9458F93bd70B218933A6f8165e7b;
-    address internal constant MODULE_PROXY_FACTORY = 0x000000000000aDdB49795b0f9bA5BC298cDda236;
-    address internal constant LDO = 0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32;
-
+contract Drills is ClutchFixture {
     // Outside the launch scope (ADR 007, ADR 011). Only the negative drills use them.
     address internal constant AAVE_V3_POOL = 0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2;
     address internal constant SDAI = 0x83F20F44975D03b1b09e64809B757c47f942BEeA;
@@ -55,103 +45,6 @@ contract Drills is Test {
     bytes4 internal constant NO_MEMBERSHIP = 0xfd8e9f28;
     bytes4 internal constant NOT_AUTHORIZED = 0x4a0bfec1;
 
-    MockAragonAgent internal agent;
-    MockEVMScriptExecutor internal executor;
-    MockEasyTrack internal easyTrack;
-    PassThroughEVMScriptFactory internal factory;
-    ISafe internal safe;
-    IRoles internal roles; // operator + governance
-    IRoles internal safety; // emergency + technical
-
-    address internal operatorSafe = makeAddr("operator-safe-standin");
-    address internal emergencySafe = makeAddr("emergency-safe-standin");
-    address internal whale = makeAddr("ldo-whale"); // objection whale
-    address internal attacker = makeAddr("attacker");
-    address internal principal;
-
-    Policy.Addresses internal a;
-
-    function setUp() public {
-        string memory rpc = vm.envOr("RPC", string("https://ethereum-rpc.publicnode.com"));
-        vm.createSelectFork(rpc, FORK_BLOCK);
-
-        principal = makeAddr("executor-eoa");
-        vm.startPrank(principal);
-        agent = new MockAragonAgent();
-        executor = new MockEVMScriptExecutor(agent);
-        // NOTE: the executor is deliberately NOT a permitted runner of the
-        // mock Agent. At the fork block the real EVMScriptExecutor holds
-        // neither RUN_SCRIPT_ROLE nor EXECUTE_ROLE on the Agent (the only
-        // holder is the Dual Governance admin executor). Easy Track policy
-        // changes therefore run through the governance role below, not
-        // through Agent authority.
-        easyTrack = new MockEasyTrack(executor, IERC20(LDO), 3 days, 5_000_000e18);
-        factory = new PassThroughEVMScriptFactory();
-        easyTrack.addEVMScriptFactory(address(factory));
-
-        ISafeProxyFactory proxyFactory = ISafeProxyFactory(SAFE_PROXY_FACTORY);
-        address[] memory owners = new address[](1);
-        owners[0] = address(agent);
-        // no fallback handler (OD-17)
-        bytes memory safeInit = abi.encodeCall(
-            ISafe.setup,
-            (owners, 1, address(0), "", address(0), address(0), 0, payable(address(0)))
-        );
-        safe = ISafe(payable(proxyFactory.createProxyWithNonce(SAFE_SINGLETON, safeInit, uint256(0x22))));
-        // canonical deployed factory — production component, not a copy
-        bytes memory rolesInit =
-            abi.encodeCall(IRoles.setUp, (abi.encode(address(safe), address(safe), address(safe))));
-        roles = IRoles(
-            IModuleProxyFactory(MODULE_PROXY_FACTORY).deployModule(
-                ROLES_MASTERCOPY, rolesInit, uint256(0x11d0)
-            )
-        );
-        safety = IRoles(
-            IModuleProxyFactory(MODULE_PROXY_FACTORY).deployModule(
-                ROLES_MASTERCOPY, rolesInit, uint256(0x11d1)
-            )
-        );
-
-        SafeExec.execAsOwner(
-            agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))
-        );
-        SafeExec.execAsOwner(
-            agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety)))
-        );
-
-        Policy.Addresses memory m;
-        m.safe = address(safe);
-        m.agent = address(agent);
-        m.operator = operatorSafe;
-        m.emergency = emergencySafe;
-        m.technical = makeAddr("emergency-brakes-standin");
-        m.policyAdmin = address(executor);
-        m.rolesOperator = address(roles);
-        m.rolesSafety = address(safety);
-        Policy.fillTokens(m);
-        Policy.fillProtocols(m);
-        a = m;
-
-        Policy.Call[] memory ops = FullPolicy.buildOperator(m, address(roles));
-        for (uint256 i = 0; i < ops.length; i++) {
-            SafeExec.execAsOwner(agent, safe, ops[i].to, ops[i].data);
-        }
-        Policy.Call[] memory saf = FullPolicy.buildSafety(m, address(safety), address(roles));
-        for (uint256 i = 0; i < saf.length; i++) {
-            SafeExec.execAsOwner(agent, safe, saf[i].to, saf[i].data);
-        }
-        vm.stopPrank();
-
-        // objection whale with > threshold LDO (simulated holder). LDO is an
-        // Aragon MiniMe token whose storage forge cannot manipulate safely;
-        // the mock ET only reads balanceOf, so mock that view for the whale.
-        vm.mockCall(
-            LDO,
-            abi.encodeWithSelector(IERC20.balanceOf.selector, whale),
-            abi.encode(6_000_000e18)
-        );
-    }
-
     // ------------------------------------------------------------------
     // helpers
     // ------------------------------------------------------------------
@@ -163,7 +56,7 @@ contract Drills is Test {
         vm.prank(operatorSafe);
         (bool ok, bytes memory ret) = address(roles).call(
             abi.encodeCall(
-                IRoles.execTransactionWithRole, (to, value, data, 0, Policy.OPERATOR(), true)
+                IRoles.execTransactionWithRole, (to, value, data, 0, OPERATOR, true)
             )
         );
         if (!ok) {
@@ -193,7 +86,7 @@ contract Drills is Test {
         vm.prank(operatorSafe);
         (bool ok, bytes memory ret) = address(roles).call(
             abi.encodeCall(
-                IRoles.execTransactionWithRole, (to, value, data, 0, Policy.OPERATOR(), true)
+                IRoles.execTransactionWithRole, (to, value, data, 0, OPERATOR, true)
             )
         );
         assertFalse(ok, "the operator call must be refused");
@@ -206,7 +99,7 @@ contract Drills is Test {
 
     function _emValue(address to, uint256 value, bytes memory data) internal {
         vm.prank(emergencySafe);
-        bool ok = safety.execTransactionWithRole(to, value, data, 0, Policy.EMERGENCY(), true);
+        bool ok = safety.execTransactionWithRole(to, value, data, 0, EMERGENCY, true);
         assertTrue(ok, "emergency call failed");
     }
 
@@ -218,7 +111,7 @@ contract Drills is Test {
         vm.prank(emergencySafe);
         (bool ok, bytes memory ret) = address(safety).call(
             abi.encodeCall(
-                IRoles.execTransactionWithRole, (to, value, data, 0, Policy.EMERGENCY(), true)
+                IRoles.execTransactionWithRole, (to, value, data, 0, EMERGENCY, true)
             )
         );
         assertFalse(ok, "the emergency call must be refused");
@@ -234,12 +127,12 @@ contract Drills is Test {
     // motion path. Motions act as the governance role on the modifier; the
     // script executor holds no Agent authority, as at the fork block.
     // ------------------------------------------------------------------
-    function _rc(bytes memory data) internal view returns (Policy.Call memory) {
-        return Policy.Call({to: address(roles), data: data});
+    function _rc(bytes memory data) internal view returns (Call memory) {
+        return Call({to: address(roles), data: data});
     }
 
-    function _motionEnact(Policy.Call[] memory calls) internal {
-        bytes memory script = EVMScriptLib.buildAsPolicyAdmin(roles, calls);
+    function _motionEnact(Call[] memory calls) internal {
+        bytes memory script = EVMScriptLib.buildAsGovernance(roles, GOVERNANCE, calls);
         vm.prank(operatorSafe);
         uint256 id = easyTrack.createMotion(address(factory), script);
         vm.warp(block.timestamp + 3 days + 1);
@@ -252,13 +145,13 @@ contract Drills is Test {
         // fixed ceiling. The replacement must not drop or widen anything
         // else; the negative checks assert that.
         address newSpender = address(0xdEaD);
-        Policy.Call[] memory calls = new Policy.Call[](1);
-        calls[0] = Policy._opApprove(
+        Call[] memory calls = new Call[](1);
+        calls[0] = MotionCalls.opApprove(
             address(roles),
             a.wsteth,
-            FullPolicy._spenders(
-                Policy.keyed(a.earnEthDepositQueue, Policy.K_EARN_ETH),
-                Policy.capped(newSpender, 10 ether)
+            MotionCalls.spenders(
+                MotionCalls.keyed(a.earnEthDepositQueue, K_EARN_ETH),
+                MotionCalls.capped(newSpender, 10 ether)
             )
         );
         _motionEnact(calls);
@@ -275,17 +168,17 @@ contract Drills is Test {
         // Add a protocol target: grant the operator a function on a fresh
         // target; remove it again with revokeTarget and prove removal.
         address newTarget = address(0xBEEF);
-        Policy.Call[] memory add = new Policy.Call[](2);
-        add[0] = _rc(abi.encodeCall(IRoles.scopeTarget, (Policy.OPERATOR(), newTarget)));
+        Call[] memory add = new Call[](2);
+        add[0] = _rc(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, newTarget)));
         add[1] = _rc(
             abi.encodeCall(
-                IRoles.allowFunction, (Policy.OPERATOR(), newTarget, IERC20.approve.selector, 0)
+                IRoles.allowFunction, (OPERATOR, newTarget, IERC20.approve.selector, 0)
             )
         );
         _motionEnact(add);
 
-        Policy.Call[] memory remove = new Policy.Call[](1);
-        remove[0] = _rc(abi.encodeCall(IRoles.revokeTarget, (Policy.OPERATOR(), newTarget)));
+        Call[] memory remove = new Call[](1);
+        remove[0] = _rc(abi.encodeCall(IRoles.revokeTarget, (OPERATOR, newTarget)));
         _motionEnact(remove);
 
         // removal cannot have widened anything else: the operator's wstETH
@@ -297,19 +190,19 @@ contract Drills is Test {
     function test_D1_change_type_3_selector() public {
         // Add a function selector on an existing target, then remove it with
         // revokeFunction.
-        Policy.Call[] memory add = new Policy.Call[](1);
+        Call[] memory add = new Call[](1);
         add[0] = _rc(
             abi.encodeCall(
-                IRoles.allowFunction, (Policy.OPERATOR(), a.wsteth, IERC20.symbol.selector, 0)
+                IRoles.allowFunction, (OPERATOR, a.wsteth, IERC20.symbol.selector, 0)
             )
         );
         _motionEnact(add);
         _op(a.wsteth, abi.encodeCall(IERC20.symbol, ()));
 
-        Policy.Call[] memory remove = new Policy.Call[](1);
+        Call[] memory remove = new Call[](1);
         remove[0] = _rc(
             abi.encodeCall(
-                IRoles.revokeFunction, (Policy.OPERATOR(), a.wsteth, IERC20.symbol.selector)
+                IRoles.revokeFunction, (OPERATOR, a.wsteth, IERC20.symbol.selector)
             )
         );
         _motionEnact(remove);
@@ -319,11 +212,11 @@ contract Drills is Test {
     function test_D1_change_type_4_parameter_constraint() public {
         // Change a bound inside an allowed function: tighten the sUSDS budget
         // and prove that the old bound no longer admits the previous amount.
-        Policy.Call[] memory tighten = new Policy.Call[](1);
+        Call[] memory tighten = new Call[](1);
         tighten[0] = _rc(
             abi.encodeCall(
                 IRoles.setAllowance,
-                (Policy.K_SUSDS, 100e18, 100e18, 100e18, 30 days, uint64(0))
+                (K_SUSDS, 100e18, 100e18, 100e18, 30 days, uint64(0))
             )
         );
         _motionEnact(tighten);
@@ -334,14 +227,14 @@ contract Drills is Test {
 
     /// @dev OD-08: a budget motion cannot set a refill period below 30 days.
     function test_D1_budget_motion_cannot_shorten_the_refill_period() public {
-        Policy.Call[] memory calls = new Policy.Call[](1);
+        Call[] memory calls = new Call[](1);
         calls[0] = _rc(
             abi.encodeCall(
                 IRoles.setAllowance,
-                (Policy.K_SUSDS, 100e18, 100e18, 100e18, 30 days - 1, uint64(0))
+                (K_SUSDS, 100e18, 100e18, 100e18, 30 days - 1, uint64(0))
             )
         );
-        bytes memory script = EVMScriptLib.buildAsPolicyAdmin(roles, calls);
+        bytes memory script = EVMScriptLib.buildAsGovernance(roles, GOVERNANCE, calls);
         vm.prank(operatorSafe);
         uint256 id = easyTrack.createMotion(address(factory), script);
         vm.warp(block.timestamp + 3 days + 1);
@@ -350,13 +243,13 @@ contract Drills is Test {
     }
 
     function test_D1_objection_rejection() public {
-        Policy.Call[] memory calls = new Policy.Call[](1);
+        Call[] memory calls = new Call[](1);
         calls[0] = _rc(
             abi.encodeCall(
-                IRoles.allowFunction, (Policy.OPERATOR(), a.wsteth, IWstETH.wrap.selector, 0)
+                IRoles.allowFunction, (OPERATOR, a.wsteth, IWstETH.wrap.selector, 0)
             )
         );
-        bytes memory script = EVMScriptLib.buildAsPolicyAdmin(roles, calls);
+        bytes memory script = EVMScriptLib.buildAsGovernance(roles, GOVERNANCE, calls);
         vm.prank(operatorSafe);
         uint256 id = easyTrack.createMotion(address(factory), script);
         vm.prank(whale);
@@ -418,14 +311,14 @@ contract Drills is Test {
     function test_D1_multi_call_script_executes_in_order() public {
         address dummyA = address(0xdEaD);
         address dummyB = address(0xbEEF);
-        Policy.Call[] memory calls = new Policy.Call[](2);
-        calls[0] = Policy._opApprove(
-            address(roles), a.wsteth, FullPolicy._spenders(Policy.capped(dummyA, type(uint256).max))
+        Call[] memory calls = new Call[](2);
+        calls[0] = MotionCalls.opApprove(
+            address(roles), a.wsteth, MotionCalls.spenders(MotionCalls.capped(dummyA, type(uint256).max))
         );
-        calls[1] = Policy._opApprove(
-            address(roles), a.steth, FullPolicy._spenders(Policy.capped(dummyB, type(uint256).max))
+        calls[1] = MotionCalls.opApprove(
+            address(roles), a.steth, MotionCalls.spenders(MotionCalls.capped(dummyB, type(uint256).max))
         );
-        bytes memory script = EVMScriptLib.buildAsPolicyAdmin(roles, calls);
+        bytes memory script = EVMScriptLib.buildAsGovernance(roles, GOVERNANCE, calls);
         vm.prank(operatorSafe);
         uint256 id = easyTrack.createMotion(address(factory), script);
         vm.warp(block.timestamp + 3 days + 1);
@@ -439,17 +332,17 @@ contract Drills is Test {
     ///      the re-supplied factory call data and compares it with the hash
     ///      recorded at creation, so a substituted script cannot enact.
     function test_D1_substituted_script_rejected_at_enactment() public {
-        Policy.Call[] memory good = new Policy.Call[](1);
-        good[0] = Policy._opApprove(
-            address(roles), a.wsteth, FullPolicy._spenders(Policy.capped(address(0xdEaD), type(uint256).max))
+        Call[] memory good = new Call[](1);
+        good[0] = MotionCalls.opApprove(
+            address(roles), a.wsteth, MotionCalls.spenders(MotionCalls.capped(address(0xdEaD), type(uint256).max))
         );
-        bytes memory goodScript = EVMScriptLib.buildAsPolicyAdmin(roles, good);
+        bytes memory goodScript = EVMScriptLib.buildAsGovernance(roles, GOVERNANCE, good);
 
-        Policy.Call[] memory evil = new Policy.Call[](1);
-        evil[0] = Policy._opApprove(
-            address(roles), a.wsteth, FullPolicy._spenders(Policy.capped(attacker, type(uint256).max))
+        Call[] memory evil = new Call[](1);
+        evil[0] = MotionCalls.opApprove(
+            address(roles), a.wsteth, MotionCalls.spenders(MotionCalls.capped(attacker, type(uint256).max))
         );
-        bytes memory evilScript = EVMScriptLib.buildAsPolicyAdmin(roles, evil);
+        bytes memory evilScript = EVMScriptLib.buildAsGovernance(roles, GOVERNANCE, evil);
 
         vm.prank(operatorSafe);
         uint256 id = easyTrack.createMotion(address(factory), goodScript);
@@ -503,7 +396,7 @@ contract Drills is Test {
             address(roles),
             abi.encodeCall(
                 IRoles.allowFunction,
-                (Policy.OPERATOR(), a.wsteth, IERC20.approve.selector, 0)
+                (OPERATOR, a.wsteth, IERC20.approve.selector, 0)
             )
         );
         vm.stopPrank();
@@ -567,9 +460,9 @@ contract Drills is Test {
         _opRevert(a.daiUsds, abi.encodeCall(IDaiUsds.usdsToDai, (attacker, 1e18)));
 
         // an approval at or above the ceiling is refused; below it, and zero, pass
-        _opRevert(a.dai, _approve(a.daiUsds, FullPolicy.FLOOR_STANDIN_USD));
-        _opRevert(a.usds, _approve(a.daiUsds, FullPolicy.FLOOR_STANDIN_USD));
-        _op(a.dai, _approve(a.daiUsds, FullPolicy.FLOOR_STANDIN_USD - 1));
+        _opRevert(a.dai, _approve(a.daiUsds, FLOOR_STANDIN_USD));
+        _opRevert(a.usds, _approve(a.daiUsds, FLOOR_STANDIN_USD));
+        _op(a.dai, _approve(a.daiUsds, FLOOR_STANDIN_USD - 1));
         _op(a.dai, _approve(a.daiUsds, 0));
     }
 
@@ -584,7 +477,7 @@ contract Drills is Test {
         _opValue(a.steth, 1 ether, abi.encodeCall(IStETH.submit, (address(0))));
 
         // the approval to the queue has a fixed ceiling and no budget key (OD-27)
-        _opRevert(a.steth, _approve(a.withdrawalQueue, FullPolicy.FLOOR_STANDIN_STETH));
+        _opRevert(a.steth, _approve(a.withdrawalQueue, FLOOR_STANDIN_STETH));
         uint256 amount = 0.5 ether;
         _op(a.steth, _approve(a.withdrawalQueue, amount));
         uint256[] memory amounts = new uint256[](1);
@@ -656,7 +549,7 @@ contract Drills is Test {
                     0,
                     abi.encodeCall(ILidoEarnDepositQueue.deposit, (uint224(400e6), address(0), noProof)),
                     0,
-                    Policy.OPERATOR(),
+                    OPERATOR,
                     false
                 )
             )
@@ -674,7 +567,7 @@ contract Drills is Test {
         _op(a.susds, abi.encodeCall(IERC4626.deposit, (200e18, address(safe))));
 
         // 1. block the operator: revokeTarget on sUSDS (roleKey pinned)
-        _em(address(roles), abi.encodeCall(IRoles.revokeTarget, (Policy.OPERATOR(), a.susds)));
+        _em(address(roles), abi.encodeCall(IRoles.revokeTarget, (OPERATOR, a.susds)));
         _opRevert(a.susds, abi.encodeCall(IERC4626.deposit, (100e18, address(safe))));
 
         // 2. zero the standing approval
@@ -721,7 +614,7 @@ contract Drills is Test {
     function _tech(address to, bytes memory data) internal returns (bool ok) {
         vm.prank(a.technical);
         (ok,) = address(safety).call(abi.encodeCall(
-            IRoles.execTransactionWithRole, (to, 0, data, 0, Policy.TECHNICAL(), true)));
+            IRoles.execTransactionWithRole, (to, 0, data, 0, TECHNICAL, true)));
     }
 
     /// @dev With two modules enabled the linked-list predecessor is no longer
@@ -758,7 +651,7 @@ contract Drills is Test {
         // the operator is dead: the Safe refuses a disabled module
         vm.prank(operatorSafe);
         vm.expectRevert(bytes("GS104"));
-        roles.execTransactionWithRole(a.wsteth, 0, abi.encodeCall(IWstETH.wrap, (1 ether)), 0, Policy.OPERATOR(), true);
+        roles.execTransactionWithRole(a.wsteth, 0, abi.encodeCall(IWstETH.wrap, (1 ether)), 0, OPERATOR, true);
         // but recovery survives, which is the point of the split
         assertTrue(safe.isModuleEnabled(address(safety)), "safety modifier must stay enabled");
         deal(a.usdc, address(safe), 10e6);
@@ -796,7 +689,7 @@ contract Drills is Test {
         _op(a.wsteth, _approve(a.earnEthDepositQueue, 1e18));
         // refill after one period restores the key
         vm.warp(block.timestamp + 30 days + 1);
-        (uint128 refill, uint128 maxRefill, uint64 period,,) = roles.allowances(Policy.K_EARN_USD);
+        (uint128 refill, uint128 maxRefill, uint64 period,,) = roles.allowances(K_EARN_USD);
         assertEq(uint256(refill), 500e6);
         assertEq(uint256(maxRefill), 500e6);
         assertEq(uint256(period), 30 days);
@@ -809,7 +702,7 @@ contract Drills is Test {
     function test_D6_adversarial() public {
         // operator cannot reach Roles admin surface
         bytes32[] memory keys = new bytes32[](1);
-        keys[0] = Policy.OPERATOR();
+        keys[0] = OPERATOR;
         bool[] memory member = new bool[](1);
         member[0] = true;
         _opRevert(
@@ -817,7 +710,7 @@ contract Drills is Test {
         );
         _opRevert(
             address(roles),
-            abi.encodeCall(IRoles.allowTarget, (Policy.OPERATOR(), attacker, 0))
+            abi.encodeCall(IRoles.allowTarget, (OPERATOR, attacker, 0))
         );
         // operator cannot disable the Safe's modules
         _opRevert(
@@ -826,7 +719,7 @@ contract Drills is Test {
         // emergency cannot widen: allowTarget on its own role is not granted
         _emRevert(
             address(roles),
-            abi.encodeCall(IRoles.allowTarget, (Policy.EMERGENCY(), attacker, 0))
+            abi.encodeCall(IRoles.allowTarget, (EMERGENCY, attacker, 0))
         );
         // emergency cannot grant itself roles
         _emRevert(
@@ -834,13 +727,13 @@ contract Drills is Test {
         );
         // emergency revokeTarget is pinned: cannot touch its own role
         _emRevert(
-            address(roles), abi.encodeCall(IRoles.revokeTarget, (Policy.EMERGENCY(), a.usdc))
+            address(roles), abi.encodeCall(IRoles.revokeTarget, (EMERGENCY, a.usdc))
         );
         // a random address cannot execute as either role
         vm.prank(attacker);
         vm.expectRevert(abi.encodeWithSelector(NOT_AUTHORIZED, attacker));
         roles.execTransactionWithRole(
-            a.wsteth, 0, abi.encodeCall(IWstETH.wrap, (1 ether)), 0, Policy.OPERATOR(), true
+            a.wsteth, 0, abi.encodeCall(IWstETH.wrap, (1 ether)), 0, OPERATOR, true
         );
         // an unlisted spender is refused for every approvable token
         _opRevert(a.usdc, _approve(attacker, 1));
@@ -852,12 +745,12 @@ contract Drills is Test {
     ///      the operator modifier.
     function test_D6_operator_holds_only_the_operator_key() public {
         bytes memory zero = _approve(a.earnUsdDepositQueue, 0);
-        bytes32[3] memory foreign = [Policy.EMERGENCY(), Policy.TECHNICAL(), Policy.POLICY_ADMIN()];
+        bytes32[3] memory foreign = [EMERGENCY, TECHNICAL, GOVERNANCE];
         for (uint256 i = 0; i < foreign.length; i++) {
             _assertRefusedAsNonMember(roles, foreign[i], zero, NO_MEMBERSHIP);
             _assertRefusedAsNonMember(safety, foreign[i], zero, NOT_AUTHORIZED);
         }
-        _assertRefusedAsNonMember(safety, Policy.OPERATOR(), zero, NOT_AUTHORIZED);
+        _assertRefusedAsNonMember(safety, OPERATOR, zero, NOT_AUTHORIZED);
         _op(a.usdc, zero);
     }
 
