@@ -50,10 +50,13 @@ FACTS = B.facts()
 NODES = {n["id"]: n for n in CONTENT["map"]["nodes"]}
 EDGES = CONTENT["map"]["edges"]
 FLOWS = CONTENT["flows"]["flows"]
-TABS = ["tab-actors", "tab-flows", "tab-mandate", "tab-constellation", "tab-reuse", "tab-assumptions", "tab-status", "tab-glossary",
-        "tab-selfcheck"]
+TABS = ["tab-actors", "tab-flows", "tab-mandate", "tab-constellation", "tab-rfp", "tab-reuse", "tab-assumptions", "tab-status",
+        "tab-glossary", "tab-selfcheck"]
 BLOCKS = CONTENT["mandate"]["blocks"]
 CHANGES = [ch for b in BLOCKS for ch in b.get("changes", [])]
+RFP = CONTENT["rfp"]
+ASKS = [ask for sec in RFP["sections"] for ask in sec.get("items", [])]
+ADDED = [ad for sec in RFP["sections"] for ad in sec.get("added", [])]
 
 
 def plain(text: str) -> str:
@@ -222,6 +225,9 @@ def test_structure(browser: Browser, run: Run) -> None:
             "roles in the constellation": (page.locator(".crole").count(), len(FACTS["policy"])),
             "specified parts": (page.locator(".card.cplan").count(), len(CONTENT["constellation"]["planned"])),
             "constellation changes": (page.locator("table.cdiff tbody tr").count(), len(CONTENT["constellation"]["changes"])),
+            "RFP parts": (page.locator(".card.rblock").count(), len(RFP["sections"])),
+            "RFP asks": (page.locator(".ritem").count(), len(ASKS)),
+            "RFP additions": (page.locator(".radd").count(), len(ADDED)),
         }
         run.check(all(a == b for a, b in counts_on_page.values()), "the page shows every item of the content", counts_on_page)
 
@@ -256,8 +262,8 @@ def test_lens(browser: Browser, run: Run) -> None:
                 shown.append(tab)
         run.check(not shown and pressed(page, "data-lens") == ["plain"],
                   f"Plain hides every technical note in every tab ({sum(notes.values())} notes)", shown)
-        bare = [t for t in ("tab-actors", "tab-flows", "tab-mandate", "tab-constellation") if not notes[t]]
-        run.check(not bare, "the actors, flows, mandate and constellation tabs carry technical notes", notes)
+        bare = [t for t in ("tab-actors", "tab-flows", "tab-mandate", "tab-constellation", "tab-rfp") if not notes[t]]
+        run.check(not bare, "the actors, flows, mandate, constellation and RFP tabs carry technical notes", notes)
         addresses = sum(bool(a.get("address") or a.get("addresses")) for a in CONTENT["actors"])
         run.check(page.locator("#tab-actors .addr.tech").count() == addresses and page.locator("#tab-actors .addr:not(.tech)").count() == 0,
                   f"every address is a technical note ({addresses} cards)")
@@ -331,6 +337,7 @@ def test_links(browser: Browser, run: Run) -> None:
         f"scene-{len(CONTENT['tour'])}": None,
         f"mandate-{BLOCKS[-1]['id']}": "tab-mandate",
         f"cchange-{B.slug(CONTENT['constellation']['changes'][-1]['area'])}": "tab-constellation",
+        f"rfp-{RFP['sections'][-1]['id']}": "tab-rfp",
     }
     for target, tab in targets.items():
         with opened(browser, run, "links", fragment=f"#{target}") as page:
@@ -526,7 +533,7 @@ def test_terms(browser: Browser, run: Run) -> None:
 
 def test_jumps(browser: Browser, run: Run) -> None:
     with opened(browser, run, "jump lists") as page:
-        lists = (("tab-actors", len(NODES)), ("tab-flows", len(FLOWS)), ("tab-mandate", len(BLOCKS)))
+        lists = (("tab-actors", len(NODES)), ("tab-flows", len(FLOWS)), ("tab-mandate", len(BLOCKS)), ("tab-rfp", len(RFP["sections"])))
         for tab, count in lists:
             selector = f"#{tab} nav.jump a"
             page.click(f"#tablink-{tab[4:]}")
@@ -560,7 +567,7 @@ def test_permissions(browser: Browser, run: Run) -> None:
 
 def test_mandate(browser: Browser, run: Run) -> None:
     with opened(browser, run, "mandate", fragment="#tab-mandate") as page:
-        stats = page.eval_on_selector_all(".mstats li", "els => els.map((e) => [e.className, e.querySelector('strong').textContent])")
+        stats = page.eval_on_selector_all("#tab-mandate .mstats li", "els => els.map((e) => [e.className, e.querySelector('strong').textContent])")
         want = [[f"ms-{s}", str(sum(ch["state"] == s for ch in CHANGES))] for s in B.CHANGE_STATES]
         run.check(stats == want, "the counts by state add up the changes of every block", stats)
         chips = page.eval_on_selector_all("#tab-mandate nav.jump a", "els => els.map((e) => e.querySelector('.count')?.textContent || '')")
@@ -588,6 +595,8 @@ def test_mandate(browser: Browser, run: Run) -> None:
                 wrong.append((b["id"], {k: got[k] for k in want if got[k] != want[k]}))
         run.check(not wrong, f"every block shows the draft's text, each control with its layer, and each change with its state and "
                   f"reason ({len(BLOCKS)} blocks, {len(CHANGES)} changes)", wrong[:2])
+        notes = page.locator("#tab-mandate .mkept > .tech").count()
+        run.check(notes == sum(bool(b.get("tech")) for b in BLOCKS), f"each block's technical note is marked as one ({notes})")
         text = page.inner_text("#tab-mandate")
         run.check(not re.search(r"[$€£%]", text), "the mandate tab shows no currency sign and no percentage", re.findall(r".{0,20}[$€£%]", text)[:2])
 
@@ -625,6 +634,48 @@ def test_constellation(browser: Browser, run: Run) -> None:
             "rs => rs.map((r) => [r.id, r.querySelector('th').firstChild.textContent, [...r.querySelector('th .badge').classList].find((c) => c.startsWith('ck-'))])")
         want = [[f"cchange-{B.slug(ch['area'])}", ch["area"], f"ck-{ch['kind']}"] for ch in k["changes"]]
         run.check(rows == want, f"the change table shows every change with its kind ({len(want)} rows)", [r for r in rows if r not in want][:2])
+
+
+def test_rfp(browser: Browser, run: Run) -> None:
+    sections = RFP["sections"]
+    with opened(browser, run, "rfp", fragment="#tab-rfp") as page:
+        stats = page.eval_on_selector_all("#tab-rfp .mstats li", "els => els.map((e) => [e.className, e.querySelector('strong').textContent])")
+        want = [[f"rv-{v}", str(sum(ask["verdict"] == v for ask in ASKS))] for v in B.RFP_VERDICTS] + [["ck-added", str(len(ADDED))]]
+        run.check(stats == want, "the counts by verdict add up every ask and every addition", stats)
+        props = page.eval_on_selector_all("#tab-rfp .rprop h4", "els => els.map((e) => e.textContent)")
+        run.check(props == [prop["name"] for prop in RFP["properties"]], f"the RFP's properties show, each with how Clutch keeps it ({len(props)})", props)
+        chips = page.eval_on_selector_all("#tab-rfp nav.jump a", "els => els.map((e) => e.querySelector('.count')?.textContent || '')")
+        marked = [sum(ask["verdict"] != "kept" for ask in sec.get("items", [])) + len(sec.get("added", [])) for sec in sections]
+        run.check(chips == [str(n) if n else "" for n in marked], "each part's link counts its changes, open asks and additions", chips)
+        wrong = []
+        for sec in sections:
+            card = page.locator(f"#rfp-{sec['id']}")
+            items = sec.get("items", [])
+            asked = [" ".join(t.split()) for t in card.locator(".ritem .rasked").all_inner_texts()]
+            got = {
+                "verdicts": card.locator(".ritem").evaluate_all("els => els.map((e) => [...e.classList].find((c) => c.startsWith('rv-')))"),
+                "asks": len(asked) == len(items) and all(plain(ask["asked"]) in text for ask, text in zip(items, asked)),
+                "reasons": card.locator(".ritem .why").count(),
+                "additions": card.locator(".radd").count(),
+                "nothing asked": card.locator(".munchanged").count(),
+            }
+            want = {
+                "verdicts": [f"rv-{ask['verdict']}" for ask in items],
+                "asks": True,
+                "reasons": sum(bool(ask.get("why")) for ask in items),
+                "additions": len(sec.get("added", [])),
+                "nothing asked": 0 if items else 1,
+            }
+            if got != want:
+                wrong.append((sec["id"], {k: got[k] for k in want if got[k] != want[k]}))
+        run.check(not wrong, f"every part shows its asks in order, each with its verdict and Clutch's answer, and its additions "
+                  f"({len(sections)} parts, {len(ASKS)} asks, {len(ADDED)} additions)", wrong[:2])
+        notes = page.locator("#tab-rfp .rblock > .tech").count()
+        run.check(notes == sum(bool(sec.get("tech")) for sec in sections), f"each part's technical note is marked as one ({notes})")
+        bare = page.locator("#tab-rfp .ritem.rv-changed:not(:has(.why)), #tab-rfp .radd:not(:has(.why))").count()
+        run.check(bare == 0, "every change and every addition shows its reason", bare)
+        text = page.inner_text("#tab-rfp")
+        run.check(not re.search(r"[$€£%]", text), "the RFP tab shows no currency sign and no percentage", re.findall(r".{0,20}[$€£%]", text)[:2])
 
 
 def test_selfcheck(browser: Browser, run: Run) -> None:
@@ -789,6 +840,7 @@ GROUPS: dict[str, Callable[[Browser, Run], None]] = {
     "permissions": test_permissions,
     "mandate": test_mandate,
     "constellation": test_constellation,
+    "rfp": test_rfp,
     "selfcheck": test_selfcheck,
     "skip": test_skip_link,
     "nojs": test_without_javascript,

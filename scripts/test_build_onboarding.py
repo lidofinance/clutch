@@ -13,10 +13,13 @@ the text it is given, and shows no fork-test stand-in address.
 
 from __future__ import annotations
 
+import atexit
 import copy
 import importlib.util
+import os
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -36,6 +39,20 @@ def _source(ref: str):
 
 def _first_change(c):
     return next(ch for b in c["mandate"]["blocks"] for ch in b.get("changes", []))
+
+
+def _first_ask(c, verdict=None):
+    return next(ask for sec in c["rfp"]["sections"] for ask in sec.get("items", []) if verdict in (None, ask["verdict"]))
+
+
+def _note_with_figure(c):
+    """Points the RFP at a copy of its note that holds a figure."""
+    handle, name = tempfile.mkstemp(suffix=".md")
+    os.close(handle)
+    path = Path(name)
+    atexit.register(path.unlink)
+    path.write_text((ROOT / c["rfp"]["note"]).read_text(encoding="utf-8") + "\nA limit of 99 % per protocol.\n", encoding="utf-8")
+    c["rfp"]["note"] = str(path)
 
 
 CONTENT_CASES = [
@@ -70,11 +87,21 @@ CONTENT_CASES = [
     ("a mandate change without sources", lambda c: _first_change(c).update(sources=[]), "no sources"),
     ("a mandate change in an unknown state", lambda c: _first_change(c).update(state="done"), "bad state done"),
     ("a control line on an unknown layer", lambda c: c["mandate"]["blocks"][0]["kept"].append("Onchain: a typo."), "unknown layer Onchain"),
-    ("a percentage from the mandate draft", lambda c: c["mandate"]["blocks"][0].update(says="Up to 10 % each."), "must not appear"),
+    ("a percentage from the mandate draft", lambda c: c["mandate"]["blocks"][0].update(says="Up to 99 % each."), "must not appear"),
     ("a dollar figure from the mandate draft", lambda c: _first_change(c).update(why="It frees $1."), "must not appear"),
     ("a constellation change of an unknown kind", lambda c: c["constellation"]["changes"][0].update(kind="moved"), "bad kind moved"),
     ("an unknown source in the constellation", lambda c: c["constellation"]["changes"][0]["sources"].append("OD-99"), "unknown open decision OD-99"),
     ("a planned part without sources", lambda c: c["constellation"]["planned"][0].update(sources=[]), "no sources"),
+    ("an ask that the research note does not hold", lambda c: _first_ask(c).update(asked="An ask that the request never made."),
+     "the ask is not in docs/research/request-for-solution-2026-10-07.md"),
+    ("an ask with an unknown verdict", lambda c: _first_ask(c).update(verdict="done"), "bad verdict done"),
+    ("a changed ask without a reason", lambda c: _first_ask(c, "changed").pop("why"), "a change needs a why"),
+    ("an ask without sources", lambda c: _first_ask(c).update(sources=[]), "no sources"),
+    ("an addition without sources", lambda c: c["rfp"]["sections"][0]["added"][0].update(sources=[]), "no sources"),
+    ("a duplicate RFP part", lambda c: c["rfp"]["sections"].append(copy.deepcopy(c["rfp"]["sections"][0])), "duplicate id"),
+    ("a figure from the RFP", lambda c: c["rfp"]["properties"][0].update(how="Up to 99 % per protocol."), "the request's figures stay out"),
+    ("a figure in the RFP's research note", _note_with_figure, "holds a currency sign or a percentage"),
+    ("a missing research note", lambda c: c["rfp"].update(note="docs/research/no-such-note.md"), "missing note docs/research/no-such-note.md"),
 ]
 
 

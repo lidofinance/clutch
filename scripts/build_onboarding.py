@@ -59,6 +59,8 @@ CHANGE_STATES = {
     "proposed": ("Proposed", "◌"),
 }
 CHANGE_KINDS = {"changed": ("Changed", "↻"), "added": ("Added", "+"), "removed": ("Removed", "−")}
+# How Clutch answers an ask of the request for solution (RFP).
+RFP_VERDICTS = {"kept": ("As asked", "✓"), "changed": ("Changed", "↻"), "owed": ("Not answered yet", "◌")}
 EDGE_KINDS = {"owns", "role", "executes", "screens", "governs", "funds", "recovers", "safety", "watches", "signers", "reports"}
 
 
@@ -273,7 +275,7 @@ def parse_yaml(text: str) -> Any:
 
 def load() -> dict[str, Any]:
     content = {}
-    for name in ("meta", "map", "actors", "flows", "assumptions", "reuse", "glossary", "tour", "quiz", "mandate", "constellation"):
+    for name in ("meta", "map", "actors", "flows", "assumptions", "reuse", "glossary", "tour", "quiz", "mandate", "constellation", "rfp"):
         path = CONTENT / f"{name}.yaml"
         try:
             content[name] = parse_yaml(path.read_text(encoding="utf-8"))
@@ -394,6 +396,39 @@ def check(c: dict[str, Any], f: dict[str, Any]) -> dict[str, dict[str, str]]:
         if ch.get("kind") not in CHANGE_KINDS:
             errors.append(f"constellation {ch.get('area')}: bad kind {ch.get('kind')}")
         sources(f"constellation {ch.get('area')}", ch.get("sources"))
+
+    # The RFP: every ask must be in the research note word for word, and no figure may appear.
+    rfp = c["rfp"]
+    note_path = ROOT / rfp["note"]
+    note = ""
+    if note_path.is_file():
+        note = " ".join(note_path.read_text(encoding="utf-8").split())
+        if re.search(r"[$€£%]", note):
+            errors.append(f"rfp: {rfp['note']} holds a currency sign or a percentage; the request's figures stay out")
+    else:
+        errors.append(f"rfp: missing note {rfp['note']}")
+    sources("rfp properties", rfp.get("properties_sources"))
+    for prop in rfp["properties"]:
+        sources(f"rfp property {prop['name']}", prop.get("sources"))
+    rfp_ids = set()
+    for sec in rfp["sections"]:
+        if sec["id"] in rfp_ids:
+            errors.append(f"rfp {sec['id']}: duplicate id")
+        rfp_ids.add(sec["id"])
+        sources(f"rfp {sec['id']}", sec.get("sources"))
+        for i, ask in enumerate(sec.get("items", []), 1):
+            where = f"rfp {sec['id']} ask {i}"
+            if ask.get("verdict") not in RFP_VERDICTS:
+                errors.append(f"{where}: bad verdict {ask.get('verdict')}")
+            if ask.get("verdict") == "changed" and not ask.get("why"):
+                errors.append(f"{where}: a change needs a why")
+            if note and " ".join(ask["asked"].split()) not in note:
+                errors.append(f"{where}: the ask is not in {rfp['note']}")
+            sources(where, ask.get("sources"))
+        for i, ad in enumerate(sec.get("added", []), 1):
+            sources(f"rfp {sec['id']} addition {i}", ad.get("sources"))
+    if re.search(r"[$€£%]", json.dumps(rfp, ensure_ascii=False)):
+        errors.append("rfp: a currency sign or a percentage must not appear; the request's figures stay out")
 
     # Every [[term]] in the text must be a glossary term.
     blob = json.dumps(c, ensure_ascii=False)
@@ -655,6 +690,16 @@ def change_badge(state: str) -> str:
     return f'<span class="badge ms-{state}"><span aria-hidden="true">{icon}</span> {esc(text)}</span>'
 
 
+def kind_badge(kind: str, text: str | None = None) -> str:
+    label, icon = CHANGE_KINDS[kind]
+    return f'<span class="badge ck-{kind}"><span aria-hidden="true">{icon}</span> {esc(text or label)}</span>'
+
+
+def verdict_badge(verdict: str) -> str:
+    text, icon = RFP_VERDICTS[verdict]
+    return f'<span class="badge rv-{verdict}"><span aria-hidden="true">{icon}</span> {esc(text)}</span>'
+
+
 def section_mandate(c: dict[str, Any], refs: dict[str, dict[str, str]]) -> str:
     m = c["mandate"]
     blocks = m["blocks"]
@@ -732,7 +777,7 @@ def section_constellation(c: dict[str, Any], f: dict[str, Any], refs: dict[str, 
     )
     rows = "".join(
         f'<tr id="cchange-{slug(ch["area"])}"><th scope="row">{esc(ch["area"])}<br>'
-        f'<span class="badge ck-{ch["kind"]}"><span aria-hidden="true">{CHANGE_KINDS[ch["kind"]][1]}</span> {CHANGE_KINDS[ch["kind"]][0]}</span></th>'
+        f'{kind_badge(ch["kind"])}</th>'
         f'<td class="cwas" data-label="Provider\'s constellation">{fmt(ch["provider"])}</td>'
         f'<td class="cnow" data-label="Clutch">{fmt(ch["clutch"])}</td>'
         f'<td data-label="Why">{fmt(ch["why"])}{source_links(ch.get("sources"), refs)}</td></tr>'
@@ -745,6 +790,58 @@ def section_constellation(c: dict[str, Any], f: dict[str, Any], refs: dict[str, 
         f'<h3>What Clutch changed from the provider\'s constellation, and why <span class="count">{len(k["changes"])}</span></h3>'
         f'<div class="tablewrap"><table class="cdiff"><thead><tr><th scope="col">Area</th><th scope="col">Provider\'s constellation</th>'
         f'<th scope="col">Clutch</th><th scope="col">Why</th></tr></thead><tbody>{rows}</tbody></table></div>'
+    )
+
+
+def _ask(ask: dict[str, Any], refs: dict[str, dict[str, str]]) -> str:
+    why = f'<p class="why"><span>Why</span> {fmt(ask["why"])}</p>' if ask.get("why") else ""
+    return (
+        f'<li class="ritem rv-{ask["verdict"]}">{verdict_badge(ask["verdict"])}'
+        f'<p class="rasked"><span class="mlabel">The RFP asked</span> {fmt(ask["asked"])}</p>'
+        f'<p><span class="mlabel">Clutch</span> {fmt(ask["clutch"])}</p>{why}{source_links(ask.get("sources"), refs)}</li>'
+    )
+
+
+def section_rfp(c: dict[str, Any], refs: dict[str, dict[str, str]]) -> str:
+    r = c["rfp"]
+    sections = r["sections"]
+    asks = [ask for sec in sections for ask in sec.get("items", [])]
+    added = [ad for sec in sections for ad in sec.get("added", [])]
+    stats = "".join(
+        f'<li class="rv-{v}"><strong>{sum(ask["verdict"] == v for ask in asks)}</strong> {verdict_badge(v)}</li>' for v in RFP_VERDICTS
+    )
+    stats += f'<li class="ck-added"><strong>{len(added)}</strong> {kind_badge("added", "Added by Clutch")}</li>'
+    props = "".join(
+        f'<article class="card rprop"><h4>{esc(prop["name"])}</h4><p>{fmt(prop["how"])}</p>{source_links(prop.get("sources"), refs)}</article>'
+        for prop in r["properties"]
+    )
+
+    def marked(sec: dict[str, Any]) -> str:
+        n = sum(ask["verdict"] != "kept" for ask in sec.get("items", [])) + len(sec.get("added", []))
+        return f' <span class="count">{n}</span>' if n else ""
+
+    jump = "".join(f'<a class="chip" href="#rfp-{esc(sec["id"])}">{esc(sec["title"])}{marked(sec)}</a>' for sec in sections)
+    cards = []
+    for sec in sections:
+        rows = "".join(_ask(ask, refs) for ask in sec.get("items", []))
+        asked = f'<ul class="rlist">{rows}</ul>' if rows else '<p class="munchanged">The RFP did not ask for these.</p>'
+        tech = f'<div class="tech">{paras(sec["tech"])}</div>' if sec.get("tech") else ""
+        adds = "".join(
+            f'<li class="radd">{kind_badge("added")} {fmt(ad["text"])}'
+            f'<p class="why"><span>Why</span> {fmt(ad["why"])}</p>{source_links(ad.get("sources"), refs)}</li>'
+            for ad in sec.get("added", [])
+        )
+        more = f'<div class="radded"><h4 class="sub">Added by Clutch</h4><ul>{adds}</ul></div>' if adds else ""
+        cards.append(
+            f'<article class="card rblock" id="rfp-{esc(sec["id"])}"><header><h3>{esc(sec["title"])}</h3></header>'
+            f'{asked}{tech}{more}{source_links(sec.get("sources"), refs)}</article>'
+        )
+    return (
+        f'<p class="lead">{fmt(r["intro"])}</p>'
+        f'<ul class="mstats" aria-label="Asks by verdict">{stats}</ul>'
+        f'<h3>The four properties</h3><div class="rprops">{props}</div>{source_links(r.get("properties_sources"), refs)}'
+        f'<nav class="jump chips" aria-label="RFP parts">{jump}</nav>'
+        f'<div class="mgrid">{"".join(cards)}</div>'
     )
 
 
@@ -939,6 +1036,7 @@ def render(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[str, str]]
         ("flows", "Flows", section_flows(c, refs)),
         ("mandate", "Mandate", section_mandate(c, refs)),
         ("constellation", "Constellation", section_constellation(c, f, refs)),
+        ("rfp", "RFP", section_rfp(c, refs)),
         ("reuse", "Built or reused", section_reuse(c, refs)),
         ("assumptions", "Assumptions", section_assumptions(c, refs)),
         ("status", "Status", section_status(c, f, refs)),

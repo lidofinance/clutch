@@ -174,6 +174,10 @@
   plain: "An order that the emergency role places from the orders account. It sells an asset for USDC, or USDT as the second destination, and pays the Aragon Agent. No guard screens it."
   sources: [ADR-007, OD-26, INV-014]
 
+- term: RFP
+  plain: "Request for solution: the requirements that Lido contributors sent to the policy provider. It asked what the provider supports today, what needs work and what it cannot do. The RFP tab maps each ask to Clutch's answer."
+  sources: ["doc:docs/research/request-for-solution-2026-10-07.md#answer"]
+
 - term: Role
   plain: "A named set of permissions on a modifier: operator, governance, emergency, technical or exit governance. A Safe or contract that holds the role can make the calls that it allows."
   tech: "On chain, a 32-byte key names the role. In Clutch the key is the label in bytes, such as `bytes32(\"operator\")`."
