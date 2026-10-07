@@ -11,11 +11,11 @@
     "test": "bun test compiler",
     "inspect": "bun .lib/scripts/inspect.ts",
     "format": "prettier --write .",
-    "pull": "zodiac pull",
-    "pull-org": "zodiac pull-org",
-    "pull-contracts": "zodiac pull-contracts",
-    "prepush": "zodiac pull-org",
-    "push": "bun ./.lib/scripts/push.ts"
+    "pull": "bun compiler/owner-guard.ts && zodiac pull",
+    "pull-org": "bun compiler/owner-guard.ts && zodiac pull-org",
+    "pull-contracts": "bun compiler/owner-guard.ts && zodiac pull-contracts",
+    "prepush": "bun compiler/owner-guard.ts && zodiac pull-org",
+    "push": "bun compiler/owner-guard.ts && bun ./.lib/scripts/push.ts"
   },
   "private": true,
   "description": "The Clutch permission policy as a Zodiac constellation, and its compiler",

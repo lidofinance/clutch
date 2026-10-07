@@ -1,0 +1,20 @@
+# Hashed denylist for scripts/check_redaction.py (ADR 012). Each entry is the SHA-256 of
+# "clutch-redaction:<kind>:<normalized term>", so this file does not name what it blocks.
+# A hash hides a term from a casual reader, not from someone who guesses it.
+# Add a term: uv run --with pyyaml==6.0.2 python scripts/check_redaction.py --hash KIND "TERM"
+# Only a human adds or removes an entry (ADR 003, decision 7).
+version: 1
+# The screening vendor's identity, found inside any run of letters and digits.
+word:
+  - length: 11
+    sha256: 89c584f24189d4af2cbbccb7ee9f764b8c01b7c2423b2e3caed00825794a76df
+# The addresses that reveal the screening vendor.
+address:
+  - sha256: 06950eba8118f4667b9c72ba151f2e665de5aea34200b4b832fbdadae602a77b
+  - sha256: d086c0ada9e3dddf8199f010b95d95cc64b502b466b211ae886c5743300a97fc
+  - sha256: 20d4dc226e540e3bb0ceeaa9e7e0fbf813a95f2d5d12fb292e59f136fc035aff
+# Figures from the unapproved mandate.
+figure:
+  - sha256: a2448585e925d340cfd9d6bb6187adf7ad97747773e68178cbbf99c01c9c6769
+  - sha256: fd7a4807204e9555a318202525ae329415cfbde6d18be7b75a66d228fc84415d
+  - sha256: db3d21ca239fd29f9d2c194d6718c131928db869169fc985f8ba19376b693615

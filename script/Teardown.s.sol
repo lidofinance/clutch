@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.8.24 <0.9.0;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
+import {Broadcast} from "./Broadcast.sol";
 import {ISafe} from "../src/interfaces/ISafe.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
@@ -11,7 +12,7 @@ import {SafeExec} from "../src/exec/SafeExec.sol";
 /// @dev Sweeps every tracked token from the Asset Safe back to the funder
 ///      through the owner path (the same power a DAO recovery action has),
 ///      then disables both Roles modifiers. Writes a final manifest.
-contract Teardown is Script {
+contract Teardown is Broadcast {
     address internal constant SENTINEL = address(0x0000000000000000000000000000000000000001);
 
     function _tokens() internal pure returns (address[11] memory TOKENS) {
@@ -29,15 +30,13 @@ contract Teardown is Script {
     }
 
     function run() external {
-        uint256 deployer = vm.envUint("PRIVATE_KEY");
         address payable agentAddr = payable(vm.envAddress("AGENT"));
         address safeAddr = vm.envAddress("SAFE");
         address rolesAddr = vm.envAddress("ROLES");
         address safetyAddr = vm.envOr("SAFETY", address(0));
-        vm.startBroadcast(deployer);
         // The broadcaster, not msg.sender: in a forge script msg.sender is
         // Foundry's default sender, whose key is public.
-        address beneficiary = vm.addr(deployer);
+        address beneficiary = _startBroadcast();
 
         MockAragonAgent agent = MockAragonAgent(agentAddr);
         ISafe safe = ISafe(payable(safeAddr));

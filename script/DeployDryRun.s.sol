@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.8.24 <0.9.0;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
+import {Broadcast} from "./Broadcast.sol";
 import {ISafe, ISafeProxyFactory, IModuleProxyFactory} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
@@ -20,9 +21,9 @@ import {SafeExec} from "../src/exec/SafeExec.sol";
 ///      manifest, then apply the artifact with ApplyPolicy, through
 ///      Agent -> Safe -> Roles, the path that drill D2 also uses (ADR 004).
 ///
-///      Usage (see Justfile, `just dry-run`):
-///        RPC=... PRIVATE_KEY=0x... forge script script/DeployDryRun.s.sol --broadcast
-contract DeployDryRun is Script {
+///      Usage (see mainnet.just, `dry-run`): a keystore signs, see Broadcast.sol.
+///        forge script script/DeployDryRun.s.sol --rpc-url $RPC --account $ACCOUNT --sender $SENDER --broadcast
+contract DeployDryRun is Broadcast {
     // Production singletons, checked at the fork block 25946643.
     // Safe v1.5.0: EM's choice for the three new Safes (OD-02, OD-17). The
     // Asset Safe is set up with no fallback handler (OD-17).
@@ -38,15 +39,19 @@ contract DeployDryRun is Script {
 
     function run() external {
         uint256 executorKey = vm.envOr("EXECUTOR_KEY", uint256(0));
-        uint256 deployer = executorKey != 0 ? executorKey : vm.envUint("PRIVATE_KEY");
         address operatorStandin = vm.envOr("OPERATOR_STANDIN", address(0));
         address emergencyStandin = vm.envOr("EMERGENCY_STANDIN", address(0));
         address technicalStandin = vm.envOr("TECHNICAL_STANDIN", address(0));
 
-        vm.startBroadcast(deployer);
         // The broadcaster, not msg.sender: in a forge script msg.sender is
         // Foundry's default sender, whose key is public.
-        address executor = vm.addr(deployer);
+        address executor;
+        if (executorKey != 0) {
+            vm.startBroadcast(executorKey);
+            executor = vm.addr(executorKey);
+        } else {
+            executor = _startBroadcast();
+        }
 
         if (operatorStandin == address(0)) operatorStandin = executor;
         if (emergencyStandin == address(0)) emergencyStandin = executor;

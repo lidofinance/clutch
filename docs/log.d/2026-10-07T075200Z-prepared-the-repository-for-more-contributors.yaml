@@ -1,0 +1,3 @@
+date: '2026-10-07'
+kind: Update
+text: 'Prepared the repository for more contributors at EM''s request: `just setup`, `just check`, `just regen` and `just log`; the mainnet recipes in `mainnet.just` behind a flag, a prompt and a keystore signer; a guard on the hosted-app scripts; the log built from fragments in `docs/log.d/`; CI checks for restricted terms and secrets, licences, invariant tests and duplicate IDs, also in the merge queue; a pull-request template, `CONTRIBUTING.md` and four skills.'

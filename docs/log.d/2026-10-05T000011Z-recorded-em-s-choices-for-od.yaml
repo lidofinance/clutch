@@ -1,0 +1,3 @@
+date: '2026-10-05'
+kind: Decision
+text: Recorded EM's choices for OD-21. The legacy Earn positions are the DAO's first-loss shares in EarnETH and EarnUSD, held by a Growth Committee Safe; after the enabling vote the Growth Committee transfers them to the Asset Safe, the Treasury Management mandate takes over their first-loss terms, each burn is a DAO vote, and a written rule forbids the operator from redeeming them. A Twyne position reduces the seed only when its holder and form are shown; none was found. Added the legacy investments research note and two runbook entries. Updated ADR 008, ADR 009, ADR 011, the registers, the LIP, the roadmap, the 2026-10-02 funding note and the research index.

@@ -1,0 +1,3 @@
+date: '2026-10-05'
+kind: Decision
+text: 'Recorded EM''s choices for OD-16: a strict YAML policy file and a Python compiler that emits one JSON artifact. The tests, the enabling vote and the drift detector use the artifact, and the round-trip check rebuilds the trees from the modifier''s events. Updated ADR 004, ADR 009, INV-016, the LIP and the roadmap.'

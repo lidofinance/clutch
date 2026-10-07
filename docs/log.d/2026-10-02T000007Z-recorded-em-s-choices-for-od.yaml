@@ -1,0 +1,3 @@
+date: '2026-10-02'
+kind: Decision
+text: Recorded EM's choices for OD-07. The operator role starts only after the guard enforces. The agreement forbids standing approvals. The guard uses the build that the Lido multisigs run, with 10-day timelocks. The vendor's written confirmation of Safe v1.5.0 support is a gate, with v1.4.1 as the fallback for the operator Safe. The vendor's name enters when the mandate is posted on the forum, with its consent. Corrected the count of post-audit changes in ADR 010 and the LIP from two to one, and recorded that the deployed build is not on the vendor's main branch. Updated ADR 001, ADR 005, the open decisions (OD-07 closed; OD-12, OD-13 and OD-17 extended), the parameters, INV-010 and the roadmap.

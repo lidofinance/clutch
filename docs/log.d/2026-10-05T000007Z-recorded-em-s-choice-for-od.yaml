@@ -1,0 +1,3 @@
+date: '2026-10-05'
+kind: Decision
+text: Recorded EM's choice for OD-15. A member of the committee or of the Emergency Brakes multisig commits the body's verification through a reviewed pull request, with `ref` linking the body's decision record. The validator now refuses a body verification without `ref`; negative cases were tested. Updated ADR 002.

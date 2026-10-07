@@ -397,14 +397,13 @@ def check(c: dict[str, Any], f: dict[str, Any]) -> dict[str, dict[str, str]]:
             errors.append(f"constellation {ch.get('area')}: bad kind {ch.get('kind')}")
         sources(f"constellation {ch.get('area')}", ch.get("sources"))
 
-    # The RFP: every ask must be in the research note word for word, and no figure may appear.
+    # The RFP: every ask must be in the research note word for word. Its figures are not
+    # restricted (OD-53); the README marks every figure in the repository as a draft.
     rfp = c["rfp"]
     note_path = ROOT / rfp["note"]
     note = ""
     if note_path.is_file():
         note = " ".join(note_path.read_text(encoding="utf-8").split())
-        if re.search(r"[$€£%]", note):
-            errors.append(f"rfp: {rfp['note']} holds a currency sign or a percentage; the request's figures stay out")
     else:
         errors.append(f"rfp: missing note {rfp['note']}")
     sources("rfp properties", rfp.get("properties_sources"))
@@ -427,8 +426,6 @@ def check(c: dict[str, Any], f: dict[str, Any]) -> dict[str, dict[str, str]]:
             sources(where, ask.get("sources"))
         for i, ad in enumerate(sec.get("added", []), 1):
             sources(f"rfp {sec['id']} addition {i}", ad.get("sources"))
-    if re.search(r"[$€£%]", json.dumps(rfp, ensure_ascii=False)):
-        errors.append("rfp: a currency sign or a percentage must not appear; the request's figures stay out")
 
     # Every [[term]] in the text must be a glossary term.
     blob = json.dumps(c, ensure_ascii=False)

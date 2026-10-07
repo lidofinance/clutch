@@ -1,0 +1,3 @@
+date: '2026-10-06'
+kind: Decision
+text: 'Recorded EM''s choice for OD-36. A motion cannot grant the operator delegatecall: the governance role''s `allowFunction` and `scopeFunction` take only None or Send. Updated the constellation and the artifact, ADR 005 and ADR 006, INV-004, the LIP and the Emergency Brakes brief, and added a regression test; 42 fork tests pass, and removing the pin fails the new test. Added the CI job for the policy artifact at EM''s request.'

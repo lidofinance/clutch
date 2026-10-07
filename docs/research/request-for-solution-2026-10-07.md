@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: The request for solution against the decided design, 2026-10-07
-description: What the request for solution that Lido contributors sent to the policy provider asked, part by part, paraphrased and without its allocation figures; the onboarding guide's RFP tab maps each ask to the decided design.
+description: What the request for solution that Lido contributors sent to the policy provider asked, part by part, paraphrased; the onboarding guide's RFP tab maps each ask to the decided design.
 tags: [rfp, policy-provider, requirements, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-07
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T07:03:48Z
+  at: 2026-10-07T08:02:59Z
 verified: []
 sources:
   - id: s1
@@ -21,12 +21,6 @@ sources:
   - id: s3
     resource: /onboarding/guide.md
     title: Onboarding guide — the RFP tab, which maps each ask to the decided design
-  - id: s4
-    resource: "https://github.com/lidofinance/clutch/blob/39f642d6af45d4e417065e261a3a004727e8d5d7/AGENTS.md#L19"
-    title: AGENTS.md at 39f642d — financial figures come only from an attested computation that ran
-  - id: s5
-    resource: /adr/001-repository-scope-visibility-licence-name.md
-    title: ADR 001 — nothing enters the repository that could not be published at deployment
 ---
 
 # The request for solution against the decided design, 2026-10-07
@@ -40,7 +34,7 @@ sources:
 ## The source
 
 - EM named the RFP on 2026-10-07 as the one shared with the policy provider, and supplied the copy that this note reads [s2]. The RFP itself stays outside the repository [s1].
-- This note paraphrases the RFP. It leaves out the RFP's target allocation figures, because a financial figure enters this repository only from an attested computation that ran [s4], and nothing enters it that could not be published at deployment [s5].
+- This note paraphrases the RFP and does not repeat its target allocation figures. EM decided on 2026-10-07 that they are not restricted (OD-53): they are targets, not decided values, and the README marks every figure in the repository as a draft [s2].
 - The guide's build fails when its RFP tab shows an ask that the next section does not hold word for word.
 
 ## What the RFP asked

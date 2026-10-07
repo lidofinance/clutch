@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T07:10:36Z
+  at: 2026-10-07T08:03:36Z
 verified: []
 sources:
   - id: s1
@@ -37,6 +37,43 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, and a local file path out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-07 — OD-50 to OD-53: reviewers, verification locks, the fork suite and the request's figures
+
+> Q1: A
+> Q2: A
+> Q3: C, will be A later, make a mark in roadmap for it
+> Q4: B, just make a proper disclosure in the readme of the repo that everything is draft and not ratified, so numbers and everything is speculative
+
+Recorded as:
+
+- (Q1, OD-50) A team verifies through a member, with `ref` to the pull request that the member approved. `human:defi-tech` is the first team in `config/actors.yaml`. A team's verification raises a page's review status and never accepts an ADR; only EM or the committee accepts one ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 6).
+- (Q2, OD-51) Each verification from 2026-10-07 on records `sha256`, the hash of the page's body, and `just verify` writes it. The validator fails when the body differs from the hash of the latest verification, until a human verifies the page again (decision 7).
+- (Q3, OD-52) The fork suite stays out of CI for now. Phase 2 of the roadmap moves it into the merge queue and onto pushes to `main`, with the archive RPC key as a repository secret, never on a pull request (decision 8).
+- (Q4, OD-53) The request for solution's allocation figures are not restricted, and the two quotes in this log stay. The README now opens with a disclosure: everything in the repository is a draft and not ratified, and every number is speculative. The guide's banner says the same. The guide's build no longer refuses a figure in the RFP tab (decision 9). [s6]
+
+## 2026-10-07 — many contributors and their agents
+
+> Now analyze the repo from the prospects that I want more contributors to come and run their agents to contribute; what should we do to streamline entry and avoid hectic things from happening?
+
+The agent answered with fifteen steps. The [research note](/research/contributor-readiness-2026-10-07.md) keeps the list, and EM's numbers refer to it.
+
+> 2. agree
+> 4. don't edit codeowners yet
+> 7. agree
+> 14. agree
+> 15. agents don't own github accounts
+>
+> Implement everything that you can and pen OD-50 if needed from this input and run an interview, again if needed
+
+Recorded as:
+
+- (2) Any agent may author a page: `generated.by` accepts any agent id. Only the humans that `config/actors.yaml` lists verify a page. Which human reviewer ids join the list is OD-50 ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 1).
+- (4) `CODEOWNERS` does not change for now (decision 2).
+- (7) Changes land through a merge queue, or with branches that are up to date with `main`, so the checks run on the merged result (decision 3).
+- (14) An agent opens a decision only as a complete row of the open-decision register. EM triages and decides in batched interviews, one decisions branch at a time (decision 4).
+- (15, OD-23) Agents own no GitHub accounts. An agent's work lands through the account of the human who runs it. OD-23 is closed, and ADR 012 decision 5 replaces ADR 003 decision 12 when EM accepts ADR 012.
+- The agent reads "Implement everything that you can" as the steps that need no further decision: 1, 3, 5, 6, 8, 9, 11 and 12, the parts of 2 and 13 that are decided, and the rules of 7 and 14. It reads "pen" as "open". It opened OD-50 to OD-53 for the rest: the human reviewer ids, a content lock for verifications, the fork suite in CI, and the request for solution's figures. [s6]
 
 ## 2026-10-07 — the RFP in the onboarding guide
 

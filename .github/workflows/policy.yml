@@ -6,6 +6,7 @@ name: policy
 
 on:
   pull_request:
+  merge_group:  # the merge queue runs the checks on the merged result (ADR 012)
   push:
     branches: [main]
 

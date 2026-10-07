@@ -1,0 +1,3 @@
+date: '2026-10-06'
+kind: Decision
+text: Recorded EM's choices for OD-33. The team works in the Zodiac UI, and local tooling verifies everything the UI produces. The constellation in TypeScript and Clutch's own compiler replace the YAML file and the Python compiler; the compiled artifact is committed and is what the vote, the templates and the drift detector consume; the Solidity builders go now. Amended ADR 004 (EM verifies it again), INV-016, the specification policy, the roadmap, the LIP's policy-encoding note, the harness README and the provenance file. Added the SDK's ABI check to the constellation note. Opened OD-35.

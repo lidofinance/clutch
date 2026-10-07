@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T21:22:14Z
+  at: 2026-10-07T08:03:36Z
 verified: []
 sources:
   - id: s1
@@ -21,7 +21,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
-| OD-23 | When does the agent get its own GitHub identity? Until it does, the agent pushes under the creator's git identity, and another member of the owning team must approve. | [ADR 003](/adr/003-agent-operating-model.md) | Deferred by EM on 2026-10-05: "later". Give it write access to branches only, so that EM can approve agent work as a code owner | EM |
 
 ## Closed
 
@@ -75,3 +74,8 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-47 | What is the maximum life of an order from the orders account? | 2026-10-06 | EM: "Q1: B", "Q2: A" and "Q3: A": the operator's market and limit orders live at most 30 days, through the order signer's `validDuration`; a TWAP order starts at its creation and ends within 30 days, with at most 30 daily or 4 weekly parts; a screening rule refuses a stop-loss expiry more than 30 days ahead, and monitoring alerts on any open order older than 30 days; a recovery order lives at most 1 day ([ADR 007](/adr/007-swapping-through-an-orders-account.md)) [s1] |
 | OD-48 | Do recovery orders need an on-chain price floor? | 2026-10-06 | EM: "Q1: B": no on-chain floor; CoW's solver competition and EBBO rule hold a fill to the on-chain market; every emergency swap pages at high severity, and monitoring alerts on a recovery order whose limit sits far below a market price; the GoodAfterTime floor stays a research item ([ADR 007](/adr/007-swapping-through-an-orders-account.md), [research note](/research/cow-orders-account-2026-10-06.md)) [s1] |
 | OD-49 | How does the emergency role exit a position that a motion onboarded? | 2026-10-06 | EM: "Q1: B" and "Q2: B", against the agent's recommendation A: an exit-only template role on the safety modifier, held by the Easy Track script executor, so the motion that onboards a protocol also adds its emergency exit; Lido Lend is a separate Morpho-Blue-compatible deployment, whose address and exit enter with its onboarding motion ([ADR 006](/adr/006-governance-through-easy-track-factories.md), [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 011](/adr/011-launch-scope.md)) [s1] |
+| OD-23 | When does the agent get its own GitHub identity? | 2026-10-07 | EM: "15. agents don't own github accounts": agents own no GitHub accounts; an agent's work lands through the account of the human who runs it, with a `Co-Authored-By` trailer ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 5) [s1] |
+| OD-50 | Which human ids may verify a page, besides EM, the committee and the Emergency Brakes multisig? | 2026-10-07 | EM: "Q1: A": one id per team, `human:defi-tech` first, with `ref` to the pull request that a member approved; a team's verification raises a page's review status and never accepts an ADR ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 6) [s1] |
+| OD-51 | Does a verification lock the page's text? | 2026-10-07 | EM: "Q2: A": each verification from 2026-10-07 on records the SHA-256 of the page's body, written by `just verify`; the validator fails when the body changes after the latest verification, until a human verifies again ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 7) [s1] |
+| OD-52 | Where does the fork suite run in CI? | 2026-10-07 | EM: "Q3: C, will be A later, make a mark in roadmap for it": the fork suite stays out of CI for now; phase 2 of the roadmap moves it into the merge queue and onto pushes to `main`, with the RPC key as a repository secret ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 8) [s1] |
+| OD-53 | Are the request for solution's allocation figures restricted, like the mandate's? | 2026-10-07 | EM: "Q4: B, just make a proper disclosure in the readme of the repo that everything is draft and not ratified, so numbers and everything is speculative": they are not restricted, the two quotes stay, and the README states that everything is a draft and not ratified ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 9) [s1] |

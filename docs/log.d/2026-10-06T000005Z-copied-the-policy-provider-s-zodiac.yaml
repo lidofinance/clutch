@@ -1,0 +1,3 @@
+date: '2026-10-06'
+kind: Evidence
+text: 'Copied the policy provider''s Zodiac constellation at `02ea37d` to `policy/constellation/`, with a provenance file and a one-line fix that lets it build offline. Added the [constellation note](/research/zodiac-constellation-2026-10-06.md): the configuration still builds and matches the chain, but its roles, holders, protocols, approvals and governance path differ from the decided design. The SDK compiles the kit''s condition shapes, but the hosted path cannot reach an Aragon vote or an Easy Track motion. Opened OD-33 and OD-34.'

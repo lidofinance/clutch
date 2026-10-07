@@ -2,6 +2,7 @@ name: docs
 
 on:
   pull_request:
+  merge_group:  # the merge queue runs the checks on the merged result (ADR 012)
   push:
     branches: [main]
 
@@ -30,6 +31,16 @@ jobs:
         run: .venv/bin/python scripts/build_onboarding.py --check
       - name: test the onboarding guide's build checks
         run: .venv/bin/python scripts/test_build_onboarding.py
+      - name: check the log is a fresh build of its fragments
+        run: .venv/bin/python scripts/build_log.py --check
+      - name: refuse restricted terms and secrets
+        run: .venv/bin/python scripts/check_redaction.py
+      - name: check every source file's licence line
+        run: .venv/bin/python scripts/check_licences.py
+      - name: check that the invariants name tests that exist
+        run: .venv/bin/python scripts/check_invariants.py
+      - name: test the repository checks
+        run: .venv/bin/python scripts/test_checks.py
 
   browser:
     name: onboarding guide in a browser

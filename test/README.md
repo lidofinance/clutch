@@ -56,10 +56,17 @@ RPC=<archive mainnet RPC> forge test     # the whole suite on the pinned fork
 just test-fork                           # the same
 just policy-compile                      # compile the constellation into the committed artifact
 just policy-check                        # fail if the artifact differs from a fresh compile; compiler tests
-just dry-run                             # deploy on mainnet, compile against its manifest, apply; not run
-just fund                                # fund from a throwaway EOA with 0.05 ETH; not run
-just teardown                            # sweep, disable both modifiers, write a manifest; not run
 ```
+
+The mainnet recipes are in `mainnet.just`, which the Justfile never loads. They broadcast real transactions, so agents never run them (AGENTS.md). A human runs one with `CLUTCH_MAINNET=1 just --justfile mainnet.just <recipe>`, and a Foundry keystore signs it after a password prompt; `.env` holds the keystore's name and address, never a key (ADR 012):
+
+```sh
+CLUTCH_MAINNET=1 just --justfile mainnet.just dry-run    # deploy on mainnet, compile against its manifest, apply; not run
+CLUTCH_MAINNET=1 just --justfile mainnet.just fund       # fund from a throwaway EOA with 0.05 ETH; not run
+CLUTCH_MAINNET=1 just --justfile mainnet.just teardown   # sweep, disable both modifiers, write a manifest; not run
+```
+
+A local rehearsal on an anvil fork may set `PRIVATE_KEY` to one of anvil's public test keys in the environment of a single command; `mainnet.just` refuses to run while `PRIVATE_KEY` is set.
 
 The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy, compile against the written manifest, apply 105 calls, then a permitted and a refused operator call. It was rehearsed again after OD-38, at block 26133512: the written manifest lists both modules, and the governance role is refused the safety modifier, the operator modifier and the Asset Safe as targets.
 

@@ -13,13 +13,10 @@ the text it is given, and shows no fork-test stand-in address.
 
 from __future__ import annotations
 
-import atexit
 import copy
 import importlib.util
-import os
 import re
 import sys
-import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -43,16 +40,6 @@ def _first_change(c):
 
 def _first_ask(c, verdict=None):
     return next(ask for sec in c["rfp"]["sections"] for ask in sec.get("items", []) if verdict in (None, ask["verdict"]))
-
-
-def _note_with_figure(c):
-    """Points the RFP at a copy of its note that holds a figure."""
-    handle, name = tempfile.mkstemp(suffix=".md")
-    os.close(handle)
-    path = Path(name)
-    atexit.register(path.unlink)
-    path.write_text((ROOT / c["rfp"]["note"]).read_text(encoding="utf-8") + "\nA limit of 99 % per protocol.\n", encoding="utf-8")
-    c["rfp"]["note"] = str(path)
 
 
 CONTENT_CASES = [
@@ -99,8 +86,6 @@ CONTENT_CASES = [
     ("an ask without sources", lambda c: _first_ask(c).update(sources=[]), "no sources"),
     ("an addition without sources", lambda c: c["rfp"]["sections"][0]["added"][0].update(sources=[]), "no sources"),
     ("a duplicate RFP part", lambda c: c["rfp"]["sections"].append(copy.deepcopy(c["rfp"]["sections"][0])), "duplicate id"),
-    ("a figure from the RFP", lambda c: c["rfp"]["properties"][0].update(how="Up to 99 % per protocol."), "the request's figures stay out"),
-    ("a figure in the RFP's research note", _note_with_figure, "holds a currency sign or a percentage"),
     ("a missing research note", lambda c: c["rfp"].update(note="docs/research/no-such-note.md"), "missing note docs/research/no-such-note.md"),
 ]
 

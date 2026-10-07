@@ -1,0 +1,3 @@
+date: '2026-10-05'
+kind: Decision
+text: Recorded EM's choices for OD-10. `@lidofinance/defi-tech` owns the repository and `@lidofinance/review-gh-workflows` owns `/.github/`; `.github/CODEOWNERS` now names them. A branch rule on `main` requires a pull request, a code-owner review and at least one approval by someone other than the pull request's creator. The agent's own GitHub identity is deferred as OD-23. Updated ADR 002, ADR 003 and SECURITY.md.
