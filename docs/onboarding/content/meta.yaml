@@ -2,8 +2,9 @@
 title: "Clutch: how the DAO's active treasury vault works"
 subtitle: "An onboarding guide for signers, engineers, reviewers and everyone who needs the picture."
 banner: >-
-  **Design stage. Nothing is deployed.** This guide shows the system as the decision records define it.
-  Every element carries its status. Every claim links to its source in the repository.
+  **Design stage. Nothing is deployed, and nothing is ratified.** This guide shows the system as the decision
+  records define it, and every number in it is a draft. Every element carries its status. Every claim links to its
+  source in the repository.
 outcomes:
   - "Name who can move the vault's funds, and who can stop them."
   - "Walk any emergency to its first action, and say how long it takes."

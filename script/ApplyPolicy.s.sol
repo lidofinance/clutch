@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.8.24 <0.9.0;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {console2} from "forge-std/Script.sol";
+import {Broadcast} from "./Broadcast.sol";
 import {ISafe} from "../src/interfaces/ISafe.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
 import {SafeExec} from "../src/exec/SafeExec.sol";
@@ -12,12 +13,11 @@ import {SafeExec} from "../src/exec/SafeExec.sol";
 ///      The artifact names the Agent and the Asset Safe in its manifest, so
 ///      it must be compiled against the manifest that DeployDryRun wrote.
 ///
-///      Usage (see Justfile, `just dry-run`):
-///        RPC=... PRIVATE_KEY=0x... ARTIFACT=dryrun-artifact.json \
-///          forge script script/ApplyPolicy.s.sol --broadcast
-contract ApplyPolicy is Script {
+///      Usage (see mainnet.just, `dry-run`): a keystore signs, see Broadcast.sol.
+///        ARTIFACT=dryrun-artifact.json forge script script/ApplyPolicy.s.sol \
+///          --rpc-url $RPC --account $ACCOUNT --sender $SENDER --broadcast
+contract ApplyPolicy is Broadcast {
     function run() external {
-        uint256 deployer = vm.envUint("PRIVATE_KEY");
         string memory path = vm.envOr("ARTIFACT", string("dryrun-artifact.json"));
         string memory j = vm.readFile(path);
         MockAragonAgent agent = MockAragonAgent(payable(vm.parseJsonAddress(j, ".manifest.agent")));
@@ -26,7 +26,7 @@ contract ApplyPolicy is Script {
         bytes[] memory data = vm.parseJsonBytesArray(j, ".calls.data");
         require(to.length > 0 && to.length == data.length, "artifact: calls");
 
-        vm.startBroadcast(deployer);
+        _startBroadcast();
         for (uint256 i = 0; i < to.length; i++) {
             SafeExec.execAsOwner(agent, safe, to[i], data[i]);
         }

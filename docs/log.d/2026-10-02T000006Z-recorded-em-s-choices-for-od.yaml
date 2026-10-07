@@ -1,0 +1,3 @@
+date: '2026-10-02'
+kind: Decision
+text: 'Recorded EM''s choices for OD-06: a funding period of one calendar month, and two funding registries, for stablecoins and for stETH, each with a limit of one TM Floor Value per month and stETH at a pinned Coingecko price. The objection is the control and the registry is the backstop. Corrected ADR 008, which named the committee''s Safe as the top-up factory''s trusted caller, and the claim in ADR 008, ADR 009 and the LIP that a report identifier goes in the payment reference, which the standard factory fixes. Added the funding registries research note, INV-017, two runbooks and OD-21. Extended OD-07, OD-11 and OD-14.'

@@ -674,8 +674,6 @@ def test_rfp(browser: Browser, run: Run) -> None:
         run.check(notes == sum(bool(sec.get("tech")) for sec in sections), f"each part's technical note is marked as one ({notes})")
         bare = page.locator("#tab-rfp .ritem.rv-changed:not(:has(.why)), #tab-rfp .radd:not(:has(.why))").count()
         run.check(bare == 0, "every change and every addition shows its reason", bare)
-        text = page.inner_text("#tab-rfp")
-        run.check(not re.search(r"[$€£%]", text), "the RFP tab shows no currency sign and no percentage", re.findall(r".{0,20}[$€£%]", text)[:2])
 
 
 def test_selfcheck(browser: Browser, run: Run) -> None:

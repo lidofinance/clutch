@@ -1,5 +1,7 @@
 # Clutch
 
+> **Draft. Nothing here is ratified.** Every decision record, specification, figure, parameter, address and permission in this repository is a working draft. The Lido DAO, the Treasury Management Committee and every other body have ratified none of it, and nothing here authorises an action on chain. Every number is speculative until the vote that sets it passes: budgets, caps, limits, thresholds, timings, and the figures quoted from the mandate draft and from the request for solution can all change. An `accepted` decision record is an engineering decision for this repository, not a ratification.
+
 Clutch is the Lido Active Treasury system. The Treasury Management Committee operates a DAO-owned Safe through a default-deny permission policy. The DAO keeps custody. An emergency Safe can pull assets back to the Aragon Agent. Easy Track motions change the policy only inside templates that are fixed at audit time.
 
 This repository is the single system of record: product documents, decisions, specifications, the permission policy, contracts, tests, scripts, runbooks and deployment records.
@@ -18,6 +20,7 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 ## Where to start
 
 - [AGENTS.md](AGENTS.md) — the rules for agents and humans. `CLAUDE.md` is a symlink to it.
+- [CONTRIBUTING.md](CONTRIBUTING.md) — how to set up, make a change, open a pull request and raise a decision, with or without an agent.
 - [docs/onboarding/clutch-onboarding.html](docs/onboarding/clutch-onboarding.html) — the interactive onboarding guide. Download it and open it in a browser; GitHub shows it as source. How it is built: [docs/onboarding/guide.md](docs/onboarding/guide.md).
 - [docs/index.md](docs/index.md) — the map, and the knowledge bundle in Open Knowledge Format 0.2.
 - [docs/product/brief.md](docs/product/brief.md) — vision, goals, North Star Metric, readers and users.
@@ -29,28 +32,23 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 
 ## How this repository works
 
-- Agents draft most text and code. Humans decide, review and merge.
+- Agents draft most text and code. Humans decide, review and merge. Any contributor's agent may author a page; only listed humans verify one. Agents own no GitHub accounts: the human who runs an agent opens its pull request ([ADR 012](docs/adr/012-contributing-with-many-agents.md)).
 - Every page in `docs/` records its sources, who produced it, who verified it, and its review status.
 - An accepted ADR is an engineering decision. It authorises nothing on chain. On-chain change still needs the vote, motion or signature that the system defines.
-- CI validates the bundle and checks that the document-status register is current. It also checks that the committed policy artifact equals a fresh compile of the constellation, that the onboarding guide equals a fresh build, and that every control of the guide works in a browser.
+- CI validates the bundle and checks that the generated files are fresh builds: the document-status register, the log, the onboarding guide and the policy artifact. It checks every control of the guide in a browser, refuses restricted terms and secrets, checks every source file's licence and every invariant's tests, and runs again in the merge queue on the merged result.
 
 ## Commands
 
 ```sh
-python3 scripts/validate_docs.py                  # validate the docs bundle; errors exit 1
-python3 scripts/validate_docs.py --write-status   # regenerate docs/registers/document-status.md
-python3 scripts/validate_docs.py --check-status   # fail if the register is out of date
-python3 scripts/test_validate_docs.py             # test the validator's recorded-verification rule
-python3 scripts/build_onboarding.py --check        # fail if the onboarding guide differs from a fresh build
-python3 scripts/test_build_onboarding.py           # test the guide build's reference and redaction checks
-uv run --with pyyaml==6.0.2 --with playwright==1.63.0 --with axe-playwright-python==0.1.8 python scripts/test_onboarding_page.py
-                                                  # drive every control of the guide in a browser
-RPC=<archive mainnet RPC> forge test              # the fork suite, on the committed policy artifact
-(cd policy/constellation && bun install --frozen-lockfile && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun test compiler)
-                                                  # fail if the artifact differs from a fresh compile
+just setup                  # once: forge-std, the policy's packages, a headless Chromium, a build
+just check                  # everything that CI runs, except the fork suite
+just regen                  # rebuild the generated files: the policy artifact, the log, the status register, the guide
+just log Update "TEXT"      # add the change's log entry as a fragment in docs/log.d/
+just test-fork              # the fork suite on the pinned mainnet fork; needs RPC in .env
+just --list                 # every recipe
 ```
 
-The validator needs Python 3.10 or later and PyYAML. Without a local PyYAML, run it through uv: `uv run --with pyyaml python scripts/validate_docs.py`.
+Without just installed, `uvx --from rust-just==1.58.0 just <recipe>` runs any recipe. The recipes run each script through uv with pinned dependencies. The mainnet recipes of the dry-run kit are in `mainnet.just`, for humans only (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Licence
 

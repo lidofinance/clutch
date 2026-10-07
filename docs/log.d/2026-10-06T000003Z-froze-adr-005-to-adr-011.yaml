@@ -1,0 +1,3 @@
+date: '2026-10-06'
+kind: Update
+text: 'Froze ADR 005 to ADR 011 for the verification by the Emergency Brakes multisig, after a final read. Wording fixes in ADR 005, 006, 007, 009 and 011; no decision changed. Added the [verification requests](/registers/verification-requests.md) register: the multisig''s duties, what each record asks, and how a member records the verification.'

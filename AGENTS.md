@@ -4,22 +4,26 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 
 ## Commands
 
-- `python3 scripts/validate_docs.py` — run before every commit. Errors block the merge.
-- `python3 scripts/validate_docs.py --write-status` — run after any frontmatter change, and commit the result.
-- `RPC=<archive RPC> forge test` — the fork suite. Never commit a key, or an RPC URL that contains one.
+- `just check` — every check that CI runs. Run it before every commit; errors block the merge. Without just: `uvx --from rust-just==1.58.0 just check`.
+- `just regen` — rebuild every generated file after a change, and commit them. On a merge conflict in a generated file, take either side and run it again.
+- `just log KIND "TEXT"` — add the change's log entry as a fragment in `docs/log.d/`. Never edit `docs/log.md`.
+- `just test-fork` — the fork suite, with `RPC=<archive RPC>` in `.env`. Never commit a key, or an RPC URL that contains one.
+- `CONTRIBUTING.md` has the workflow; `skills/` has the procedures.
 
 ## Rules for every page in docs/
 
 - Frontmatter holds `type`, `title`, `description`, `status`, `review_status`, `generated`, `verified` and `sources`. Copy a neighbouring page of the same type.
 - Agents write `review_status: slop` only. Agents never add a `human:` entry to `verified`, and never set an ADR's `decision` to `accepted`.
-- One exception: on a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry carries `recorded_by` and a `ref` to the decision-log heading that quotes the instruction, and the commit message says the agent made the edit. It never covers `human:tmc` or `human:emergency-brakes` (OD-15, OD-31).
+- One exception: on a human's explicit written instruction, an agent may record that human's own acceptance and verification with `just verify`. The entry carries `recorded_by`, a `ref` to the decision-log heading that quotes the instruction, and the hash of the page's body; the commit message says the agent made the edit. It never covers a body or a team, such as `human:tmc`, `human:emergency-brakes` or `human:defi-tech` (OD-15, OD-31, OD-50, OD-51).
 - Every ADR declares `constrains_operator`. An ADR that constrains the operator needs a verification from the Emergency Brakes multisig before it is accepted.
 - A meaningful edit bumps `generated.at`, which resets a reviewed page to `slop`.
 - Cite per claim with inline `[sN]` markers that match `sources`.
 - Financial figures come only from an Attested Computation that ran. Never reason your way to a number.
 - Write in Simplified Technical English: one idea per sentence, active voice, controlled `must`, `should`, `can` and `may`, absolute ISO dates.
 - Refer to people by role. EM is the only name used.
-- Call the screening vendor "the screening vendor" until the vendor is announced.
+- Call the screening vendor "the screening vendor" until the vendor is announced. `scripts/check_redaction.py` refuses restricted terms and secrets; never work around it.
+- Open a decision only as a complete row of the open-decision register: the question with its options, the page that closes it, your recommendation and who decides. EM triages and decides in batched interviews, one decisions branch at a time (ADR 012).
+- Take a new OD, ADR or INV number from `main` when you open the pull request. The validator refuses a number that is used twice.
 
 ## Rules for code and tests
 
@@ -32,6 +36,8 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 ## Out of scope for agents
 
 - Merging. Humans merge.
+- A GitHub account of their own. An agent works through the account of the human who runs it, and the commit carries a `Co-Authored-By` trailer (ADR 012).
+- Any recipe in `mainnet.just`, and the package scripts that call the hosted Zodiac app (`push`, `pull`, `pull-org`, `pull-contracts`). Agents never use the Zodiac API key.
 - Anything under `deployed/`, and any governance action or deployment.
 - Parameters: budgets, approval ceilings, swap instance settings, funding limits, factory allowlists and role membership. Agents draft options; the acceptor decides.
 - Raising a runbook above `slop` without a fork drill record, or a policy change without the verification output.

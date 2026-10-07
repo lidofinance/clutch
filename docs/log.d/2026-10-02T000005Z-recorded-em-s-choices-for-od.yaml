@@ -1,0 +1,3 @@
+date: '2026-10-02'
+kind: Decision
+text: 'Recorded EM''s choices for OD-05: the committee Safes manage the swap instances, the live parameters are copied by pair class, and instances come from the standard factory, so recovered tokens go to the treasury. Corrected ADR 007 and the LIP, which said that anyone can place an order and that the Aragon Agent manages every instance. Closed OD-18 with evidence, and added OD-20 for the pricing configuration. Added the Stonks research note. Amended INV-002 and INV-014.'

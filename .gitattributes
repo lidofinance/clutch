@@ -1,0 +1,7 @@
+# Generated files: rebuild them with `just regen`, never merge them by hand. On a conflict,
+# take either side, run `just regen` and commit the result (ADR 012). GitHub collapses their
+# diffs in a pull request. The policy artifact is not listed: reviewers approve its diff
+# (ADR 004, decision 14).
+docs/onboarding/clutch-onboarding.html linguist-generated=true
+docs/registers/document-status.md linguist-generated=true
+docs/log.md linguist-generated=true

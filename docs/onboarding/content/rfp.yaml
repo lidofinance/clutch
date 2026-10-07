@@ -1,7 +1,6 @@
 # The request for solution (RFP) that Lido contributors sent to the policy provider, ask by ask:
 # what it asked, how Clutch answers, and what Clutch changed and why. The research note in `note`
-# records the asks; the build fails when an ask here is not in that note word for word, and when a
-# currency sign or a percentage appears: the request's allocation figures stay out.
+# records the asks; the build fails when an ask here is not in that note word for word.
 # Verdict: kept (Clutch does what the request asked), changed (Clutch answers differently; `why`
 # gives the reason), owed (the design has no answer yet). `added` lists what Clutch adds that the
 # request did not ask for.
@@ -9,7 +8,7 @@ note: docs/research/request-for-solution-2026-10-07.md
 intro: >-
   The RFP asked any other design to keep four properties, and Clutch keeps all four. Below, each card takes one
   part of the RFP. Every ask shows how Clutch answers it, and a highlighted note marks each difference and each
-  addition, with the reason. The RFP's allocation figures stay out of this page, as the mandate's do.
+  addition, with the reason. Like everything in this repository, the comparison is a draft.
 properties_sources: ["doc:docs/research/request-for-solution-2026-10-07.md#what-to-send-back"]
 properties:
   - name: DAO ownership

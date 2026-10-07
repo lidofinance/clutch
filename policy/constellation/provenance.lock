@@ -1,0 +1,24 @@
+# Files that come from the policy provider's constellation at 02ea37d (PROVENANCE.md).
+# verbatim <git blob hash> <path>: unchanged, so the file carries no SPDX line.
+# derived <path>: changed, so it carries SPDX-License-Identifier: LGPL-3.0-only and a notice (OD-34).
+# scripts/check_licences.py checks this list. Only a human adds an entry.
+verbatim 5b7267fc60bb32f5b2e1e71b9488450751402ed3 .lib/allow.ts
+derived .lib/constellation.ts
+verbatim 8663db6a80571b3bfcf690fe0dbe43cc1592186b .lib/globals.ts
+verbatim 6d97a96c3570f78f5add45ad58e8fe4bf9a3ec28 .lib/index.ts
+verbatim a64e785645abb4f21c04c58c4e1c998bd0019b8a .lib/ref.ts
+verbatim e85de7f0d2c6ebeb2b8380a6c5ab7f57cabbdb47 .lib/scripts/inspect.ts
+verbatim 07f4e2aa0f5a8b31214f99815c1ff5be3850935f .lib/scripts/push.ts
+verbatim 8799f50d878ce940201d21967d0804884b90ab37 .lib/types.ts
+derived constellation/addresses.ts
+derived constellation/allowances/index.ts
+derived constellation/index.ts
+derived constellation/nodes.ts
+verbatim 0811f1e80c9f8f48e14229e643456af18910765a constellation/roles/emergency/index.ts
+derived constellation/roles/emergency/members.ts
+derived constellation/roles/emergency/permissions.ts
+derived constellation/roles/index.ts
+verbatim 0811f1e80c9f8f48e14229e643456af18910765a constellation/roles/operator/index.ts
+derived constellation/roles/operator/members.ts
+derived constellation/roles/operator/permissions.ts
+derived zodiac.config.ts

@@ -1,0 +1,3 @@
+date: '2026-10-02'
+kind: Decision
+text: 'Recorded EM''s choice for OD-01: the screening vendor''s existing transaction guard on a dedicated operator Safe, which is also the trusted caller of every factory. Updated ADR 005, ADR 006 and ADR 010, the open decisions (OD-01 closed, OD-02 and OD-07 narrowed, OD-19 added), the parameters, INV-010, the runbook list, the LIP draft''s section 9.1 and the harness README. The vendor''s identity stays out; its evidence is cited as restricted.'

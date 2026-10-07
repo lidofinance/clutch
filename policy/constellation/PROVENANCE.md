@@ -12,6 +12,8 @@ This directory started as a copy of the policy provider's Zodiac constellation f
 
 The copied files are LGPL-3.0-only, as the upstream `LICENSE` and `package.json` state. They keep that licence under decision 9 of [ADR 001](../../docs/adr/001-repository-scope-visibility-licence-name.md) (OD-34): a derived file gets `SPDX-License-Identifier: LGPL-3.0-only` and a modification notice when it changes. New files use `AGPL-3.0-or-later`. JSON files cannot carry a header; `package.json` and `bun.lock` are derived, and `manifests/` and `artifacts/` are new.
 
+`provenance.lock` lists every file that comes from upstream: an unchanged file with its git blob hash, a changed file by path. `scripts/check_licences.py` checks every source file against it in CI ([ADR 012](../../docs/adr/012-contributing-with-many-agents.md)).
+
 ## Not copied
 
 | Path | Reason |
@@ -54,7 +56,7 @@ The import commit is byte-identical to the upstream files at the commit above. L
 | `constellation/addresses.ts`, `nodes.ts`, `index.ts`, `allowances/index.ts`, `roles/index.ts` | Rewritten: the launch-scope contracts and a deployment manifest; two Roles modifiers bound by address and no Safe node; one budget key per protocol spender with dry-run stand-ins; four roles. SPDX line and notice in each |
 | `constellation/roles/operator/*.ts`, `constellation/roles/emergency/*.ts` | Rewritten to the operator and emergency roles of ADR 005, with explicit function signatures. SPDX line and notice in each changed file; the two `index.ts` files are unchanged |
 | `zodiac.config.ts`, `tsconfig.json` | No contracts for the `allow` kit; `compiler/` is type-checked. SPDX line and notice |
-| `package.json`, `bun.lock` | Exact versions, the same as the lockfile resolved, plus `ethers` and `zodiac-roles-sdk` as direct dependencies; compile, check and test scripts. The lockfile changes only in the placement of type packages |
+| `package.json`, `bun.lock` | Exact versions, the same as the lockfile resolved, plus `ethers` and `zodiac-roles-sdk` as direct dependencies; compile, check and test scripts; every script that calls the hosted app runs `compiler/owner-guard.ts` first (ADR 012). The lockfile changes only in the placement of type packages |
 | `abis/` | Deleted: Clutch writes signatures and needs no ABI files |
 | `constellation/lib.ts`, `constellation/parameters.ts`, `constellation/roles/governance/`, `constellation/roles/technical/`, `compiler/`, `manifests/`, `artifacts/` | New |
 

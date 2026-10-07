@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T13:38:35Z
+  at: 2026-10-07T07:49:32Z
 verified: []
 sources:
   - id: s1
@@ -22,6 +22,9 @@ sources:
   - id: s4
     resource: /registers/decision-log.md
     title: Decision log — EM on the onboarding guide (OD-37) and its browser tests, 2026-10-06
+  - id: s5
+    resource: /adr/012-contributing-with-many-agents.md
+    title: ADR 012 — the invariant check in CI, and the generated files rebuilt instead of merged
 ---
 
 # Specification policy
@@ -38,7 +41,7 @@ This policy applies [ADR 004](/adr/004-specifications-and-policy-as-data.md) [s1
 
 - Each invariant has an ID `INV-NNN`. An ID is never reused.
 - Each invariant states one property that a test can check.
-- Each invariant maps to at least one named test. CI fails when an invariant has no test, once the check exists [s1].
+- Each invariant maps to at least one named test. CI fails when an invariant names a test that does not exist, or when a Draft invariant names none [s5]. A pending invariant may wait for its test until the end of phase 2, when CI fails on any invariant without a test [s1].
 - Each invariant names the ADR that sets it. An invariant that depends on an open decision is marked "pending".
 
 ## Behaviour scenarios

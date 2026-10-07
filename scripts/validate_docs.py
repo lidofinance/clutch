@@ -19,7 +19,9 @@ Profile rules on top of OKF 0.2:
   `generated.at`, and a review status of human-reviewed or finalized.
 - No `generated.at` or `verified[].at` lies in the future beyond a small clock skew.
 - Every inline [sN] marker matches a `sources` id.
-- Actors come from config/actors.yaml.
+- Humans and processes come from config/actors.yaml. Any agent id may author a page in
+  `generated.by` (ADR 012). Only listed humans verify, and only listed agents record a
+  human's verification.
 
 Clutch rules on top of the Gaggle profile:
 - AGENTS.md holds at most 60 lines (ADR 003).
@@ -35,12 +37,21 @@ Clutch rules on top of the Gaggle profile:
   (ADR 003, OD-31). The entry names the agent in `recorded_by`, and its `ref` links the
   decision-log heading that quotes the instruction. An agent never records a body's
   verification.
+- A team, such as `human:defi-tech`, verifies with `ref`: the link to the pull request that
+  a member approved. A team never accepts an ADR; only EM or the committee does (OD-50).
+- A verification from 2026-10-07 on records `sha256`, the hash of the page's body. The
+  check fails when the body differs from the hash of the latest verification, until a
+  human verifies the page again with `just verify` (OD-51).
+- An ID in the open-decision register, the invariants or the ADR numbers is used once
+  and never reused. An open decision names its question, the page that closes it, an
+  agent recommendation and who decides (ADR 012).
 """
 
 from __future__ import annotations
 
 import argparse
 import functools
+import hashlib
 import re
 import subprocess
 import sys
@@ -71,6 +82,12 @@ TYPES = {
 AGENTS_MAX_LINES = 60
 CO_VERIFIER = "human:emergency-brakes"
 BODY_ACTORS = ("human:tmc", "human:emergency-brakes")
+ACCEPTORS = ("human:em", "human:tmc")  # ADR 002: EM in the interim, the committee permanently
+# A team's verification links the pull request that a member approved (ADR 012, OD-50).
+PR_REF = re.compile(r"\Ahttps://github\.com/lidofinance/clutch/pull/\d+\Z")
+# Verifications from this date on record the hash of the page's body (ADR 012, OD-51).
+BODY_LOCK_FROM = datetime(2026, 10, 7)
+SHA256 = re.compile(r"\A[0-9a-f]{64}\Z")
 BODY_REF = re.compile(r"\A(https://\S+|urn:\S+)\Z")
 # A verification that an agent recorded links the decision-log heading that quotes the
 # human's instruction (ADR 003, OD-31).
@@ -132,7 +149,23 @@ def _allowed_actors(root: Path) -> set[str]:
     if not config.is_file():
         return set()
     data = yaml.safe_load(config.read_text(encoding="utf-8")) or {}
-    return {str(a) for key in ("humans", "processes", "agents") for a in (data.get(key) or [])}
+    return {str(a) for key in ("humans", "teams", "processes", "agents") for a in (data.get(key) or [])}
+
+
+@functools.lru_cache(maxsize=8)
+def _teams(root: Path) -> frozenset[str]:
+    config = root / "config" / "actors.yaml"
+    if not config.is_file():
+        return frozenset()
+    data = yaml.safe_load(config.read_text(encoding="utf-8")) or {}
+    return frozenset(str(a) for a in (data.get("teams") or []))
+
+
+def body_hash(text: str) -> str:
+    """The SHA-256 of a page's body: everything after the frontmatter, with LF line ends."""
+    match = FRONTMATTER.match(text)
+    body = text[match.end():] if match else text
+    return hashlib.sha256(body.replace("\r\n", "\n").encode("utf-8")).hexdigest()
 
 
 def _check_actor(actor: Any, allowed: set[str], where: str, out: list[str]) -> None:
@@ -141,6 +174,15 @@ def _check_actor(actor: Any, allowed: set[str], where: str, out: list[str]) -> N
         out.append(f"{where} is not a valid OKF actor id: {text!r}")
     elif allowed and text not in allowed:
         out.append(f"{where} {text!r} is not in config/actors.yaml")
+
+
+def _check_author(actor: Any, allowed: set[str], out: list[str]) -> None:
+    """Any agent may author a page; a human or a process must be listed (ADR 012)."""
+    text = str(actor)
+    if not ACTOR.match(text):
+        out.append(f"generated.by is not a valid OKF actor id: {text!r}")
+    elif text.startswith(("human:", "process:")):
+        _check_actor(text, allowed, "generated.by", out)
 
 
 @functools.lru_cache(maxsize=8)
@@ -204,7 +246,7 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
     if not isinstance(generated, dict) or not generated.get("by") or not generated.get("at"):
         out.append("`generated` must be a mapping with `by` and `at` (OKF 0.2 section 5.2)")
     else:
-        _check_actor(generated["by"], allowed, "generated.by", out)
+        _check_author(generated["by"], allowed, out)
         generated_at = _as_dt(generated["at"])
         if generated_at is None:
             out.append(f"generated.at is not an ISO 8601 datetime: {generated['at']!r}")
@@ -215,12 +257,17 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
     if raw_verified not in (None, []) and not isinstance(raw_verified, (list, dict)):
         out.append("`verified` must be a list of {by, at} events (OKF 0.2 section 5.2)")
     human_checks: dict[str, datetime] = {}
+    latest: tuple[datetime, str, str | None] | None = None  # the newest verification: when, who, its body hash
+    teams = _teams(docs.parent)
     for index, event in enumerate(_verifications(meta)):
         where = f"verified[{index}]"
         if not isinstance(event, dict) or not event.get("by") or not event.get("at"):
             out.append(f"{where} must be a mapping with `by` and `at`")
             continue
-        _check_actor(event["by"], allowed, f"{where}.by", out)
+        if not str(event["by"]).startswith("human:"):
+            out.append(f"{where}.by must name a human: agents never verify (ADR 003)")
+        else:
+            _check_actor(event["by"], allowed, f"{where}.by", out)
         event_at = _as_dt(event["at"])
         if event_at is None:
             out.append(f"{where}.at is not an ISO 8601 datetime: {event['at']!r}")
@@ -234,8 +281,8 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
             if not actor.startswith("human:"):
                 out.append(f"{where}: `recorded_by` applies only to a human's verification")
                 continue
-            if actor in BODY_ACTORS:
-                out.append(f"{where}: an agent never records a body's verification; a member records it (ADR 002, OD-15)")
+            if actor in BODY_ACTORS or actor in teams:
+                out.append(f"{where}: an agent never records a body's or a team's verification; a member records it (ADR 002, OD-15, OD-50)")
                 continue
             if recorder.startswith(("human:", "process:")):
                 out.append(f"{where}.recorded_by must name an agent, not {recorder!r}")
@@ -250,8 +297,26 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
         if actor in BODY_ACTORS and not BODY_REF.match(str(event.get("ref", "")).strip()):
             out.append(f"{where} by {actor} needs `ref`, an https or urn link to the body's decision record (ADR 002)")
             continue
+        if actor in teams and not PR_REF.match(str(event.get("ref", "")).strip()):
+            out.append(f"{where} by {actor} needs `ref`, the link to the pull request that a member approved (ADR 012, OD-50)")
+            continue
+        digest = event.get("sha256")
+        if digest is None and event_at >= BODY_LOCK_FROM:
+            out.append(f"{where} needs `sha256`, the hash of the page's body; write the entry with `just verify` (ADR 012, OD-51)")
+            continue
+        if digest is not None and not SHA256.match(str(digest)):
+            out.append(f"{where}.sha256 must be 64 lowercase hex characters")
+            continue
+        if latest is None or event_at >= latest[0]:
+            latest = (event_at, actor, None if digest is None else str(digest))
         if actor.startswith("human:"):
             human_checks[actor] = max(event_at, human_checks.get(actor, event_at))
+
+    if latest is not None and latest[2] is not None and latest[2] != body_hash(text):
+        out.append(
+            f"the body changed after the latest verification, by {latest[1]} at {_iso(latest[0])}; "
+            "a human verifies the page again with `just verify` (ADR 012, OD-51)"
+        )
 
     current_humans = {
         actor for actor, at in human_checks.items() if generated_at is None or at >= generated_at
@@ -273,6 +338,8 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
             acceptor = str(meta.get("accepted_by", "")).strip()
             if not acceptor.startswith("human:"):
                 out.append("an accepted Decision needs `accepted_by`, a human actor")
+            elif acceptor not in ACCEPTORS:
+                out.append(f"accepted_by {acceptor!r}: only EM or the committee accepts an ADR (ADR 002); a team never does (OD-50)")
             else:
                 _check_actor(acceptor, allowed, "accepted_by", out)
                 if acceptor not in current_humans:
@@ -367,6 +434,41 @@ def _tracked(root: Path) -> list[str] | None:
     return [item.decode() for item in done.stdout.split(b"\0") if item]
 
 
+OD_REGISTER = "docs/registers/open-decisions.md"
+ID_REGISTERS = (
+    (OD_REGISTER, re.compile(r"^\|\s*(OD-\d+)\s*\|", re.MULTILINE)),
+    ("docs/specs/invariants.md", re.compile(r"^\|\s*(INV-\d+)\s*\|", re.MULTILINE)),
+)
+
+
+def _check_registers(root: Path) -> list[Issue]:
+    """IDs are used once and never reused; an open decision is complete (ADR 012)."""
+    issues: list[Issue] = []
+    for rel, pattern in ID_REGISTERS:
+        path = root / rel
+        if not path.is_file():
+            continue
+        ids = pattern.findall(path.read_text(encoding="utf-8"))
+        for ident in sorted({i for i in ids if ids.count(i) > 1}):
+            issues.append(Issue(rel, f"{ident} appears in more than one row; an ID is used once and never reused (ADR 012)"))
+    numbers: dict[str, list[str]] = {}
+    for path in sorted((root / "docs" / "adr").glob("[0-9][0-9][0-9]-*.md")):
+        numbers.setdefault(path.name[:3], []).append(path.name)
+    for number, names in sorted(numbers.items()):
+        if len(names) > 1:
+            issues.append(Issue("docs/adr", f"ADR {number} is taken by {', '.join(names)}; a number is used once (ADR 012)"))
+    register = root / OD_REGISTER
+    if register.is_file():
+        open_part = register.read_text(encoding="utf-8").split("\n## Closed", 1)[0]
+        for line in open_part.splitlines():
+            if re.match(r"^\|\s*OD-\d+\s*\|", line):
+                cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+                if len(cells) < 5 or not all(cells[:5]):
+                    issues.append(Issue(OD_REGISTER, f"{cells[0]}: an open decision needs a question, the page that closes it, "
+                                        "an agent recommendation and who decides (ADR 012)"))
+    return issues
+
+
 def _concepts(docs: Path) -> list[Path]:
     return sorted(p for p in docs.rglob("*.md") if p.name not in RESERVED)
 
@@ -459,6 +561,8 @@ def validate(root: Path) -> list[Issue]:
                 issues.append(Issue(rel, message.removeprefix("WARN "), warning=warning))
 
         issues.extend(Issue(rel, message) for message in _check_links(path, docs, text))
+
+    issues.extend(_check_registers(root))
 
     agents = root / "AGENTS.md"
     if agents.is_file():

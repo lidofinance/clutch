@@ -1,0 +1,3 @@
+date: '2026-10-07'
+kind: Decision
+text: 'Recorded EM''s answers on more contributors and their agents in [ADR 012](/adr/012-contributing-with-many-agents.md): any agent may author a page and only listed humans verify; CODEOWNERS stays as it is for now; changes land through a merge queue; an agent opens a decision only as a complete row, and EM decides in batched interviews; agents own no GitHub accounts, which closes OD-23. Opened OD-50 to OD-53.'

@@ -18,4 +18,4 @@ license: AGPL-3.0-or-later
 5. Never write a financial figure that no attested computation produced. Never set a parameter; list options for the acceptor instead.
 6. Never set `decision: accepted` and never add a `human:` entry to `verified`. EM or the committee accepts an ADR by editing it.
 7. Add or update the ADR's line in `docs/adr/index.md`, and the matching items in `docs/registers/open-decisions.md` and `docs/specs/invariants.md`.
-8. Run `python3 scripts/validate_docs.py --write-status`, then `python3 scripts/validate_docs.py`. Fix every error before you stop.
+8. Add a log fragment with `just log Decision "..."`. Run `just regen`, then `just check-docs`. Fix every error before you stop.

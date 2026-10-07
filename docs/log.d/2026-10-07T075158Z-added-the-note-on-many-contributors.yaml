@@ -1,0 +1,3 @@
+date: '2026-10-07'
+kind: Evidence
+text: 'Added the [note on many contributors and their agents](/research/contributor-readiness-2026-10-07.md): which files most changes touch, who could author and verify, what CI ran, the unsafe defaults for an agent, the fifteen steps that EM answered by number, and the keystore rehearsal of the mainnet recipes on an anvil fork.'

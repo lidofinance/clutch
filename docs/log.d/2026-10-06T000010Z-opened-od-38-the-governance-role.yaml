@@ -1,0 +1,3 @@
+date: '2026-10-06'
+kind: Evidence
+text: Opened OD-38. The governance role's guard refuses the operator modifier and the Asset Safe as administered targets, but not the safety modifier, which the Asset Safe also owns. A fork probe granted the operator `scopeTarget` and `allowFunction` on the safety modifier through the governance role; the operator then gave its own Safe a new role on the safety modifier and moved USDC out of the Asset Safe. Added OD-38 to the open questions of ADR 006 and to the verification requests, so that the Emergency Brakes multisig verifies ADR 005 and ADR 006 after EM decides it.

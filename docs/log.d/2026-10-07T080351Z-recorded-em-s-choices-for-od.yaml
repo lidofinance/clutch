@@ -1,0 +1,3 @@
+date: '2026-10-07'
+kind: Decision
+text: 'Recorded EM''s choices for OD-50 to OD-53 in [ADR 012](/adr/012-contributing-with-many-agents.md): a team, `human:defi-tech` first, verifies with its pull request and never accepts an ADR; each verification from 2026-10-07 on records the hash of the page''s body, written by `just verify`, and an edit after it fails the check; the fork suite stays out of CI until phase 2; the request for solution''s figures are not restricted, and the README now opens with a draft disclosure: nothing is ratified, and every number is speculative.'

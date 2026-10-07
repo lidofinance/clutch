@@ -1,40 +1,82 @@
-# Dry-run of the Clutch permission system. Requires: foundry, an archive
-# mainnet RPC, and a funded throwaway EOA for the mainnet recipes.
-# Only the governance heads are mocked; see test/README.md.
+# Clutch: one command each for setup, for the checks that CI runs, and for the generated
+# files (ADR 012). Run `just <recipe>`. Without just installed:
+#   uvx --from rust-just==1.58.0 just <recipe>
+# The mainnet recipes of the dry-run kit are in mainnet.just, which this file never loads.
 
 set dotenv-load
 
-# 1. Fork drill suite (no keys needed) on the pinned mainnet fork
+py := "uv run --quiet --with pyyaml==6.0.2 python"
+browser := "uv run --quiet --with pyyaml==6.0.2 --with playwright==1.63.0 --with axe-playwright-python==0.1.8 python"
+
+# List the recipes
+default:
+	@{{just_executable()}} --list --justfile {{justfile()}}
+
+# Install what the checks need: forge-std, the policy's packages and a headless Chromium
+setup:
+	git submodule update --init --depth 1
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts
+	uv run --quiet --with playwright==1.63.0 python -m playwright install --only-shell chromium
+	forge build
+	@echo "Ready. The fork suite also needs RPC=<archive mainnet RPC> in .env, which git ignores."
+
+# Print the versions of the tools that the checks use
+doctor:
+	@uv --version
+	@echo "bun $(bun --version) (CI pins 1.3.0)"
+	@forge --version | head -1
+	@git --version
+
+# Rebuild every generated file: the policy artifact, the log, the status register and the guide
+regen: policy-compile
+	{{py}} scripts/build_log.py
+	{{py}} scripts/validate_docs.py --write-status
+	{{py}} scripts/build_onboarding.py
+
+# Run every check that CI runs, except the fork suite
+check: check-docs check-policy check-browser
+
+# The docs bundle, the generated files, the repository checks and their tests
+check-docs:
+	{{py}} scripts/validate_docs.py
+	{{py}} scripts/validate_docs.py --check-status
+	{{py}} scripts/test_validate_docs.py
+	{{py}} scripts/build_log.py --check
+	{{py}} scripts/build_onboarding.py --check
+	{{py}} scripts/test_build_onboarding.py
+	{{py}} scripts/check_redaction.py
+	{{py}} scripts/check_licences.py
+	{{py}} scripts/check_invariants.py
+	{{py}} scripts/test_checks.py
+
+# The policy artifact equals a fresh compile; the compiler's tests; the type check
+check-policy:
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun test compiler && ./node_modules/.bin/tsc --noEmit -p .
+
+# Every control of the onboarding guide, in headless Chromium
+check-browser:
+	{{browser}} scripts/test_onboarding_page.py
+
+# The fork suite on the pinned mainnet fork; needs RPC (no keys)
 test-fork:
 	RPC=${RPC} forge test -vvv
 
-# 2. Dry run on MAINNET: deploy (mocked Agent/ET + real Safe/Roles), compile the
-#    policy against the deployment manifest, then apply the artifact through the Agent
-dry-run:
-	forge script script/DeployDryRun.s.sol --rpc-url ${RPC} --broadcast --slow
-	cd policy/constellation && bun compiler/compile.ts --manifest ../../dryrun-manifest.json --out ../../dryrun-artifact.json
-	ARTIFACT=dryrun-artifact.json forge script script/ApplyPolicy.s.sol --rpc-url ${RPC} --broadcast --slow
+# Add a log entry dated now, and rebuild the log. KIND: Decision, Evidence, Import, Initialization or Update
+log kind text:
+	{{py}} scripts/build_log.py --new {{quote(kind)}} {{quote(text)}}
 
-# 3. Fund it from a 0.05 ETH funder EOA (run after dry-run; SAFE from dryrun-manifest.json)
-fund:
-	forge script script/BootstrapFunds.s.sol --rpc-url ${RPC} --broadcast
+# Record a human's own verification of a page, with the hash of its body. Humans only (CONTRIBUTING.md)
+verify page by *flags:
+	{{py}} scripts/verify_page.py {{quote(page)}} --by {{quote(by)}} {{flags}}
 
-# 4. Tear it all down: sweep funds, disable both modifiers, write teardown manifest
-teardown:
-	forge script script/Teardown.s.sol --rpc-url ${RPC} --broadcast
-
-# 5. Compile only
+# Compile the contracts and scripts
 build:
 	forge build
 
 # Policy (ADR 004): compile the constellation into the committed fork artifact
 policy-compile:
-	cd policy/constellation && bun install --frozen-lockfile && bun compiler/compile.ts --manifest manifests/fork-25946643.json
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json
 
 # Policy: fail if the committed artifact differs from a fresh compile; run the compiler tests
 policy-check:
-	cd policy/constellation && bun install --frozen-lockfile && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun test compiler
-
-# Show all manifests
-status:
-	@cat dryrun-manifest.json dryrun-artifact.json bootstrap-manifest.json teardown-manifest.json 2>/dev/null || true
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun test compiler

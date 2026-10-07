@@ -1,0 +1,3 @@
+date: '2026-10-05'
+kind: Decision
+text: Recorded EM's choices for OD-14. The mandate's publisher and schedule stand, and defi-tech builds a report generator that anyone can re-run. Prices come from Coingecko with an on-chain-rate fallback, and an old price is never carried silently. No top-up rests on a snapshot with an unpriced asset, and none starts while the monthly report is late. A report's identifier is anchored only in its forum post. EM also accepted that the mandate text states the price rule and the late-report rule. Updated ADR 008, ADR 009, the parameters, the LIP and the roadmap.

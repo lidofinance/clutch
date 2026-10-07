@@ -1,0 +1,3 @@
+date: '2026-10-05'
+kind: Decision
+text: EM accepted ADR 001 to ADR 004. At EM's instruction, the agent wrote EM's acceptance fields and `verified` entries; the decision log quotes the instruction. ADR 005 to ADR 011 stay proposed; each also needs a verification from the Emergency Brakes multisig.

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T07:10:36Z
+  at: 2026-10-07T08:02:59Z
 verified: []
 sources:
   - id: s1
@@ -36,7 +36,7 @@ sources:
     title: Decision log — EM's request for an analysis of the RFP in the guide, 2026-10-07
   - id: s9
     resource: /research/request-for-solution-2026-10-07.md
-    title: Research note — what the request for solution asked, without its allocation figures
+    title: Research note — what the request for solution asked
 ---
 
 # Onboarding guide
@@ -55,7 +55,7 @@ The onboarding guide is one interactive page that explains Clutch to everyone wh
 - Ten tabs: the actors, the flows, the mandate, the constellation, the RFP, what Clutch reuses and what it adds, the assumptions, the status, a glossary and an optional self-check of nine questions. Each flow can play on the map step by step.
 - The Mandate tab shows each block of the mandate draft as a card: what the draft says, how Clutch keeps the rule on each layer, and what Clutch changed and why. A badge and a coloured border mark each change as mandate text owed, a design choice or proposed [s5][s6]. The draft is not public, so the tab paraphrases only what the repository records about it, and the build refuses a currency sign or a percentage in it [s3].
 - The Constellation tab draws the built policy from the committed artifact: the Asset Safe, its two modifiers and their roles, with each role's holder and its count of targets and calls [s4]. It lists the parts that are specified but not built, and a table of what Clutch changed from the policy provider's constellation, each change with its kind and its reason [s5][s7].
-- The RFP tab takes the request for solution that Lido contributors sent to the policy provider, part by part. Each ask shows how Clutch answers it, marked as asked, changed or not answered yet, with the reason for each change, and each part lists what Clutch added. A research note records the asks, without the request's allocation figures [s8][s9].
+- The RFP tab takes the request for solution that Lido contributors sent to the policy provider, part by part. Each ask shows how Clutch answers it, marked as asked, changed or not answered yet, with the reason for each change, and each part lists what Clutch added. A research note records the asks [s8][s9].
 - Each element shows its status: whether it exists today, is built and tested on a fork, is specified, is open or is planned. Each claim links to its source in the repository.
 - A Plain and a Technical detail level, and a light and a dark theme. Technical adds contract addresses, exact permissions, function signatures and implementation notes, in the tabs and in every scene of the tour [s5]. The map is also a list of its boxes and arrows, so no tooltip holds the only copy of a fact. The page reads in full without JavaScript, works on a phone, where the tabs keep one row that scrolls sideways, and prints with every section open.
 - It leaves out the names of people, any unannounced counterparty, every financial figure and the fork tests' stand-in addresses. The screening vendor stays "[the screening vendor]".
@@ -64,13 +64,12 @@ The onboarding guide is one interactive page that explains Clutch to everyone wh
 
 - The text lives in `docs/onboarding/content/`, the style and the script in `docs/onboarding/src/`. The script `scripts/build_onboarding.py` writes the page [s2].
 - The build reads the facts that the repository already states: the titles and states of the decision records, the open decisions, the invariants, the runbooks, the status labels of the LIP, the roadmap, the review state of every page, and the roles and permissions of the committed policy artifact [s4].
-- The build fails when a reference to a decision, an invariant, a test, a runbook, a LIP part, a file or a heading does not resolve. It also fails when a content file repeats a key, when a glossary link has no term, when an address is not already recorded in `docs/`, in the constellation or in `script/`, or when a fork-test stand-in address reaches the page. It fails when a mandate change has an unknown state, a control line names an unknown layer, a constellation change has an unknown kind, or the mandate content holds a currency sign or a percentage. It fails when an RFP ask is not in the research note word for word, an ask has an unknown verdict, a changed ask has no reason, or the RFP content or its note holds a currency sign or a percentage.
+- The build fails when a reference to a decision, an invariant, a test, a runbook, a LIP part, a file or a heading does not resolve. It also fails when a content file repeats a key, when a glossary link has no term, when an address is not already recorded in `docs/`, in the constellation or in `script/`, or when a fork-test stand-in address reaches the page. It fails when a mandate change has an unknown state, a control line names an unknown layer, a constellation change has an unknown kind, or the mandate content holds a currency sign or a percentage. It fails when an RFP ask is not in the research note word for word, an ask has an unknown verdict, or a changed ask has no reason.
 - CI fails when the committed page differs from a fresh build [s2].
 
 ```sh
-uv run --with pyyaml python scripts/build_onboarding.py           # write the page
-uv run --with pyyaml python scripts/build_onboarding.py --check   # fail if the page is stale
-uv run --with pyyaml python scripts/test_build_onboarding.py      # test the build's checks
+just regen          # write the page, with the other generated files
+just check-docs     # among other checks: fail if the page is stale, and test the build's checks
 ```
 
 ## How it is tested
@@ -82,9 +81,10 @@ uv run --with pyyaml python scripts/test_build_onboarding.py      # test the bui
 - CI runs both test scripts on every pull request.
 
 ```sh
-uv run --with playwright==1.63.0 python -m playwright install --only-shell chromium   # once
+just setup          # once: installs the headless Chromium, among other tools
+just check-browser  # the browser tests
 uv run --with pyyaml==6.0.2 --with playwright==1.63.0 --with axe-playwright-python==0.1.8 \
-    python scripts/test_onboarding_page.py [group ...]                               # the browser tests
+    python scripts/test_onboarding_page.py [group ...]   # only the named groups
 ```
 
 ## Rules

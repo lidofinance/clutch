@@ -1,0 +1,3 @@
+date: '2026-10-05'
+kind: Decision
+text: Recorded EM's choices for OD-13. The defi-tech team writes the detector specification and makes the important updates; the vroom team reviews the detectors, runs the platform and maintains the engine and the bot. The committee configures the vault's rules in the screening vendor's service, with defi-tech supporting. Added the detector specification, owed in phase 1, to ADR 009 and the roadmap.

@@ -1,0 +1,3 @@
+date: '2026-10-05'
+kind: Decision
+text: 'Recorded EM''s choice for OD-22. DAI earns through Sky''s DAI–USDS converter: the operator converts DAI to USDS and back, one to one, with the receiver pinned to the Asset Safe, and the converter approvals carry a fixed ceiling of one TM Floor Value, as the stETH approval to wstETH does. DAI stays out of the Stonks rebalancing set, and recovery keeps its DAI→USDC instance. Added the DAI research note. Updated ADR 005, ADR 009, ADR 011, INV-008, the registers, the LIP (also its WETH and wstETH rows, left over from OD-20), the ADR and research indexes and the kit README. Only OD-23, deferred by EM, stays open.'
