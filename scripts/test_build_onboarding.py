@@ -87,6 +87,9 @@ CONTENT_CASES = [
     ("an addition without sources", lambda c: c["rfp"]["sections"][0]["added"][0].update(sources=[]), "no sources"),
     ("a duplicate RFP part", lambda c: c["rfp"]["sections"].append(copy.deepcopy(c["rfp"]["sections"][0])), "duplicate id"),
     ("a missing research note", lambda c: c["rfp"].update(note="docs/research/no-such-note.md"), "missing note docs/research/no-such-note.md"),
+    ("a banner without the draft disclaimer", lambda c: c["meta"].update(banner="A finished design."), "must keep the draft disclaimer 'hypothetical draft'"),
+    ("a banner that drops 'nothing is ratified'", lambda c: c["meta"].update(banner="**Hypothetical draft.** Approved."), "must keep the draft disclaimer 'nothing is ratified'"),
+    ("a footer without the draft disclaimer", lambda c: c["meta"].update(footer="How this page is made."), "meta footer: must keep the draft disclaimer"),
 ]
 
 

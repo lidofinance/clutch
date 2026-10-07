@@ -1,0 +1,3 @@
+date: '2026-10-07'
+kind: Update
+text: 'Published the onboarding guide on GitHub Pages at EM''s request: a CI workflow deploys the committed page from `main` after it checks that the page is a fresh build and keeps its draft disclaimer. The banner and the footer now say that the page is a hypothetical draft, not ratified and not advice; the build refuses a page without that disclaimer; and the page asks search engines not to index it ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 10). The title no longer squeezes beside the detail caption.'

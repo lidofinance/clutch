@@ -231,6 +231,12 @@ def test_structure(browser: Browser, run: Run) -> None:
         }
         run.check(all(a == b for a, b in counts_on_page.values()), "the page shows every item of the content", counts_on_page)
 
+        robots = page.get_attribute("meta[name=robots]", "content") or ""
+        banner = " ".join(page.inner_text(".banner").split()).lower()
+        footer = " ".join(page.inner_text("footer.foot").split()).lower()
+        run.check("noindex" in robots and all(p in banner for p in B.DISCLAIMERS["banner"]) and all(p in footer for p in B.DISCLAIMERS["footer"]),
+                  "the page says that it is a hypothetical draft, in the banner and the footer, and asks search engines not to index it", robots)
+
         hrefs = page.eval_on_selector_all("a[href^='http']", "els => els.map((e) => e.getAttribute('href'))")
         foreign = [h for h in hrefs if not h.startswith(B.REPO_URL)]
         missing = sorted({h for h in hrefs if h.startswith(B.REPO_URL) and not (ROOT / h[len(B.REPO_URL):].split("#")[0]).exists()})

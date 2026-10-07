@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T07:49:32Z
+  at: 2026-10-07T08:22:39Z
 verified: []
 sources:
   - id: s1
@@ -24,7 +24,7 @@ sources:
     title: Decision log — EM on the onboarding guide (OD-37) and its browser tests, 2026-10-06
   - id: s5
     resource: /adr/012-contributing-with-many-agents.md
-    title: ADR 012 — the invariant check in CI, and the generated files rebuilt instead of merged
+    title: ADR 012 — the invariant check in CI, the generated files rebuilt instead of merged, and the guide on GitHub Pages
 ---
 
 # Specification policy
@@ -76,3 +76,4 @@ Behaviour is written as "WHEN a condition, THEN an expected result". A scenario 
 - A pull request that changes a decision, a role, a permission, a flow or a runbook updates the guide's content and commits the rebuilt page in the same pull request.
 - CI fails when the committed page differs from a fresh build, or when a reference in the guide does not resolve [s4].
 - Browser tests drive every control of the page, and CI runs them on every pull request [s4].
+- CI publishes the page on GitHub Pages from `main`, after it checks that the page is a fresh build and keeps its draft disclaimer [s5].

@@ -59,6 +59,8 @@ CHANGE_STATES = {
     "proposed": ("Proposed", "◌"),
 }
 CHANGE_KINDS = {"changed": ("Changed", "↻"), "added": ("Added", "+"), "removed": ("Removed", "−")}
+# The page is public on GitHub Pages, so it keeps its draft disclaimer (ADR 012, decision 10).
+DISCLAIMERS = {"banner": ("hypothetical draft", "nothing is ratified"), "footer": ("hypothetical draft",)}
 # How Clutch answers an ask of the request for solution (RFP).
 RFP_VERDICTS = {"kept": ("As asked", "✓"), "changed": ("Changed", "↻"), "owed": ("Not answered yet", "◌")}
 EDGE_KINDS = {"owns", "role", "executes", "screens", "governs", "funds", "recovers", "safety", "watches", "signers", "reports"}
@@ -396,6 +398,13 @@ def check(c: dict[str, Any], f: dict[str, Any]) -> dict[str, dict[str, str]]:
         if ch.get("kind") not in CHANGE_KINDS:
             errors.append(f"constellation {ch.get('area')}: bad kind {ch.get('kind')}")
         sources(f"constellation {ch.get('area')}", ch.get("sources"))
+
+    # The disclaimer: the page is published, so it must say that it is a draft.
+    for key, phrases in DISCLAIMERS.items():
+        text = " ".join(str(c["meta"].get(key, "")).split()).lower()
+        for phrase in phrases:
+            if phrase not in text:
+                errors.append(f"meta {key}: must keep the draft disclaimer {phrase!r} (ADR 012, decision 10)")
 
     # The RFP: every ask must be in the research note word for word. Its figures are not
     # restricted (OD-53); the README marks every figure in the repository as a draft.
@@ -1055,6 +1064,7 @@ def render(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[str, str]]
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
 <meta name="generator" content="scripts/build_onboarding.py">
+<meta name="robots" content="noindex, nofollow">
 <script>document.documentElement.classList.add("js")</script>
 <title>{esc(m["title"])}</title>
 <style>

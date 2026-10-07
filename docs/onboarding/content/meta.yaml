@@ -2,9 +2,10 @@
 title: "Clutch: how the DAO's active treasury vault works"
 subtitle: "An onboarding guide for signers, engineers, reviewers and everyone who needs the picture."
 banner: >-
-  **Design stage. Nothing is deployed, and nothing is ratified.** This guide shows the system as the decision
-  records define it, and every number in it is a draft. Every element carries its status. Every claim links to its
-  source in the repository.
+  **Hypothetical draft.** This page shows a design under discussion for an active treasury vault of the Lido DAO.
+  Nothing is deployed, and nothing is ratified: no Lido body has approved it, and it authorises no action. Every
+  number, address and parameter is a draft that can change. It is not financial, legal or investment advice. Every
+  element carries its status, and every claim links to its source in the repository, which is not public yet.
 outcomes:
   - "Name who can move the vault's funds, and who can stop them."
   - "Walk any emergency to its first action, and say how long it takes."
@@ -79,6 +80,8 @@ owed:
   - "No runbook is written yet. Each needs a fork drill before it counts."
   - "No document describes the deployment sequence step by step yet."
 footer: |-
-  **How this page is made.** A script builds it from the repository: `uv run --with pyyaml python scripts/build_onboarding.py`. The text lives in `docs/onboarding/content/`. The tables of decisions, invariants, runbooks and permissions are read from the repository at build time. CI fails when the page differs from a fresh build, when a link to a decision, invariant, test or page does not resolve, or when a browser test of a control on this page fails. A change to a decision, a role or a flow updates this page in the same pull request.
+  **Hypothetical draft.** Nothing on this page is ratified, deployed or advice. The Lido DAO and its committees have approved none of it, and every number can change.
+
+  **How this page is made.** A script builds it from the repository: `just regen`. The text lives in `docs/onboarding/content/`. The tables of decisions, invariants, runbooks and permissions are read from the repository at build time. CI fails when the page differs from a fresh build, when a link to a decision, invariant, test or page does not resolve, or when a browser test of a control on this page fails. A change to a decision, a role or a flow updates this page in the same pull request.
 
   **What it leaves out.** No person's name, no unannounced counterparty, and no financial figure. Budgets and ceilings come from an attested computation that enters the repository with the approved mandate. The page makes no network request.
