@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T22:32:10Z
+  at: 2026-10-07T07:10:36Z
 verified: []
 sources:
   - id: s1
@@ -25,6 +25,9 @@ sources:
   - id: s5
     resource: "urn:clutch:interview:2026-10-06"
     title: EM's decision interview, continued on 2026-10-06; the transcript is not in the repository
+  - id: s6
+    resource: "urn:clutch:interview:2026-10-07"
+    title: EM's requests of 2026-10-07; the transcript is not in the repository
 ---
 
 # Decision log
@@ -34,6 +37,14 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, and a local file path out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-07 — the RFP in the onboarding guide
+
+> now I want our onboarding doc also to include analysis against RFP we shared with Zodiac inbox/Active Treasury Management — 1pager.md, similar way we made an explicit highlight of mandate and its changes, and constellation cfg with its changes
+>
+> update the onboarding doc, fix tests if needed
+
+Recorded as: the onboarding guide gets an RFP tab ([onboarding guide](/onboarding/guide.md)). The agent reads "RFP we shared with Zodiac" as the request for solution in the file that EM named, which Lido contributors sent to the policy provider. A research note records what the request asked, paraphrased and without its allocation figures, and cites the request as held outside the repository ([research note](/research/request-for-solution-2026-10-07.md), [ADR 001](/adr/001-repository-scope-visibility-licence-name.md)). The tab gives each ask its answer in the decided design, marks it as asked, changed or not answered yet, gives the reason for each change, and lists what Clutch adds that the request did not ask for. [s6]
 
 ## 2026-10-06 — the mandate and the constellation in the onboarding guide
 

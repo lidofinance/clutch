@@ -57,6 +57,7 @@ tab_intros:
   flows: "What happens, step by step. Each flow can play on the map. The badge shows whether the flow is built and tested on a fork, specified, or still open."
   mandate: "The committee's rulebook, block by block: what the draft says, how Clutch keeps each rule, and what Clutch changed and why. Highlighted notes mark each change."
   constellation: "The permission policy as code: the accounts, modifiers and roles that the committed artifact builds, what is specified but not built, and what Clutch changed from the policy provider's version."
+  rfp: "The [[RFP|request for solution]] that Lido contributors sent to the policy provider, ask by ask: what it asked, how Clutch answers, and what Clutch changed or added, and why. Highlighted notes mark each difference."
   reuse: "What Clutch takes from audited code and existing platforms, and what it adds. New things carry the review and audit risk."
   assumptions: "What must stay true for the design to hold, ranked by impact. Each one says what breaks if it is false and what watches it."
   status: "Where the work stands. These tables are read from the repository when the page is built."
