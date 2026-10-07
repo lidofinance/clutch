@@ -290,6 +290,8 @@ main:focus:not(:focus-visible), #player-title:focus:not(:focus-visible) { outlin
 
 /* The Plain / Technical switch: what Technical adds. */
 .lensnote { flex-basis: 100%; margin: 0; font-size: 0.8rem; color: var(--ink-2); text-align: right; }
+/* The caption wraps inside the controls, so the title keeps the width of the page. */
+.controls { max-width: 34rem; }
 .addr.tech { border-left: 0; padding: 0; color: inherit; font-size: inherit; }
 
 /* The mandate: what the draft says, how it is kept, and what Clutch changed.

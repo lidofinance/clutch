@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T08:03:36Z
+  at: 2026-10-07T08:22:39Z
 verified: []
 sources:
   - id: s1
@@ -57,6 +57,10 @@ EM decided on 2026-10-07, closing OD-50 to OD-53 [s1]:
 8. (OD-52) The fork suite stays out of CI for now. Phase 2 of the roadmap moves it into the merge queue and onto pushes to `main`, with the archive RPC key as a repository secret, never on a pull request.
 9. (OD-53) The request for solution's allocation figures are not restricted. The README opens with a disclosure: everything in the repository is a draft and not ratified, and every number is speculative.
 
+EM decided on 2026-10-07 [s1]:
+
+10. A CI workflow publishes the onboarding guide on GitHub Pages from `main`. The page says that it is a hypothetical draft: nothing is deployed or ratified, every number can change, and it is not advice. This replaces "internal first" of OD-37 for the guide's page alone. The repository stays private until deployment (ADR 001).
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Proposed direction
@@ -74,6 +78,7 @@ EM asked the agent to implement every step that needs no further decision [s1]. 
 - **IDs (step 9).** The validator refuses an OD, ADR or INV number that is used twice, and an open decision with an empty cell. A contributor takes the next number from `main`.
 - **Pull requests (step 11).** A pull-request template asks for the agent, what a human must check, the commands that ran and a restricted-data statement. One decision or one feature goes in each pull request.
 - **Procedures (step 12).** `CONTRIBUTING.md` holds the workflow. Four skills join `adr-draft`: `decision-interview`, `record-decision`, `guide-update` and `research-note`.
+- **The guide on GitHub Pages (decision 10).** `.github/workflows/pages.yml` runs on a push to `main` that changes the page, or by hand. It checks that the committed page is a fresh build and still carries its disclaimer, then deploys the page as `index.html`, with a `robots.txt` that asks crawlers to stay away. The page also carries a `noindex` tag. Only the deploy job may write to Pages; a pull request never deploys. The build refuses a banner or a footer that drops the disclaimer.
 - **CI gaps (step 13).** `scripts/check_licences.py` replaces ADR 001's grep command: every source file carries AGPL-3.0-or-later, a changed provider file carries LGPL-3.0-only, and an unchanged provider file matches its blob hash in `policy/constellation/provenance.lock`. `scripts/check_invariants.py` fails when an invariant names a test that does not exist, or when a Draft invariant names none. The fork suite stays a local check until phase 2 (decision 8).
 
 ## Options considered
@@ -99,6 +104,8 @@ EM asked the agent to implement every step that needs no further decision [s1]. 
 - A local rehearsal on an anvil fork may still set `PRIVATE_KEY` to one of anvil's public keys, for one command. `mainnet.just` refuses to run while it is set.
 - A contributor needs uv, bun, Foundry and git, and an archive RPC for the fork suite.
 
+- Anyone with the address can read the guide. Its source links point into the private repository, so a reader without access gets an error page there.
+
 ## Confirmation
 
 - `scripts/test_validate_docs.py`: any agent may author; an unlisted human cannot author or verify; an agent never verifies; an OD, an INV and an ADR number are each used once; an open decision needs every cell; a team verifies only with its pull request and never accepts an ADR; a verification from 2026-10-07 on needs the body's hash, and an edit after it fails.
@@ -111,6 +118,8 @@ EM asked the agent to implement every step that needs no further decision [s1]. 
 - A contributor's agent leaks a restricted term or a secret past the check.
 - The merge queue blocks routine work for more than a day.
 - An agent writes a human's entry that the human did not instruct.
+
+- `scripts/test_build_onboarding.py`: a banner or a footer without the draft disclaimer fails the build. The browser tests check the disclaimer and the `noindex` tag. `actionlint` 1.7.12 finds nothing in the workflows, and the page works when served over HTTP, with no outside request and no console message (2026-10-07).
 
 ## Open questions
 

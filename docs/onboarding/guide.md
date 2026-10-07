@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T08:02:59Z
+  at: 2026-10-07T08:22:39Z
 verified: []
 sources:
   - id: s1
@@ -37,6 +37,9 @@ sources:
   - id: s9
     resource: /research/request-for-solution-2026-10-07.md
     title: Research note — what the request for solution asked
+  - id: s10
+    resource: /adr/012-contributing-with-many-agents.md
+    title: ADR 012 — decision 10, the guide on GitHub Pages with its draft disclaimer
 ---
 
 # Onboarding guide
@@ -45,9 +48,10 @@ The onboarding guide is one interactive page that explains Clutch to everyone wh
 
 ## Open the guide
 
-- Get the file from the repository and open it in a browser. GitHub shows an HTML file as source code, so it does not show the page [s1].
+- Open the published page on GitHub Pages, at the address in the repository's Pages settings: `https://lidofinance.github.io/clutch/` for a public site. A CI workflow publishes it from `main` [s10].
+- Or get the file from the repository and open it in a browser. GitHub shows an HTML file as source code, so it does not show the page [s1].
 - The page is one self-contained file. It makes no network request and stores nothing, so it works offline.
-- The page is written to the publication standard. It goes public with the repository at deployment, not before [s1][s3].
+- The page is written to the publication standard. EM decided on 2026-10-07 to publish it ahead of the repository, which stays private until deployment [s3][s10]. Its banner and footer say that it is a hypothetical draft: nothing is deployed or ratified, every number can change, and it is not advice. The build refuses a page without that disclaimer, and the page asks search engines not to index it.
 
 ## What it holds
 

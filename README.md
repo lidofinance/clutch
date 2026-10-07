@@ -21,7 +21,7 @@ A clutch is the set of eggs brooded together in one nest. The name continues the
 
 - [AGENTS.md](AGENTS.md) — the rules for agents and humans. `CLAUDE.md` is a symlink to it.
 - [CONTRIBUTING.md](CONTRIBUTING.md) — how to set up, make a change, open a pull request and raise a decision, with or without an agent.
-- [docs/onboarding/clutch-onboarding.html](docs/onboarding/clutch-onboarding.html) — the interactive onboarding guide. Download it and open it in a browser; GitHub shows it as source. How it is built: [docs/onboarding/guide.md](docs/onboarding/guide.md).
+- [docs/onboarding/clutch-onboarding.html](docs/onboarding/clutch-onboarding.html) — the interactive onboarding guide. CI publishes it on GitHub Pages from `main` (`https://lidofinance.github.io/clutch/` for a public site); it carries the same draft disclaimer as this README. Or download it and open it in a browser; GitHub shows it as source. How it is built: [docs/onboarding/guide.md](docs/onboarding/guide.md).
 - [docs/index.md](docs/index.md) — the map, and the knowledge bundle in Open Knowledge Format 0.2.
 - [docs/product/brief.md](docs/product/brief.md) — vision, goals, North Star Metric, readers and users.
 - [docs/adr/](docs/adr/index.md) — decision records. What is still open is in [docs/registers/open-decisions.md](docs/registers/open-decisions.md).

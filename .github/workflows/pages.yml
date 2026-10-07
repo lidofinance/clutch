@@ -1,0 +1,63 @@
+name: pages
+
+# Publishes the onboarding guide on GitHub Pages (ADR 012, decision 10). The site is
+# the committed page, after two checks: it is a fresh build of the repository, and it
+# still says that it is a hypothetical draft. Only a push to main or a manual run
+# deploys; a pull request never does.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/onboarding/clutch-onboarding.html
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: assemble the site
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: install the build dependency
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet pyyaml==6.0.2
+      - name: check that the guide is a fresh build
+        run: .venv/bin/python scripts/build_onboarding.py --check
+      - name: assemble the site
+        run: |
+          mkdir -p _site
+          cp docs/onboarding/clutch-onboarding.html _site/index.html
+          printf 'User-agent: *\nDisallow: /\n' > _site/robots.txt
+      - name: refuse a page without its draft disclaimer
+        run: |
+          grep -q 'Hypothetical draft' _site/index.html
+          grep -q 'nothing is ratified' _site/index.html
+          grep -q 'name="robots" content="noindex' _site/index.html
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    name: deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T08:03:36Z
+  at: 2026-10-07T08:22:39Z
 verified: []
 sources:
   - id: s1
@@ -37,6 +37,12 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, and a local file path out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-07 — the onboarding guide on GitHub Pages
+
+> I want to host our onboarding html on GitHub pages from this repo CI workflow, implement it and tell what should I do from my side; we don't need to be super private here, just preserve disclaimers that this is a hypothetical draft, etc etc
+
+Recorded as: a CI workflow publishes the onboarding guide on GitHub Pages from `main` ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 10). This replaces "internal first" of OD-37, and "it goes public with the repository at deployment", for the guide's page alone. The repository itself stays private until deployment ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)). The page says, in its banner and its footer, that it is a hypothetical draft: nothing is deployed or ratified, every number can change, and it is not advice. The build refuses a banner or a footer without that disclaimer. [s6]
 
 ## 2026-10-07 — OD-50 to OD-53: reviewers, verification locks, the fork suite and the request's figures
 
