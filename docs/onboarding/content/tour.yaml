@@ -22,12 +22,12 @@
   sources: [ADR-005, INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
 
 - title: Every operator transaction is screened
-  text: "[the screening vendor]'s [[guard]] sits on the operator Safe. It refuses any transaction that the vendor has not approved, once and exactly.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path."
+  text: "[the screening vendor]'s [[guard]] sits on the operator Safe. It refuses any transaction that the vendor has not approved, once and exactly.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nAt launch the guard is not set yet. The vault starts under a [[launch cap]] of one million dollars, and the cap lifts once the guard is live (OD-54)."
   tech: "A transaction guard on the operator Safe. The vendor's key approves each exact transaction on chain, once, before it runs; a transaction without an approval reverts. The owners can remove the guard only through a 10-day timelock. Its bypass mode stays off: turning it on needs the vendor's approval and a 10-day timelock (INV-010)."
   nodes: [screening, operator-safe]
   edges: [screen]
   flows: [vendor-outage]
-  sources: [ADR-010, INV-010]
+  sources: [ADR-010, INV-010, OD-54]
 
 - title: Changes by motion, inside templates
   text: "The committee can widen its own permissions only through Easy Track [[motion|motions]], each built by a fixed [[template]]. LDO holders have 72 hours to object, and 0.5% of LDO stops a motion. This window is the timelock for every structural increase of exposure, such as a new target or a higher budget.\n\nAt enactment, the governance role writes the change. The modifier checks that write again: no role change, no [[delegatecall]], and no administrative target. The Asset Safe and its modifiers are refused as targets. The same motion gives the emergency role an exit from what it onboards."

@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T21:22:14Z
+  at: 2026-10-09T06:40:00Z
 verified: []
 sources:
   - id: s1
@@ -84,13 +84,19 @@ EM stated on 2026-10-06, closing OD-49 [s1]:
 
 13. Lido Lend is a separate deployment that is compatible with Morpho Blue, not markets on Morpho Blue's own contract. Its address enters with the onboarding motion, and that motion also adds its emergency exit ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13).
 
+EM decided on 2026-10-08 [s1]:
+
+14. Lido's withdrawal queue leaves the launch scope. WETH is bought and sold in CoW orders, and ETH is staked through `submit` ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 27). The other assets of the launch list stay: ETH staking, WETH, DAI with Sky's converter, and LDO.
+
+Decision 14 replaces the withdrawal-queue route of decision 6.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 | Asset or venue | Role in the vault | Notes |
 |---|---|---|
-| ETH, WETH | held; wrap and unwrap; WETH bought and sold in CoW orders by the operator, and sold by recovery; staking and Lido's withdrawal queue stay available | not a funding asset |
+| ETH, WETH | held; wrap and unwrap; WETH bought and sold in CoW orders by the operator, and sold by recovery; staking stays available; no withdrawal queue (decision 14) | not a funding asset |
 | stETH, wstETH | held; wrap and unwrap; sold through CoW orders | stETH can seed the vault |
 | USDC, USDT | held | can seed the vault |
 | DAI | held; converted to USDS and back through Sky's converter, one to one | can seed the vault; recovery sells it into USDC or USDT (OD-26) |
@@ -101,7 +107,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 | Orders account | CoW market, limit, TWAP and stop-loss orders for the operator; recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
 | Lido Lend | lending, after launch | one motion through the Morpho Blue template once Lido Lend's own contract exists, which also adds its emergency exit (OD-49); the protocol cap applies until it matures and a budget motion unlocks it (OD-41) |
 
-Out of the launch scope: sDAI, Aave and every other third-party lending market, and router swaps on Uniswap and 1inch until the screening vendor can bound their output (OD-43).
+Out of the launch scope: sDAI, Aave and every other third-party lending market, Lido's withdrawal queue (decision 14), and router swaps on Uniswap and 1inch until the screening vendor can bound their output (OD-43).
 
 ## Options considered
 

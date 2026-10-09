@@ -99,14 +99,15 @@ contract ReviewProbe is ReviewBase {
     // =================================================================
     // REGRESSION GUARD (duplicate-scope wipe): a second scope on the same
     // function replaces the first, so every spender of a token must sit in
-    // one approve scope. USDS and stETH each have two spenders.
+    // one approve scope. USDS has two spenders. stETH had two until the
+    // withdrawal queue left the design (ADR 007, decision 27).
     // =================================================================
     function test_regression_one_approve_scope_per_token_keeps_every_spender() public {
         assertTrue(_op(a.usds, _approve(a.susds, 1e18)), "usds->sUSDS");
         assertTrue(_op(a.usds, _approve(a.daiUsds, 1e18)), "usds->converter (no wipe)");
         assertTrue(_op(a.dai, _approve(a.daiUsds, 1e18)), "dai->converter");
         assertTrue(_op(a.steth, _approve(a.wsteth, 1e18)), "steth->wstETH");
-        assertTrue(_op(a.steth, _approve(a.withdrawalQueue, 1e17)), "steth->queue (no wipe)");
+        assertFalse(_op(a.steth, _approve(a.withdrawalQueue, 1e17)), "steth->queue is out of scope");
     }
 
     // =================================================================
@@ -299,8 +300,7 @@ contract ReviewProbe is ReviewBase {
         // a capped spender: the ceiling binds, below it passes
         _opRefused(a.steth, _approve(a.wsteth, FLOOR_STANDIN_STETH), "the ceiling must bind");
         assertTrue(_op(a.steth, _approve(a.wsteth, FLOOR_STANDIN_STETH - 1)), "below the ceiling passes");
-        _opRefused(a.steth, _approve(a.withdrawalQueue, FLOOR_STANDIN_STETH), "the queue ceiling must bind");
-        assertTrue(_op(a.steth, _approve(a.withdrawalQueue, FLOOR_STANDIN_STETH - 1)), "below the queue ceiling passes");
+        _opRefused(a.steth, _approve(a.withdrawalQueue, 1), "the withdrawal queue is out of scope (ADR 007, decision 27)");
         // zero is always allowed, even with the key exhausted
         assertTrue(_op(a.usdc, _approve(a.earnUsdDepositQueue, 500e6)), "a bounded approval is allowed");
         assertTrue(_op(a.usdc, _approve(a.earnUsdDepositQueue, 0)), "self-revocation must stay available");

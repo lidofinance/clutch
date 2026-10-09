@@ -1,0 +1,3 @@
+date: '2026-10-09'
+kind: Update
+text: 'Removed Lido''s withdrawal queue from the policy, the ADRs, the LIP and the guide (ADR 007 decision 27, ADR 011 decision 14): the artifact has 100 calls, and a drill shows both roles refused the queue.'

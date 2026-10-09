@@ -245,8 +245,8 @@
     - "Set a refill period below 30 days."
     - "Touch a key that is not the operator's."
     - "Use ceilings before the attested figures enter the repository."
-  numbers: ["refill period: 30 days or more", "retune: every 2 weeks", "a second motion on one key within 14 days alerts"]
-  sources: [ADR-009, INV-012, OD-41, "lip:part-7"]
+  numbers: ["refill period: 30 days or more", "no routine retune: a motion only after an event (OD-56)", "every budget motion alerts"]
+  sources: [ADR-009, INV-012, OD-41, OD-56, "lip:part-7"]
 
 # --- Operator Safe ------------------------------------------------------------------------------
 - id: operator-safe
@@ -254,7 +254,7 @@
   name: Operator Safe
   status: instance
   label: specified
-  what: "A new Safe with the committee's signers. It holds no assets and has no modules. Every transaction that it makes needs [the screening vendor]'s approval first."
+  what: "A new Safe with the committee's signers. It holds no assets and has no modules. From the lift of the launch cap, every transaction that it makes needs [the screening vendor]'s approval first. Until then it has no guard, and the vault stays under a cap of one million dollars (OD-54, OD-55)."
   controlled_by: "The committee's seven signers, at 4 of 7. Safe v1.5.0."
   can:
     - "Hold the operator role: change positions in approved protocols, within budgets."
@@ -262,12 +262,12 @@
     - "Hold the operator role on the [[orders account]]: place CoW market, [[limit order|limit]], [[TWAP]] and [[stop-loss order|stop-loss]] orders that pay the Asset Safe."
     - "Remove the screening guard, but only through a fixed 10-day timelock."
   cannot:
-    - "Run a transaction without [the screening vendor]'s single-use approval. The guard [[fail closed|fails closed]]."
+    - "Run a transaction without [the screening vendor]'s single-use approval, once the guard is set. The guard [[fail closed|fails closed]]."
     - "Hold assets or modules."
     - "Be replaced without a DAO vote. A new operator Safe also needs every factory deployed and registered again."
   numbers: ["Safe v1.5.0", "4 of 7", "guard removal: 10-day timelock"]
   address: "To be deployed"
-  sources: [ADR-005, ADR-010, ADR-006, ADR-007, INV-010, "doc:docs/registers/parameters.md#parameters"]
+  sources: [ADR-005, ADR-010, ADR-006, ADR-007, INV-010, OD-54, "doc:docs/registers/parameters.md#parameters"]
 
 # --- Emergency Safe -----------------------------------------------------------------------------
 - id: emergency-safe
@@ -319,7 +319,7 @@
   name: "[the screening vendor]'s transaction guard"
   status: instance
   label: specified
-  what: "A [[guard]] contract on the operator Safe. The Safe consults it before every transaction. It refuses a transaction that the vendor has not approved, once and exactly."
+  what: "A [[guard]] contract on the operator Safe. The Safe consults it before every transaction. It refuses a transaction that the vendor has not approved, once and exactly. It is set after the launch; the launch cap lifts once it is set with its bypass mode off (OD-54)."
   controlled_by: "The vendor's key approves transactions. Only the operator Safe's owners can remove the guard, through a 10-day timelock."
   can:
     - "Check every operator Safe transaction: each operator action, each order on the orders account and each new motion."
@@ -328,9 +328,9 @@
     - "Touch the Asset Safe, the emergency Safe, the Emergency Brakes multisig or the DAO path. Recovery never waits for the vendor."
     - "Act as a module guard. Safe v1.5.0 refuses it as one."
     - "Hold a standing approval under the agreement, except its two built-in timelock approvals. The code allows them, so monitoring alerts on one, and the vendor's written acceptance is still owed."
-  numbers: ["removal timelock: 10 days", "bypass timelock: 10 days", "bypass off before the vote"]
+  numbers: ["removal timelock: 10 days", "bypass timelock: 10 days", "bypass off before the cap lifts"]
   address: "To be deployed"
-  sources: [ADR-010, INV-010, "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
+  sources: [ADR-010, INV-010, OD-54, "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
 
 - id: vendor-service
   node: screening
@@ -391,7 +391,7 @@
   what: "The permissions of the operator Safe on the operator modifier. Every receiver, owner and beneficiary is pinned to the Asset Safe, so the operator can change positions but cannot move assets out."
   controlled_by: "Held by the operator Safe. The DAO writes it at the enabling vote. Motions widen it inside templates; a DAO vote can change it in any way."
   can:
-    - "Stake ETH, wrap and unwrap stETH and WETH, and use Lido's withdrawal queue with the Asset Safe as owner."
+    - "Stake ETH, and wrap and unwrap stETH and WETH."
     - "Deposit into and redeem from earnETH, earnUSD and sUSDS. Claims pay the Asset Safe."
     - "Convert DAI to USDS and back through Sky's converter, paid to the Asset Safe."
     - "Approve a protocol spender. The [[approval]] spends that spender's budget key, or stays under a fixed ceiling."
@@ -430,14 +430,14 @@
   status: new
   label: built
   what: "Refillable quotas on the operator modifier, counted in token units. An approval to a protocol spends the key of that spender. An approval of zero is always free."
-  controlled_by: "The DAO sets them first. The budget factory retunes them by motion."
+  controlled_by: "The DAO sets them first. A budget motion changes a key only after an event, such as a new floor or a product unlock (OD-56)."
   can:
     - "Refill each period up to a maximum. Each successful call draws them down."
     - "Stay apart: the key of one asset never pays for another asset."
   cannot:
-    - "See value. A key counts token units, so it drifts with price between retunes."
+    - "See value. A key counts token units, so it drifts with price."
   numbers: ["amounts in the repository: dry-run stand-ins", "production figures: from the attested computation, after the mandate is approved"]
-  sources: [ADR-009, INV-011, "test:test_D5_budget_enforcement_and_refill", "test:test_budget_keys_of_different_assets_are_independent"]
+  sources: [ADR-009, INV-011, OD-56, "test:test_D5_budget_enforcement_and_refill", "test:test_budget_keys_of_different_assets_are_independent"]
 
 # --- Safety modifier ----------------------------------------------------------------------------
 - id: safety-modifier
@@ -464,9 +464,9 @@
   what: "The permissions of the emergency Safe on the safety modifier. They only reduce exposure. It moves assets only to the Aragon Agent or into the orders account, and a recovery order pays only the Agent. A recovery order, which is specified, has no on-chain price floor; CoW's rules hold its fill to the on-chain market (OD-48)."
   controlled_by: "Held by the emergency Safe, at 2 of 7."
   can:
-    - "Revoke any operator target or function. One revoke reaches every operator permission on the modifier; the orders operator modifier needs its own, which is specified."
+    - "Revoke any operator target or function. One revoke reaches every operator permission on the modifier; the orders modifier needs its own, which is specified."
     - "Set any operator spender's approval to zero."
-    - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, redeem sUSDS, claim from the withdrawal queue. A protocol that a motion onboards gets its emergency exit from the same motion, which is specified (OD-49)."
+    - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, and redeem sUSDS. A protocol that a motion onboards gets its emergency exit from the same motion, which is specified (OD-49)."
     - "Unwrap wstETH and WETH, and stake ETH."
     - "Transfer the vault's tokens and Earn shares, but only to the Aragon Agent."
   cannot:
@@ -636,7 +636,6 @@
   controlled_by: "The Aragon Agent, at 1 of 1. Safe v1.5.0."
   can:
     - "Own both modifiers, and run their permitted calls as itself: it is their [[avatar]]."
-    - "Own a withdrawal-queue request."
     - "Send a token to the orders account for an order, under the orders budgets. Specified, not built."
   cannot:
     - "Take an ERC-721 or ERC-1155 safe transfer, or sign by EIP-1271. It has no [[fallback handler]], on purpose."
@@ -714,28 +713,12 @@
     - "Mint stETH to the Asset Safe on `submit`, with the referral pinned to zero."
     - "Wrap and unwrap: stETH and wstETH, ETH and WETH."
   cannot:
-    - "Turn stETH back into ETH at once. Unstaking goes through Lido's withdrawal queue and takes days."
+    - "Turn stETH back into ETH. The vault does not use Lido's withdrawal queue; it sells stETH in CoW orders instead (ADR 007, decision 27)."
   addresses:
     - {name: "stETH", address: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"}
     - {name: "wstETH", address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"}
     - {name: "WETH", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"}
   sources: [ADR-007, ADR-011, "test:test_D4_emergency_weth_route_to_agent"]
-
-- id: withdrawal-queue
-  node: protocols
-  name: Lido withdrawal queue
-  status: existing
-  label: existing
-  what: "Lido's contract that turns stETH back into ETH. The vault uses it to unstake. WETH can also be bought in a CoW order, in minutes instead of days (OD-46)."
-  controlled_by: "Its proxy admin is the Aragon Agent, so only a DAO vote upgrades it."
-  can:
-    - "Take a request from the operator, with the Asset Safe as owner, and pay the Asset Safe on claim."
-    - "Let the emergency role claim a finalized request."
-  cannot:
-    - "Cancel a request. A request takes days to finalize."
-  numbers: ["stETH approval: a fixed ceiling, no budget key (OD-27)"]
-  address: "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
-  sources: [ADR-007, OD-27, OD-46, "test:test_D3_withdrawal_queue_round_trip_buys_weth", "doc:docs/research/recovery-and-withdrawal-queue-2026-10-05.md#the-withdrawal-queue"]
 
 - id: lido-earn
   node: protocols
@@ -798,7 +781,7 @@
   status: instance
   label: specified
   what: "A new Safe that the Aragon Agent owns. Every vault swap is a [[CoW]] order placed from it. It holds only tokens in transit, between a transfer from the Asset Safe and a fill."
-  controlled_by: "The Aragon Agent, at 1 of 1. The roles act on it only through its own two modifiers."
+  controlled_by: "The Aragon Agent, at 1 of 1. The roles act on it only through its own modifier (OD-57)."
   can:
     - "Place CoW market and [[limit order|limit orders]] through CoW's order signer, and [[TWAP]] and [[stop-loss order|stop-loss orders]] through ComposableCoW."
     - "Pay the Asset Safe for the operator's orders, and the Aragon Agent for [[recovery order|recovery orders]]. Each role's permissions pin the receiver."
@@ -814,20 +797,20 @@
 
 - id: orders-modifiers
   node: orders
-  name: The orders account's two modifiers
+  name: The orders account's modifier
   status: instance
   label: specified
-  what: "Two Roles modifiers on the orders account, from the same mastercopy as the Asset Safe's. The orders operator modifier carries the operator and governance roles. The orders safety modifier carries the emergency and technical roles."
-  controlled_by: "Their owner, the orders account, so in the end the DAO."
+  what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator, emergency and technical roles, and no governance role, because no motion writes on the orders account (OD-57)."
+  controlled_by: "Its owner, the orders account, so in the end the DAO."
   can:
     - "Let the operator sign orders through the order signer and create TWAP and stop-loss orders. The receiver is the Asset Safe, and a stop-loss order's oracles are pinned to Chainlink feeds."
     - "Let the emergency role cancel any order, set a relayer approval to zero, send any listed token to the Aragon Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent."
-    - "Let the technical role disable the orders operator modifier, with the module argument pinned."
+    - "Let the technical role remove the operator Safe from the operator role, with every argument pinned. The emergency role keeps working on the same modifier (OD-57)."
   cannot:
     - "Let a motion add a token to the lists. That needs a DAO vote (OD-46)."
-    - "Let the governance role make the orders account or one of its modules a target, as on the Asset Safe (OD-38)."
+    - "Take a permission from a motion. It has no governance role; a DAO vote writes it (OD-57)."
   address: "To be deployed"
-  sources: [ADR-007, ADR-005, OD-43, OD-38, OD-46, INV-014, INV-022]
+  sources: [ADR-007, ADR-005, OD-43, OD-46, OD-57, INV-014, INV-022]
 
 - id: cow-order-signer
   node: orders

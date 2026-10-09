@@ -67,7 +67,7 @@
 
 - name: The protocols of the launch scope
   column: reused
-  what: "stETH, wstETH, WETH, Lido's withdrawal queue, Lido Earn, sUSDS and Sky's DAI–USDS converter. Lido Lend comes later through the Morpho Blue template."
+  what: "stETH, wstETH, WETH, Lido Earn, sUSDS and Sky's DAI–USDS converter. Lido Lend comes later through the Morpho Blue template. The withdrawal queue left the design on 2026-10-08."
   why: "The mandate's launch list. Clutch adds permissions only, never code, to these protocols."
   owner: "Their own governance"
   sources: [ADR-011]
@@ -82,9 +82,9 @@
 - name: "[the screening vendor]'s approval and monitoring service"
   column: reused
   what: "The vendor's existing service, which approves transactions and watches for depegs and protocol compromise."
-  why: "Lido already has an arrangement with the vendor for four guarded multisigs. On-chain blocking before execution is a hard requirement."
+  why: "Lido already has an arrangement with the vendor for four guarded multisigs. Above the launch cap, on-chain blocking before execution is a hard requirement (OD-54)."
   owner: "[the screening vendor]"
-  sources: [ADR-010, ADR-009]
+  sources: [ADR-010, ADR-009, OD-54]
 
 # --- New instance of existing code --------------------------------------------------------------
 - name: The five Safes
@@ -104,9 +104,9 @@
 - name: The screening guard instance
   column: instance
   what: "One instance of the vendor's existing transaction guard, of the build that the guarded Lido multisigs run."
-  why: "Lido writes no guard code. Lido reviews the one change made after the guard's audit: both timelocks went from 1 day to 10 days."
+  why: "Lido writes no guard code. Lido reviews the one change made after the guard's audit: both timelocks went from 1 day to 10 days. The instance is set after the launch, before the launch cap lifts (OD-54)."
   owner: "[the screening vendor]"
-  sources: [ADR-010]
+  sources: [ADR-010, OD-54]
 
 - name: Funding registries and top-up factories
   column: instance
@@ -140,7 +140,7 @@
 - name: Template factories and the budget factory
   column: new
   what: "Five template factories and one budget factory for Easy Track: the only new contracts allowed."
-  why: "Motions then onboard protocols and retune budgets without a DAO vote, but only inside templates fixed at audit time."
+  why: "Motions then onboard protocols and change budgets after an event without a DAO vote, but only inside templates fixed at audit time."
   owner: "`@lidofinance/defi-tech`; an external audit in phase 3"
   sources: [ADR-006, ADR-009, "lip:part-4"]
 

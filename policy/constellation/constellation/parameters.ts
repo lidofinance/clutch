@@ -10,7 +10,7 @@
 
 const DAY = 24n * 60n * 60n;
 
-/** One TM Floor Value in stETH: the ceiling of the stETH approvals to the wstETH contract and the withdrawal queue (OD-08, OD-27). */
+/** One TM Floor Value in stETH: the ceiling of the stETH approval to the wstETH contract (OD-08). */
 export const FLOOR_STANDIN_STETH = 10n * 10n ** 18n;
 
 /** One TM Floor Value in DAI or USDS: the ceiling of the approvals to Sky's converter (OD-22). */

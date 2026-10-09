@@ -1,5 +1,16 @@
 # Log
 
+## 2026-10-09
+
+* **Decision**: Recorded EM's choice for OD-57: one modifier on the orders account, with the operator, emergency and technical roles and no governance role; two on the Asset Safe (ADR 005 decisions 21 and 22, ADR 007 decision 28). Recorded EM's reason for OD-56 and dropped price moves from the proposed budget events (ADR 009).
+* **Update**: Removed Lido's withdrawal queue from the policy, the ADRs, the LIP and the guide (ADR 007 decision 27, ADR 011 decision 14): the artifact has 100 calls, and a drill shows both roles refused the queue.
+* **Decision**: Recorded EM's choices for OD-54 to OD-56: a launch without the screening guard under a one-million-dollar cap that the committee keeps by procedure and a forum post lifts once the guard is live (ADR 010, ADR 008), and budgets without a routine retune (ADR 009). OD-57 stays open with a clearer question.
+
+## 2026-10-08
+
+* **Decision**: Recorded EM's answers to the simplification options of 2026-10-08: A, B, B2, D, G, H and K not taken; the withdrawal queue leaves the design; OD-54 to OD-57 opened for the capped launch without the guard, its figure, the budget retune and one modifier per account.
+* **Evidence**: Added the simplification research note: eleven options checked against Lido practice, the ENS endowment and Aave's Finance Steward, chain reads at block 26147727, and a fork probe of one modifier per account (test/SingleModifierProbe.t.sol, 6 of 6, 4 mutants killed).
+
 ## 2026-10-07
 
 * **Update**: Published the onboarding guide on GitHub Pages at EM's request: a CI workflow deploys the committed page from `main` after it checks that the page is a fresh build and keeps its draft disclaimer. The banner and the footer now say that the page is a hypothetical draft, not ratified and not advice; the build refuses a page without that disclaimer; and the page asks search engines not to index it ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 10). The title no longer squeezes beside the detail caption.

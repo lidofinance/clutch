@@ -6,8 +6,8 @@ height: 750
 description: The Lido DAO owns the Asset Safe; it also owns the orders account and the first-loss Safe, which the map
   shows without an arrow. The Asset Safe owns two Roles modifiers. The operator Safe holds the operator role and Easy Track holds the governance role on the operator modifier.
   The emergency Safe holds the emergency role and the Emergency Brakes multisig holds the technical role on the safety
-  modifier. Easy Track also holds the exit-governance role there, and every role acts on the orders account through its
-  own two modifiers; the map draws no arrow for these. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
+  modifier. Easy Track also holds the exit-governance role there, and the operator, emergency and technical roles act on the
+  orders account through its own modifier; the map draws no arrow for these. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
   through CoW orders from the orders account. The first-loss Safe holds the DAO's first-loss Earn shares. Monitoring
   watches the vault and pages the Emergency Brakes multisig. Reporting publishes from the vault's snapshots.
 nodes:
@@ -92,7 +92,7 @@ nodes:
 - id: screening
   label: Screening guard
   sub: '[the screening vendor]'
-  summary: A transaction guard on the operator Safe. It refuses any transaction that the vendor has not approved once.
+  summary: A transaction guard on the operator Safe. It refuses any transaction that the vendor has not approved once. It is set after the launch; the launch cap of one million dollars lifts once it is live (OD-54).
   domain: ext
   kind: service
   status: instance
@@ -162,8 +162,7 @@ nodes:
 - id: protocols
   label: Approved protocols
   sub: Lido staking · Lido Earn · Sky
-  summary: 'Where the vault puts assets to work: stETH and wstETH, the withdrawal queue, earnETH and earnUSD, and Sky''s sUSDS
-    and converter.'
+  summary: 'Where the vault puts assets to work: stETH and wstETH, earnETH and earnUSD, and Sky''s sUSDS and converter.'
   domain: ext
   kind: external
   status: existing
@@ -174,7 +173,7 @@ nodes:
 - id: orders
   label: Orders account
   sub: CoW orders · Agent owns it
-  summary: 'A Safe that the Aragon Agent owns, with its own two modifiers. The roles place CoW orders from it: the operator''s
+  summary: 'A Safe that the Aragon Agent owns, with one modifier of its own. The roles place CoW orders from it: the operator''s
     orders pay the Asset Safe, and recovery orders pay the Aragon Agent.'
   domain: vault
   kind: contract

@@ -24,8 +24,8 @@ The constellation in `policy/constellation/constellation` follows the decisions 
 
 - The launch scope of ADR 011: no Aave, no sDAI and no other third-party lending market. The operator converts DAI to USDS and back through Sky's converter, with the receiver pinned to the Asset Safe (OD-22).
 - No order pre-signing and no CoW relayer approval on the Asset Safe (ADR 007).
-- Staking and WETH (OD-20): the operator and the emergency role stake ETH through Lido's `submit` with the referral pinned to zero; the operator wraps and unwraps WETH and requests and claims Lido withdrawals pinned to the Asset Safe; the emergency role unwraps WETH and claims withdrawals.
-- Approvals (ADR 009, OD-08): an approval to a protocol spender spends the budget key that the spender serves; zero spends nothing; deposits spend no budget. The stETH approvals to the wstETH contract and to the withdrawal queue, and the DAI and USDS approvals to the converter, have a fixed ceiling instead (OD-08, OD-22, OD-27).
+- Staking and WETH (OD-20): the operator and the emergency role stake ETH through Lido's `submit` with the referral pinned to zero; the operator wraps and unwraps WETH; the emergency role unwraps WETH. The withdrawal queue left the design on 2026-10-08, and both roles are refused it (ADR 007, decision 27).
+- Approvals (ADR 009, OD-08): an approval to a protocol spender spends the budget key that the spender serves; zero spends nothing; deposits spend no budget. The stETH approval to the wstETH contract, and the DAI and USDS approvals to the converter, have a fixed ceiling instead (OD-08, OD-22).
 - Governance (ADR 006): every operator permission lives under the `operator` key; the governance role holds no `assignRoles`, and a budget motion cannot set a refill period below 30 days.
 - Keys: each role and budget key is its label as `bytes32`, such as `bytes32("operator")`, which is how the Zodiac app encodes a key (ADR 004, decision 10).
 

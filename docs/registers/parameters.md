@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T21:22:14Z
+  at: 2026-10-09T06:40:00Z
 verified: []
 sources:
   - id: s1
@@ -44,7 +44,7 @@ sources:
 | Easy Track objection threshold | 0.5 percent of LDO, 50 basis points | Read [s2] | — |
 | Trusted caller of every factory | the operator Safe | EM decision of 2026-10-02 [s1] | [ADR 006](/adr/006-governance-through-easy-track-factories.md) |
 | Swap venue | CoW orders from the orders account: market, limit, TWAP and stop-loss; no Stonks 2.0 instance | EM decision of 2026-10-06 (OD-43) [s1], replacing Stonks 2.0 (decided 2026-09-22, OD-05, OD-20) | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Orders account | a Safe owned by the Aragon Agent at one of one, with CoW's fallback handler and its own two modifiers | EM decision of 2026-10-06 (OD-43) [s1] | ADR 007 |
+| Orders account | a Safe owned by the Aragon Agent at one of one, with CoW's fallback handler and one modifier of its own, carrying the operator, emergency and technical roles and no governance role | EM decisions of 2026-10-06 (OD-43) and 2026-10-09 (OD-57) [s1] | ADR 007, [ADR 005](/adr/005-account-graph-and-roles.md) |
 | Order receivers | the Asset Safe for the operator's orders; the Aragon Agent for the emergency role's orders | EM decision of 2026-10-06 (OD-43) [s1] | ADR 007 |
 | Router swaps (Uniswap, 1inch) | none at launch; only after the screening vendor can bound a swap's minimum output | EM decision of 2026-10-06 (OD-43) [s1] | ADR 007 |
 | Orders budgets | one budget key per listed token on transfers into the orders account; figures not in this repository | EM decision of 2026-10-06 (OD-43): budgets [s1]; one key per token is the agent's proposal; figures by attested computation | ADR 007, [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
@@ -60,6 +60,7 @@ sources:
 | Ceiling per USDS payment | 2,000,000 | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Funding registries | two: stablecoins and stETH; the Asset Safe is the only recipient of each | EM decision of 2026-10-02 [s1] | ADR 008 |
 | Funding period | one calendar month | EM decision of 2026-10-02 [s1] | ADR 008 |
+| Launch cap without the guard | one million dollars on the Asset Safe and the orders account, at the report's price rule; the first-loss Safe is outside; held by procedure; a forum post lifts it once the guard is set on the operator Safe with its bypass mode off | EM decisions of 2026-10-08 and 2026-10-09 (OD-54, OD-55) [s1] | [ADR 010](/adr/010-pre-execution-screening.md), ADR 008 |
 | Funding limit per period | one TM Floor Value in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared; the figures are not in this repository | EM decision of 2026-10-02 [s1]; figures by attested computation, entering when the mandate is approved | ADR 008 |
 | Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Funding assets | USDC, USDT, DAI, USDS, sUSDS, stETH; not ETH | EM decision of 2026-10-05 [s1] | ADR 008 |
@@ -68,14 +69,15 @@ sources:
 | First-loss burn | a DAO vote only; the first-loss Safe calls `burn` on the share token | EM decisions of 2026-10-05 and 2026-10-06 (OD-42) [s1] | ADR 008 |
 | Redemption of the first-loss shares | no role can reach the first-loss Safe; a burn or a redemption is a DAO vote | EM decisions of 2026-10-05 (OD-21, OD-28) and 2026-10-06 (OD-42) [s1] | ADR 008 |
 | Twyne | not counted against the seed until its holder and form are shown on chain or in a signed record | EM decision of 2026-10-05 [s1] | ADR 008 |
-| Budget per key | not in this repository | Computed by attested computation on 2026-09-22 and again on 2026-10-02 with the literal yield-bearing base; enters when the mandate is approved | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
+| Budget per key | not in this repository; the yield-bearing key gets a fixed monthly figure like the other keys (OD-56) | Computed by attested computation on 2026-09-22 and again on 2026-10-02 with the literal yield-bearing base; enters when the mandate is approved | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | Cap tier of a new Lido product | the protocol and counterparty cap until the product matures; the mandate states the criteria; a budget motion with a forum post unlocks it; Lido Lend is new, earnETH and earnUSD are not | EM decision of 2026-10-06 (OD-41) [s1], replacing the three-month rule of 2026-10-02 and 2026-10-05 (OD-04, OD-12) | ADR 009 |
 | Yield-bearing cap base | the top-4 stablecoins plus the yield-bearing stablecoins held directly; own-product and protocol positions excluded | EM decision of 2026-10-02 [s1] | ADR 009 |
-| Budget retune cadence | every two weeks | EM decision [s1] | ADR 009 |
+| Budget retune cadence | none: a key is set once and changes by motion only after an event | EM decision of 2026-10-09 (OD-56) [s1], replacing the fortnightly retune of 2026-09-22 | ADR 009 |
+| Budget events | a new TM Floor Value; a spender onboarded by motion; a new Lido product's unlock; the lift of the launch cap; a price move is not an event | agent proposal in ADR 009, following EM's reason of 2026-10-09 (OD-56) | ADR 009 |
 | Budget refill-period floor | 30 days | EM decision of 2026-10-02 [s1] | ADR 009 |
 | Escalation of a worsening cap breach | the Emergency Brakes multisig disables the operator modifier through the technical role when a published cap breach is still there after the committee's rebalancing window of two working days and is larger at the next fortnightly snapshot; monitoring publishes each fortnightly cap reading to IPFS, from the report generator at the snapshot's pinned block; a DAO vote can also do it | EM decisions of 2026-10-05 and 2026-10-06 (OD-29, OD-32) [s1] | ADR 009 |
 | Liquidity buffer | at least one month of baseline spend, in stablecoins held directly and sUSDS; a continuous detector, a report line, a screening rule if the vendor can check it, a display in the Zodiac UI; the committee restores it within the mandate's window; the figure is not in this repository | EM decision of 2026-10-06 (OD-40) [s1]; figure by attested computation | ADR 009 |
-| Approval bound | an approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget; the stETH approval to the wstETH contract has a fixed ceiling of one TM Floor Value in stETH; the DAI and USDS approvals to Sky's DAI–USDS converter and the stETH approval to Lido's withdrawal queue have the same fixed ceiling | EM decisions of 2026-10-02 and 2026-10-05 (OD-08, OD-22, OD-27) [s1] | ADR 007, ADR 009, ADR 011 |
+| Approval bound | an approval to a protocol spender spends the budget of the key it serves; zero is free; deposits no longer spend budget; the stETH approval to the wstETH contract has a fixed ceiling of one TM Floor Value in stETH; the DAI and USDS approvals to Sky's DAI–USDS converter have the same fixed ceiling; no approval to Lido's withdrawal queue | EM decisions of 2026-10-02, 2026-10-05 and 2026-10-08 (OD-08, OD-22; the withdrawal queue left the design) [s1] | ADR 007, ADR 009, ADR 011 |
 | Report storage | IPFS; no DataBus | EM decision [s1] | ADR 009 |
 | Report anchor | the report's forum post only; no on-chain anchor | EM decision of 2026-10-05 [s1] | ADR 009 |
 | Price source and staleness limit | Coingecko close at the Snapshot Date; a price older than 24 hours counts as missing | EM decision of 2026-10-05 [s1] | ADR 009 |
