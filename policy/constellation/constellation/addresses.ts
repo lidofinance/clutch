@@ -2,6 +2,8 @@
 // Modified for Clutch on 2026-10-06: the provider's governance actors are
 // replaced by the contracts of the launch scope and a deployment manifest.
 // See PROVENANCE.md.
+// Changed for Clutch on 2026-10-09: the withdrawal queue left the scope
+// (ADR 007, decision 27).
 import { readFileSync } from "node:fs";
 
 /**
@@ -55,8 +57,6 @@ export const USDS = "0xdC035D45d973E3EC169d2276DDab16f1e407384F";
 export const SUSDS = "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD";
 /** Sky's DAI–USDS converter (OD-22). */
 export const DAI_USDS = "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A";
-/** Lido's withdrawal queue (OD-20, OD-27). */
-export const WITHDRAWAL_QUEUE = "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1";
 /** Lido earnUSD: the USDC deposit queue, the redeem queue and the share token. */
 export const EARN_USD = {
   depositQueue: "0xC75E7E73B25fEa8bB23EB55CC48BA55067b5be76",
@@ -82,7 +82,6 @@ export const NAMES: Record<string, string> = {
   [USDS]: "USDS",
   [SUSDS]: "sUSDS",
   [DAI_USDS]: "DAI–USDS converter",
-  [WITHDRAWAL_QUEUE]: "Lido withdrawal queue",
   [EARN_USD.depositQueue]: "earnUSD USDC deposit queue",
   [EARN_USD.redeemQueue]: "earnUSD redeem queue",
   [EARN_USD.share]: "earnUSD share",

@@ -23,7 +23,7 @@ blocks:
     says: "A launch list of assets and venues: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access, Lido Lend access and LDO. It names four main stablecoins: USDC, USDT, USDS and DAI."
     kept:
       - "On chain: default deny. A new target needs a template motion with a 72-hour objection window, or a DAO vote."
-      - "Before execution: the screening vendor checks every operator transaction and every new motion."
+      - "Before execution: the screening vendor checks every operator transaction and every new motion, once the launch cap lifts (OD-54)."
       - "Detection: drift of the chain from the committed policy."
     tech: "INV-004 and INV-005 bound what a motion can add. INV-015 keeps the operator inside the launch scope."
     changes:
@@ -45,7 +45,7 @@ blocks:
       - "Before execution: a screening rule is requested that refuses an operator transaction that breaches a cap."
       - "Detection: monitoring publishes the cap reading of each fortnightly snapshot. If a breach is not fixed within two working days and is larger at the next reading, the Emergency Brakes multisig stops the operator."
       - "Display: each cap against its limit, in the Zodiac UI."
-    tech: "Budget keys count token units and refill no more often than every 30 days. Caps are ratios, so the committee retunes the budgets every two weeks."
+    tech: "Budget keys count token units and refill no more often than every 30 days. Caps are ratios, so budgets drift with price. There is no routine retune: a budget motion follows an event (OD-56)."
     changes:
       - text: "A new Lido product, Lido Lend first, stays in the protocol cap until it meets the maturity criteria and a budget motion with a forum post unlocks it. earnETH and earnUSD are not new."
         why: "A product without a track record should not take the whole vault on its first day."
@@ -82,7 +82,7 @@ blocks:
     says: "A motion seeds the vault in stETH or stablecoins, up to the TM Floor Value, and later top-ups refill it to the floor. After an objection, a further pull needs a Snapshot vote. The legacy investments reduce the seed."
     kept:
       - "On chain: two funding registries pay only the Asset Safe, within a monthly limit each."
-      - "Before execution: the screening vendor checks every top-up motion when the operator Safe creates it."
+      - "Before execution: the screening vendor checks every top-up motion when the operator Safe creates it, once the launch cap lifts (OD-54)."
       - "Detection: alerts on a top-up motion outside days 1 to 10 of a month, on top-ups above the posted shortfall, and on any top-up after an objected one."
     tech: "INV-017 fixes the registries' recipient. A registry cannot enforce the Snapshot-vote rule after an objection; monitoring and a DAO vote that sets the limit to zero cover it."
     changes:
@@ -94,7 +94,11 @@ blocks:
         why: "EM decided that stETH covers the mandate's \"(st)ETH\", so the funding registries need no ETH path."
         state: design
         sources: [ADR-008, OD-11]
-    sources: [ADR-008, OD-06, OD-11, INV-017, "runbook:Top up the vault"]
+      - text: "Until the screening guard is live, the vault stays under a cap of one million dollars on the Asset Safe and the orders account. A forum post lifts the cap once the guard is set with its bypass mode off."
+        why: "EM allowed a launch without the guard under this cap. The registries keep their limits, so the cap holds by procedure: top-ups stop at the cap, monitoring alerts above it, and LDO holders can object."
+        state: owed
+        sources: [ADR-010, ADR-008, OD-54, OD-55]
+    sources: [ADR-008, OD-06, OD-11, OD-54, INV-017, "runbook:Top up the vault"]
 
   - id: swaps
     title: Swaps

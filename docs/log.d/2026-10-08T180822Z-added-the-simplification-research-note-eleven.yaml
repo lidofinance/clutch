@@ -1,0 +1,3 @@
+date: '2026-10-08'
+kind: Evidence
+text: 'Added the simplification research note: eleven options checked against Lido practice, the ENS endowment and Aave''s Finance Steward, chain reads at block 26147727, and a fork probe of one modifier per account (test/SingleModifierProbe.t.sol, 6 of 6, 4 mutants killed).'

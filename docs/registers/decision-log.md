@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T08:22:39Z
+  at: 2026-10-09T06:40:00Z
 verified: []
 sources:
   - id: s1
@@ -28,6 +28,12 @@ sources:
   - id: s6
     resource: "urn:clutch:interview:2026-10-07"
     title: EM's requests of 2026-10-07; the transcript is not in the repository
+  - id: s7
+    resource: "urn:clutch:interview:2026-10-08"
+    title: EM's request for simplification options and EM's answers, 2026-10-08; the transcript is not in the repository
+  - id: s8
+    resource: "urn:clutch:interview:2026-10-09"
+    title: EM's answers to OD-54 to OD-57, 2026-10-09; the transcript is not in the repository
 ---
 
 # Decision log
@@ -37,6 +43,66 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, and a local file path out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-09 — OD-56's reason, and OD-57: one modifier on the orders account
+
+> Q3: on Q3 I believe we will mostly rely on the off-chain monitoring and guard, because this data is still asynchronous in its nature, so that having excessive work on-chain adds a little value imo as you mentioned price drifts happen and happen regardless our own cadence due to volatility and market stress
+> Q4: B
+
+Recorded as:
+
+- (Q3, OD-56) EM confirmed option C and gave the reason: the caps rest mostly on off-chain monitoring and the screening guard, because value data is asynchronous. More on-chain work adds little value, because prices drift with volatility and market stress whatever the cadence. Following this reason, the agent dropped "a price move outside a band" from its proposed list of budget events, so budgets do not follow prices at all ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 31 to 33).
+- (Q4, OD-57) The orders account carries one modifier, with the operator, emergency and technical roles and no governance role. The Asset Safe keeps its two modifiers. On the orders account, the technical role stops the operator by removing the operator Safe's membership of the operator role, with every argument pinned ([ADR 005](/adr/005-account-graph-and-roles.md), decision 21; [ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 28). [s8]
+
+## 2026-10-09 — OD-54 to OD-56: the capped launch, its figure and the budgets
+
+> Q1: C
+> Q2: A
+> Q3: C, but please explain in a more detailed but digestable way what is about
+>
+> On Q4 please outline all options better, what you assume to be a 'vote' and etc; I feel that I am confused now
+
+Recorded as:
+
+- (Q1, OD-54) The launch without the screening guard stays under its cap by procedure. The funding registries keep the limits of [ADR 008](/adr/008-funding-through-existing-payments.md). Until the cap lifts, the committee requests a top-up only while the vault stays at or below the cap. Monitoring alerts above the cap, and LDO holders can object to a top-up motion that would cross it. A forum post lifts the cap once the guard is set on the operator Safe with its bypass mode off. The enabling vote no longer waits for the guard ([ADR 010](/adr/010-pre-execution-screening.md), decisions 20 to 22; ADR 008, decision 20).
+- (Q2, OD-55) The cap is one million dollars, on the Asset Safe and the orders account. The first-loss Safe stays outside it ([ADR 010](/adr/010-pre-execution-screening.md), decision 20).
+- (Q3, OD-56) Budgets have no routine retune. Each key is set once and changes by motion only after an event. The yield-bearing key gets a fixed monthly budget. The caps stay detective. This replaces the fortnightly retune ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 31 to 33). EM asked for a fuller explanation, which the agent gave in its reply of 2026-10-09.
+- (Q4, OD-57) Not answered. EM asked for a clearer outline of the options and of what "vote" means. OD-57 stays open, with a clearer question.
+- (F of 2026-10-08) The withdrawal queue is now out of [ADR 007](/adr/007-swapping-through-an-orders-account.md) (decision 27), [ADR 011](/adr/011-launch-scope.md) (decision 14) and the policy. [s8]
+
+## 2026-10-08 — simplification options; OD-54 to OD-57 opened
+
+> say I want to achieve 80% of result with 20% of complexity and effort in clutch; what can be a list of options to drop or simplify things? research it hard and deep, validate every claim you made against Lido approaches and established trust models
+
+The agent answered with eleven options, A to K, each checked against Lido practice, the ENS endowment and Aave's Finance Steward ([research note](/research/simplification-2026-10-08.md)). EM answered:
+
+> - A is not an option, we must not do it basically it's a lot of ops burden — omnibus votes are heavy to run, coordinate, gather quorum and repeat especially out of order when needed
+> - B option sounds possible but still undesirable
+> - E option — I want to talk a bit more
+> - F option — we can cut withdrawal queue; others should stay IMO
+> - G options is a bit too weak to cut — we won't get rid of the on-chain code but we will lose UX a lot
+> - C option — let's test it and research
+> - H option — possible, but saves is too low
+>
+> - B2: agree to not consider, too scary
+> - D: agree to not consider, weak escape hatch without it
+> - J: we can launch without guard but under a cap of ~$1-3M only
+> - K: too early
+>
+> incorporate this input, update the reasoning, and run a batched interview afterwards
+
+Recorded as:
+
+- (A) Not taken. The template factories, the exit-governance role and the budget factory stay. A DAO vote for every change costs too much in operations: an omnibus vote is heavy to run and coordinate, needs a quorum, and is hard to repeat out of order ([ADR 006](/adr/006-governance-through-easy-track-factories.md)).
+- (B) Not taken for now. TWAP and stop-loss orders stay ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
+- (B2, D) Not considered. The orders account stays, and the emergency role keeps its recovery orders, the escape hatch ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
+- (C) The agent tested one modifier per account on a fork and opened OD-57 ([research note](/research/simplification-2026-10-08.md)).
+- (E) Opened as OD-56, for discussion ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+- (F) The withdrawal queue leaves the design: the operator's withdrawal requests and claims, its stETH approval to the queue, and the emergency role's claim. ETH staking, WETH, DAI with Sky's converter, and LDO stay. The records and the policy change follow with the answers to OD-54 to OD-57 ([ADR 007](/adr/007-swapping-through-an-orders-account.md), [ADR 011](/adr/011-launch-scope.md)).
+- (G) Not taken. The display requirements and the requested vendor rules stay: the on-chain code stays either way, and the display carries the user experience ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+- (H) Not taken. Safe v1.5.0 stays, because the saving is too small ([ADR 005](/adr/005-account-graph-and-roles.md), [ADR 010](/adr/010-pre-execution-screening.md)).
+- (J) A launch without the screening guard is acceptable under a cap of about one to three million dollars. Opened as OD-54, how the cap holds and lifts, and OD-55, its figure ([ADR 010](/adr/010-pre-execution-screening.md)).
+- (K) Not taken: too early. [s7]
 
 ## 2026-10-07 — the onboarding guide on GitHub Pages
 

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 // Modified for Clutch on 2026-10-06: rewritten to the launch scope of ADR 011
 // and the approval rule of OD-08. See PROVENANCE.md.
+// Changed for Clutch on 2026-10-09: the withdrawal queue left the scope
+// (ADR 007, decision 27).
 import { c, call, callWithValue } from "../../lib";
 import {
   DAI,
@@ -12,7 +14,6 @@ import {
   USDC,
   USDS,
   WETH,
-  WITHDRAWAL_QUEUE,
   WSTETH,
 } from "../../addresses";
 import { earn_eth_deposit_wsteth, earn_usd_deposit, sky_savings_usds } from "../../allowances";
@@ -33,7 +34,6 @@ const ZERO = "0x0000000000000000000000000000000000000000";
  */
 export const APPROVALS: readonly { token: string; spender: string; budget?: string; ceiling?: bigint }[] = [
   { token: STETH, spender: WSTETH, ceiling: FLOOR_STANDIN_STETH },
-  { token: STETH, spender: WITHDRAWAL_QUEUE, ceiling: FLOOR_STANDIN_STETH }, // OD-27
   { token: USDS, spender: SUSDS, budget: sky_savings_usds.key },
   { token: USDS, spender: DAI_USDS, ceiling: FLOOR_STANDIN_USD }, // OD-22
   { token: DAI, spender: DAI_USDS, ceiling: FLOOR_STANDIN_USD }, // OD-22
@@ -57,13 +57,11 @@ export default [
     ),
   ),
 
-  // Lido staking: stake ETH with no referral, wrap and unwrap, and the
-  // withdrawal queue, which pays a claim to the request's owner (OD-20).
+  // Lido staking: stake ETH with no referral, and wrap and unwrap (OD-20).
+  // The withdrawal queue left the scope (ADR 007, decision 27).
   callWithValue(STETH, "submit(address)", ZERO),
   call(WSTETH, "wrap(uint256)"),
   call(WSTETH, "unwrap(uint256)"),
-  call(WITHDRAWAL_QUEUE, "requestWithdrawals(uint256[],address)", undefined, c.avatar),
-  call(WITHDRAWAL_QUEUE, "claimWithdrawals(uint256[],uint256[])"),
 
   // WETH: wrap and unwrap (OD-20).
   callWithValue(WETH, "deposit()"),

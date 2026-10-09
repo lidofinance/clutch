@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 010: Pre-execution screening"
-description: A suspicious operator transaction is blocked on chain before it executes, by the screening vendor's existing transaction guard on a dedicated operator Safe that is also the trusted caller of every factory; it fails closed, and recovery never passes through vendor code; the operator Safe runs Safe v1.5.0, which the vendor supports, and the vendor is asked to refuse delegatecalls except to Safe's batching library.
+description: A suspicious operator transaction is blocked on chain before it executes, by the screening vendor's existing transaction guard on a dedicated operator Safe that is also the trusted caller of every factory; it fails closed, and recovery never passes through vendor code; the operator Safe runs Safe v1.5.0, which the vendor supports, and the vendor is asked to refuse delegatecalls except to Safe's batching library. The vault may launch without the guard under a cap of one million dollars, held by procedure; a forum post lifts the cap once the guard is live.
 tags: [screening, guard, safe, security]
 status: draft
 review_status: slop
@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T18:18:12Z
+  at: 2026-10-09T06:40:00Z
 verified: []
 sources:
   - id: s1
@@ -108,12 +108,20 @@ EM decided on 2026-10-06, closing OD-39 and OD-45 [s1]:
 
 19. The screening vendor's rules for the vault are a written list in this repository, in the [control matrix](/specs/control-matrix.md). A relaxation of a rule is a change under control: the Emergency Brakes multisig and the forum get a notice, and the vendor's own delay applies if it has one ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 26 and 30).
 
+EM decided on 2026-10-08 and 2026-10-09, closing OD-54 and OD-55 [s1]:
+
+20. The vault may launch without the screening guard, under a cap of one million dollars on the Asset Safe and the orders account. Above the cap, on-chain blocking stays a hard requirement. This narrows decision 2.
+21. The cap holds by procedure. The funding registries keep the limits of [ADR 008](/adr/008-funding-through-existing-payments.md). Until the cap lifts, the committee requests a top-up only while the vault stays at or below the cap. Monitoring alerts above the cap, and LDO holders can object to a top-up motion that would cross it.
+22. A forum post lifts the cap once the guard is set on the operator Safe with its bypass mode off.
+
+Decision 22 replaces decision 8: the enabling vote no longer waits for the guard, and the check of decision 8 applies to the lift. Decisions 9, 10 and 12 become conditions of the lift, not of the launch. Decision 18, the singleton alert, still applies from the launch.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules, ever. It holds the operator role on the operator modifier, and it is the trusted caller of every factory. It runs Safe v1.5.0, with a threshold of 4 of 7.
-- **Guard.** One instance of the vendor's guard, of the build that the Lido multisigs run, set on the operator Safe with `setGuard`. The vendor's key then turns the bypass mode off. The owners cannot turn it on again without the vendor's approval and the 10-day bypass timelock [s11]. Only then does the enabling vote grant the operator role (decision 8).
+- **Guard.** One instance of the vendor's guard, of the build that the Lido multisigs run, set on the operator Safe with `setGuard`. The vendor's key then turns the bypass mode off. The owners cannot turn it on again without the vendor's approval and the 10-day bypass timelock [s11]. Only then does the cap lift (decision 22).
 - **What it screens.** Every transaction of the operator Safe: every operator action, on the Asset Safe and on the orders account, and the creation of every motion. Motion enactment is not screened, but Easy Track's hash check fixes a motion's content at creation.
 - **What it never touches.** The emergency Safe, the Emergency Brakes multisig and the DAO path act through the safety modifier or the owner path, and no guard is set on the Asset Safe. Recovery is therefore unscreened by construction.
 - **Removal.** Only the operator Safe's owners can remove the guard, through the 10-day timelock. A vendor outage therefore stops the operator for at most ten days, and a hostile removal stays visible for ten days.
@@ -122,6 +130,14 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **The check before the vote.** The advisory, release and bug-bounty reads of the due-diligence note [s12] run again shortly before the enabling vote starts. A change on the vault's Safe paths goes to EM (decision 16).
 - **Tooling.** Add the new instance to the estate's existing bytecode-verification and state-check configurations for this guard.
 - **The rule list.** The list changes in a reviewed pull request, as the permission policy does, and the vendor's name stays redacted until it is announced.
+- **The capped launch (OD-54, OD-55).**
+  - From the enabling vote to the lift, the operator Safe has no guard. The enabling vote still creates it, grants it the operator role and registers the factories with it as their trusted caller. Its owners set the guard later with one Safe transaction, and no factory changes.
+  - Until the lift, the controls are the operator's policy, the four-of-seven threshold, monitoring, the emergency revoke and the technical switch. The cap bounds what they protect.
+  - The cap counts the Asset Safe and the orders account at the price rule of [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 20. The first-loss Safe is outside it, because no role can reach it.
+  - The cap limits what the treasury puts in. A rise in prices that takes the vault above the cap needs no action, and monitoring reports it.
+  - Monitoring alerts on a top-up motion whose enactment would take the vault above the cap, while its objection window is open, and on a vault value above the cap at each fortnightly reading.
+  - The lift: the guard instance of decision 10 is set on the operator Safe, the vendor's key turns its bypass mode off, the agreement of decision 9 is in place, and Lido's monitoring covers the instance (decision 12). A check confirms the guard's address, the bypass mode and the absence of standing approvals. The committee's forum post links the check and lifts the cap.
+  - The vendor's name stays redacted until decision 13 ends the redaction.
 - **Rules requested from the vendor** (OD-39, OD-40, OD-43, OD-47): refuse an operator transaction that would take the liquidity buffer below its floor; refuse one that would breach a cap at the post-transaction state; refuse an order whose limit price, or a router swap whose minimum output, lies too far below a market price; refuse a stop-loss order whose expiry is more than 30 days ahead. The written list shows each one as requested until the vendor confirms that it can check it before execution. The vendor is also asked whether it records rule changes and whether it can delay a relaxation.
 
 ## Options considered
@@ -130,13 +146,18 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **Option 3: a dedicated operator Safe, with the committee's Safe kept as trusted caller.** Not chosen. It pins fewer addresses, but motions would not be screened.
 - **Option 5: the guard on the committee's existing Safe.** Not chosen. It is the smallest deployment, but every committee transaction, including duties outside the vault, would need the vendor's approval.
 - **A guard written by Lido.** Rejected: it would be a new contract other than a factory.
-- **Detection and response only, or advisory screening in the signing flow.** Rejected: EM made on-chain blocking a hard requirement.
+- **Detection and response only, or advisory screening in the signing flow.** Rejected: EM made on-chain blocking a hard requirement. On 2026-10-08 EM allowed a launch without the guard under a cap (decision 20).
+- **A capped launch whose cap holds in the funding registries, lifted by a DAO vote (OD-54 A).** Not chosen by EM. It would hold on chain, at the cost of one more DAO vote at the lift.
+- **A capped launch lifted by a second registry pair whose top-up factory refuses a motion until the guard is set (OD-54 B).** Not chosen by EM. It adds a factory that reads the vendor's guard.
+- **A cap of three million dollars, or a figure set with the mandate (OD-55 B and C).** Not chosen by EM.
 
 ## Consequences
 
 - Three Safes share the committee's signers: the committee's Safe, the operator Safe and the emergency Safe. Every signer rotation must update all three.
 - The operator Safe's address is pinned in several places. It is the immutable trusted caller of every factory [s8] and the operator role's holder. Replacing it needs a DAO vote that re-registers every factory. A vendor fault does not force a replacement, because the owners can remove the guard after ten days.
 - Fail closed: a vendor outage stops operator activity and new motions. Recovery is unaffected.
+- Until the cap lifts, no operator transaction and no motion creation is screened. A top-up above the cap is a breach of procedure, not a revert. Objections and monitoring are its controls.
+- The vendor is off the launch's critical path. The enabling vote no longer waits for the guard, the vendor's terms on standing approvals or the detector's support for Safe v1.5.0. The lift waits for them.
 - The guard is the one component that can stop operator activity and motion creation, and Lido does not write it. This narrows provider independence on purpose. The structural mitigations are that recovery never passes through it, the owners can remove it after ten days, and the technical role can disable the operator modifier.
 - The build adds one change after the audit's fix review: the 10-day timelocks. It is not on the vendor's main branch, and the vendor's documentation still says 1 day. Lido reviews the change, and the vendor is asked to merge and document it [s11]. An earlier version of this record counted two such changes. The second, an early return for callers other than the guarded Safe, is the commit that the report's fix review pins [s11].
 - The vendor's support for Safe v1.5.0 rests on EM's report of 2026-10-05. The confirmation itself is outside this repository.
@@ -160,7 +181,8 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - Approval latency makes routine operation impractical.
 - The vendor withdraws its support for Safe v1.5.0.
 - The check before the enabling vote finds a Safe change on the vault's paths (decision 16).
+- A top-up takes the vault above the cap before the lift (decision 21).
 
 ## Open questions
 
-None open. OD-17 was decided on 2026-10-05, and OD-39 and OD-45 on 2026-10-06. Owed: the vendor's answers on the requested rules and on rule-change records and delays.
+None open. OD-17 was decided on 2026-10-05, OD-39 and OD-45 on 2026-10-06, and OD-54 and OD-55 on 2026-10-09. Owed: the vendor's answers on the requested rules and on rule-change records and delays, before the lift.

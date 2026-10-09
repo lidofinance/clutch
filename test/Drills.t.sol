@@ -465,44 +465,24 @@ contract Drills is ClutchFixture {
         _op(a.dai, _approve(a.daiUsds, 0));
     }
 
-    /// @dev OD-20: WETH is bought through the withdrawal queue. The request's
-    ///      owner is pinned to the Asset Safe, the claim pays it, and the vault
-    ///      wraps the ETH (ADR 007, owed fork tests). The oracle report that
-    ///      finalizes requests is simulated: the Lido contract, which holds
-    ///      the queue's FINALIZE_ROLE at the fork block, finalizes every
-    ///      pending request at the current share rate.
-    function test_D3_withdrawal_queue_round_trip_buys_weth() public {
+    /// @dev ADR 007 decision 27: the withdrawal queue left the design on
+    ///      2026-10-08. Neither the operator nor the emergency role can
+    ///      approve the queue, request a withdrawal or claim one. WETH is
+    ///      bought in CoW orders instead, and staking stays.
+    function test_D3_withdrawal_queue_is_out_of_scope() public {
         vm.deal(address(safe), 1 ether);
         _opValue(a.steth, 1 ether, abi.encodeCall(IStETH.submit, (address(0))));
+        assertGt(IERC20(a.steth).balanceOf(address(safe)), 0.99 ether, "staking stays");
 
-        // the approval to the queue has a fixed ceiling and no budget key (OD-27)
-        _opRevert(a.steth, _approve(a.withdrawalQueue, FLOOR_STANDIN_STETH));
-        uint256 amount = 0.5 ether;
-        _op(a.steth, _approve(a.withdrawalQueue, amount));
+        // no approval to the queue, of any size
+        _opRevert(a.steth, _approve(a.withdrawalQueue, 1));
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = amount;
-        _opRevert(a.withdrawalQueue, abi.encodeCall(IWithdrawalQueue.requestWithdrawals, (amounts, attacker)));
-        _op(a.withdrawalQueue, abi.encodeCall(IWithdrawalQueue.requestWithdrawals, (amounts, address(safe))));
-        IWithdrawalQueue wq = IWithdrawalQueue(a.withdrawalQueue);
-        uint256 id = wq.getLastRequestId();
-        assertEq(wq.ownerOf(id), address(safe), "the Asset Safe owns the request");
-
-        uint256 eth = wq.unfinalizedStETH();
-        uint256 shareRate = IStETH(a.steth).getPooledEthByShares(1e27);
-        vm.deal(a.steth, a.steth.balance + eth);
-        vm.prank(a.steth);
-        wq.finalize{value: eth}(id, shareRate);
-
+        amounts[0] = 0.5 ether;
+        _opRevert(a.withdrawalQueue, abi.encodeCall(IWithdrawalQueue.requestWithdrawals, (amounts, address(safe))));
         uint256[] memory ids = new uint256[](1);
-        ids[0] = id;
-        uint256[] memory hints = wq.findCheckpointHints(ids, 1, wq.getLastCheckpointIndex());
-        uint256 before = address(safe).balance;
-        _op(a.withdrawalQueue, abi.encodeCall(IWithdrawalQueue.claimWithdrawals, (ids, hints)));
-        uint256 claimed = address(safe).balance - before;
-        assertApproxEqAbs(claimed, amount, 2, "the claim must pay the Asset Safe");
-
-        _opValue(a.weth, claimed, abi.encodeCall(IWETH.deposit, ()));
-        assertEq(IERC20(a.weth).balanceOf(address(safe)), claimed);
+        uint256[] memory hints = new uint256[](1);
+        _opRevert(a.withdrawalQueue, abi.encodeCall(IWithdrawalQueue.claimWithdrawals, (ids, hints)));
+        _emRevert(a.withdrawalQueue, abi.encodeCall(IWithdrawalQueue.claimWithdrawals, (ids, hints)));
     }
 
     function test_D3_operator_cannot_route_around_avatar() public {

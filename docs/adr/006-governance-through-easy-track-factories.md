@@ -95,7 +95,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. Once it is enacted, the emergency Safe can revoke the new permission at once.
 - **The exit-governance role.** It writes permissions only under the `emergency` key, through `scopeTarget`, `scopeFunction` and `allowFunction`, with the execution options None or Send (decision 9). It refuses the Asset Safe and every module of it as a target, the safety modifier included (decision 10). It holds no `assignRoles`, cannot touch the technical role, and sets no allowance.
 - **Exit templates.** Each onboarding template also builds the emergency exit for its target: redeem, withdraw, claim and cancel with the receiver and owner pinned to the Asset Safe; a transfer of the new receipt token pinned to the Aragon Agent; and an approval of the new spender set to zero. It emits no entry, no deposit and no non-zero approval. The modifier cannot check that a tree is an exit, so the template's code, its tests and its audit carry that.
-- Every removal is an emergency action. The emergency role holds `revokeTarget` and `revokeFunction`, pinned to the `operator` key, and acts at once. Every operator permission lives under that key, so one revoke on each operator modifier reaches all of them.
+- Every removal is an emergency action. The emergency role holds `revokeTarget` and `revokeFunction`, pinned to the `operator` key, and acts at once. Every operator permission lives under that key, so one revoke on the operator modifier and one on the orders modifier reach all of them.
 
 ## Options considered
 

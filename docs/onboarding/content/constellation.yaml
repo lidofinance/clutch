@@ -8,9 +8,9 @@ intro: >-
   approve, and this page reads the graph below from that artifact when it is built.
 planned:
   - name: Orders account
-    where: "A second Agent-owned Safe, with its own two modifiers"
-    what: "An orders operator modifier for the operator and governance roles, and an orders safety modifier for the emergency and technical roles. The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
-    sources: [ADR-007, OD-43, INV-023]
+    where: "A second Agent-owned Safe, with one modifier of its own"
+    what: "One orders modifier for the operator, emergency and technical roles, with no governance role (OD-57). The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
+    sources: [ADR-007, OD-43, OD-57, INV-023]
   - name: Exit-governance role
     where: "On the safety modifier, held by the Easy Track script executor"
     what: "The motion that onboards a protocol also writes the emergency role's exit for it. The role writes only under the emergency key."
@@ -30,8 +30,8 @@ changes:
     kind: changed
     provider: "The committee's existing Safe."
     clutch: "A new operator Safe at 4 of 7, with the screening vendor's guard, which is also the trusted caller of every factory."
-    why: "Blocking a transaction before it runs is a hard requirement. A dedicated Safe carries the guard and creates every motion, so each one is screened."
-    sources: [ADR-010, OD-01, OD-19]
+    why: "Above the launch cap, blocking a transaction before it runs is a hard requirement. A dedicated Safe carries the guard and creates every motion, so each one is screened. The vault may launch without the guard under a cap of one million dollars; the guard comes before the cap lifts (OD-54, OD-55)."
+    sources: [ADR-010, OD-01, OD-19, OD-54, OD-55]
   - area: Emergency holder
     kind: changed
     provider: "The Emergency Brakes multisig."
@@ -77,9 +77,9 @@ changes:
   - area: ETH and WETH
     kind: added
     provider: "No permission for staking, WETH or the withdrawal queue."
-    clutch: "Stake ETH, wrap and unwrap WETH, and request and claim Lido withdrawals for the Asset Safe."
-    why: "ETH and WETH are on the launch list, and unstaking goes through Lido's withdrawal queue."
-    sources: [ADR-007, OD-20]
+    clutch: "Stake ETH, and wrap and unwrap WETH. No Lido withdrawal queue: stETH is sold in CoW orders instead (ADR 007, decision 27)."
+    why: "ETH and WETH are on the launch list. The withdrawal queue left the design on 2026-10-08, because CoW orders already buy WETH and a request cannot be cancelled."
+    sources: [ADR-007, ADR-011, OD-20]
   - area: Approvals and budgets
     kind: changed
     provider: "Approvals pin the spender and leave the amount open; deposits spend monthly budgets with placeholder figures."

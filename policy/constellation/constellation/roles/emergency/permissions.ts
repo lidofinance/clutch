@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 // Modified for Clutch on 2026-10-06: rewritten to the emergency role of
 // ADR 005 on the safety modifier, held by the emergency Safe. See PROVENANCE.md.
+// Changed for Clutch on 2026-10-09: the withdrawal queue left the scope
+// (ADR 007, decision 27).
 import { anyOf, c, call, callWithValue, key, unique } from "../../lib";
 import {
   DAI,
@@ -14,7 +16,6 @@ import {
   USDS,
   USDT,
   WETH,
-  WITHDRAWAL_QUEUE,
   WSTETH,
 } from "../../addresses";
 import { APPROVALS } from "../operator/permissions";
@@ -46,7 +47,6 @@ export default [
   // WETH goes through stETH: unwrap, stake, then send or swap (OD-20).
   call(WETH, "withdraw(uint256)"),
   callWithValue(STETH, "submit(address)", ZERO),
-  call(WITHDRAWAL_QUEUE, "claimWithdrawals(uint256[],uint256[])"),
 
   // Lido Earn exits. A pending deposit is cancelled; a priced one is claimed
   // so that its shares can be redeemed. Claims pay the Asset Safe.

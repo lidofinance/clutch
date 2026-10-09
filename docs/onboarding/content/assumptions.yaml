@@ -34,11 +34,19 @@
 
 - assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
   kind: trust
-  why: "On-chain blocking before execution is a hard requirement. The guard screens every operator action and every new motion."
+  why: "Above the launch cap, on-chain blocking before execution is a hard requirement. Once the cap lifts, the guard screens every operator action and every new motion."
   breaks: "One standing approval of the modifier's execution function would approve all vault activity. One approved stray delegatecall can replace the operator Safe's code and drop the guard. An outage stops the operator and new motions for up to ten days."
   watched_by: []
-  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector must add Safe v1.5.0 and this instance. The vendor's written acceptance of the no-standing-approval rule is owed."
-  sources: [ADR-010, INV-010, "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
+  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector must add Safe v1.5.0 and this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before the cap lifts, not before the launch (OD-54)."
+  sources: [ADR-010, INV-010, OD-54, "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
+
+- assumption: "Until the guard is live, the committee keeps the vault under a cap of one million dollars by procedure."
+  kind: operational
+  why: "EM allowed a launch without the screening guard under that cap, on the Asset Safe and the orders account (OD-54, OD-55)."
+  breaks: "No contract refuses a top-up above the cap: only the procedure, an objection and monitoring stop it. Until the cap lifts, no operator transaction and no motion creation is screened."
+  watched_by: []
+  watch_note: "The alerts on a top-up motion that would cross the cap, and on a vault value above it, are not built."
+  sources: [ADR-010, ADR-008, OD-54, OD-55]
 
 - assumption: "The committed artifact, compiled from the constellation, is the only statement of the policy."
   kind: design
@@ -144,13 +152,13 @@
   watch_note: "INV-017 is pending: no registry, factory or test exists. The funding flags are not built."
   sources: [ADR-008, INV-017]
 
-- assumption: "Budgets in token units, retuned every two weeks, stay close enough to the mandate's ratio caps."
+- assumption: "Budgets in token units bound the monthly flow to each spender; the caps are measured, not enforced by budgets."
   kind: design
   why: "The modifier can count only token units per key, while caps are ratios of value."
-  breaks: "Budgets drift with price between retunes. Keys for Lido products bound only the monthly movement, a weak control."
+  breaks: "Budgets drift with price, and no budget motion follows the price (OD-56). A key can allow more than its cap's room after a price rise; the published cap reading, and the guard once it is live, catch a breach. Keys for Lido products bound only the monthly movement, a weak control."
   watched_by: [INV-011, "test:test_D5_budget_enforcement_and_refill", "test:test_budget_keys_of_different_assets_are_independent"]
   watch_note: "The per-key ceilings (INV-012) wait for the attested figures. The budget-burn alerts are not built."
-  sources: [ADR-009, INV-011, INV-012]
+  sources: [ADR-009, INV-011, INV-012, OD-56]
 
 - assumption: "The attested computation behind budgets, limits and ceilings ran correctly on inputs that match the approved mandate."
   kind: operational
@@ -159,14 +167,6 @@
   watched_by: []
   watch_note: "It ran with an independent attester and pinned inputs on 2026-09-22 and 2026-10-02. The results enter only after the mandate is approved."
   sources: [ADR-009, "doc:docs/registers/parameters.md#parameters"]
-
-- assumption: "Lido's withdrawal queue finalizes requests in days, pays the Asset Safe, and changes only by DAO vote."
-  kind: trust
-  why: "It is how the vault unstakes stETH. Since OD-46 the operator can also buy WETH in a CoW order, in minutes instead of days."
-  breaks: "A request cannot be cancelled. An operator error can lock stETH in requests for days. The emergency role can claim only after finalization."
-  watched_by: ["test:test_D3_withdrawal_queue_round_trip_buys_weth"]
-  watch_note: "The test uses a simulated finalizing report."
-  sources: [ADR-007, "doc:docs/research/recovery-and-withdrawal-queue-2026-10-05.md#the-withdrawal-queue"]
 
 - assumption: "Sky's DAI–USDS converter stays one to one, with no admin and no fee, and USDS stays sound."
   kind: trust

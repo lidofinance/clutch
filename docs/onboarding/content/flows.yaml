@@ -3,7 +3,7 @@
 groups:
   - id: operations
     title: Everyday operations
-    summary: "What the committee does on a normal day. The screening guard and the policy check every operator transaction before it runs."
+    summary: "What the committee does on a normal day. The policy checks every operator transaction before it runs, and so does the screening guard once the launch cap lifts (OD-54)."
   - id: governance
     title: Changing what the operator may do
     summary: "Motions widen the operator's permissions only through fixed templates, with 72 hours for LDO holders to object. Everything else is a DAO vote."
@@ -39,7 +39,7 @@ flows:
         text: "The vendor reviews the exact transaction and approves it on chain, once. Without the approval, the guard makes the operator Safe refuse it."
         nodes: [screening, operator-safe]
         edges: [screen]
-        check: "The guard fails closed. INV-010 is pending: the harness has no guard yet."
+        check: "The guard fails closed. Until the launch cap lifts, no guard is set and this step does not happen (OD-54). INV-010 is pending: the harness has no guard yet."
       - who: "Operator modifier"
         text: "The modifier checks the call against the operator's permissions and refuses anything that the policy does not list. An approval spends its spender's budget key."
         nodes: [operator-safe, operator-modifier]
@@ -176,15 +176,15 @@ flows:
     group: governance
     title: A budget motion
     label: specified
-    summary: "How budgets follow the mandate. Every two weeks, the committee can retune the operator's budget keys by motion, from a holdings snapshot."
-    trigger: "The fortnightly snapshot shows that a budget no longer fits the mandate's caps."
+    summary: "How a budget key changes. There is no routine retune: the committee files a budget motion only after an event (OD-56)."
+    trigger: "An event: a new TM Floor Value, a new spender, a product's unlock, or the lift of the launch cap. A price move is not an event."
     time: "72 hours."
     steps:
       - who: "Committee"
-        text: "The committee reads the holdings at a pinned block and derives each key's new budget, under that key's ceiling."
+        text: "The attested computation derives the key's new budget, under that key's ceiling. The forum post names the event."
         nodes: [committee, asset-safe]
       - who: "Operator Safe"
-        text: "The operator Safe creates a motion on the budget factory. The guard screens it."
+        text: "The operator Safe creates a motion on the budget factory. The guard screens it, once the guard is set (OD-54)."
         nodes: [operator-safe, screening, easytrack]
         edges: [motions, screen]
       - who: "Easy Track"
@@ -193,9 +193,9 @@ flows:
         edges: [gov-role, object]
         check: "INV-012: the 30-day floor is tested; the per-key ceilings wait for the attested figures."
       - who: "Monitoring"
-        text: "Monitoring flags a second budget motion on the same key within 14 days."
+        text: "Monitoring flags every budget motion, and checks that its forum post names an event."
         nodes: [monitoring]
-    sources: [ADR-009, INV-011, INV-012, "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period"]
+    sources: [ADR-009, INV-011, INV-012, OD-56, "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period"]
 
   - id: dao-change
     group: governance
@@ -328,7 +328,7 @@ flows:
     group: reporting
     title: The fortnightly snapshot
     label: specified
-    summary: "Every two weeks, a reading of the vault at a pinned block drives two things: the budget retune, and the published cap reading."
+    summary: "Every two weeks, a reading of the vault at a pinned block drives the published cap reading. Budgets no longer follow it (OD-56)."
     trigger: "Every two weeks."
     steps:
       - who: "Monitoring"
@@ -342,11 +342,7 @@ flows:
         text: "If a cap is breached, the committee rebalances within two working days."
         nodes: [committee, operator-safe]
         edges: [signers-op]
-      - who: "Committee"
-        text: "Where a budget no longer fits, the committee retunes it by motion."
-        nodes: [operator-safe, easytrack]
-        edges: [motions]
-    sources: [ADR-009, OD-32, "lip:part-9"]
+    sources: [ADR-009, OD-32, OD-56, "lip:part-9"]
 
   - id: monthly-report
     group: reporting
@@ -410,7 +406,7 @@ flows:
         text: "The alert pages the signers."
         nodes: [monitoring, committee]
       - who: "Emergency Safe, 2 of 7"
-        text: "Revoke the operator's targets or functions. One revoke reaches every operator permission on the operator modifier; the orders operator modifier needs one more, once it exists."
+        text: "Revoke the operator's targets or functions. One revoke reaches every operator permission on the operator modifier; the orders modifier needs one more, once it exists."
         nodes: [emergency-safe, safety-modifier, operator-modifier]
         edges: [em-role, revoke]
         check: "INV-018: every operator permission is under one key."
@@ -423,10 +419,10 @@ flows:
         nodes: [emergency-safe, safety-modifier, asset-safe, protocols]
         edges: [em-role, own-sf, positions]
       - who: "Emergency Safe"
-        text: "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, redeem sUSDS, claim finalized withdrawals."
+        text: "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, and redeem sUSDS."
         nodes: [safety-modifier, asset-safe, protocols]
         edges: [own-sf, positions]
-        check: "Tested on a fork for sUSDS and WETH. The Earn and withdrawal-queue exits are in the policy but not yet tested."
+        check: "Tested on a fork for sUSDS and WETH. The Earn exits are in the policy but not yet tested."
       - who: "Emergency Safe"
         text: "Send assets home to the Aragon Agent. The transfer goes only to this fixed address."
         nodes: [safety-modifier, asset-safe, dao]
@@ -480,7 +476,7 @@ flows:
         nodes: [monitoring, brakes]
         edges: [page]
       - who: "Emergency Brakes multisig, 3 of 5"
-        text: "The multisig calls `disableModule` on the Asset Safe through the technical role. The module argument is pinned to the operator modifier. It does the same on the orders account for the orders operator modifier."
+        text: "The multisig calls `disableModule` on the Asset Safe through the technical role. The module argument is pinned to the operator modifier. On the orders account it removes the operator Safe from the operator role on the orders modifier instead, every argument pinned, so recovery keeps working there (OD-57)."
         nodes: [brakes, safety-modifier, asset-safe, orders]
         edges: [tech-role, own-sf]
         check: "Built for the Asset Safe. Specified for the orders account."
@@ -630,10 +626,10 @@ flows:
         text: "An external audit, Lido's review of the guard change and of CoW's order signer, and fork drills that initiate within 6 hours."
         nodes: [policy, screening, orders]
       - who: "Phase 4: governance and deployment"
-        text: "The mandate's Snapshot vote, the LIP, the enabling vote and deployment, the share transfer to the first-loss Safe and the seed motion."
+        text: "The mandate's Snapshot vote, the LIP, the enabling vote and deployment without the guard under a cap of one million dollars, the share transfer to the first-loss Safe and the seed motion."
         nodes: [dao, asset-safe, first-loss, funding]
       - who: "Phase 5: operation"
-        text: "Fortnightly retunes, monthly reports and recurring drills."
+        text: "Monthly reports, the fortnightly cap reading, budget motions after events and recurring drills. Once the guard is set with its bypass mode off, the committee's forum post lifts the launch cap."
         nodes: [committee, reporting, monitoring]
     sources: ["doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates"]
 
@@ -648,8 +644,8 @@ flows:
         text: "Before the vote, fork tests show that CoW's order signer and fallback handler work on Safe v1.5.0 behind a Roles modifier."
         nodes: [orders]
         check: "INV-022 and INV-023 are pending."
-      - who: "[the screening vendor]"
-        text: "The guard is set on the operator Safe, with bypass mode off. This is checked when the vote starts and watched until it executes."
+      - who: "Committee"
+        text: "The vote does not wait for the guard. The vault launches under a cap of one million dollars, which the committee keeps by procedure until the guard is set with its bypass mode off and its forum post lifts the cap (OD-54, OD-55)."
         nodes: [screening, operator-safe]
         edges: [screen]
       - who: "Lido"
@@ -663,7 +659,7 @@ flows:
         text: "After the vote, the Growth Committee moves the first-loss shares to the first-loss Safe, and the seed motion funds the vault."
         nodes: [funding, first-loss, asset-safe, operator-safe, easytrack]
         edges: [topup, motions]
-    sources: [ADR-004, ADR-007, ADR-008, ADR-010, INV-022, INV-023, "doc:ROADMAP.md#roadmap"]
+    sources: [ADR-004, ADR-007, ADR-008, ADR-010, INV-022, INV-023, OD-54, "doc:ROADMAP.md#roadmap"]
 
   - id: signer-rotation
     group: deployment

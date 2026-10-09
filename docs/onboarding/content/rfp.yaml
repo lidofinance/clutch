@@ -107,7 +107,7 @@ sections:
         sources: [ADR-006, OD-09]
       - asked: "For an urgent risk, the emergency authority blocks or revokes within hours, and a durable change follows later."
         verdict: kept
-        clutch: "The emergency Safe revokes the operator's targets and functions on both operator modifiers at once, and the Emergency Brakes multisig can switch the operator off. A revoke is durable: only a motion or a DAO vote grants the permission again."
+        clutch: "The emergency Safe revokes the operator's targets and functions on the operator modifier and the orders modifier at once, and the Emergency Brakes multisig can switch the operator off. A revoke is durable: only a motion or a DAO vote grants the permission again."
         sources: [ADR-005, ADR-006, INV-009, "lip:part-6"]
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#permission-change-paths", ADR-006]
 
@@ -117,8 +117,8 @@ sections:
       - asked: "A launch set of stETH, wstETH, LDO, USDC, USDT, DAI, sDAI, USDS, sUSDS, earnUSD and earnETH, with a note of the assets or actions that need custom policy work."
         verdict: changed
         clutch: "Clutch takes the mandate draft's launch list: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access, Lido Lend access and LDO. DAI earns through Sky's DAI–USDS converter, and sDAI is out."
-        why: "The mandate is the committee's rulebook. DAI earns through USDS without a swap or a third-party market, so sDAI is not needed. ETH and WETH need staking, wrapping and Lido's withdrawal queue."
-        sources: [ADR-011, OD-20, OD-22, INV-015]
+        why: "The mandate is the committee's rulebook. DAI earns through USDS without a swap or a third-party market, so sDAI is not needed. ETH and WETH need staking and wrapping. Lido's withdrawal queue left the design on 2026-10-08: stETH is sold in CoW orders instead."
+        sources: [ADR-011, ADR-007, OD-20, OD-22, INV-015]
       - asked: "Unapproved actions are denied by default. On-chain rules restrict the target contracts, the functions, the transferred value and the relevant parameters."
         verdict: kept
         clutch: "Each role reaches only named targets and functions, and no target is open as a whole. Every receiver, owner and beneficiary is pinned to the vault, and only the staking and wrapping calls can carry ETH."
@@ -169,9 +169,9 @@ sections:
         sources: [ADR-005, ADR-007, INV-002]
       - asked: "In an incident, new operator transactions stop first. The emergency signers check the event, revoke approvals, exit positions or start queued withdrawals, and return what is liquid to the treasury. The DAO disables a role or a module if needed, and an incident report follows."
         verdict: kept
-        clutch: "The Emergency Brakes multisig switches the operator off. The emergency Safe revokes, exits and returns assets, redeems Earn shares through their queues and claims Lido withdrawals that are ready. A DAO vote can disable anything, and the committee publishes an incident report within 72 hours."
+        clutch: "The Emergency Brakes multisig switches the operator off. The emergency Safe revokes, exits and returns assets, redeems Earn shares through their queues, and sells stETH by a recovery order or sends it to the Agent. A DAO vote can disable anything, and the committee publishes an incident report within 72 hours."
         sources: [ADR-005, ADR-009, INV-009, "runbook:Return assets to the Agent"]
-    tech: "The emergency role can claim Lido withdrawals but cannot request them: stETH leaves by a recovery order or by a transfer to the Agent. Earn shares leave through their redeem queues, and the role can cancel open deposit requests."
+    tech: "The vault does not use Lido's withdrawal queue (ADR 007, decision 27): stETH leaves by a recovery order or by a transfer to the Agent. Earn shares leave through their redeem queues, and the role can cancel open deposit requests."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#emergency-response", ADR-005, "lip:part-6", "doc:policy/constellation/artifacts/fork-25946643.json"]
 
   - id: monitoring
@@ -186,9 +186,10 @@ sections:
         clutch: "The detector specification lists each detector with what it watches, its severity and where it runs. It is owed in phase 1, and it sets no alert time yet."
         sources: [ADR-009, OD-13]
       - asked: "Each operator transaction is simulated and checked before execution, and the answer names the service that checks it."
-        verdict: kept
-        clutch: "The screening vendor checks each operator transaction before it runs. Its transaction guard on the operator Safe refuses any transaction that the vendor did not approve on chain, once. Every motion is screened too, because the operator Safe creates it. The repository does not record whether the vendor simulates each transaction."
-        sources: [ADR-010, OD-01, INV-010, "lip:part-9"]
+        verdict: changed
+        clutch: "From the lift of the launch cap, the screening vendor checks each operator transaction before it runs. Its transaction guard on the operator Safe refuses any transaction that the vendor did not approve on chain, once. Every motion is screened too, because the operator Safe creates it. Until the cap lifts, the vault runs without the guard under a cap of one million dollars, which the committee keeps by procedure. The repository does not record whether the vendor simulates each transaction."
+        why: "EM allowed a launch without the guard under this cap, so the vendor is not on the launch's critical path. Above the cap, blocking before execution stays a hard requirement."
+        sources: [ADR-010, OD-01, OD-54, OD-55, INV-010, "lip:part-9"]
       - asked: "The answer explains what happens when the monitoring or blocking service is unavailable. On-chain permissions stay the final enforcement layer, and losing monitoring never widens them."
         verdict: kept
         clutch: "The guard fails closed: the operator and new motions stop, and recovery is unaffected. The owners can remove the guard after ten days. If monitoring stops, the permissions on chain still hold and do not widen."

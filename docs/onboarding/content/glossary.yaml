@@ -111,16 +111,20 @@
   sources: [ADR-008, OD-42, INV-021]
 
 - term: Fortnightly snapshot
-  plain: "A reading of the vault's holdings at a pinned block every two weeks. It drives the budget retune and the published cap reading."
-  sources: [ADR-009, OD-32]
+  plain: "A reading of the vault's holdings at a pinned block every two weeks. It drives the published cap reading. Budgets no longer follow it (OD-56)."
+  sources: [ADR-009, OD-32, OD-56]
 
 - term: Guard
-  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard on the operator Safe. A module guard does the same for module transactions; Clutch uses none."
+  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard on the operator Safe, set after the launch and before the [[launch cap]] lifts. A module guard does the same for module transactions; Clutch uses none."
   sources: [ADR-010]
 
 - term: Invariant
   plain: "A property that must always hold, stated so that a test can check it. Each has an ID, `INV-NNN`, that is never reused."
   sources: ["doc:docs/specs/specification-policy.md#invariants"]
+
+- term: Launch cap
+  plain: "A cap of one million dollars on the Asset Safe and the orders account while the screening guard is not live. The committee keeps it by procedure: top-ups stop at the cap, monitoring alerts above it, and LDO holders can object. A forum post lifts it once the guard is set with its bypass mode off."
+  sources: [ADR-010, ADR-008, OD-54, OD-55]
 
 - term: Limit order
   plain: "A CoW order that sells only at a set price or better. It can stand for up to 30 days. A sale when a price rises to a target is a limit order."
@@ -163,8 +167,8 @@
   sources: ["doc:docs/registers/open-decisions.md#open-decisions"]
 
 - term: Orders account
-  plain: "A Safe that the Aragon Agent owns, with CoW's fallback handler and its own two modifiers. The roles place CoW orders from it. It holds only tokens in transit."
-  sources: [ADR-007, OD-43, INV-023]
+  plain: "A Safe that the Aragon Agent owns, with CoW's fallback handler and one modifier of its own. The roles place CoW orders from it. It holds only tokens in transit."
+  sources: [ADR-007, OD-43, OD-57, INV-023]
 
 - term: Permission
   plain: "The rule stored for one role, contract and function. It says which argument values are allowed. A new write replaces the old rule; it does not add to it."
@@ -244,5 +248,5 @@
   sources: [ADR-007, "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
 - term: Withdrawal queue
-  plain: "Lido's contract that turns stETH back into ETH. A request cannot be cancelled and takes days to finalize."
-  sources: [ADR-007]
+  plain: "Lido's contract that turns stETH back into ETH. A request cannot be cancelled and takes days to finalize. The vault does not use it: it left the design on 2026-10-08, and stETH is sold in CoW orders instead."
+  sources: [ADR-007, ADR-011]

@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 005: Account graph and roles"
-description: A Safe owned only by the Aragon Agent holds the assets; two Roles modifiers split the operator and governance roles from the emergency and technical roles; a dedicated operator Safe with the committee's signers holds the operator role; the emergency Safe carries the same signers at a quorum of two; the Emergency Brakes multisig can disable the operator's modifiers and nothing else; an Agent-owned orders account with two modifiers of its own places every CoW order, and an Agent-owned first-loss Safe with no modules holds the first-loss shares; the Asset Safe, the operator Safe and the emergency Safe run Safe v1.5.0, and the Asset Safe has no fallback handler.
+description: A Safe owned only by the Aragon Agent holds the assets; two Roles modifiers split the operator and governance roles from the emergency and technical roles; a dedicated operator Safe with the committee's signers holds the operator role; the emergency Safe carries the same signers at a quorum of two; the Emergency Brakes multisig can stop the operator and nothing else; an Agent-owned orders account with one modifier of its own places every CoW order, and an Agent-owned first-loss Safe with no modules holds the first-loss shares; the Asset Safe, the operator Safe and the emergency Safe run Safe v1.5.0, and the Asset Safe has no fallback handler.
 tags: [architecture, roles, safe, zodiac, emergency]
 status: draft
 review_status: slop
@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T21:22:14Z
+  at: 2026-10-09T08:00:00Z
 verified: []
 sources:
   - id: s1
@@ -107,6 +107,13 @@ EM decided on 2026-10-06, closing OD-42 and OD-43 [s1]:
 19. The DAO's first-loss Earn shares sit in a dedicated first-loss Safe, owned by the Aragon Agent at one of one, with no modules. No role can reach them ([ADR 008](/adr/008-funding-through-existing-payments.md)).
 20. A dedicated orders account places every swap as a CoW order. It is a Safe owned by the Aragon Agent, with CoW's fallback handler and its own modifiers ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
 
+EM decided on 2026-10-09, closing OD-57 [s1]:
+
+21. The orders account carries one modifier, with the operator, emergency and technical roles and no governance role. The Asset Safe keeps its two modifiers (decision 6).
+22. On the orders account, the technical role stops the operator by removing the operator Safe's membership of the operator role, with every argument pinned.
+
+Decisions 21 and 22 narrow decision 6 to the Asset Safe, and decision 18's switch on the orders account becomes the membership removal.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
@@ -117,18 +124,18 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - **Operator modifier.** A minimal proxy of the Roles mastercopy. Owner, avatar and target are the Asset Safe. It carries the `operator` and `governance` roles.
 - **Safety modifier.** A second minimal proxy with the same settings. It carries the `emergency` and `technical` roles, and the exit-governance role through which a motion adds an emergency exit ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13).
 - The Asset Safe owns both modifiers. A role's call executes as the Safe, so a narrowly scoped role can administer a modifier without any authority over the Agent. This is how the emergency role revokes the operator.
-- **Orders account.** A new Safe owned one-of-one by the Aragon Agent, with CoW's fallback handler. It holds only tokens in transit between a transfer and a fill. It runs Safe v1.5.0 if a fork test shows that CoW's fallback handler works on it; that is not checked yet. Its two modifiers mirror the Asset Safe's: the orders operator modifier carries the `operator` and `governance` roles, and the orders safety modifier carries the `emergency` and `technical` roles ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
+- **Orders account.** A new Safe owned one-of-one by the Aragon Agent, with CoW's fallback handler. It holds only tokens in transit between a transfer and a fill. It runs Safe v1.5.0 if a fork test shows that CoW's fallback handler works on it; that is not checked yet. It has one modifier, the orders modifier, with the `operator`, `emergency` and `technical` roles and no `governance` role (decision 21). No motion writes there: a DAO vote adds a token and grants the order signer's delegatecall ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). The technical role stops the operator there by `assignRoles(operatorSafe, [operator], [false])`, with every argument pinned, and the emergency role keeps working on the same modifier (decision 22).
 - **First-loss Safe.** A new Safe owned one-of-one by the Aragon Agent, with no module, no guard and no fallback handler, on Safe v1.5.0 like the Asset Safe. It holds only the DAO's first-loss Earn shares. A burn is a DAO vote ([ADR 008](/adr/008-funding-through-existing-payments.md)).
 - Easy Track never receives authority over the Agent.
 
 | Role | Holder | Modifier | May do | May not do |
 |---|---|---|---|---|
 | DAO | Aragon Agent, by vote through Dual Governance | owner path | everything: own the Safe, replace the policy, change membership | — |
-| `operator` | operator Safe, the committee's signers, four of seven, screened ([ADR 010](/adr/010-pre-execution-screening.md)) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below a fixed ceiling ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); stake ETH, and request and claim Lido withdrawals pinned to the Asset Safe ([ADR 007](/adr/007-swapping-through-an-orders-account.md)); convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md)); fund the orders account under budgets, and from it place CoW orders that pay the Asset Safe ([ADR 007](/adr/007-swapping-through-an-orders-account.md)) | move assets out, except into the orders account; borrow; administer a modifier or a Safe; change its own permissions |
-| `governance` | Easy Track executor | operator, orders operator | write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | submit a condition tree; grant or remove any role; touch the emergency role; target the modifier's avatar or any of its modules (OD-38); grant delegatecall (OD-36) |
-| `emergency` | emergency Safe, two signatures, the committee's signers | safety | zero approvals; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS; send assets to the orders account or to the Agent; revoke the operator's targets and functions on both operator modifiers, which is how every removal happens; on the orders account, cancel orders, set a relayer approval to zero, send tokens to the Agent or the Asset Safe, and place orders that buy USDC or USDT and pay the Agent | add a permission; enter a protocol except by staking ETH; borrow; reach the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md)); change the recovery destination; disable a module |
+| `operator` | operator Safe, the committee's signers, four of seven, screened once the launch cap lifts ([ADR 010](/adr/010-pre-execution-screening.md) decision 22) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below a fixed ceiling ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)); stake ETH ([ADR 007](/adr/007-swapping-through-an-orders-account.md)); convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md)); fund the orders account under budgets, and from it place CoW orders that pay the Asset Safe ([ADR 007](/adr/007-swapping-through-an-orders-account.md)) | move assets out, except into the orders account; borrow; administer a modifier or a Safe; change its own permissions |
+| `governance` | Easy Track executor | operator | write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | submit a condition tree; grant or remove any role; touch the emergency role; target the modifier's avatar or any of its modules (OD-38); grant delegatecall (OD-36) |
+| `emergency` | emergency Safe, two signatures, the committee's signers | safety, orders | zero approvals; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS; send assets to the orders account or to the Agent; revoke the operator's targets and functions on the operator modifier and on the orders modifier, which is how every removal happens; on the orders account, cancel orders, set a relayer approval to zero, send tokens to the Agent or the Asset Safe, and place orders that buy USDC or USDT and pay the Agent | add a permission; enter a protocol except by staking ETH; borrow; reach the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md)); change the recovery destination; disable a module |
 | exit governance | Easy Track executor | safety | write an emergency exit for a target that an onboarding motion names: redeem, withdraw, claim and cancel pinned to the Asset Safe, a transfer pinned to the Agent, an approval set to zero (OD-49) | write anything but an exit; grant delegatecall; touch the technical role or membership; set an allowance; target the Asset Safe or a module of it |
-| `technical` | Emergency Brakes Safe, three of five | safety, orders safety | disable the operator modifier, or the orders operator modifier, for a defect in the permission layer or for a cap breach that gets worse (decision 18); the module argument is pinned | anything else, including disabling either safety modifier |
+| `technical` | Emergency Brakes Safe, three of five | safety, orders | disable the operator modifier, for a defect in the permission layer or for a cap breach that gets worse (decision 18), with the module argument pinned; on the orders account, remove the operator Safe's membership of the operator role, with every argument pinned (decision 22) | anything else, including disabling the safety modifier or the orders modifier |
 
 ## Options considered
 
@@ -136,6 +143,8 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - A transfer permission to the Agent for the technical role, so that a body independent of the committee can return assets within six hours, as the mandate draft describes [s12]. Not chosen by EM (OD-30): it gives the Emergency Brakes multisig a power over assets.
 - A separate technical committee. Not chosen: the Emergency Brakes multisig already holds the Easy Track pause and has technical members.
 - One modifier for all roles. Not chosen: a guard could not tell recovery from the operator, and disabling the module would remove recovery too.
+- One modifier on each account, the Asset Safe included (OD-57 A). Not chosen by EM. On the Asset Safe the motion writers, the governance and exit-governance roles, would share a contract with the emergency and technical roles, kept apart only by the role-key pins, and the technical switch would depend on the modifier's own membership check.
+- Two modifiers on the orders account, as on the Asset Safe (OD-57 C), the design until 2026-10-09. Replaced by EM: no motion writes on the orders account, so the split protected nothing there.
 - The Agent as owner of the modifiers. Not chosen: the emergency role could then not revoke the operator without Agent authority.
 
 ## Consequences
@@ -149,15 +158,18 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - The orders account carries the fallback handler and the contract-signature path that the Asset Safe avoids. Its exposure is what enters it: the operator's transfers spend budgets, and the emergency role's do not ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
 - The first-loss shares are out of reach of every role, so their protection no longer rests on a written rule ([ADR 008](/adr/008-funding-through-existing-payments.md)).
 - Disabling the operator modifier leaves the safety modifier working, so recovery survives the technical switch [s4].
+- The orders account has no switch at the Safe: disabling its only modifier would also stop recovery there. Its technical stop is the pinned membership removal, which relies on the modifier's own membership check (decision 22). The orders account holds only tokens in transit, and a DAO vote can still disable its modifier.
 - The safety policy pins the operator modifier's address. Replacing the operator modifier therefore needs a DAO vote that rewrites the safety policy in the same action. EM accepted this as a documented procedure on 2026-09-22 [s1].
 - Freezing queued motions needs the Emergency Brakes multisig, a different body. The general Lido incident process pages it.
 - Every DAO-path action carries the Dual Governance delay.
 - The Asset Safe, the operator Safe and the emergency Safe run Safe v1.5.0, and so do the first-loss Safe and, if its fork test passes, the orders account. Safe v1.5.0 has a short record of holding value [s7]. The LIP says so.
 - The vault's main Safe paths are ones that Certora formally verified on v1.5.0: transaction execution, `approveHash` and module execution [s7]. The contract-signature path and the fallback handler, where v1.5.0 changed most and where the next release changes again, stay unused on the Asset Safe. The orders account uses them, and holds only tokens in transit.
-- Without a fallback handler, the Asset Safe refuses ERC-721 and ERC-1155 safe transfers, and it cannot sign a message by EIP-1271. A protocol that needs either comes back to EM (decision 15). Lido's withdrawal queue creates a request without that receiver check, so the Asset Safe can own one ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
+- Without a fallback handler, the Asset Safe refuses ERC-721 and ERC-1155 safe transfers, and it cannot sign a message by EIP-1271. A protocol that needs either comes back to EM (decision 15). The vault no longer uses Lido's withdrawal queue, whose requests are ERC-721 tokens ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 27).
 - A later change of the Asset Safe's Safe version needs a DAO vote with a delegatecall to Safe's migration contract.
 
 ## Confirmation
+
+- The probe `test/SingleModifierProbe.t.sol`, on the Asset Safe of the harness as a stand-in for the orders modifier: on one modifier, the pinned membership removal stops the operator, recovery keeps working, the switch cannot be repointed or widened, and the operator cannot restore itself (6 tests, 2026-10-08). The orders account's own test is owed with the orders account.
 
 - INV-001, INV-002, INV-003, INV-004, INV-009, INV-019, INV-021, INV-022 and INV-023 in the [invariants](/specs/invariants.md).
 - Kit tests: the technical role is the only one that can disable a module, and only the operator modifier [s4]; the emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6]; the Asset Safe has the Agent as its only owner, the pinned singleton, and no fallback handler or guard [s11].
@@ -170,4 +182,4 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 ## Open questions
 
-None open. OD-42, OD-43 and OD-49 were decided on 2026-10-06. The orders account's fallback handler on Safe v1.5.0 needs a fork test before it is relied on ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
+None open. OD-42, OD-43 and OD-49 were decided on 2026-10-06, and OD-57 on 2026-10-09. The orders account's fallback handler on Safe v1.5.0 needs a fork test before it is relied on ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).

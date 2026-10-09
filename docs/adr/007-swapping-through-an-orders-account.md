@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 007: Swapping through an orders account"
-description: Every swap, routine or emergency, is a CoW order placed from a dedicated orders account — a Safe owned by the Aragon Agent, with CoW's fallback handler and its own two modifiers; the operator funds it under budgets and places market, limit, TWAP and stop-loss orders that pay the Asset Safe; the emergency role places recovery orders that pay the Aragon Agent into USDC or USDT, or sends assets to the Agent; the launch uses CoW only; Stonks 2.0 is no longer used; staking and the withdrawal queue stay, and the withdrawal-queue approval keeps its fixed ceiling.
+description: Every swap, routine or emergency, is a CoW order placed from a dedicated orders account — a Safe owned by the Aragon Agent, with CoW's fallback handler and one modifier of its own; the operator funds it under budgets and places market, limit, TWAP and stop-loss orders that pay the Asset Safe; the emergency role places recovery orders that pay the Aragon Agent into USDC or USDT, or sends assets to the Agent; the launch uses CoW only; Stonks 2.0 is no longer used; staking stays, and the withdrawal queue left the design on 2026-10-08.
 tags: [swaps, cow, orders, emergency, rebalancing]
 status: draft
 review_status: slop
@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T21:22:14Z
+  at: 2026-10-09T08:00:00Z
 verified: []
 sources:
   - id: s1
@@ -106,7 +106,7 @@ EM decided on 2026-10-06, closing OD-46 [s1]:
 21. A DAO vote adds a token to the lists, for the operator and for recovery, with its relayer approval, its emergency transfer and its recovery orders in the same vote. No motion can add one, because the order signer's permission is a delegatecall (OD-36).
 22. The operator's lists start with stETH, wstETH, WETH, USDC, USDT, USDS and LDO. DAI and sUSDS stay off.
 
-Decision 22 adds WETH to decision 4's set. The operator trades WETH in CoW orders, so decision 13's route through stETH is no longer the only one; staking and the withdrawal queue stay available.
+Decision 22 adds WETH to decision 4's set. The operator trades WETH in CoW orders, so decision 13's route through stETH is no longer the only one. Staking stays available; the withdrawal queue left the design on 2026-10-08 (decision 27).
 
 EM decided on 2026-10-06, closing OD-47 [s1]:
 
@@ -118,11 +118,21 @@ EM decided on 2026-10-06, closing OD-48 [s1]:
 
 26. Recovery orders have no on-chain price floor. CoW's solver competition and its EBBO rule hold a fill to at least the on-chain market, and a solver that breaks the rule must refund the user or lose its bond. Every emergency swap pages at high severity, and monitoring alerts on a recovery order whose limit sits far below a market price. A floor through GoodAfterTime stays a research item [s11].
 
+EM decided on 2026-10-08 [s1]:
+
+27. The withdrawal queue leaves the design. The operator neither requests nor claims Lido withdrawals and holds no stETH approval to the queue. The emergency role does not claim.
+
+Decision 27 replaces the withdrawal-queue route of decision 13 and decision 16. Staking through `submit` stays, and WETH is bought in CoW orders (decision 22).
+
+EM decided on 2026-10-09, closing OD-57 [s1]:
+
+28. The orders account carries one modifier, with the operator, emergency and technical roles and no governance role. The technical role stops the operator there by removing the operator Safe's membership of the operator role, with every argument pinned ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 21 and 22).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as text.
 
-- **The orders account.** A new Safe, owned by the Aragon Agent at one of one. Its fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it. It has two modifiers, as the Asset Safe has: the orders operator modifier, with the `operator` and `governance` roles, and the orders safety modifier, with the `emergency` and `technical` roles. Each modifier's owner, avatar and target is the orders account. The enabling vote sets it up.
+- **The orders account.** A new Safe, owned by the Aragon Agent at one of one. Its fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it. It has one modifier, the orders modifier, with the `operator`, `emergency` and `technical` roles and no `governance` role (decision 28). Its owner, avatar and target is the orders account. The enabling vote sets it up.
 - **Operator, on the Asset Safe.** A transfer of a listed token to the orders account, pinned to it, spends that token's orders budget. The budgets are figures from the attested computation.
 - **Operator, on the orders account.**
   - A delegatecall to the order signer: sell and buy tokens from the lists, the Asset Safe as receiver, an order life of at most 30 days (decision 23), and a fee bound. `unsignOrder` cancels.
@@ -131,9 +141,9 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - **Emergency role.**
   - On the Asset Safe: a transfer of any asset to the orders account, or to the Aragon Agent.
   - On the orders account: cancel any order, revoke the operator's targets and functions, set an approval of CoW's vault relayer to zero, send any listed token to the Aragon Agent or the Asset Safe, and place orders through the order signer that buy USDC or USDT, pay the Aragon Agent and live at most 1 day (decision 25).
-- **Technical role.** It can disable the orders operator modifier, with the module argument pinned. The orders safety modifier keeps working.
+- **Technical role.** It removes the operator Safe's membership of the operator role on the orders modifier, by `assignRoles(operatorSafe, [operator], [false])` with every argument pinned (decision 28). The emergency role keeps working on the same modifier. A fork probe showed this switch on a stand-in modifier on 2026-10-08.
 - **Relayer approvals.** The enabling vote has the orders account approve CoW's vault relayer for the maximum amount of every token on the lists, the recovery tokens included. No role can raise an approval on the orders account, so a recovery order settles even when the operator is revoked. If the emergency role sets an approval to zero, every order in that token stops, recovery orders included, until a DAO vote sets it again; sending the token to the Agent stays open.
-- **Governance role.** It cannot add a token to the lists (decision 21). It refuses the orders account and its modules as targets, as on the Asset Safe (OD-38).
+- **Governance role.** The orders account has none (decision 28). No motion writes there: a DAO vote adds a token (decision 21) and grants the order signer's delegatecall (OD-36). The Asset Safe's governance role refuses the orders account and its modifier as targets (OD-38).
 - **Tokens.** The operator's lists start with decision 22's set. Recovery sells every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues. It buys USDC, or USDT as the second destination. The enabling vote sets both lists.
 - **Routers.** None at launch. If the screening vendor confirms a check of a swap's minimum output against a market price, routes to Uniswap and 1inch from the orders account follow, with the Asset Safe as recipient.
 - **Price protection.** An order's own terms, CoW's solver competition, the screening of every operator transaction, the budgets on the operator's transfers into the orders account, and monitoring of each fill against a market price. Nothing on chain bounds the price, but CoW's competition and EBBO rule hold a fill to the on-chain market (decision 26). The emergency role's orders have neither screening nor a budget, so paging and the limit alert cover them.
@@ -148,6 +158,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - **A custom price check in the modifier.** Not chosen: it is new contract code ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 1).
 - **Direct order pre-signing by the operator.** Not chosen: a pre-signature hides the order's terms [s3]. The order signer reads them from a typed order.
 - **The withdrawal-queue approval under a budget key.** Not chosen by EM: it needs a new figure from the attested computation. Only the DAO can upgrade the queue, and a claim pays the Asset Safe [s9].
+- **Keep the withdrawal queue for unstaking at par.** The design until 2026-10-08. Replaced by EM (decision 27): CoW orders already buy WETH, and a request cannot be cancelled.
 
 ## Consequences
 
@@ -160,18 +171,18 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - Proceeds go straight to their receiver: the Asset Safe for the operator, the Aragon Agent for recovery. No recovered token goes to the treasury by accident.
 - A recovery order names its own limit, so it can fill in a depeg at a price that the emergency signers accept. The service level stays the time to initiate, not the time to fill.
 - The vault no longer depends on Chainlink's Feed Registry, the shared Stonks router, or the committee's Safe as the router's manager. The router's settings stop being an untimelocked lever on the vault (OD-45).
-- Recovery can sell wstETH, WETH and sUSDS directly. The operator buys and sells WETH in CoW orders in minutes, where the withdrawal queue takes days and a request cannot be cancelled. Staking and the withdrawal queue stay for unstaking.
+- Recovery can sell wstETH, WETH and sUSDS directly. The operator buys and sells WETH in CoW orders in minutes. Staking stays; unstaking goes through CoW orders only (decision 27).
 - A new token waits for a DAO vote. The launch lists cover the mandate's assets, so this should be rare.
-- The new components are one Safe and two modifiers, all instances of existing code. The delegatecall to the order signer comes from the enabling vote, because a motion cannot grant one (OD-36).
+- The new components are one Safe and one modifier, both instances of existing code (decision 28). The delegatecall to the order signer comes from the enabling vote, because a motion cannot grant one (OD-36).
 - The order signer has no audit that this repository found. It is 40 lines long, and Lido reviews it in phase 3.
-- A fixed ceiling bounds each approval to the withdrawal queue, not each month. An operator error or a captured quorum can put all stETH into requests. A request cannot be cancelled, so that stETH stays illiquid until finalization: days, and longer in bunker mode. The emergency role can claim a request only after finalization [s9].
+- The vault does not use the withdrawal queue (decision 27). No operator error or captured quorum can lock stETH in a request that cannot be cancelled [s9]. A large unstaking pays CoW's market price instead of the queue's par.
 - The mandate text owes changes: the venues and order types, the absence of an on-chain price bound, and the emergency swap into USDC or USDT [s10] ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
 
 ## Confirmation
 
 - INV-002, INV-008, INV-013, INV-014, INV-022, INV-023 and INV-024 in the [invariants](/specs/invariants.md).
-- Kit tests that stand: the operator cannot pre-sign an order or approve the CoW relayer from the Asset Safe [s5]; staking and a withdrawal-queue round trip work with the Asset Safe as owner [s7]; WETH's unwrap pays the Asset Safe [s8].
-- Fork tests owed: the order signer by delegatecall from a Safe v1.5.0 through a roles modifier, with the receiver pinned; a TWAP and a stop-loss order from a Safe v1.5.0 with CoW's fallback handler; the conditions that pin the receiver and the oracles inside ComposableCoW's encoded order data; a refusal of every other receiver; the life bounds of decisions 23 to 25, including a refusal of a TWAP order outside both shapes; the emergency role's cancel, sweep and recovery order, settled with the relayer approval that the vote sets; and the technical role's switch on the orders account.
+- Kit tests that stand: the operator cannot pre-sign an order or approve the CoW relayer from the Asset Safe [s5]; staking works with the Asset Safe as owner [s7], and the withdrawal queue is refused to both roles (`test_D3_withdrawal_queue_is_out_of_scope`); WETH's unwrap pays the Asset Safe [s8].
+- Fork tests owed: the order signer by delegatecall from a Safe v1.5.0 through a roles modifier, with the receiver pinned; a TWAP and a stop-loss order from a Safe v1.5.0 with CoW's fallback handler; the conditions that pin the receiver and the oracles inside ComposableCoW's encoded order data; a refusal of every other receiver; the life bounds of decisions 23 to 25, including a refusal of a TWAP order outside both shapes; the emergency role's cancel, sweep and recovery order, settled with the relayer approval that the vote sets; and the technical role's membership removal on the orders modifier, with recovery still working (decision 28).
 
 ## Reversal conditions
 
@@ -185,4 +196,4 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 ## Open questions
 
 
-OD-43, OD-46, OD-47, OD-48 and OD-49 were decided on 2026-10-06. Owed: the fork tests above, the screening vendor's answer on output checks, and the orders budgets from the attested computation.
+OD-43, OD-46, OD-47, OD-48 and OD-49 were decided on 2026-10-06, and OD-57 on 2026-10-09. Owed: the fork tests above, the screening vendor's answer on output checks, and the orders budgets from the attested computation.
