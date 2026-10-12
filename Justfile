@@ -34,7 +34,7 @@ regen: policy-compile
 	{{py}} scripts/build_onboarding.py
 
 # Run every check that CI runs, except the fork suite
-check: check-docs check-policy check-browser
+check: check-docs check-policy check-browser check-workflows
 
 # The docs bundle, the generated files, the repository checks and their tests
 check-docs:
@@ -56,6 +56,23 @@ check-policy:
 # Every control of the onboarding guide, in headless Chromium
 check-browser:
 	{{browser}} scripts/test_onboarding_page.py
+
+# The workflows: actionlint and zizmor, offline
+check-workflows:
+	uvx --from actionlint-py==1.7.12.25 actionlint .github/workflows/*.yml
+	uvx zizmor==1.30.1 --offline .github/workflows
+
+# The guide's items whose content or sources changed since their pins, with each source's change
+stale:
+	{{py}} scripts/build_onboarding.py --stale
+
+# After a review, pin guide items again: just repin actor:asset-safe flow:topup
+repin +items:
+	{{py}} scripts/build_onboarding.py --repin {{items}}
+
+# Every outside link of the committed guide, through the GitHub API (weekly in CI)
+links:
+	{{py}} scripts/check_links.py
 
 # The fork suite on the pinned mainnet fork; needs RPC (no keys)
 test-fork:

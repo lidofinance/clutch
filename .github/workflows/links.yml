@@ -1,0 +1,31 @@
+name: links
+
+# Checks once a week that every outside link of the published onboarding guide
+# resolves: each linked file exists on its branch and has the linked heading
+# (ADR 012, decision 11). Pull requests do not run it: their build check resolves
+# the same links against the files of the pull request.
+
+on:
+  schedule:
+    - cron: "23 6 * * 1" # Mondays, 06:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    name: outside links of the onboarding guide
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: install the build dependency
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet pyyaml==6.0.2
+      - name: check every outside link through the GitHub API
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: .venv/bin/python scripts/check_links.py

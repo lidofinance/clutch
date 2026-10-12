@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-09T06:40:00Z
+  at: 2026-10-12T07:54:32Z
 verified: []
 sources:
   - id: s1
@@ -34,15 +34,34 @@ sources:
   - id: s8
     resource: "urn:clutch:interview:2026-10-09"
     title: EM's answers to OD-54 to OD-57, 2026-10-09; the transcript is not in the repository
+  - id: s9
+    resource: "urn:clutch:interview:2026-10-12"
+    title: EM's request for a triage of the onboarding guide's tests, and EM's answer, 2026-10-12; the transcript is not in the repository
 ---
 
 # Decision log
 
 Entries quote EM exactly, including typos. An agent copied them from the interview transcripts. EM should confirm each entry by verifying this page. Newest first. Times are UTC.
 
-Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, and a local file path out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
+Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-12 — the onboarding guide's invariant checks, source pins and coverage
+
+> learn what we did recently in [another, private Lido repository and its pull request]
+> pay attention to Copilot findings and how we addressed them; triage if the same test suite and approach should be apploed for clutch onboarding guide
+
+The agent read the other guide's review and its fixes, and probed this guide ([research note](/research/guide-invariants-2026-10-12.md)). It proposed three tiers. Now: the browser checks that find live defects, and the fixes. Cheap guards: the map rule, a weekly link check, the page as an artifact of each pull request, and a check of the workflows. Later, with EM's decision: pins of each item to its sources, with references to single decisions, and a coverage rule. EM answered:
+
+> do a PR to clutch without deferring 'Later' items
+
+Recorded as: one pull request carries all three tiers ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 11).
+
+- The browser tests check accessibility in twelve presentation states and check the page without its script. The dark palette applies only on screens, and only the script gives an element a widget role.
+- Each item of the guide is pinned to the text of its sources. A reference names a decision or a section of an ADR, never the whole ADR. Every ADR, invariant, LIP part and runbook is cited or excluded with a reason, and every box and arrow of the map is used.
+- CI attaches the built page to each pull request, reports its pin changes, checks the workflows with zizmor, and checks the guide's outside links every week.
+- The mapping of the guide's references to decisions found nine places that were behind OD-54 and OD-57. The same pull request fixes them. [s9]
 
 ## 2026-10-09 — OD-56's reason, and OD-57: one modifier on the orders account
 

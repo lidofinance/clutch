@@ -4,14 +4,15 @@
   tech: "The Asset Safe is a Safe v1.5.0 proxy. The Aragon Agent is its only owner, at a threshold of one, and it has no guard and no fallback handler. The Agent approves each transaction by `approveHash`, or sends it itself (INV-001)."
   nodes: [dao, asset-safe, orders, first-loss]
   edges: [own]
-  sources: [ADR-005, ADR-007, ADR-008, INV-001, "doc:docs/product/brief.md#the-system"]
+  sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction",
+    "ADR-007#d17", "ADR-008#d19", INV-001, "doc:docs/product/brief.md#the-system"]
 
 - title: Nobody touches the vault directly
   text: "The Asset Safe switches on two [[Roles modifier|Roles modifiers]] from Zodiac. Each holder of a [[role]] calls a modifier. The modifier checks the call against the policy and, if it is allowed, runs it as the Asset Safe.\n\nThe policy is [[default-deny]]: a call that the policy does not list is refused."
   tech: "The modifiers are EIP-1167 proxies of the deployed, locked Roles mastercopy. The Asset Safe is their owner, avatar and target."
   nodes: [asset-safe, operator-modifier, safety-modifier]
   edges: [own-op, own-sf]
-  sources: [ADR-005, "lip:part-1"]
+  sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1"]
 
 - title: "The operator: the committee at work"
   text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its permissions is the Asset Safe."
@@ -19,7 +20,7 @@
   nodes: [committee, operator-safe, operator-modifier, asset-safe, protocols]
   edges: [signers-op, op-role, own-op, positions]
   flows: [op-tx, swap-order]
-  sources: [ADR-005, INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
+  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#proposed-direction", INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
 
 - title: Every operator transaction is screened
   text: "[the screening vendor]'s [[guard]] sits on the operator Safe. It refuses any transaction that the vendor has not approved, once and exactly.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nAt launch the guard is not set yet. The vault starts under a [[launch cap]] of one million dollars, and the cap lifts once the guard is live (OD-54)."
@@ -27,7 +28,8 @@
   nodes: [screening, operator-safe]
   edges: [screen]
   flows: [vendor-outage]
-  sources: [ADR-010, INV-010, OD-54]
+  sources: ["ADR-010#d1", "ADR-010#d3", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d20", "ADR-010#d21",
+    "ADR-010#d22", "ADR-010#proposed-direction", INV-010, OD-54]
 
 - title: Changes by motion, inside templates
   text: "The committee can widen its own permissions only through Easy Track [[motion|motions]], each built by a fixed [[template]]. LDO holders have 72 hours to object, and 0.5% of LDO stops a motion. This window is the timelock for every structural increase of exposure, such as a new target or a higher budget.\n\nAt enactment, the governance role writes the change. The modifier checks that write again: no role change, no [[delegatecall]], and no administrative target. The Asset Safe and its modifiers are refused as targets. The same motion gives the emergency role an exit from what it onboards."
@@ -35,7 +37,9 @@
   nodes: [operator-safe, easytrack, dao, operator-modifier]
   edges: [motions, object, gov-role]
   flows: [onboard, budget, unlock]
-  sources: [ADR-006, INV-004, INV-012, OD-36, OD-38, OD-45, "doc:policy/constellation/constellation/roles/governance/permissions.ts"]
+  sources: ["ADR-006#d2", "ADR-006#d3", "ADR-006#d4", "ADR-006#d5", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10",
+    "ADR-006#d11", "ADR-006#d13", "ADR-006#context", "ADR-006#proposed-direction", INV-004, INV-012, OD-36,
+    OD-38, OD-45, "doc:policy/constellation/constellation/roles/governance/permissions.ts"]
 
 - title: Swaps are CoW orders
   text: "Every swap is a [[CoW]] order placed from the [[orders account]]. The operator sends a token there under a budget, then places a market, [[limit order|limit]], [[TWAP]] or [[stop-loss order|stop-loss]] order that pays the Asset Safe. A [[recovery order]] buys USDC or USDT and pays the Aragon Agent.\n\nNothing on chain bounds an order's price. CoW's competition rules, screening, the budgets and monitoring of each fill take its place."
@@ -43,7 +47,8 @@
   nodes: [asset-safe, orders]
   edges: [swaps]
   flows: [swap-order, standing-order, recovery-order]
-  sources: [ADR-007, OD-43, INV-013, INV-014, INV-022, INV-024]
+  sources: ["ADR-007#d5", "ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d23", "ADR-007#d26",
+    "ADR-007#proposed-direction", OD-43, INV-013, INV-014, INV-022, INV-024]
 
 - title: "Money in: top-ups"
   text: "Funding comes from the DAO treasury through the existing payment path. Once a month, the operator Safe creates a [[top-up]] motion. LDO holders can object for 72 hours.\n\nTwo funding registries pay only the Asset Safe, each within a monthly limit. The objection is the control; the limit is the backstop."
@@ -51,7 +56,7 @@
   nodes: [operator-safe, easytrack, funding, dao, asset-safe]
   edges: [motions, topup-motion, treasury, topup]
   flows: [topup, seed]
-  sources: [ADR-008, INV-017]
+  sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#proposed-direction", INV-017]
 
 - title: "Emergencies: two fast stops, one slow exit"
   text: "The **emergency Safe** has the committee's signers at 2 of 7. Through the safety modifier it revokes the operator, exits positions and sends assets to the Aragon Agent. It is fast, but it is not independent of the committee.\n\nThe **Emergency Brakes multisig**, outside the committee, can switch the operator modifier off and pause Easy Track. Only the DAO is fully independent, and a DAO vote takes days."
@@ -59,7 +64,8 @@
   nodes: [emergency-safe, safety-modifier, operator-modifier, brakes, dao, asset-safe]
   edges: [signers-em, em-role, revoke, tech-role, pause, own]
   flows: [financial-incident, recovery-order, technical-defect, unsafe-motion]
-  sources: [ADR-005, INV-002, INV-009, "lip:part-6"]
+  sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d3", "ADR-005#d4", "ADR-005#d11", "ADR-005#d16", "ADR-005#d17",
+    "ADR-005#context", "ADR-005#proposed-direction", INV-002, INV-009, "lip:part-6"]
 
 - title: Caps are watched, not enforced
   text: "No contract reverts on a [[cap]] or on the [[liquidity buffer]]. Monitoring watches the buffer all the time and publishes the cap reading to IPFS every two weeks. Each month, the committee publishes a report that anyone can reproduce.\n\nIf a breach is not fixed within two working days and is larger at the next reading, monitoring pages the Emergency Brakes multisig, which switches the operator off. The [[control matrix]] lists each rule's controls on every layer."
@@ -67,11 +73,12 @@
   nodes: [monitoring, reporting, asset-safe, brakes, committee]
   edges: [watch, report, page]
   flows: [fortnightly, monthly-report, buffer-low, cap-breach]
-  sources: [ADR-009, OD-29, OD-32, OD-39, OD-40]
+  sources: ["ADR-009#d1", "ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d26", "ADR-009#d27", "ADR-009#d33",
+    OD-29, OD-32, OD-39, OD-40]
 
 - title: Little new code, and where it stands
   text: "Clutch reuses deployed code that already runs: Safe, Zodiac Roles, Easy Track, CoW's order contracts and Lido's monitoring. It adds Easy Track factories, the permission policy with its compiler, the vault's detectors and a report generator.\n\nToday the design is in phase 0. Nothing is deployed, no audit is done and no runbook is written. The **Built or reused** and **Status** tabs show each part."
   tech: "New code: the Easy Track factories, Clutch's TypeScript policy compiler, the detectors and the report generator. Reused as deployed: Safe v1.5.0, the locked Roles mastercopy, Easy Track and CoW's contracts."
   nodes: [policy, easytrack, reporting, monitoring]
   flows: [policy-change, roadmap, enabling-vote]
-  sources: [ADR-006, ADR-004, "doc:ROADMAP.md#roadmap"]
+  sources: ["ADR-006#d1", "ADR-004#d12", "ADR-004#d13", "doc:ROADMAP.md#roadmap"]

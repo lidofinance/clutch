@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-09T08:00:00Z
+  at: 2026-10-12T07:55:43Z
 verified: []
 ---
 
@@ -31,10 +31,10 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-10-09 | none |
 | [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-10-09 | none |
 | [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-10-09 | none |
-| [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-10-07 | none |
-| [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-10-07 | none |
+| [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-10-12 | none |
+| [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-10-12 | none |
 | [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-10-05 | none |
-| [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-10-09 | none |
+| [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-10-12 | none |
 | [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-10-09 | none |
 | [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-10-09 | none |
 | [registers/verification-requests.md](/registers/verification-requests.md) | Register | slop |  | 2026-10-06 | none |
@@ -44,6 +44,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/cow-orders-account-2026-10-06.md](/research/cow-orders-account-2026-10-06.md) | Research Note | slop |  | 2026-10-06 | none |
 | [research/dai-usds-conversion-2026-10-05.md](/research/dai-usds-conversion-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/funding-registries-2026-10-02.md](/research/funding-registries-2026-10-02.md) | Research Note | slop |  | 2026-10-05 | none |
+| [research/guide-invariants-2026-10-12.md](/research/guide-invariants-2026-10-12.md) | Research Note | slop |  | 2026-10-12 | none |
 | [research/legacy-investments-2026-10-05.md](/research/legacy-investments-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/recovery-and-withdrawal-queue-2026-10-05.md](/research/recovery-and-withdrawal-queue-2026-10-05.md) | Research Note | slop |  | 2026-10-05 | none |
 | [research/request-for-solution-2026-10-07.md](/research/request-for-solution-2026-10-07.md) | Research Note | slop |  | 2026-10-07 | none |

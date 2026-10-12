@@ -13,8 +13,15 @@ changed scene, flow, box or question changes its test with it. Each group below
 exercises one kind of interactive element; name groups to run only those. The
 page must make no network request and log no console error in any group.
 
-Set ONBOARDING_CHROMIUM to a browser executable to use it instead of the one
-that Playwright installed.
+Two groups check invariants instead of examples. "matrix" runs axe in every
+presentation state: the script on or off, each theme, and screen or print. It also
+fails on text with the colour of its own background. "static" checks the page
+without its script: nothing may look interactive and do nothing. Each of the two
+first proves that it catches a planted defect.
+
+Set ONBOARDING_PAGE to test another copy of the page, for example one with a
+planted defect. Set ONBOARDING_CHROMIUM to a browser executable to use it instead
+of the one that Playwright installed.
 """
 
 from __future__ import annotations
@@ -23,6 +30,7 @@ import importlib.util
 import os
 import re
 import sys
+import tempfile
 from collections import Counter
 from contextlib import contextmanager
 from pathlib import Path
@@ -31,7 +39,8 @@ from typing import Any, Callable, Iterator
 from playwright.sync_api import Browser, Page, sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
-URL = (ROOT / "docs" / "onboarding" / "clutch-onboarding.html").as_uri()
+PAGE = Path(os.environ.get("ONBOARDING_PAGE") or ROOT / "docs" / "onboarding" / "clutch-onboarding.html").resolve()
+URL = PAGE.as_uri()
 LIGHT_PAGE = "rgb(249, 249, 247)"  # --page in the light theme
 DARK_PAGE = "rgb(13, 13, 13)"  # --page in the dark theme
 
@@ -89,8 +98,16 @@ class Run:
         return ok
 
 
+def static_url() -> str:
+    """The page without its scripts: what a reader without JavaScript gets. axe still runs in it."""
+    page = re.sub(r"<script>.*?</script>", "", PAGE.read_text(encoding="utf-8"), flags=re.S)
+    with tempfile.NamedTemporaryFile("w", suffix=".html", prefix="clutch-static-", delete=False, encoding="utf-8") as out:
+        out.write(page)
+    return Path(out.name).as_uri()
+
+
 @contextmanager
-def opened(browser: Browser, run: Run, group: str, *, fragment: str = "", **options: Any) -> Iterator[Page]:
+def opened(browser: Browser, run: Run, group: str, *, fragment: str = "", url: str | None = None, **options: Any) -> Iterator[Page]:
     """A fresh page. Instant scrolls by default; one group checks the smooth default."""
     options.setdefault("viewport", {"width": 1440, "height": 1000})
     options.setdefault("reduced_motion", "reduce")
@@ -105,7 +122,7 @@ def opened(browser: Browser, run: Run, group: str, *, fragment: str = "", **opti
     page.on("console", console)
     page.on("pageerror", lambda error: run.problems.append(f"{group}: page error: {error}"))
     page.on("request", lambda r: None if r.url.startswith(("file:", "data:")) else run.problems.append(f"{group}: request {r.url}"))
-    page.goto(URL + fragment)
+    page.goto((url or URL) + fragment)
     try:
         yield page
     finally:
@@ -828,6 +845,102 @@ def test_accessibility(browser: Browser, run: Run) -> None:
             scan(page, f"{scheme} theme, the player closed again")
 
 
+REVEAL = """() => {
+  document.querySelectorAll('.tabpanel').forEach((p) => { p.hidden = false; });
+  document.body.classList.replace('lens-plain', 'lens-tech');
+  document.querySelectorAll('details').forEach((d) => { d.open = true; });
+}"""
+
+
+def presentation_states() -> Iterator[tuple[bool, str, str | None, str]]:
+    """Every reachable presentation state: the script on or off, the system colour scheme, the
+    chosen theme (None is Auto), and screen or print. Without the script, only Auto exists."""
+    for script in (True, False):
+        for system in ("light", "dark"):
+            for theme in ((None, "light", "dark") if script else (None,)):
+                if theme == system:
+                    continue  # the same as Auto
+                for media in ("screen", "print"):
+                    yield script, system, theme, media
+
+
+def test_state_matrix(browser: Browser, run: Run) -> None:
+    from axe_playwright_python.sync_playwright import Axe
+
+    axe = Axe()
+    static = static_url()
+
+    def problems(page: Page) -> list[tuple[str, int, Any]]:
+        """axe violations, plus text with the colour of its own background. axe reports a 1:1
+        contrast as incomplete, not as a violation, because the text can be hidden on purpose."""
+        result = axe.run(page, options={"resultTypes": ["violations", "incomplete"]}).response
+        out = [(v["id"], len(v["nodes"]), v["nodes"][0]["target"]) for v in result["violations"]]
+        same = [n for i in result["incomplete"] if i["id"] == "color-contrast" for n in i["nodes"]
+                if any((c.get("data") or {}).get("messageKey") == "equalRatio" for c in n.get("any", []))]
+        if same:
+            out.append(("text with the colour of its background", len(same), same[0]["target"]))
+        return out
+
+    # The scan must see a defect: text with the colour of its own background.
+    with opened(browser, run, "matrix") as page:
+        page.evaluate("const p = document.querySelector('.subtitle'); p.style.background = '#ffffff'; p.style.color = '#ffffff';")
+        found = problems(page)
+        run.check(any(f[0] == "text with the colour of its background" for f in found), "the matrix scan catches planted text with no contrast", found)
+    for script, system, theme, media in presentation_states():
+        name = f"script {'on' if script else 'off'}, {system} system, theme {theme or 'Auto'}, {media}"
+        with opened(browser, run, "matrix", url=None if script else static, color_scheme=system) as page:
+            if theme:
+                page.click(f"[data-theme-set={theme}]")
+            page.evaluate(REVEAL)
+            page.emulate_media(media=media)
+            found = problems(page)
+            run.check(not found, f"axe finds no violation in the whole content: {name}", found[:3])
+
+
+WIDGET_ROLES = [
+    "button", "checkbox", "combobox", "grid", "gridcell", "link", "listbox", "menu", "menubar", "menuitem",
+    "menuitemcheckbox", "menuitemradio", "option", "radio", "radiogroup", "scrollbar", "searchbox", "slider",
+    "spinbutton", "switch", "tab", "tablist", "tabpanel", "textbox", "tree", "treegrid", "treeitem",
+]
+INERT = """(widgetRoles) => {
+  // Everything that a reader can focus, or that assistive technology announces as a control, must
+  // work without the script: a link to a target, a native form control, or a summary.
+  const native = new Set(['a', 'input', 'select', 'textarea', 'summary', 'label']);
+  const shown = (e) => e.getClientRects().length > 0;
+  const cls = (e) => (typeof e.className === 'string' ? e.className : (e.className && e.className.baseVal) || '').split(' ')[0];
+  const name = (e) => e.tagName.toLowerCase() + (e.id ? '#' + e.id : cls(e) ? '.' + cls(e) : '');
+  const out = [];
+  for (const e of document.querySelectorAll('body *')) {
+    if (!shown(e)) continue;
+    const tag = e.tagName.toLowerCase();
+    const role = e.getAttribute('role');
+    const tabindex = e.getAttribute('tabindex');
+    if (role && widgetRoles.includes(role)) out.push(`${name(e)} has role=${role}`);
+    else if (tabindex !== null && Number(tabindex) >= 0 && !native.has(tag)) out.push(`${name(e)} has tabindex=${tabindex}`);
+    else if (tag === 'button') out.push(`${name(e)} is a button`);
+    for (const state of ['aria-pressed', 'aria-selected', 'aria-expanded', 'aria-controls']) {
+      if (e.hasAttribute(state)) out.push(`${name(e)} has ${state}`);
+    }
+    if (tag === 'a') {
+      const href = e.getAttribute('href') || '';
+      if (!href) out.push(`${name(e)} is a link without a target`);
+      else if (href.startsWith('#') && href.length > 1 && !document.getElementById(href.slice(1))) out.push(`${name(e)} links to a missing ${href}`);
+    }
+  }
+  return out;
+}"""
+
+
+def test_static_page(browser: Browser, run: Run) -> None:
+    with opened(browser, run, "static", url=static_url()) as page:
+        found = page.evaluate(INERT, WIDGET_ROLES)
+        run.check(not found, "without the script, nothing looks interactive and does nothing", found[:6])
+        # The check must see a defect: a tab role that only the script can honour.
+        page.evaluate("document.querySelector('.tab').setAttribute('role', 'tab')")
+        planted = page.evaluate(INERT, WIDGET_ROLES)
+        run.check(any("role=tab" in f for f in planted), "the static check catches a planted tab role", planted[:3])
+
+
 GROUPS: dict[str, Callable[[Browser, Run], None]] = {
     "structure": test_structure,
     "theme": test_theme,
@@ -853,6 +966,8 @@ GROUPS: dict[str, Callable[[Browser, Run], None]] = {
     "motion": test_motion,
     "layout": test_map_layout,
     "a11y": test_accessibility,
+    "matrix": test_state_matrix,
+    "static": test_static_page,
 }
 
 

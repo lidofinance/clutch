@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Tests of the repository checks of ADR 012: the log build, the redaction and secret
-check, the licence check and the invariant check.
+check, the licence check, the invariant check and the pin report of the onboarding guide.
 
 Run:
   uv run --with pyyaml==6.0.2 python scripts/test_checks.py
@@ -33,6 +33,7 @@ VERIFY = _load("verify_page")
 RED = _load("check_redaction")
 LIC = _load("check_licences")
 INV = _load("check_invariants")
+PINS = _load("pin_report")
 
 
 def _denylist(words=(), addresses=(), figures=()):
@@ -77,6 +78,22 @@ PAGE = "---\ntype: Decision\nreview_status: slop\n{verified}\nsources: []\n---\n
 ZEBRA = _denylist(words=["zebracorn"], addresses=["0x" + "ab" * 20], figures=["42%", "$7.5M"])
 KEY = "0x" + "c0ffee" * 10 + "abcd"
 ROW = "| INV-901 | A property. | [ADR 001](/adr/001.md) | {state} | {tests} |"
+BASE = {
+    "actor:a": {"content": "c1", "sources": {"ADR-001": "s1"}},
+    "flow:b": {"content": "c2", "sources": {"OD-01": "s2", "INV-001": "s3"}},
+}
+
+
+def _pins(**changes):
+    """The pins of BASE with some items replaced; an item set to None is removed."""
+    head = {key: {"content": v["content"], "sources": dict(v["sources"])} for key, v in BASE.items()}
+    for key, value in changes.items():
+        key = key.replace("__", ":")
+        if value is None:
+            head.pop(key, None)
+        else:
+            head[key] = value
+    return PINS.compare(BASE, head)
 
 CASES = [
     # The log.
@@ -124,6 +141,18 @@ CASES = [
      == PAGE.format(verified="verified:\n  - by: human:em\n    at: T1\n  - by: human:tmc\n    at: T2")),
     ("the helper can set the review status", lambda: "review_status: human-reviewed" in VERIFY.add_entry(PAGE.format(verified="verified: []"), ["by: human:em", "at: T"], "human-reviewed")),
     ("the helper keeps the body as it was", lambda: VERIFY.add_entry(PAGE.format(verified="verified: []"), ["by: human:em", "at: T"]).endswith("\n---\n# Body\n")),
+    # The pin report of the onboarding guide.
+    ("equal pins report no change", lambda: _pins() == {"kept": [], "changed": [], "new": [], "removed": []}),
+    ("a changed source with the same text is a kept item", lambda: _pins(flow__b={"content": "c2", "sources": {"OD-01": "s9", "INV-001": "s3"}})["kept"] == [("flow:b", ["OD-01"])]),
+    ("a changed text is a changed item", lambda: _pins(actor__a={"content": "c9", "sources": {"ADR-001": "s1"}})["changed"] == [("actor:a", [])]),
+    ("a changed text names its changed sources too", lambda: _pins(actor__a={"content": "c9", "sources": {"ADR-001": "s9"}})["changed"] == [("actor:a", ["ADR-001"])]),
+    ("a new source on the same text is a kept item", lambda: _pins(actor__a={"content": "c1", "sources": {"ADR-001": "s1", "OD-02": "s4"}})["kept"] == [("actor:a", ["OD-02"])]),
+    ("a dropped source on the same text is a kept item", lambda: _pins(flow__b={"content": "c2", "sources": {"OD-01": "s2"}})["kept"] == [("flow:b", ["no longer INV-001"])]),
+    ("a new item lists its sources", lambda: _pins(term__c={"content": "c3", "sources": {"OD-03": "s5", "ADR-002": "s6"}})["new"] == [("term:c", ["ADR-002", "OD-03"])]),
+    ("a removed item is reported", lambda: _pins(actor__a=None)["removed"] == [("actor:a", [])]),
+    ("the report says when nothing changed", lambda: "No pin changed against `origin/main`." in PINS.markdown(_pins(), "origin/main")),
+    ("the report puts kept items first and counts every change", lambda: (lambda md: "3 pins changed" in md and md.index("Text kept after a source change") < md.index("Text changed") < md.index("New items"))(
+        PINS.markdown(_pins(flow__b={"content": "c2", "sources": {"OD-01": "s9", "INV-001": "s3"}}, actor__a={"content": "c9", "sources": {"ADR-001": "s1"}}, term__c={"content": "c3", "sources": {}}), "origin/main"))),
 ]
 
 

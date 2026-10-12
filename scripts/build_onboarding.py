@@ -3,25 +3,43 @@
 """Build the onboarding guide: docs/onboarding/clutch-onboarding.html.
 
 Run:
-  uv run --with pyyaml python scripts/build_onboarding.py           # write the page
-  uv run --with pyyaml python scripts/build_onboarding.py --check   # fail if the page is stale
+  uv run --with pyyaml python scripts/build_onboarding.py                  # write the page
+  uv run --with pyyaml python scripts/build_onboarding.py --check          # fail on a check or a stale page
+  uv run --with pyyaml python scripts/build_onboarding.py --stale          # list stale items, with source diffs
+  uv run --with pyyaml python scripts/build_onboarding.py --repin ITEM ... # pin items again after a review
+  uv run --with pyyaml python scripts/build_onboarding.py --list-sources   # every reference that content can cite
 
 The guide's text lives in docs/onboarding/content/*.yaml. Facts that the
 repository already states are read at build time: ADR titles and states, open
 decisions, invariants, runbooks, the LIP's status labels, the roadmap, the
 review state of every page, and the roles and permissions of the compiled
 policy artifact. Every reference in the content must resolve, or the build
-fails. The output is one self-contained HTML file with no external requests.
-The content renders without JavaScript; the script only adds interaction.
+fails. Every ADR, invariant, LIP part and runbook must be cited by the guide or
+excluded with a reason, and every box and arrow of the map must be used.
+
+Every item of the guide is pinned to the hash of its content and of the text of
+each source that it cites (docs/onboarding/pins.json). When a source changes,
+the build fails until a person reviews the item and pins it again with --repin.
+An ADR reference names what the claim rests on: `ADR-007#d27` pins decision 27
+and every other block of the Decision section that names it, such as "Decision 27
+replaces the route of decision 13", and `ADR-007#<heading>` pins that section. A
+whole ADR is refused, because each new decision would flag every item that cites it.
+
+The output is one self-contained HTML file with no external requests. The
+content renders without JavaScript; the script only adds interaction, and it
+alone gives elements their widget roles.
 """
 
 from __future__ import annotations
 
 import argparse
+import difflib
+import hashlib
 import html
 import importlib.util
 import json
 import re
+import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
@@ -34,8 +52,11 @@ GUIDE = ROOT / "docs" / "onboarding"
 CONTENT = GUIDE / "content"
 SRC = GUIDE / "src"
 OUT = GUIDE / "clutch-onboarding.html"
+PINS = GUIDE / "pins.json"
 ARTIFACT = ROOT / "policy" / "constellation" / "artifacts" / "fork-25946643.json"
 REPO_URL = "https://github.com/lidofinance/clutch/blob/main/"
+# Keys that place an item on the map. A pin ignores them, so moving a box needs no new review.
+LAYOUT_KEYS = {"x", "y", "w", "h", "via", "label_at", "offset"}
 
 DOMAINS = {"gov", "ops", "vault", "ext"}
 KINDS = {"body", "multisig", "contract", "service", "external"}
@@ -101,6 +122,110 @@ def _plain(md: str) -> str:
     """Markdown cell text without links, emphasis or code ticks."""
     md = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", md)
     return md.replace("**", "").replace("`", "").strip()
+
+
+def normalize(text: str) -> str:
+    """Text with every run of white space as one space, so a re-wrap is not a change."""
+    return " ".join(str(text).split())
+
+
+def digest(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def parse_sections(text: str) -> list[dict[str, Any]]:
+    """Every heading of a Markdown file with its anchor, as the validator makes it, and its
+    text up to the next heading of the same or a higher level."""
+    lines = text.split("\n")
+    heads: list[tuple[int, int, str]] = []
+    fenced = False
+    for i, line in enumerate(lines):
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+            continue
+        match = None if fenced else re.match(r"(#{1,6})\s+(.*?)\s*#*\s*$", line)
+        if match:
+            heads.append((i, len(match.group(1)), match.group(2)))
+    seen: dict[str, int] = {}
+    out = []
+    for index, (start, level, title) in enumerate(heads):
+        base = re.sub(r"[^\w\- ]", "", title.strip().lower()).replace(" ", "-")
+        count = seen.get(base, 0)
+        seen[base] = count + 1
+        end = next((j for j, other, _ in heads[index + 1:] if other <= level), len(lines))
+        out.append({"slug": base if count == 0 else f"{base}-{count}", "title": title, "level": level,
+                    "text": "\n".join(lines[start:end])})
+    return out
+
+
+def _decision_blocks(adr_text: str) -> list[tuple[str | None, str]]:
+    """The blocks of an ADR's Decision section: each numbered decision with its number, and
+    each other paragraph, such as "Decision 22 replaces decision 8", with None."""
+    section = next((s["text"] for s in parse_sections(adr_text) if s["slug"] == "decision"), "")
+    blocks: list[tuple[str | None, str]] = []
+    current: tuple[str | None, list[str]] | None = None
+    for line in section.split("\n")[1:]:
+        match = re.match(r"(\d+)\. ", line)
+        if match:
+            current = (match.group(1), [line])
+            blocks.append(current)  # type: ignore[arg-type]
+        elif not line.strip():
+            current = None
+        elif current and (current[0] is None or line.startswith("   ")):
+            current[1].append(line)
+        else:
+            current = (None, [line])
+            blocks.append(current)  # type: ignore[arg-type]
+    return [(number, "\n".join(lines)) for number, lines in blocks]
+
+
+def _decisions(adr_text: str) -> dict[str, str]:
+    """The numbered decisions of an ADR's Decision section, by number."""
+    return {number: text for number, text in _decision_blocks(adr_text) if number}
+
+
+# "decisions 1, 3, 6 to 12 and 14", "decision 18's", "point 4". A mention that follows another
+# ADR, such as "[ADR 010](/adr/010-x.md) decisions 20 to 22" or "ADR 003 decision 12", is that ADR's.
+_NUMBERS = r"\d+(?:'s)?(?:(?:\s*,\s*|\s+and\s+|\s+or\s+|\s+to\s+)\d+(?:'s)?)*"
+_OTHER_ADR = re.compile(r"\[?ADR[ -](\d{3})\]?(?:\([^)]*\))?\s*(?:decisions?|points?)\s+" + _NUMBERS, re.I)
+_NAMED = re.compile(r"\b(?:decisions?|points?)\s+(" + _NUMBERS + ")", re.I)
+
+
+def _named_decisions(text: str, adr: str) -> set[str]:
+    """The numbers of this ADR's decisions that a block of its Decision section names."""
+    text = _OTHER_ADR.sub(lambda m: m.group(0) if m.group(1) == adr[-3:] else " ", text)
+    out: set[int] = set()
+    for match in _NAMED.finditer(text):
+        for part in re.split(r"\s*,\s*|\s+and\s+|\s+or\s+", match.group(1).replace("'s", "")):
+            low, _, high = part.partition(" to ")
+            out |= set(range(int(low), int(high or low) + 1))
+    return {str(n) for n in out}
+
+
+def decision_text(adr_text: str, adr: str, number: str) -> str:
+    """The text that `ADR-NNN#dN` pins: the decision, and every other block of the Decision
+    section that names it. A later decision that replaces or narrows it then changes the pin."""
+    blocks = _decision_blocks(adr_text)
+    own = [text for n, text in blocks if n == number]
+    if not own:
+        return ""
+    return "\n\n".join(own + [text for n, text in blocks if n != number and number in _named_decisions(text, adr)])
+
+
+def _test_body(source: str, name: str) -> str:
+    """The text of a Solidity test function, from its signature to its closing brace."""
+    start = source.find(f"function {name}(")
+    if start < 0:
+        return ""
+    depth = 0
+    for i in range(source.find("{", start), len(source)):
+        if source[i] == "{":
+            depth += 1
+        elif source[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return source[start:i + 1]
+    return source[start:]
 
 
 def facts() -> dict[str, Any]:
@@ -209,10 +334,30 @@ def policy() -> list[dict[str, Any]]:
 
 def resolve(ref: str, f: dict[str, Any]) -> dict[str, str]:
     """A source reference as a label and a link. Raises BuildError if it does not resolve."""
-    if re.fullmatch(r"ADR-\d{3}", ref):
-        if ref not in f["adrs"]:
-            raise BuildError(f"unknown ADR {ref}")
-        return {"label": ref.replace("-", " "), "href": REPO_URL + f["adrs"][ref]["path"], "title": f["adrs"][ref]["title"]}
+    match = re.fullmatch(r"(ADR-\d{3})(?:#(.+))?", ref)
+    if match:
+        adr, anchor = match.groups()
+        if adr not in f["adrs"]:
+            raise BuildError(f"unknown ADR {adr}")
+        info = f["adrs"][adr]
+        out = {"label": adr.replace("-", " "), "href": REPO_URL + info["path"], "title": info["title"]}
+        # A whole ADR would pin its whole Decision section, so every new decision would
+        # flag every item that cites the ADR. A reference names what the claim rests on.
+        if not anchor:
+            raise BuildError(f"{adr} names no decision or heading: cite {adr}#dN or {adr}#<heading>. "
+                             "--list-sources lists them")
+        text = (ROOT / info["path"]).read_text(encoding="utf-8")
+        decision = re.fullmatch(r"d(\d+)", anchor)
+        if decision:
+            if decision.group(1) not in _decisions(text):
+                raise BuildError(f"{adr} has no decision {decision.group(1)}")
+            out.update(label=f"{out['label']}, decision {decision.group(1)}", href=out["href"] + "#decision")
+        else:
+            section = next((s for s in parse_sections(text) if s["slug"] == anchor), None)
+            if not section:
+                raise BuildError(f"{adr} has no heading #{anchor}")
+            out.update(label=f"{out['label']}: {section['title']}", href=out["href"] + "#" + anchor)
+        return out
     if re.fullmatch(r"OD-\d{2}", ref):
         if ref not in f["ods"]:
             raise BuildError(f"unknown open decision {ref}")
@@ -251,6 +396,152 @@ def resolve(ref: str, f: dict[str, Any]) -> dict[str, str]:
 
 
 # --------------------------------------------------------------------------
+# Pins: the reviewed state of each item and of the sources that it cites
+# --------------------------------------------------------------------------
+
+def locate(ref: str, f: dict[str, Any]) -> dict[str, str]:
+    """Where the text that a reference pins lives: a file, and a section, row, decision or test in it."""
+    match = re.fullmatch(r"(ADR-\d{3})(?:#(.+))?", ref)
+    if match:
+        adr, anchor = match.groups()
+        path = f["adrs"][adr]["path"]
+        if anchor and re.fullmatch(r"d\d+", anchor):
+            return {"path": path, "kind": "decision", "key": anchor[1:], "adr": adr}
+        return {"path": path, "kind": "section", "key": anchor or "decision"}
+    if re.fullmatch(r"OD-\d{2}", ref):
+        return {"path": "docs/registers/open-decisions.md", "kind": "row", "key": ref}
+    if re.fullmatch(r"INV-\d{3}", ref):
+        return {"path": "docs/specs/invariants.md", "kind": "row", "key": ref}
+    if ref.startswith("test:"):
+        return {"path": f["tests"][ref[5:]], "kind": "test", "key": ref[5:]}
+    if ref.startswith("runbook:"):
+        return {"path": "docs/runbooks/index.md", "kind": "row", "key": ref[8:]}
+    if ref.startswith("lip:part-"):
+        return {"path": "docs/specs/lip-draft.md", "kind": "section", "key": f["lip"][ref[9:]]["anchor"]}
+    path, _, anchor = ref[4:].partition("#")
+    return {"path": path, "kind": "section" if anchor else "file", "key": anchor}
+
+
+def extract(text: str, where: dict[str, str]) -> str:
+    """The pinned part of a file's text. Empty when the file no longer holds it."""
+    kind, key = where["kind"], where["key"]
+    if kind == "file":
+        return text
+    if kind == "section":
+        return next((s["text"] for s in parse_sections(text) if s["slug"] == key), "")
+    if kind == "decision":
+        return decision_text(text, where["adr"], key)
+    if kind == "test":
+        return _test_body(text, key)
+    return next((line for line in text.splitlines() if line.startswith(f"| {key} |")), "")
+
+
+def items(c: dict[str, Any]) -> list[tuple[str, dict[str, Any], list[str]]]:
+    """Every pinned item of the guide: its key, its content and the sources that it cites."""
+    out: list[tuple[str, dict[str, Any], list[str]]] = []
+    out += [(f"actor:{a['id']}", a, a["sources"]) for a in c["actors"]]
+    out += [(f"flow:{fl['id']}", fl, fl["sources"]) for fl in c["flows"]["flows"]]
+    out += [(f"scene:{slug(s['title'])}", s, s["sources"]) for s in c["tour"]]
+    out += [(f"assumption:{a['id']}", a, a["sources"] + a.get("watched_by", [])) for a in c["assumptions"]]
+    out += [(f"reuse:{slug(r['name'])}", r, r["sources"]) for r in c["reuse"]]
+    out += [(f"term:{slug(t['term'])}", t, t["sources"]) for t in c["glossary"]]
+    out += [(f"quiz:{q['id']}", q, q["sources"]) for q in c["quiz"]]
+    for b in c["mandate"]["blocks"]:
+        out.append((f"mandate:{b['id']}", b, b["sources"] + [r for ch in b.get("changes", []) for r in ch["sources"]]))
+    out += [(f"planned:{slug(p['name'])}", p, p["sources"]) for p in c["constellation"]["planned"]]
+    out += [(f"change:{slug(ch['area'])}", ch, ch["sources"]) for ch in c["constellation"]["changes"]]
+    rfp = c["rfp"]
+    out.append(("rfp:properties", {"intro": rfp["intro"], "properties": rfp["properties"]},
+                rfp["properties_sources"] + [r for p in rfp["properties"] for r in p["sources"]]))
+    for sec in rfp["sections"]:
+        cited = sec.get("sources", []) + [r for ask in sec.get("items", []) for r in ask["sources"]]
+        cited += [r for ad in sec.get("added", []) for r in ad["sources"]]
+        out.append((f"rfp:{sec['id']}", sec, cited))
+    return out
+
+
+def pin_state(c: dict[str, Any], f: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """The hash of each item's content and of the text that each of its sources pins."""
+    files: dict[str, str] = {}
+
+    def text_of(ref: str) -> str:
+        where = locate(ref, f)
+        if where["path"] not in files:
+            files[where["path"]] = (ROOT / where["path"]).read_text(encoding="utf-8")
+        return extract(files[where["path"]], where)
+
+    state = {}
+    for key, item, cited in items(c):
+        meaning = {k: v for k, v in item.items() if k not in LAYOUT_KEYS}
+        state[key] = {
+            "content": digest(json.dumps(meaning, sort_keys=True, ensure_ascii=False)),
+            "sources": {ref: digest(normalize(text_of(ref))) for ref in sorted(set(cited))},
+        }
+    return state
+
+
+def read_pins(path: Path = PINS) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8")).get("items", {})
+
+
+def write_pins(pins: dict[str, Any], path: Path = PINS) -> None:
+    data = {
+        "about": ("The reviewed state of each item of the onboarding guide: the hash of its content and of the text "
+                  "that each of its sources pins. Write it only with build_onboarding.py --repin, after a review."),
+        "items": {k: pins[k] for k in sorted(pins)},
+    }
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def stale_items(current: dict[str, Any], pinned: dict[str, Any]) -> dict[str, list[str]]:
+    """Each item whose content or sources differ from its pin, with the reasons."""
+    out: dict[str, list[str]] = {}
+    for key, now in current.items():
+        old = pinned.get(key)
+        if old is None:
+            out[key] = ["it has no pin yet"]
+            continue
+        reasons = []
+        if old.get("content") != now["content"]:
+            reasons.append("its content changed")
+        for ref, h in now["sources"].items():
+            if ref not in old.get("sources", {}):
+                reasons.append(f"it cites a new source {ref}")
+            elif old["sources"][ref] != h:
+                reasons.append(f"the source {ref} changed")
+        reasons += [f"it no longer cites {ref}" for ref in old.get("sources", {}) if ref not in now["sources"]]
+        if reasons:
+            out[key] = reasons
+    for key in pinned:
+        if key not in current:
+            out[key] = ["the item no longer exists; its pin must go"]
+    return out
+
+
+def _git(*args: str) -> str | None:
+    try:
+        return subprocess.run(["git", "-C", str(ROOT), *args], capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
+def source_diff(ref: str, f: dict[str, Any]) -> str:
+    """How a source's pinned text changed since the last commit of the pins, as a unified diff."""
+    commit = (_git("log", "-1", "--format=%H", "--", str(PINS.relative_to(ROOT))) or "").strip()
+    if not commit:
+        return "    (no earlier version of the pins in git history)"
+    where = locate(ref, f)
+    old_file = _git("show", f"{commit}:{where['path']}")
+    if old_file is None:
+        return f"    ({where['path']} is not in that commit)"
+    now = extract((ROOT / where["path"]).read_text(encoding="utf-8"), where)
+    diff = difflib.unified_diff(extract(old_file, where).splitlines(), now.splitlines(), "pinned", "now", lineterm="", n=1)
+    return "\n".join("    " + line for line in list(diff)[:80]) or "    (only white space changed)"
+
+
+# --------------------------------------------------------------------------
 # Content
 # --------------------------------------------------------------------------
 
@@ -277,7 +568,7 @@ def parse_yaml(text: str) -> Any:
 
 def load() -> dict[str, Any]:
     content = {}
-    for name in ("meta", "map", "actors", "flows", "assumptions", "reuse", "glossary", "tour", "quiz", "mandate", "constellation", "rfp"):
+    for name in ("meta", "map", "actors", "flows", "assumptions", "reuse", "glossary", "tour", "quiz", "mandate", "constellation", "rfp", "coverage"):
         path = CONTENT / f"{name}.yaml"
         try:
             content[name] = parse_yaml(path.read_text(encoding="utf-8"))
@@ -286,8 +577,9 @@ def load() -> dict[str, Any]:
     return content
 
 
-def check(c: dict[str, Any], f: dict[str, Any]) -> dict[str, dict[str, str]]:
-    """Cross-checks the content and resolves every reference. Returns the reference table."""
+def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = None) -> dict[str, dict[str, str]]:
+    """Cross-checks the content and resolves every reference. Returns the reference table.
+    With `pinned`, it also fails on every item whose content or sources differ from its pin."""
     errors: list[str] = []
     refs: dict[str, dict[str, str]] = {}
 
@@ -344,6 +636,14 @@ def check(c: dict[str, Any], f: dict[str, Any]) -> dict[str, dict[str, str]]:
                     errors.append(f"flow {fl['id']} step {i}: unknown edge {e}")
         sources(f"flow {fl['id']}", fl.get("sources"))
 
+    for kind, entries in (("assumption", c["assumptions"]), ("quiz", c["quiz"])):
+        ids = [e.get("id") for e in entries]
+        for i, value in enumerate(ids, 1):
+            if not value or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", str(value)):
+                errors.append(f"{kind} {i}: needs an id in lower case with hyphens, which its pin uses as a key")
+        for value, count in Counter(ids).items():
+            if value and count > 1:
+                errors.append(f"{kind} {value}: duplicate id")
     for i, a in enumerate(c["assumptions"], 1):
         sources(f"assumption {i}", a.get("sources"))
         for ref in a.get("watched_by", []):
@@ -448,6 +748,38 @@ def check(c: dict[str, Any], f: dict[str, Any]) -> dict[str, dict[str, str]]:
         if address.lower() not in known:
             errors.append(f"address {address} is not recorded in docs/, policy/ or script/")
 
+    # Every box and arrow of the map is used: a flow step or a tour scene lights it.
+    used_nodes = {n for part in c["tour"] + [s for fl in c["flows"]["flows"] for s in fl["steps"]] for n in part.get("nodes", [])}
+    used_edges = {e for part in c["tour"] + [s for fl in c["flows"]["flows"] for s in fl["steps"]] for e in part.get("edges", [])}
+    errors += [f"map: no flow step or tour scene lights the box {n}" for n in nodes if n not in used_nodes]
+    errors += [f"map: no flow step or tour scene walks the arrow {e}" for e in edges if e not in used_edges]
+
+    # Coverage: every ADR, invariant, LIP part and runbook is cited, or excluded with a reason.
+    cited = {r for r in refs} | {r.split("#")[0] for r in refs if r.startswith("ADR-")}
+    universe = {
+        "adrs": set(f["adrs"]),
+        "invariants": set(f["invariants"]),
+        "lip": {f"lip:part-{p}" for p in f["lip"]},
+        "runbooks": {f"runbook:{r}" for r in f["runbooks"]},
+    }
+    for group, members in universe.items():
+        excluded = (c["coverage"] or {}).get(group) or {}
+        for name in sorted(members):
+            if name in cited and name in excluded:
+                errors.append(f"coverage: {name} is cited and also excluded; drop the exclusion")
+            elif name not in cited and name not in excluded:
+                errors.append(f"coverage: {name} is not cited and not excluded with a reason")
+        for name, reason in excluded.items():
+            if name not in members:
+                errors.append(f"coverage: the excluded {name} does not exist")
+            elif not str(reason or "").strip():
+                errors.append(f"coverage: the exclusion of {name} needs a reason")
+
+    # Pins: an item that changed, or whose sources changed, needs a review and a new pin.
+    if pinned is not None and not errors:
+        for key, reasons in stale_items(pin_state(c, f), pinned).items():
+            errors.append(f"pin {key}: {'; '.join(reasons)}. Review the item, then run build_onboarding.py --repin {key}")
+
     if errors:
         raise BuildError("\n".join(sorted(set(errors))))
     return refs
@@ -488,9 +820,25 @@ def count(n: int, noun: str) -> str:
 
 
 def source_links(items: list[str], refs: dict[str, dict[str, str]]) -> str:
-    links = []
+    """The sources of an item. The decisions of one ADR share a chip: "ADR 007, decisions 18 and 23"."""
+    shown: list[dict[str, str]] = []
+    decisions: dict[str, list[str]] = {}
     for ref in items or []:
-        r = refs[ref]
+        match = re.fullmatch(r"(ADR-\d{3})#d(\d+)", ref)
+        if not match:
+            shown.append(refs[ref])
+            continue
+        adr, number = match.groups()
+        if adr not in decisions:
+            decisions[adr] = []
+            shown.append({**refs[ref], "adr": adr})
+        decisions[adr].append(number)
+    links = []
+    for r in shown:
+        if "adr" in r:
+            numbers = sorted(set(decisions[r["adr"]]), key=int)
+            which = f"decision {numbers[0]}" if len(numbers) == 1 else f"decisions {', '.join(numbers[:-1])} and {numbers[-1]}"
+            r = {**r, "label": f"{r['adr'].replace('-', ' ')}, {which}"}
         links.append(f'<a class="src" href="{esc(r["href"])}" title="{esc(r["title"])}">{esc(r["label"])}</a>')
     return f'<p class="sources"><span>Sources</span> {" ".join(links)}</p>' if links else ""
 
@@ -572,8 +920,9 @@ def render_map(m: dict[str, Any]) -> str:
         lines = n["label"].split("\n")
         tip = f'{n["label"].replace(chr(10), " ")}: {n["summary"]}'
         parts.append(
+            # Without the script a box is a labelled image; guide.js makes it a button.
             f'<g class="node dom-{n["domain"]} kind-{n["kind"]} ns-{n["status"]}" id="node-{n["id"]}" data-node="{n["id"]}" '
-            f'tabindex="0" role="button" aria-label="{esc(tip)}" data-tip="{esc(tip)}">'
+            f'role="img" aria-label="{esc(tip)}" data-tip="{esc(tip)}">'
             f'<rect x="{x}" y="{y}" width="{nw}" height="{nh}" rx="{10 if n["kind"] in ("multisig", "body") else 4}"/>'
             f'<g class="glyph" transform="translate({x + 9},{y + 8})" aria-hidden="true">{GLYPHS[n["kind"]]}</g>'
         )
@@ -1049,11 +1398,12 @@ def render(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[str, str]]
         ("glossary", "Glossary", section_glossary(c, refs)),
         ("selfcheck", "Self-check", section_quiz(c, refs)),
     ]
+    # Without the script the tabs are plain links to sections; guide.js makes them a tab widget.
     tablist = "".join(
-        f'<a class="tab" role="tab" href="#tab-{k}" id="tablink-{k}" aria-controls="tab-{k}">{esc(t)}</a>' for k, t, _ in tabs
+        f'<a class="tab" href="#tab-{k}" id="tablink-{k}">{esc(t)}</a>' for k, t, _ in tabs
     )
     panels = "".join(
-        f'<section class="tabpanel" role="tabpanel" id="tab-{k}" aria-labelledby="tablink-{k}"><h2>{esc(t)}</h2>'
+        f'<section class="tabpanel" id="tab-{k}" aria-labelledby="tablink-{k}"><h2>{esc(t)}</h2>'
         f'<p class="intro">{fmt(m["tab_intros"][k])}</p>{body}</section>'
         for k, t, body in tabs
     )
@@ -1104,7 +1454,7 @@ def render(c: dict[str, Any], f: dict[str, Any], refs: dict[str, dict[str, str]]
 </section>
 {section_tour(c, refs)}
 <section class="explore" aria-label="Explore">
-<nav class="tabs" role="tablist" aria-label="Sections">{tablist}</nav>
+<nav class="tabs" aria-label="Sections">{tablist}</nav>
 {panels}
 </section>
 </main>
@@ -1130,21 +1480,86 @@ def stand_in_leaks(page: str) -> list[str]:
     return sorted(a for a in fork_only_addresses() if a in page.lower())
 
 
-def build() -> str:
+def build(pinned: dict[str, Any] | None = None) -> str:
     c = load()
     f = facts()
-    refs = check(c, f)
+    refs = check(c, f, read_pins() if pinned is None else pinned)
     page = render(c, f, refs)
     if leaks := stand_in_leaks(page):
         raise BuildError("the page shows fork-test stand-in addresses: " + ", ".join(leaks))
     return page
 
 
+def list_sources(f: dict[str, Any]) -> list[str]:
+    """Every reference that content can cite, with what it names."""
+    out = []
+    for adr, info in f["adrs"].items():
+        text = (ROOT / info["path"]).read_text(encoding="utf-8")
+        out += [f"{adr}#d{n}  {' '.join(body.split())[:90]}" for n, body in _decisions(text).items()]
+        out += [f"{adr}#{s['slug']}  {info['title']}: {s['title']}" for s in parse_sections(text) if s["level"] == 2 and s["slug"] != "decision"]
+    out += [f"{od}  {info['question'][:70]}" for od, info in f["ods"].items()]
+    out += [f"{inv}  {info['text'][:70]}" for inv, info in f["invariants"].items()]
+    out += [f"lip:part-{p}  {info['title']}" for p, info in f["lip"].items()]
+    out += [f"runbook:{name}" for name in f["runbooks"]]
+    out += [f"test:{name}" for name in f["tests"]]
+    return out
+
+
+def repin(keys: list[str] | None) -> str:
+    """Pins the given items, or every item, to their current content and sources."""
+    c, f = load(), facts()
+    check(c, f, None)
+    current = pin_state(c, f)
+    chosen = list(current) if keys is None else keys
+    unknown = [k for k in chosen if k not in current]
+    if unknown:
+        raise BuildError(f"unknown items: {', '.join(unknown)}. Run --stale to see the keys.")
+    pinned = read_pins()
+    for key in chosen:
+        pinned[key] = current[key]
+    for key in [k for k in pinned if k not in current]:
+        del pinned[key]
+    write_pins(pinned)
+    return f"pinned {len(chosen)} items in {PINS.relative_to(ROOT)}; commit it with the review"
+
+
+def stale_report() -> tuple[bool, str]:
+    """The stale items with their reasons and the diff of each changed source."""
+    c, f = load(), facts()
+    check(c, f, None)
+    current = pin_state(c, f)
+    pinned = read_pins()
+    stale = stale_items(current, pinned)
+    lines = [] if stale else ["every item matches its pin"]
+    for key, reasons in stale.items():
+        lines.append(f"{key}: {'; '.join(reasons)}")
+        for ref, h in current.get(key, {}).get("sources", {}).items():
+            old = pinned.get(key, {}).get("sources", {}).get(ref)
+            if old and old != h:
+                lines.append(f"  {ref}:\n{source_diff(ref, f)}")
+    return bool(stale), "\n".join(lines)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--check", action="store_true", help="fail if the committed page differs from a fresh build")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--check", action="store_true", help="fail if a check fails or the committed page differs from a fresh build")
+    group.add_argument("--stale", action="store_true", help="list the items whose pins are stale, with the change of each source")
+    group.add_argument("--repin", nargs="+", metavar="ITEM", help="after a review, pin these items to their current content and sources")
+    group.add_argument("--repin-all", action="store_true", help="pin every item; only for the first pin or a reviewed bulk change")
+    group.add_argument("--list-sources", action="store_true", help="print every reference that content can cite")
     args = parser.parse_args()
     try:
+        if args.list_sources:
+            print("\n".join(list_sources(facts())))
+            return 0
+        if args.stale:
+            stale, report = stale_report()
+            print(report)
+            return 1 if stale else 0
+        if args.repin or args.repin_all:
+            print(repin(None if args.repin_all else args.repin))
+            return 0
         page = build()
     except BuildError as exc:
         print(f"onboarding guide: build failed\n{exc}", file=sys.stderr)
