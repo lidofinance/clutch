@@ -38,6 +38,14 @@ Many contributors work here, each with their own agents. This page is the workfl
 - `docs/log.md`, `docs/registers/document-status.md` and `docs/onboarding/clutch-onboarding.html` come from scripts. Never edit them by hand. On a merge conflict, take either side, run `just regen` and commit the result.
 - The policy artifact is generated too, but reviewers approve its diff ([ADR 004](docs/adr/004-specifications-and-policy-as-data.md), decision 14).
 
+## Change the onboarding guide
+
+- The guide's text is in `docs/onboarding/content/`. Run `just regen` after a change, and commit the rebuilt page with it. The [guide-update skill](skills/guide-update/SKILL.md) has the steps.
+- Cite what a claim rests on: `ADR-007#d27` for a decision, `ADR-007#proposed-direction` for a section. The build refuses a whole ADR. `uv run --with pyyaml python scripts/build_onboarding.py --list-sources` lists every decision and heading.
+- Each item of the guide is pinned to the text of its sources in `docs/onboarding/pins.json`. A change to an ADR, a register, a runbook, a test or a page that an item cites makes the build fail. Run `just stale`, read each item next to its source change, and fix the item if it is wrong. Then run `just repin <item>` and commit `pins.json` with your change. Never pin an item again without that review.
+- On a merge conflict in `pins.json`, take `main`'s version, run `just stale` and pin your items again.
+- A new ADR, invariant, LIP part or runbook needs a citation in the guide, or an entry with a reason in `docs/onboarding/content/coverage.yaml`.
+
 ## Decisions
 
 - A question that needs a decision becomes a row of [the open-decision register](docs/registers/open-decisions.md): the question with its options, the page that closes it, the agent's recommendation and who decides. The validator refuses an incomplete row.

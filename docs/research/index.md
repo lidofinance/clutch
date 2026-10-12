@@ -1,5 +1,6 @@
 # Research
 
+* [The onboarding guide's tests and pins, 2026-10-12](guide-invariants-2026-10-12.md) - the evidence behind ADR 012 decision 11: two defect classes from the review of another Lido guide, probed on this guide in twelve presentation states and without its script; the churn of pins on whole ADRs, measured on the changes of 2026-10-09; the decision-level references; and the drift from OD-54 and OD-57 that the mapping found.
 * [Simplification options, 2026-10-08](simplification-2026-10-08.md) - the evidence behind OD-54 to OD-57: eleven options to cut complexity, checked against Lido practice, the ENS endowment and Aave's Finance Steward; EM's answers; a fork probe of one modifier per account; the budget keys that a retune touches; and how a capped launch without the screening guard holds on chain.
 * [Chain reads for the design ADRs, 2026-09-30](chain-reads-2026-09-30.md) - every on-chain fact the design ADRs rely on, read at one pinned block with the exact command.
 * [The Zodiac constellation as the policy backbone, 2026-10-06](zodiac-constellation-2026-10-06.md) - the evidence behind OD-33 and OD-34: whether the provider's configuration still builds and matches the chain, what runs locally and what only the hosted app runs, a compile probe against the kit's condition shapes, the differences from the decided design, and what Clutch must build.

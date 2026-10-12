@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: "ADR 012: Contributing with many agents"
-description: Many contributors may run their own agents here — any agent may author a page, and only listed humans and teams verify, with a hash that locks the page's body; agents own no GitHub accounts; changes land through a merge queue; decisions enter as complete open-decision rows and are decided in batched interviews; safe defaults, one command for setup, checks and generated files, and checks for restricted terms, licences, invariants and IDs.
+description: Many contributors may run their own agents here — any agent may author a page, and only listed humans and teams verify, with a hash that locks the page's body; agents own no GitHub accounts; changes land through a merge queue; decisions enter as complete open-decision rows and are decided in batched interviews; safe defaults, one command for setup, checks and generated files, and checks for restricted terms, licences, invariants and IDs; the onboarding guide is checked in every presentation state, and each of its items is pinned to the decisions that it cites.
 tags: [agents, contributors, process, security, ci]
 status: draft
 review_status: slop
@@ -9,7 +9,7 @@ decision: proposed
 constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T08:22:39Z
+  at: 2026-10-12T07:55:43Z
 verified: []
 sources:
   - id: s1
@@ -30,6 +30,12 @@ sources:
   - id: s6
     resource: /registers/open-decisions.md
     title: Open decisions — OD-23, and OD-50 to OD-53 from this record
+  - id: s7
+    resource: /registers/decision-log.md
+    title: Decision log — EM's request for a triage of the onboarding guide's tests, and EM's answer, 2026-10-12
+  - id: s8
+    resource: /research/guide-invariants-2026-10-12.md
+    title: Research note — the guide's defects in print and without its script, the churn of whole-ADR pins, and the drift that the decision-level references found
 ---
 
 # ADR 012: Contributing with many agents
@@ -61,6 +67,10 @@ EM decided on 2026-10-07 [s1]:
 
 10. A CI workflow publishes the onboarding guide on GitHub Pages from `main`. The page says that it is a hypothetical draft: nothing is deployed or ratified, every number can change, and it is not advice. This replaces "internal first" of OD-37 for the guide's page alone. The repository stays private until deployment (ADR 001).
 
+EM decided on 2026-10-12 [s7]:
+
+11. The onboarding guide gets every check that the agent's triage of 2026-10-12 proposed, in one pull request, with no part deferred [s8]. The browser tests check every presentation state and the page without its script. Each item of the guide is pinned to the text of its sources, and a reference names a decision or a section of an ADR, not the whole ADR. Every ADR, invariant, LIP part and runbook is cited by the guide or excluded with a reason. CI attaches the built page to each pull request, reports the pin changes, checks the workflows, and checks the guide's outside links each week.
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Proposed direction
@@ -79,6 +89,12 @@ EM asked the agent to implement every step that needs no further decision [s1]. 
 - **Pull requests (step 11).** A pull-request template asks for the agent, what a human must check, the commands that ran and a restricted-data statement. One decision or one feature goes in each pull request.
 - **Procedures (step 12).** `CONTRIBUTING.md` holds the workflow. Four skills join `adr-draft`: `decision-interview`, `record-decision`, `guide-update` and `research-note`.
 - **The guide on GitHub Pages (decision 10).** `.github/workflows/pages.yml` runs on a push to `main` that changes the page, or by hand. It checks that the committed page is a fresh build and still carries its disclaimer, then deploys the page as `index.html`, with a `robots.txt` that asks crawlers to stay away. The page also carries a `noindex` tag. Only the deploy job may write to Pages; a pull request never deploys. The build refuses a banner or a footer that drops the disclaimer.
+- **The guide's checks (decision 11).** The research note has the evidence [s8].
+  - Browser: the `matrix` group runs axe-core in twelve presentation states and also fails on text with the colour of its own background. The `static` group fails when the page without its script has anything that looks interactive and does nothing. Each group first proves that it catches a planted defect. `ONBOARDING_PAGE` runs the tests on another copy of the page.
+  - Fixes: the dark palette applies only on screens. Only the script gives the tabs, the panels and the map boxes their widget roles.
+  - Pins: `docs/onboarding/pins.json` holds the hash of each item's content and of the text that each source pins. `ADR-NNN#dN` pins decision N and every other block of the Decision section that names it, so a later decision that replaces it changes the pin. `ADR-NNN#<heading>` pins that section. The build refuses a whole ADR, fails on a stale pin, and names the command that pins the item again. The map's layout is not pinned. `just stale` shows each change; `just repin <item>` pins the item after a review.
+  - Coverage: `docs/onboarding/content/coverage.yaml` excludes ADR 012, INV-007 and INV-020, each with its reason. The build also fails on a map box or arrow that no flow step or tour scene uses.
+  - CI: the `docs` workflow attaches the page to each pull request for 14 days, writes the pin report of `scripts/pin_report.py` into the job summary, and lists the stale items when the build check fails. A `workflows` job runs zizmor 1.30.1. The `links` workflow runs `scripts/check_links.py` every Monday and by hand. `just check` also runs actionlint and zizmor, offline.
 - **CI gaps (step 13).** `scripts/check_licences.py` replaces ADR 001's grep command: every source file carries AGPL-3.0-or-later, a changed provider file carries LGPL-3.0-only, and an unchanged provider file matches its blob hash in `policy/constellation/provenance.lock`. `scripts/check_invariants.py` fails when an invariant names a test that does not exist, or when a Draft invariant names none. The fork suite stays a local check until phase 2 (decision 8).
 
 ## Options considered
@@ -112,14 +128,15 @@ EM asked the agent to implement every step that needs no further decision [s1]. 
 - `scripts/test_checks.py`: the log build and its fragments, restricted words, addresses and figures, secrets, licences and invariants.
 - `bun test compiler`: the owner guard refuses without the owner's confirmation, in CI, outside `main` and with local changes.
 - The keystore rehearsal of `mainnet.just` on an anvil fork, 2026-10-07: deploy, apply, fund and teardown, and the refusals [s2].
+- `scripts/test_build_onboarding.py`: a banner or a footer without the draft disclaimer fails the build. The browser tests check the disclaimer and the `noindex` tag. `actionlint` 1.7.12 finds nothing in the workflows, and the page works when served over HTTP, with no outside request and no console message (2026-10-07).
+- Decision 11, on 2026-10-12: `scripts/test_build_onboarding.py` passes 85 cases, among them the coverage and map rules, a whole ADR refused, the six pin cases, a decision's pin that covers the note that replaces it, and one chip for the decisions of one ADR. `scripts/test_onboarding_page.py` passes 193 checks, and on the page of 5c7e68b its `matrix` and `static` groups fail in the four checks that the research note describes [s8]. `scripts/test_checks.py` passes the ten cases of the pin report. Planted defects in the pin report and in the builder's new rules each fail a test. actionlint 1.7.12 and zizmor 1.30.1 find nothing in the workflows.
 
 ## Reversal conditions
 
 - A contributor's agent leaks a restricted term or a secret past the check.
 - The merge queue blocks routine work for more than a day.
 - An agent writes a human's entry that the human did not instruct.
-
-- `scripts/test_build_onboarding.py`: a banner or a footer without the draft disclaimer fails the build. The browser tests check the disclaimer and the `noindex` tag. `actionlint` 1.7.12 finds nothing in the workflows, and the page works when served over HTTP, with no outside request and no console message (2026-10-07).
+- Reviewers pin guide items again without reading the source changes, or most pull requests flag most items.
 
 ## Open questions
 

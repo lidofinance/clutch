@@ -7,7 +7,7 @@ No runbook is written yet. The table lists the runbooks that the design owes, wi
 | Runbook | Holder | Permission | Written | Drilled |
 |---|---|---|---|---|
 | Revoke the operator | emergency Safe | `revokeTarget` and `revokeFunction` on the operator modifier and on the orders operator modifier, role key pinned to `operator` | No | No |
-| Remove a strategy | emergency Safe | `revokeTarget` or `revokeFunction` on the operator modifier, or on the orders operator modifier, for one target or function, role key pinned to `operator`; then a forum post | No | No |
+| Remove a strategy | emergency Safe | `revokeTarget` or `revokeFunction` on the operator modifier, or on the orders modifier, for one target or function, role key pinned to `operator`; then a forum post | No | No |
 | Zero the approvals | emergency Safe | `approve(spender, 0)` on each token that the operator can approve | No | No |
 | Exit positions to the Safe | emergency Safe | redeem, withdraw, cancel and claim on each position, receiver and owner pinned to the avatar; the first-loss shares sit in the first-loss Safe, out of reach ([ADR 008](/adr/008-funding-through-existing-payments.md)) | No | No |
 | Recovery order | emergency Safe | `transfer` pinned to the orders account; then, on the orders account, a delegatecall to the CoW order signer for an order that buys USDC or USDT, pays the Aragon Agent and lives at most 1 day; a new order if it does not fill ([ADR 007](/adr/007-swapping-through-an-orders-account.md)) | No | No |

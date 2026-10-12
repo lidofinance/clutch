@@ -6,9 +6,12 @@ Run:
   uv run --with pyyaml python scripts/test_build_onboarding.py
 
 Each content case changes one item of the committed content in memory and checks
-that the build refuses it with the expected message. The page cases render the
-committed content and check that the page loads nothing from outside itself, escapes
-the text it is given, and shows no fork-test stand-in address.
+that the build refuses it with the expected message. The pin cases do the same with
+the committed pins: a changed item, a changed source, a new item and a removed item
+each need a review and a new pin. The page cases render the committed content and
+check that the page loads nothing from outside itself, escapes the text it is given,
+shows no fork-test stand-in address and gives no element a widget role without its
+script.
 """
 
 from __future__ import annotations
@@ -40,6 +43,29 @@ def _first_change(c):
 
 def _first_ask(c, verdict=None):
     return next(ask for sec in c["rfp"]["sections"] for ask in sec.get("items", []) if verdict in (None, ask["verdict"]))
+
+
+def _spare_node(c):
+    node = copy.deepcopy(c["map"]["nodes"][0])
+    node["id"] = "spare"
+    c["map"]["nodes"].append(node)
+
+
+def _spare_edge(c):
+    edge = copy.deepcopy(c["map"]["edges"][0])
+    edge["id"] = "spare-edge"
+    c["map"]["edges"].append(edge)
+
+
+def _coverage(group, name, reason=None, drop=False):
+    def change(c):
+        excluded = c["coverage"].setdefault(group, {}) or {}
+        c["coverage"][group] = excluded
+        if drop:
+            excluded.pop(name)
+        else:
+            excluded[name] = reason
+    return change
 
 
 CONTENT_CASES = [
@@ -90,6 +116,41 @@ CONTENT_CASES = [
     ("a banner without the draft disclaimer", lambda c: c["meta"].update(banner="A finished design."), "must keep the draft disclaimer 'hypothetical draft'"),
     ("a banner that drops 'nothing is ratified'", lambda c: c["meta"].update(banner="**Hypothetical draft.** Approved."), "must keep the draft disclaimer 'nothing is ratified'"),
     ("a footer without the draft disclaimer", lambda c: c["meta"].update(footer="How this page is made."), "meta footer: must keep the draft disclaimer"),
+    ("a whole ADR as a source", _source("ADR-007"), "ADR-007 names no decision or heading"),
+    ("a reference to one decision of an ADR", _source("ADR-007#d27"), None),
+    ("a reference to a section of an ADR", _source("ADR-007#consequences"), None),
+    ("a reference to a decision that the ADR lacks", _source("ADR-007#d999"), "ADR-007 has no decision 999"),
+    ("a reference to a heading that the ADR lacks", _source("ADR-007#no-such-heading"), "ADR-007 has no heading #no-such-heading"),
+    ("an assumption without an id", lambda c: c["assumptions"][0].pop("id"), "assumption 1: needs an id"),
+    ("two assumptions with one id", lambda c: c["assumptions"][1].update(id=c["assumptions"][0]["id"]), "duplicate id"),
+    ("a question without an id", lambda c: c["quiz"][0].update(id="Not A Slug"), "quiz 1: needs an id"),
+    ("a box that no flow step or scene lights", _spare_node, "lights the box spare"),
+    ("an arrow that no flow step or scene walks", _spare_edge, "walks the arrow spare-edge"),
+    ("an ADR that is neither cited nor excluded", _coverage("adrs", "ADR-012", drop=True), "ADR-012 is not cited and not excluded"),
+    ("an invariant that is neither cited nor excluded", _coverage("invariants", "INV-007", drop=True), "INV-007 is not cited and not excluded"),
+    ("a cited ADR that is also excluded", _coverage("adrs", "ADR-005", "A reason."), "ADR-005 is cited and also excluded"),
+    ("an exclusion without a reason", _coverage("adrs", "ADR-012", ""), "the exclusion of ADR-012 needs a reason"),
+    ("an exclusion of something that does not exist", _coverage("runbooks", "runbook:No such runbook", "A reason."), "the excluded runbook:No such runbook does not exist"),
+]
+
+
+def _repinned_source(pins):
+    """The pins with one source hash changed, as if the source had changed since the review."""
+    key = next(k for k, v in pins.items() if v["sources"])
+    ref = next(iter(pins[key]["sources"]))
+    pins[key]["sources"][ref] = "0" * 16
+    return f"pin {key}: the source {ref} changed"
+
+
+PIN_CASES = [
+    ("the committed pins match the content and the sources", lambda c, p: None, None),
+    ("a changed item needs a new pin", lambda c, p: c["actors"][0].update(what="A changed text."), f"pin actor:{{a0}}: its content changed"),
+    ("a changed source needs a new pin", lambda c, p: _repinned_source(p), "the source"),
+    ("a new item has no pin yet", lambda c, p: c["glossary"].append({"term": "Spare term", "plain": "A spare term.", "sources": ["ADR-005#d6"]}),
+     "pin term:spare-term: it has no pin yet"),
+    ("an item that is gone leaves a pin that must go", lambda c, p: p.update({"actor:gone": {"content": "0", "sources": {}}}),
+     "pin actor:gone: the item no longer exists"),
+    ("a new source of an item needs a new pin", lambda c, p: c["actors"][0]["sources"].append("OD-01"), "it cites a new source OD-01"),
 ]
 
 
@@ -121,6 +182,52 @@ def main() -> int:
     else:
         report(False, "a repeated key in a content file", "accepted")
 
+    pins = b.read_pins()
+    for name, change, expected in PIN_CASES:
+        c = copy.deepcopy(content)
+        p = copy.deepcopy(pins)
+        result = change(c, p)
+        expected = expected.replace("{a0}", content["actors"][0]["id"]) if expected else expected
+        if isinstance(result, str):
+            expected = result
+        try:
+            b.check(c, facts, p)
+        except b.BuildError as exc:
+            report(expected is not None and expected in str(exc), name, str(exc))
+        else:
+            report(expected is None, name, "accepted")
+
+    where = {
+        "decision": b.locate("ADR-007#d27", facts),
+        "section": b.locate("ADR-007#proposed-direction", facts),
+        "row": b.locate("OD-57", facts),
+        "test": b.locate("test:test_D3_withdrawal_queue_is_out_of_scope", facts),
+        "lip": b.locate("lip:part-8", facts),
+    }
+    texts = {k: b.extract((ROOT / w["path"]).read_text(encoding="utf-8"), w) for k, w in where.items()}
+    report(texts["decision"].startswith("27. ") and "Decision 27 replaces" in texts["decision"] and "\n28. " not in texts["decision"],
+           "a decision reference pins that decision and the notes that name it", texts["decision"][:80])
+    report(texts["section"].startswith("## Proposed direction") and "## Options considered" not in texts["section"],
+           "a heading reference pins that section alone", texts["section"][:80])
+
+    # A later decision that replaces an earlier one leaves the earlier text as it was, so the
+    # earlier decision's pin also covers every block of the Decision section that names it.
+    adr = "## Decision\n\n1. Budgets retune.\n2. Budgets stay.\n   - Set once.\n\nDecision 2 replaces decision 1.\n\n" \
+          "3. Monitoring pages ([ADR 010](/adr/010-x.md) decision 1).\n\n## Proposed direction\n\n- Not pinned.\n"
+    report(b.decision_text(adr, "ADR-099", "1") == "1. Budgets retune.\n\nDecision 2 replaces decision 1.",
+           "a decision's pin covers the note that replaces it, and not another ADR's decision 1", repr(b.decision_text(adr, "ADR-099", "1")))
+    report(b.decision_text(adr, "ADR-099", "2") == "2. Budgets stay.\n   - Set once.\n\nDecision 2 replaces decision 1.",
+           "a decision's pin keeps its indented lines", repr(b.decision_text(adr, "ADR-099", "2")))
+    report(b._named_decisions("Decisions 17 to 20 replace decisions 1, 3, 6 to 12 and 14; decision 15's count", "ADR-007")
+           == {str(n) for n in [1, 3, 6, 7, 8, 9, 10, 11, 12, 14, 15, 17, 18, 19, 20]}, "lists and ranges of decisions are read")
+    adr9 = (ROOT / facts["adrs"]["ADR-009"]["path"]).read_text(encoding="utf-8")
+    report("Decision 31 replaces decision 5" in b.decision_text(adr9, "ADR-009", "5"), "ADR 009's decision 5 pins the note that replaces it")
+    report(texts["row"].startswith("| OD-57 |"), "an OD reference pins its row", texts["row"][:80])
+    report(texts["test"].startswith("function test_D3_withdrawal_queue_is_out_of_scope(") and texts["test"].endswith("}"),
+           "a test reference pins the test function", texts["test"][-80:])
+    report(texts["lip"].startswith("#### Part 8"), "a LIP reference pins its part", texts["lip"][:80])
+    report(b.digest(b.normalize("a  b\n c")) == b.digest(b.normalize("a b c")), "a re-wrapped source keeps its pin")
+
     refs = b.check(content, facts)
     page = b.render(content, facts, refs)
 
@@ -140,7 +247,14 @@ def main() -> int:
     f["policy"][0]["members"] = [stand_in]
     report(b.stand_in_leaks(b.render(content, f, refs)) == [stand_in], "a stand-in address from the artifact is caught")
 
-    total = len(CONTENT_CASES) + 6
+    widget = re.findall(r'role="(?:tab|tablist|tabpanel|button)"|aria-controls=|tabindex="0"', page)
+    report(not widget, "the page gives no element a widget role without its script", str(widget[:5]))
+
+    chips = re.findall(r'class="src"[^>]*>([^<]+)<', b.source_links(["ADR-007#d27", "OD-57", "ADR-007#d18", "ADR-007#consequences"], refs | {
+        r: b.resolve(r, facts) for r in ("ADR-007#d27", "ADR-007#d18", "OD-57", "ADR-007#consequences")}))
+    report(chips == ["ADR 007, decisions 18 and 27", "OD-57", "ADR 007: Consequences"], "the decisions of one ADR share a chip", str(chips))
+
+    total = len(CONTENT_CASES) + len(PIN_CASES) + 10 + 6 + 2
     print(f"{total - failures} passed, {failures} failed")
     return 1 if failures else 0
 

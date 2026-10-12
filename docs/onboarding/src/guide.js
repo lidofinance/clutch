@@ -38,8 +38,15 @@
   const edgesOf = (id) => $$(".edge", map).filter((g) => g.dataset.from === id || g.dataset.to === id).map((g) => g.dataset.edge);
 
   // --- tabs -------------------------------------------------------------------
+  // Without this script the tabs are plain links to sections. The script makes them a tab widget.
   const tabs = $$(".tab");
-  const panelIds = tabs.map((t) => t.getAttribute("aria-controls"));
+  const panelIds = tabs.map((t) => t.getAttribute("href").slice(1));
+  $("nav.tabs").setAttribute("role", "tablist");
+  tabs.forEach((t, i) => {
+    t.setAttribute("role", "tab");
+    t.setAttribute("aria-controls", panelIds[i]);
+  });
+  $$(".tabpanel").forEach((p) => p.setAttribute("role", "tabpanel"));
   function showTab(id) {
     tabs.forEach((t) => {
       const on = t.getAttribute("aria-controls") === id;
@@ -183,7 +190,10 @@
       edges: edgesOf(id),
     }], { fromMap: true, byKeyboard });
   }
+  // Without this script a box is a labelled image. The script makes it a button.
   $$(".node", map).forEach((g) => {
+    g.setAttribute("role", "button");
+    g.tabIndex = 0;
     g.addEventListener("click", () => openNode(g.dataset.node, false));
     g.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openNode(g.dataset.node, true); }

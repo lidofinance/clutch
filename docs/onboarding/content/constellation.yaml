@@ -10,97 +10,98 @@ planned:
   - name: Orders account
     where: "A second Agent-owned Safe, with one modifier of its own"
     what: "One orders modifier for the operator, emergency and technical roles, with no governance role (OD-57). The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
-    sources: [ADR-007, OD-43, OD-57, INV-023]
+    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d28", OD-43, OD-57, INV-023]
   - name: Exit-governance role
     where: "On the safety modifier, held by the Easy Track script executor"
     what: "The motion that onboards a protocol also writes the emergency role's exit for it. The role writes only under the emergency key."
-    sources: [ADR-006, OD-49, INV-025]
+    sources: ["ADR-006#d13", "ADR-006#proposed-direction", OD-49, INV-025]
   - name: First-loss Safe
     where: "An Agent-owned Safe outside the policy"
     what: "It has no module, so no role and no motion can reach the first-loss shares. A DAO vote burns or redeems them."
-    sources: [ADR-008, OD-42, INV-021]
+    sources: ["ADR-008#d15", "ADR-008#d19", OD-42, INV-021]
 changes:
   - area: Modifiers
     kind: changed
     provider: "One Roles modifier, with the operator and emergency roles."
     clutch: "Two modifiers on the Asset Safe: the operator modifier for the operator and governance roles, and the safety modifier for the emergency and technical roles."
     why: "Recovery must keep working when the operator is switched off, and no screening may sit in its way."
-    sources: [ADR-005, "doc:docs/research/zodiac-constellation-2026-10-06.md#4-differences-from-the-decided-design"]
+    sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction",
+      "doc:docs/research/zodiac-constellation-2026-10-06.md#4-differences-from-the-decided-design"]
   - area: Operator holder
     kind: changed
     provider: "The committee's existing Safe."
     clutch: "A new operator Safe at 4 of 7, with the screening vendor's guard, which is also the trusted caller of every factory."
     why: "Above the launch cap, blocking a transaction before it runs is a hard requirement. A dedicated Safe carries the guard and creates every motion, so each one is screened. The vault may launch without the guard under a cap of one million dollars; the guard comes before the cap lifts (OD-54, OD-55)."
-    sources: [ADR-010, OD-01, OD-19, OD-54, OD-55]
+    sources: ["ADR-010#d2", "ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction", OD-01, OD-19, OD-54, OD-55]
   - area: Emergency holder
     kind: changed
     provider: "The Emergency Brakes multisig."
     clutch: "A new emergency Safe: the committee's signers at 2 of 7. The Emergency Brakes multisig keeps a technical role."
     why: "Financial emergencies go to the people who watch the portfolio every day, at a threshold that acts in minutes."
-    sources: [ADR-005, OD-30]
+    sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d3", "ADR-005#d16", OD-30]
   - area: Technical role
     kind: added
     provider: "None. The emergency role could call `disableModule` with both arguments open."
     clutch: "The Emergency Brakes multisig can disable only the operator modifier; the module argument is pinned."
     why: "An open `disableModule` could switch off the safety modifier, and with it every recovery path."
-    sources: [ADR-005, INV-009]
+    sources: ["ADR-005#d3", "ADR-005#proposed-direction", INV-009]
   - area: Governance
     kind: added
     provider: "No role. It assumed that motions act as the Aragon Agent, which Easy Track cannot do."
     clutch: "A governance role for Easy Track's script executor. It writes operator permissions from fixed templates, never delegatecall and never on the Asset Safe or its modules."
     why: "Motions need their own narrow role; two fork probes showed how a wider one reaches the vault (OD-36, OD-38)."
-    sources: [ADR-006, OD-36, OD-38, INV-004]
+    sources: ["ADR-006#d5", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-006#proposed-direction", OD-36, OD-38, INV-004]
   - area: Asset Safe
     kind: changed
     provider: "Agent-owned, on the Safe v1.4.1 singleton. The constellation's Safe node cannot set a version, a guard or a fallback handler."
     clutch: "Safe v1.5.0, the Aragon Agent as its only owner, no guard and no fallback handler. Clutch's own script deploys it."
     why: "Recovery must never pass through vendor code, and the vault stays off the parts of Safe that changed most."
-    sources: [ADR-005, OD-17, INV-001]
+    sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#context", "ADR-005#proposed-direction", OD-17, INV-001]
   - area: Lending and savings
     kind: removed
     provider: "Aave v3 supply and withdraw, aToken transfers, and sDAI."
     clutch: "None of these. sUSDS stays; Lido Lend joins later by one motion."
     why: "Third-party lending markets are outside the launch scope."
-    sources: [ADR-011, INV-015]
+    sources: ["ADR-011#d1", "ADR-011#d3", "ADR-011#d13", "ADR-011#proposed-direction", INV-015]
   - area: Swaps
     kind: changed
     provider: "A CoW swap action over six sell and five buy tokens, with a TODO for bounds, compiled by the hosted app."
     clutch: "No swap on the Asset Safe. CoW orders from the orders account, with every receiver pinned; specified, not built."
     why: "An action that only the hosted app compiles cannot be reviewed here, and its price bounds were still a TODO."
-    sources: [ADR-007, OD-33, OD-43]
+    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", OD-33, OD-43]
   - area: DAI
     kind: added
     provider: "No converter; DAI goes to Aave or sDAI."
     clutch: "Sky's DAI–USDS converter, one to one, with the receiver pinned to the Asset Safe."
     why: "DAI earns through USDS without a swap and without a third-party market."
-    sources: [ADR-011, OD-22]
+    sources: ["ADR-011#d7", OD-22]
   - area: ETH and WETH
     kind: added
     provider: "No permission for staking, WETH or the withdrawal queue."
     clutch: "Stake ETH, and wrap and unwrap WETH. No Lido withdrawal queue: stETH is sold in CoW orders instead (ADR 007, decision 27)."
     why: "ETH and WETH are on the launch list. The withdrawal queue left the design on 2026-10-08, because CoW orders already buy WETH and a request cannot be cancelled."
-    sources: [ADR-007, ADR-011, OD-20]
+    sources: ["ADR-007#d13", "ADR-007#d27", "ADR-011#d1", "ADR-011#d12", "ADR-011#d14", OD-20]
   - area: Approvals and budgets
     kind: changed
     provider: "Approvals pin the spender and leave the amount open; deposits spend monthly budgets with placeholder figures."
     clutch: "Each approval spends its spender's budget key, or stays under a fixed ceiling; deposits spend nothing; a budget motion cannot set a refill period under 30 days."
     why: "A spender can pull an approval without any deposit, so the approval is what must be bounded."
-    sources: [ADR-009, OD-08, INV-008, INV-012]
+    sources: ["ADR-009#d13", "ADR-009#d14", "ADR-009#d15", OD-08, INV-008, INV-012]
   - area: First-loss shares
     kind: changed
     provider: "Both roles can redeem Earn shares."
     clutch: "The first-loss shares sit in a first-loss Safe outside the policy; the roles never see them."
     why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart."
-    sources: [ADR-008, OD-42]
+    sources: ["ADR-008#d19", OD-42]
   - area: Compiling and pushing
     kind: changed
     provider: "The hosted app compiles actions and pushes the policy, with an API key."
     clutch: "Clutch's own offline compiler writes the committed artifact, and CI checks it. The Zodiac UI is a view, and local tooling verifies everything it builds."
     why: "Reviewers must approve exactly what the vote applies, so the compile runs here, from the reviewed commit."
-    sources: [ADR-004, OD-33, OD-35]
+    sources: ["ADR-004#d10", "ADR-004#d11", "ADR-004#d13", "ADR-004#d14", "ADR-004#d16", OD-33, OD-35]
   - area: Licence and provenance
     kind: changed
     provider: "LGPL-3.0-only files from the provider."
     clutch: "Files derived from the provider keep LGPL-3.0-only, with a notice when changed; new files are AGPL-3.0-or-later."
     why: "The provider's licence travels with its code."
-    sources: [ADR-001, OD-34, "doc:policy/constellation/PROVENANCE.md#changes-from-upstream"]
+    sources: ["ADR-001#d9", OD-34, "doc:policy/constellation/PROVENANCE.md#changes-from-upstream"]

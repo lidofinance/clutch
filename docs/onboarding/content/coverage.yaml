@@ -1,0 +1,9 @@
+# The coverage rule of build_onboarding.py: every ADR, invariant, LIP part and runbook is cited by
+# the guide or listed here with the reason why the guide leaves it out. A cited item must not be listed.
+adrs:
+  ADR-012: "It governs how contributors and their agents work in this repository, not how the vault works."
+invariants:
+  INV-007: "Retired on 2026-10-05: the design has no role-toggle factory (OD-09)."
+  INV-020: "Retired on 2026-10-06: the design has no Stonks instance, converter or price feed (OD-43)."
+lip: {}
+runbooks: {}

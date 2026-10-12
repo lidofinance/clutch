@@ -1,0 +1,3 @@
+date: '2026-10-12'
+kind: Update
+text: The onboarding guide's tests now check twelve presentation states and the page without its script; each item is pinned to the decisions that it cites; nine places behind OD-54 and OD-57 are fixed; CI adds the page artifact, the pin report, zizmor and a weekly link check.

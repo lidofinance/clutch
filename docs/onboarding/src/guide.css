@@ -23,7 +23,8 @@
   --focus: #2a78d6;
   --link: #1f63bb;
 }
-@media (prefers-color-scheme: dark) {
+/* The dark palette is for screens only. Print always uses the light palette. */
+@media screen and (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
     --page: #0d0d0d;
@@ -42,22 +43,24 @@
     --link: #4a93ea;
   }
 }
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #0d0d0d;
-  --surface: #1a1a19;
-  --ink: #ffffff;
-  --ink-2: #c3c2b7;
-  --muted: #898781;
-  --grid: #2c2c2a;
-  --axis: #383835;
-  --border: rgba(255, 255, 255, 0.10);
-  --gov: #3987e5;
-  --ops: #d95926;
-  --vault: #199e70;
-  --ext: #898781;
-  --focus: #3987e5;
-  --link: #4a93ea;
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.10);
+    --gov: #3987e5;
+    --ops: #d95926;
+    --vault: #199e70;
+    --ext: #898781;
+    --focus: #3987e5;
+    --link: #4a93ea;
+  }
 }
 
 * { box-sizing: border-box; }

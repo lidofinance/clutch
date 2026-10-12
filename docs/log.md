@@ -1,5 +1,10 @@
 # Log
 
+## 2026-10-12
+
+* **Update**: The onboarding guide's tests now check twelve presentation states and the page without its script; each item is pinned to the decisions that it cites; nine places behind OD-54 and OD-57 are fixed; CI adds the page artifact, the pin report, zizmor and a weekly link check.
+* **Decision**: Recorded EM's request to give the onboarding guide every check of the triage of 2026-10-12 in one pull request: ADR 012, decision 11, and the research note on the guide's tests and pins.
+
 ## 2026-10-09
 
 * **Decision**: Recorded EM's choice for OD-57: one modifier on the orders account, with the operator, emergency and technical roles and no governance role; two on the Asset Safe (ADR 005 decisions 21 and 22, ADR 007 decision 28). Recorded EM's reason for OD-56 and dropped price moves from the proposed budget events (ADR 009).

@@ -25,7 +25,9 @@
     - "Give an exit that is independent of itself. The emergency Safe has the same people."
   numbers: ["Safe v1.3.0", "4 of 7", "rebalancing window: 2 working days"]
   address: "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647"
-  sources: [ADR-005, ADR-009, ADR-010, ADR-002, OD-40, OD-41, OD-45, "doc:docs/research/chain-reads-2026-09-30.md#committees"]
+  sources: ["ADR-005#d1", "ADR-005#d7", "ADR-005#d9", "ADR-005#d16", "ADR-005#d17", "ADR-009#d6", "ADR-009#d18",
+    "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28", "ADR-010#d19", "ADR-002#d1", "ADR-002#d2",
+    OD-40, OD-41, OD-45, "doc:docs/research/chain-reads-2026-09-30.md#committees"]
 
 # --- Lido DAO ----------------------------------------------------------------------------------
 - id: ldo-holders
@@ -42,7 +44,8 @@
     - "Act on the vault directly. Every DAO action goes through [[Dual Governance]] to the Aragon Agent."
     - "Shorten a motion's objection window."
   numbers: ["objection threshold: 0.5% of LDO", "objection window: 72 h"]
-  sources: [ADR-006, ADR-005, "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap"]
+  sources: ["ADR-006#d4", "ADR-006#d6", "ADR-006#d8", "ADR-006#context", "ADR-005#context",
+    "ADR-005#proposed-direction", "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap"]
 
 - id: aragon-voting
   node: dao
@@ -57,7 +60,7 @@
   cannot:
     - "Reach the vault's Safes except through Dual Governance and the Aragon Agent."
   address: "0x2e59A20f205bB85a89C53f1936454680651E618e"
-  sources: [ADR-008, ADR-005, "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
+  sources: ["ADR-008#d9", "ADR-008#d10", "ADR-005#context", "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
 
 - id: dual-governance
   node: dao
@@ -71,7 +74,7 @@
   cannot:
     - "Skip its own delay."
   address: "0x23E0B465633FF5178808F4A75186E2F2F9537021"
-  sources: [ADR-005, "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
+  sources: ["ADR-005#context", "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
 
 - id: aragon-agent
   node: dao
@@ -92,7 +95,9 @@
     - "Be reached by an Easy Track motion. Easy Track has no authority over it."
   numbers: ["owns the Asset Safe, the orders account and the first-loss Safe, each at 1 of 1"]
   address: "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
-  sources: [ADR-005, ADR-006, ADR-007, ADR-008, OD-36, OD-46, INV-001, INV-021, INV-023]
+  sources: ["ADR-005#d14", "ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d12",
+    "ADR-007#d19", "ADR-007#d21", "ADR-008#d15", "ADR-008#d19", "ADR-008#proposed-direction", OD-36, OD-46,
+    INV-001, INV-021, INV-023]
 
 # --- Funding path ------------------------------------------------------------------------------
 - id: finance
@@ -111,7 +116,8 @@
   addresses:
     - {name: "Aragon Finance", address: "0xB9E5CBB9CA5b0d659238807E84D0176930753d86"}
     - {name: "Aragon ACL", address: "0x9895F0F17cc1d1891b6f18ee0b483B6f221b37Bb"}
-  sources: [ADR-008, "lip:part-5", "doc:docs/research/chain-reads-2026-09-30.md#funding-path"]
+  sources: ["ADR-008#d9", "ADR-008#d12", "ADR-008#proposed-direction", "lip:part-5",
+    "doc:docs/research/chain-reads-2026-09-30.md#funding-path"]
 
 - id: token-list
   node: funding
@@ -125,7 +131,7 @@
   cannot:
     - "Keep the vault apart from other setups. A change made for another setup also changes the vault's funding assets."
   address: "0x4AC40c34f8992bb1e5E856A448792158022551ca"
-  sources: [ADR-008, "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries"]
+  sources: ["ADR-008#d10", "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries"]
 
 - id: registries
   node: funding
@@ -143,7 +149,8 @@
     - "Stop two full monthly limits within about 72 hours around a month boundary."
   numbers: ["period: one calendar month", "limit: one TM Floor Value each, from the attested computation"]
   address: "To be deployed"
-  sources: [ADR-008, INV-017, "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts"]
+  sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d8", "ADR-008#proposed-direction", INV-017,
+    "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts"]
 
 - id: topup-factories
   node: funding
@@ -159,7 +166,8 @@
     - "Carry a report identifier. The payment reference is fixed, so the forum post carries the identifier."
   numbers: ["top-ups expected on days 1–10 of a month", "objection window: 72 h"]
   address: "To be deployed"
-  sources: [ADR-008, "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries"]
+  sources: ["ADR-008#d4", "ADR-008#d6", "ADR-008#proposed-direction",
+    "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries"]
 
 - id: growth-committee
   node: funding
@@ -174,7 +182,9 @@
     - "Decide a burn after the move. A burn is then a DAO vote."
   numbers: ["Safe v1.4.1", "5 of 9"]
   address: "0xf6F0732c1e9971497342C295141566E6F1A31e96"
-  sources: [ADR-008, OD-42, "runbook:Move the legacy Earn shares", "doc:docs/research/legacy-investments-2026-10-05.md#the-earn-positions"]
+  sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d15", "ADR-008#d19", "ADR-008#proposed-direction", OD-42,
+    "runbook:Move the legacy Earn shares",
+    "doc:docs/research/legacy-investments-2026-10-05.md#the-earn-positions"]
 
 # --- Easy Track ---------------------------------------------------------------------------------
 - id: easy-track
@@ -194,7 +204,8 @@
     - "Reach the Aragon Agent."
   numbers: ["window: 72 h", "objection: 0.5% of LDO", "window floor: 48 h"]
   address: "0xF0211b7660680B49De1A7E9f25C65660F0a13Fea"
-  sources: [ADR-006, INV-005, OD-45, "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
+  sources: ["ADR-006#d1", "ADR-006#d4", "ADR-006#d6", "ADR-006#d11", "ADR-006#context", INV-005, OD-45,
+    "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
 
 - id: evmscript-executor
   node: easytrack
@@ -212,7 +223,8 @@
     - "Run scripts as the Aragon Agent. It holds neither `RUN_SCRIPT_ROLE` nor `EXECUTE_ROLE`."
     - "Add a recipient to the vault's registries, or change their limit or period."
   address: "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977"
-  sources: [ADR-005, ADR-006, ADR-008, OD-49, "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
+  sources: ["ADR-005#context", "ADR-005#proposed-direction", "ADR-006#d5", "ADR-006#d8", "ADR-006#d13", "ADR-008#d8",
+    "ADR-008#d9", "ADR-008#proposed-direction", OD-49, "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
 
 - id: template-factories
   node: easytrack
@@ -229,7 +241,8 @@
     - "Remove a permission. Every removal is the emergency Safe's revoke (OD-09)."
     - "Add a token to the orders account's lists. The order signer's permission is a delegatecall, which no motion can write (OD-36, OD-46)."
   numbers: ["5 templates", "external audit in phase 3"]
-  sources: [ADR-006, ADR-011, OD-09, OD-36, OD-43, OD-46, OD-49, "lip:part-4"]
+  sources: ["ADR-006#d1", "ADR-006#d2", "ADR-006#d3", "ADR-006#d5", "ADR-006#d7", "ADR-006#d12", "ADR-006#d13",
+    "ADR-006#proposed-direction", "ADR-011#d3", "ADR-011#d13", OD-09, OD-36, OD-43, OD-46, OD-49, "lip:part-4"]
 
 - id: budget-factory
   node: easytrack
@@ -246,7 +259,8 @@
     - "Touch a key that is not the operator's."
     - "Use ceilings before the attested figures enter the repository."
   numbers: ["refill period: 30 days or more", "no routine retune: a motion only after an event (OD-56)", "every budget motion alerts"]
-  sources: [ADR-009, INV-012, OD-41, OD-56, "lip:part-7"]
+  sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d28", "ADR-009#d30", "ADR-009#d31", "ADR-009#proposed-direction",
+    INV-012, OD-41, OD-56, "lip:part-7"]
 
 # --- Operator Safe ------------------------------------------------------------------------------
 - id: operator-safe
@@ -267,7 +281,10 @@
     - "Be replaced without a DAO vote. A new operator Safe also needs every factory deployed and registered again."
   numbers: ["Safe v1.5.0", "4 of 7", "guard removal: 10-day timelock"]
   address: "To be deployed"
-  sources: [ADR-005, ADR-010, ADR-006, ADR-007, INV-010, OD-54, "doc:docs/registers/parameters.md#parameters"]
+  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d12", "ADR-005#d21", "ADR-005#proposed-direction", "ADR-010#d4",
+    "ADR-010#d9", "ADR-010#d10", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "ADR-010#proposed-direction",
+    "ADR-006#d3", "ADR-006#proposed-direction", "ADR-007#d18", INV-010, OD-54,
+    "doc:docs/registers/parameters.md#parameters"]
 
 # --- Emergency Safe -----------------------------------------------------------------------------
 - id: emergency-safe
@@ -289,7 +306,10 @@
     - "Fail apart from the operator. The same people sign both Safes."
   numbers: ["Safe v1.5.0", "2 of 7", "initiate within 6 h"]
   address: "To be deployed"
-  sources: [ADR-005, ADR-007, ADR-008, OD-42, OD-43, "lip:part-6", "doc:docs/registers/parameters.md#parameters"]
+  sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d11", "ADR-005#d13", "ADR-005#d16", "ADR-005#d17", "ADR-005#d19",
+    "ADR-005#d21", "ADR-005#proposed-direction", "ADR-007#d13", "ADR-007#d19", "ADR-007#d24", "ADR-007#d25",
+    "ADR-007#proposed-direction", "ADR-008#d19", OD-42, OD-43, "lip:part-6",
+    "doc:docs/registers/parameters.md#parameters"]
 
 # --- Emergency Brakes ---------------------------------------------------------------------------
 - id: emergency-brakes
@@ -300,7 +320,7 @@
   what: "An existing Lido multisig with technical members, outside the committee. It is the independent stop in Clutch, and it checks the committee's decisions."
   controlled_by: "Five owners, at 3 of 5. Safe v1.3.0. A chain read found no owner address that it shares with the committee's Safe."
   can:
-    - "Hold the technical role: disable the operator modifier, and the orders account's operator modifier, for a defect in the permission layer, or on the fixed cap-breach trigger."
+    - "Hold the technical role: disable the operator modifier for a defect in the permission layer, or on the fixed cap-breach trigger. On the orders account, it removes the operator Safe from the operator role instead (OD-57)."
     - "Pause Easy Track. This stops every DAO motion, not only Clutch's."
     - "Verify every decision record that constrains the operator, before it is accepted."
     - "View the Lido Zodiac workspace."
@@ -311,7 +331,10 @@
     - "Touch assets or permissions, or send assets anywhere."
   numbers: ["Safe v1.3.0", "3 of 5"]
   address: "0x73b047fe6337183A454c5217241D780a932777bD"
-  sources: [ADR-005, ADR-009, ADR-002, OD-45, "doc:docs/registers/verification-requests.md#the-duties-that-the-records-give-the-multisig", "doc:docs/research/chain-reads-2026-09-30.md#committees"]
+  sources: ["ADR-005#d3", "ADR-005#d4", "ADR-005#d18", "ADR-005#d22", "ADR-005#context", "ADR-005#proposed-direction",
+    "ADR-009#d24", "ADR-009#d30", "ADR-002#d2", "ADR-004#d16", OD-45, OD-57,
+    "doc:docs/registers/verification-requests.md#the-duties-that-the-records-give-the-multisig",
+    "doc:docs/research/chain-reads-2026-09-30.md#committees"]
 
 # --- Screening ----------------------------------------------------------------------------------
 - id: vendor-guard
@@ -330,7 +353,9 @@
     - "Hold a standing approval under the agreement, except its two built-in timelock approvals. The code allows them, so monitoring alerts on one, and the vendor's written acceptance is still owed."
   numbers: ["removal timelock: 10 days", "bypass timelock: 10 days", "bypass off before the cap lifts"]
   address: "To be deployed"
-  sources: [ADR-010, INV-010, OD-54, "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
+  sources: ["ADR-010#d1", "ADR-010#d2", "ADR-010#d3", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d20",
+    "ADR-010#d22", "ADR-010#proposed-direction", INV-010, OD-54,
+    "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
 
 - id: vendor-service
   node: screening
@@ -346,7 +371,8 @@
     - "Remove or relax the guard."
     - "Sit on the recovery path."
     - "Relax a rule quietly. A relaxation is a reviewed change to the written list, with notice to the Emergency Brakes multisig and the forum (OD-45)."
-  sources: [ADR-010, ADR-009, OD-39, OD-45, "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
+  sources: ["ADR-010#d1", "ADR-010#d5", "ADR-010#d19", "ADR-010#proposed-direction", "ADR-009#d18", "ADR-009#d26",
+    "ADR-009#d30", OD-39, OD-45, "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
 
 # --- Operator modifier --------------------------------------------------------------------------
 - id: operator-modifier
@@ -363,7 +389,8 @@
     - "Be replaced without a DAO vote. The safety policy names its address, so the vote also rewrites the safety policy."
   numbers: ["budget period: 30 days"]
   address: "To be deployed"
-  sources: [ADR-005, "lip:part-1", "test:test_D3_operator_lifecycle", "runbook:Replace the operator modifier"]
+  sources: ["ADR-005#d6", "ADR-005#proposed-direction", "lip:part-1", "test:test_D3_operator_lifecycle",
+    "runbook:Replace the operator modifier"]
 
 - id: roles-mastercopy
   node: operator-modifier
@@ -380,7 +407,7 @@
   addresses:
     - {name: "Roles mastercopy", address: "0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5"}
     - {name: "Module proxy factory", address: "0x000000000000aDdB49795b0f9bA5BC298cDda236"}
-  sources: [ADR-005, "doc:docs/research/chain-reads-2026-09-30.md#safe-and-zodiac"]
+  sources: ["ADR-005#context", "doc:docs/research/chain-reads-2026-09-30.md#safe-and-zodiac"]
 
 - id: role-operator
   node: operator-modifier
@@ -402,7 +429,8 @@
     - "Use delegatecall on the Asset Safe. Its one planned delegatecall, to CoW's order signer, is on the orders account and is specified (OD-43)."
     - "Reach the first-loss shares. They sit in the first-loss Safe, which has no module (OD-42)."
   numbers: ["one role key: `operator`"]
-  sources: [ADR-005, ADR-009, OD-42, INV-003, INV-008, INV-018, "test:test_D3_operator_cannot_route_around_avatar"]
+  sources: ["ADR-005#d7", "ADR-005#proposed-direction", "ADR-009#d13", "ADR-009#d14", OD-42, INV-003, INV-008, INV-018,
+    "test:test_D3_operator_cannot_route_around_avatar"]
 
 - id: role-governance
   node: operator-modifier
@@ -422,7 +450,10 @@
     - "Grant the operator delegatecall (OD-36)."
     - "Take a condition tree from a motion: the factories build every tree. This is specified, and the modifier does not check it."
   numbers: ["refill period: 30 days or more"]
-  sources: [ADR-006, ADR-005, INV-004, OD-36, OD-38, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe"]
+  sources: ["ADR-006#d5", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-006#proposed-direction",
+    "ADR-005#proposed-direction", INV-004, OD-36, OD-38,
+    "test:test_policyadmin_cannot_grant_operator_the_safety_modifier",
+    "test:test_policyadmin_refuses_every_module_of_the_asset_safe"]
 
 - id: budget-keys
   node: operator-modifier
@@ -437,7 +468,8 @@
   cannot:
     - "See value. A key counts token units, so it drifts with price."
   numbers: ["amounts in the repository: dry-run stand-ins", "production figures: from the attested computation, after the mandate is approved"]
-  sources: [ADR-009, INV-011, OD-56, "test:test_D5_budget_enforcement_and_refill", "test:test_budget_keys_of_different_assets_are_independent"]
+  sources: ["ADR-009#d3", "ADR-009#d13", "ADR-009#d31", "ADR-009#proposed-direction", INV-011, OD-56,
+    "test:test_D5_budget_enforcement_and_refill", "test:test_budget_keys_of_different_assets_are_independent"]
 
 # --- Safety modifier ----------------------------------------------------------------------------
 - id: safety-modifier
@@ -453,7 +485,8 @@
   cannot:
     - "Be disabled by the technical role. If it has a defect, the fix is a DAO vote."
   address: "To be deployed"
-  sources: [ADR-005, INV-009, OD-49, "test:test_D4_module_disabling_is_technical_only_and_pinned"]
+  sources: ["ADR-005#d3", "ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction", INV-009, OD-49,
+    "test:test_D4_module_disabling_is_technical_only_and_pinned"]
 
 - id: role-emergency
   node: safety-modifier
@@ -474,7 +507,10 @@
     - "Send an asset anywhere except the Aragon Agent. The transfer to the orders account is specified but not built."
     - "Disable a module."
     - "Reach the first-loss shares. They sit in the first-loss Safe, which has no module (OD-42)."
-  sources: [ADR-005, ADR-008, OD-42, OD-48, OD-49, INV-002, "test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval", "test:test_emergency_can_durably_stop_operator_reapproval"]
+  sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d11", "ADR-005#d16", "ADR-005#d19", "ADR-005#proposed-direction",
+    "ADR-008#d19", OD-42, OD-48, OD-49, INV-002, "test:test_D4_emergency_flow",
+    "test:test_emergency_cannot_give_a_non_zero_approval",
+    "test:test_emergency_can_durably_stop_operator_reapproval"]
 
 - id: exit-governance
   node: safety-modifier
@@ -488,7 +524,7 @@
   cannot:
     - "Write an entry, a deposit or a non-zero approval. The templates emit only exits; the modifier cannot check that, so tests and the audit do."
     - "Grant delegatecall, touch the technical role or membership, set an allowance, or target the Asset Safe or any module of it."
-  sources: [ADR-006, ADR-005, OD-49, INV-025]
+  sources: ["ADR-006#d13", "ADR-006#proposed-direction", "ADR-005#proposed-direction", OD-49, INV-025]
 
 - id: role-technical
   node: safety-modifier
@@ -496,15 +532,16 @@
   status: new
   label: built
   role: technical
-  what: "One permission for the Emergency Brakes multisig: switch off the operator modifier."
+  what: "The Emergency Brakes multisig's switch that stops the operator: on the Asset Safe it disables the operator modifier, and on the orders account it removes the operator Safe from the operator role."
   controlled_by: "Held by the Emergency Brakes multisig, at 3 of 5."
   can:
     - "Call `disableModule` on the Asset Safe, with the module pinned to the operator modifier. The operator and governance roles stop at once."
-    - "Do the same on the orders account, with the module pinned to its operator modifier. Specified, not built."
+    - "On the orders account, remove the operator Safe from the operator role, with every argument pinned. The emergency role keeps working there. Specified, not built (OD-57)."
   cannot:
-    - "Disable the safety modifier or any later module."
+    - "Disable the safety modifier, the orders modifier or any later module."
     - "Do anything else."
-  sources: [ADR-005, ADR-009, INV-009, "test:test_D4_module_disabling_is_technical_only_and_pinned"]
+  sources: ["ADR-005#d3", "ADR-005#d18", "ADR-005#d22", "ADR-005#proposed-direction", "ADR-009#d24", OD-57, INV-009,
+    "test:test_D4_module_disabling_is_technical_only_and_pinned"]
 
 # --- Policy pipeline and repository -------------------------------------------------------------
 - id: constellation
@@ -520,7 +557,8 @@
   cannot:
     - "Change the chain by itself. Only a vote or a motion applies a policy."
   numbers: ["copied from the policy provider's constellation at `02ea37d`", "copied files keep LGPL-3.0-only (OD-34)"]
-  sources: [ADR-004, OD-33, OD-34, "doc:policy/constellation/PROVENANCE.md#changes-from-upstream"]
+  sources: ["ADR-004#d10", "ADR-004#d11", "ADR-004#d12", "ADR-004#d14", "ADR-004#d16", OD-33, OD-34,
+    "doc:policy/constellation/PROVENANCE.md#changes-from-upstream"]
 
 - id: compiler
   node: policy
@@ -534,7 +572,7 @@
     - "Run offline from a frozen lockfile with pinned versions."
   cannot:
     - "Compile an entry that only the hosted app can compile, such as an action or a DeFi Kit preset. It refuses one."
-  sources: [ADR-004, "doc:policy/constellation/PROVENANCE.md#build"]
+  sources: ["ADR-004#d9", "ADR-004#d13", "doc:policy/constellation/PROVENANCE.md#build"]
 
 - id: artifact
   node: policy
@@ -548,7 +586,8 @@
   cannot:
     - "Describe mainnet yet. The committed artifact is for the fork tests: stand-in holders and dry-run amounts."
   numbers: ["format `clutch.policy-artifact/1`"]
-  sources: [ADR-004, INV-016, "doc:test/README.md#the-policy-pipeline", "doc:.github/workflows/policy.yml"]
+  sources: ["ADR-004#d9", "ADR-004#d14", "ADR-004#d15", INV-016, "doc:test/README.md#the-policy-pipeline",
+    "doc:.github/workflows/policy.yml"]
 
 - id: round-trip
   node: policy
@@ -561,7 +600,7 @@
     - "Catch a compiler or SDK bug before it reaches the chain."
   cannot:
     - "Run yet. A decode of real modifier events must be checked first."
-  sources: [ADR-004, INV-016, "doc:ROADMAP.md#roadmap"]
+  sources: ["ADR-004#d7", "ADR-004#d9", INV-016, "doc:ROADMAP.md#roadmap"]
 
 - id: zodiac-app
   node: policy
@@ -580,7 +619,10 @@
     - "Be used by CI or by an agent. Neither holds the key."
     - "Show the vault's value today. The hosted app shows no balances, value or alerts. The list asks for the value per account, asset and protocol, the [[liquidity buffer]], each cap, the budget left, open orders, pending motions, and warnings before signing."
     - "Make a third party's live value count. Such a value is labelled as indicative and never feeds a cap, a top-up or a report (OD-44)."
-  sources: [ADR-004, ADR-009, OD-33, OD-35, OD-44, "doc:docs/research/zodiac-constellation-2026-10-06.md#2-what-runs-locally-and-what-only-the-hosted-app-runs", "doc:docs/research/cow-orders-account-2026-10-06.md#the-hosted-zodiac-app"]
+  sources: ["ADR-004#d10", "ADR-004#d11", "ADR-004#d16", "ADR-009#d29", "ADR-009#proposed-direction", OD-33, OD-35,
+    OD-44,
+    "doc:docs/research/zodiac-constellation-2026-10-06.md#2-what-runs-locally-and-what-only-the-hosted-app-runs",
+    "doc:docs/research/cow-orders-account-2026-10-06.md#the-hosted-zodiac-app"]
 
 - id: repository
   node: policy
@@ -595,7 +637,8 @@
   cannot:
     - "Hold a key, a seed or an RPC credential."
     - "Go public before deployment. Nothing enters it that could not be published at that point."
-  sources: [ADR-001, ADR-002, ADR-003, "doc:SECURITY.md#repository-rules"]
+  sources: ["ADR-001#d1", "ADR-001#d2", "ADR-001#d4", "ADR-002#d3", "ADR-003#d8", "ADR-003#d9", "ADR-003#d10",
+    "ADR-003#d11", "doc:SECURITY.md#repository-rules"]
 
 - id: em
   node: policy
@@ -608,7 +651,7 @@
     - "Close an [[open decision]]."
   cannot:
     - "Accept a record that constrains the operator without the Emergency Brakes multisig's verification."
-  sources: [ADR-002, "doc:docs/registers/open-decisions.md#open-decisions"]
+  sources: ["ADR-002#d1", "ADR-002#d2", "ADR-002#d7", "doc:docs/registers/open-decisions.md#open-decisions"]
 
 - id: ai-agents
   node: policy
@@ -624,7 +667,7 @@
     - "Mark a page reviewed, or record a body's verification."
     - "Set a parameter: budgets, ceilings, swap settings, funding limits, allowlists or role membership."
     - "Use the Zodiac key."
-  sources: [ADR-003, OD-31, "doc:AGENTS.md#out-of-scope-for-agents"]
+  sources: ["ADR-003#d5", "ADR-003#d6", "ADR-003#d7", "ADR-003#d14", OD-31, "doc:AGENTS.md#out-of-scope-for-agents"]
 
 # --- Asset Safe ---------------------------------------------------------------------------------
 - id: asset-safe
@@ -643,7 +686,8 @@
     - "Change its Safe version without a DAO vote."
   numbers: ["Safe v1.5.0", "1 of 1", "no guard", "no fallback handler"]
   address: "To be deployed"
-  sources: [ADR-005, INV-001, "test:test_asset_safe_shape"]
+  sources: ["ADR-005#d6", "ADR-005#d12", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20", "ADR-005#context",
+    "ADR-005#proposed-direction", INV-001, "test:test_asset_safe_shape"]
 
 - id: safe-contracts
   node: asset-safe
@@ -662,7 +706,8 @@
     - {name: "Safe v1.5.0 singleton", address: "0xFf51A5898e281Db6DfC7855790607438dF2ca44b"}
     - {name: "Safe proxy factory", address: "0x14F2982D601c9458F93bd70B218933A6f8165e7b"}
     - {name: "MultiSendCallOnly v1.5.0", address: "0xA83c336B20401Af773B6219BA5027174338D1836"}
-  sources: [ADR-005, ADR-010, INV-019, "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
+  sources: ["ADR-005#d8", "ADR-005#d12", "ADR-005#d13", "ADR-005#context", "ADR-010#d15", "ADR-010#d17", INV-019,
+    "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
 - id: vault-tokens
   node: asset-safe
@@ -682,7 +727,9 @@
     - {name: "DAI", address: "0x6B175474E89094C44Da98b954EedeAC495271d0F"}
     - {name: "USDS", address: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"}
     - {name: "LDO", address: "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32"}
-  sources: [ADR-011, ADR-007, OD-22, OD-26, OD-46, "doc:docs/registers/parameters.md#parameters"]
+  sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d5", "ADR-011#d7", "ADR-011#d11", "ADR-011#d12", "ADR-011#d14",
+    "ADR-007#d5", "ADR-007#d21", "ADR-007#d22", "ADR-007#proposed-direction", OD-22, OD-26, OD-46,
+    "doc:docs/registers/parameters.md#parameters"]
 
 # --- First-loss Safe ----------------------------------------------------------------------------
 - id: first-loss-safe
@@ -699,7 +746,9 @@
     - "Be reached by the operator or the emergency role. The no-redeem rule is structural, not written (OD-42)."
   numbers: ["Safe v1.5.0", "1 of 1", "no module, guard or fallback handler"]
   address: "To be deployed"
-  sources: [ADR-008, ADR-005, OD-42, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
+  sources: ["ADR-008#d13", "ADR-008#d15", "ADR-008#d19", "ADR-008#proposed-direction", "ADR-005#d19",
+    "ADR-005#proposed-direction", OD-42, INV-021, "runbook:Move the legacy Earn shares",
+    "runbook:Burn first-loss Earn shares"]
 
 # --- Approved protocols -------------------------------------------------------------------------
 - id: lido-staking
@@ -718,7 +767,7 @@
     - {name: "stETH", address: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"}
     - {name: "wstETH", address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"}
     - {name: "WETH", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"}
-  sources: [ADR-007, ADR-011, "test:test_D4_emergency_weth_route_to_agent"]
+  sources: ["ADR-007#d13", "ADR-007#d27", "ADR-011#d14", "test:test_D4_emergency_weth_route_to_agent"]
 
 - id: lido-earn
   node: protocols
@@ -740,7 +789,8 @@
     - {name: "earnUSD USDC deposit queue", address: "0xC75E7E73B25fEa8bB23EB55CC48BA55067b5be76"}
     - {name: "earnUSD redeem queue", address: "0x9e36A74FE278906a76e7615263e46a83fC40c47F"}
     - {name: "earnUSD share", address: "0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981"}
-  sources: [ADR-011, ADR-008, OD-42, "test:test_D3b_earn_deposit_policy_layer", "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move"]
+  sources: ["ADR-011#d1", "ADR-011#proposed-direction", "ADR-008#d19", OD-42, "test:test_D3b_earn_deposit_policy_layer",
+    "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move"]
 
 - id: sky
   node: protocols
@@ -757,7 +807,10 @@
   addresses:
     - {name: "sUSDS", address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"}
     - {name: "DAI–USDS converter", address: "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A"}
-  sources: [ADR-011, OD-22, OD-26, "test:test_D3_dai_usds_conversion_pays_the_asset_safe", "doc:docs/research/dai-usds-conversion-2026-10-05.md#the-converter", "doc:docs/research/recovery-and-withdrawal-queue-2026-10-05.md#usds-and-dai-carry-usdc-risk"]
+  sources: ["ADR-011#d7", "ADR-011#proposed-direction", OD-22, OD-26,
+    "test:test_D3_dai_usds_conversion_pays_the_asset_safe",
+    "doc:docs/research/dai-usds-conversion-2026-10-05.md#the-converter",
+    "doc:docs/research/recovery-and-withdrawal-queue-2026-10-05.md#usds-and-dai-carry-usdc-risk"]
 
 - id: lido-lend
   node: protocols
@@ -772,7 +825,8 @@
     - "Leave the protocol cap before it matures and a budget motion with a forum post unlocks it (OD-41)."
     - "Be granted an exit at the enabling vote: its address is not known before it deploys."
   numbers: ["the Morpho Blue template's end-to-end test: owed", "budget key: from the attested computation"]
-  sources: [ADR-011, ADR-006, ADR-009, OD-41, OD-49, "doc:docs/registers/parameters.md#parameters"]
+  sources: ["ADR-011#d3", "ADR-011#d10", "ADR-011#d13", "ADR-006#d13", "ADR-009#d3", "ADR-009#d28", OD-41, OD-49,
+    "doc:docs/registers/parameters.md#parameters"]
 
 # --- Orders account -----------------------------------------------------------------------------
 - id: orders-account
@@ -793,7 +847,10 @@
     - "Swap through a router at launch. Uniswap and 1inch wait until [the screening vendor] can check a swap's minimum output (OD-43)."
   numbers: ["owner: the Aragon Agent, 1 of 1", "order life: 30 days; a recovery order: 1 day", "orders budgets: from the attested computation"]
   address: "To be deployed"
-  sources: [ADR-007, ADR-005, OD-43, OD-47, OD-48, INV-013, INV-023, "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design"]
+  sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d20", "ADR-007#d23", "ADR-007#d25", "ADR-007#d26",
+    "ADR-007#d28", "ADR-007#proposed-direction", "ADR-005#d15", "ADR-005#d20", "ADR-005#d21", OD-43, OD-47,
+    OD-48, INV-013, INV-023,
+    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design"]
 
 - id: orders-modifiers
   node: orders
@@ -810,7 +867,8 @@
     - "Let a motion add a token to the lists. That needs a DAO vote (OD-46)."
     - "Take a permission from a motion. It has no governance role; a DAO vote writes it (OD-57)."
   address: "To be deployed"
-  sources: [ADR-007, ADR-005, OD-43, OD-46, OD-57, INV-014, INV-022]
+  sources: ["ADR-007#d19", "ADR-007#d21", "ADR-007#d25", "ADR-007#d28", "ADR-007#proposed-direction", "ADR-005#d21",
+    "ADR-005#d22", OD-43, OD-46, OD-57, INV-014, INV-022]
 
 - id: cow-order-signer
   node: orders
@@ -826,7 +884,8 @@
     - "Pin a receiver or amounts. The permission must pin them."
     - "Show an audit. None was found; it is 40 lines long, and Lido reviews it in phase 3."
   address: "0x23dA9AdE38E4477b23770DeD512fD37b12381FAB"
-  sources: [ADR-007, "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer"]
+  sources: ["ADR-007#d18", "ADR-007#d23", "ADR-007#proposed-direction",
+    "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer"]
 
 - id: composable-cow
   node: orders
@@ -848,7 +907,8 @@
     - {name: "TWAP handler", address: "0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5"}
     - {name: "StopLoss handler", address: "0x412c36e5011cd2517016d243a2dfb37f73a242e7"}
     - {name: "ExtensibleFallbackHandler", address: "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5"}
-  sources: [ADR-007, INV-022, INV-023, "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
+  sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d24", "ADR-007#proposed-direction", INV-022, INV-023,
+    "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
 - id: cow
   node: orders
@@ -864,7 +924,10 @@
   cannot:
     - "Take an order from the Asset Safe. The Asset Safe never pre-signs an order and never approves CoW's relayer."
     - "Bound an order's price on chain. The order's own limit is the only bound."
-  sources: [ADR-007, INV-013, "test:test_D6_out_of_scope_venues_are_refused", "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss", "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
+  sources: ["ADR-007#d17", "ADR-007#d26", "ADR-007#proposed-direction", INV-013,
+    "test:test_D6_out_of_scope_venues_are_refused",
+    "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss",
+    "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
 
 - id: routers
   node: orders
@@ -877,7 +940,8 @@
     - "Take a swap whose recipient and tokens a permission pins."
   cannot:
     - "Have their minimum output bounded by the modifier. They wait until [the screening vendor] can check a swap's minimum output against a market price before execution (OD-43)."
-  sources: [ADR-007, ADR-011, OD-43, "doc:docs/research/cow-orders-account-2026-10-06.md#uniswap-and-1inch"]
+  sources: ["ADR-007#d20", "ADR-007#proposed-direction", "ADR-011#d11", OD-43,
+    "doc:docs/research/cow-orders-account-2026-10-06.md#uniswap-and-1inch"]
 
 # --- Monitoring ---------------------------------------------------------------------------------
 - id: lido-monitoring
@@ -900,7 +964,10 @@
   cannot:
     - "Block a transaction. If it stops, no permission widens."
   numbers: ["detector specification: phase 1", "vault detectors built: none yet"]
-  sources: [ADR-009, ADR-010, ADR-007, OD-13, OD-32, OD-40, OD-41, OD-42, OD-43, OD-45, OD-47, OD-48, OD-49, "doc:ROADMAP.md#roadmap"]
+  sources: ["ADR-009#d1", "ADR-009#d7", "ADR-009#d17", "ADR-009#d21", "ADR-009#d24", "ADR-009#d25", "ADR-009#d27",
+    "ADR-009#d28", "ADR-009#d30", "ADR-009#proposed-direction", "ADR-010#d12", "ADR-010#d18", "ADR-007#d24",
+    "ADR-007#d26", "ADR-007#proposed-direction", OD-13, OD-32, OD-40, OD-41, OD-42, OD-43, OD-45, OD-47, OD-48,
+    OD-49, "doc:ROADMAP.md#roadmap"]
 
 - id: vendor-monitoring
   node: monitoring
@@ -913,7 +980,7 @@
     - "Watch for depegs, protocol compromise and counterparty anomalies."
   cannot:
     - "Replace Lido's own monitoring of the vault's permissions."
-  sources: [ADR-009, OD-13]
+  sources: ["ADR-009#d7", "ADR-009#d18", "ADR-009#proposed-direction", OD-13]
 
 - id: incident-process
   node: monitoring
@@ -927,7 +994,7 @@
     - "Page the Emergency Brakes multisig for the Easy Track pause and for the technical role."
   cannot:
     - "Act on the vault. It only reaches the people who can."
-  sources: [ADR-009, ADR-005, "lip:part-6"]
+  sources: ["ADR-009#d8", "ADR-009#d25", "ADR-005#d3", "ADR-005#d4", "lip:part-6"]
 
 # --- Reporting ----------------------------------------------------------------------------------
 - id: report-generator
@@ -946,7 +1013,8 @@
     - "Carry an old price over silently. A price older than 24 hours counts as missing."
     - "Anchor a report on chain."
   numbers: ["monthly report: within 7 days after month-end", "incident report: within 72 h", "build: phase 2"]
-  sources: [ADR-009, OD-14, OD-32, OD-40, OD-41, "lip:part-9"]
+  sources: ["ADR-009#d19", "ADR-009#d20", "ADR-009#d22", "ADR-009#d25", "ADR-009#d27", "ADR-009#d28",
+    "ADR-009#proposed-direction", OD-14, OD-32, OD-40, OD-41, "lip:part-9"]
 
 - id: ipfs-forum
   node: reporting
@@ -960,7 +1028,7 @@
     - "Carry the disclosure before each motion, the post after each revoke, the post before each top-up, and the mandate."
   cannot:
     - "Give the guarantee of a chain. No report is anchored on chain."
-  sources: [ADR-009, ADR-006, ADR-008]
+  sources: ["ADR-009#d2", "ADR-009#d19", "ADR-009#d22", "ADR-009#d25", "ADR-006#d4", "ADR-006#d7", "ADR-008#proposed-direction"]
 
 - id: coingecko
   node: reporting
@@ -975,4 +1043,4 @@
   cannot:
     - "Price an asset that has neither source. The report then lists it as unpriced, and no top-up rests on that snapshot."
   numbers: ["a price older than 24 h counts as missing"]
-  sources: [ADR-009, ADR-008]
+  sources: ["ADR-009#d20", "ADR-008#d4"]
