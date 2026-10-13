@@ -2,6 +2,7 @@
 
 ## 2026-10-13
 
+* **Decision**: Recorded OD-67: no first-loss burn without the objection window. Every first-loss burn, Earn's included, runs as an Easy Track motion that the operator Safe creates; after the window, the Easy Track executor burns through a new first-loss-burn role. The operator Safe's first-loss role keeps the redemption and the claim, paid to the Aragon Agent. This replaces the direct burn of OD-60 (ADR 008, decision 23).
 * **Decision**: Opened OD-65, who holds the emergency Safe's fifth seat (EM: a Tech-team member, tentatively), and OD-66, how insurance funds for products other than Lido Earn join the vault. EM agreed on two templates, burnable shares and a fixed payout address, and prefers that burns and payouts run as Easy Track motions. The research note adds which products fit each template.
 * **Decision**: Recorded EM's re-verification of ADR 004 after its OD-64 edit, at EM's instruction, with recorded_by, a decision-log ref and the body's hash. ADR 004 decision 17: the Emergency Brakes multisig does not get access to view the Zodiac workspace.
 * **Decision**: Recorded EM's re-verification of ADR 002 after its OD-63 edit, at EM's instruction, with recorded_by, a decision-log ref and the body's hash. The operator Safe holds the first-loss role (OD-60). OD-64: a relaxation of a screening rule gets a notice on the forum only, and the Emergency Brakes multisig gets no view of the Zodiac workspace; ADR 004 changes when EM verifies it again.

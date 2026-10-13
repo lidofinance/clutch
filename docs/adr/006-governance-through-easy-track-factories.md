@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T08:15:41Z
+  at: 2026-10-13T16:49:45Z
 verified: []
 sources:
   - id: s1
@@ -88,7 +88,8 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 - Each factory owns one template. A motion carries typed parameters only, such as a target, an asset and a budget key. The factory builds the tree.
 - Every factory's trusted caller is the operator Safe. Easy Track fixes the trusted caller at deployment [s7].
-- Every factory hard-codes the `operator` role key and refuses the Asset Safe, the orders account and their modules as a target.
+- Every permission factory hard-codes the `operator` role key and refuses the Asset Safe, the orders account and their modules as a target.
+- The first-loss burn factory writes no permission. Its motion names an amount and one of the two share tokens that the factory pins, earnETH or earnUSD, and burns that amount through the `first-loss-burn` role on the first-loss modifier ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23). It is the only Clutch motion that moves value away from the DAO. Decision 7's "Easy Track only expands" is read here as a rule for permissions, which this motion does not change.
 - The kit's role-toggle factory [s4] left the design (decision 8) and the kit on 2026-10-05. The budget factory and the template factories are not built.
 - The modifier constrains the governance role again, so a factory bug cannot reach administration. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator the Asset Safe or one of its modules as a target (decision 10), nor the orders account or one of its modules, cannot set an allowance outside the operator's budget keys, and cannot set a refill period below 30 days [s6]. A factory bug can still grant the operator a call on an ordinary target, such as a token transfer; the template and the objection window are the controls for that.
 - A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. The emergency Safe's switch also freezes it, because its write goes through the operator modifier. Enabling the modifier again re-arms it, because a motion does not expire, so the DAO's restart vote cancels it first ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 25 and 26). Once it is enacted, the emergency Safe can revoke the new permission at once.

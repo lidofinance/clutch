@@ -13,7 +13,7 @@
   can:
     - "Operate the vault through the operator Safe, at 4 of 7."
     - "Act in an emergency through its two seats on the emergency Safe, at 3 of 5 with two Emergency Brakes members and one member of neither body (OD-58)."
-    - "Burn or redeem the [[first-loss shares]] through the operator Safe's first-loss role, on the Earn team's written instruction (OD-60)."
+    - "Execute the first-loss terms on the Earn team's written instruction: propose a burn of the [[first-loss shares]] as an Easy Track motion, or redeem them to the Aragon Agent through the operator Safe's first-loss role (OD-60, OD-67)."
     - "Configure the vault's rules in [the screening vendor]'s monitoring service."
     - "Review and publish the monthly report, and fix a [[cap]] breach within two working days."
     - "Restore the [[liquidity buffer]] within the mandate's window when it falls below its floor (OD-40)."
@@ -27,8 +27,8 @@
   numbers: ["Safe v1.3.0", "4 of 7", "rebalancing window: 2 working days", "two seats on the emergency Safe"]
   address: "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647"
   sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d24", "ADR-005#d26", "ADR-005#d27", "ADR-008#d21", "ADR-008#d22",
-    "ADR-009#d6", "ADR-009#d18", "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28", "ADR-010#d19",
-    "ADR-010#d23", "ADR-002#d1", OD-40, OD-41, OD-45, OD-58, OD-59, OD-60, OD-64,
+    "ADR-008#d23", "ADR-009#d6", "ADR-009#d18", "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28", "ADR-010#d19",
+    "ADR-010#d23", "ADR-002#d1", OD-40, OD-41, OD-45, OD-58, OD-59, OD-60, OD-64, OD-67,
     "doc:docs/research/chain-reads-2026-09-30.md#committees"]
 
 # --- Lido DAO ----------------------------------------------------------------------------------
@@ -92,7 +92,7 @@
   can:
     - "Do anything on the Asset Safe as its only owner: replace the policy, change a role's members, turn a [[module]] on or off, move any asset."
     - "Enable the operator modifier again after the switch, by vote through Dual Governance. This is the only restart (OD-59)."
-    - "Change or remove the first-loss role, by vote (OD-60)."
+    - "Change or remove the two first-loss roles and the burn factory, by vote (OD-60, OD-67)."
     - "Add a token to the orders account's lists, for the operator or for [[recovery order|recovery orders]], by vote. No motion can write the order signer's permission (OD-36, OD-46)."
     - "Grant the operator [[delegatecall]]. Only a DAO vote can do this (OD-36)."
     - "Receive recovered assets: every emergency transfer out of the vault's accounts, and every recovery order, pays it."
@@ -104,7 +104,7 @@
   address: "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
   sources: ["ADR-005#d14", "ADR-005#d19", "ADR-005#d20", "ADR-005#d26", "ADR-005#d27", "ADR-005#proposed-direction",
     "ADR-006#d9", "ADR-006#d12", "ADR-007#d19", "ADR-007#d21", "ADR-008#d21", "ADR-008#proposed-direction", OD-36,
-    OD-46, OD-59, OD-60, INV-001, INV-021, INV-023]
+    OD-46, OD-59, OD-60, OD-67, INV-001, INV-021, INV-023]
 
 # --- Funding path ------------------------------------------------------------------------------
 - id: finance
@@ -186,11 +186,11 @@
   can:
     - "Transfer the first-loss shares to the [[first-loss Safe]] once, after the enabling vote. The [[seed]] motion follows."
   cannot:
-    - "Execute the first-loss terms after the move. The committee takes that over, through the first-loss role (OD-60)."
+    - "Execute the first-loss terms after the move. The committee takes that over: a burn by Easy Track motion, an exit through the first-loss role (OD-60, OD-67)."
   numbers: ["Safe v1.4.1", "5 of 9"]
   address: "0xf6F0732c1e9971497342C295141566E6F1A31e96"
-  sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d19", "ADR-008#d22", "ADR-008#proposed-direction", OD-42, OD-60,
-    "runbook:Move the legacy Earn shares",
+  sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d19", "ADR-008#d22", "ADR-008#d23", "ADR-008#proposed-direction", OD-42,
+    OD-60, OD-67, "runbook:Move the legacy Earn shares",
     "doc:docs/research/legacy-investments-2026-10-05.md#the-earn-positions"]
 
 # --- Easy Track ---------------------------------------------------------------------------------
@@ -221,11 +221,12 @@
   name: Easy Track script executor
   status: existing
   label: existing
-  what: "The contract that runs an enacted motion's script. In Clutch it holds the governance role on the operator modifier."
+  what: "The contract that runs an enacted motion's script. In Clutch it holds the governance role on the operator modifier, the exit-governance role on the safety modifier and the first-loss burn role on the first-loss modifier."
   controlled_by: "Easy Track. Only an enacted motion makes it act."
   can:
     - "Act as the governance role: write the operator's permissions and budgets, inside the limits that the policy sets."
     - "Act as the exit-governance role on the safety modifier: add the emergency exit for a protocol that a motion onboards (OD-49)."
+    - "Act as the first-loss burn role on the first-loss modifier: burn the DAO's [[first-loss shares]] in an enacted burn motion (OD-67)."
     - "Make payments through Aragon Finance, under the shared payment permission."
     - "Spend the funding registries' limits."
   cannot:
@@ -233,14 +234,15 @@
     - "Add a recipient to the vault's registries, or change their limit or period."
   address: "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977"
   sources: ["ADR-005#context", "ADR-005#proposed-direction", "ADR-006#d5", "ADR-006#d8", "ADR-006#d13", "ADR-008#d8",
-    "ADR-008#d9", "ADR-008#proposed-direction", OD-49, "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
+    "ADR-008#d9", "ADR-008#d23", "ADR-008#proposed-direction", OD-49, OD-67,
+    "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
 
 - id: template-factories
   node: easytrack
   name: Template factories (five)
   status: new
   label: specified
-  what: "The only new contracts that Clutch may add. Each factory owns one fixed [[template]]. A motion gives it typed values, such as a target, an asset and a budget key, and the factory builds the permission."
+  what: "Five of the new Easy Track factories, the only kind of new contract that Clutch may add. Each factory owns one fixed [[template]]. A motion gives it typed values, such as a target, an asset and a budget key, and the factory builds the permission."
   controlled_by: "The operator Safe is the trusted caller, fixed at deployment. The DAO registers each factory by vote."
   can:
     - "Onboard a protocol without a DAO vote: wrap and unwrap, a tokenized vault, a queue vault, a spender approval or a Morpho Blue market."
@@ -271,6 +273,23 @@
   sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d28", "ADR-009#d30", "ADR-009#d31", "ADR-009#proposed-direction",
     INV-012, OD-41, OD-56, "lip:part-7"]
 
+- id: first-loss-burn-factory
+  node: easytrack
+  name: First-loss burn factory
+  status: new
+  label: specified
+  what: "A new Easy Track factory for burns of the DAO's [[first-loss shares]]. Every first-loss burn is one of its motions, so every burn waits for the objection window (OD-67)."
+  controlled_by: "The operator Safe is the trusted caller. The DAO registers it by vote."
+  can:
+    - "Burn an amount of the DAO's earnETH or earnUSD shares, in a motion that the operator Safe creates on the Earn team's written instruction."
+    - "Act only when the window ends without an objection: anyone enacts the motion, and the Easy Track script executor burns through the first-loss burn role."
+  cannot:
+    - "Burn any other token. The factory pins the two share tokens."
+    - "Write a permission, or transfer, approve or redeem the shares."
+  numbers: ["window: 72 h", "two share tokens pinned"]
+  sources: ["ADR-008#d22", "ADR-008#d23", "ADR-008#proposed-direction", "ADR-006#proposed-direction", OD-67, INV-021,
+    "runbook:Burn first-loss Earn shares", "lip:part-4"]
+
 # --- Operator Safe ------------------------------------------------------------------------------
 - id: operator-safe
   node: operator-safe
@@ -283,16 +302,17 @@
     - "Hold the operator role: change positions in approved protocols, within budgets."
     - "Create motions as the trusted caller of every Clutch factory, and cancel its own motions."
     - "Hold the operator role on the [[orders account]]: place CoW market, [[limit order|limit]], [[TWAP]] and [[stop-loss order|stop-loss]] orders that pay the Asset Safe."
-    - "Hold the first-loss role: burn the DAO's [[first-loss shares]], or redeem them to the Aragon Agent, on the Earn team's written instruction (OD-60)."
+    - "Hold the first-loss role: redeem the DAO's [[first-loss shares]] to the Aragon Agent, on the Earn team's written instruction (OD-60)."
     - "Remove the screening guard, but only through a fixed 10-day timelock."
   cannot:
     - "Run a transaction without [the screening vendor]'s single-use approval, once the guard is set. The guard [[fail closed|fails closed]]."
     - "Hold assets or modules."
+    - "Burn the first-loss shares at once. It only creates the burn motion, which waits for the objection window (OD-67)."
     - "Be replaced without a DAO vote. A new operator Safe also needs every factory deployed and registered again."
   numbers: ["Safe v1.5.0", "4 of 7", "guard removal: 10-day timelock"]
   address: "To be deployed"
   sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d12", "ADR-005#d21", "ADR-005#d27", "ADR-005#proposed-direction",
-    "ADR-008#d21", OD-60, "ADR-010#d4",
+    "ADR-008#d21", "ADR-008#d23", OD-60, OD-67, "ADR-010#d4",
     "ADR-010#d9", "ADR-010#d10", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "ADR-010#proposed-direction",
     "ADR-006#d3", "ADR-006#proposed-direction", "ADR-007#d18", INV-010, OD-54,
     "doc:docs/registers/parameters.md#parameters"]
@@ -314,14 +334,14 @@
   cannot:
     - "Add a permission or give a non-zero approval."
     - "Enter a protocol, except to stake ETH, or borrow."
-    - "Reach the first-loss shares. They sit in the [[first-loss Safe]], where only the operator Safe's narrow first-loss role acts."
+    - "Reach the first-loss shares. They sit in the [[first-loss Safe]], where only a burn motion and the operator Safe's narrow first-loss role act."
     - "Disable the safety modifier or the orders modifier, or change where recovered assets go."
     - "Restore what it stopped: enable a module again, grant a permission again or raise an approval. The DAO restarts (OD-59)."
   numbers: ["Safe v1.5.0", "3 of 5", "2 committee seats, 2 Emergency Brakes seats, 1 seat for neither", "initiate within 6 h"]
   address: "To be deployed"
   sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d13", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26",
     "ADR-005#proposed-direction", "ADR-007#d13", "ADR-007#d19", "ADR-007#d25", "ADR-007#d30",
-    "ADR-007#proposed-direction", "ADR-009#d34", OD-42, OD-43, OD-58, OD-59, INV-026, "lip:part-6",
+    "ADR-007#proposed-direction", "ADR-009#d34", OD-42, OD-43, OD-58, OD-59, OD-67, INV-026, "lip:part-6",
     "doc:docs/registers/parameters.md#parameters"]
 
 # --- Emergency Brakes ---------------------------------------------------------------------------
@@ -437,9 +457,9 @@
     - "Borrow, or use a venue outside the launch scope."
     - "Administer a modifier or the Safe, or change its own permissions."
     - "Use delegatecall on the Asset Safe. Its one planned delegatecall, to CoW's order signer, is on the orders account and is specified (OD-43)."
-    - "Reach the first-loss shares through the operator role. They sit in the first-loss Safe, where only the operator Safe's separate first-loss role acts (OD-42, OD-60)."
+    - "Reach the first-loss shares through the operator role. They sit in the first-loss Safe, where only a burn motion and the operator Safe's separate first-loss role act (OD-42, OD-60, OD-67)."
   numbers: ["one role key: `operator`"]
-  sources: ["ADR-005#d7", "ADR-005#proposed-direction", "ADR-009#d13", "ADR-009#d14", OD-42, OD-60, INV-003, INV-008, INV-018,
+  sources: ["ADR-005#d7", "ADR-005#proposed-direction", "ADR-009#d13", "ADR-009#d14", OD-42, OD-60, OD-67, INV-003, INV-008, INV-018,
     "test:test_D3_operator_cannot_route_around_avatar"]
 
 - id: role-governance
@@ -518,9 +538,9 @@
     - "Send an asset anywhere except the Aragon Agent. The transfer to the orders account is specified but not built."
     - "Disable the safety modifier or any later module. The switch's pin is exact."
     - "Restore what it stopped: enable a module, grant a permission or set a budget. The compiler refuses a policy that gives it one (OD-59)."
-    - "Reach the first-loss shares. They sit in the first-loss Safe, where only the operator Safe's narrow first-loss role acts (OD-60)."
+    - "Reach the first-loss shares. They sit in the first-loss Safe, where only a burn motion and the operator Safe's narrow first-loss role act (OD-60, OD-67)."
   sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26", "ADR-005#proposed-direction",
-    "ADR-008#d21", OD-42, OD-48, OD-49, OD-58, OD-59, INV-002, INV-009, INV-027, "test:test_D4_emergency_flow",
+    "ADR-008#d21", "ADR-008#d23", OD-42, OD-48, OD-49, OD-58, OD-59, OD-67, INV-002, INV-009, INV-027, "test:test_D4_emergency_flow",
     "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned",
     "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts",
     "test:test_emergency_cannot_give_a_non_zero_approval",
@@ -549,7 +569,7 @@
   what: "The permission policy, written as a Zodiac [[constellation]] in TypeScript under `policy/constellation/`. It names the Safes, the modifiers, the roles, the permissions and the budget keys."
   controlled_by: "The repository. A change is a reviewed pull request. `@lidofinance/defi-tech` owns it."
   can:
-    - "State every permission of the three built roles in one place. The exit-governance role and the first-loss role join when they are built (OD-49, OD-60)."
+    - "State every permission of the three built roles in one place. The exit-governance role and the two first-loss roles join when they are built (OD-49, OD-60, OD-67)."
     - "Go to the Lido Zodiac workspace, so that the UI can show it."
   cannot:
     - "Change the chain by itself. Only a vote or a motion applies a policy."
@@ -734,18 +754,19 @@
   name: First-loss Safe
   status: instance
   label: specified
-  what: "A new Safe that holds only the DAO's [[first-loss shares]] in earnETH and earnUSD. The Aragon Agent owns it. One modifier carries one narrow role, held by the operator Safe, so the committee can execute the first-loss terms without a vote."
+  what: "A new Safe that holds only the DAO's [[first-loss shares]] in earnETH and earnUSD. The Aragon Agent owns it. One modifier carries two narrow roles, so the committee can execute the first-loss terms without a DAO vote: a burn waits for an Easy Track motion's objection window, and an exit pays the Aragon Agent."
   controlled_by: "The Aragon Agent, at 1 of 1. Safe v1.5.0, with no guard or fallback handler, and one modifier: the first-loss modifier."
   can:
     - "Receive the first-loss shares from the Growth Committee Safe, once, after the enabling vote."
-    - "Burn the shares, or redeem them with the proceeds pinned to the Aragon Agent, through the first-loss role (OD-60)."
+    - "Burn the shares, but only in an enacted Easy Track motion, through the first-loss burn role (OD-67)."
+    - "Redeem the shares with the proceeds pinned to the Aragon Agent, through the operator Safe's first-loss role (OD-60)."
   cannot:
     - "Be reached by the operator or the emergency role. The no-redeem rule for the operator is structural, not written (OD-42)."
-    - "Send the shares anywhere. The role cannot transfer or approve them."
-  numbers: ["Safe v1.5.0", "1 of 1", "one modifier, one role", "no guard or fallback handler"]
+    - "Send the shares anywhere. Neither role can transfer or approve them."
+  numbers: ["Safe v1.5.0", "1 of 1", "one modifier, two roles", "no guard or fallback handler"]
   address: "To be deployed"
-  sources: ["ADR-008#d13", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#proposed-direction", "ADR-005#d27",
-    "ADR-005#proposed-direction", OD-42, OD-60, INV-021, "runbook:Move the legacy Earn shares",
+  sources: ["ADR-008#d13", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-008#proposed-direction",
+    "ADR-005#d27", "ADR-005#proposed-direction", OD-42, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares",
     "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares"]
 
 - id: role-first-loss
@@ -753,17 +774,34 @@
   name: The first-loss role
   status: new
   label: specified
-  what: "The committee's narrow role on the first-loss Safe. It executes the first-loss terms of the March 2026 Earn allocation, in place of the Growth Committee."
+  what: "The committee's narrow role on the first-loss Safe. Under the first-loss terms of the March 2026 Earn allocation, it exits the shares to the Aragon Agent, in place of the Growth Committee. A burn uses another role, by motion only (OD-67)."
   controlled_by: "Held by the operator Safe, at 4 of 7. Its guard screens each action once the launch cap lifts. It acts on the Earn team's written instruction. The DAO can change or remove the role by vote."
   can:
-    - "Burn the DAO's earnETH or earnUSD shares after a loss of at least 1% that the curators confirm. Below that, a Snapshot exception comes first."
     - "Request and claim the shares' redemption on a confirmed material risk, with the proceeds pinned to the Aragon Agent."
   cannot:
+    - "Burn the shares. Only an enacted burn motion can (OD-67)."
     - "Transfer or approve the shares, or pay anyone but the Aragon Agent."
     - "Reach the Asset Safe or the orders account."
-  numbers: ["burn trigger: a confirmed loss of at least 1%", "incident update: within 7 days"]
-  sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", "ADR-008#context", "ADR-008#proposed-direction", "ADR-005#d27",
-    OD-60, INV-021, "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares",
+  sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-008#context", "ADR-008#proposed-direction",
+    "ADR-005#d27", OD-60, OD-67, INV-021, "runbook:Exit the first-loss shares",
+    "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms"]
+
+- id: role-first-loss-burn
+  node: first-loss
+  name: The first-loss burn role
+  status: new
+  label: specified
+  what: "The role on the first-loss Safe that burns the DAO's [[first-loss shares]]. Only an enacted Easy Track motion uses it, so every burn waits for the objection window (OD-67)."
+  controlled_by: "Held by the Easy Track script executor. The operator Safe creates each burn motion on the first-loss burn factory, on the Earn team's written instruction. The DAO can change or remove the role by vote."
+  can:
+    - "Burn the DAO's earnETH or earnUSD shares after a loss of at least 1% that the curators confirm. Below that, a Snapshot exception comes first."
+  cannot:
+    - "Act before a motion's objection window ends, or on a motion that LDO holders reject."
+    - "Transfer, approve or redeem the shares."
+    - "Reach the Asset Safe or the orders account."
+  numbers: ["burn trigger: a confirmed loss of at least 1%", "objection window: 72 h", "incident update: within 7 days"]
+  sources: ["ADR-008#d14", "ADR-008#d22", "ADR-008#d23", "ADR-008#context", "ADR-008#proposed-direction",
+    "ADR-008#consequences", "ADR-005#proposed-direction", OD-67, INV-021, "runbook:Burn first-loss Earn shares",
     "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms"]
 
 # --- Approved protocols -------------------------------------------------------------------------
@@ -795,7 +833,7 @@
   can:
     - "Take deposits and redemptions from the operator. Claims pay the Asset Safe."
     - "Let the emergency role cancel, claim and redeem, and send shares to the Aragon Agent."
-    - "Let the first-loss role burn the DAO's first-loss shares, or redeem them to the Aragon Agent (OD-60)."
+    - "Let a burn motion burn the DAO's first-loss shares, and the first-loss role redeem them to the Aragon Agent (OD-60, OD-67)."
   cannot:
     - "Tell the DAO's first-loss shares from other shares. That is why the first-loss Safe holds them apart (OD-42)."
     - "Promise that shares stay transferable. Their administrators can add a pause, whitelist, lockup or blacklist."
@@ -806,7 +844,7 @@
     - {name: "earnUSD USDC deposit queue", address: "0xC75E7E73B25fEa8bB23EB55CC48BA55067b5be76"}
     - {name: "earnUSD redeem queue", address: "0x9e36A74FE278906a76e7615263e46a83fC40c47F"}
     - {name: "earnUSD share", address: "0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981"}
-  sources: ["ADR-011#d1", "ADR-011#proposed-direction", "ADR-008#d19", "ADR-008#d21", OD-42, OD-60,
+  sources: ["ADR-011#d1", "ADR-011#proposed-direction", "ADR-008#d19", "ADR-008#d21", "ADR-008#d23", OD-42, OD-60, OD-67,
     "test:test_D3b_earn_deposit_policy_layer",
     "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move"]
 
@@ -973,7 +1011,7 @@
     - "Alert on [[drift]] from the artifact on every modifier, the safety policy included, since motions can write exits there (OD-49); on approvals and budget burn; on owner, threshold, module, guard and singleton changes of the new Safes; and on the orders account's fallback handler, domain verifier and relayer approvals."
     - "Watch the [[liquidity buffer]] all the time, and warn before it reaches its floor (OD-40)."
     - "Check each fill against a market price, ask the committee at 30 days to confirm or cancel each open order, and alert on a recovery order whose limit sits far below a market price, on tokens left in the orders account and on late parts of conditional orders (OD-43, OD-48, OD-61)."
-    - "Alert on any change of the first-loss Safe's balance, owners or modules, and page on every action of the first-loss role (OD-42, OD-60)."
+    - "Alert on any change of the first-loss Safe's balance, owners or modules, and page on every burn motion and every action of the first-loss role (OD-42, OD-60, OD-67)."
     - "Page at high severity on every emergency swap (OD-48)."
     - "Follow a new Lido product's exposure against the protocol cap until a motion unlocks it, and record the changes of the screening rules that the vendor reports (OD-41, OD-45)."
     - "Follow every motion, flag odd top-ups and repeated budget motions, and grade emergency actions."
@@ -985,7 +1023,7 @@
   sources: ["ADR-009#d1", "ADR-009#d7", "ADR-009#d17", "ADR-009#d21", "ADR-009#d24", "ADR-009#d25", "ADR-009#d27",
     "ADR-009#d28", "ADR-009#d30", "ADR-009#proposed-direction", "ADR-010#d12", "ADR-010#d18", "ADR-007#d24",
     "ADR-007#d26", "ADR-007#d29", "ADR-007#proposed-direction", "ADR-009#d34", "ADR-008#proposed-direction", OD-13,
-    OD-32, OD-40, OD-41, OD-42, OD-43, OD-45, OD-48, OD-49, OD-58, OD-60, OD-61, "doc:ROADMAP.md#roadmap"]
+    OD-32, OD-40, OD-41, OD-42, OD-43, OD-45, OD-48, OD-49, OD-58, OD-60, OD-61, OD-67, "doc:ROADMAP.md#roadmap"]
 
 - id: vendor-monitoring
   node: monitoring

@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: The committee's feedback of 2026-10-12
-description: The evidence behind OD-58 to OD-66 — six points of feedback from the CFO, a member of the committee; Lido's pause-or-disable rule and its emergency bodies; how Easy Track pauses and restarts; the 2026 incidents that bear on emergency powers; the first-loss terms of March 2026; CoW's order life; prices under stress; the quorums of the new emergency Safe; what the new model simplifies; and a drill that shows the switch freezing a queued motion.
+description: The evidence behind OD-58 to OD-67 — six points of feedback from the CFO, a member of the committee; Lido's pause-or-disable rule and its emergency bodies; how Easy Track pauses and restarts; the 2026 incidents that bear on emergency powers; the first-loss terms of March 2026; CoW's order life; prices under stress; the quorums of the new emergency Safe; what the new model simplifies; and a drill that shows the switch freezing a queued motion.
 tags: [emergency, governance, easy-track, first-loss, orders, prices, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-13
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T16:13:25Z
+  at: 2026-10-13T17:07:39Z
 verified: []
 sources:
   - id: s1
@@ -149,7 +149,7 @@ No such data exists for a group that mixes members of different bodies. The firs
 
 ## The first-loss terms
 
-- After a loss of at least 1% that the curators confirm, the Earn team may instruct the executing committee to burn up to all of the DAO's shares in that vault. On a confirmed material risk, it may instruct a withdrawal through the vault's normal redemption. No vote is needed. An incident update is due within seven days, and the DAO may change or end the authorisation at any time [s10].
+- After a loss of at least 1% that the curators confirm, the Earn team may instruct the executing committee to burn up to all of the DAO's shares in that vault. On a confirmed material risk, it may instruct a withdrawal through the vault's normal redemption. No vote is needed. An incident update is due within seven days, and the DAO may change or end the authorisation at any time. The burn decision must be documented in the incident update, but "execution may precede posting if time-sensitive" [s10].
 - After the Kelp incident the loss stayed below 1%. A Snapshot approved a one-time exception, and the burn ran on 2026-05-15 as one `burn` call [s11].
 - Lido's review says that the activation criteria and the roles of the curators and the DAO "will be formalized before the next incident" [s11].
 - Under OD-42, every burn or redemption was a DAO vote through Dual Governance: about nine days, plus a slot in an omnibus vote. That is slower than the terms that the mandate takes over.

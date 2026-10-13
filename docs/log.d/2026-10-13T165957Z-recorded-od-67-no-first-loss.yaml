@@ -1,0 +1,3 @@
+date: '2026-10-13'
+kind: Decision
+text: 'Recorded OD-67: no first-loss burn without the objection window. Every first-loss burn, Earn''s included, runs as an Easy Track motion that the operator Safe creates; after the window, the Easy Track executor burns through a new first-loss-burn role. The operator Safe''s first-loss role keeps the redemption and the claim, paid to the Aragon Agent. This replaces the direct burn of OD-60 (ADR 008, decision 23).'

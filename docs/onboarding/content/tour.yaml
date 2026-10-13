@@ -15,12 +15,12 @@
   sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1"]
 
 - title: "The operator: the committee at work"
-  text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its operator permissions is the Asset Safe. Its one other role, on the [[first-loss Safe]], burns the first-loss shares or redeems them to the Aragon Agent."
+  text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its operator permissions is the Asset Safe. Its one other role, on the [[first-loss Safe]], redeems the first-loss shares to the Aragon Agent. A burn of them is an Easy Track motion that it creates."
   tech: "The operator Safe calls `execTransactionWithRole` on the operator modifier with the role key `bytes32(\"operator\")`; a batch goes through MultiSendCallOnly v1.5.0. Every receiver, owner and beneficiary is pinned with `EqualToAvatar` (INV-003)."
   nodes: [committee, operator-safe, operator-modifier, asset-safe, protocols]
   edges: [signers-op, op-role, own-op, positions]
   flows: [op-tx, swap-order]
-  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d27", "ADR-005#proposed-direction", OD-60, INV-003,
+  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d27", "ADR-005#proposed-direction", "ADR-008#d23", OD-60, OD-67, INV-003,
     "test:test_D3_operator_cannot_route_around_avatar"]
 
 - title: Every operator transaction is screened

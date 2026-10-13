@@ -104,12 +104,13 @@
   sources: ["ADR-005#d15", "ADR-005#d20", "ADR-007#d17"]
 
 - term: First-loss shares
-  plain: "The DAO's earnETH and earnUSD shares from the March 2026 Earn allocation. They take losses first, to protect other depositors. They move to the first-loss Safe. The committee burns them or redeems them to the Aragon Agent through one narrow role, on the Earn team's written instruction."
-  sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", OD-21, OD-42, OD-60]
+  plain: "The DAO's earnETH and earnUSD shares from the March 2026 Earn allocation. They take losses first, to protect other depositors. They move to the first-loss Safe. On the Earn team's written instruction, they burn by Easy Track motion, after the objection window, or the committee redeems them to the Aragon Agent through one narrow role."
+  sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", OD-21, OD-42, OD-60,
+    OD-67]
 
 - term: First-loss Safe
-  plain: "A Safe that the Aragon Agent owns, which holds only the first-loss shares. Its one modifier carries one narrow role for the operator Safe: burn the shares, or redeem them to the Aragon Agent."
-  sources: ["ADR-008#d19", "ADR-008#d21", OD-42, OD-60, INV-021]
+  plain: "A Safe that the Aragon Agent owns, which holds only the first-loss shares. Its one modifier carries two narrow roles: Easy Track's, which burns the shares only by enacted motion, and the operator Safe's, which redeems them to the Aragon Agent."
+  sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", OD-42, OD-60, OD-67, INV-021]
 
 - term: Fortnightly snapshot
   plain: "A reading of the vault's holdings at a pinned block every two weeks. It drives the published cap reading. Budgets no longer follow it (OD-56)."
@@ -188,7 +189,7 @@
   sources: ["doc:docs/research/request-for-solution-2026-10-07.md#answer"]
 
 - term: Role
-  plain: "A named set of permissions on a modifier: operator, governance, emergency, exit governance or first-loss. A Safe or contract that holds the role can make the calls that it allows."
+  plain: "A named set of permissions on a modifier: operator, governance, emergency, exit governance, first-loss or first-loss burn. A Safe or contract that holds the role can make the calls that it allows."
   tech: "On chain, a 32-byte key names the role. In Clutch the key is the label in bytes, such as `bytes32(\"operator\")`."
   sources: ["ADR-005#proposed-direction", "lip:part-2"]
 
