@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T09:03:30Z
+  at: 2026-10-13T16:13:25Z
 verified: []
 sources:
   - id: s1
@@ -213,4 +213,4 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 
 ## Open questions
 
-None open. OD-42, OD-43 and OD-49 were decided on 2026-10-06, OD-57 on 2026-10-09, and OD-58 to OD-60 on 2026-10-13. The orders account's fallback handler on Safe v1.5.0 needs a fork test before it is relied on ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). The fifth signer of the emergency Safe is not chosen yet; a Snapshot appoints them before the emergency Safe is deployed.
+None open. OD-42, OD-43 and OD-49 were decided on 2026-10-06, OD-57 on 2026-10-09, and OD-58 to OD-60 on 2026-10-13. The orders account's fallback handler on Safe v1.5.0 needs a fork test before it is relied on ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). OD-65 asks who holds the emergency Safe's fifth seat. EM said on 2026-10-13 that a member of the Tech team may hold it, tentatively. A Snapshot appoints the signer before the emergency Safe is deployed.

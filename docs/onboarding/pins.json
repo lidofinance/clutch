@@ -224,7 +224,7 @@
         "ADR-002#d1": "fbef8c1e24375017",
         "ADR-002#d7": "04f2137680376c15",
         "OD-63": "8a00bc5ed89f6e63",
-        "doc:docs/registers/open-decisions.md#open-decisions": "05adf7814b046c98"
+        "doc:docs/registers/open-decisions.md#open-decisions": "612b064fd702554a"
       }
     },
     "actor:emergency-brakes": {
@@ -3058,7 +3058,7 @@
     "term:open-decision": {
       "content": "c96ba21de127cccb",
       "sources": {
-        "doc:docs/registers/open-decisions.md#open-decisions": "05adf7814b046c98"
+        "doc:docs/registers/open-decisions.md#open-decisions": "612b064fd702554a"
       }
     },
     "term:orders-account": {

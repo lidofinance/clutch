@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T09:11:38Z
+  at: 2026-10-13T16:13:25Z
 verified: []
 sources:
   - id: s1
@@ -39,7 +39,10 @@ sources:
     title: EM's request for a triage of the onboarding guide's tests, and EM's answer, 2026-10-12; the transcript is not in the repository
   - id: s10
     resource: "urn:clutch:interview:2026-10-13"
-    title: EM's request to triage the committee's feedback, EM's answers to cards 1 to 5, EM's answers on ADR 002, the first-loss holder and OD-64, and EM's verification of ADR 004, 2026-10-13; the transcript is not in the repository
+    title: EM's request to triage the committee's feedback, EM's answers to cards 1 to 5, EM's answers on ADR 002, the first-loss holder and OD-64, EM's verification of ADR 004, and EM's answer on OD-65 and OD-66, 2026-10-13; the transcript is not in the repository
+  - id: s11
+    resource: "urn:clutch:restricted:cfo-followup-2026-10-13"
+    title: The CFO's follow-up questions and EM's answers in the committee's channel, 2026-10-13; outside the repository
 ---
 
 # Decision log
@@ -49,6 +52,27 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-13 — OD-65 and OD-66 opened: the fifth signer and insurance funds
+
+After the changes, the CFO asked two follow-up questions in the committee's channel: whether the emergency Safe's fifth signer can come from the Tech team, and whether the vault can manage more "insurance funds", for other products too. EM answered there [s11]:
+
+> yup, tentatively tho
+
+> Yeah, should have, will model it further
+
+The agent proposed two open decisions, two templates for a new fund (burnable shares, and a fixed payout address), and one Easy Track motion to onboard each fund ([research note](/research/cfo-feedback-2026-10-13.md#follow-up-insurance-funds-for-other-products)). EM answered:
+
+> add OD-65 and OD-66;
+> I agree on two templates: burnable shares and a fixed payout address;
+> may we execute these under ET motion? I would do so
+>
+> take this into account and report back
+
+Recorded as:
+
+- (OD-65) Open. EM's tentative answer: the fifth signer may come from the Tech team, if they are a member of neither the committee nor the Emergency Brakes multisig ([ADR 005](/adr/005-account-graph-and-roles.md), decision 24).
+- (OD-66) Open, with two points from EM. A new insurance fund uses one of two templates: burnable shares, or a fixed payout address. EM prefers that the burns and the payouts run as Easy Track motions. The agent reads "these" as the burns and the payouts, not only the onboarding of a fund, and states the consequences in the OD-66 row. No ADR decision changes until OD-66 closes. [s10]
 
 ## 2026-10-13 — ADR 004 verified again
 

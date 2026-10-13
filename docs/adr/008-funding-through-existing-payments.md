@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T09:03:30Z
+  at: 2026-10-13T16:13:25Z
 verified: []
 sources:
   - id: s1
@@ -183,3 +183,4 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 ## Open questions
 
 - Twyne: who holds the position, and in what form. The mandate's drafters owe the evidence (decision 17).
+- OD-66: how the vault adds and uses insurance funds for products other than Lido Earn. EM agreed on two templates, burnable shares and a fixed payout address, and prefers that burns and payouts run as Easy Track motions. Decisions 21 and 22 cover the earnETH and earnUSD shares only until OD-66 closes.

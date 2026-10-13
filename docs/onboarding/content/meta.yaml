@@ -68,7 +68,8 @@ tab_intros:
 quiz_note: "Pick an answer to see whether it is right and why. Nothing leaves this page."
 owed:
   - "EM accepts ADR 005 to ADR 011."
-  - "A Snapshot appoints the emergency Safe's fifth signer, a member of neither the committee nor the Emergency Brakes multisig (OD-58)."
+  - "A Snapshot appoints the emergency Safe's fifth signer, a member of neither the committee nor the Emergency Brakes multisig (OD-58, OD-65)."
+  - "EM decides how insurance funds for products other than Lido Earn join the vault, before the enabling vote (OD-66)."
   - "The committee's valuation policy sets the price waterfall's band and the share of the vault that its last level may price (OD-62)."
   - "[the screening vendor] confirms in writing that it accepts no standing approvals and agrees to be named."
   - "[the screening vendor] says which rules it can check before execution: the liquidity buffer, the caps, an order's limit, a stop-loss order's expiry and a router swap's minimum output."

@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T09:11:38Z
+  at: 2026-10-13T16:13:25Z
 verified: []
 sources:
   - id: s1
@@ -21,6 +21,8 @@ EM decides every item until the Treasury Management Committee takes over as acce
 
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
+| OD-65 | Who holds the emergency Safe's fifth seat? The fifth signer is a member of neither the committee nor the Emergency Brakes multisig (OD-58), and a DAO Snapshot appoints them. | [ADR 005](/adr/005-account-graph-and-roles.md) | EM said on 2026-10-13 "yup, tentatively tho" to a member of the Tech team. Accept that as a criterion, not a name: a Tech-team member on neither body, whose key and seed are generated apart from the Emergency Brakes members' setup, who signs a written statement of independence, keeps on-call duty and takes part in the timed drill. Review the seat at the first rotation, because the only quorum without the committee is then all from the engineering organisation | EM; a DAO Snapshot appoints the signer |
+| OD-66 | How does the vault add and use insurance funds for products other than Lido Earn? | [ADR 008](/adr/008-funding-through-existing-payments.md) | EM agreed on 2026-10-13 to two templates, burnable shares and a fixed payout address, and prefers that burns and payouts run as Easy Track motions. Recommendation: (1) a standing framework in the mandate, set by one Snapshot: eligible products on Ethereum, standard terms with a confirming party independent of the product team, and a cap per fund and in total; (2) one onboarding motion per fund, from one of the two templates, through a governance role on the first-loss modifier; (3) burns and payouts as Easy Track motions, through an executor role on that modifier, so that each transfer of value out of the DAO gets the 72-hour objection window; (4) exits that pay the Aragon Agent stay with the operator Safe's direct role, because the value stays with the DAO and speed matters; (5) a funding registry that pays only the first-loss Safe. The roles and the factories ship in the enabling vote, or adding them later is itself a DAO vote. If burns run as motions, an Earn burn also waits 72 hours, which changes OD-60 and ADR 008 decision 21 | EM; the mandate's Snapshot sets the framework |
 
 ## Closed
 
