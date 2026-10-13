@@ -213,7 +213,7 @@
         "ADR-006#d11": "6398609ed6600c10",
         "ADR-006#d4": "5ab2acb33dc085cb",
         "ADR-006#d6": "19bdc7726421d75b",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-005": "5044f42cd3c66d90",
         "OD-45": "491bf7e914d77d88",
         "OD-59": "c29ce8258ab49273",
@@ -298,7 +298,7 @@
       "sources": {
         "ADR-005#proposed-direction": "a74d547781ae673a",
         "ADR-006#d13": "1cccea48fc1c5ebf",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-025": "b1d1b98ca6a24a52",
         "OD-49": "802c246a2e3ee2ff"
       }
@@ -316,7 +316,7 @@
     "actor:first-loss-burn-factory": {
       "content": "3f31750a43d21811",
       "sources": {
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "ADR-008#d22": "75b05eafe71007af",
         "ADR-008#d23": "2df97a9d852fa9a1",
         "ADR-008#proposed-direction": "34b4a74741f70cbf",
@@ -378,7 +378,7 @@
       "content": "c6e7b329a843ab3e",
       "sources": {
         "ADR-006#d4": "5ab2acb33dc085cb",
-        "ADR-006#d7": "e9238e258281c265",
+        "ADR-006#d7": "4ceab412a1b97589",
         "ADR-008#proposed-direction": "34b4a74741f70cbf",
         "ADR-009#d19": "e080779f3a6fea3b",
         "ADR-009#d2": "f10af298d1998ded",
@@ -498,7 +498,7 @@
         "ADR-005#d9": "0e2dddf9234835dc",
         "ADR-005#proposed-direction": "a74d547781ae673a",
         "ADR-006#d3": "1bdb7f8f66d010a7",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "ADR-007#d18": "7414cde592d8be14",
         "ADR-008#d21": "88a1d456a4ad386e",
         "ADR-008#d23": "2df97a9d852fa9a1",
@@ -675,10 +675,10 @@
         "ADR-005#proposed-direction": "a74d547781ae673a",
         "ADR-006#d10": "f36b9795083873e4",
         "ADR-006#d5": "3460717fe3d5d82b",
-        "ADR-006#d7": "e9238e258281c265",
+        "ADR-006#d7": "4ceab412a1b97589",
         "ADR-006#d8": "3db26a864c607da9",
         "ADR-006#d9": "a494beea33bd39c4",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-004": "0e4f226be3e350de",
         "OD-36": "7f07912f1202457a",
         "OD-38": "30e9ef9d9c8919a9",
@@ -775,8 +775,8 @@
         "ADR-006#d2": "0d8fda60c38f083a",
         "ADR-006#d3": "1bdb7f8f66d010a7",
         "ADR-006#d5": "3460717fe3d5d82b",
-        "ADR-006#d7": "e9238e258281c265",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#d7": "4ceab412a1b97589",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "ADR-011#d13": "a14ffaed05c28055",
         "ADR-011#d3": "f6d3b85eb49797ad",
         "OD-09": "e48b44d924cd5bb9",
@@ -1113,7 +1113,7 @@
         "ADR-006#d10": "f36b9795083873e4",
         "ADR-006#d13": "1cccea48fc1c5ebf",
         "ADR-006#d9": "a494beea33bd39c4",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-004": "0e4f226be3e350de",
         "INV-009": "c077255efee1429b",
         "INV-018": "b179aa0fdd4c842b",
@@ -1224,7 +1224,7 @@
         "ADR-006#d13": "1cccea48fc1c5ebf",
         "ADR-006#d2": "0d8fda60c38f083a",
         "ADR-006#d5": "3460717fe3d5d82b",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-004": "0e4f226be3e350de",
         "OD-49": "802c246a2e3ee2ff",
         "lip:part-4": "c02d93369c0dd1ce"
@@ -1326,7 +1326,7 @@
         "ADR-006#d5": "3460717fe3d5d82b",
         "ADR-006#d8": "3db26a864c607da9",
         "ADR-006#d9": "a494beea33bd39c4",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-004": "0e4f226be3e350de",
         "OD-36": "7f07912f1202457a",
         "OD-38": "30e9ef9d9c8919a9"
@@ -1557,10 +1557,10 @@
         "ADR-006#d3": "1bdb7f8f66d010a7",
         "ADR-006#d4": "5ab2acb33dc085cb",
         "ADR-006#d5": "3460717fe3d5d82b",
-        "ADR-006#d7": "e9238e258281c265",
+        "ADR-006#d7": "4ceab412a1b97589",
         "ADR-006#d8": "3db26a864c607da9",
         "ADR-006#d9": "a494beea33bd39c4",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-004": "0e4f226be3e350de",
         "INV-005": "5044f42cd3c66d90",
         "INV-025": "b1d1b98ca6a24a52",
@@ -1777,8 +1777,8 @@
         "ADR-006#context": "675b4e00cf0ab961",
         "ADR-006#d13": "1cccea48fc1c5ebf",
         "ADR-006#d4": "5ab2acb33dc085cb",
-        "ADR-006#d7": "e9238e258281c265",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#d7": "4ceab412a1b97589",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "OD-49": "802c246a2e3ee2ff",
         "OD-59": "c29ce8258ab49273",
         "runbook:Pause Easy Track": "19a58096518e0964",
@@ -1989,7 +1989,7 @@
       "content": "bb97133d43954c1d",
       "sources": {
         "ADR-006#d13": "1cccea48fc1c5ebf",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-025": "b1d1b98ca6a24a52",
         "OD-49": "802c246a2e3ee2ff"
       }
@@ -2541,10 +2541,10 @@
         "ADR-006#d3": "1bdb7f8f66d010a7",
         "ADR-006#d5": "3460717fe3d5d82b",
         "ADR-006#d6": "19bdc7726421d75b",
-        "ADR-006#d7": "e9238e258281c265",
+        "ADR-006#d7": "4ceab412a1b97589",
         "ADR-006#d8": "3db26a864c607da9",
         "ADR-006#d9": "a494beea33bd39c4",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "ADR-008#d23": "2df97a9d852fa9a1",
         "ADR-010#d22": "2366596ef9d1ea47",
         "ADR-010#proposed-direction": "b7ecd80656ca5525",
@@ -2629,8 +2629,8 @@
         "ADR-006#context": "675b4e00cf0ab961",
         "ADR-006#d11": "6398609ed6600c10",
         "ADR-006#d6": "19bdc7726421d75b",
-        "ADR-006#d7": "e9238e258281c265",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#d7": "4ceab412a1b97589",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "ADR-009#d30": "f7c5fb1ee071a13b",
         "INV-004": "0e4f226be3e350de",
         "INV-009": "c077255efee1429b",
@@ -2654,7 +2654,7 @@
         "ADR-006#d10": "f36b9795083873e4",
         "ADR-006#d5": "3460717fe3d5d82b",
         "ADR-006#d9": "a494beea33bd39c4",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-001": "985cef6e1179ae9a",
         "INV-002": "3a950bbdf6e48842",
         "INV-003": "ae7570f337217693",
@@ -2700,7 +2700,7 @@
         "ADR-006#d5": "3460717fe3d5d82b",
         "ADR-006#d8": "3db26a864c607da9",
         "ADR-006#d9": "a494beea33bd39c4",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d",
+        "ADR-006#proposed-direction": "d55e498e93d5b252",
         "INV-004": "0e4f226be3e350de",
         "INV-012": "6e2a87fd6539097a",
         "OD-36": "7f07912f1202457a",
@@ -3265,7 +3265,7 @@
       "content": "c3434c46ba7fb185",
       "sources": {
         "ADR-006#d5": "3460717fe3d5d82b",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d"
+        "ADR-006#proposed-direction": "d55e498e93d5b252"
       }
     },
     "term:tm-floor-value": {
@@ -3288,7 +3288,7 @@
       "content": "1e336282e0399109",
       "sources": {
         "ADR-006#d3": "1bdb7f8f66d010a7",
-        "ADR-006#proposed-direction": "ad94775cfda9e02d"
+        "ADR-006#proposed-direction": "d55e498e93d5b252"
       }
     },
     "term:twap": {

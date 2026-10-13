@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T16:49:45Z
+  at: 2026-10-13T17:15:09Z
 verified: []
 sources:
   - id: s1
@@ -52,6 +52,16 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-13 — OD-67: three readings confirmed
+
+The agent asked EM to check three points of the OD-67 record. First, its reading of "keep ET motion": only the burn moves to motions, and the exit to the Aragon Agent stays a direct role. Second, its reading of [ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 7, "Easy Track only expands", as a rule for permissions. Third, its proposals: the burn factory's shape, an amount and one of two pinned share tokens, and the advice to pause the Earn vault until a burn enacts. EM answered:
+
+> 1. confirm
+> 2. confirm
+> 3. good
+
+Recorded as: the first two readings are EM's. A motion that changes no permission, such as the first-loss burn, does not break decision 7 ([ADR 006](/adr/006-governance-through-easy-track-factories.md), the note after decision 13). EM agrees with the proposals of the third point; they stay in the agent-drafted text of [ADR 006](/adr/006-governance-through-easy-track-factories.md), [ADR 008](/adr/008-funding-through-existing-payments.md) and the LIP draft. [s10]
 
 ## 2026-10-13 — OD-67: no first-loss burn without the objection window
 
