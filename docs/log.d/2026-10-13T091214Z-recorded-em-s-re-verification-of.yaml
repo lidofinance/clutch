@@ -1,0 +1,3 @@
+date: '2026-10-13'
+kind: Decision
+text: 'Recorded EM''s re-verification of ADR 004 after its OD-64 edit, at EM''s instruction, with recorded_by, a decision-log ref and the body''s hash. ADR 004 decision 17: the Emergency Brakes multisig does not get access to view the Zodiac workspace.'

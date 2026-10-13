@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T09:03:30Z
+  at: 2026-10-13T09:11:38Z
 verified: []
 sources:
   - id: s1
@@ -39,7 +39,7 @@ sources:
     title: EM's request for a triage of the onboarding guide's tests, and EM's answer, 2026-10-12; the transcript is not in the repository
   - id: s10
     resource: "urn:clutch:interview:2026-10-13"
-    title: EM's request to triage the committee's feedback, EM's answers to cards 1 to 5, and EM's answers on ADR 002, the first-loss holder and OD-64, 2026-10-13; the transcript is not in the repository
+    title: EM's request to triage the committee's feedback, EM's answers to cards 1 to 5, EM's answers on ADR 002, the first-loss holder and OD-64, and EM's verification of ADR 004, 2026-10-13; the transcript is not in the repository
 ---
 
 # Decision log
@@ -49,6 +49,12 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-13 — ADR 004 verified again
+
+> record my re-verification of ADR 004; push
+
+Recorded as: EM verifies ADR 004 again after the OD-64 edit, which adds decision 17: the Emergency Brakes multisig does not get access to view the Lido Zodiac workspace. ADR 004 stays accepted. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's. EM also asked the agent to push the branch. [s10]
 
 ## 2026-10-13 — ADR 002 verified again, the first-loss holder and OD-64
 
@@ -62,7 +68,7 @@ Recorded as:
 
 - EM verifies ADR 002 again after the OD-63 edit, so it stays accepted. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's.
 - (OD-60) The operator Safe holds the `first-loss` role, not the committee's own Safe. This replaces the agent's earlier reading ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 21; [ADR 005](/adr/005-account-graph-and-roles.md), decision 27).
-- (OD-64) The Emergency Brakes multisig loses both. A relaxation of a screening rule gets a notice on the forum only ([ADR 010](/adr/010-pre-execution-screening.md), decision 23), and the multisig no longer gets a view of the Lido Zodiac workspace. ADR 004 is accepted, so its text changes when EM verifies it again. [s10]
+- (OD-64) The Emergency Brakes multisig loses both. A relaxation of a screening rule gets a notice on the forum only ([ADR 010](/adr/010-pre-execution-screening.md), decision 23), and the multisig no longer gets a view of the Lido Zodiac workspace. ADR 004 is accepted, so its text changed when EM verified it again, the same day (see the entry above). [s10]
 
 ## 2026-10-13 — OD-62: prices and the Zodiac UI; the protected files
 

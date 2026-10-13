@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:12:59Z
+  at: 2026-10-13T09:03:30Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -19,10 +19,15 @@ verified:
     at: 2026-10-06T08:16:51Z
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-06--adr-001-and-adr-004-verified-again
+  - by: human:em
+    at: 2026-10-13T09:11:53Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-13--adr-004-verified-again
+    sha256: 889927fc006912dd3a4ea63794b9fb280a36f2255b634d4f1c51717a8f96fcd9
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on specifications and the policy, 2026-09-30, on the format and compiler, 2026-10-05, and on the Zodiac constellation, 2026-10-06
+    title: Decision log — EM on specifications and the policy, 2026-09-30, on the format and compiler, 2026-10-05, on the Zodiac constellation, 2026-10-06, and on the workspace's viewers, 2026-10-13
   - id: s2
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — lend-markets specification layers
@@ -93,6 +98,10 @@ EM decided on 2026-10-06, closing OD-35 [s1]:
 
 16. The team that owns the repository, `@lidofinance/defi-tech`, owns the Lido Zodiac workspace and its API key. A member of that team pushes from the merged `main`, with the key in a local `.env` that git ignores. The committee and the Emergency Brakes multisig get access to view the workspace. CI holds no key.
 
+EM decided on 2026-10-13, closing OD-64 [s1]:
+
+17. The Emergency Brakes multisig does not get access to view the workspace. This replaces the Emergency Brakes multisig in decision 16.
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Options considered
@@ -139,4 +148,4 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Open questions
 
-None open. OD-16 was decided on 2026-10-05. OD-33 and OD-35 were decided on 2026-10-06.
+None open. OD-16 was decided on 2026-10-05. OD-33 and OD-35 were decided on 2026-10-06, and OD-64 on 2026-10-13.

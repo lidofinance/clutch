@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T09:03:30Z
+  at: 2026-10-13T09:11:38Z
 verified: []
 sources:
   - id: s1
@@ -89,4 +89,4 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-61 | How long may an operator order live? | 2026-10-13 | EM: "M, TWAP and stop-loss orders follow the same bound as limit orders": every operator order lives at most 90 days, and each monthly report lists every open order; a recovery order still lives at most 1 day. Replaces the 30-day bounds of OD-47 ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 29) [s1] |
 | OD-62 | Which price does a report use when a source is missing or wrong, and what does the Zodiac UI show? | 2026-10-13 | EM: "Q1: keep OD-44, still add more demand from Zodiac UI to have display and monitoring there", "Q2: M" and "Q3: it should": a five-level price waterfall replaces "unpriced"; the committee's valuation policy sets the band and the level-5 share; the Zodiac UI is also asked to show Lido's alerts, and Lido's readings and alerts stay canonical. Refines OD-14 and OD-44 ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 35 to 38) [s1] |
 | OD-63 | Does the Emergency Brakes multisig still verify the records that constrain the operator? | 2026-10-13 | EM: "Q3: It shouldn't": no, and nothing replaces it. The `constrains_operator` field, its validator rule and `human:emergency-brakes` go, and the verification-requests register retires. ADR 002 changed, and EM verified it again the same day ([ADR 002](/adr/002-decision-and-review-process.md), decision 12; `AGENTS.md`) [s1] |
-| OD-64 | Does the Emergency Brakes multisig keep the notice of a relaxed screening rule and its view of the Lido Zodiac workspace? | 2026-10-13 | EM: "drop both": a relaxation of a screening rule gets a notice on the forum only, and the multisig no longer gets a view of the workspace. ADR 004 decision 16 changes when EM verifies ADR 004 again ([ADR 010](/adr/010-pre-execution-screening.md), decision 23; [ADR 004](/adr/004-specifications-and-policy-as-data.md)) [s1] |
+| OD-64 | Does the Emergency Brakes multisig keep the notice of a relaxed screening rule and its view of the Lido Zodiac workspace? | 2026-10-13 | EM: "drop both": a relaxation of a screening rule gets a notice on the forum only, and the multisig no longer gets a view of the workspace. ADR 004 changed, and EM verified it again the same day ([ADR 010](/adr/010-pre-execution-screening.md), decision 23; [ADR 004](/adr/004-specifications-and-policy-as-data.md), decision 17) [s1] |

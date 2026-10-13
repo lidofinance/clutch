@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-13T09:03:30Z
+  at: 2026-10-13T09:11:38Z
 verified: []
 ---
 
@@ -23,7 +23,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | human-reviewed | accepted | 2026-10-06 | human:em (recorded) |
 | [adr/002-decision-and-review-process.md](/adr/002-decision-and-review-process.md) | Decision | human-reviewed | accepted | 2026-10-13 | human:em (recorded) |
 | [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | human-reviewed | accepted | 2026-10-06 | human:em (recorded) |
-| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-10-06 | human:em (recorded) |
+| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-10-13 | human:em (recorded) |
 | [adr/005-account-graph-and-roles.md](/adr/005-account-graph-and-roles.md) | Decision | slop | proposed | 2026-10-13 | none |
 | [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | slop | proposed | 2026-10-13 | none |
 | [adr/007-swapping-through-an-orders-account.md](/adr/007-swapping-through-an-orders-account.md) | Decision | slop | proposed | 2026-10-13 | none |
