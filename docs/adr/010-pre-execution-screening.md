@@ -6,10 +6,9 @@ tags: [screening, guard, safe, security]
 status: draft
 review_status: slop
 decision: proposed
-constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-09T06:40:00Z
+  at: 2026-10-13T08:15:41Z
 verified: []
 sources:
   - id: s1
@@ -123,7 +122,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules, ever. It holds the operator role on the operator modifier, and it is the trusted caller of every factory. It runs Safe v1.5.0, with a threshold of 4 of 7.
 - **Guard.** One instance of the vendor's guard, of the build that the Lido multisigs run, set on the operator Safe with `setGuard`. The vendor's key then turns the bypass mode off. The owners cannot turn it on again without the vendor's approval and the 10-day bypass timelock [s11]. Only then does the cap lift (decision 22).
 - **What it screens.** Every transaction of the operator Safe: every operator action, on the Asset Safe and on the orders account, and the creation of every motion. Motion enactment is not screened, but Easy Track's hash check fixes a motion's content at creation.
-- **What it never touches.** The emergency Safe, the Emergency Brakes multisig and the DAO path act through the safety modifier or the owner path, and no guard is set on the Asset Safe. Recovery is therefore unscreened by construction.
+- **What it never touches.** The emergency Safe and the DAO path act through the safety modifier or the owner path, and no guard is set on the Asset Safe. The Emergency Brakes multisig holds no role in the vault ([ADR 005](/adr/005-account-graph-and-roles.md) decision 23). Recovery is therefore unscreened by construction.
 - **Removal.** Only the operator Safe's owners can remove the guard, through the 10-day timelock. A vendor outage therefore stops the operator for at most ten days, and a hostile removal stays visible for ten days.
 - **Monitoring.** Lido's existing detector for this guard carries the alerts the vault needs: the start of either timelock, the bypass mode turning on, a standing approval, a keeper change, an added policy contract, and module, guard or owner changes on the operator Safe [s11]. It must add Safe v1.5.0 and the new instance (decision 12). Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity. The agreement forbids such approvals (decision 9). Lido's monitoring also needs a critical alert on any change of the singleton of the new Safes (decision 18), because a delegatecall can replace a Safe's implementation without any Safe event [s12].
 - **Delegatecalls.** The operator Safe needs a delegatecall only to batch calls through Safe's MultiSendCallOnly v1.5.0 [s12]. The vendor is asked to refuse every other delegatecall (decision 17). One approved delegatecall to another target could replace the operator Safe's implementation and remove the guard.
@@ -132,7 +131,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **The rule list.** The list changes in a reviewed pull request, as the permission policy does, and the vendor's name stays redacted until it is announced.
 - **The capped launch (OD-54, OD-55).**
   - From the enabling vote to the lift, the operator Safe has no guard. The enabling vote still creates it, grants it the operator role and registers the factories with it as their trusted caller. Its owners set the guard later with one Safe transaction, and no factory changes.
-  - Until the lift, the controls are the operator's policy, the four-of-seven threshold, monitoring, the emergency revoke and the technical switch. The cap bounds what they protect.
+  - Until the lift, the controls are the operator's policy, the four-of-seven threshold, monitoring, the emergency revoke and the switch. The cap bounds what they protect.
   - The cap counts the Asset Safe and the orders account at the price rule of [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 20. The first-loss Safe is outside it, because no role can reach it.
   - The cap limits what the treasury puts in. A rise in prices that takes the vault above the cap needs no action, and monitoring reports it.
   - Monitoring alerts on a top-up motion whose enactment would take the vault above the cap, while its objection window is open, and on a vault value above the cap at each fortnightly reading.

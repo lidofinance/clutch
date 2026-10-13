@@ -3,6 +3,8 @@
 // ADR 005 on the safety modifier, held by the emergency Safe. See PROVENANCE.md.
 // Changed for Clutch on 2026-10-09: the withdrawal queue left the scope
 // (ADR 007, decision 27).
+// Changed for Clutch on 2026-10-13: the emergency role holds the switch that
+// the technical role held (ADR 005, decision 25).
 import { anyOf, c, call, callWithValue, key, unique } from "../../lib";
 import {
   DAI,
@@ -33,9 +35,12 @@ const RETURNABLE = [STETH, WSTETH, WETH, LDO, USDC, USDT, DAI, USDS, SUSDS, EARN
  * What the emergency Safe may do, without a governance motion (ADR 005): zero
  * approvals, exit positions into the Asset Safe, and send assets to the
  * Agent, whose address is a literal. It may also revoke the operator's
- * targets and functions, which is how every removal happens (OD-09). It
- * cannot add a permission, give a non-zero approval, enter a venue except by
- * staking ETH, or choose a recipient.
+ * targets and functions, which is how every removal happens (OD-09), and
+ * switch the operator off by disabling the operator modifier. It cannot add a
+ * permission, give a non-zero approval, enter a venue except by staking ETH,
+ * choose a recipient, or restore what it stopped: the DAO restarts (ADR 005,
+ * decision 26). The compiler refuses any call of this role on the Asset Safe
+ * or one of its modules that does not only remove authority.
  */
 export default [
   ...APPROVED_TOKENS.map((token) => call(token, "approve(address,uint256)", anyOf(SPENDERS), 0n)),
@@ -62,6 +67,12 @@ export default [
   // that modifier, and a call through a role executes as the Asset Safe.
   call(manifest.operatorModifier, "revokeTarget(bytes32,address)", key("operator")),
   call(manifest.operatorModifier, "revokeFunction(bytes32,address,bytes4)", key("operator")),
+
+  // The switch: disable the operator modifier. The module argument is pinned
+  // to that modifier, so the switch cannot reach the safety modifier or a
+  // later module. The first argument is a pointer in the Safe's module list
+  // whose value depends on that list at call time, so it stays open.
+  call(manifest.assetSafe, "disableModule(address,address)", undefined, manifest.operatorModifier),
 
   // Return to the treasury: every transfer is pinned to the Agent.
   ...RETURNABLE.map((token) => call(token, "transfer(address,uint256)", manifest.agent)),

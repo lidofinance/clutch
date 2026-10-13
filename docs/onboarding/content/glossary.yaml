@@ -104,12 +104,12 @@
   sources: ["ADR-005#d15", "ADR-005#d20", "ADR-007#d17"]
 
 - term: First-loss shares
-  plain: "The DAO's earnETH and earnUSD shares from the March 2026 Earn allocation. They take losses first, to protect other depositors. They move to the first-loss Safe, and only a DAO vote may burn or redeem them."
-  sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d15", "ADR-008#d19", OD-21, OD-28, OD-42]
+  plain: "The DAO's earnETH and earnUSD shares from the March 2026 Earn allocation. They take losses first, to protect other depositors. They move to the first-loss Safe. The committee burns them or redeems them to the Aragon Agent through one narrow role, on the Earn team's written instruction."
+  sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", OD-21, OD-42, OD-60]
 
 - term: First-loss Safe
-  plain: "A Safe that the Aragon Agent owns, with no modules, that holds only the first-loss shares. No role can reach it."
-  sources: ["ADR-008#d19", OD-42, INV-021]
+  plain: "A Safe that the Aragon Agent owns, which holds only the first-loss shares. Its one modifier carries one narrow role for the committee's Safe: burn the shares, or redeem them to the Aragon Agent."
+  sources: ["ADR-008#d19", "ADR-008#d21", OD-42, OD-60, INV-021]
 
 - term: Fortnightly snapshot
   plain: "A reading of the vault's holdings at a pinned block every two weeks. It drives the published cap reading. Budgets no longer follow it (OD-56)."
@@ -128,8 +128,8 @@
   sources: ["ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "ADR-008#d20", OD-54, OD-55]
 
 - term: Limit order
-  plain: "A CoW order that sells only at a set price or better. It can stand for up to 30 days. A sale when a price rises to a target is a limit order."
-  sources: ["ADR-007#d18", "ADR-007#d23", OD-43]
+  plain: "A CoW order that sells only at a set price or better. It can stand for up to 90 days, like every operator order. A sale when a price rises to a target is a limit order."
+  sources: ["ADR-007#d18", "ADR-007#d23", "ADR-007#d29", OD-43, OD-61]
 
 - term: Liquidity buffer
   plain: "The stablecoins that the Asset Safe holds directly, and sUSDS, kept at or above one month of baseline spend. Monitoring watches it, every report shows it, and the committee restores it within the mandate's window."
@@ -175,6 +175,10 @@
   plain: "The rule stored for one role, contract and function. It says which argument values are allowed. A new write replaces the old rule; it does not add to it."
   sources: ["ADR-006#context", "lip:part-3"]
 
+- term: Price waterfall
+  plain: "The written order of price sources for a report: Coingecko's close, a second aggregator, a Chainlink feed or a pool's time-weighted price, the on-chain rate into a priced underlying, and last the committee's estimate. No asset is unpriced, and every price shows its level."
+  sources: ["ADR-009#d35", "ADR-009#d36", "ADR-009#d37", OD-62]
+
 - term: Recovery order
   plain: "An order that the emergency role places from the orders account. It sells an asset for USDC, or USDT as the second destination, and pays the Aragon Agent. No guard screens it."
   sources: ["ADR-007#d5", "ADR-007#d19", "ADR-007#proposed-direction", OD-26, INV-014]
@@ -184,7 +188,7 @@
   sources: ["doc:docs/research/request-for-solution-2026-10-07.md#answer"]
 
 - term: Role
-  plain: "A named set of permissions on a modifier: operator, governance, emergency, technical or exit governance. A Safe or contract that holds the role can make the calls that it allows."
+  plain: "A named set of permissions on a modifier: operator, governance, emergency, exit governance or first-loss. A Safe or contract that holds the role can make the calls that it allows."
   tech: "On chain, a 32-byte key names the role. In Clutch the key is the label in bytes, such as `bytes32(\"operator\")`."
   sources: ["ADR-005#proposed-direction", "lip:part-2"]
 
@@ -223,6 +227,11 @@
 - term: sUSDS
   plain: "Sky's savings token for USDS. The vault holds it as a savings position, and it counts toward the liquidity buffer."
   sources: ["ADR-011#d1", "ADR-011#proposed-direction"]
+
+- term: Switch
+  plain: "The emergency role's call that disables the operator modifier on the Asset Safe. The operator stops, and so does every queued motion that writes through that modifier. Recovery keeps working. Only a DAO vote turns the operator on again."
+  tech: "`disableModule(prevModule, operatorModifier)` on the Asset Safe, with the module argument pinned by `EqualTo`."
+  sources: ["ADR-005#d25", "ADR-005#d26", "ADR-005#proposed-direction", OD-58, OD-59, INV-009]
 
 - term: Template
   plain: "The fixed shape of permission that one Easy Track factory builds. A motion supplies only typed values, such as a target, an asset and a budget key."

@@ -19,9 +19,9 @@
 - name: Zodiac hosted app
   column: reused
   what: "The provider's UI shows the account graph, the policy, the difference from the chain and the transactions that a change needs."
-  why: "The team works in the Zodiac UI (OD-33). It is a view: local tooling verifies everything that it produces. Lido gives the provider a written list of what it must also show, with Lido's readings as the canonical figures (OD-44)."
+  why: "The team works in the Zodiac UI (OD-33). It is a view: local tooling verifies everything that it produces. Lido gives the provider a written list of what it must also show, Lido's alerts included, with Lido's readings and alerts as the canonical figures (OD-44, OD-62)."
   owner: "The policy provider"
-  sources: ["ADR-004#d10", "ADR-004#d11", OD-33, OD-44]
+  sources: ["ADR-004#d10", "ADR-004#d11", "ADR-009#d38", OD-33, OD-44, OD-62]
 
 - name: Safe v1.5.0 singleton, proxy factory and MultiSendCallOnly
   column: reused
@@ -97,12 +97,13 @@
   sources: ["ADR-005#d7", "ADR-005#d12", "ADR-005#d13", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20",
     "ADR-005#proposed-direction", "ADR-007#d17", "ADR-008#d19", "ADR-010#d15", "ADR-010#proposed-direction"]
 
-- name: The three Roles modifiers
+- name: The four Roles modifiers
   column: instance
-  what: "Two minimal proxies of the Roles mastercopy on the Asset Safe, and one on the orders account."
-  why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator, emergency and technical roles, and there the technical role removes the operator Safe from its role (OD-57)."
-  owner: "The DAO, through the Asset Safe and the orders account"
-  sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#d22", "ADR-005#context", "ADR-007#d28", OD-57]
+  what: "Two minimal proxies of the Roles mastercopy on the Asset Safe, one on the orders account and one on the first-loss Safe."
+  why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator and emergency roles, and there the emergency role's revoke stops the operator (OD-57, OD-58). The first-loss modifier carries one narrow role for the committee's Safe (OD-60)."
+  owner: "The DAO, through the Asset Safe, the orders account and the first-loss Safe"
+  sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#d25", "ADR-005#d27", "ADR-005#context", "ADR-007#d28", "ADR-007#d30",
+    OD-57, OD-58, OD-60]
 
 - name: The screening guard instance
   column: instance
@@ -128,7 +129,7 @@
 # --- New code or configuration -------------------------------------------------------------------
 - name: The permission policy
   column: new
-  what: "The five roles and their permissions: what the operator, governance, emergency, technical and exit-governance roles may call, and with which arguments. Four are built; the exit-governance role is specified (OD-49)."
+  what: "The five roles and their permissions: what the operator, governance, emergency, exit-governance and first-loss roles may call, and with which arguments. Three are built; the exit-governance and first-loss roles are specified (OD-49, OD-60)."
   why: "This is the heart of Clutch. Every permission traces back to a decision and forward to a test."
   owner: "`@lidofinance/defi-tech`; reviewers approve each change"
   sources: ["ADR-005#d6", "ADR-005#proposed-direction", "ADR-004#d3", "ADR-004#d7", "ADR-004#d12", INV-004, INV-018]
@@ -164,9 +165,10 @@
 - name: The vault's detectors
   column: new
   what: "New detectors on Lido's monitoring platform: drift, approvals, budgets, motions, funding, Safe changes, orders and fills, the liquidity buffer, the first-loss Safe, the cap reading and missing reports."
-  why: "Caps are detective. Monitoring is how a breach is seen and how the Emergency Brakes multisig is paged."
+  why: "Caps are detective. Monitoring is how a breach is seen and how the emergency Safe is paged."
   owner: "`@lidofinance/defi-tech` writes the specification"
-  sources: ["ADR-009#d1", "ADR-009#d17", "ADR-009#d24", "ADR-009#d25", "ADR-009#proposed-direction", OD-13, OD-32, OD-40, OD-43]
+  sources: ["ADR-009#d1", "ADR-009#d17", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", "ADR-009#proposed-direction", OD-13,
+    OD-32, OD-40, OD-43, OD-58]
 
 - name: The control matrix and the screening rule list
   column: new

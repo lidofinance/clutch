@@ -1,0 +1,3 @@
+date: '2026-10-13'
+kind: Update
+text: Merged the technical role into the emergency role in the policy, with a compiler guard that refuses a grant or a budget for the emergency role, and a drill that shows the switch freezing a queued motion until the DAO restarts. Removed the constrains_operator rule from the validator, the ADRs, AGENTS.md and the actors, and retired the verification-requests register.

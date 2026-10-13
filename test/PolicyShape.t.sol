@@ -15,7 +15,6 @@ contract PolicyShape is Test {
     bytes32 internal constant OPERATOR = bytes32("operator");
     bytes32 internal constant GOVERNANCE = bytes32("governance");
     bytes32 internal constant EMERGENCY = bytes32("emergency");
-    bytes32 internal constant TECHNICAL = bytes32("technical");
 
     // Outside the launch scope (ADR 007, ADR 011).
     address internal constant AAVE_V3_POOL = 0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2;
@@ -26,6 +25,7 @@ contract PolicyShape is Test {
     address internal operatorRoles;
     address internal safetyRoles;
     address internal operatorSafe;
+    address internal emergencySafe;
     address internal governanceMember;
     address[] internal to;
     bytes[] internal data;
@@ -35,6 +35,7 @@ contract PolicyShape is Test {
         operatorRoles = vm.parseJsonAddress(m, ".operatorModifier");
         safetyRoles = vm.parseJsonAddress(m, ".safetyModifier");
         operatorSafe = vm.parseJsonAddress(m, ".operatorSafe");
+        emergencySafe = vm.parseJsonAddress(m, ".emergencySafe");
         governanceMember = vm.parseJsonAddress(m, ".easyTrackExecutor");
         string memory j = vm.readFile(ARTIFACT);
         to = vm.parseJsonAddressArray(j, ".calls.to");
@@ -80,7 +81,9 @@ contract PolicyShape is Test {
     /// @dev INV-018: the operator holds only the `operator` key, every
     ///      operator-modifier permission is either the operator's or the
     ///      governance role's on the modifier itself, and the safety modifier
-    ///      never names the operator.
+    ///      never names the operator. The emergency Safe is the safety
+    ///      modifier's only member, so the Emergency Brakes multisig holds no
+    ///      role (ADR 005, decision 23).
     function test_operator_holds_only_the_operator_key() public view {
         for (uint256 i = 0; i < to.length; i++) {
             (bytes4 sel, bytes memory args) = _args(data[i]);
@@ -102,9 +105,10 @@ contract PolicyShape is Test {
                 if (sel == IRoles.assignRoles.selector) {
                     (address member,,) = abi.decode(args, (address, bytes32[], bool[]));
                     assertTrue(member != operatorSafe, "the operator holds no safety key");
+                    assertEq(member, emergencySafe, "the emergency Safe is the safety modifier's only member");
                 }
                 if (key == bytes32(0)) continue;
-                assertTrue(key == EMERGENCY || key == TECHNICAL, "safety keys only");
+                assertEq(key, EMERGENCY, "the emergency key only");
             }
         }
     }

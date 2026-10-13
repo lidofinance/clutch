@@ -72,6 +72,7 @@ const manifest = artifact.manifest;
 const protectedAccounts = [manifest.assetSafe, ...manifest.modules];
 const GRANTS = ["scopeTarget(bytes32,address)", "allowFunction(bytes32,address,bytes4,uint8)",
   "scopeFunction(bytes32,address,bytes4,(uint8,uint8,uint8,bytes)[],uint8)"];
+const pad = (a: string) => "0x" + a.slice(2).toLowerCase().padStart(64, "0");
 const grant = (modifiers: typeof artifact.modifiers, signature: string) =>
   modifiers.flatMap((m) => m.roles).find((r) => r.name === "governance")!.targets[0].functions.find((f) => f.signature === signature)!;
 
@@ -85,7 +86,6 @@ test("every governance grant refuses the Asset Safe and every module as its targ
 
 test("the compiler refuses a grant that leaves a module unguarded", () => {
   const modifiers = structuredClone(artifact.modifiers);
-  const pad = (a: string) => "0x" + a.slice(2).toLowerCase().padStart(64, "0");
   const scope = grant(modifiers, GRANTS[0]);
   const child = scope.conditions.find((n) => n.compValue.toLowerCase() === pad(manifest.safetyModifier))!;
   child.compValue = pad("0x000000000000000000000000000000000000dEaD");
@@ -107,6 +107,46 @@ test("the compiler refuses a call outside the fixed set on a module", () => {
 
 test("the compiler refuses access to every function of the Asset Safe", () => {
   const modifiers = structuredClone(artifact.modifiers);
-  modifiers.flatMap((m) => m.roles).find((r) => r.name === "technical")!.targets[0].clearance = Clearance.Target;
+  const emergency = modifiers.flatMap((m) => m.roles).find((r) => r.name === "emergency")!;
+  emergency.targets.find((t) => t.address === manifest.assetSafe)!.clearance = Clearance.Target;
   expect(() => checkProtected(modifiers, manifest)).toThrow(/may not call every function of the Asset Safe/);
+});
+
+// ADR 005, decisions 25 and 26: the emergency role holds the switch, and no
+// emergency role restores what it stopped. The DAO restarts.
+const DISABLE_MODULE = id("disableModule(address,address)").slice(0, 10) as `0x${string}`;
+
+test("the emergency role holds the switch, pinned to the operator modifier", () => {
+  const onSafe = role("emergency").targets.filter((t) => t.address === manifest.assetSafe);
+  expect(onSafe.length).toBe(1);
+  expect(onSafe[0].functions.map((f) => f.selector)).toEqual([DISABLE_MODULE]);
+  const pinned = onSafe[0].functions[0].conditions.filter((n) => n.operator === EQUAL_TO).map((n) => n.compValue.toLowerCase());
+  expect(pinned).toEqual([pad(manifest.operatorModifier)]);
+  for (const r of artifact.modifiers.flatMap((m) => m.roles)) {
+    if (r.name !== "emergency") expect(r.targets.some((t) => t.address === manifest.assetSafe)).toBe(false);
+  }
+});
+
+test("every approval of the emergency role is zero", () => {
+  const ZERO = "0x" + "0".repeat(64);
+  const all = approvals("emergency");
+  expect(all.length).toBeGreaterThan(0);
+  for (const { f } of all) {
+    const params = f.conditions.flatMap((n, i) => (i !== 0 && n.parent === 0 ? [n] : []));
+    expect(params.length).toBe(2);
+    expect(params[1].operator).toBe(EQUAL_TO);
+    expect(params[1].compValue).toBe(ZERO);
+  }
+});
+
+test("the compiler refuses a grant or a budget for the emergency role", () => {
+  for (const signature of [GRANTS[0], "setAllowance(bytes32,uint128,uint128,uint128,uint64,uint64)"]) {
+    const modifiers = structuredClone(artifact.modifiers);
+    const governance = modifiers.flatMap((m) => m.roles).find((r) => r.name === "governance")!;
+    const emergency = modifiers.flatMap((m) => m.roles).find((r) => r.name === "emergency")!;
+    const lent = governance.targets[0].functions.find((f) => f.signature === signature)!;
+    emergency.targets.find((t) => t.address === manifest.operatorModifier)!.functions.push(structuredClone(lent));
+    const name = signature.replace(/[()[\]]/g, "\\$&");
+    expect(() => checkProtected(modifiers, manifest)).toThrow(new RegExp(`${name} would let a role that stops restore authority`));
+  }
 });

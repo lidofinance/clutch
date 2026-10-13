@@ -1,5 +1,11 @@
 # Log
 
+## 2026-10-13
+
+* **Decision**: Recorded EM's answers to the committee's feedback of 2026-10-12 (OD-58 to OD-63). The Emergency Brakes multisig touches no funds and keeps only the Easy Track pause. The emergency Safe becomes three of five, with two committee members, two Emergency Brakes members and a fifth signer who is a member of neither body, and its role holds the switch; the technical role goes. No emergency body restarts what it stopped. The committee's Safe holds a narrow first-loss role. Every operator order lives at most 90 days. A five-level price waterfall replaces unpriced assets, and the Zodiac UI is also asked to show Lido's alerts. The Emergency Brakes multisig no longer verifies records.
+* **Update**: Merged the technical role into the emergency role in the policy, with a compiler guard that refuses a grant or a budget for the emergency role, and a drill that shows the switch freezing a queued motion until the DAO restarts. Removed the constrains_operator rule from the validator, the ADRs, AGENTS.md and the actors, and retired the verification-requests register.
+* **Evidence**: Added the research note on the committee's feedback of 2026-10-12: Lido's pause-or-disable rule, Easy Track's roles and restart, the 2026 incidents, the first-loss terms, CoW's order life, prices under stress and the quorums of the new emergency Safe.
+
 ## 2026-10-12
 
 * **Update**: The onboarding guide's tests now check twelve presentation states and the page without its script; each item is pinned to the decisions that it cites; nine places behind OD-54 and OD-57 are fixed; CI adds the page artifact, the pin report, zizmor and a weekly link check.

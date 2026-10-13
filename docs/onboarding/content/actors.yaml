@@ -8,11 +8,12 @@
   name: Treasury Management Committee and its Safe
   status: existing
   label: existing
-  what: "The people who run the [[mandate]] day to day. The committee's own Safe stays as it is. Its seven signers also sign the two new Safes: the operator Safe and the emergency Safe."
+  what: "The people who run the [[mandate]] day to day. The committee's own Safe stays as it is, and holds the vault's first-loss role. Its seven signers also sign the operator Safe, and two of them sit on the emergency Safe."
   controlled_by: "Seven signers. The committee's Safe runs Safe v1.3.0 at 4 of 7."
   can:
     - "Operate the vault through the operator Safe, at 4 of 7."
-    - "Act in an emergency through the emergency Safe, at 2 of 7."
+    - "Act in an emergency through its two seats on the emergency Safe, at 3 of 5 with two Emergency Brakes members and one member of neither body (OD-58)."
+    - "Burn or redeem the [[first-loss shares]] through the first-loss role of its own Safe, on the Earn team's written instruction (OD-60)."
     - "Configure the vault's rules in [the screening vendor]'s monitoring service."
     - "Review and publish the monthly report, and fix a [[cap]] breach within two working days."
     - "Restore the [[liquidity buffer]] within the mandate's window when it falls below its floor (OD-40)."
@@ -21,13 +22,13 @@
   cannot:
     - "Hold the operator role on its own Safe. A dedicated operator Safe holds it."
     - "Relax a screening rule quietly. A relaxation is a reviewed change, with notice to the Emergency Brakes multisig and the forum (OD-45)."
-    - "Accept a record that constrains the operator without a verification by the Emergency Brakes multisig."
-    - "Give an exit that is independent of itself. The emergency Safe has the same people."
-  numbers: ["Safe v1.3.0", "4 of 7", "rebalancing window: 2 working days"]
+    - "Act alone in an emergency. Every quorum of the emergency Safe needs a signer from outside the committee (OD-58)."
+    - "Restart what an emergency body stopped. Only the DAO restarts (OD-59)."
+  numbers: ["Safe v1.3.0", "4 of 7", "rebalancing window: 2 working days", "two seats on the emergency Safe"]
   address: "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647"
-  sources: ["ADR-005#d1", "ADR-005#d7", "ADR-005#d9", "ADR-005#d16", "ADR-005#d17", "ADR-009#d6", "ADR-009#d18",
-    "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28", "ADR-010#d19", "ADR-002#d1", "ADR-002#d2",
-    OD-40, OD-41, OD-45, "doc:docs/research/chain-reads-2026-09-30.md#committees"]
+  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d24", "ADR-005#d26", "ADR-005#d27", "ADR-008#d21", "ADR-008#d22",
+    "ADR-009#d6", "ADR-009#d18", "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28", "ADR-010#d19",
+    "ADR-002#d1", OD-40, OD-41, OD-45, OD-58, OD-59, OD-60, "doc:docs/research/chain-reads-2026-09-30.md#committees"]
 
 # --- Lido DAO ----------------------------------------------------------------------------------
 - id: ldo-holders
@@ -37,15 +38,16 @@
   what: "The owners of Lido DAO governance. They vote on every change that only the DAO may make, and they can stop any Easy Track [[motion]]."
   controlled_by: "Token holders."
   can:
-    - "Vote in Aragon Voting: the [[enabling vote]], a policy replacement, a role membership change, a first-loss burn, a registry limit."
+    - "Vote in Aragon Voting: the [[enabling vote]], a policy replacement, a role membership change, a registry limit, and every restart after an emergency stop (OD-59)."
+    - "Appoint the emergency Safe's fifth signer by Snapshot: a member of neither the committee nor the Emergency Brakes multisig (OD-58)."
     - "Object to any Easy Track motion in its [[objection window]]. An objection of 0.5% of LDO stops it."
     - "Approve the mandate in a [[Snapshot vote]] before the on-chain vote."
   cannot:
     - "Act on the vault directly. Every DAO action goes through [[Dual Governance]] to the Aragon Agent."
     - "Shorten a motion's objection window."
   numbers: ["objection threshold: 0.5% of LDO", "objection window: 72 h"]
-  sources: ["ADR-006#d4", "ADR-006#d6", "ADR-006#d8", "ADR-006#context", "ADR-005#context",
-    "ADR-005#proposed-direction", "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap"]
+  sources: ["ADR-006#d4", "ADR-006#d6", "ADR-006#d8", "ADR-006#context", "ADR-005#context", "ADR-005#d24", "ADR-005#d26",
+    "ADR-005#proposed-direction", OD-58, OD-59, "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap"]
 
 - id: aragon-voting
   node: dao
@@ -57,10 +59,13 @@
   can:
     - "Manage the shared payment permission of the Easy Track executor, and rewrite it as one unit."
     - "Administer the shared stablecoin token list."
+    - "Hold Easy Track's pause, unpause and cancel roles itself. A vote item that unpauses Easy Track or cancels a queued motion runs when the vote runs, in five days, outside Dual Governance."
   cannot:
     - "Reach the vault's Safes except through Dual Governance and the Aragon Agent."
   address: "0x2e59A20f205bB85a89C53f1936454680651E618e"
-  sources: ["ADR-008#d9", "ADR-008#d10", "ADR-005#context", "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
+  sources: ["ADR-008#d9", "ADR-008#d10", "ADR-005#context", "ADR-005#d26", OD-59,
+    "doc:docs/research/chain-reads-2026-09-30.md#governance-authority",
+    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts"]
 
 - id: dual-governance
   node: dao
@@ -85,7 +90,8 @@
   controlled_by: "The Dual Governance admin executor."
   can:
     - "Do anything on the Asset Safe as its only owner: replace the policy, change a role's members, turn a [[module]] on or off, move any asset."
-    - "Have the first-loss Safe burn or redeem the [[first-loss shares]], by vote."
+    - "Enable the operator modifier again after the switch, by vote through Dual Governance. This is the only restart (OD-59)."
+    - "Change or remove the first-loss role, by vote (OD-60)."
     - "Add a token to the orders account's lists, for the operator or for [[recovery order|recovery orders]], by vote. No motion can write the order signer's permission (OD-36, OD-46)."
     - "Grant the operator [[delegatecall]]. Only a DAO vote can do this (OD-36)."
     - "Receive recovered assets: every emergency transfer out of the vault's accounts, and every recovery order, pays it."
@@ -95,9 +101,9 @@
     - "Be reached by an Easy Track motion. Easy Track has no authority over it."
   numbers: ["owns the Asset Safe, the orders account and the first-loss Safe, each at 1 of 1"]
   address: "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
-  sources: ["ADR-005#d14", "ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d12",
-    "ADR-007#d19", "ADR-007#d21", "ADR-008#d15", "ADR-008#d19", "ADR-008#proposed-direction", OD-36, OD-46,
-    INV-001, INV-021, INV-023]
+  sources: ["ADR-005#d14", "ADR-005#d19", "ADR-005#d20", "ADR-005#d26", "ADR-005#d27", "ADR-005#proposed-direction",
+    "ADR-006#d9", "ADR-006#d12", "ADR-007#d19", "ADR-007#d21", "ADR-008#d21", "ADR-008#proposed-direction", OD-36,
+    OD-46, OD-59, OD-60, INV-001, INV-021, INV-023]
 
 # --- Funding path ------------------------------------------------------------------------------
 - id: finance
@@ -179,10 +185,10 @@
   can:
     - "Transfer the first-loss shares to the [[first-loss Safe]] once, after the enabling vote. The [[seed]] motion follows."
   cannot:
-    - "Decide a burn after the move. A burn is then a DAO vote."
+    - "Execute the first-loss terms after the move. The committee takes that over, through the first-loss role (OD-60)."
   numbers: ["Safe v1.4.1", "5 of 9"]
   address: "0xf6F0732c1e9971497342C295141566E6F1A31e96"
-  sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d15", "ADR-008#d19", "ADR-008#proposed-direction", OD-42,
+  sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d19", "ADR-008#d22", "ADR-008#proposed-direction", OD-42, OD-60,
     "runbook:Move the legacy Earn shares",
     "doc:docs/research/legacy-investments-2026-10-05.md#the-earn-positions"]
 
@@ -201,11 +207,13 @@
     - "Act as the timelock for every structural increase of exposure: a new target or a higher budget waits for the objection window (OD-45)."
   cannot:
     - "Shorten a motion's window. The global window can never go below 48 hours."
+    - "Expire a motion. After a pause or the switch, a queued motion can still enact, so the DAO's restart vote cancels the queued motions first (OD-59)."
     - "Reach the Aragon Agent."
   numbers: ["window: 72 h", "objection: 0.5% of LDO", "window floor: 48 h"]
   address: "0xF0211b7660680B49De1A7E9f25C65660F0a13Fea"
-  sources: ["ADR-006#d1", "ADR-006#d4", "ADR-006#d6", "ADR-006#d11", "ADR-006#context", INV-005, OD-45,
-    "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
+  sources: ["ADR-006#d1", "ADR-006#d4", "ADR-006#d6", "ADR-006#d11", "ADR-006#context", "ADR-006#proposed-direction",
+    INV-005, OD-45, OD-59, "doc:docs/research/chain-reads-2026-09-30.md#easy-track",
+    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts"]
 
 - id: evmscript-executor
   node: easytrack
@@ -292,23 +300,25 @@
   name: Emergency Safe
   status: instance
   label: specified
-  what: "A new Safe with the same seven signers as the committee, at a lower threshold, so that it can act in minutes. It holds no assets, and no guard screens it."
-  controlled_by: "The committee's signers, at 2 of 7. Safe v1.5.0."
+  what: "A new Safe with five signers: two committee members, two Emergency Brakes members and one member of neither body. Three must sign, so the committee cannot use it alone. It holds no assets, and no guard screens it."
+  controlled_by: "Five signers, at 3 of 5. Safe v1.5.0. The committee and the Emergency Brakes multisig each appoint two seats, and a DAO Snapshot appoints the fifth. A signer who leaves their body leaves the seat."
   can:
     - "Hold the emergency role: revoke the operator, zero approvals, exit positions and send assets to the Aragon Agent."
+    - "Switch the operator off: disable the operator modifier, for a defect in the permission layer, on the cap-breach trigger, or when the committee is compromised or silent. The switch also freezes the vault's queued motions (OD-58)."
     - "Make every removal of an operator permission. A forum post follows."
-    - "Hold the emergency role on the orders account: cancel any order, send tokens to the Aragon Agent or the Asset Safe, and place [[recovery order|recovery orders]]."
+    - "Hold the emergency role on the orders account: revoke the operator there, cancel any order, send tokens to the Aragon Agent or the Asset Safe, and place [[recovery order|recovery orders]]."
+    - "Overrule a silent or compromised committee: the two Emergency Brakes members and the fifth signer form a quorum."
   cannot:
     - "Add a permission or give a non-zero approval."
     - "Enter a protocol, except to stake ETH, or borrow."
-    - "Reach the first-loss shares. They sit in the [[first-loss Safe]], which has no module."
-    - "Disable a module, or change where recovered assets go."
-    - "Fail apart from the operator. The same people sign both Safes."
-  numbers: ["Safe v1.5.0", "2 of 7", "initiate within 6 h"]
+    - "Reach the first-loss shares. They sit in the [[first-loss Safe]], where only the committee's narrow role acts."
+    - "Disable the safety modifier or the orders modifier, or change where recovered assets go."
+    - "Restore what it stopped: enable a module again, grant a permission again or raise an approval. The DAO restarts (OD-59)."
+  numbers: ["Safe v1.5.0", "3 of 5", "2 committee seats, 2 Emergency Brakes seats, 1 seat for neither", "initiate within 6 h"]
   address: "To be deployed"
-  sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d11", "ADR-005#d13", "ADR-005#d16", "ADR-005#d17", "ADR-005#d19",
-    "ADR-005#d21", "ADR-005#proposed-direction", "ADR-007#d13", "ADR-007#d19", "ADR-007#d24", "ADR-007#d25",
-    "ADR-007#proposed-direction", "ADR-008#d19", OD-42, OD-43, "lip:part-6",
+  sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d13", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26",
+    "ADR-005#proposed-direction", "ADR-007#d13", "ADR-007#d19", "ADR-007#d25", "ADR-007#d30",
+    "ADR-007#proposed-direction", "ADR-009#d34", OD-42, OD-43, OD-58, OD-59, INV-026, "lip:part-6",
     "doc:docs/registers/parameters.md#parameters"]
 
 # --- Emergency Brakes ---------------------------------------------------------------------------
@@ -317,23 +327,22 @@
   name: Emergency Brakes multisig
   status: existing
   label: existing
-  what: "An existing Lido multisig with technical members, outside the committee. It is the independent stop in Clutch, and it checks the committee's decisions."
+  what: "An existing Lido multisig with technical members, outside the committee. In Clutch it keeps only the global Easy Track pause, as its 2022 mandate says, and it touches no funds. Two of its members also sit on the emergency Safe."
   controlled_by: "Five owners, at 3 of 5. Safe v1.3.0. A chain read found no owner address that it shares with the committee's Safe."
   can:
-    - "Hold the technical role: disable the operator modifier for a defect in the permission layer, or on the fixed cap-breach trigger. On the orders account, it removes the operator Safe from the operator role instead (OD-57)."
     - "Pause Easy Track. This stops every DAO motion, not only Clutch's."
-    - "Verify every decision record that constrains the operator, before it is accepted."
+    - "Appoint two seats on the emergency Safe (OD-58)."
     - "View the Lido Zodiac workspace."
     - "Get notice of every relaxation of a screening rule (OD-45)."
   cannot:
-    - "Unpause Easy Track. Only the DAO can."
-    - "Disable a safety modifier, or enable an operator modifier again."
-    - "Touch assets or permissions, or send assets anywhere."
-  numbers: ["Safe v1.3.0", "3 of 5"]
+    - "Unpause Easy Track or cancel a motion. Only the DAO can (OD-59)."
+    - "Hold a role on any modifier, touch assets or permissions, or send assets anywhere (OD-58)."
+    - "Verify decision records. That duty ended on 2026-10-13 (OD-63)."
+  numbers: ["Safe v1.3.0", "3 of 5", "two seats on the emergency Safe"]
   address: "0x73b047fe6337183A454c5217241D780a932777bD"
-  sources: ["ADR-005#d3", "ADR-005#d4", "ADR-005#d18", "ADR-005#d22", "ADR-005#context", "ADR-005#proposed-direction",
-    "ADR-009#d24", "ADR-009#d30", "ADR-002#d2", "ADR-004#d16", OD-45, OD-57,
-    "doc:docs/registers/verification-requests.md#the-duties-that-the-records-give-the-multisig",
+  sources: ["ADR-005#d4", "ADR-005#d23", "ADR-005#d24", "ADR-005#d26", "ADR-005#context", "ADR-005#proposed-direction",
+    "ADR-009#d30", "ADR-004#d16", OD-45, OD-58, OD-59, OD-63, INV-027,
+    "doc:docs/research/cfo-feedback-2026-10-13.md#lidos-emergency-bodies-and-their-rule",
     "doc:docs/research/chain-reads-2026-09-30.md#committees"]
 
 # --- Screening ----------------------------------------------------------------------------------
@@ -348,7 +357,7 @@
     - "Check every operator Safe transaction: each operator action, each order on the orders account and each new motion."
     - "Fail closed: with no approval, the transaction reverts."
   cannot:
-    - "Touch the Asset Safe, the emergency Safe, the Emergency Brakes multisig or the DAO path. Recovery never waits for the vendor."
+    - "Touch the Asset Safe, the emergency Safe or the DAO path. Recovery and the switch never wait for the vendor."
     - "Act as a module guard. Safe v1.5.0 refuses it as one."
     - "Hold a standing approval under the agreement, except its two built-in timelock approvals. The code allows them, so monitoring alerts on one, and the vendor's written acceptance is still owed."
   numbers: ["removal timelock: 10 days", "bypass timelock: 10 days", "bypass off before the cap lifts"]
@@ -427,9 +436,9 @@
     - "Borrow, or use a venue outside the launch scope."
     - "Administer a modifier or the Safe, or change its own permissions."
     - "Use delegatecall on the Asset Safe. Its one planned delegatecall, to CoW's order signer, is on the orders account and is specified (OD-43)."
-    - "Reach the first-loss shares. They sit in the first-loss Safe, which has no module (OD-42)."
+    - "Reach the first-loss shares. They sit in the first-loss Safe, where only the committee's narrow role acts (OD-42, OD-60)."
   numbers: ["one role key: `operator`"]
-  sources: ["ADR-005#d7", "ADR-005#proposed-direction", "ADR-009#d13", "ADR-009#d14", OD-42, INV-003, INV-008, INV-018,
+  sources: ["ADR-005#d7", "ADR-005#proposed-direction", "ADR-009#d13", "ADR-009#d14", OD-42, OD-60, INV-003, INV-008, INV-018,
     "test:test_D3_operator_cannot_route_around_avatar"]
 
 - id: role-governance
@@ -445,7 +454,7 @@
     - "Set the operator's budgets, with a refill period of at least 30 days."
     - "Revoke an operator target or function. No factory plans to use this."
   cannot:
-    - "Grant or remove a role, or touch the emergency or technical role."
+    - "Grant or remove a role, or touch the emergency role."
     - "Make the Asset Safe or any of its modules an operator target, the safety modifier included (OD-38). The compiler refuses a policy without this guard."
     - "Grant the operator delegatecall (OD-36)."
     - "Take a condition tree from a motion: the factories build every tree. This is specified, and the modifier does not check it."
@@ -477,16 +486,16 @@
   name: Safety modifier
   status: instance
   label: built
-  what: "A second Roles modifier on the Asset Safe, for the emergency and technical roles. No guard screens it, so recovery never waits for the vendor."
+  what: "A second Roles modifier on the Asset Safe, for the emergency role and its switch. No guard screens it, so recovery never waits for the vendor."
   controlled_by: "Its owner, the Asset Safe, so in the end the DAO."
   can:
-    - "Carry the emergency role and the technical role. It has no budget keys. The exit-governance role is specified, not built (OD-49)."
-    - "Keep working after the technical role disables the operator modifier."
+    - "Carry the emergency role. It has no budget keys. The exit-governance role is specified, not built (OD-49)."
+    - "Keep working after the emergency role's switch disables the operator modifier."
   cannot:
-    - "Be disabled by the technical role. If it has a defect, the fix is a DAO vote."
+    - "Be disabled by the switch: its pin is exact. If it has a defect, the fix is a DAO vote."
   address: "To be deployed"
-  sources: ["ADR-005#d3", "ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction", INV-009, OD-49,
-    "test:test_D4_module_disabling_is_technical_only_and_pinned"]
+  sources: ["ADR-005#d6", "ADR-005#d25", "ADR-005#context", "ADR-005#proposed-direction", INV-009, OD-49, OD-58,
+    "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned"]
 
 - id: role-emergency
   node: safety-modifier
@@ -495,9 +504,10 @@
   label: built
   role: emergency
   what: "The permissions of the emergency Safe on the safety modifier. They only reduce exposure. It moves assets only to the Aragon Agent or into the orders account, and a recovery order pays only the Agent. A recovery order, which is specified, has no on-chain price floor; CoW's rules hold its fill to the on-chain market (OD-48)."
-  controlled_by: "Held by the emergency Safe, at 2 of 7."
+  controlled_by: "Held by the emergency Safe, at 3 of 5."
   can:
     - "Revoke any operator target or function. One revoke reaches every operator permission on the modifier; the orders modifier needs its own, which is specified."
+    - "Switch the operator off: `disableModule` on the Asset Safe, with the module pinned to the operator modifier. The operator and governance roles stop at once, and so does every queued motion that writes through them (OD-58)."
     - "Set any operator spender's approval to zero."
     - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, and redeem sUSDS. A protocol that a motion onboards gets its emergency exit from the same motion, which is specified (OD-49)."
     - "Unwrap wstETH and WETH, and stake ETH."
@@ -505,10 +515,13 @@
   cannot:
     - "Add a permission or give a non-zero approval."
     - "Send an asset anywhere except the Aragon Agent. The transfer to the orders account is specified but not built."
-    - "Disable a module."
-    - "Reach the first-loss shares. They sit in the first-loss Safe, which has no module (OD-42)."
-  sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d11", "ADR-005#d16", "ADR-005#d19", "ADR-005#proposed-direction",
-    "ADR-008#d19", OD-42, OD-48, OD-49, INV-002, "test:test_D4_emergency_flow",
+    - "Disable the safety modifier or any later module. The switch's pin is exact."
+    - "Restore what it stopped: enable a module, grant a permission or set a budget. The compiler refuses a policy that gives it one (OD-59)."
+    - "Reach the first-loss shares. They sit in the first-loss Safe, where only the committee's narrow role acts (OD-60)."
+  sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26", "ADR-005#proposed-direction",
+    "ADR-008#d21", OD-42, OD-48, OD-49, OD-58, OD-59, INV-002, INV-009, INV-027, "test:test_D4_emergency_flow",
+    "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned",
+    "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts",
     "test:test_emergency_cannot_give_a_non_zero_approval",
     "test:test_emergency_can_durably_stop_operator_reapproval"]
 
@@ -523,25 +536,8 @@
     - "Write an exit for the emergency role: redeem, withdraw, claim and cancel with the receiver and owner pinned to the Asset Safe, a transfer pinned to the Aragon Agent, or an approval set to zero."
   cannot:
     - "Write an entry, a deposit or a non-zero approval. The templates emit only exits; the modifier cannot check that, so tests and the audit do."
-    - "Grant delegatecall, touch the technical role or membership, set an allowance, or target the Asset Safe or any module of it."
+    - "Grant delegatecall, touch membership or the switch, set an allowance, or target the Asset Safe or any module of it."
   sources: ["ADR-006#d13", "ADR-006#proposed-direction", "ADR-005#proposed-direction", OD-49, INV-025]
-
-- id: role-technical
-  node: safety-modifier
-  name: The technical role
-  status: new
-  label: built
-  role: technical
-  what: "The Emergency Brakes multisig's switch that stops the operator: on the Asset Safe it disables the operator modifier, and on the orders account it removes the operator Safe from the operator role."
-  controlled_by: "Held by the Emergency Brakes multisig, at 3 of 5."
-  can:
-    - "Call `disableModule` on the Asset Safe, with the module pinned to the operator modifier. The operator and governance roles stop at once."
-    - "On the orders account, remove the operator Safe from the operator role, with every argument pinned. The emergency role keeps working there. Specified, not built (OD-57)."
-  cannot:
-    - "Disable the safety modifier, the orders modifier or any later module."
-    - "Do anything else."
-  sources: ["ADR-005#d3", "ADR-005#d18", "ADR-005#d22", "ADR-005#proposed-direction", "ADR-009#d24", OD-57, INV-009,
-    "test:test_D4_module_disabling_is_technical_only_and_pinned"]
 
 # --- Policy pipeline and repository -------------------------------------------------------------
 - id: constellation
@@ -552,7 +548,7 @@
   what: "The permission policy, written as a Zodiac [[constellation]] in TypeScript under `policy/constellation/`. It names the Safes, the modifiers, the roles, the permissions and the budget keys."
   controlled_by: "The repository. A change is a reviewed pull request. `@lidofinance/defi-tech` owns it."
   can:
-    - "State every permission of the four built roles in one place. The exit-governance role joins when it is built (OD-49)."
+    - "State every permission of the three built roles in one place. The exit-governance role and the first-loss role join when they are built (OD-49, OD-60)."
     - "Go to the Lido Zodiac workspace, so that the UI can show it."
   cannot:
     - "Change the chain by itself. Only a vote or a motion applies a policy."
@@ -607,7 +603,7 @@
   name: Zodiac app and the Lido workspace
   status: mixed
   label: planned
-  what: "The policy provider's hosted app. The team pushes the constellation to a Lido workspace there. The app shows the account graph, the policy, the difference from the chain and the transactions that a change needs. Lido gives the provider a written list of what the UI must also show, from Lido's readings, and Lido builds that display itself if the provider declines (OD-44)."
+  what: "The policy provider's hosted app. The team pushes the constellation to a Lido workspace there. The app shows the account graph, the policy, the difference from the chain and the transactions that a change needs. Lido gives the provider a written list of what the UI must also show, from Lido's readings and Lido's alerts, and Lido builds that display and monitoring itself if the provider declines (OD-44, OD-62)."
   controlled_by: "The app: the policy provider. The workspace and its key: `@lidofinance/defi-tech` (OD-35). The committee and the Emergency Brakes multisig can view it."
   can:
     - "Show the system and its drift in a UI."
@@ -617,10 +613,10 @@
     - "Give signers, a vote or a motion a transaction, unless Clutch's compiler makes the same calls from the same commit."
     - "Set a Safe's version, guard or fallback handler."
     - "Be used by CI or by an agent. Neither holds the key."
-    - "Show the vault's value today. The hosted app shows no balances, value or alerts. The list asks for the value per account, asset and protocol, the [[liquidity buffer]], each cap, the budget left, open orders, pending motions, and warnings before signing."
+    - "Show the vault's value today. The hosted app shows no balances, value or alerts. The list asks for the value per account, asset and protocol, the [[liquidity buffer]], each cap, the budget left, open orders, pending motions, Lido's alerts, and warnings before signing."
     - "Make a third party's live value count. Such a value is labelled as indicative and never feeds a cap, a top-up or a report (OD-44)."
-  sources: ["ADR-004#d10", "ADR-004#d11", "ADR-004#d16", "ADR-009#d29", "ADR-009#proposed-direction", OD-33, OD-35,
-    OD-44,
+  sources: ["ADR-004#d10", "ADR-004#d11", "ADR-004#d16", "ADR-009#d29", "ADR-009#d38", "ADR-009#proposed-direction",
+    OD-33, OD-35, OD-44, OD-62,
     "doc:docs/research/zodiac-constellation-2026-10-06.md#2-what-runs-locally-and-what-only-the-hosted-app-runs",
     "doc:docs/research/cow-orders-account-2026-10-06.md#the-hosted-zodiac-app"]
 
@@ -650,8 +646,8 @@
     - "Accept a decision record. An acceptance is an engineering decision. It authorises nothing on chain."
     - "Close an [[open decision]]."
   cannot:
-    - "Accept a record that constrains the operator without the Emergency Brakes multisig's verification."
-  sources: ["ADR-002#d1", "ADR-002#d2", "ADR-002#d7", "doc:docs/registers/open-decisions.md#open-decisions"]
+    - "Keep the acceptor role. The committee takes it over after EM's interim period."
+  sources: ["ADR-002#d1", "ADR-002#d7", OD-63, "doc:docs/registers/open-decisions.md#open-decisions"]
 
 - id: ai-agents
   node: policy
@@ -737,18 +733,37 @@
   name: First-loss Safe
   status: instance
   label: specified
-  what: "A new Safe that holds only the DAO's [[first-loss shares]] in earnETH and earnUSD. The Aragon Agent owns it. It has no module, so no role can reach the shares."
-  controlled_by: "The Aragon Agent, at 1 of 1. Safe v1.5.0, with no module, guard or fallback handler."
+  what: "A new Safe that holds only the DAO's [[first-loss shares]] in earnETH and earnUSD. The Aragon Agent owns it. One modifier carries one narrow role, held by the committee's Safe, so the committee can execute the first-loss terms without a vote."
+  controlled_by: "The Aragon Agent, at 1 of 1. Safe v1.5.0, with no guard or fallback handler, and one modifier: the first-loss modifier."
   can:
     - "Receive the first-loss shares from the Growth Committee Safe, once, after the enabling vote."
-    - "Burn or redeem the shares, but only when a DAO vote has it do so."
+    - "Burn the shares, or redeem them with the proceeds pinned to the Aragon Agent, through the first-loss role (OD-60)."
   cannot:
-    - "Be reached by the operator or the emergency role. The no-redeem rule is structural, not written (OD-42)."
-  numbers: ["Safe v1.5.0", "1 of 1", "no module, guard or fallback handler"]
+    - "Be reached by the operator or the emergency role. The no-redeem rule for the operator is structural, not written (OD-42)."
+    - "Send the shares anywhere. The role cannot transfer or approve them."
+  numbers: ["Safe v1.5.0", "1 of 1", "one modifier, one role", "no guard or fallback handler"]
   address: "To be deployed"
-  sources: ["ADR-008#d13", "ADR-008#d15", "ADR-008#d19", "ADR-008#proposed-direction", "ADR-005#d19",
-    "ADR-005#proposed-direction", OD-42, INV-021, "runbook:Move the legacy Earn shares",
-    "runbook:Burn first-loss Earn shares"]
+  sources: ["ADR-008#d13", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#proposed-direction", "ADR-005#d27",
+    "ADR-005#proposed-direction", OD-42, OD-60, INV-021, "runbook:Move the legacy Earn shares",
+    "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares"]
+
+- id: role-first-loss
+  node: first-loss
+  name: The first-loss role
+  status: new
+  label: specified
+  what: "The committee's narrow role on the first-loss Safe. It executes the first-loss terms of the March 2026 Earn allocation, in place of the Growth Committee."
+  controlled_by: "Held by the committee's Safe, at 4 of 7. It acts on the Earn team's written instruction. The DAO can change or remove the role by vote."
+  can:
+    - "Burn the DAO's earnETH or earnUSD shares after a loss of at least 1% that the curators confirm. Below that, a Snapshot exception comes first."
+    - "Request and claim the shares' redemption on a confirmed material risk, with the proceeds pinned to the Aragon Agent."
+  cannot:
+    - "Transfer or approve the shares, or pay anyone but the Aragon Agent."
+    - "Reach the Asset Safe or the orders account."
+  numbers: ["burn trigger: a confirmed loss of at least 1%", "incident update: within 7 days"]
+  sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", "ADR-008#context", "ADR-008#proposed-direction", "ADR-005#d27",
+    OD-60, INV-021, "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares",
+    "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms"]
 
 # --- Approved protocols -------------------------------------------------------------------------
 - id: lido-staking
@@ -779,6 +794,7 @@
   can:
     - "Take deposits and redemptions from the operator. Claims pay the Asset Safe."
     - "Let the emergency role cancel, claim and redeem, and send shares to the Aragon Agent."
+    - "Let the first-loss role burn the DAO's first-loss shares, or redeem them to the Aragon Agent (OD-60)."
   cannot:
     - "Tell the DAO's first-loss shares from other shares. That is why the first-loss Safe holds them apart (OD-42)."
     - "Promise that shares stay transferable. Their administrators can add a pause, whitelist, lockup or blacklist."
@@ -789,7 +805,8 @@
     - {name: "earnUSD USDC deposit queue", address: "0xC75E7E73B25fEa8bB23EB55CC48BA55067b5be76"}
     - {name: "earnUSD redeem queue", address: "0x9e36A74FE278906a76e7615263e46a83fC40c47F"}
     - {name: "earnUSD share", address: "0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981"}
-  sources: ["ADR-011#d1", "ADR-011#proposed-direction", "ADR-008#d19", OD-42, "test:test_D3b_earn_deposit_policy_layer",
+  sources: ["ADR-011#d1", "ADR-011#proposed-direction", "ADR-008#d19", "ADR-008#d21", OD-42, OD-60,
+    "test:test_D3b_earn_deposit_policy_layer",
     "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move"]
 
 - id: sky
@@ -845,11 +862,11 @@
     - "Bound an order's price on chain. An order's limit is a number that the caller chooses. CoW's rules, screening, the orders budgets and monitoring of each fill take the place of a bound, and screening covers only the operator (OD-48)."
     - "Limit what the emergency role sends in. The operator's transfers spend the orders budgets; the emergency role's have no budget."
     - "Swap through a router at launch. Uniswap and 1inch wait until [the screening vendor] can check a swap's minimum output (OD-43)."
-  numbers: ["owner: the Aragon Agent, 1 of 1", "order life: 30 days; a recovery order: 1 day", "orders budgets: from the attested computation"]
+  numbers: ["owner: the Aragon Agent, 1 of 1", "order life: 90 days; a recovery order: 1 day", "orders budgets: from the attested computation"]
   address: "To be deployed"
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d20", "ADR-007#d23", "ADR-007#d25", "ADR-007#d26",
-    "ADR-007#d28", "ADR-007#proposed-direction", "ADR-005#d15", "ADR-005#d20", "ADR-005#d21", OD-43, OD-47,
-    OD-48, INV-013, INV-023,
+    "ADR-007#d28", "ADR-007#d29", "ADR-007#d30", "ADR-007#proposed-direction", "ADR-005#d15", "ADR-005#d20",
+    "ADR-005#d21", OD-43, OD-47, OD-48, OD-61, INV-013, INV-023,
     "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design"]
 
 - id: orders-modifiers
@@ -857,18 +874,18 @@
   name: The orders account's modifier
   status: instance
   label: specified
-  what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator, emergency and technical roles, and no governance role, because no motion writes on the orders account (OD-57)."
+  what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, and no governance role, because no motion writes on the orders account (OD-57, OD-58)."
   controlled_by: "Its owner, the orders account, so in the end the DAO."
   can:
     - "Let the operator sign orders through the order signer and create TWAP and stop-loss orders. The receiver is the Asset Safe, and a stop-loss order's oracles are pinned to Chainlink feeds."
     - "Let the emergency role cancel any order, set a relayer approval to zero, send any listed token to the Aragon Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent."
-    - "Let the technical role remove the operator Safe from the operator role, with every argument pinned. The emergency role keeps working on the same modifier (OD-57)."
+    - "Let the emergency role stop the operator by revoking its targets and functions. The stop also cancels the operator's open orders, because a fill does not consult the policy (OD-58)."
   cannot:
     - "Let a motion add a token to the lists. That needs a DAO vote (OD-46)."
     - "Take a permission from a motion. It has no governance role; a DAO vote writes it (OD-57)."
   address: "To be deployed"
-  sources: ["ADR-007#d19", "ADR-007#d21", "ADR-007#d25", "ADR-007#d28", "ADR-007#proposed-direction", "ADR-005#d21",
-    "ADR-005#d22", OD-43, OD-46, OD-57, INV-014, INV-022]
+  sources: ["ADR-007#d19", "ADR-007#d21", "ADR-007#d25", "ADR-007#d28", "ADR-007#d30", "ADR-007#proposed-direction",
+    "ADR-005#d21", "ADR-005#d25", OD-43, OD-46, OD-57, OD-58, INV-014, INV-022]
 
 - id: cow-order-signer
   node: orders
@@ -954,20 +971,20 @@
   can:
     - "Alert on [[drift]] from the artifact on every modifier, the safety policy included, since motions can write exits there (OD-49); on approvals and budget burn; on owner, threshold, module, guard and singleton changes of the new Safes; and on the orders account's fallback handler, domain verifier and relayer approvals."
     - "Watch the [[liquidity buffer]] all the time, and warn before it reaches its floor (OD-40)."
-    - "Check each fill against a market price, and alert on open orders older than 30 days, on a recovery order whose limit sits far below a market price, on tokens left in the orders account and on late parts of conditional orders (OD-43, OD-47, OD-48)."
-    - "Alert on any change of the first-loss Safe's balance, owners or modules (OD-42)."
+    - "Check each fill against a market price, ask the committee at 30 days to confirm or cancel each open order, and alert on a recovery order whose limit sits far below a market price, on tokens left in the orders account and on late parts of conditional orders (OD-43, OD-48, OD-61)."
+    - "Alert on any change of the first-loss Safe's balance, owners or modules, and page on every action of the first-loss role (OD-42, OD-60)."
     - "Page at high severity on every emergency swap (OD-48)."
     - "Follow a new Lido product's exposure against the protocol cap until a motion unlocks it, and record the changes of the screening rules that the vendor reports (OD-41, OD-45)."
     - "Follow every motion, flag odd top-ups and repeated budget motions, and grade emergency actions."
-    - "Publish the cap reading of each [[fortnightly snapshot]] to IPFS, and page the Emergency Brakes multisig on the cap-breach trigger."
+    - "Publish the cap reading of each [[fortnightly snapshot]] to IPFS, and page the emergency Safe on the cap-breach trigger (OD-58)."
     - "Flag a monthly report that is still missing on day 8."
   cannot:
     - "Block a transaction. If it stops, no permission widens."
   numbers: ["detector specification: phase 1", "vault detectors built: none yet"]
   sources: ["ADR-009#d1", "ADR-009#d7", "ADR-009#d17", "ADR-009#d21", "ADR-009#d24", "ADR-009#d25", "ADR-009#d27",
     "ADR-009#d28", "ADR-009#d30", "ADR-009#proposed-direction", "ADR-010#d12", "ADR-010#d18", "ADR-007#d24",
-    "ADR-007#d26", "ADR-007#proposed-direction", OD-13, OD-32, OD-40, OD-41, OD-42, OD-43, OD-45, OD-47, OD-48,
-    OD-49, "doc:ROADMAP.md#roadmap"]
+    "ADR-007#d26", "ADR-007#d29", "ADR-007#proposed-direction", "ADR-009#d34", "ADR-008#proposed-direction", OD-13,
+    OD-32, OD-40, OD-41, OD-42, OD-43, OD-45, OD-48, OD-49, OD-58, OD-60, OD-61, "doc:ROADMAP.md#roadmap"]
 
 - id: vendor-monitoring
   node: monitoring
@@ -991,10 +1008,10 @@
   controlled_by: "Lido's existing incident responders."
   can:
     - "Send every vault alert to the people who act on it."
-    - "Page the Emergency Brakes multisig for the Easy Track pause and for the technical role."
+    - "Page the emergency Safe for every emergency action, the switch included, and the Emergency Brakes multisig for the Easy Track pause."
   cannot:
     - "Act on the vault. It only reaches the people who can."
-  sources: ["ADR-009#d8", "ADR-009#d25", "ADR-005#d3", "ADR-005#d4", "lip:part-6"]
+  sources: ["ADR-009#d8", "ADR-009#d25", "ADR-009#d34", "ADR-005#d4", "ADR-005#d25", OD-58, "lip:part-6"]
 
 # --- Reporting ----------------------------------------------------------------------------------
 - id: report-generator
@@ -1005,7 +1022,8 @@
   what: "A program in the Clutch repository that builds each report from the chain at a pinned block. Anyone can run it again and get the same result."
   controlled_by: "`@lidofinance/defi-tech` builds it. The committee reviews and publishes each report. Monitoring runs it every fortnight."
   can:
-    - "Show balances, positions, exposures, each ratio with its numerator and denominator, and each price with its source and time."
+    - "Show balances, positions, exposures, each ratio with its numerator and denominator, and each price with its level, its source and its time (OD-62)."
+    - "List every open order with its limit, its age and the idle balance behind it, in each monthly report (OD-61)."
     - "Show the first-loss Safe as a sub-allocation of the vault."
     - "Show the liquidity buffer against its floor in every report (OD-40)."
     - "Count a new Lido product in the protocol cap until a motion unlocks it (OD-41)."
@@ -1013,8 +1031,8 @@
     - "Carry an old price over silently. A price older than 24 hours counts as missing."
     - "Anchor a report on chain."
   numbers: ["monthly report: within 7 days after month-end", "incident report: within 72 h", "build: phase 2"]
-  sources: ["ADR-009#d19", "ADR-009#d20", "ADR-009#d22", "ADR-009#d25", "ADR-009#d27", "ADR-009#d28",
-    "ADR-009#proposed-direction", OD-14, OD-32, OD-40, OD-41, "lip:part-9"]
+  sources: ["ADR-009#d19", "ADR-009#d22", "ADR-009#d25", "ADR-009#d27", "ADR-009#d28", "ADR-009#d35", "ADR-009#d36",
+    "ADR-009#proposed-direction", "ADR-007#d29", OD-14, OD-32, OD-40, OD-41, OD-61, OD-62, "lip:part-9"]
 
 - id: ipfs-forum
   node: reporting
@@ -1032,15 +1050,16 @@
 
 - id: coingecko
   node: reporting
-  name: Coingecko prices
+  name: Coingecko and the price waterfall
   status: existing
   label: existing
-  what: "The price source for reports: the closing price at the Snapshot Date."
-  controlled_by: "External."
+  what: "The first price source for reports, the closing price at the Snapshot Date, and the written five-level waterfall behind it (OD-62)."
+  controlled_by: "External sources. The committee's written valuation policy sets the waterfall's band and the share that its last level may price."
   can:
-    - "Price each asset in a report. A missing or stale price falls back to the asset's on-chain rate into an underlying that has a price."
+    - "Price each asset in a report. When Coingecko's price is missing, more than 24 hours old or outside a band around a second aggregator's price, the next level applies: a second aggregator, a Chainlink feed or a pool's time-weighted price, the on-chain rate into a priced underlying, and last the committee's estimate with its method."
     - "Give the stETH price that is pinned when the enabling vote is prepared, for the stETH registry limit."
   cannot:
-    - "Price an asset that has neither source. The report then lists it as unpriced, and no top-up rests on that snapshot."
-  numbers: ["a price older than 24 h counts as missing"]
-  sources: ["ADR-009#d20", "ADR-008#d4"]
+    - "Leave an asset unpriced. Every price carries its level and its source, and a top-up waits while the committee's estimate prices more than the set share of the vault."
+  numbers: ["a price older than 24 h counts as missing", "five levels", "band and level-5 share: not set"]
+  sources: ["ADR-009#d35", "ADR-009#d36", "ADR-009#d37", "ADR-008#d4", OD-62,
+    "doc:docs/research/cfo-feedback-2026-10-13.md#prices-under-stress"]

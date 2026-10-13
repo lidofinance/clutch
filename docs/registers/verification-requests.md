@@ -1,13 +1,13 @@
 ---
 type: Register
 title: Verification requests
-description: What each record that constrains the operator asks the Emergency Brakes multisig to check, the duties those records give the multisig, and how a member records the multisig's verification.
+description: Retired on 2026-10-13 (OD-63). What each record that constrained the operator asked the Emergency Brakes multisig to check, and the duties that the records gave the multisig until then.
 tags: [verification, emergency-brakes, process]
-status: draft
+status: deprecated
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T21:22:14Z
+  at: 2026-10-13T08:15:41Z
 verified: []
 sources:
   - id: s1
@@ -34,9 +34,14 @@ sources:
   - id: s8
     resource: /registers/decision-log.md
     title: Decision log — EM on OD-38 and on OD-39 to OD-45, 2026-10-06
+  - id: s9
+    resource: /registers/decision-log.md
+    title: Decision log — EM on OD-58 and OD-63, 2026-10-13
 ---
 
 # Verification requests
+
+**Retired on 2026-10-13.** The Emergency Brakes multisig no longer verifies any record, and it holds no role in the vault. It keeps only the global Easy Track pause (OD-58, OD-63) [s9]. The text below records the request as it stood before that date. It assigns no duty now.
 
 ## Why the multisig verifies
 

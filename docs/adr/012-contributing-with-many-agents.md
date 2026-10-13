@@ -6,7 +6,6 @@ tags: [agents, contributors, process, security, ci]
 status: draft
 review_status: slop
 decision: proposed
-constrains_operator: false
 generated:
   by: claude-code/opus-5.5
   at: 2026-10-12T07:55:43Z

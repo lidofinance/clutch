@@ -11,7 +11,7 @@ This repository is the single system of record: product documents, decisions, sp
 - Design and specification stage. Nothing is deployed.
 - Private. The repository becomes public no later than deployment. Nothing enters it that could not be published at that point.
 - Agents drafted the first version of every document. Each page stays `slop` until a human reviews it. The state of every page is in [docs/registers/document-status.md](docs/registers/document-status.md).
-- EM accepts decisions in the interim. The Treasury Management Committee is the permanent acceptor. An ADR that constrains the committee also needs a verification from the Emergency Brakes multisig.
+- EM accepts decisions in the interim. The Treasury Management Committee is the permanent acceptor.
 
 ## Why "Clutch"
 

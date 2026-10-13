@@ -19,8 +19,8 @@ properties:
     sources: ["ADR-005#proposed-direction", "ADR-006#d5", "ADR-006#d9", "ADR-006#d10", "ADR-006#proposed-direction",
       INV-003, INV-004]
   - name: Rapid risk reduction
-    how: "The emergency Safe revokes, exits and returns assets at once, and no guard sits on its path. The Emergency Brakes multisig can switch the operator off. Fork drills must show each action started within six hours."
-    sources: ["ADR-005#d3", "ADR-005#d11", "ADR-005#context", "ADR-005#proposed-direction", INV-002, INV-009, INV-010,
+    how: "The emergency Safe revokes, exits and returns assets at once, and no guard sits on its path. It can also switch the operator off. Fork drills must show each action started within six hours."
+    sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#context", "ADR-005#proposed-direction", OD-58, INV-002, INV-009, INV-010,
       "doc:ROADMAP.md#standing-gates"]
   - name: Walk-away operation
     how: "Clutch compiles and checks the policy itself, from the reviewed commit, and the provider's hosted app is out of the path. Removal, recovery and DAO actions are plain on-chain calls with no vendor code on their path."
@@ -40,24 +40,24 @@ sections:
           INV-002]
       - asked: "An Emergency Safe at 3 of 5, which the RFP links to the Emergency Brakes multisig, revokes approvals, exits approved positions and returns assets to the fixed DAO treasury address."
         verdict: changed
-        clutch: "A new emergency Safe holds the emergency role: the committee's signers, with two signatures needed. The Emergency Brakes multisig holds a technical role, which can only switch the operator off."
-        why: "Financial emergencies need people who watch the portfolio every day and can act in minutes. The Emergency Brakes multisig stays independent of the committee, and a DAO vote can do anything."
-        sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d3", "ADR-005#d16", "ADR-005#proposed-direction", OD-30, INV-009,
+        clutch: "A new emergency Safe at 3 of 5 holds the emergency role and the switch: two Emergency Brakes members, two committee members and one member of neither body. The Emergency Brakes multisig itself keeps only the Easy Track pause."
+        why: "Financial emergencies need people who watch the portfolio every day, and technical ones need the engineering view. No single body acts alone, and the quorum without the committee returns assets without it."
+        sources: ["ADR-005#d2", "ADR-005#d23", "ADR-005#d24", "ADR-005#d25", "ADR-005#proposed-direction", OD-58, INV-009,
           "lip:part-2"]
       - asked: "Neither Safe can block the removal of its own authority, and the Operator Safe cannot block a DAO recovery action."
         verdict: kept
-        clutch: "The Asset Safe owns both modifiers, so a DAO vote can remove any role. The Emergency Brakes multisig can switch the operator off. Recovery runs through the emergency Safe, which has no guard, and the safety modifier, which carries no operator role."
-        sources: ["ADR-005#d3", "ADR-005#d6", "ADR-005#proposed-direction", INV-009, INV-010]
+        clutch: "The Asset Safe owns both modifiers, so a DAO vote can remove any role. The emergency Safe can switch the operator off. Recovery runs through the emergency Safe, which has no guard, and the safety modifier, which carries no operator role."
+        sources: ["ADR-005#d6", "ADR-005#d25", "ADR-005#proposed-direction", INV-009, INV-010]
     added:
-      - text: "Two modifiers on the Asset Safe: the operator modifier for the operator and governance roles, and the safety modifier for the emergency, technical and exit-governance roles."
+      - text: "Two modifiers on the Asset Safe: the operator modifier for the operator and governance roles, and the safety modifier for the emergency and exit-governance roles."
         why: "Recovery must keep working when the operator is switched off, and no screening may sit in its way."
         sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction"]
       - text: "An orders account, owned by the Aragon Agent, places CoW orders for the operator and for recovery."
         why: "Conditional orders need CoW's fallback handler, and the Asset Safe has none."
         sources: ["ADR-007#d17", OD-43, "lip:part-6"]
-      - text: "A first-loss Safe, owned by the Aragon Agent and with no module, holds the DAO's first-loss Earn shares."
-        why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart."
-        sources: ["ADR-008#d19", OD-42, INV-021]
+      - text: "A first-loss Safe, owned by the Aragon Agent, holds the DAO's first-loss Earn shares. One narrow role of the committee's Safe burns them or redeems them to the Agent."
+        why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart, and the committee executes the first-loss terms without a vote."
+        sources: ["ADR-008#d19", "ADR-008#d21", OD-42, OD-60, INV-021]
     tech: "The Asset Safe, the operator Safe, the emergency Safe and the first-loss Safe run Safe v1.5.0. Each modifier is an EIP-1167 minimal proxy of the locked Roles mastercopy, deployed through the Zodiac module proxy factory, with the Asset Safe as its owner, avatar and target."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#accounts", "ADR-005#d12", "ADR-005#d13",
       "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1"]
@@ -114,8 +114,8 @@ sections:
         sources: ["ADR-006#d6", "ADR-006#d7", OD-09]
       - asked: "For an urgent risk, the emergency authority blocks or revokes within hours, and a durable change follows later."
         verdict: kept
-        clutch: "The emergency Safe revokes the operator's targets and functions on the operator modifier and the orders modifier at once, and the Emergency Brakes multisig can switch the operator off. A revoke is durable: only a motion or a DAO vote grants the permission again."
-        sources: ["ADR-005#d3", "ADR-005#d11", "ADR-006#d7", "ADR-006#proposed-direction", INV-009, "lip:part-6"]
+        clutch: "The emergency Safe revokes the operator's targets and functions on the operator modifier and the orders modifier at once, and it can switch the operator off. A revoke is durable: only a motion or a DAO vote grants the permission again, and only a DAO vote restarts the operator."
+        sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#d26", "ADR-006#d7", "ADR-006#proposed-direction", INV-009, "lip:part-6"]
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#permission-change-paths", "ADR-006#d7"]
 
   - id: assets
@@ -174,13 +174,14 @@ sections:
         sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction", INV-009, INV-010]
       - asked: "The emergency role cannot add permissions, enter a new protocol, borrow, create leverage or change the recovery destination."
         verdict: kept
-        clutch: "It cannot add a permission, borrow, reach the first-loss Safe, change the recovery destination or disable a module. The only protocol that it enters is Lido's staking, because recovery stakes ETH before it sells."
-        sources: ["ADR-005#d19", "ADR-005#proposed-direction", "ADR-007#d13", "ADR-007#proposed-direction", INV-002]
+        clutch: "It cannot add a permission, borrow, reach the first-loss Safe, change the recovery destination, disable any module but the operator modifier, or restore what it stopped. The only protocol that it enters is Lido's staking, because recovery stakes ETH before it sells."
+        sources: ["ADR-005#d25", "ADR-005#d26", "ADR-005#proposed-direction", "ADR-007#d13", "ADR-007#proposed-direction",
+          INV-002, INV-027]
       - asked: "In an incident, new operator transactions stop first. The emergency signers check the event, revoke approvals, exit positions or start queued withdrawals, and return what is liquid to the treasury. The DAO disables a role or a module if needed, and an incident report follows."
         verdict: kept
-        clutch: "The Emergency Brakes multisig switches the operator off. The emergency Safe revokes, exits and returns assets, redeems Earn shares through their queues, and sells stETH by a recovery order or sends it to the Agent. A DAO vote can disable anything, and the committee publishes an incident report within 72 hours."
-        sources: ["ADR-005#d3", "ADR-005#d11", "ADR-005#proposed-direction", "ADR-009#d19", INV-009,
-          "runbook:Return assets to the Agent"]
+        clutch: "The emergency Safe switches the operator off, revokes, exits and returns assets, redeems Earn shares through their queues, and sells stETH by a recovery order or sends it to the Agent. A DAO vote can disable anything, and the committee publishes an incident report within 72 hours."
+        sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#proposed-direction", "ADR-009#d19", INV-009,
+          "runbook:Return assets to the Agent", "runbook:Switch the operator off"]
     tech: "The vault does not use Lido's withdrawal queue (ADR 007, decision 27): stETH leaves by a recovery order or by a transfer to the Agent. Earn shares leave through their redeem queues, and the role can cancel open deposit requests."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#emergency-response", "ADR-005#proposed-direction",
       "ADR-007#d27", "lip:part-6", "doc:policy/constellation/artifacts/fork-25946643.json"]
@@ -237,8 +238,8 @@ sections:
         sources: ["ADR-005#proposed-direction", "doc:test/Drills.t.sol"]
       - asked: "Permission removal, module disablement, emergency recovery and DAO ownership actions stay available through an outage, a suspension, a billing dispute or a contract termination."
         verdict: kept
-        clutch: "All of them are on-chain calls by the emergency Safe, the Emergency Brakes multisig or the DAO, and no vendor code is on their path."
-        sources: ["ADR-005#d3", "ADR-005#d11", "ADR-005#proposed-direction", INV-010, "doc:docs/specs/lip-draft.md#problem"]
+        clutch: "All of them are on-chain calls by the emergency Safe or the DAO, and no vendor code is on their path."
+        sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#proposed-direction", INV-010, "doc:docs/specs/lip-draft.md#problem"]
     tech: "The repository-owner team holds the Zodiac workspace and its API key. CI and agents never push, and the key never enters the repository, CI or a vote."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#provider-independence", "ADR-004#d16", OD-35]
 
@@ -253,8 +254,8 @@ sections:
         why: "A spender can pull an approval without any deposit, so the approval is what must be bounded."
         sources: ["ADR-009#d13", "ADR-009#d15", OD-08, INV-008, INV-012]
       - text: "Reports: a monthly report that anyone can re-run at a pinned block, and a cap reading every two weeks on IPFS."
-        why: "Tokenholders hold the committee to the mandate through its reports, and a breach in the cap reading is what makes the Emergency Brakes multisig switch the operator off."
-        sources: ["ADR-009#d19", "ADR-009#d24", "ADR-009#d25", OD-14, OD-32]
+        why: "Tokenholders hold the committee to the mandate through its reports, and a breach in the cap reading is what makes the emergency Safe switch the operator off."
+        sources: ["ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", OD-14, OD-32, OD-58]
       - text: "A control matrix that gives every rule of the mandate a control on each layer that can carry it, with an owner."
         why: "Much of the mandate cannot be enforced on chain, so each rule needs a named control and owner."
         sources: ["ADR-009#d26", OD-39, "doc:docs/specs/control-matrix.md#the-matrix"]

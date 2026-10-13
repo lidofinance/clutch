@@ -4,6 +4,8 @@
 // See PROVENANCE.md.
 // Changed for Clutch on 2026-10-09: the withdrawal queue left the scope
 // (ADR 007, decision 27).
+// Changed for Clutch on 2026-10-13: the Emergency Brakes multisig holds no
+// role in the policy (ADR 005, decision 23).
 import { readFileSync } from "node:fs";
 
 /**
@@ -21,7 +23,7 @@ export type Manifest = {
   assetSafe: string;
   /** The modifier with the `operator` and `governance` roles. */
   operatorModifier: string;
-  /** The modifier with the `emergency` and `technical` roles. */
+  /** The modifier with the `emergency` role. */
   safetyModifier: string;
   /**
    * Every module that the Asset Safe enables, both modifiers included. The
@@ -33,10 +35,11 @@ export type Manifest = {
   modules: string[];
   /** The operator Safe: the committee's signers, 4 of 7, with the screening guard. */
   operatorSafe: string;
-  /** The emergency Safe: the committee's signers, 2 of 7. */
+  /**
+   * The emergency Safe, 3 of 5: two committee members, two Emergency Brakes
+   * members and one member of neither body.
+   */
   emergencySafe: string;
-  /** The Emergency Brakes multisig, which holds the technical role. */
-  emergencyBrakes: string;
   /** The Easy Track script executor, which holds the governance role. */
   easyTrackExecutor: string;
 };
@@ -94,6 +97,5 @@ export const NAMES: Record<string, string> = {
   [manifest.safetyModifier]: "safety modifier",
   [manifest.operatorSafe]: "operator Safe",
   [manifest.emergencySafe]: "emergency Safe",
-  [manifest.emergencyBrakes]: "Emergency Brakes multisig",
   [manifest.easyTrackExecutor]: "Easy Track script executor",
 };

@@ -15,6 +15,7 @@ import {
 } from "../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
 import {MockEasyTrack} from "../src/mocks/MockEasyTrack.sol";
+import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 
 import {Call, SafeExec, EVMScriptLib} from "../src/exec/SafeExec.sol";
 import {ClutchFixture} from "./utils/Fixture.sol";
@@ -22,8 +23,8 @@ import {MotionCalls} from "./utils/MotionCalls.sol";
 
 /// @title Drills — the dry-run drill suite, executed against a pinned
 ///        mainnet fork. D1 governance through the mock Easy Track; D2 the
-///        direct DAO path; D3 operator lifecycle; D4 emergency and technical
-///        roles; D5 budgets; D6 adversarial cases and the launch scope.
+///        direct DAO path; D3 operator lifecycle; D4 the emergency role and
+///        its switch; D5 budgets; D6 adversarial cases and the launch scope.
 contract Drills is ClutchFixture {
     // Outside the launch scope (ADR 007, ADR 011). Only the negative drills use them.
     address internal constant AAVE_V3_POOL = 0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2;
@@ -590,12 +591,6 @@ contract Drills is ClutchFixture {
         _emValueRevert(a.steth, 1 ether, abi.encodeCall(IStETH.submit, (attacker)));
     }
 
-    function _tech(address to, bytes memory data) internal returns (bool ok) {
-        vm.prank(a.technical);
-        (ok,) = address(safety).call(abi.encodeCall(
-            IRoles.execTransactionWithRole, (to, 0, data, 0, TECHNICAL, true)));
-    }
-
     /// @dev With two modules enabled the linked-list predecessor is no longer
     ///      the sentinel, so it must be resolved from the Safe.
     function _prevModule(address module) internal view returns (address) {
@@ -608,24 +603,21 @@ contract Drills is ClutchFixture {
         revert("module not enabled");
     }
 
-    /// @dev Module disabling answers a defect in the permission layer, so it
-    ///      sits with the technical role, not the financial one, and the
-    ///      module argument is pinned.
-    function test_D4_module_disabling_is_technical_only_and_pinned() public {
-        // the financial emergency role does not hold it
-        _emRevert(address(safe), abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles))));
-        // nor does the operator
-        _opRevert(address(safe), abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles))));
-        // the technical role cannot point it at some other module
-        assertFalse(
-            _tech(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(0xdEaD)))),
-            "module argument must be pinned to the operator modifier"
-        );
-        // it can disable this modifier
-        assertTrue(
-            _tech(address(safe), abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles)))),
-            "technical role must be able to disable the operator modifier"
-        );
+    /// @dev The switch: the emergency role disables the operator modifier,
+    ///      with the module argument pinned (ADR 005, decision 25). Recovery
+    ///      survives on the safety modifier, which the switch cannot reach.
+    ///      No role enables the modifier again; only the owner path, the DAO,
+    ///      does (decision 26).
+    function test_D4_the_switch_is_the_emergency_role_s_and_pinned() public {
+        bytes memory off = abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles)));
+        // the operator does not hold it
+        _opRevert(address(safe), off);
+        // the emergency role cannot point it at some other module
+        _emRevert(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(0xdEaD))));
+        // nor at the safety modifier: the pin is exact
+        _emRevert(address(safe), abi.encodeCall(ISafe.disableModule, (_prevModule(address(safety)), address(safety))));
+        // it can disable the operator modifier
+        _em(address(safe), off);
         assertFalse(safe.isModuleEnabled(address(roles)), "operator modifier should be off");
         // the operator is dead: the Safe refuses a disabled module
         vm.prank(operatorSafe);
@@ -635,11 +627,8 @@ contract Drills is ClutchFixture {
         assertTrue(safe.isModuleEnabled(address(safety)), "safety modifier must stay enabled");
         deal(a.usdc, address(safe), 10e6);
         _em(a.usdc, abi.encodeCall(IERC20.transfer, (address(agent), 1e6)));
-        // it cannot switch off the safety modifier either: the pin is exact
-        assertFalse(
-            _tech(address(safe), abi.encodeCall(ISafe.disableModule, (SENTINEL, address(safety)))),
-            "the safety modifier must not be disablable through this role"
-        );
+        // the emergency role cannot restore what it stopped
+        _emRevert(address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
         // and the owner path restores it
         vm.startPrank(principal);
         SafeExec.execAsOwner(
@@ -647,6 +636,39 @@ contract Drills is ClutchFixture {
         );
         vm.stopPrank();
         assertTrue(safe.isModuleEnabled(address(roles)));
+    }
+
+    /// @dev The switch also freezes a queued motion: its write goes through
+    ///      the disabled operator modifier, so its enactment fails, while
+    ///      exits still work. The owner path enables the modifier again, and
+    ///      that re-arms the same motion, because a motion does not expire. So
+    ///      the DAO's restart cancels the queued motions first (ADR 005,
+    ///      decision 26).
+    function test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts() public {
+        Call[] memory add = new Call[](1);
+        add[0] = _rc(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(0xBEEF))));
+        bytes memory script = EVMScriptLib.buildAsGovernance(roles, GOVERNANCE, add);
+        vm.prank(operatorSafe);
+        uint256 id = easyTrack.createMotion(address(factory), script);
+
+        _em(address(safe), abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles))));
+        vm.warp(block.timestamp + 3 days + 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                MockEVMScriptExecutor.CallFailed.selector, 0, abi.encodeWithSignature("Error(string)", "GS104")
+            )
+        );
+        easyTrack.enactMotion(id, script);
+
+        // exits still work
+        deal(a.usdc, address(safe), 10e6);
+        _em(a.usdc, abi.encodeCall(IERC20.transfer, (address(agent), 1e6)));
+
+        // the owner path enables the modifier again, and the same motion enacts
+        vm.startPrank(principal);
+        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
+        vm.stopPrank();
+        easyTrack.enactMotion(id, script);
     }
 
     // ------------------------------------------------------------------
@@ -724,7 +746,7 @@ contract Drills is ClutchFixture {
     ///      the operator modifier.
     function test_D6_operator_holds_only_the_operator_key() public {
         bytes memory zero = _approve(a.earnUsdDepositQueue, 0);
-        bytes32[3] memory foreign = [EMERGENCY, TECHNICAL, GOVERNANCE];
+        bytes32[2] memory foreign = [EMERGENCY, GOVERNANCE];
         for (uint256 i = 0; i < foreign.length; i++) {
             _assertRefusedAsNonMember(roles, foreign[i], zero, NO_MEMBERSHIP);
             _assertRefusedAsNonMember(safety, foreign[i], zero, NOT_AUTHORIZED);

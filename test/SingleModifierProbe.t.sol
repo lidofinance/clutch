@@ -20,7 +20,16 @@ import {ClutchFixture} from "./utils/Fixture.sol";
 ///      modifier for the orders account on 2026-10-09 (OD-57); the Asset Safe
 ///      keeps two. The harness has no orders account yet, so the Asset Safe of
 ///      the fixture stands in for the orders account here.
+///
+///      On 2026-10-13 EM merged the technical role into the emergency role
+///      and dropped the membership removal (ADR 005, decision 25): on the
+///      orders account the emergency role's revoke stops the operator. C5
+///      tests that stop; C2, C3, C4 and C6 record the replaced switch, so the
+///      probe keeps its own technical key and stand-in.
 contract SingleModifierProbe is ClutchFixture {
+    bytes32 internal constant TECHNICAL = bytes32("technical");
+    address internal brakes = makeAddr("emergency-brakes-standin");
+
     // AbiType and Operator values of the deployed mastercopy (IRoles.sol).
     uint8 internal constant STATIC = 1;
     uint8 internal constant ARRAY = 4;
