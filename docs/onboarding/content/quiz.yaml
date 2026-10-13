@@ -25,23 +25,35 @@
   question: "A stablecoin depegs. Who acts first, and how fast must they start?"
   options:
     - "The DAO, by vote, within days"
-    - "The emergency Safe, at 2 of 7, within six hours"
+    - "The emergency Safe, at 3 of 5, within six hours"
     - "The Emergency Brakes multisig, by swapping the assets"
     - "[the screening vendor], by freezing the vault"
   answer: 1
-  why: "Financial emergencies go to the committee's signers at the lower threshold. They revoke the operator, exit and send assets to the Agent. Six hours is the mandate's ceiling to start, and drills must prove it."
-  sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d11", "ADR-005#context", "ADR-005#proposed-direction", "lip:part-6"]
+  why: "Financial emergencies go to the emergency Safe: two committee members, two Emergency Brakes members and one member of neither body, at 3 of 5. They revoke the operator, exit and send assets to the Agent. Six hours is the mandate's ceiling to start, and drills must prove it."
+  sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d24", "ADR-005#context", "ADR-005#proposed-direction", OD-58, "lip:part-6"]
 
 - id: brakes-powers
   question: "What can the Emergency Brakes multisig do?"
   options:
     - "Send the vault's assets to the Aragon Agent"
-    - "Switch off the operator modifier, and pause Easy Track"
+    - "Pause Easy Track, and nothing in the vault itself"
     - "Revoke one permission at a time"
     - "Unpause Easy Track after an incident"
   answer: 1
-  why: "Its technical role can only stop the operator: it disables the Asset Safe's operator modifier, and on the orders account it removes the operator Safe from the operator role. It also holds the Easy Track pause. It cannot touch assets, and only the DAO can unpause Easy Track."
-  sources: ["ADR-005#d3", "ADR-005#d4", "ADR-005#d22", "ADR-005#context", "ADR-005#proposed-direction", OD-57, INV-009]
+  why: "In Clutch it keeps only the global Easy Track pause, and it touches no funds. The switch that stops the operator belongs to the emergency Safe, where two of its members sit. Only the DAO can unpause Easy Track."
+  sources: ["ADR-005#d4", "ADR-005#d23", "ADR-005#d24", "ADR-005#d26", "ADR-005#context", OD-58, OD-59]
+
+- id: restart
+  question: "The emergency Safe has switched the operator off. Who turns it on again?"
+  options:
+    - "The emergency Safe, once the incident is over"
+    - "The Emergency Brakes multisig"
+    - "The DAO, by vote"
+    - "The operator Safe"
+  answer: 2
+  why: "No emergency body restores what it stopped. A DAO vote enables the operator modifier again through Dual Governance, and the same vote first cancels the queued motions, because a motion does not expire."
+  sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59,
+    "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts"]
 
 - id: vendor-offline
   question: "[the screening vendor] goes offline. What still works?"
@@ -84,8 +96,9 @@
     - "Yes, but only for stablecoins"
     - "Yes, Easy Track checks it"
   answer: 1
-  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the Emergency Brakes multisig to switch the operator off. Screening may also refuse an operator transaction that breaches a cap, if the vendor confirms that it can check that."
-  sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d33", "ADR-009#proposed-direction", OD-29]
+  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the emergency Safe to switch the operator off. Screening may also refuse an operator transaction that breaches a cap, if the vendor confirms that it can check that."
+  sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d33", "ADR-009#d34", "ADR-009#proposed-direction", OD-29,
+    OD-58]
 
 - id: operator-threshold
   question: "A colleague says that the operator Safe signs at 3 of 5. Where do you check?"
@@ -95,5 +108,5 @@
     - "The Zodiac app"
     - "The forum"
   answer: 1
-  why: "Every claim on this page links to its source. The operator Safe is 4 of 7 (ADR 005). The Emergency Brakes multisig is the one at 3 of 5."
-  sources: ["ADR-005#d9", "ADR-005#context", "doc:docs/registers/parameters.md#parameters"]
+  why: "Every claim on this page links to its source. The operator Safe is 4 of 7 (ADR 005). The Emergency Brakes multisig and the emergency Safe are the ones at 3 of 5."
+  sources: ["ADR-005#d9", "ADR-005#d24", "ADR-005#context", "doc:docs/registers/parameters.md#parameters"]

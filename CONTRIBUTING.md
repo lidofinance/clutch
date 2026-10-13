@@ -4,7 +4,7 @@ Many contributors work here, each with their own agents. This page is the workfl
 
 ## Who does what
 
-- EM decides in the interim. The Treasury Management Committee is the permanent acceptor. The Emergency Brakes multisig verifies each ADR that constrains the operator ([ADR 002](docs/adr/002-decision-and-review-process.md)).
+- EM decides in the interim. The Treasury Management Committee is the permanent acceptor ([ADR 002](docs/adr/002-decision-and-review-process.md)). No other body verifies an ADR before it is accepted (OD-63).
 - Humans review, verify and merge. Agents draft text, code and tests.
 - Agents own no GitHub accounts. The human who runs an agent opens its pull request and answers for it. Each commit carries a `Co-Authored-By` trailer for the agent, and each page names the agent in `generated.by`.
 - Any agent may author a page. Only the humans that [config/actors.yaml](config/actors.yaml) lists verify a page.
@@ -29,7 +29,7 @@ Many contributors work here, each with their own agents. This page is the workfl
 
 - Only the humans and teams that `config/actors.yaml` lists verify a page. Agents never verify.
 - Run `just verify <page> <your id>`. It writes your entry with the time and the hash of the page's body. Add `--review human-reviewed` to set the review status as well.
-- A team member, such as one of `human:defi-tech`, adds `--ref <the pull request that you approve>`. A member of the committee or of the Emergency Brakes multisig adds `--ref <the body's decision record>`.
+- A team member, such as one of `human:defi-tech`, adds `--ref <the pull request that you approve>`. A member of the committee adds `--ref <the committee's decision record>`.
 - Any later edit to the page's body fails the check until someone verifies the page again (OD-51).
 - A team's verification raises a page's review status. Only EM or the committee accepts an ADR (OD-50).
 

@@ -15,12 +15,13 @@
   sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1"]
 
 - title: "The operator: the committee at work"
-  text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its permissions is the Asset Safe."
+  text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its operator permissions is the Asset Safe. Its one other role, on the [[first-loss Safe]], burns the first-loss shares or redeems them to the Aragon Agent."
   tech: "The operator Safe calls `execTransactionWithRole` on the operator modifier with the role key `bytes32(\"operator\")`; a batch goes through MultiSendCallOnly v1.5.0. Every receiver, owner and beneficiary is pinned with `EqualToAvatar` (INV-003)."
   nodes: [committee, operator-safe, operator-modifier, asset-safe, protocols]
   edges: [signers-op, op-role, own-op, positions]
   flows: [op-tx, swap-order]
-  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#proposed-direction", INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
+  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d27", "ADR-005#proposed-direction", OD-60, INV-003,
+    "test:test_D3_operator_cannot_route_around_avatar"]
 
 - title: Every operator transaction is screened
   text: "[the screening vendor]'s [[guard]] sits on the operator Safe. It refuses any transaction that the vendor has not approved, once and exactly.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nAt launch the guard is not set yet. The vault starts under a [[launch cap]] of one million dollars, and the cap lifts once the guard is live (OD-54)."
@@ -43,7 +44,7 @@
 
 - title: Swaps are CoW orders
   text: "Every swap is a [[CoW]] order placed from the [[orders account]]. The operator sends a token there under a budget, then places a market, [[limit order|limit]], [[TWAP]] or [[stop-loss order|stop-loss]] order that pays the Asset Safe. A [[recovery order]] buys USDC or USDT and pays the Aragon Agent.\n\nNothing on chain bounds an order's price. CoW's competition rules, screening, the budgets and monitoring of each fill take its place."
-  tech: "Market and limit orders: a delegatecall from the orders account to CoW's order signer, `signOrder`, with tokens from the lists, the Asset Safe as receiver and a `validDuration` of at most 30 days. TWAP and stop-loss orders go through ComposableCoW, with only those two handlers; a TWAP order is created with `createWithContext`, so it starts at its creation. These permissions are ADR 007's proposed direction (INV-022, INV-024)."
+  tech: "Market and limit orders: a delegatecall from the orders account to CoW's order signer, `signOrder`, with tokens from the lists, the Asset Safe as receiver and a `validDuration` of at most 90 days. TWAP and stop-loss orders go through ComposableCoW, with only those two handlers; a TWAP order is created with `createWithContext`, so it starts at its creation. These permissions are ADR 007's proposed direction (INV-022, INV-024)."
   nodes: [asset-safe, orders]
   edges: [swaps]
   flows: [swap-order, standing-order, recovery-order]
@@ -58,23 +59,23 @@
   flows: [topup, seed]
   sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#proposed-direction", INV-017]
 
-- title: "Emergencies: two fast stops, one slow exit"
-  text: "The **emergency Safe** has the committee's signers at 2 of 7. Through the safety modifier it revokes the operator, exits positions and sends assets to the Aragon Agent. It is fast, but it is not independent of the committee.\n\nThe **Emergency Brakes multisig**, outside the committee, can switch the operator modifier off and pause Easy Track. Only the DAO is fully independent, and a DAO vote takes days."
-  tech: "Target: initiate any emergency action within six hours. Drills on a fork must prove it before launch."
+- title: "Emergencies: two fast stops, one slow restart"
+  text: "The **emergency Safe** has five signers: two committee members, two members of the Emergency Brakes multisig and one member of neither body. Three must sign, so the committee cannot use it alone. Through the safety modifier it revokes the operator, switches the operator modifier off, exits positions and sends assets to the Aragon Agent.\n\nThe **Emergency Brakes multisig** keeps only the Easy Track pause, and touches no funds. No emergency body restarts what it stopped: only a DAO vote does, in days."
+  tech: "Target: initiate any emergency action within six hours. Drills on a fork must prove it before launch. The switch is `disableModule` on the Asset Safe, pinned to the operator modifier (INV-009); the emergency role holds no call that restores authority (INV-027)."
   nodes: [emergency-safe, safety-modifier, operator-modifier, brakes, dao, asset-safe]
-  edges: [signers-em, em-role, revoke, tech-role, pause, own]
+  edges: [signers-em, em-role, revoke, pause, own]
   flows: [financial-incident, recovery-order, technical-defect, unsafe-motion]
-  sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d3", "ADR-005#d4", "ADR-005#d11", "ADR-005#d16", "ADR-005#d17",
-    "ADR-005#context", "ADR-005#proposed-direction", INV-002, INV-009, "lip:part-6"]
+  sources: ["ADR-005#d2", "ADR-005#d4", "ADR-005#d11", "ADR-005#d23", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26",
+    "ADR-005#context", "ADR-005#proposed-direction", OD-58, OD-59, INV-002, INV-009, INV-027, "lip:part-6"]
 
 - title: Caps are watched, not enforced
-  text: "No contract reverts on a [[cap]] or on the [[liquidity buffer]]. Monitoring watches the buffer all the time and publishes the cap reading to IPFS every two weeks. Each month, the committee publishes a report that anyone can reproduce.\n\nIf a breach is not fixed within two working days and is larger at the next reading, monitoring pages the Emergency Brakes multisig, which switches the operator off. The [[control matrix]] lists each rule's controls on every layer."
-  tech: "The cap reading is the report generator's output at the fortnightly snapshot's pinned block, published to IPFS. The alert that pages the Emergency Brakes multisig links it (OD-32)."
-  nodes: [monitoring, reporting, asset-safe, brakes, committee]
+  text: "No contract reverts on a [[cap]] or on the [[liquidity buffer]]. Monitoring watches the buffer all the time and publishes the cap reading to IPFS every two weeks. Each month, the committee publishes a report that anyone can reproduce.\n\nIf a breach is not fixed within two working days and is larger at the next reading, monitoring pages the emergency Safe, which switches the operator off. The [[control matrix]] lists each rule's controls on every layer."
+  tech: "The cap reading is the report generator's output at the fortnightly snapshot's pinned block, published to IPFS. The alert that pages the emergency Safe links it (OD-32, OD-58)."
+  nodes: [monitoring, reporting, asset-safe, emergency-safe, committee]
   edges: [watch, report, page]
   flows: [fortnightly, monthly-report, buffer-low, cap-breach]
   sources: ["ADR-009#d1", "ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d26", "ADR-009#d27", "ADR-009#d33",
-    OD-29, OD-32, OD-39, OD-40]
+    "ADR-009#d34", OD-29, OD-32, OD-39, OD-40, OD-58]
 
 - title: Little new code, and where it stands
   text: "Clutch reuses deployed code that already runs: Safe, Zodiac Roles, Easy Track, CoW's order contracts and Lido's monitoring. It adds Easy Track factories, the permission policy with its compiler, the vault's detectors and a report generator.\n\nToday the design is in phase 0. Nothing is deployed, no audit is done and no runbook is written. The **Built or reused** and **Status** tabs show each part."

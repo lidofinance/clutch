@@ -36,7 +36,6 @@ abstract contract ClutchFixture is Test {
     bytes32 internal constant OPERATOR = bytes32("operator");
     bytes32 internal constant GOVERNANCE = bytes32("governance");
     bytes32 internal constant EMERGENCY = bytes32("emergency");
-    bytes32 internal constant TECHNICAL = bytes32("technical");
     bytes32 internal constant K_SUSDS = bytes32("sky_savings_usds");
     bytes32 internal constant K_EARN_USD = bytes32("earn_usd_deposit");
     bytes32 internal constant K_EARN_ETH = bytes32("earn_eth_deposit_wsteth");
@@ -52,10 +51,9 @@ abstract contract ClutchFixture is Test {
         address agent; // dry-run: MockAragonAgent; production: the Aragon Agent
         address operator; // stand-in for the operator Safe
         address emergency; // stand-in for the emergency Safe
-        address technical; // stand-in for the Emergency Brakes multisig
         address governance; // the governance role's member: the mock script executor
         address rolesOperator; // modifier with the operator and governance roles
-        address rolesSafety; // modifier with the emergency and technical roles
+        address rolesSafety; // modifier with the emergency role
         address steth;
         address wsteth;
         address weth;
@@ -81,11 +79,10 @@ abstract contract ClutchFixture is Test {
     PassThroughEVMScriptFactory internal factory;
     ISafe internal safe;
     IRoles internal roles; // operator + governance
-    IRoles internal safety; // emergency + technical
+    IRoles internal safety; // emergency
 
     address internal operatorSafe = makeAddr("operator-safe-standin");
     address internal emergencySafe = makeAddr("emergency-safe-standin");
-    address internal brakes = makeAddr("emergency-brakes-standin");
     address internal whale = makeAddr("ldo-whale"); // objection whale
     address internal attacker = makeAddr("attacker");
     address internal principal;
@@ -146,7 +143,6 @@ abstract contract ClutchFixture is Test {
         a.agent = address(agent);
         a.operator = operatorSafe;
         a.emergency = emergencySafe;
-        a.technical = brakes;
         a.governance = address(executor);
         a.rolesOperator = address(roles);
         a.rolesSafety = address(safety);
@@ -178,7 +174,6 @@ abstract contract ClutchFixture is Test {
         assertEq(vm.parseJsonAddress(m, ".safetyModifier"), a.rolesSafety, "manifest: safety modifier");
         assertEq(vm.parseJsonAddress(m, ".operatorSafe"), a.operator, "manifest: operator Safe");
         assertEq(vm.parseJsonAddress(m, ".emergencySafe"), a.emergency, "manifest: emergency Safe");
-        assertEq(vm.parseJsonAddress(m, ".emergencyBrakes"), a.technical, "manifest: Emergency Brakes");
         assertEq(vm.parseJsonAddress(m, ".easyTrackExecutor"), a.governance, "manifest: script executor");
 
         // The governance role refuses every listed module as an administered

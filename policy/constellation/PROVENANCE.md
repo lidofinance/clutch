@@ -27,7 +27,7 @@ The copied files are LGPL-3.0-only, as the upstream `LICENSE` and `package.json`
 
 | Path | Content |
 |---|---|
-| `constellation/` | The policy: the two modifiers, the four roles, the budgets and the fixed values |
+| `constellation/` | The policy: the two modifiers, the three roles, the budgets and the fixed values |
 | `compiler/` | Clutch's compiler and its tests (ADR 004, decision 13) |
 | `manifests/` | Deployment addresses. `fork-25946643.json` is the fork fixture's deployment, not mainnet |
 | `artifacts/` | The compiled artifact for each manifest, committed (ADR 004, decision 14) |
@@ -59,5 +59,7 @@ The import commit is byte-identical to the upstream files at the commit above. L
 | `package.json`, `bun.lock` | Exact versions, the same as the lockfile resolved, plus `ethers` and `zodiac-roles-sdk` as direct dependencies; compile, check and test scripts; every script that calls the hosted app runs `compiler/owner-guard.ts` first (ADR 012). The lockfile changes only in the placement of type packages |
 | `abis/` | Deleted: Clutch writes signatures and needs no ABI files |
 | `constellation/lib.ts`, `constellation/parameters.ts`, `constellation/roles/governance/`, `constellation/roles/technical/`, `compiler/`, `manifests/`, `artifacts/` | New |
+
+Each later change carries a dated notice in the file that it changes. On 2026-10-13 the technical role merged into the emergency role, and `constellation/roles/technical/` was deleted ([ADR 005](../../docs/adr/005-account-graph-and-roles.md), decision 25).
 
 Unchanged from upstream: the other `.lib/` files, `LICENSE`, `.gitignore`, `.editorconfig` and `.prettierignore`.

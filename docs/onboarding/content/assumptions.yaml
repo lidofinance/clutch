@@ -1,11 +1,11 @@
 # What must stay true, ranked by impact (highest first). Kind: trust, design or operational.
 # `watched_by` lists the checks that exist; an empty list shows "Not checked yet".
 - id: no-owner-path
-  assumption: "No role can reach an owner-only function of the Asset Safe, the orders account or a modifier."
+  assumption: "No role can reach an owner-only function of the Asset Safe, the orders account or a modifier, beyond the narrow, pinned calls that the policy grants."
   kind: design
   why: "The Asset Safe owns both modifiers, and every role call runs as the Asset Safe. The emergency revoke and the governance writes work only because a narrow role may administer a modifier. The LIP calls this composition the primary risk."
   breaks: "An operator, a motion or a factory bug gets administration of the vault. Fork probes found two such paths, and both are closed: a motion could grant the operator delegatecall (OD-36), or give it the safety modifier as a target (OD-38)."
-  watched_by: [INV-004, INV-009, INV-018, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe", "test:test_policyadmin_cannot_grant_operator_delegatecall", "test:test_D6_adversarial"]
+  watched_by: [INV-004, INV-009, INV-018, INV-027, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe", "test:test_policyadmin_cannot_grant_operator_delegatecall", "test:test_D6_adversarial"]
   watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. Since OD-49 a motion can also write the emergency role's exits on the safety modifier, through the exit-governance role; INV-025 has no test yet. An external audit is due in phase 3."
   sources: ["ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d10", "ADR-006#d13", "ADR-006#proposed-direction",
     OD-36, OD-38, OD-49, INV-025, "lip:part-2"]
@@ -23,20 +23,22 @@
 - id: dao-sound
   assumption: "The DAO stays sound and able to act."
   kind: trust
-  why: "The DAO is the final authority and the only path that is independent of the committee. Only the DAO replaces the policy, enables a disabled modifier, replaces the operator Safe, sets registry limits or burns first-loss shares."
-  breaks: "No independent exit remains: the Emergency Brakes multisig can only stop the operator. Every DAO action takes days, and a defect in the safety modifier leaves only the DAO path."
-  watched_by: ["test:test_D2_direct_DAO_path"]
-  watch_note: "The test runs on a mock Agent. The DAO runbooks are listed but not written."
-  sources: ["ADR-005#d16", "ADR-005#d17", "ADR-005#proposed-direction", "lip:part-6", "doc:docs/runbooks/index.md#runbooks"]
+  why: "The DAO is the final authority. Only the DAO replaces the policy, enables a disabled modifier, unpauses Easy Track, replaces the operator Safe or sets registry limits. Every restart after an emergency stop is a DAO vote (OD-59)."
+  breaks: "Nothing restarts after a stop: the operator stays switched off, or Easy Track stays paused. Every DAO action takes days, and a defect in the safety modifier leaves only the DAO path."
+  watched_by: ["test:test_D2_direct_DAO_path", "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts"]
+  watch_note: "The tests run on a mock Agent and a mock Easy Track. The DAO runbooks are listed but not written."
+  sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59, "lip:part-6", "runbook:Restart after a stop",
+    "doc:docs/runbooks/index.md#runbooks"]
 
 - id: signers-good-faith
   assumption: "The committee's signers act in good faith."
   kind: trust
-  why: "The same people sign the committee's Safe, the operator Safe at 4 of 7 and the emergency Safe at 2 of 7. Financial emergencies go to the people who watch the portfolio daily."
-  breaks: "The operator and the emergency role do not fail apart. Two compromised keys reach the emergency role. Only role scoping stops the operator from blocking an emergency action. The committee also proposes its own expansions."
+  why: "The same people sign the committee's Safe and the operator Safe at 4 of 7, and the operator Safe also holds the first-loss role. Two of them sit on the emergency Safe."
+  breaks: "The committee proposes its own expansions and executes the first-loss terms. A captured operator Safe can burn the first-loss shares, which moves their value to the vault's other depositors. Two compromised committee keys do not reach the emergency role (OD-58)."
   watched_by: ["test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval"]
-  watch_note: "INV-002 and INV-014 are pending. Paging on every emergency action is not built."
-  sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d9", "ADR-005#d16", "ADR-005#d17", "ADR-006#d3", INV-002, INV-014]
+  watch_note: "INV-002, INV-014 and INV-021 are pending. Paging on every emergency action and on every action of the first-loss role is not built."
+  sources: ["ADR-005#d2", "ADR-005#d9", "ADR-005#d24", "ADR-005#d27", "ADR-008#d21", "ADR-008#consequences", "ADR-006#d3",
+    OD-58, OD-60, INV-002, INV-014, INV-021]
 
 - id: guard-single-use
   assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
@@ -107,24 +109,35 @@
   sources: ["ADR-006#d1", "ADR-006#d3", "ADR-006#d6", "ADR-006#context", INV-005, INV-006]
 
 - id: six-hour-start
-  assumption: "The emergency Safe's signers and the Emergency Brakes multisig can start any emergency action within six hours."
+  assumption: "The emergency Safe's signers can start any emergency action within six hours, and the Emergency Brakes multisig can pause Easy Track in that time."
   kind: operational
-  why: "Six hours is the mandate's ceiling and a hard gate. The measure is the time to initiate, not the time to fill an order."
+  why: "Six hours is the mandate's ceiling and a hard gate. The measure is the time to initiate, not the time to fill an order. Every quorum of the emergency Safe needs a signer from outside the committee."
   breaks: "Recovery comes late in a depeg. A misread runbook during a depeg loses funds in minutes."
   watched_by: []
-  watch_note: "The validator refuses a reviewed runbook whose drill exceeds six hours. No runbook is written or drilled yet; drills are a phase 3 gate."
-  sources: ["doc:docs/product/brief.md#hard-gates", "doc:docs/specs/specification-policy.md#runbooks",
-    "doc:ROADMAP.md#standing-gates"]
+  watch_note: "The validator refuses a reviewed runbook whose drill exceeds six hours. No runbook is written or drilled yet; drills are a phase 3 gate. No response-time data exists for a group that mixes members of two bodies; the first drill measures it."
+  sources: ["ADR-005#consequences", OD-58, "doc:docs/product/brief.md#hard-gates",
+    "doc:docs/specs/specification-policy.md#runbooks", "doc:ROADMAP.md#standing-gates"]
+
+- id: emergency-seats
+  assumption: "The emergency Safe keeps its seat rule: two committee members, two Emergency Brakes members and a fifth signer who is a member of neither body."
+  kind: trust
+  why: "No quorum of the emergency Safe is the committee alone, and the quorum without the committee is the mandate's independent exit. It holds the switch, and the cap-breach trigger pages it."
+  breaks: "Seat capture: any three signers can change the owners, for example to add a third committee member. The committee could then act alone, or the independent exit would be lost. A worsening breach or a defect would go on."
+  watched_by: [INV-026, "test:test_operator_holds_only_the_operator_key"]
+  watch_note: "The emergency Safe is not deployed, and its fifth signer is not chosen. The owner-change alert and the paging alert on the trigger are not built."
+  sources: ["ADR-005#d24", "ADR-005#d25", "ADR-005#proposed-direction", "ADR-005#consequences", "ADR-009#d34", OD-58,
+    INV-026]
 
 - id: brakes-independent
   assumption: "The Emergency Brakes multisig stays independent of the committee and answers pages."
   kind: trust
-  why: "It verifies the records that constrain the operator, holds the technical switch, and holds the Easy Track pause."
-  breaks: "The committee would approve its own limits. A worsening breach or a defect would go on, and queued motions could not be frozen."
+  why: "It holds the Easy Track pause, which freezes every motion of the DAO, and two of its members sit on the emergency Safe."
+  breaks: "A queued motion that the switch cannot reach, such as a top-up or an exit write, could not be frozen. The quorum without the committee would weaken."
   watched_by: []
-  watch_note: "A chain read found no owner address that it shares with the committee's Safe. The paging alert on the trigger is not built. The multisig has not yet verified ADR 005 to ADR 011."
-  sources: ["ADR-002#d2", "ADR-005#d3", "ADR-005#d4", "ADR-005#d18", "ADR-009#d24", "ADR-009#d25",
-    "doc:docs/registers/verification-requests.md#why-the-multisig-verifies"]
+  watch_note: "A chain read found no owner address that it shares with the committee's Safe. On 2026-10-13 it held Easy Track's pause role, and neither the unpause role nor the cancel role."
+  sources: ["ADR-005#d4", "ADR-005#d23", "ADR-005#d24", OD-58,
+    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts",
+    "doc:docs/research/chain-reads-2026-09-30.md#committees"]
 
 - id: cap-breach-fixed
   assumption: "Monitoring detects a cap breach, and the committee fixes it within two working days."
@@ -219,7 +232,7 @@
   why: "earnETH and earnUSD are launch positions, and the first-loss shares move to the first-loss Safe after the enabling vote."
   breaks: "Curator misbehaviour becomes a financial emergency. A pause, whitelist, lockup or blacklist on the shares is a reversal condition."
   watched_by: ["test:test_D3b_earn_deposit_policy_layer"]
-  watch_note: "Fork tests of the share transfer and the DAO burn are owed. The first-loss balance alert is not built."
+  watch_note: "Fork tests of the share transfer and of the first-loss role are owed. The first-loss balance alert is not built."
   sources: ["ADR-008#d13", "ADR-008#d19", "ADR-008#confirmation", "ADR-008#reversal-conditions", "ADR-011#d1", OD-42,
     "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move"]
 
@@ -233,13 +246,23 @@
   sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#reversal-conditions", OD-14]
 
 - id: signer-rotation
-  assumption: "Every signer rotation reaches all three Safes that carry the committee's signers."
+  assumption: "Every signer rotation reaches each Safe that carries the signer: the committee's Safe, the operator Safe and, for a seat holder, the emergency Safe."
   kind: operational
-  why: "Nothing on chain keeps the committee's Safe, the operator Safe and the emergency Safe in step."
+  why: "Nothing on chain keeps the committee's Safe, the operator Safe and the emergency Safe's seats in step."
   breaks: "A departed signer keeps operator or emergency power, or a quorum becomes unreachable."
   watched_by: []
-  watch_note: "The runbook to rotate a signer on all three Safes is listed, not written. Owner-change alerts are not built."
-  sources: ["ADR-005#d5", "ADR-005#d16"]
+  watch_note: "The runbook to rotate a signer is listed, not written. Owner-change alerts are not built."
+  sources: ["ADR-005#d24", "ADR-005#proposed-direction", OD-58, "runbook:Rotate a signer"]
+
+- id: prices-sound
+  assumption: "The price waterfall gives every asset a fair price, and the committee's valuation policy sets a sound band and level-5 share."
+  kind: trust
+  why: "Caps, the liquidity buffer and top-ups rest on the reported value. A single price source can be wrong, not only missing."
+  breaks: "A wrong price opens a top-up that the vault does not need, or hides a breach. A committee estimate prices the committee's own positions."
+  watched_by: []
+  watch_note: "The report generator is phase 2 work. The band and the level-5 share are not set."
+  sources: ["ADR-009#d35", "ADR-009#d36", "ADR-009#d37", OD-62,
+    "doc:docs/research/cfo-feedback-2026-10-13.md#prices-under-stress"]
 
 - id: harness-faithful
   assumption: "The test harness behaves like the real system for what the tests claim."
@@ -247,7 +270,7 @@
   why: "The LIP's Implemented parts rest on fork tests. Nothing is deployed, and no audit is done."
   breaks: "Green tests can miss real behaviour: the Dual Governance delay, the real Easy Track and the screening guard."
   watched_by: []
-  watch_note: "The harness mocks the Aragon Agent, Easy Track and its executor, and uses plain stand-in addresses for the operator Safe, the emergency Safe and the Emergency Brakes multisig."
+  watch_note: "The harness mocks the Aragon Agent, Easy Track and its executor, and uses plain stand-in addresses for the operator Safe and the emergency Safe."
   sources: ["doc:test/README.md#what-is-real-and-what-is-mocked", "lip:part-1"]
 
 - id: branch-rule

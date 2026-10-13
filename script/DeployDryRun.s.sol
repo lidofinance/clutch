@@ -41,7 +41,6 @@ contract DeployDryRun is Broadcast {
         uint256 executorKey = vm.envOr("EXECUTOR_KEY", uint256(0));
         address operatorStandin = vm.envOr("OPERATOR_STANDIN", address(0));
         address emergencyStandin = vm.envOr("EMERGENCY_STANDIN", address(0));
-        address technicalStandin = vm.envOr("TECHNICAL_STANDIN", address(0));
 
         // The broadcaster, not msg.sender: in a forge script msg.sender is
         // Foundry's default sender, whose key is public.
@@ -55,7 +54,6 @@ contract DeployDryRun is Broadcast {
 
         if (operatorStandin == address(0)) operatorStandin = executor;
         if (emergencyStandin == address(0)) emergencyStandin = executor;
-        if (technicalStandin == address(0)) technicalStandin = executor;
 
         // --- sanity: singletons must carry code -------------------------
         require(SAFE_SINGLETON.code.length > 0, "singleton missing");
@@ -134,8 +132,6 @@ contract DeployDryRun is Broadcast {
             m,
             '","emergencySafe":"',
             vm.toString(emergencyStandin),
-            '","emergencyBrakes":"',
-            vm.toString(technicalStandin),
             '","easyTrackExecutor":"',
             vm.toString(address(executor_)),
             '","easyTrack":"',

@@ -6,10 +6,9 @@ tags: [governance, easy-track, factories, templates]
 status: draft
 review_status: slop
 decision: proposed
-constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T21:22:14Z
+  at: 2026-10-13T08:15:41Z
 verified: []
 sources:
   - id: s1
@@ -92,8 +91,8 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - Every factory hard-codes the `operator` role key and refuses the Asset Safe, the orders account and their modules as a target.
 - The kit's role-toggle factory [s4] left the design (decision 8) and the kit on 2026-10-05. The budget factory and the template factories are not built.
 - The modifier constrains the governance role again, so a factory bug cannot reach administration. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator the Asset Safe or one of its modules as a target (decision 10), nor the orders account or one of its modules, cannot set an allowance outside the operator's budget keys, and cannot set a refill period below 30 days [s6]. A factory bug can still grant the operator a call on an ordinary target, such as a token transfer; the template and the objection window are the controls for that.
-- A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. Once it is enacted, the emergency Safe can revoke the new permission at once.
-- **The exit-governance role.** It writes permissions only under the `emergency` key, through `scopeTarget`, `scopeFunction` and `allowFunction`, with the execution options None or Send (decision 9). It refuses the Asset Safe and every module of it as a target, the safety modifier included (decision 10). It holds no `assignRoles`, cannot touch the technical role, and sets no allowance.
+- A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. The emergency Safe's switch also freezes it, because its write goes through the operator modifier. Enabling the modifier again re-arms it, because a motion does not expire, so the DAO's restart vote cancels it first ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 25 and 26). Once it is enacted, the emergency Safe can revoke the new permission at once.
+- **The exit-governance role.** It writes permissions only under the `emergency` key, through `scopeTarget`, `scopeFunction` and `allowFunction`, with the execution options None or Send (decision 9). It refuses the Asset Safe and every module of it as a target, the safety modifier included (decision 10). It holds no `assignRoles`, cannot reach the switch, and sets no allowance.
 - **Exit templates.** Each onboarding template also builds the emergency exit for its target: redeem, withdraw, claim and cancel with the receiver and owner pinned to the Asset Safe; a transfer of the new receipt token pinned to the Aragon Agent; and an approval of the new spender set to zero. It emits no entry, no deposit and no non-zero approval. The modifier cannot check that a tree is an exit, so the template's code, its tests and its audit carry that.
 - Every removal is an emergency action. The emergency role holds `revokeTarget` and `revokeFunction`, pinned to the `operator` key, and acts at once. Every operator permission lives under that key, so one revoke on the operator modifier and one on the orders modifier reach all of them.
 
@@ -113,12 +112,12 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 ## Consequences
 
 - The unscreened emergency path gets a motion writer for the first time. A template flaw can widen the emergency role, and only the objection window, the Easy Track pause and a DAO vote stop it. The audit covers every exit template, and the drift detector watches the safety policy too.
-- A position that a motion onboards has an emergency exit from the day the motion enacts, and the exit survives the technical switch, because it lives on the safety modifier.
+- A position that a motion onboards has an emergency exit from the day the motion enacts, and the exit survives the switch, because it lives on the safety modifier.
 - The audit question becomes "can this template ever emit something unsafe". Each template must pin every receiver, owner and beneficiary field, bound every value-moving amount, never emit an administrative selector, and produce a script in the production format.
 - A motion can point the operator at a contract that no one has audited. The template bounds how the vault interacts with it, so the loss ceiling is the attached budget. The controls are the objection window, the disclosure and monitoring. The LIP must say so plainly.
 - Replacing the operator Safe means redeploying every factory with the new trusted caller and registering each one again by DAO vote [s7].
-- The committee proposes its own expansions. The objection window, the disclosure rule and the Emergency Brakes pause are the counterweights.
-- Routine removals happen at two of seven, without screening and without notice in advance. The forum post follows the removal. Monitoring pages a revoke-only emergency action at a lower severity than a transfer or a swap.
+- The committee proposes its own expansions. The objection window, the disclosure rule, the Emergency Brakes pause, and the emergency Safe's revoke and switch, which the committee cannot use alone, are the counterweights.
+- Routine removals happen at three of five on the emergency Safe, without screening and without notice in advance. The forum post follows the removal. Monitoring pages a revoke-only emergency action at a lower severity than a transfer or a swap.
 - A removed strategy comes back only through an onboarding motion or a DAO vote.
 - The kit's toggle factory and its tests [s4][s5] are removed from the kit. INV-007 retires.
 
@@ -126,6 +125,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 - INV-004, INV-005, INV-006 and INV-018 in the [invariants](/specs/invariants.md).
 - Kit tests for the governance-role guards [s6]. The factory-path tests ran on the retired toggle factory, so the template factories need their own.
+- `test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts` (2026-10-13): with the operator modifier disabled, a queued motion's enactment fails while exits work, and the same motion enacts after the owner path enables the modifier again.
 - For decision 10, a fork test replays the probe that found the gap and shows each step refused, and another refuses every module that the Asset Safe enables on chain. The compiler's own tests refuse a policy without the guard and a manifest that misses a module.
 - Each template factory, when built, needs its own tests for the four audit properties above.
 

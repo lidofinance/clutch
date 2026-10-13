@@ -46,7 +46,7 @@ blocks:
     kept:
       - "On chain: none. The policy cannot see value; budgets per protocol spender bound how much can move each month."
       - "Before execution: a screening rule is requested that refuses an operator transaction that breaches a cap."
-      - "Detection: monitoring publishes the cap reading of each fortnightly snapshot. If a breach is not fixed within two working days and is larger at the next reading, the Emergency Brakes multisig stops the operator."
+      - "Detection: monitoring publishes the cap reading of each fortnightly snapshot. If a breach is not fixed within two working days and is larger at the next reading, the emergency Safe switches the operator off."
       - "Display: each cap against its limit, in the Zodiac UI."
     tech: "Budget keys count token units and refill no more often than every 30 days. Caps are ratios, so budgets drift with price. There is no routine retune: a budget motion follows an event (OD-56)."
     changes:
@@ -63,7 +63,7 @@ blocks:
         state: proposed
         sources: ["ADR-009#d1", "ADR-009#proposed-direction", "lip:part-9"]
     sources: ["ADR-009#d4", "ADR-009#d9", "ADR-009#d13", "ADR-009#d15", "ADR-009#d24", "ADR-009#d25", "ADR-009#d29",
-      "ADR-009#d31", "ADR-009#proposed-direction", "ADR-011#d10", OD-29, OD-32,
+      "ADR-009#d31", "ADR-009#d34", "ADR-009#proposed-direction", "ADR-011#d10", OD-29, OD-32, OD-58,
       "doc:docs/specs/control-matrix.md#the-matrix"]
 
   - id: buffer
@@ -113,7 +113,7 @@ blocks:
       - "On chain: every swap is a CoW order from the orders account, and each role's permissions pin the receiver: the Asset Safe for the operator, the Aragon Agent for recovery."
       - "Before execution: the screening vendor checks every operator order. Recovery orders are never screened."
       - "Detection: each fill against a market price, open orders, and a page on every emergency swap."
-    tech: "Orders live at most 30 days, recovery orders 1 day (INV-024). Nothing on chain bounds an order's price; CoW's competition and EBBO rule hold a fill to the on-chain market."
+    tech: "Orders live at most 90 days, recovery orders 1 day (INV-024). Nothing on chain bounds an order's price; CoW's competition and EBBO rule hold a fill to the on-chain market."
     changes:
       - text: "The emergency swap goes into USDC, or USDT as the second destination, and not into any of the four main stablecoins."
         why: "USDS and DAI carry USDC risk through Sky's peg stability module, so they are no escape from a USDC depeg."
@@ -123,24 +123,24 @@ blocks:
         why: "The committee needs those order types, and a router swap without a bounded output loses value to front-running."
         state: owed
         sources: ["ADR-007#d18", "ADR-007#d20", "ADR-007#d26", OD-43, OD-48]
-    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d23", "ADR-007#d24", "ADR-007#d25", "ADR-007#d26",
-      "ADR-007#proposed-direction", OD-26, OD-43, OD-47, OD-48, INV-024, "runbook:Recovery order"]
+    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d23", "ADR-007#d25", "ADR-007#d26", "ADR-007#d29",
+      "ADR-007#proposed-direction", OD-26, OD-43, OD-48, OD-61, INV-024, "runbook:Recovery order"]
 
   - id: emergency
     title: Emergency exit
     says: "A dual-access emergency exit: the DAO, and an emergency committee independent of the Treasury Management Committee, can each return every asset to the treasury within six hours."
     kept:
-      - "On chain: the emergency Safe revokes, exits and sends assets to the Agent through the safety modifier, which nothing screens."
-      - "On chain: the Emergency Brakes multisig can switch the operator off; a DAO vote can do anything."
+      - "On chain: the emergency Safe revokes, exits and sends assets to the Agent through the safety modifier, which nothing screens. Its five signers are two committee members, two Emergency Brakes members and one member of neither body, at 3 of 5, so the committee cannot use it alone."
+      - "On chain: the emergency Safe can switch the operator off; the Emergency Brakes multisig can pause Easy Track; only a DAO vote restarts."
       - "Drills: fork drills must show every emergency action initiated within six hours."
-    tech: "INV-002 and INV-009 fix the emergency and technical powers. A motion that onboards a protocol also adds its emergency exit through the exit-governance role (INV-025)."
+    tech: "INV-002 and INV-009 fix the emergency powers, and INV-027 refuses any emergency call that restores authority. A motion that onboards a protocol also adds its emergency exit through the exit-governance role (INV-025)."
     changes:
-      - text: "The emergency section describes the emergency Safe as the committee's signers at two of seven, the technical role of the Emergency Brakes multisig, and a DAO vote as the path that is independent of the committee."
-        why: "Speed comes from the committee's own signers. The Emergency Brakes multisig is independent but only stops the operator, and only the DAO is fully independent, in days."
+      - text: "The emergency section describes the emergency Safe: three of five, with two committee members, two Emergency Brakes members and a fifth signer who is a member of neither body."
+        why: "Its quorum without the committee, the two Emergency Brakes members and the fifth signer, is the draft's independent emergency committee, so the dual-access exit holds as drafted."
         state: owed
-        sources: ["ADR-005#d16", OD-30]
-    sources: ["ADR-005#d1", "ADR-005#d3", "ADR-005#d4", "ADR-005#d11", "ADR-005#d16", "ADR-005#d17", "ADR-005#context",
-      "ADR-005#proposed-direction", OD-30, OD-49, "lip:part-6", "runbook:Return assets to the Agent"]
+        sources: ["ADR-005#d24", OD-58]
+    sources: ["ADR-005#d2", "ADR-005#d4", "ADR-005#d11", "ADR-005#d23", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26",
+      "ADR-005#context", "ADR-005#proposed-direction", OD-49, OD-58, OD-59, "lip:part-6", "runbook:Return assets to the Agent"]
 
   - id: reporting
     title: Reporting
@@ -149,37 +149,40 @@ blocks:
       - "A report generator in this repository that anyone can run again at a pinned block."
       - "No top-up starts while the monthly report is late; monitoring flags it on day 8."
       - "Monitoring publishes the cap reading of each fortnightly snapshot to IPFS."
-    tech: "Prices come from Coingecko's close at the Snapshot Date, with the asset's on-chain rate as the fallback. Reports have no on-chain anchor; the forum post carries the report's identifier."
+      - "Each monthly report lists every open order with its limit, its age and the idle balance behind it."
+      - "Display: Lido's readings and alerts in the Zodiac UI; Lido builds both if the provider declines."
+    tech: "Prices follow a five-level waterfall, Coingecko first, and every price shows its level and its source. Reports have no on-chain anchor; the forum post carries the report's identifier."
     changes:
-      - text: "The reporting section states the price rule."
+      - text: "The reporting section states the price waterfall, and that the committee's valuation policy sets its band and the share that its last level may price."
         why: "Tokenholders can then hold the committee to how each figure was priced."
         state: owed
-        sources: ["ADR-009#d20", "ADR-009#d23", OD-14]
+        sources: ["ADR-009#d23", "ADR-009#d35", "ADR-009#d37", OD-14, OD-62]
       - text: "The reporting section states the late-report rule: no top-up while the report is late."
         why: "The report is the evidence for every top-up."
         state: owed
         sources: ["ADR-009#d21", "ADR-009#d23", OD-14]
-    sources: ["ADR-009#d19", "ADR-009#d20", "ADR-009#d21", "ADR-009#d22", "ADR-009#d25", OD-14, OD-32]
+    sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#d25", "ADR-009#d35", "ADR-009#d36", "ADR-009#d38",
+      "ADR-007#d29", OD-14, OD-32, OD-61, OD-62]
 
   - id: legacy
     title: Legacy investments
     says: "Legacy DAO investments carry over into the vault and reduce the initial funding request."
     kept:
-      - "On chain: the DAO's first-loss Earn shares sit in a first-loss Safe with no module, so no role can reach them."
-      - "A burn or a redemption of the first-loss shares is a DAO vote."
-      - "Detection: alerts on any change of the first-loss Safe's balance, owners or modules."
-    tech: "INV-021 fixes the first-loss Safe's shape. The Growth Committee's Safe moves the shares once, after the enabling vote."
+      - "On chain: the DAO's first-loss Earn shares sit in a first-loss Safe. One narrow role of the operator Safe burns them or redeems them to the Aragon Agent; no other role reaches them."
+      - "The committee acts on the Earn team's written instruction, under the March 2026 terms. Below them, a Snapshot exception comes first."
+      - "Detection: alerts on any change of the first-loss Safe's balance, owners or modules, and a page on every action of the role."
+    tech: "INV-021 fixes the first-loss Safe's shape and its one role. The Growth Committee's Safe moves the shares once, after the enabling vote."
     changes:
-      - text: "The legacy section takes over the first-loss terms of the March 2026 Earn allocation, and the shares sit in a first-loss Safe that no role can reach."
-        why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart."
+      - text: "The legacy section takes over the first-loss terms of the March 2026 Earn allocation, with the committee as executor in place of the Growth Committee, through one narrow role on a first-loss Safe."
+        why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart, and the narrow role keeps a burn as fast as the Growth Committee's."
         state: owed
-        sources: ["ADR-008#d14", "ADR-008#d19", OD-21, OD-28, OD-42]
+        sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", OD-21, OD-42, OD-60]
       - text: "Twyne reduces the seed only when its holder and form are shown."
         why: "No Lido address checked holds a Twyne position."
         state: design
         sources: ["ADR-008#d17", OD-21]
-    sources: ["ADR-008#d13", "ADR-008#d15", "ADR-008#d17", "ADR-008#d19", "ADR-008#proposed-direction", OD-21, OD-42,
-      INV-021, "runbook:Move the legacy Earn shares"]
+    sources: ["ADR-008#d13", "ADR-008#d17", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#proposed-direction",
+      OD-21, OD-42, OD-60, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
 
   - id: controls
     title: How each rule is kept
@@ -187,7 +190,7 @@ blocks:
     kept:
       - "Every rule gets a control on each layer that can carry it: on chain, before execution, detection and display."
       - "Motions are the timelock for every structural increase of exposure."
-      - "A relaxation of a screening rule gets a notice to the Emergency Brakes multisig and the forum, and the vendor's own delay if it has one."
+      - "A relaxation of a screening rule gets a notice on the forum, and the vendor's own delay if it has one."
     tech: "The control matrix maps each rule to its controls, owner and status."
     changes:
       - text: "The control section says how each rule is kept, by reference to the control matrix."
@@ -197,6 +200,6 @@ blocks:
       - text: "Easy Track motions are the timelock for structural increases of exposure, and screening rules get change control."
         why: "A wider target list or a looser screening rule must not take effect without notice."
         state: design
-        sources: ["ADR-009#d30", "ADR-010#d19", OD-45]
+        sources: ["ADR-009#d30", "ADR-010#d19", "ADR-010#d23", OD-45, OD-64]
     sources: ["ADR-009#d26", "ADR-009#d30", OD-39, OD-45, "doc:docs/specs/control-matrix.md#control-matrix",
       "doc:ROADMAP.md#roadmap"]

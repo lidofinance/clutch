@@ -5,16 +5,18 @@ width: 1180
 height: 750
 description: The Lido DAO owns the Asset Safe; it also owns the orders account and the first-loss Safe, which the map
   shows without an arrow. The Asset Safe owns two Roles modifiers. The operator Safe holds the operator role and Easy Track holds the governance role on the operator modifier.
-  The emergency Safe holds the emergency role and the Emergency Brakes multisig holds the technical role on the safety
-  modifier. Easy Track also holds the exit-governance role there, and the operator, emergency and technical roles act on the
-  orders account through its own modifier; the map draws no arrow for these. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
+  The emergency Safe holds the emergency role on the safety modifier, the switch included. Two of its five signers come
+  from the committee and two from the Emergency Brakes multisig, which itself holds only the Easy Track pause. Easy Track
+  also holds the exit-governance role there, the operator and emergency roles act on the orders account through its own
+  modifier, and the operator Safe also holds the first-loss role; the map draws no arrow for these. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
   through CoW orders from the orders account. The first-loss Safe holds the DAO's first-loss Earn shares. Monitoring
-  watches the vault and pages the Emergency Brakes multisig. Reporting publishes from the vault's snapshots.
+  watches the vault and pages the emergency Safe. Reporting publishes from the vault's snapshots.
 nodes:
 - id: committee
   label: Committee
   sub: Treasury Management · 4 of 7
-  summary: The people who run the mandate. The same signers sign the operator Safe and the emergency Safe.
+  summary: The people who run the mandate. The same signers sign the operator Safe, and two of them sit on the emergency
+    Safe.
   domain: ops
   kind: multisig
   status: existing
@@ -69,8 +71,10 @@ nodes:
   h: 84
 - id: emergency-safe
   label: Emergency Safe
-  sub: 2 of 7 · same signers
-  summary: 'Holds the emergency role. It can only reduce exposure: revoke, exit, sell into stablecoins and send assets home.'
+  sub: 3 of 5 · two bodies and one
+  summary: 'Holds the emergency role and the switch. Two committee members, two Emergency Brakes members and one member of
+    neither body sign it, so the committee cannot use it alone. It can only reduce exposure: revoke, switch off, exit, sell
+    into stablecoins and send assets home.'
   domain: ops
   kind: multisig
   status: instance
@@ -80,8 +84,9 @@ nodes:
   h: 84
 - id: brakes
   label: Emergency Brakes
-  sub: independent stop · 3 of 5
-  summary: Independent of the committee. It holds the technical role and the Easy Track pause.
+  sub: Easy Track pause · 3 of 5
+  summary: Outside the committee. It holds only the Easy Track pause and touches no funds. Two of its members sit on the
+    emergency Safe.
   domain: ops
   kind: multisig
   status: existing
@@ -113,9 +118,9 @@ nodes:
   h: 84
 - id: safety-modifier
   label: Safety modifier
-  sub: 'emergency, technical, exits'
-  summary: A second Roles modifier for the emergency and technical roles. Nothing screens it, so recovery never waits on a
-    vendor. Its exit-governance role, which is specified, lets the motion that onboards a protocol add its emergency exit
+  sub: 'emergency, the switch, exits'
+  summary: A second Roles modifier for the emergency role, the switch included. Nothing screens it, so recovery never waits
+    on a vendor. Its exit-governance role, which is specified, lets the motion that onboards a protocol add its emergency exit
     here.
   domain: vault
   kind: contract
@@ -149,9 +154,9 @@ nodes:
   h: 88
 - id: first-loss
   label: First-loss Safe
-  sub: no modules · Agent owns it
-  summary: A Safe that the Aragon Agent owns, with no modules. It holds only the DAO's first-loss Earn shares, so no role
-    can reach them. Only a DAO vote can burn or redeem them.
+  sub: one narrow role · Agent owns it
+  summary: A Safe that the Aragon Agent owns. It holds only the DAO's first-loss Earn shares. One role, held by the
+    operator Safe, burns them or redeems them to the Agent, on the Earn team's written instruction.
   domain: vault
   kind: contract
   status: instance
@@ -254,15 +259,6 @@ edges:
   label_at:
   - 730
   - 300
-- id: tech-role
-  from: brakes
-  to: safety-modifier
-  kind: role
-  short: technical role
-  label: The Emergency Brakes multisig holds the technical role on the safety modifier.
-  label_at:
-  - 905
-  - 298
 - id: gov-role
   from: easytrack
   to: operator-modifier
@@ -314,8 +310,9 @@ edges:
   from: committee
   to: emergency-safe
   kind: signers
-  short: same signers, 2 of 7
-  label: The emergency Safe has the committee's signers, at 2 of 7. It is not independent of the committee.
+  short: two seats
+  label: Two of the committee's signers sit on the emergency Safe, at 3 of 5 with two Emergency Brakes members and one
+    member of neither body. The committee cannot act alone there.
   via:
   - - 160
     - 148
@@ -338,7 +335,7 @@ edges:
   to: operator-modifier
   kind: safety
   short: revoke · disable
-  label: The emergency role can revoke the operator's permissions. The technical role can disable the operator modifier.
+  label: The emergency role can revoke the operator's permissions, and its switch can disable the operator modifier.
   label_at:
   - 590
   - 328
@@ -362,7 +359,8 @@ edges:
   to: protocols
   kind: owns
   short: Earn shares
-  label: The first-loss Safe holds the DAO's first-loss shares in earnETH and earnUSD. No role can move them.
+  label: The first-loss Safe holds the DAO's first-loss shares in earnETH and earnUSD. Only the committee's narrow role
+    burns them or redeems them to the Agent.
 - id: topup-motion
   from: easytrack
   to: funding
@@ -408,16 +406,16 @@ edges:
     fills, owners, modules and motions.'
 - id: page
   from: monitoring
-  to: brakes
+  to: emergency-safe
   kind: screens
   short: pages
-  label: Monitoring pages the Emergency Brakes multisig when the cap-breach trigger is met, or for a defect in the permission
-    layer.
+  label: Monitoring pages the emergency Safe when the cap-breach trigger is met, for a defect in the permission layer, or
+    for a financial emergency.
   via:
   - - 875
     - 600
   - - 875
-    - 290
+    - 234
   label_at:
   - 875
   - 470

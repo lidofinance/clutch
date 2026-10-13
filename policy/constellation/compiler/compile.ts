@@ -11,7 +11,8 @@
  * compile, such as an action or a DeFi Kit preset, because local tooling
  * cannot verify it (ADR 004, decision 11). It also refuses a policy that lets
  * a role reach the Asset Safe or one of its modules beyond a fixed set of
- * calls (OD-38). Its output is deterministic, so CI can compare the committed
+ * calls (OD-38), or lets the emergency role restore what it stopped (ADR 005,
+ * decision 26). Its output is deterministic, so CI can compare the committed
  * artifact with a fresh compile.
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -162,10 +163,18 @@ const ON_MODULE = new Map([
 ]);
 
 /**
+ * The roles that stop and never restore. On the Asset Safe and its modules
+ * they hold only `narrow` calls, so they cannot give back what they removed:
+ * the DAO restarts (ADR 005, decision 26).
+ */
+const STOP_ONLY = new Set(["emergency"]);
+
+/**
  * Refuses a policy in which a role reaches the Asset Safe or one of its
- * modules beyond the calls above, or grants a permission without refusing
- * every one of them as the administered target. The manifest's `modules`
- * must list every compiled modifier that acts for the Asset Safe (OD-38).
+ * modules beyond the calls above, grants a permission without refusing every
+ * one of them as the administered target, or lets a role that stops make
+ * anything but a `narrow` call there. The manifest's `modules` must list
+ * every compiled modifier that acts for the Asset Safe (OD-38).
  */
 export function checkProtected(modifiers: Artifact["modifiers"], manifest: Record<string, any>) {
   const safe = getAddress(manifest.assetSafe);
@@ -193,6 +202,9 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
           const kind = allowed.get(fn.selector);
           const name = fn.signature ?? fn.selector;
           if (!kind) throw new Error(`${where}: ${name} is not allowed on the Asset Safe or one of its modules (OD-38)`);
+          if (kind !== "narrow" && STOP_ONLY.has(role.name)) {
+            throw new Error(`${where}: ${name} would let a role that stops restore authority; the DAO restarts (ADR 005, decision 26)`);
+          }
           if (kind !== "narrow" && fn.wildcarded) throw new Error(`${where}: ${name} needs a condition (OD-38)`);
           const missing = kind === "grant" ? unguarded(fn.conditions, protectedAccounts) : [];
           if (missing.length > 0) {

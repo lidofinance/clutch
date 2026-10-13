@@ -15,7 +15,7 @@ This harness runs the Clutch permission policy against production contracts on a
 | `MockAragonAgent` | the Aragon Agent: single-argument `forward(bytes)`, `execute`, `canForward` |
 | `MockEVMScriptExecutor` | the Easy Track script executor: parses the production CallsScript format |
 | `MockEasyTrack` | Easy Track: re-invokes the factory at enactment and requires a matching script hash |
-| Operator Safe, emergency Safe, Emergency Brakes multisig | plain addresses that stand in for them |
+| Operator Safe, emergency Safe | plain addresses that stand in for them |
 | The policy | `policy/constellation/artifacts/fork-25946643.json`, compiled from the constellation against `manifests/fork-25946643.json`; `utils/Fixture.sol` deploys at the manifest's addresses, checks each, checks that the manifest's `modules` are exactly the Asset Safe's modules (OD-38), and applies the artifact's calls through the Agent and the Asset Safe |
 
 ## What the policy follows
@@ -27,6 +27,7 @@ The constellation in `policy/constellation/constellation` follows the decisions 
 - Staking and WETH (OD-20): the operator and the emergency role stake ETH through Lido's `submit` with the referral pinned to zero; the operator wraps and unwraps WETH; the emergency role unwraps WETH. The withdrawal queue left the design on 2026-10-08, and both roles are refused it (ADR 007, decision 27).
 - Approvals (ADR 009, OD-08): an approval to a protocol spender spends the budget key that the spender serves; zero spends nothing; deposits spend no budget. The stETH approval to the wstETH contract, and the DAI and USDS approvals to the converter, have a fixed ceiling instead (OD-08, OD-22).
 - Governance (ADR 006): every operator permission lives under the `operator` key; the governance role holds no `assignRoles`, and a budget motion cannot set a refill period below 30 days.
+- Emergency (ADR 005, decisions 23 to 26): the emergency Safe holds the only role on the safety modifier. Its switch disables the operator modifier, pinned to it, and also freezes the queued motions. It restores nothing: the compiler refuses a grant or a budget for it, and only the DAO enables the modifier again. The Emergency Brakes multisig holds no role.
 - Keys: each role and budget key is its label as `bytes32`, such as `bytes32("operator")`, which is how the Zodiac app encodes a key (ADR 004, decision 10).
 
 Budgets and fixed ceilings are dry-run stand-ins. The production figures come from the attested computation and are not in this repository.
@@ -76,9 +77,10 @@ The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy
 
 | File | Covers |
 | --- | --- |
-| `Drills.t.sol` | governance encoding and enactment, the four kinds of permission change and the budget-motion floor, the direct DAO path, operator lifecycle on in-scope venues, the emergency and technical roles, budgets, adversarial cases, the launch scope, and the Asset Safe's shape |
+| `Drills.t.sol` | governance encoding and enactment, the four kinds of permission change and the budget-motion floor, the direct DAO path, operator lifecycle on in-scope venues, the emergency role and its switch, budgets, adversarial cases, the launch scope, and the Asset Safe's shape |
 | `ReviewProbe.t.sol` | escalation guards, approval bounds, budget keys, budget-motion bounds, and regression tests and probes for defects found in review |
-| `PolicyShape.t.sol` | static checks of the committed artifact: role keys, and no out-of-scope target, spender or receiver |
+| `PolicyShape.t.sol` | static checks of the committed artifact: role keys and members, and no out-of-scope target, spender or receiver |
+| `SingleModifierProbe.t.sol` | one modifier per account (OD-57), on a stand-in for the orders account: the emergency role's revoke on its own modifier, and the membership removal that ADR 005 decision 25 replaced |
 | `utils/Fixture.sol` | the shared deployment at the manifest's addresses, with the artifact applied |
 | `utils/MotionCalls.sol` | the admin calls that the governance drills put in a motion; test inputs, not the policy |
 | `Bootstrap.t.sol` | the funding script |

@@ -25,14 +25,11 @@ Profile rules on top of OKF 0.2:
 
 Clutch rules on top of the Gaggle profile:
 - AGENTS.md holds at most 60 lines (ADR 003).
-- Every Decision declares `constrains_operator` as true or false. An accepted Decision
-  that constrains the operator also needs a `human:emergency-brakes` verification at or
-  after `generated.at` (ADR 002).
 - Every Runbook names the `permission` it exercises. A Runbook above `slop` needs a
   passing `drill` record, and the drill's time to initiate must not exceed six hours,
   the mandate's ceiling (ADR 002, ROADMAP standing gates).
-- A verification by a body, `human:tmc` or `human:emergency-brakes`, carries `ref`: an
-  https or urn link to the body's decision record (ADR 002, OD-15).
+- A verification by a body, `human:tmc`, carries `ref`: an https or urn link to the
+  body's decision record (ADR 002, OD-15).
 - An agent records a human's own verification only on that human's written instruction
   (ADR 003, OD-31). The entry names the agent in `recorded_by`, and its `ref` links the
   decision-log heading that quotes the instruction. An agent never records a body's
@@ -80,8 +77,7 @@ TYPES = {
     "Research Note", "Runbook", "Specification",
 }
 AGENTS_MAX_LINES = 60
-CO_VERIFIER = "human:emergency-brakes"
-BODY_ACTORS = ("human:tmc", "human:emergency-brakes")
+BODY_ACTORS = ("human:tmc",)
 ACCEPTORS = ("human:em", "human:tmc")  # ADR 002: EM in the interim, the committee permanently
 # A team's verification links the pull request that a member approved (ADR 012, OD-50).
 PR_REF = re.compile(r"\Ahttps://github\.com/lidofinance/clutch/pull/\d+\Z")
@@ -328,9 +324,6 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
         )
 
     if kind == "Decision":
-        constrains = meta.get("constrains_operator")
-        if not isinstance(constrains, bool):
-            out.append("a Decision must declare `constrains_operator: true` or `false`")
         decision = str(meta.get("decision", "")).strip()
         if decision not in DECISIONS:
             out.append(f"a Decision needs `decision`: one of {sorted(DECISIONS)}")
@@ -346,11 +339,6 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
                     out.append(f"accepted_by {acceptor!r} has no verification at or after generated.at")
             if review not in ("human-reviewed", "finalized"):
                 out.append("an accepted Decision needs review_status human-reviewed or finalized")
-            if constrains is True and CO_VERIFIER not in current_humans:
-                out.append(
-                    f"an accepted Decision that constrains the operator needs a {CO_VERIFIER} "
-                    "verification at or after generated.at"
-                )
         elif decision == "superseded":
             target = str(meta.get("superseded_by", "")).strip()
             if not target:

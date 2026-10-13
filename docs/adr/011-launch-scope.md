@@ -6,7 +6,6 @@ tags: [scope, assets, launch, lido-lend]
 status: draft
 review_status: slop
 decision: proposed
-constrains_operator: true
 generated:
   by: claude-code/opus-5.5
   at: 2026-10-09T06:40:00Z

@@ -7,7 +7,6 @@ status: draft
 review_status: human-reviewed
 decision: accepted
 accepted_by: human:em
-constrains_operator: false
 generated:
   by: claude-code/opus-5.5
   at: 2026-10-06T06:22:07Z

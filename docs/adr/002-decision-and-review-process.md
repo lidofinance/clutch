@@ -1,16 +1,15 @@
 ---
 type: Decision
 title: "ADR 002: Decision and review process"
-description: EM accepts decisions in the interim and the Treasury Management Committee permanently; the Emergency Brakes multisig also verifies every ADR that constrains the operator; pages carry OKF 0.2 trust fields and a review ladder that an edit resets.
+description: EM accepts decisions in the interim and the Treasury Management Committee permanently; no other body verifies an ADR, since the Emergency Brakes multisig's verification ended on 2026-10-13; pages carry OKF 0.2 trust fields and a review ladder that an edit resets.
 tags: [process, review, okf, trust]
 status: draft
 review_status: human-reviewed
 decision: accepted
 accepted_by: human:em
-constrains_operator: false
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T06:22:07Z
+  at: 2026-10-13T08:15:41Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -20,10 +19,15 @@ verified:
     at: 2026-10-06T06:23:50Z
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-06--adr-002-and-adr-003-verified-again
+  - by: human:em
+    at: 2026-10-13T09:03:50Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-13--adr-002-verified-again-the-first-loss-holder-and-od-64
+    sha256: eb19c8a2f7b4ce5a182f4f5760a7d5e80459a801b201278d7cbdba684cb0c7e5
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the acceptor and on Emergency Brakes verification, 2026-09-30, and the confirmed reading, 2026-10-05, and on recorded verifications, 2026-10-06
+    title: Decision log — EM on the acceptor and on Emergency Brakes verification, 2026-09-30, and the confirmed reading, 2026-10-05, on recorded verifications, 2026-10-06, and on the end of the Emergency Brakes verification, 2026-10-13
   - id: s2
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — the lend-markets review ladder and OKF 0.2
@@ -43,7 +47,8 @@ sources:
 - lido-lend-markets marks every agent-drafted document with a review status from `slop` to `finalized`, and resets it after a substantial rewrite [s2].
 - OKF 0.2 records who generated a page, who verified it, and its sources [s3].
 - The Treasury Management Committee operates the vault. The emergency Safe carries the committee's own signers. Without an outside verifier, the committee would approve its own limits.
-- The Emergency Brakes multisig is a separate Safe with a quorum of three of five. At block 26092572 it shares no owner address with the committee's Safe [s4]. It holds the technical role in [ADR 005](/adr/005-account-graph-and-roles.md).
+- The Emergency Brakes multisig is a separate Safe with a quorum of three of five. At block 26092572 it shares no owner address with the committee's Safe [s4]. Until 2026-10-13 it held the technical role in [ADR 005](/adr/005-account-graph-and-roles.md).
+- On 2026-10-13 the emergency Safe became three of five, with two committee members, two Emergency Brakes members and one member of neither body, and the Emergency Brakes multisig lost every role in the vault ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 23 and 24).
 
 ## Decision
 
@@ -70,16 +75,18 @@ EM decided on 2026-10-06, closing OD-31 [s1]:
 
 11. Point 4 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry names the agent in `recorded_by` and links, in `ref`, the decision-log heading that quotes the instruction. An agent never records a body's verification ([ADR 003](/adr/003-agent-operating-model.md) decision 14).
 
+EM decided on 2026-10-13, closing OD-63 [s1]:
+
+12. The Emergency Brakes multisig no longer verifies an ADR before it is accepted, and nothing replaces it. This replaces decision 2. Decision 10 now covers the committee only.
+
 An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## How the validator enforces it
 
-`scripts/validate_docs.py` enforces points 2 to 6 and the runbook half of point 9:
+`scripts/validate_docs.py` enforces points 3 to 6 and the runbook half of point 9:
 
-- Every ADR declares `constrains_operator: true` or `false`.
-- An accepted ADR with `constrains_operator: true` needs a `human:emergency-brakes` verification at or after `generated.at`, in addition to its acceptor's.
 - A Runbook names the `permission` it exercises. Above `slop`, it needs a `drill` record with `at`, `network`, `block`, `time_to_initiate_seconds` and `result: pass`, and the time to initiate must not exceed six hours.
-- A verification by `human:tmc` or `human:emergency-brakes` needs `ref`, an https or urn link to the body's decision record. Without it, the entry does not count (point 10).
+- A verification by `human:tmc` needs `ref`, an https or urn link to the committee's decision record. Without it, the entry does not count (point 10).
 - A verification with `recorded_by` must name an agent and must link, in `ref`, a heading of the decision log. The validator refuses it on a body's actor. The status register marks it `(recorded)` (point 11).
 
 The validator does not yet check the verification-procedure output for a policy change. That check arrives with the procedure in phase 2 of the [roadmap](https://github.com/lidofinance/clutch/blob/main/ROADMAP.md).
@@ -90,6 +97,7 @@ The validator does not yet check the verification-procedure output for a policy 
 - A body's quorum signature: each body signs a Safe message over the page, and a script checks it on chain. Not chosen by EM: every verification would need a signing round.
 - The whole DAO accepts every ADR. Not chosen: an ADR authorises nothing on chain, and on-chain changes already need a vote or a motion.
 - OKF fields without a review ladder. Not chosen: there is then no review depth between unverified and reviewed.
+- The Emergency Brakes multisig keeps verifying the records that constrain the operator, the design until 2026-10-13. Replaced by EM (decision 12): the multisig holds no role in the vault now, and an accepted ADR authorises nothing on chain (decision 7).
 
 ## Consequences
 
@@ -97,11 +105,11 @@ The validator does not yet check the verification-procedure output for a policy 
 - EM accepts a decision with one explicit edit, not in conversation.
 - The committee re-ratifies what EM accepted in the interim.
 - Known gap: the validator cannot see an edit that leaves `generated.at` unchanged. A CI step that compares each changed page with the base branch closes it. The step is planned for phase 1.
-- Known gap: the validator cannot tell who wrote a `human:` entry. Human review of the pull request is the control. CODEOWNERS and the branch rule on `main` enforce it (OD-10, decided 2026-10-05). For the two bodies, the `ref` link makes each entry checkable against the body's own record (point 10). The entry is still a member's claim, not a proof. An entry that an agent records on instruction says so in `recorded_by` (point 11); an entry that does not say so still depends on that review.
+- Known gap: the validator cannot tell who wrote a `human:` entry. Human review of the pull request is the control. CODEOWNERS and the branch rule on `main` enforce it (OD-10, decided 2026-10-05). For the committee, the `ref` link makes each entry checkable against its own record (point 10). The entry is still a member's claim, not a proof. An entry that an agent records on instruction says so in `recorded_by` (point 11); an entry that does not say so still depends on that review.
 
 ## Confirmation
 
-- The validator rejects a review status above `slop` without a current human verification, an accepted ADR without its acceptor's verification, and an accepted constraining ADR without the Emergency Brakes verification.
+- The validator rejects a review status above `slop` without a current human verification, and an accepted ADR without its acceptor's verification.
 - The `docs` CI workflow runs the validator and the register check.
 
 ## Reversal conditions
@@ -111,4 +119,4 @@ The validator does not yet check the verification-procedure output for a policy 
 
 ## Open questions
 
-None open. OD-12 and OD-15 were decided on 2026-10-05.
+None open. OD-12 and OD-15 were decided on 2026-10-05, and OD-63 on 2026-10-13.

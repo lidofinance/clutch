@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-12T07:54:32Z
+  at: 2026-10-13T09:11:38Z
 verified: []
 sources:
   - id: s1
@@ -37,15 +37,113 @@ sources:
   - id: s9
     resource: "urn:clutch:interview:2026-10-12"
     title: EM's request for a triage of the onboarding guide's tests, and EM's answer, 2026-10-12; the transcript is not in the repository
+  - id: s10
+    resource: "urn:clutch:interview:2026-10-13"
+    title: EM's request to triage the committee's feedback, EM's answers to cards 1 to 5, EM's answers on ADR 002, the first-loss holder and OD-64, and EM's verification of ADR 004, 2026-10-13; the transcript is not in the repository
 ---
 
 # Decision log
 
 Entries quote EM exactly, including typos. An agent copied them from the interview transcripts. EM should confirm each entry by verifying this page. Newest first. Times are UTC.
 
-Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
+Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-13 — ADR 004 verified again
+
+> record my re-verification of ADR 004; push
+
+Recorded as: EM verifies ADR 004 again after the OD-64 edit, which adds decision 17: the Emergency Brakes multisig does not get access to view the Lido Zodiac workspace. ADR 004 stays accepted. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's. EM also asked the agent to push the branch. [s10]
+
+## 2026-10-13 — ADR 002 verified again, the first-loss holder and OD-64
+
+After the decisions of the day, the agent asked three things. It asked EM to verify ADR 002 again after its OD-63 edit. It asked which Safe "TMC Safe" means for the first-loss role. It also asked whether the Emergency Brakes multisig keeps two things: a notice of a relaxed screening rule ([ADR 010](/adr/010-pre-execution-screening.md), decision 19), and a view of the Lido Zodiac workspace ([ADR 004](/adr/004-specifications-and-policy-as-data.md), decision 16). EM answered:
+
+> - record my re-verification of ADR 002
+> - TMC Safe means operator safe
+> - drop both
+
+Recorded as:
+
+- EM verifies ADR 002 again after the OD-63 edit, so it stays accepted. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's.
+- (OD-60) The operator Safe holds the `first-loss` role, not the committee's own Safe. This replaces the agent's earlier reading ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 21; [ADR 005](/adr/005-account-graph-and-roles.md), decision 27).
+- (OD-64) The Emergency Brakes multisig loses both. A relaxation of a screening rule gets a notice on the forum only ([ADR 010](/adr/010-pre-execution-screening.md), decision 23), and the multisig no longer gets a view of the Lido Zodiac workspace. ADR 004 is accepted, so its text changed when EM verified it again, the same day (see the entry above). [s10]
+
+## 2026-10-13 — OD-62: prices and the Zodiac UI; the protected files
+
+The agent's fifth card asked whether Lido's readings stay canonical in the Zodiac UI (Q1), whether a written price waterfall replaces "unpriced" (Q2), and whether the committee's valuation policy sets the waterfall's band and the share of the vault that the last level may price (Q3). EM answered:
+
+> Q1: keep OD-44, still add more demand from Zodiac UI to have display and monitoring there
+> Q2: M
+> Q3: it should
+>
+> also, go ahead on editing two protected files from card 1
+
+Recorded as:
+
+- (Q1) OD-44 stays: Lido's readings and alerts are canonical, and the Zodiac UI displays them. The requirement list to the policy provider grows: the UI should carry the monitoring too, with Lido's alerts shown there. If the provider declines, Lido builds both ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 38).
+- (Q2, OD-62) A five-level price waterfall replaces "unpriced": Coingecko's close; a second aggregator; a Chainlink feed or the deepest pool's time-weighted price; the on-chain rate into a priced underlying; the committee's estimate, with its method. Every price carries its level and its source. A top-up post names every price below level 2, and a top-up waits while level 5 covers more than a set share of the vault ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 35 and 36).
+- (Q3) The committee's written valuation policy sets the band of level 2 and the level-5 share. No figure is set yet ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 37).
+- EM's go-ahead is the explicit request that `config/actors.yaml` and `AGENTS.md` need before an agent edits them (ADR 003). The agent removed `human:emergency-brakes` from the actors and rewrote the `AGENTS.md` rule on `constrains_operator` (OD-63). [s10]
+
+## 2026-10-13 — OD-61: the order life
+
+The agent's fourth card proposed 90 days for limit orders and stop-loss expiries, with TWAP shapes scaled to 90 days and every open order in the monthly report. EM answered:
+
+> M, TWAP and stop-loss orders follow the same bound as limit orders
+
+Recorded as: every operator order lives at most 90 days: market and limit orders through the order signer's `validDuration`, TWAP orders through their parts and spacing, and stop-loss orders through the requested screening rule. Each monthly report lists every open order with its limit, its age and the idle balance behind it. A recovery order still lives at most 1 day. This replaces the 30-day bounds of OD-47 ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 29). [s10]
+
+## 2026-10-13 — OD-60: the first-loss role
+
+The agent's third card proposed one modifier on the first-loss Safe, with a narrow first-loss role: burn the DAO's own shares, and redeem them with the proceeds pinned to the Aragon Agent. EM answered:
+
+> M, role is hold by TMC Safe
+
+Recorded as: the first-loss Safe stays owned by the Aragon Agent at one of one, and gets one modifier with one `first-loss` role that the operator Safe holds. The role burns the DAO's earnETH and earnUSD shares, and requests and claims their redemption with the proceeds pinned to the Agent. It cannot transfer or approve them. The committee executes the first-loss terms of the March 2026 Earn allocation in place of the Growth Committee, on the Earn team's written instruction. The same day, EM said that "TMC Safe" means the operator Safe, so the operator Safe holds the role (see the entry above). This replaces the DAO vote of OD-42 for a burn or a redemption ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 21 and 22; [ADR 005](/adr/005-account-graph-and-roles.md), decision 27). [s10]
+
+## 2026-10-13 — OD-59: no resume by an emergency body
+
+The agent's second card asked who restarts Easy Track after a pause: the DAO, as now (A); the Emergency Brakes multisig with the unpause and cancel roles (B); or the multisig with the cancel role only (the middle). After card 1, the agent added that the emergency Safe's switch also freezes the queued motions that write through the operator modifier, and that re-enabling the modifier re-arms them. EM answered:
+
+> Card 2: strongly A; now new powers, no resume under emergency bodies
+
+Recorded as: A. The agent reads "now new powers" as "no new powers". No emergency body, neither the emergency Safe nor the Emergency Brakes multisig, holds a power to resume: no unpause, no re-enabled module, no permission granted again, no raised approval. The DAO restarts after either stop: a Voting item unpauses Easy Track, and an Agent item through Dual Governance enables the operator modifier again, after the same vote cancels the queued motions. The policy already met this rule; the compiler now refuses a policy that breaks it ([ADR 005](/adr/005-account-graph-and-roles.md), decision 26). [s10]
+
+## 2026-10-13 — OD-58 and OD-63: the emergency Safe and the switch
+
+The agent's first card asked who holds the emergency powers. It set out the current design, the committee's design, in which the Emergency Brakes multisig exits and the emergency Safe goes, and two middles. EM answered:
+
+> On the card 1:
+>
+> 1. I strongly believe technical emergency brakes must not touch funds.
+> 2. Let's remove technical role of Emergency Brakes: "Hold the technical role: disable the operator modifier for a defect in the permission layer, or on the fixed cap-breach trigger. On the orders account, it removes the operator Safe from the operator role instead (OD-57)."
+> 3. Let's compose Emergency Safe 3/5 where 2 folks from TMC, 2 folks from Emergency Brakes, and 1 independent guy, and assign this responsibility "Hold the technical role: disable the operator modifier for a defect in the permission layer, or on the fixed cap-breach trigger. On the orders account, it removes the operator Safe from the operator role instead (OD-57)"
+> 4. I.e., Emergency Brakes in this setup can only pause ET
+> 5. Take into account all of this and figure out what this all brings and what things can be simplified automatically if any under this new trust model (I mean we can have logical (quasi-)tautology somewhere)
+
+The agent analysed the quorums and listed what the model simplifies. It asked whether the switch merges into the emergency role and the orders account's membership removal goes (Q1), how the seats are appointed (Q2), and whether the Emergency Brakes multisig still verifies the records that constrain the operator (Q3). EM answered:
+
+> - Q1: yes
+> - Q2: directionally agree, let's just have a strict requirement that 5th signed is not within TMC and Emergency Brakes
+> - Q3: It shouldn't
+
+Recorded as:
+
+- (1, 4, OD-58) The Emergency Brakes multisig touches no funds and holds no role in the vault. It keeps only the global Easy Track pause ([ADR 005](/adr/005-account-graph-and-roles.md), decision 23).
+- (3, Q2) The emergency Safe has five signers at three of five: two committee members, two Emergency Brakes members, and a fifth signer who is a member of neither body. The agent reads "5th signed" as "fifth signer". The committee and the Emergency Brakes multisig appoint two seats each, and a DAO Snapshot appoints the fifth. A signer who leaves their body leaves the seat ([ADR 005](/adr/005-account-graph-and-roles.md), decision 24).
+- (2, 3, Q1) The switch moves to the emergency role, and the technical role goes. On the orders account, the emergency role's revoke stops the operator, and the membership removal of OD-57 goes. The emergency Safe switches off on the cap-breach trigger ([ADR 005](/adr/005-account-graph-and-roles.md), decision 25; [ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 30; [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 34).
+- (5) The simplifications are in the [research note](/research/cfo-feedback-2026-10-13.md). The mandate's independent emergency committee now holds as drafted, so the mandate and the LIP owe no statement that the fast exit is not independent. This replaces OD-30.
+- (Q3, OD-63) The Emergency Brakes multisig no longer verifies the records that constrain the operator, and nothing replaces it. The `constrains_operator` field, its validator rule and `human:emergency-brakes` go, and the verification-requests register retires. ADR 002 is accepted, so its text changed when EM verified it again, the same day (see the entry above). [s10]
+
+## 2026-10-13 — the committee's feedback asked
+
+> we got a feedback from CFO ([a name]) who is also sitting within TMC, see [a local file]
+> let's try to triage and address this points one by one, meticulous interview is needed;
+> Before we start this interview, do a deep research to prepare the background: learn the current state of the art, learn the landscape, current market conditions, incidents track, recent treasury management news, general crypto sentiment, protocols launched and sun set, crypto 2026 reports and so on and so forth.
+
+Recorded as: the agent researched first: emergency powers in other treasuries and councils, the 2026 incidents, the market and Lido's own records. It then prepared five cards for the six points ([research note](/research/cfo-feedback-2026-10-13.md)). [s10]
 
 ## 2026-10-12 — the onboarding guide's invariant checks, source pins and coverage
 

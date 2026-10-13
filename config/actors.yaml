@@ -2,8 +2,8 @@
 #
 # human:em is EM, the interim acceptor of decisions (docs/adr/002).
 # human:tmc is the Treasury Management Committee, the permanent acceptor.
-# human:emergency-brakes is the Emergency Brakes multisig, which also verifies
-#   every ADR that constrains the operator before it is accepted.
+# The Emergency Brakes multisig verifies no ADR since 2026-10-13 (OD-63), so it is
+#   not listed.
 # Any agent id of the form <runner>/<model> may author a page in generated.by (ADR 012).
 # Only the humans below verify a page. Only the agents below may record a human's own
 # verification on that human's written instruction (ADR 003, decision 14).
@@ -13,7 +13,6 @@ version: 1
 humans:
   - human:em
   - human:tmc
-  - human:emergency-brakes
 
 # A team verifies through a member, with `ref` to the pull request that the member
 # approved. A team's verification raises a page's review status and never accepts an

@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 // Modified for Clutch on 2026-10-06: the two modifiers of ADR 005 and the
 // four roles. See PROVENANCE.md.
+// Changed for Clutch on 2026-10-13: the technical role merged into the
+// emergency role (ADR 005, decision 25).
 import { manifest } from "./addresses";
 import { operatorRolesNode, safetyRolesNode } from "./nodes";
-import { emergency, governance, operator, technical } from "./roles";
+import { emergency, governance, operator } from "./roles";
 import { earn_eth_deposit_wsteth, earn_usd_deposit, sky_savings_usds } from "./allowances";
 
 /**
@@ -21,14 +23,14 @@ export const operator_modifier = operatorRolesNode({
 });
 
 /**
- * The safety modifier: the emergency and technical roles. They sit on a
- * separate module, so that disabling the operator modifier does not disarm
- * recovery (ADR 005).
+ * The safety modifier: the emergency role. It sits on a separate module, so
+ * that the emergency role's switch, which disables the operator modifier,
+ * does not disarm recovery (ADR 005).
  */
 export const safety_modifier = safetyRolesNode({
   address: manifest.safetyModifier as `0x${string}`,
   owner: manifest.assetSafe as `0x${string}`,
   avatar: manifest.assetSafe as `0x${string}`,
   target: manifest.assetSafe as `0x${string}`,
-  roles: { emergency, technical },
+  roles: { emergency },
 });

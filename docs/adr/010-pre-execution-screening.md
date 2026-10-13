@@ -6,15 +6,14 @@ tags: [screening, guard, safe, security]
 status: draft
 review_status: slop
 decision: proposed
-constrains_operator: true
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-09T06:40:00Z
+  at: 2026-10-13T09:03:30Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on on-chain blocking and the guard, 2026-09-22, on the route and the vendor's guard, 2026-10-02, and on Safe v1.5.0, 2026-10-05
+    title: Decision log — EM on on-chain blocking and the guard, 2026-09-22, on the route and the vendor's guard, 2026-10-02, on Safe v1.5.0, 2026-10-05, and on the notice of a relaxed rule, 2026-10-13
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — guard hooks per Safe version, the committee Safe, Safe v1.5.0 provenance and audits
@@ -116,14 +115,18 @@ EM decided on 2026-10-08 and 2026-10-09, closing OD-54 and OD-55 [s1]:
 
 Decision 22 replaces decision 8: the enabling vote no longer waits for the guard, and the check of decision 8 applies to the lift. Decisions 9, 10 and 12 become conditions of the lift, not of the launch. Decision 18, the singleton alert, still applies from the launch.
 
+EM decided on 2026-10-13, closing OD-64 [s1]:
+
+23. A relaxation of a screening rule gets a notice on the forum only. The Emergency Brakes multisig no longer gets one. This replaces the notice to the Emergency Brakes multisig in decision 19.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules, ever. It holds the operator role on the operator modifier, and it is the trusted caller of every factory. It runs Safe v1.5.0, with a threshold of 4 of 7.
 - **Guard.** One instance of the vendor's guard, of the build that the Lido multisigs run, set on the operator Safe with `setGuard`. The vendor's key then turns the bypass mode off. The owners cannot turn it on again without the vendor's approval and the 10-day bypass timelock [s11]. Only then does the cap lift (decision 22).
-- **What it screens.** Every transaction of the operator Safe: every operator action, on the Asset Safe and on the orders account, and the creation of every motion. Motion enactment is not screened, but Easy Track's hash check fixes a motion's content at creation.
-- **What it never touches.** The emergency Safe, the Emergency Brakes multisig and the DAO path act through the safety modifier or the owner path, and no guard is set on the Asset Safe. Recovery is therefore unscreened by construction.
+- **What it screens.** Every transaction of the operator Safe: every operator action, on the Asset Safe and on the orders account, every action of the first-loss role ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 21), and the creation of every motion. Motion enactment is not screened, but Easy Track's hash check fixes a motion's content at creation.
+- **What it never touches.** The emergency Safe and the DAO path act through the safety modifier or the owner path, and no guard is set on the Asset Safe. The Emergency Brakes multisig holds no role in the vault ([ADR 005](/adr/005-account-graph-and-roles.md) decision 23). Recovery is therefore unscreened by construction.
 - **Removal.** Only the operator Safe's owners can remove the guard, through the 10-day timelock. A vendor outage therefore stops the operator for at most ten days, and a hostile removal stays visible for ten days.
 - **Monitoring.** Lido's existing detector for this guard carries the alerts the vault needs: the start of either timelock, the bypass mode turning on, a standing approval, a keeper change, an added policy contract, and module, guard or owner changes on the operator Safe [s11]. It must add Safe v1.5.0 and the new instance (decision 12). Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity. The agreement forbids such approvals (decision 9). Lido's monitoring also needs a critical alert on any change of the singleton of the new Safes (decision 18), because a delegatecall can replace a Safe's implementation without any Safe event [s12].
 - **Delegatecalls.** The operator Safe needs a delegatecall only to batch calls through Safe's MultiSendCallOnly v1.5.0 [s12]. The vendor is asked to refuse every other delegatecall (decision 17). One approved delegatecall to another target could replace the operator Safe's implementation and remove the guard.
@@ -132,7 +135,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **The rule list.** The list changes in a reviewed pull request, as the permission policy does, and the vendor's name stays redacted until it is announced.
 - **The capped launch (OD-54, OD-55).**
   - From the enabling vote to the lift, the operator Safe has no guard. The enabling vote still creates it, grants it the operator role and registers the factories with it as their trusted caller. Its owners set the guard later with one Safe transaction, and no factory changes.
-  - Until the lift, the controls are the operator's policy, the four-of-seven threshold, monitoring, the emergency revoke and the technical switch. The cap bounds what they protect.
+  - Until the lift, the controls are the operator's policy, the four-of-seven threshold, monitoring, the emergency revoke and the switch. The cap bounds what they protect.
   - The cap counts the Asset Safe and the orders account at the price rule of [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 20. The first-loss Safe is outside it, because no role can reach it.
   - The cap limits what the treasury puts in. A rise in prices that takes the vault above the cap needs no action, and monitoring reports it.
   - Monitoring alerts on a top-up motion whose enactment would take the vault above the cap, while its objection window is open, and on a vault value above the cap at each fortnightly reading.
@@ -185,4 +188,4 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 ## Open questions
 
-None open. OD-17 was decided on 2026-10-05, OD-39 and OD-45 on 2026-10-06, and OD-54 and OD-55 on 2026-10-09. Owed: the vendor's answers on the requested rules and on rule-change records and delays, before the lift.
+None open. OD-17 was decided on 2026-10-05, OD-39 and OD-45 on 2026-10-06, OD-54 and OD-55 on 2026-10-09, and OD-64 on 2026-10-13. Owed: the vendor's answers on the requested rules and on rule-change records and delays, before the lift.

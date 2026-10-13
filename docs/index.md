@@ -16,7 +16,7 @@ The system of record for Clutch, the Lido Active Treasury system. Every page car
 
 # Decisions
 
-* [Decision records](adr/) - one global sequence. EM accepts in the interim; the Treasury Management Committee is the permanent acceptor; the Emergency Brakes multisig verifies every record that constrains the operator.
+* [Decision records](adr/) - one global sequence. EM accepts in the interim; the Treasury Management Committee is the permanent acceptor.
 
 # Specifications
 
@@ -28,7 +28,7 @@ The system of record for Clutch, the Lido Active Treasury system. Every page car
 
 # Registers
 
-* [Registers](registers/) - decision log, open decisions, parameters, verification requests and the generated document-status table.
+* [Registers](registers/) - decision log, open decisions, parameters, the retired verification requests and the generated document-status table.
 
 # Research
 

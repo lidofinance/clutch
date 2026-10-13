@@ -9,21 +9,21 @@ intro: >-
 planned:
   - name: Orders account
     where: "A second Agent-owned Safe, with one modifier of its own"
-    what: "One orders modifier for the operator, emergency and technical roles, with no governance role (OD-57). The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
-    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d28", OD-43, OD-57, INV-023]
+    what: "One orders modifier for the operator and emergency roles, with no governance role (OD-57, OD-58). The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
+    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d28", "ADR-007#d30", OD-43, OD-57, OD-58, INV-023]
   - name: Exit-governance role
     where: "On the safety modifier, held by the Easy Track script executor"
     what: "The motion that onboards a protocol also writes the emergency role's exit for it. The role writes only under the emergency key."
     sources: ["ADR-006#d13", "ADR-006#proposed-direction", OD-49, INV-025]
-  - name: First-loss Safe
-    where: "An Agent-owned Safe outside the policy"
-    what: "It has no module, so no role and no motion can reach the first-loss shares. A DAO vote burns or redeems them."
-    sources: ["ADR-008#d15", "ADR-008#d19", OD-42, INV-021]
+  - name: First-loss Safe and its role
+    where: "An Agent-owned Safe with one modifier of its own"
+    what: "One first-loss modifier with one role, held by the operator Safe: burn the DAO's first-loss shares, or redeem them to the Aragon Agent. No other role and no motion reaches them."
+    sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d22", OD-42, OD-60, INV-021]
 changes:
   - area: Modifiers
     kind: changed
     provider: "One Roles modifier, with the operator and emergency roles."
-    clutch: "Two modifiers on the Asset Safe: the operator modifier for the operator and governance roles, and the safety modifier for the emergency and technical roles."
+    clutch: "Two modifiers on the Asset Safe: the operator modifier for the operator and governance roles, and the safety modifier for the emergency role and its switch."
     why: "Recovery must keep working when the operator is switched off, and no screening may sit in its way."
     sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction",
       "doc:docs/research/zodiac-constellation-2026-10-06.md#4-differences-from-the-decided-design"]
@@ -36,15 +36,15 @@ changes:
   - area: Emergency holder
     kind: changed
     provider: "The Emergency Brakes multisig."
-    clutch: "A new emergency Safe: the committee's signers at 2 of 7. The Emergency Brakes multisig keeps a technical role."
-    why: "Financial emergencies go to the people who watch the portfolio every day, at a threshold that acts in minutes."
-    sources: ["ADR-005#d1", "ADR-005#d2", "ADR-005#d3", "ADR-005#d16", OD-30]
-  - area: Technical role
-    kind: added
-    provider: "None. The emergency role could call `disableModule` with both arguments open."
-    clutch: "The Emergency Brakes multisig can disable only the operator modifier; the module argument is pinned."
-    why: "An open `disableModule` could switch off the safety modifier, and with it every recovery path."
-    sources: ["ADR-005#d3", "ADR-005#proposed-direction", INV-009]
+    clutch: "A new emergency Safe at 3 of 5: two committee members, two Emergency Brakes members and one member of neither body. The Emergency Brakes multisig keeps only the Easy Track pause."
+    why: "Financial emergencies need the people who watch the portfolio every day, and no single body may act alone. The quorum without the committee is the mandate's independent exit."
+    sources: ["ADR-005#d2", "ADR-005#d23", "ADR-005#d24", OD-58]
+  - area: Module disabling
+    kind: changed
+    provider: "The emergency role could call `disableModule` with both arguments open."
+    clutch: "The emergency role can disable only the operator modifier; the module argument is pinned. It holds no call that restores authority, and the compiler refuses one."
+    why: "An open `disableModule` could switch off the safety modifier, and with it every recovery path. Only the DAO restarts."
+    sources: ["ADR-005#d25", "ADR-005#d26", "ADR-005#proposed-direction", OD-58, OD-59, INV-009, INV-027]
   - area: Governance
     kind: added
     provider: "No role. It assumed that motions act as the Aragon Agent, which Easy Track cannot do."
@@ -90,9 +90,9 @@ changes:
   - area: First-loss shares
     kind: changed
     provider: "Both roles can redeem Earn shares."
-    clutch: "The first-loss shares sit in a first-loss Safe outside the policy; the roles never see them."
-    why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart."
-    sources: ["ADR-008#d19", OD-42]
+    clutch: "The first-loss shares sit in a first-loss Safe. Only its one narrow role, held by the operator Safe, burns them or redeems them to the Agent; the vault's other roles never see them."
+    why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart. The narrow role lets the committee execute the first-loss terms without a vote."
+    sources: ["ADR-008#d19", "ADR-008#d21", OD-42, OD-60]
   - area: Compiling and pushing
     kind: changed
     provider: "The hosted app compiles actions and pushes the policy, with an API key."

@@ -167,8 +167,10 @@ def main() -> int:
          "recorded_by must name an agent"),
         ("recorded_by names an unknown agent", ENTRY.replace("claude-code/opus-5.5", "rogue/agent"),
          "is not in config/actors.yaml"),
-        ("an agent records a body's verification", ENTRY.replace("by: human:em", "by: human:emergency-brakes"),
+        ("an agent records a body's verification", ENTRY.replace("by: human:em", "by: human:tmc"),
          "an agent never records a body's or a team's verification"),
+        ("the Emergency Brakes multisig verifies no page (OD-63)", ENTRY.replace("by: human:em", "by: human:emergency-brakes"),
+         "'human:emergency-brakes' is not in config/actors.yaml"),
     ]
     failures = 0
     for name, entry, expected in cases:
