@@ -100,7 +100,7 @@
 - name: The four Roles modifiers
   column: instance
   what: "Two minimal proxies of the Roles mastercopy on the Asset Safe, one on the orders account and one on the first-loss Safe."
-  why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator and emergency roles, and there the emergency role's revoke stops the operator (OD-57, OD-58). The first-loss modifier carries one narrow role for the committee's Safe (OD-60)."
+  why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator and emergency roles, and there the emergency role's revoke stops the operator (OD-57, OD-58). The first-loss modifier carries one narrow role for the operator Safe (OD-60)."
   owner: "The DAO, through the Asset Safe, the orders account and the first-loss Safe"
   sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#d25", "ADR-005#d27", "ADR-005#context", "ADR-007#d28", "ADR-007#d30",
     OD-57, OD-58, OD-60]

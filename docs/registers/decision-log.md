@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T08:15:41Z
+  at: 2026-10-13T09:03:30Z
 verified: []
 sources:
   - id: s1
@@ -39,7 +39,7 @@ sources:
     title: EM's request for a triage of the onboarding guide's tests, and EM's answer, 2026-10-12; the transcript is not in the repository
   - id: s10
     resource: "urn:clutch:interview:2026-10-13"
-    title: EM's request to triage the committee's feedback, and EM's answers to cards 1 to 5, 2026-10-13; the transcript is not in the repository
+    title: EM's request to triage the committee's feedback, EM's answers to cards 1 to 5, and EM's answers on ADR 002, the first-loss holder and OD-64, 2026-10-13; the transcript is not in the repository
 ---
 
 # Decision log
@@ -49,6 +49,20 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-13 — ADR 002 verified again, the first-loss holder and OD-64
+
+After the decisions of the day, the agent asked three things. It asked EM to verify ADR 002 again after its OD-63 edit. It asked which Safe "TMC Safe" means for the first-loss role. It also asked whether the Emergency Brakes multisig keeps two things: a notice of a relaxed screening rule ([ADR 010](/adr/010-pre-execution-screening.md), decision 19), and a view of the Lido Zodiac workspace ([ADR 004](/adr/004-specifications-and-policy-as-data.md), decision 16). EM answered:
+
+> - record my re-verification of ADR 002
+> - TMC Safe means operator safe
+> - drop both
+
+Recorded as:
+
+- EM verifies ADR 002 again after the OD-63 edit, so it stays accepted. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's.
+- (OD-60) The operator Safe holds the `first-loss` role, not the committee's own Safe. This replaces the agent's earlier reading ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 21; [ADR 005](/adr/005-account-graph-and-roles.md), decision 27).
+- (OD-64) The Emergency Brakes multisig loses both. A relaxation of a screening rule gets a notice on the forum only ([ADR 010](/adr/010-pre-execution-screening.md), decision 23), and the multisig no longer gets a view of the Lido Zodiac workspace. ADR 004 is accepted, so its text changes when EM verifies it again. [s10]
 
 ## 2026-10-13 — OD-62: prices and the Zodiac UI; the protected files
 
@@ -81,7 +95,7 @@ The agent's third card proposed one modifier on the first-loss Safe, with a narr
 
 > M, role is hold by TMC Safe
 
-Recorded as: the first-loss Safe stays owned by the Aragon Agent at one of one, and gets one modifier with one `first-loss` role that the committee's Safe holds. The role burns the DAO's earnETH and earnUSD shares, and requests and claims their redemption with the proceeds pinned to the Agent. It cannot transfer or approve them. The committee executes the first-loss terms of the March 2026 Earn allocation in place of the Growth Committee, on the Earn team's written instruction. The agent reads "TMC Safe" as the committee's own Safe, not the operator Safe. This replaces the DAO vote of OD-42 for a burn or a redemption ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 21 and 22; [ADR 005](/adr/005-account-graph-and-roles.md), decision 27). [s10]
+Recorded as: the first-loss Safe stays owned by the Aragon Agent at one of one, and gets one modifier with one `first-loss` role that the operator Safe holds. The role burns the DAO's earnETH and earnUSD shares, and requests and claims their redemption with the proceeds pinned to the Agent. It cannot transfer or approve them. The committee executes the first-loss terms of the March 2026 Earn allocation in place of the Growth Committee, on the Earn team's written instruction. The same day, EM said that "TMC Safe" means the operator Safe, so the operator Safe holds the role (see the entry above). This replaces the DAO vote of OD-42 for a burn or a redemption ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 21 and 22; [ADR 005](/adr/005-account-graph-and-roles.md), decision 27). [s10]
 
 ## 2026-10-13 — OD-59: no resume by an emergency body
 
@@ -115,7 +129,7 @@ Recorded as:
 - (3, Q2) The emergency Safe has five signers at three of five: two committee members, two Emergency Brakes members, and a fifth signer who is a member of neither body. The agent reads "5th signed" as "fifth signer". The committee and the Emergency Brakes multisig appoint two seats each, and a DAO Snapshot appoints the fifth. A signer who leaves their body leaves the seat ([ADR 005](/adr/005-account-graph-and-roles.md), decision 24).
 - (2, 3, Q1) The switch moves to the emergency role, and the technical role goes. On the orders account, the emergency role's revoke stops the operator, and the membership removal of OD-57 goes. The emergency Safe switches off on the cap-breach trigger ([ADR 005](/adr/005-account-graph-and-roles.md), decision 25; [ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 30; [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 34).
 - (5) The simplifications are in the [research note](/research/cfo-feedback-2026-10-13.md). The mandate's independent emergency committee now holds as drafted, so the mandate and the LIP owe no statement that the fast exit is not independent. This replaces OD-30.
-- (Q3, OD-63) The Emergency Brakes multisig no longer verifies the records that constrain the operator, and nothing replaces it. The `constrains_operator` field, its validator rule and `human:emergency-brakes` go, and the verification-requests register retires. ADR 002 is accepted, so its text changes when EM verifies it again. [s10]
+- (Q3, OD-63) The Emergency Brakes multisig no longer verifies the records that constrain the operator, and nothing replaces it. The `constrains_operator` field, its validator rule and `human:emergency-brakes` go, and the verification-requests register retires. ADR 002 is accepted, so its text changed when EM verified it again, the same day (see the entry above). [s10]
 
 ## 2026-10-13 — the committee's feedback asked
 

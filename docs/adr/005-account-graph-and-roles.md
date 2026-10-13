@@ -1,19 +1,19 @@
 ---
 type: Decision
 title: "ADR 005: Account graph and roles"
-description: A Safe owned only by the Aragon Agent holds the assets; two Roles modifiers split the operator and governance roles from the emergency role; a dedicated operator Safe with the committee's signers holds the operator role; the emergency Safe, three of five with two committee members, two Emergency Brakes members and one member of neither body, holds the emergency role and its switch; the Emergency Brakes multisig touches no funds and keeps only the Easy Track pause; no emergency body resumes what it stopped; an Agent-owned orders account with one modifier of its own places every CoW order, and an Agent-owned first-loss Safe, with one narrow role for the committee's Safe, holds the first-loss shares; the Asset Safe, the operator Safe and the emergency Safe run Safe v1.5.0, and the Asset Safe has no fallback handler.
+description: A Safe owned only by the Aragon Agent holds the assets; two Roles modifiers split the operator and governance roles from the emergency role; a dedicated operator Safe with the committee's signers holds the operator role; the emergency Safe, three of five with two committee members, two Emergency Brakes members and one member of neither body, holds the emergency role and its switch; the Emergency Brakes multisig touches no funds and keeps only the Easy Track pause; no emergency body resumes what it stopped; an Agent-owned orders account with one modifier of its own places every CoW order, and an Agent-owned first-loss Safe, with one narrow role for the operator Safe, holds the first-loss shares; the Asset Safe, the operator Safe and the emergency Safe run Safe v1.5.0, and the Asset Safe has no fallback handler.
 tags: [architecture, roles, safe, zodiac, emergency]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T08:15:41Z
+  at: 2026-10-13T09:03:30Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM's design answers of 2026-09-22, and later decisions to OD-60 on 2026-10-13
+    title: Decision log — EM's design answers of 2026-09-22, and later decisions to OD-64 on 2026-10-13
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Agent authority, committee Safes, Roles mastercopy
@@ -129,20 +129,20 @@ Decision 24 replaces decisions 1, 5, 16 and 17, and the quorum and the signers o
 
 EM decided on 2026-10-13, closing OD-60 [s1]:
 
-27. The first-loss Safe gets one modifier, with one `first-loss` role that the committee's Safe holds. The role burns the DAO's first-loss shares, and redeems them with the proceeds pinned to the Aragon Agent ([ADR 008](/adr/008-funding-through-existing-payments.md) decisions 21 and 22). This replaces "with no modules" and "No role can reach them" in decision 19.
+27. The first-loss Safe gets one modifier, with one `first-loss` role that the operator Safe holds. The role burns the DAO's first-loss shares, and redeems them with the proceeds pinned to the Aragon Agent ([ADR 008](/adr/008-funding-through-existing-payments.md) decisions 21 and 22). This replaces "with no modules" and "No role can reach them" in decision 19.
 
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 - **Asset Safe.** A new Safe owned one-of-one by the Aragon Agent. It holds the assets, apart from the first-loss shares and the tokens in transit in the orders account. No guard and no fallback handler are set on it. It runs Safe v1.5.0. The Agent approves the hash of each transaction, or sends the transaction itself, so the Safe checks a type-1 signature (decision 14).
-- **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules. It carries the screening guard, holds the operator role and is the trusted caller of every factory. It runs Safe v1.5.0, with a threshold of 4 of 7.
+- **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules. It carries the screening guard, holds the operator role and is the trusted caller of every factory. It also holds the first-loss role (decision 27). It runs Safe v1.5.0, with a threshold of 4 of 7.
 - **Emergency Safe.** A new Safe with five signers and a threshold of three: two committee members, two Emergency Brakes members and one member of neither body (decision 24). It holds no assets and has no guard. It holds the emergency role on the safety modifier and on the orders modifier, the switch included (decision 25). It runs Safe v1.5.0. Exactly two of its owners are owners of the committee's Safe, exactly two are owners of the Emergency Brakes Safe, and one is an owner of neither. One person can hold several addresses, so the fifth signer also states in writing that they belong to neither body. An owner change is a critical alert, and a DAO vote can replace the role's holder.
 - **Operator modifier.** A minimal proxy of the Roles mastercopy. Owner, avatar and target are the Asset Safe. It carries the `operator` and `governance` roles.
 - **Safety modifier.** A second minimal proxy with the same settings. It carries the `emergency` role, and the exit-governance role through which a motion adds an emergency exit ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13).
 - The Asset Safe owns both modifiers. A role's call executes as the Safe, so a narrowly scoped role can administer a modifier without any authority over the Agent. This is how the emergency role revokes the operator.
 - **Orders account.** A new Safe owned one-of-one by the Aragon Agent, with CoW's fallback handler. It holds only tokens in transit between a transfer and a fill. It runs Safe v1.5.0 if a fork test shows that CoW's fallback handler works on it; that is not checked yet. It has one modifier, the orders modifier, with the `operator` and `emergency` roles and no `governance` role (decisions 21 and 25). No motion writes there: a DAO vote adds a token and grants the order signer's delegatecall ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). The emergency role stops the operator there by revoking its targets and functions on the orders modifier (decision 25).
-- **First-loss Safe.** A new Safe owned one-of-one by the Aragon Agent, with no guard and no fallback handler, on Safe v1.5.0 like the Asset Safe. It holds only the DAO's first-loss Earn shares. It has one modifier, the first-loss modifier, whose owner, avatar and target is the first-loss Safe. Its one role, `first-loss`, is held by the committee's Safe (decision 27). The role acts on the Earn team's written instruction ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 22).
+- **First-loss Safe.** A new Safe owned one-of-one by the Aragon Agent, with no guard and no fallback handler, on Safe v1.5.0 like the Asset Safe. It holds only the DAO's first-loss Earn shares. It has one modifier, the first-loss modifier, whose owner, avatar and target is the first-loss Safe. Its one role, `first-loss`, is held by the operator Safe (decision 27). The role acts on the Earn team's written instruction ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 22).
 - **Restart.** After the switch, an Agent item of a DAO vote enables the operator modifier again, through Dual Governance. The switch also freezes each queued motion that writes through the operator modifier, and the restart re-arms it, because a motion does not expire. So the same vote first cancels the queued motions, through Voting's cancel role. After an Easy Track pause, a Voting item unpauses Easy Track (decision 26).
 - Easy Track never receives authority over the Agent.
 
@@ -153,7 +153,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 | `governance` | Easy Track executor | operator | write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | submit a condition tree; grant or remove any role; touch the emergency role; target the modifier's avatar or any of its modules (OD-38); grant delegatecall (OD-36) |
 | `emergency` | emergency Safe, three of five: two committee members, two Emergency Brakes members and one member of neither body | safety, orders | zero approvals; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS; send assets to the orders account or to the Agent; revoke the operator's targets and functions on the operator modifier and on the orders modifier, which is how every removal happens and how the operator stops on the orders account; disable the operator modifier, with the module argument pinned (decision 25); on the orders account, cancel orders, set a relayer approval to zero, send tokens to the Agent or the Asset Safe, and place orders that buy USDC or USDT and pay the Agent | add a permission; enter a protocol except by staking ETH; borrow; reach the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md)); change the recovery destination; disable the safety modifier or the orders modifier; restore what it stopped: enable a module, grant a permission again or raise an approval (decision 26) |
 | exit governance | Easy Track executor | safety | write an emergency exit for a target that an onboarding motion names: redeem, withdraw, claim and cancel pinned to the Asset Safe, a transfer pinned to the Agent, an approval set to zero (OD-49) | write anything but an exit; grant delegatecall; touch membership or the switch; set an allowance; target the Asset Safe or a module of it |
-| `first-loss` | the committee's Safe, four of seven | first-loss | burn the DAO's earnETH and earnUSD shares; request and claim their redemption, with the proceeds pinned to the Aragon Agent; on the Earn team's written instruction (decision 27; [ADR 008](/adr/008-funding-through-existing-payments.md)) | transfer or approve the shares; pay anyone but the Agent; reach the Asset Safe or the orders account |
+| `first-loss` | operator Safe, the committee's signers, four of seven, screened once the launch cap lifts | first-loss | burn the DAO's earnETH and earnUSD shares; request and claim their redemption, with the proceeds pinned to the Aragon Agent; on the Earn team's written instruction (decision 27; [ADR 008](/adr/008-funding-through-existing-payments.md)) | transfer or approve the shares; pay anyone but the Agent; reach the Asset Safe or the orders account |
 
 The Emergency Brakes multisig holds no role in this table. It keeps the global Easy Track pause (decisions 4 and 23).
 
@@ -174,7 +174,7 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 
 ## Consequences
 
-- The committee's Safe and the operator Safe share the committee's seven signers. The emergency Safe carries two of them and two members of the Emergency Brakes multisig. A rotation that touches a seat also updates the emergency Safe (decision 24). The first-loss role puts the committee's Safe itself into the role graph (decision 27).
+- The committee's Safe and the operator Safe share the committee's seven signers. The emergency Safe carries two of them and two members of the Emergency Brakes multisig. A rotation that touches a seat also updates the emergency Safe (decision 24). The operator Safe also holds the first-loss role (decision 27), so a compromise of its quorum can burn the first-loss shares, but it cannot take them.
 - Every quorum of the emergency Safe needs a signer from outside the committee and a signer from outside the Emergency Brakes multisig. The committee cannot act alone in an emergency, and two stolen committee keys reach nothing.
 - A quorum without the committee can return assets within hours: the two Emergency Brakes members and the fifth signer. So the mandate's emergency committee, independent of the committee, three of five, with dual access, holds as drafted [s12]. That quorum has no spare signer, and the fifth signer is pivotal for it. The mandate text and the LIP owe no statement that the fast exit is not independent.
 - Every emergency action needs a signer from outside the committee. No response-time data exists for such a mixed group, so a timed drill runs before launch.

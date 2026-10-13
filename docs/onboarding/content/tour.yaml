@@ -15,12 +15,13 @@
   sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1"]
 
 - title: "The operator: the committee at work"
-  text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its permissions is the Asset Safe."
+  text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its operator permissions is the Asset Safe. Its one other role, on the [[first-loss Safe]], burns the first-loss shares or redeems them to the Aragon Agent."
   tech: "The operator Safe calls `execTransactionWithRole` on the operator modifier with the role key `bytes32(\"operator\")`; a batch goes through MultiSendCallOnly v1.5.0. Every receiver, owner and beneficiary is pinned with `EqualToAvatar` (INV-003)."
   nodes: [committee, operator-safe, operator-modifier, asset-safe, protocols]
   edges: [signers-op, op-role, own-op, positions]
   flows: [op-tx, swap-order]
-  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#proposed-direction", INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
+  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d27", "ADR-005#proposed-direction", OD-60, INV-003,
+    "test:test_D3_operator_cannot_route_around_avatar"]
 
 - title: Every operator transaction is screened
   text: "[the screening vendor]'s [[guard]] sits on the operator Safe. It refuses any transaction that the vendor has not approved, once and exactly.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nAt launch the guard is not set yet. The vault starts under a [[launch cap]] of one million dollars, and the cap lifts once the guard is live (OD-54)."

@@ -55,7 +55,7 @@ sections:
       - text: "An orders account, owned by the Aragon Agent, places CoW orders for the operator and for recovery."
         why: "Conditional orders need CoW's fallback handler, and the Asset Safe has none."
         sources: ["ADR-007#d17", OD-43, "lip:part-6"]
-      - text: "A first-loss Safe, owned by the Aragon Agent, holds the DAO's first-loss Earn shares. One narrow role of the committee's Safe burns them or redeems them to the Agent."
+      - text: "A first-loss Safe, owned by the Aragon Agent, holds the DAO's first-loss Earn shares. One narrow role of the operator Safe burns them or redeems them to the Agent."
         why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart, and the committee executes the first-loss terms without a vote."
         sources: ["ADR-008#d19", "ADR-008#d21", OD-42, OD-60, INV-021]
     tech: "The Asset Safe, the operator Safe, the emergency Safe and the first-loss Safe run Safe v1.5.0. Each modifier is an EIP-1167 minimal proxy of the locked Roles mastercopy, deployed through the Zodiac module proxy factory, with the Asset Safe as its owner, avatar and target."

@@ -17,7 +17,7 @@ planned:
     sources: ["ADR-006#d13", "ADR-006#proposed-direction", OD-49, INV-025]
   - name: First-loss Safe and its role
     where: "An Agent-owned Safe with one modifier of its own"
-    what: "One first-loss modifier with one role, held by the committee's Safe: burn the DAO's first-loss shares, or redeem them to the Aragon Agent. No other role and no motion reaches them."
+    what: "One first-loss modifier with one role, held by the operator Safe: burn the DAO's first-loss shares, or redeem them to the Aragon Agent. No other role and no motion reaches them."
     sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d22", OD-42, OD-60, INV-021]
 changes:
   - area: Modifiers
@@ -90,7 +90,7 @@ changes:
   - area: First-loss shares
     kind: changed
     provider: "Both roles can redeem Earn shares."
-    clutch: "The first-loss shares sit in a first-loss Safe. Only its one narrow role, held by the committee's Safe, burns them or redeems them to the Agent; the vault's other roles never see them."
+    clutch: "The first-loss shares sit in a first-loss Safe. Only its one narrow role, held by the operator Safe, burns them or redeems them to the Agent; the vault's other roles never see them."
     why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart. The narrow role lets the committee execute the first-loss terms without a vote."
     sources: ["ADR-008#d19", "ADR-008#d21", OD-42, OD-60]
   - area: Compiling and pushing

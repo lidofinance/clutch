@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T08:15:41Z
+  at: 2026-10-13T09:03:30Z
 verified: []
 sources:
   - id: s1
@@ -67,9 +67,9 @@ sources:
 | Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Funding assets | USDC, USDT, DAI, USDS, sUSDS, stETH; not ETH | EM decision of 2026-10-05 [s1] | ADR 008 |
 | First-loss Safe | a Safe owned by the Aragon Agent at one of one, with no guard or fallback handler, and one modifier with the `first-loss` role; it holds only the first-loss shares | EM decisions of 2026-10-06 (OD-42) and 2026-10-13 (OD-60) [s1] | ADR 008, [ADR 005](/adr/005-account-graph-and-roles.md) |
-| First-loss role holder | the committee's Safe, four of seven | EM decision of 2026-10-13 (OD-60): "TMC Safe", read as the committee's own Safe [s1] | ADR 008, ADR 005 |
+| First-loss role holder | the operator Safe, four of seven; its guard screens each action once the launch cap lifts | EM decisions of 2026-10-13 (OD-60): "role is hold by TMC Safe" and "TMC Safe means operator safe" [s1] | ADR 008, ADR 005 |
 | Legacy Earn first-loss shares | the earnETH and earnUSD shares that the Growth Committee Safe `0xf6F0732c1e9971497342C295141566E6F1A31e96` holds, 1,362.84 and 1,998,416.46 at block 26126791; transferred to the dedicated first-loss Safe after the enabling vote (OD-42) | EM decisions of 2026-10-05 and 2026-10-06 [s1]; read [s5] | ADR 008 |
-| First-loss burn | the committee's Safe through the `first-loss` role, on the Earn team's written instruction under the March 2026 terms; below the terms, after a Snapshot exception | EM decision of 2026-10-13 (OD-60) [s1], replacing the DAO vote of OD-42; the Snapshot step is the agent's proposal | ADR 008 |
+| First-loss burn | the operator Safe through the `first-loss` role, on the Earn team's written instruction under the March 2026 terms; below the terms, after a Snapshot exception | EM decision of 2026-10-13 (OD-60) [s1], replacing the DAO vote of OD-42; the Snapshot step is the agent's proposal | ADR 008 |
 | Redemption of the first-loss shares | the `first-loss` role requests and claims the redemption, with the proceeds pinned to the Aragon Agent; it cannot transfer or approve the shares | EM decision of 2026-10-13 (OD-60) [s1], replacing the DAO vote of OD-42 | ADR 008 |
 | Twyne | not counted against the seed until its holder and form are shown on chain or in a signed record | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Budget per key | not in this repository; the yield-bearing key gets a fixed monthly figure like the other keys (OD-56) | Computed by attested computation on 2026-09-22 and again on 2026-10-02 with the literal yield-bearing base; enters when the mandate is approved | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
@@ -89,7 +89,7 @@ sources:
 | Zodiac UI | displays Lido's readings and Lido's alerts, which stay canonical; Lido builds both if the policy provider declines | EM decisions of 2026-10-06 (OD-44) and 2026-10-13 (OD-62) [s1] | ADR 009 |
 | Late-report flag | day 8 after month-end; no top-up motion while the report is late | EM decision of 2026-10-05 [s1] | ADR 009 |
 | Screening guard | the screening vendor's existing transaction guard, one instance on the operator Safe, of the build that the Lido multisigs run | EM decisions of 2026-10-02 [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
-| Screening rules | a written list in the [control matrix](/specs/control-matrix.md); a relaxation gets a notice to the Emergency Brakes multisig and the forum, and the vendor's own delay if it has one | EM decisions of 2026-10-06 (OD-39, OD-45) [s1]; the change by reviewed pull request is the agent's proposal | [ADR 010](/adr/010-pre-execution-screening.md) |
+| Screening rules | a written list in the [control matrix](/specs/control-matrix.md); a relaxation gets a notice on the forum, and the vendor's own delay if it has one | EM decisions of 2026-10-06 (OD-39, OD-45) and 2026-10-13 (OD-64) [s1]; the change by reviewed pull request is the agent's proposal | [ADR 010](/adr/010-pre-execution-screening.md) |
 | Guard removal and bypass timelocks | 10 days each, fixed in the chosen build | EM decision of 2026-10-02 [s1]; a constant in the vendor's code | ADR 010 |
 | Delegatecall target of the operator Safe | only Safe's MultiSendCallOnly v1.5.0, `0xA83c336B20401Af773B6219BA5027174338D1836`; a request to the vendor, not a gate | EM decision of 2026-10-05 [s1]; address and code hash [s3] | ADR 010 |
 | Standing approvals on the guard | none, except the guard's two built-in timelock approvals | EM decision of 2026-10-02 [s1] | ADR 010 |

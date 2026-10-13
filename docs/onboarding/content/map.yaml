@@ -8,7 +8,7 @@ description: The Lido DAO owns the Asset Safe; it also owns the orders account a
   The emergency Safe holds the emergency role on the safety modifier, the switch included. Two of its five signers come
   from the committee and two from the Emergency Brakes multisig, which itself holds only the Easy Track pause. Easy Track
   also holds the exit-governance role there, the operator and emergency roles act on the orders account through its own
-  modifier, and the committee's Safe holds the first-loss role; the map draws no arrow for these. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
+  modifier, and the operator Safe also holds the first-loss role; the map draws no arrow for these. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
   through CoW orders from the orders account. The first-loss Safe holds the DAO's first-loss Earn shares. Monitoring
   watches the vault and pages the emergency Safe. Reporting publishes from the vault's snapshots.
 nodes:
@@ -156,7 +156,7 @@ nodes:
   label: First-loss Safe
   sub: one narrow role · Agent owns it
   summary: A Safe that the Aragon Agent owns. It holds only the DAO's first-loss Earn shares. One role, held by the
-    committee's Safe, burns them or redeems them to the Agent, on the Earn team's written instruction.
+    operator Safe, burns them or redeems them to the Agent, on the Earn team's written instruction.
   domain: vault
   kind: contract
   status: instance

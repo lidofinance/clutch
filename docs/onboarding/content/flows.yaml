@@ -271,12 +271,12 @@ flows:
         text: "A pull request changes the written list of the vendor's rules in the control matrix. Reviewers approve it."
         nodes: [committee, policy]
       - who: "Committee"
-        text: "The committee gives notice to the Emergency Brakes multisig and on the forum."
-        nodes: [committee, brakes, reporting]
+        text: "The committee gives notice on the forum (OD-64)."
+        nodes: [committee, reporting]
       - who: "[the screening vendor]"
         text: "The vendor applies the change, after its own delay if it has one."
         nodes: [screening]
-    sources: ["ADR-010#d19", "ADR-010#proposed-direction", OD-39, OD-45,
+    sources: ["ADR-010#d19", "ADR-010#d23", "ADR-010#proposed-direction", OD-39, OD-45, OD-64,
       "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
 
   # --- Funding ------------------------------------------------------------------------------------
@@ -334,7 +334,7 @@ flows:
         nodes: [easytrack, funding, asset-safe, dao]
         edges: [treasury, topup]
       - who: "The committee"
-        text: "From then on, the committee's first-loss role burns the shares or redeems them to the Agent, on the Earn team's written instruction. No other role reaches the first-loss Safe, and monitoring alerts on any change of its balance."
+        text: "From then on, the operator Safe's first-loss role burns the shares or redeems them to the Agent, on the Earn team's written instruction. No other role reaches the first-loss Safe, and monitoring alerts on any change of its balance."
         nodes: [committee, first-loss, monitoring]
         edges: [first-loss-shares]
         check: "INV-021: the first-loss Safe has the Agent as its only owner, and one modifier with one narrow role. Specified, not built."
@@ -353,10 +353,10 @@ flows:
         text: "A curator flags the loss, and the vault's curators confirm it. The Earn team instructs the committee in writing: burn up to all of the DAO's shares in that vault, or exit through the vault's normal redemption."
         nodes: [protocols, committee]
         check: "Below 1%, a Snapshot exception comes first, as after the Kelp incident."
-      - who: "Committee's Safe, 4 of 7"
-        text: "The committee's Safe calls `burn` on the share token through the first-loss role. For an exit, it requests and claims the redemption, and the proceeds go to the Aragon Agent."
-        nodes: [committee, first-loss, protocols]
-        edges: [first-loss-shares]
+      - who: "Operator Safe, 4 of 7"
+        text: "The operator Safe calls `burn` on the share token through the first-loss role. For an exit, it requests and claims the redemption, and the proceeds go to the Aragon Agent. Once the launch cap lifts, the screening guard checks this transaction too."
+        nodes: [committee, operator-safe, screening, first-loss, protocols]
+        edges: [signers-op, screen, first-loss-shares]
         check: "INV-021: the role cannot transfer or approve the shares. Specified, not built."
       - who: "Monitoring"
         text: "Monitoring pages on the action, and alerts on the change of the first-loss Safe's balance."

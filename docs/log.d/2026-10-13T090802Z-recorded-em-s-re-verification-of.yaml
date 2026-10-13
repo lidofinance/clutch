@@ -1,0 +1,3 @@
+date: '2026-10-13'
+kind: Decision
+text: 'Recorded EM''s re-verification of ADR 002 after its OD-63 edit, at EM''s instruction, with recorded_by, a decision-log ref and the body''s hash. The operator Safe holds the first-loss role (OD-60). OD-64: a relaxation of a screening rule gets a notice on the forum only, and the Emergency Brakes multisig gets no view of the Zodiac workspace; ADR 004 changes when EM verifies it again.'

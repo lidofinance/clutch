@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T08:15:41Z
+  at: 2026-10-13T09:03:30Z
 verified: []
 sources:
   - id: s1
@@ -130,7 +130,7 @@ flowchart TD
     TMC -.->|two seats| EMS
     EB["Emergency Brakes 3/5<br/>touches no funds"] -.->|two seats| EMS
     EB -.->|global pause| ET
-    CS["TMC multisig 4/7"] -->|first-loss role<br/>burn, or redeem to the Agent| FL
+    OPS -->|first-loss role<br/>burn, or redeem to the Agent| FL
 
     ROLES -->|approved calls only| DEFI["Approved protocols"]
     SAFE --> DEFI
@@ -173,7 +173,7 @@ Template factories remove the problem without forcing a vote for every new proto
 | Finance application | `0xB9E5CBB9CA5b0d659238807E84D0176930753d86` | existing, `vault()` returns the Agent |
 | Easy Track | `0xF0211b7660680B49De1A7E9f25C65660F0a13Fea` | existing |
 | EVMScriptExecutor | `0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977` | existing |
-| TMC multisig | `0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647` | existing, threshold 4 of 7; its signers also sign the Operator Safe, and two of them sit on the Emergency Safe. Holds the **first-loss** role (OD-60) |
+| TMC multisig | `0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647` | existing, threshold 4 of 7; its signers also sign the Operator Safe, and two of them sit on the Emergency Safe |
 | Emergency Brakes multisig | `0x73b047fe6337183A454c5217241D780a932777bD` | existing, threshold 3 of 5; holds the global Easy Track pause and no role in the vault; two of its members sit on the Emergency Safe (OD-58) |
 | **Emergency Safe** | to be deployed | new Safe v1.5.0 instance, **threshold 3 of 5**: two TMC members, two Emergency Brakes members and a fifth signer who is a member of neither body. No guard |
 | Safe singleton v1.5.0 | `0xFf51A5898e281Db6DfC7855790607438dF2ca44b` | reused. `VERSION()` returns `1.5.0`, and the runtime codehash equals `0xdda019cbd7c867a533a2a86e5c53434fdc50b13122b5a5ddb4a8df61b31c20f2`, matching the published deployment record. Released 2025-07-03, audited by Certora and Ackee at pinned commits, covered by the Safe bug-bounty programme. The Asset Safe, the Operator Safe and the Emergency Safe use v1.5.0, by EM's decisions of 2026-10-02 and 2026-10-05 [s1]. The screening vendor's guard passed the same fork suite on v1.3.0, v1.4.1 and v1.5.0 [s6], and the vendor confirmed its support for v1.5.0, as EM reported on 2026-10-05. None of the six Lido Safes checked runs v1.5.0 today. Its record of holding value is short; see Security Considerations [s8] |
@@ -181,12 +181,12 @@ Template factories remove the problem without forcing a vote for every new proto
 | Zodiac Roles mastercopy | `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5` | reused, `owner()` is `0x…01`, i.e. locked |
 | Zodiac ModuleProxyFactory | `0x000000000000aDdB49795b0f9bA5BC298cDda236` | reused |
 | **Asset Safe** | to be deployed | new instance of the singleton. No guard and no fallback handler are set on it. The Aragon Agent authorizes its transactions only by `approveHash` or by sending them itself, never by a contract signature (OD-17) |
-| **Operator Safe** | to be deployed | new Safe instance with the TMC signers. Holds no assets and no modules. Threshold 4 of 7. Holds the operator role, is the trusted caller of every factory, and carries the screening guard |
+| **Operator Safe** | to be deployed | new Safe instance with the TMC signers. Holds no assets and no modules. Threshold 4 of 7. Holds the operator role and the **first-loss** role (OD-60), is the trusted caller of every factory, and carries the screening guard |
 | **Operator modifier** | to be deployed | minimal proxy of the mastercopy. Carries the operator and governance roles. The operator role is held by the Operator Safe, whose transactions are screened |
 | **Safety modifier** | to be deployed | minimal proxy of the mastercopy. Carries the emergency role, and the exit-governance role through which a motion adds an emergency exit (OD-49). Never screened |
 | **Screening guard** | vendor-supplied | the screening vendor's existing transaction guard, one instance for the Operator Safe, set with `setGuard`. Not written by Lido |
 | **Orders account** | to be deployed | new Safe instance owned by the Aragon Agent, one of one, with CoW's `ExtensibleFallbackHandler` at `0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5` and ComposableCoW as the verifier of CoW's settlement domain. Holds only tokens in transit between a transfer and a fill. It has one modifier with the operator and emergency roles and no governance role, because no motion writes there (OD-43, OD-57, OD-58) [s11] |
-| **First-loss Safe** | to be deployed | new Safe instance owned by the Aragon Agent, one of one, with no guard or fallback handler. Holds only the DAO's first-loss Earn shares. One modifier carries the **first-loss** role, held by the TMC multisig: burn the shares, or redeem them with the proceeds pinned to the Agent (OD-42, OD-60) |
+| **First-loss Safe** | to be deployed | new Safe instance owned by the Aragon Agent, one of one, with no guard or fallback handler. Holds only the DAO's first-loss Earn shares. One modifier carries the **first-loss** role, held by the Operator Safe: burn the shares, or redeem them with the proceeds pinned to the Agent (OD-42, OD-60) |
 | CoW order signer | `0x23dA9AdE38E4477b23770DeD512fD37b12381FAB` | reused, verified `CowswapOrderSigner`; called by delegatecall from the orders account [s11] |
 | ComposableCoW, TWAP and StopLoss handlers | `0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74`, `0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5`, `0x412c36e5011cd2517016d243a2dfb37f73a242e7` | reused; Ackee audited ComposableCoW and CoW's fallback handler, and Gnosis reviewed ComposableCoW; whether the two handlers are in those reports' scope is not checked [s11] |
 
@@ -211,7 +211,7 @@ The principals and their roles follow. Role keys are `bytes32`; the encoding mus
 | `emergency` | Emergency Safe, three of five: two TMC members, two Emergency Brakes members and one member of neither body. **Safety modifier** and the orders modifier | Set approvals to zero; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS; transfer assets to the Agent or to the orders account; on the orders account, cancel orders, send tokens to the Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent; revoke the operator's targets and functions, which is how every removal happens; disable the **operator** modifier, with the module argument pinned, for a defect in the permission layer or on the cap-breach trigger (OD-29, OD-58) | Add any permission; enter any protocol except by staking ETH; borrow; reach the first-loss Safe; change the recovery destination; disable the safety modifier or the orders modifier; restore what it stopped (OD-59) |
 | `governance` | EVMScriptExecutor, driven by Easy Track | Write operator permissions from a fixed template, for a target named in a motion; set operator budgets within ceilings | Submit a condition tree; grant or remove any role; touch the emergency role; target the modifier's avatar or any of its modules; grant delegatecall |
 | exit governance | EVMScriptExecutor, driven by Easy Track. **Safety modifier** | Write the emergency role's exit for a target that an onboarding motion names, from the same template: redeem, withdraw, claim and cancel pinned to the avatar, a transfer pinned to the Agent, an approval set to zero (OD-49) | Write anything but an exit; grant delegatecall; touch membership or the switch; set an allowance; target the Asset Safe or any of its modules |
-| `first-loss` | TMC multisig, four of seven. **First-loss modifier** | Burn the DAO's earnETH and earnUSD shares; request and claim their redemption, with the proceeds pinned to the Agent; on the Earn team's written instruction under the March 2026 terms (OD-60) | Transfer or approve the shares; pay anyone but the Agent |
+| `first-loss` | Operator Safe, the TMC signers, four of seven, screened once the launch cap lifts. **First-loss modifier** | Burn the DAO's earnETH and earnUSD shares; request and claim their redemption, with the proceeds pinned to the Agent; on the Earn team's written instruction under the March 2026 terms (OD-60) | Transfer or approve the shares; pay anyone but the Agent |
 
 The emergency role's ability to revoke the operator works because the Safe owns the modifier: a call through the emergency role executes as the Safe, which the modifier accepts as its owner.
 
@@ -342,7 +342,7 @@ Two consequences to accept. A per-payment ceiling is not a per-motion ceiling, s
 
 The mandate puts seeding and top-ups on Easy Track, and it makes the objection the control of a top-up. The registry is the backstop.
 
-**The legacy Earn shares (OD-21).** The DAO's first-loss shares in EarnETH and EarnUSD, approved by Snapshot in March 2026, sit in a Growth Committee Safe [s10]. After the enabling vote, the Growth Committee transfers them to a dedicated first-loss Safe, owned by the Aragon Agent, and the seed is one floor less their value (OD-42). This proposal takes over the first-loss terms of that allocation, with the committee as executor in place of the Growth Committee (OD-60). The first-loss Safe has one modifier, whose one role, held by the TMC multisig, burns the shares or redeems them with the proceeds pinned to the Agent, on the Earn team's written instruction. No other role reaches the first-loss Safe, so the no-redeem rule for the operator is structural, not written. Reports show the first-loss Safe as a sub-allocation of the vault, and monitoring alerts on every action of the role and on any change of its balance, owners or modules. A Twyne position counts against the seed only when its holder and form are shown.
+**The legacy Earn shares (OD-21).** The DAO's first-loss shares in EarnETH and EarnUSD, approved by Snapshot in March 2026, sit in a Growth Committee Safe [s10]. After the enabling vote, the Growth Committee transfers them to a dedicated first-loss Safe, owned by the Aragon Agent, and the seed is one floor less their value (OD-42). This proposal takes over the first-loss terms of that allocation, with the committee as executor in place of the Growth Committee (OD-60). The first-loss Safe has one modifier, whose one role, held by the Operator Safe, burns the shares or redeems them with the proceeds pinned to the Agent, on the Earn team's written instruction. No other role reaches the first-loss Safe, so the no-redeem rule for the operator is structural, not written. Reports show the first-loss Safe as a sub-allocation of the vault, and monitoring alerts on every action of the role and on any change of its balance, owners or modules. A Twyne position counts against the seed only when its holder and form are shown.
 
 - **Period: one calendar month.** The mandate's top-up follows each month-end snapshot, so each month's top-up has its own limit. No live Lido registry uses one month; they use three, six or twelve [s7].
 - **Limit: one TM Floor Value per registry per month.** Stablecoins count at par. The stETH limit is the floor at the Coingecko price pinned when the enabling vote is prepared, set by attested computation. Either asset can carry a full refill, as the mandate allows for the seed and for the runway protection's stETH top-up.
@@ -586,7 +586,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Restart after a stop | DAO | A Voting item unpauses Easy Track; an Agent item through Dual Governance enables the operator modifier again; the same vote first cancels the queued motions | Five days; about nine days through Dual Governance |
 | Return assets to the DAO | Emergency Safe, three of five | Direct through the modifier | Minutes to initiate |
 | Replace the whole policy | DAO | Vote through Dual Governance to the Agent | Vote plus Dual Governance timelock |
-| Burn first-loss Earn shares | TMC multisig, on the Earn team's written instruction | The first-loss role calls `burn` on the share token, through the first-loss modifier | Minutes to initiate |
+| Burn first-loss Earn shares | Operator Safe, on the Earn team's written instruction, with the vendor's approval once the launch cap lifts | The first-loss role calls `burn` on the share token, through the first-loss modifier | Minutes to initiate |
 
 Signer-set reconciliation between the TMC multisig and the Operator Safe is a manual runbook duty, handled the same way as consensus-member and committee rotations elsewhere in the protocol. The Emergency Safe follows its seat rule: a signer who leaves the committee or the Emergency Brakes multisig leaves the seat. There is no on-chain enforcement, so a rotation is not complete until every affected Safe is updated.
 

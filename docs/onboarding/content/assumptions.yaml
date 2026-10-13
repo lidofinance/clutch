@@ -33,8 +33,8 @@
 - id: signers-good-faith
   assumption: "The committee's signers act in good faith."
   kind: trust
-  why: "The same people sign the committee's Safe and the operator Safe at 4 of 7, and the committee's Safe holds the first-loss role. Two of them sit on the emergency Safe."
-  breaks: "The committee proposes its own expansions and executes the first-loss terms. A captured committee Safe can burn the first-loss shares, which moves their value to the vault's other depositors. Two compromised committee keys no longer reach the emergency role (OD-58)."
+  why: "The same people sign the committee's Safe and the operator Safe at 4 of 7, and the operator Safe also holds the first-loss role. Two of them sit on the emergency Safe."
+  breaks: "The committee proposes its own expansions and executes the first-loss terms. A captured operator Safe can burn the first-loss shares, which moves their value to the vault's other depositors. Two compromised committee keys do not reach the emergency role (OD-58)."
   watched_by: ["test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval"]
   watch_note: "INV-002, INV-014 and INV-021 are pending. Paging on every emergency action and on every action of the first-loss role is not built."
   sources: ["ADR-005#d2", "ADR-005#d9", "ADR-005#d24", "ADR-005#d27", "ADR-008#d21", "ADR-008#consequences", "ADR-006#d3",

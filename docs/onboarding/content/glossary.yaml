@@ -108,7 +108,7 @@
   sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", OD-21, OD-42, OD-60]
 
 - term: First-loss Safe
-  plain: "A Safe that the Aragon Agent owns, which holds only the first-loss shares. Its one modifier carries one narrow role for the committee's Safe: burn the shares, or redeem them to the Aragon Agent."
+  plain: "A Safe that the Aragon Agent owns, which holds only the first-loss shares. Its one modifier carries one narrow role for the operator Safe: burn the shares, or redeem them to the Aragon Agent."
   sources: ["ADR-008#d19", "ADR-008#d21", OD-42, OD-60, INV-021]
 
 - term: Fortnightly snapshot

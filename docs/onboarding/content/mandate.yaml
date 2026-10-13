@@ -168,7 +168,7 @@ blocks:
     title: Legacy investments
     says: "Legacy DAO investments carry over into the vault and reduce the initial funding request."
     kept:
-      - "On chain: the DAO's first-loss Earn shares sit in a first-loss Safe. One narrow role of the committee's Safe burns them or redeems them to the Aragon Agent; no other role reaches them."
+      - "On chain: the DAO's first-loss Earn shares sit in a first-loss Safe. One narrow role of the operator Safe burns them or redeems them to the Aragon Agent; no other role reaches them."
       - "The committee acts on the Earn team's written instruction, under the March 2026 terms. Below them, a Snapshot exception comes first."
       - "Detection: alerts on any change of the first-loss Safe's balance, owners or modules, and a page on every action of the role."
     tech: "INV-021 fixes the first-loss Safe's shape and its one role. The Growth Committee's Safe moves the shares once, after the enabling vote."
@@ -190,7 +190,7 @@ blocks:
     kept:
       - "Every rule gets a control on each layer that can carry it: on chain, before execution, detection and display."
       - "Motions are the timelock for every structural increase of exposure."
-      - "A relaxation of a screening rule gets a notice to the Emergency Brakes multisig and the forum, and the vendor's own delay if it has one."
+      - "A relaxation of a screening rule gets a notice on the forum, and the vendor's own delay if it has one."
     tech: "The control matrix maps each rule to its controls, owner and status."
     changes:
       - text: "The control section says how each rule is kept, by reference to the control matrix."
@@ -200,6 +200,6 @@ blocks:
       - text: "Easy Track motions are the timelock for structural increases of exposure, and screening rules get change control."
         why: "A wider target list or a looser screening rule must not take effect without notice."
         state: design
-        sources: ["ADR-009#d30", "ADR-010#d19", OD-45]
+        sources: ["ADR-009#d30", "ADR-010#d19", "ADR-010#d23", OD-45, OD-64]
     sources: ["ADR-009#d26", "ADR-009#d30", OD-39, OD-45, "doc:docs/specs/control-matrix.md#control-matrix",
       "doc:ROADMAP.md#roadmap"]
