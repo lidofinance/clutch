@@ -55,9 +55,9 @@ sections:
       - text: "An orders account, owned by the Aragon Agent, places CoW orders for the operator and for recovery."
         why: "Conditional orders need CoW's fallback handler, and the Asset Safe has none."
         sources: ["ADR-007#d17", OD-43, "lip:part-6"]
-      - text: "A first-loss Safe, owned by the Aragon Agent, holds the DAO's first-loss Earn shares. One narrow role of the operator Safe burns them or redeems them to the Agent."
-        why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart, and the committee executes the first-loss terms without a vote."
-        sources: ["ADR-008#d19", "ADR-008#d21", OD-42, OD-60, INV-021]
+      - text: "A first-loss Safe, owned by the Aragon Agent, holds the DAO's first-loss Earn shares. An Easy Track motion burns them, and one narrow role of the operator Safe redeems them to the Agent."
+        why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart, and the committee executes the first-loss terms without a DAO vote."
+        sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", OD-42, OD-60, OD-67, INV-021]
     tech: "The Asset Safe, the operator Safe, the emergency Safe and the first-loss Safe run Safe v1.5.0. Each modifier is an EIP-1167 minimal proxy of the locked Roles mastercopy, deployed through the Zodiac module proxy factory, with the Asset Safe as its owner, avatar and target."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#accounts", "ADR-005#d12", "ADR-005#d13",
       "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1"]
@@ -77,8 +77,9 @@ sections:
         sources: ["ADR-006#d1", "ADR-006#proposed-direction", INV-004, "doc:ROADMAP.md#roadmap"]
       - asked: "The Aragon Agent stays the only owner of the Asset Safe. Easy Track gets no ownership and no unrestricted execution, and it executes only the permission changes that the Operator Safe proposes in motions."
         verdict: kept
-        clutch: "Easy Track never receives authority over the Agent. Its executor holds only the governance and exit-governance roles, and the operator Safe, as the trusted caller of every factory, creates every motion."
-        sources: ["ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-010#proposed-direction", INV-004]
+        clutch: "Easy Track never receives authority over the Agent. On the Asset Safe, its executor holds only the governance and exit-governance roles. Outside it, the executor also holds the burn role on the first-loss Safe, so every first-loss burn is a motion (OD-67). The operator Safe, as the trusted caller of every factory, creates every motion."
+        sources: ["ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-008#d23", "ADR-010#proposed-direction", OD-67,
+          INV-004]
       - asked: "A direct DAO path can make every change that Easy Track can make."
         verdict: kept
         clutch: "A DAO vote, through Dual Governance, can do everything on the owner path: replace the policy, change membership and apply any change without Easy Track. A fork test runs that path."

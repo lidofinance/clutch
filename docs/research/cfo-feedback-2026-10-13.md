@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: The committee's feedback of 2026-10-12
-description: The evidence behind OD-58 to OD-63 — six points of feedback from the CFO, a member of the committee; Lido's pause-or-disable rule and its emergency bodies; how Easy Track pauses and restarts; the 2026 incidents that bear on emergency powers; the first-loss terms of March 2026; CoW's order life; prices under stress; the quorums of the new emergency Safe; what the new model simplifies; and a drill that shows the switch freezing a queued motion.
+description: The evidence behind OD-58 to OD-67 — six points of feedback from the CFO, a member of the committee; Lido's pause-or-disable rule and its emergency bodies; how Easy Track pauses and restarts; the 2026 incidents that bear on emergency powers; the first-loss terms of March 2026; CoW's order life; prices under stress; the quorums of the new emergency Safe; what the new model simplifies; and a drill that shows the switch freezing a queued motion.
 tags: [emergency, governance, easy-track, first-loss, orders, prices, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-13
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T08:15:41Z
+  at: 2026-10-13T17:07:39Z
 verified: []
 sources:
   - id: s1
@@ -72,6 +72,21 @@ sources:
   - id: s20
     resource: "https://research.4pillars.io/en/research/reflections-on-the-resolv-protocol-exploit"
     title: Four Pillars — the Resolv exploit; a single report of the time that the pause's signatures took
+  - id: s21
+    resource: "urn:clutch:restricted:cfo-followup-2026-10-13"
+    title: The CFO's follow-up questions and EM's answers in the committee's channel, 2026-10-13; outside the repository
+  - id: s22
+    resource: "https://github.com/mellow-finance/flexible-vaults/blob/735e085339a5ad6a637e742870a7e1c746554d95/src/managers/BurnableTokenizedShareManager.sol#L9-L15"
+    title: Mellow flexible-vaults — the burnable share manager; `burn` burns the caller's own shares
+  - id: s23
+    resource: "https://github.com/mellow-finance/flexible-vaults/blob/f164438c2d0d5e5d78c52481e7716ee0d174c41b/src/managers/ShareManager.sol#L241"
+    title: Mellow flexible-vaults — the plain share manager; `burn` is `onlyQueue`
+  - id: s24
+    resource: "https://github.com/Se7en-Seas/boring-vault/blob/4538ccf7706290e38b739e939854897c0f81f6de/src/base/BoringVault.sol#L94-L99"
+    title: Veda BoringVault — `exit`, the only path to `_burn`, needs an authorised caller
+  - id: s25
+    resource: "https://github.com/morpho-org/morpho-blue/blob/8f89ede29ec9d2cfa9688aa670346226a3571f06/src/Morpho.sol#L390-L401"
+    title: Morpho Blue — a liquidation that leaves bad debt lowers the market's total supply assets
 ---
 
 # The committee's feedback of 2026-10-12
@@ -134,7 +149,7 @@ No such data exists for a group that mixes members of different bodies. The firs
 
 ## The first-loss terms
 
-- After a loss of at least 1% that the curators confirm, the Earn team may instruct the executing committee to burn up to all of the DAO's shares in that vault. On a confirmed material risk, it may instruct a withdrawal through the vault's normal redemption. No vote is needed. An incident update is due within seven days, and the DAO may change or end the authorisation at any time [s10].
+- After a loss of at least 1% that the curators confirm, the Earn team may instruct the executing committee to burn up to all of the DAO's shares in that vault. On a confirmed material risk, it may instruct a withdrawal through the vault's normal redemption. No vote is needed. An incident update is due within seven days, and the DAO may change or end the authorisation at any time. The burn decision must be documented in the incident update, but "execution may precede posting if time-sensitive" [s10].
 - After the Kelp incident the loss stayed below 1%. A Snapshot approved a one-time exception, and the burn ran on 2026-05-15 as one `burn` call [s11].
 - Lido's review says that the activation criteria and the roles of the curators and the DAO "will be formalized before the next incident" [s11].
 - Under OD-42, every burn or redemption was a DAO vote through Dual Governance: about nine days, plus a slot in an omnibus vote. That is slower than the terms that the mandate takes over.
@@ -175,8 +190,23 @@ It does not simplify the two modifiers on the Asset Safe, because recovery must 
 
 The drill `test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts` ran on the pinned fork on 2026-10-13 and passed. A motion that writes through the governance role is queued. The emergency role disables the operator modifier. After the objection window, the enactment reverts with the Safe's `GS104`, while the emergency role's transfer to the Agent still works. The owner path enables the modifier again, and the same motion then enacts. So a restart must cancel the queued motions first.
 
+## Follow-up: insurance funds for other products
+
+On 2026-10-13 the CFO asked whether the vault can manage more insurance funds, for other products too (OD-66) [s21]. A first-loss fund needs a way for the DAO's position to take a loss before other depositors. Each product's contracts decide that way.
+
+| Product contracts | How a holder's position can take a loss | Template that fits |
+|---|---|---|
+| A Mellow vault with the burnable share manager, as Lido Earn uses | `burn(uint256)` burns the caller's own shares [s22] | burnable shares |
+| A Mellow vault with the plain share manager | only a queue can burn shares [s23] | none, unless the product gives a payout address |
+| A Veda vault | only an authorised caller can burn shares, through `exit` [s24] | none, unless the product gives a payout address |
+| A Morpho Blue market, the base of Lido Lend | a liquidation that leaves bad debt lowers the market's supply assets, so every lender of that market takes the loss [s25] | none, unless the product gives a payout address, for example a reserve that covers bad debt |
+| A product on another chain | its shares are on that chain | none: the first-loss Safe is on Ethereum |
+
+So the burnable-shares template serves the Lido Earn family. Any other product needs a fixed payout address that its own design defines, or a new template. A new template needs a factory that the DAO registers by vote, once for each kind of product.
+
 ## Open after the decisions
 
-- The fifth signer: who, on what terms, and the Snapshot that appoints them.
+- The fifth signer: who, on what terms, and the Snapshot that appoints them (OD-65).
+- Insurance funds for products other than Lido Earn (OD-66).
 - The committee's valuation policy: the band of level 2 and the level-5 share (OD-62).
 - The policy provider's answer on display and monitoring in the Zodiac UI (OD-44, OD-62).

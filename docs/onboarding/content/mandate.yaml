@@ -168,21 +168,21 @@ blocks:
     title: Legacy investments
     says: "Legacy DAO investments carry over into the vault and reduce the initial funding request."
     kept:
-      - "On chain: the DAO's first-loss Earn shares sit in a first-loss Safe. One narrow role of the operator Safe burns them or redeems them to the Aragon Agent; no other role reaches them."
+      - "On chain: the DAO's first-loss Earn shares sit in a first-loss Safe. A burn runs only as an Easy Track motion, and one narrow role of the operator Safe redeems them to the Aragon Agent; no other role reaches them."
       - "The committee acts on the Earn team's written instruction, under the March 2026 terms. Below them, a Snapshot exception comes first."
-      - "Detection: alerts on any change of the first-loss Safe's balance, owners or modules, and a page on every action of the role."
-    tech: "INV-021 fixes the first-loss Safe's shape and its one role. The Growth Committee's Safe moves the shares once, after the enabling vote."
+      - "Detection: alerts on any change of the first-loss Safe's balance, owners or modules, and a page on every burn motion and every action of the role."
+    tech: "INV-021 fixes the first-loss Safe's shape and its two roles. The Growth Committee's Safe moves the shares once, after the enabling vote."
     changes:
-      - text: "The legacy section takes over the first-loss terms of the March 2026 Earn allocation, with the committee as executor in place of the Growth Committee, through one narrow role on a first-loss Safe."
-        why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart, and the narrow role keeps a burn as fast as the Growth Committee's."
+      - text: "The legacy section takes over the first-loss terms of the March 2026 Earn allocation, with the committee as executor in place of the Growth Committee: a burn as an Easy Track motion, and an exit through one narrow role on a first-loss Safe."
+        why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart. A burn moves the shares' value to other depositors, so LDO holders get the objection window; an exit pays the DAO, so it stays fast."
         state: owed
-        sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", OD-21, OD-42, OD-60]
+        sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", OD-21, OD-42, OD-60, OD-67]
       - text: "Twyne reduces the seed only when its holder and form are shown."
         why: "No Lido address checked holds a Twyne position."
         state: design
         sources: ["ADR-008#d17", OD-21]
-    sources: ["ADR-008#d13", "ADR-008#d17", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#proposed-direction",
-      OD-21, OD-42, OD-60, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
+    sources: ["ADR-008#d13", "ADR-008#d17", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23",
+      "ADR-008#proposed-direction", OD-21, OD-42, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
 
   - id: controls
     title: How each rule is kept

@@ -334,41 +334,48 @@ flows:
         nodes: [easytrack, funding, asset-safe, dao]
         edges: [treasury, topup]
       - who: "The committee"
-        text: "From then on, the operator Safe's first-loss role burns the shares or redeems them to the Agent, on the Earn team's written instruction. No other role reaches the first-loss Safe, and monitoring alerts on any change of its balance."
+        text: "From then on, on the Earn team's written instruction, a burn motion burns the shares, and the operator Safe's first-loss role redeems them to the Agent. No other role reaches the first-loss Safe, and monitoring alerts on any change of its balance."
         nodes: [committee, first-loss, monitoring]
         edges: [first-loss-shares]
-        check: "INV-021: the first-loss Safe has the Agent as its only owner, and one modifier with one narrow role. Specified, not built."
-    sources: ["ADR-008#d4", "ADR-008#d13", "ADR-008#d19", "ADR-008#d20", "ADR-008#d21", "ADR-008#proposed-direction",
-      OD-21, OD-42, OD-54, OD-60, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
+        check: "INV-021: the first-loss Safe has the Agent as its only owner, and one modifier with two narrow roles. Specified, not built."
+    sources: ["ADR-008#d4", "ADR-008#d13", "ADR-008#d19", "ADR-008#d20", "ADR-008#d21", "ADR-008#d23",
+      "ADR-008#proposed-direction", OD-21, OD-42, OD-54, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
 
   - id: first-loss-burn
     group: funding
     title: A first-loss burn or exit
     label: specified
-    summary: "How the DAO's first-loss Earn shares absorb a loss, as the March 2026 terms say. The committee executes the terms through one narrow role, without a vote (OD-60)."
+    summary: "How the DAO's first-loss Earn shares absorb a loss, as the March 2026 terms say. The committee executes the terms without a DAO vote: a burn is an Easy Track motion, with its objection window, and an exit goes through one narrow role (OD-60, OD-67)."
     trigger: "A loss of at least 1% in earnETH or earnUSD that the curators confirm, or a confirmed material risk."
-    time: "Minutes to initiate, after the Earn team's written instruction."
+    time: "A burn: at least 72 hours, the objection window. An exit: minutes to initiate, then the redeem queue. Both start after the Earn team's written instruction."
     steps:
       - who: "Earn team and curators"
         text: "A curator flags the loss, and the vault's curators confirm it. The Earn team instructs the committee in writing: burn up to all of the DAO's shares in that vault, or exit through the vault's normal redemption."
         nodes: [protocols, committee]
         check: "Below 1%, a Snapshot exception comes first, as after the Kelp incident."
       - who: "Operator Safe, 4 of 7"
-        text: "The operator Safe calls `burn` on the share token through the first-loss role. For an exit, it requests and claims the redemption, and the proceeds go to the Aragon Agent. Once the launch cap lifts, the screening guard checks this transaction too."
-        nodes: [committee, operator-safe, screening, first-loss, protocols]
-        edges: [signers-op, screen, first-loss-shares]
-        check: "INV-021: the role cannot transfer or approve the shares. Specified, not built."
+        text: "For a burn, the operator Safe creates a motion on the first-loss burn factory, and the forum post with the instruction goes up with it. For an exit, it requests and claims the redemption through the first-loss role, and the proceeds go to the Aragon Agent. Once the launch cap lifts, the screening guard checks both transactions."
+        nodes: [committee, operator-safe, screening, easytrack, first-loss, protocols]
+        edges: [signers-op, screen, motions, first-loss-shares]
+        check: "INV-021: only an enacted motion can burn the shares, and neither role can transfer or approve them. Specified, not built."
+      - who: "Easy Track, after 72 hours"
+        text: "If LDO holders do not object, anyone enacts the motion. The Easy Track script executor calls `burn` on the share token through the first-loss burn role."
+        nodes: [easytrack, first-loss, protocols]
+        edges: [first-loss-shares]
       - who: "Monitoring"
-        text: "Monitoring pages on the action, and alerts on the change of the first-loss Safe's balance."
-        nodes: [monitoring, first-loss]
+        text: "Monitoring pages on the motion and on the action, and alerts on the change of the first-loss Safe's balance."
+        nodes: [monitoring, easytrack, first-loss]
       - who: "Committee"
         text: "The incident update follows on the forum within seven days. Reports show the first-loss amount less the burn."
         nodes: [committee, reporting]
     escapes:
+      - "LDO holders object: the motion fails, and nothing burns. The DAO can still burn by vote, as the Safe's owner."
+      - "Depositors see the motion for 72 hours and can time their entries and exits, so the vault should pause deposits and redemptions until the burn, as Lido Earn did after the Kelp incident."
       - "A curator freezes the vault: an exit waits for the vault, and a burn still works."
-      - "The DAO changes or ends the authorisation: a vote changes or removes the role."
-    sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", "ADR-008#context", "ADR-008#proposed-direction", "ADR-005#d27",
-      OD-60, INV-021, "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares",
+      - "The DAO changes or ends the authorisation: a vote changes or removes the roles and the burn factory."
+    sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-008#context", "ADR-008#proposed-direction",
+      "ADR-008#consequences", "ADR-005#d27", OD-60, OD-67, INV-021, "runbook:Burn first-loss Earn shares",
+      "runbook:Exit the first-loss shares",
       "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms"]
 
   # --- Reporting and monitoring -------------------------------------------------------------------
@@ -691,7 +698,7 @@ flows:
         text: "The specifications and the detector specification, the control matrix and the screening rule list with the vendor's questions, the Zodiac UI requirement list, the orders account's fork tests, the runbook drafts and the Lido Zodiac workspace."
         nodes: [policy, monitoring, screening, orders]
       - who: "Phase 2: build"
-        text: "The round-trip check, the orders account and its permissions, the first-loss Safe with its narrow role, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the readings that the Zodiac UI shows, and the invariant-to-test check."
+        text: "The round-trip check, the orders account and its permissions, the first-loss Safe with its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the readings that the Zodiac UI shows, and the invariant-to-test check."
         nodes: [policy, orders, first-loss, easytrack, funding, reporting, monitoring]
       - who: "Phase 3: assurance"
         text: "An external audit, Lido's review of the guard change and of CoW's order signer, and fork drills that initiate within 6 hours."
@@ -723,7 +730,7 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, operator-safe, emergency-safe]
       - who: "LDO holders"
-        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance and first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories and adds USDS to the payment permission."
+        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories and adds USDS to the payment permission."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
         edges: [own, own-op, own-sf]
       - who: "Growth Committee, then the operator Safe"
