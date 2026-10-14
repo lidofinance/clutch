@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T18:57:48Z
+  at: 2026-10-14T20:11:35Z
 verified: []
 sources:
   - id: s1
@@ -68,10 +68,10 @@ Figures stay out of this page. They come from the attested computation once the 
 | Structural increases of exposure wait for a timelock (OD-45) | Motions with a 72-hour objection window, or DAO votes, which run as direct Voting items (OD-73) [s6] | The creation of every motion | Motion lifecycle | Pending motions and their deadlines | LDO holders; the Emergency Brakes multisig can pause Easy Track; the emergency Safe's switch freezes the vault's queued motions | Built on a mock Easy Track; specified |
 | A relaxation of a screening rule is controlled (OD-45) | — | The written list below; the vendor's own delay, if it has one | A rule change, where the vendor reports one | — | The committee and `@lidofinance/defi-tech`; the forum gets notice (OD-64) | Specified |
 | A motion adds only exits to the emergency role (OD-49) | The exit-governance role writes only under the `emergency` key, with no delegatecall, no allowance and no administrative target (INV-025) | The creation of every motion | Drift on the safety policy | — | `@lidofinance/defi-tech` writes the templates; LDO holders can object | Specified |
-| No delegatecall by motion, and no vault account as a motion's target | The governance roles' guards on the operator modifier and the orders modifier (OD-36, OD-38, OD-68; INV-028) | — | Drift | — | `@lidofinance/defi-tech` | Built for the Asset Safe, and the compiler refuses a policy without the guard; the orders modifier's governance role specified |
+| No delegatecall by motion, and no vault account as a motion's target | The governance role's guards (OD-36, OD-38) | — | Drift | — | `@lidofinance/defi-tech` | Built for the Asset Safe, and the compiler refuses a policy without the guard; the orders account has no governance role (OD-78) |
 | An emergency action starts within six hours | The emergency role, with its switch (INV-002, INV-009) | Never screened | Paging through the general Lido incident process | — | The emergency Safe; the Emergency Brakes multisig for the Easy Track pause | Built for the listed positions; a position that a motion onboards gets its emergency exit from that motion (OD-49), specified; runbooks and drills owed |
 | The operator Safe keeps the committee's signers, and the emergency Safe keeps its seat rule (OD-58) | — | — | Owner-change alerts, critical on the emergency Safe (INV-026) | Signer sets | The committee and the Emergency Brakes multisig, for their seats | Specified; runbook owed |
-| No emergency body restores what it stopped (OD-59, OD-75) | The emergency role holds only calls that remove authority, and the compiler refuses a grant or a budget for it (INV-027); a motion restores only launch permissions and relayer approvals (INV-031) | — | Drift; any change of Easy Track's roles | — | The DAO restarts, by vote or by a restore motion | Built for the Asset Safe; the Easy Track roles are a chain check before the enabling vote |
+| No emergency body restores what it stopped (OD-59) | The emergency role holds only calls that remove authority, and the compiler refuses a grant or a budget for it (INV-027) | — | Drift; any change of Easy Track's roles | — | The DAO restarts, by vote (OD-78) | Built for the Asset Safe; the Easy Track roles are a chain check before the enabling vote |
 | Every asset has a price, with its level and source (OD-62) | None | — | The report generator's five-level waterfall; a top-up post names every price below level 2; a top-up waits while level 5 covers more than the set share | Lido's readings, with each price's level and source | The committee's valuation policy sets the band and the level-5 share | Specified; the figures are not set |
 | Reports can be reproduced | — | — | The report generator at a pinned block | Lido's readings | `@lidofinance/defi-tech` builds the generator; the committee publishes | Specified |
 

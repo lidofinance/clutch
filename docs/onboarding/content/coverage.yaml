@@ -5,5 +5,8 @@ adrs:
 invariants:
   INV-007: "Retired on 2026-10-05: the design has no role-toggle factory (OD-09)."
   INV-020: "Retired on 2026-10-06: the design has no Stonks instance, converter or price feed (OD-43)."
+  INV-028: "Retired on 2026-10-14: the orders modifier has no governance role and no approvals role (OD-78)."
+  INV-030: "Retired on 2026-10-14: the token template does not ship (OD-78)."
+  INV-031: "Retired on 2026-10-14: the restore template does not ship (OD-78)."
 lip: {}
 runbooks: {}

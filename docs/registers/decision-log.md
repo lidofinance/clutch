@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T19:25:23Z
+  at: 2026-10-14T20:11:35Z
 verified: []
 sources:
   - id: s1
@@ -45,7 +45,7 @@ sources:
     title: The CFO's follow-up questions and EM's answers in the committee's channel, 2026-10-13; outside the repository
   - id: s12
     resource: "urn:clutch:interview:2026-10-14"
-    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-77, 2026-10-14; the transcript is not in the repository
+    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-78, 2026-10-14; the transcript is not in the repository
 ---
 
 # Decision log
@@ -55,6 +55,23 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-14 — OD-78: a smaller launch
+
+EM asked how many Safes, actors, new Easy Track factories and launch vote items the design has, and said:
+
+> now I feel that complexity is large
+
+The agent counted them and listed three items as optional at launch: insurance funds; the token template, with the orders modifier's governance and approvals roles; and the restore template. EM answered:
+
+> I want cut, remove optional at launch; also run 80/20 pass even after that
+
+Recorded as:
+
+- (OD-78) Insurance funds do not ship with the launch: no fund roles, no fund templates, and no third funding registry or top-up factory. A later vote adds them; OD-66's framework, checklist, motions and exit describe them for that vote ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 31).
+- (OD-78) The token template does not ship, and the orders modifier has no governance role and no approvals role. A DAO vote adds a token to the orders account, for every order type, with its relayer approval, and sets again an approval that the emergency role set to zero ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 38).
+- (OD-78) The restore template does not ship. The DAO restarts by vote after each stop, as OD-59 decided ([ADR 005](/adr/005-account-graph-and-roles.md), decision 30; [ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 17).
+- The 80/20 pass on the smaller design follows; EM decides its options separately. [s12]
 
 ## 2026-10-14 — OD-76 and OD-77: launch stop-loss feeds, and the restore's launch version
 

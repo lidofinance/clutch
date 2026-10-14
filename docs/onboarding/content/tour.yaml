@@ -60,13 +60,14 @@
   sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#proposed-direction", INV-017]
 
 - title: "Emergencies: two fast stops, one slow restart"
-  text: "The **emergency Safe** has five signers: two committee members, two members of the Emergency Brakes multisig and one member of neither body. Three must sign, so the committee cannot use it alone. Through the safety modifier it revokes the operator, switches the operator modifier off, exits positions and sends assets to the Aragon Agent.\n\nThe **Emergency Brakes multisig** keeps only the Easy Track pause, and touches no funds. No emergency body restarts what it stopped. Only a DAO vote turns the operator on again, in days; a motion can restore launch permissions and relayer approvals."
+  text: "The **emergency Safe** has five signers: two committee members, two members of the Emergency Brakes multisig and one member of neither body. Three must sign, so the committee cannot use it alone. Through the safety modifier it revokes the operator, switches the operator modifier off, exits positions and sends assets to the Aragon Agent.\n\nThe **Emergency Brakes multisig** keeps only the Easy Track pause, and touches no funds. No emergency body restarts what it stopped: only a DAO vote does, in days."
   tech: "Target: initiate any emergency action within six hours. Drills on a fork must prove it before launch. The switch is `disableModule` on the Asset Safe, pinned to the operator modifier (INV-009); the emergency role holds no call that restores authority (INV-027)."
   nodes: [emergency-safe, safety-modifier, operator-modifier, brakes, dao, asset-safe]
   edges: [signers-em, em-role, revoke, pause, own]
   flows: [financial-incident, recovery-order, technical-defect, unsafe-motion]
   sources: ["ADR-005#d2", "ADR-005#d4", "ADR-005#d11", "ADR-005#d23", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26",
-    "ADR-005#context", "ADR-005#proposed-direction", OD-58, OD-59, INV-002, INV-009, INV-027, "lip:part-6", OD-75, "ADR-005#d29"]
+    "ADR-005#context", "ADR-005#proposed-direction", OD-58, OD-59, INV-002, INV-009, INV-027, "lip:part-6",
+    "ADR-005#d30"]
 
 - title: Caps are watched, not enforced
   text: "No contract reverts on a [[cap]] or on the [[liquidity buffer]]. Monitoring watches the buffer all the time and publishes the cap reading to IPFS every two weeks. Each month, the committee publishes a report that anyone can reproduce.\n\nIf a breach is not fixed within two working days and is larger at the next reading, monitoring pages the emergency Safe, which switches the operator off. The [[control matrix]] lists each rule's controls on every layer."

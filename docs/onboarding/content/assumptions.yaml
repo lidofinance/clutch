@@ -23,12 +23,12 @@
 - id: dao-sound
   assumption: "The DAO stays sound and able to act."
   kind: trust
-  why: "The DAO is the final authority. Only the DAO replaces the policy, enables a disabled modifier, unpauses Easy Track, replaces the operator Safe or sets registry limits. The operator modifier's restart and the order signer's permission stay DAO votes; a motion restores the other launch permissions and relayer approvals (OD-59, OD-75)."
+  why: "The DAO is the final authority. Only the DAO replaces the policy, enables a disabled modifier, unpauses Easy Track, replaces the operator Safe or sets registry limits. Every restart after an emergency stop is a DAO vote (OD-59)."
   breaks: "Nothing restarts after a stop: the operator stays switched off, or Easy Track stays paused. Every DAO action takes about five days, and a defect in the safety modifier leaves only the DAO path."
   watched_by: ["test:test_D2_direct_DAO_path", "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts"]
   watch_note: "The tests run on a mock owner and a mock Easy Track. The DAO runbooks are listed but not written."
   sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59, "lip:part-6", "runbook:Restart after a stop",
-    "doc:docs/runbooks/index.md#runbooks", OD-73, "ADR-005#d28", OD-75, "ADR-005#d29"]
+    "doc:docs/runbooks/index.md#runbooks", OD-73, "ADR-005#d28", "ADR-005#d30"]
 
 - id: signers-good-faith
   assumption: "The committee's signers act in good faith."
@@ -91,13 +91,13 @@
     "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
 - id: templates-safe
-  assumption: "Every template pins each receiver, owner and beneficiary, bounds each amount that moves value, never emits an administrative function, and gives the emergency role only exits, which include a recovery TWAP that pays the Agent."
+  assumption: "Every template pins each receiver, owner and beneficiary, bounds each amount that moves value, never emits an administrative function, and gives the emergency role only exits."
   kind: design
   why: "Motions onboard protocols without a DAO vote. The audit question becomes: can this template ever emit something unsafe?"
   breaks: "Any motion that survives its objection window can use a template flaw. A sound template can still point the operator at an unaudited contract; then only the attached budget bounds the loss."
   watched_by: []
   watch_note: "No factory is built. Each needs tests for the four properties. The governance role's limits (INV-004) are a second layer."
-  sources: ["ADR-006#d2", "ADR-006#d5", "ADR-006#d13", "ADR-006#proposed-direction", INV-004, OD-49, "lip:part-4", "ADR-007#d35", OD-74]
+  sources: ["ADR-006#d2", "ADR-006#d5", "ADR-006#d13", "ADR-006#proposed-direction", INV-004, OD-49, "lip:part-4"]
 
 - id: easy-track-window
   assumption: "Easy Track gives every motion an objection window of at least 48 hours, and rebuilds and hash-checks each script at enactment."

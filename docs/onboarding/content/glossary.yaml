@@ -183,8 +183,8 @@
 
 - term: Recovery order
   plain: "An order that the emergency role places from the orders account. It sells an asset for USDC, or USDT as the second destination, and pays the Aragon Agent. No guard screens it."
-  tech: "A delegatecall to CoW's order signer, which lives at most 1 day. For a token that a motion added, a ComposableCoW TWAP order instead, with no delegatecall, which ends within 1 day (OD-74)."
-  sources: ["ADR-007#d5", "ADR-007#d19", "ADR-007#proposed-direction", OD-26, INV-014, "ADR-007#d21", "ADR-007#d25", "ADR-007#d35", OD-74]
+  tech: "A delegatecall to CoW's order signer, which lives at most 1 day."
+  sources: ["ADR-007#d5", "ADR-007#d19", "ADR-007#proposed-direction", OD-26, INV-014, "ADR-007#d21", "ADR-007#d25"]
 
 - term: RFP
   plain: "Request for solution: the requirements that Lido contributors sent to the policy provider. It asked what the provider supports today, what needs work and what it cannot do. The RFP tab maps each ask to Clutch's answer."
@@ -196,8 +196,8 @@
   sources: ["ADR-005#proposed-direction", "lip:part-2"]
 
 - term: Roles modifier
-  plain: "A Zodiac module that checks each call against the caller's role, refuses anything not explicitly allowed, and runs the rest as the Safe. Clutch has three: an operator modifier and a safety modifier on the Asset Safe, and one orders modifier on the orders account."
-  sources: ["ADR-005#d6", "ADR-005#d21", OD-57]
+  plain: "A Zodiac module that checks each call against the caller's role, refuses anything not explicitly allowed, and runs the rest as the Safe. Clutch has four: an operator modifier and a safety modifier on the Asset Safe, one orders modifier on the orders account, and one first-loss modifier on the first-loss Safe."
+  sources: ["ADR-005#d6", "ADR-005#d21", OD-57, OD-60, "ADR-005#proposed-direction"]
 
 - term: Round-trip check
   plain: "A planned check that rebuilds the applied permissions from the modifier's on-chain events on a fork, and compares them with the artifact. The chain then checks the compiler."

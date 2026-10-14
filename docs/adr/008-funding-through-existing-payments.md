@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T18:12:36Z
+  at: 2026-10-14T20:11:35Z
 verified: []
 sources:
   - id: s1
@@ -125,13 +125,19 @@ EM decided on 2026-10-14, closing OD-71 and OD-66 [s1]:
 
 Decision 24 makes the re-pin of decision 8 optional. Decisions 25 to 30 close OD-66; EM corrected the agent's first reading of decision 25 the same day. Since OD-73, Aragon Voting owns the first-loss Safe and administers the vault's funding registries ([ADR 005](/adr/005-account-graph-and-roles.md) decision 28).
 
+EM decided on 2026-10-14, after a count of the launch, closing OD-78 [s1]:
+
+31. Insurance funds do not ship with the launch: no fund roles on the first-loss modifier, no fund templates, and no third funding registry or top-up factory. A later vote adds them; decisions 25, 26, 28 and 29 describe them for that vote.
+
+Decision 31 replaces decisions 27 and 30.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 - **The shared permission gains USDS.** The vote rewrites the whole parameter array as one unit. The seven existing entries stay, and USDS joins with a ceiling of 2,000,000 per payment (decision 12). A fork test of the new array is owed before the vote.
 - **Several payments in one motion.** A motion repeats the Asset Safe as recipient, one payment per ceiling. The ceilings are per call, not per motion [s4].
-- **Two registries from the standard builder.** Each has the Asset Safe as its only recipient and the Aragon Agent as admin. As on the committee's registries, the Easy Track executor gets no role to add recipients [s4].
+- **Two registries from the standard builder.** Each has the Asset Safe as its only recipient and Aragon Voting as admin ([ADR 005](/adr/005-account-graph-and-roles.md) decision 28). As on the committee's registries, the Easy Track executor gets no role to add recipients [s4].
 - **Two top-up factories.** The stablecoin factory uses the shared stablecoin token list, after the vote adds USDS to it. The stETH factory is the single-token version. The operator Safe is the trusted caller of both, as of every factory ([ADR 006](/adr/006-governance-through-easy-track-factories.md)). The DAO registers them by vote.
 - **The figures.** The stablecoin limit is the TM Floor Value at par. The stETH limit is the floor divided by the pinned price. An attested computation produces both, and they enter this repository when the mandate is approved.
 - **The seed.** The same registries carry the seed. It is at most one floor, less the value of the first-loss shares that arrive from the Growth Committee, set by attested computation at the Earn oracle price. Twyne counts only when shown (decision 17). The seed motion follows the share transfer. Until the cap lifts, the seed is also at most the cap (decision 20).

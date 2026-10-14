@@ -100,7 +100,7 @@
 - name: The four Roles modifiers
   column: instance
   what: "Two minimal proxies of the Roles mastercopy on the Asset Safe, one on the orders account and one on the first-loss Safe."
-  why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator and emergency roles, and there the emergency role's revoke stops the operator (OD-57, OD-58); a governance role there adds a token for TWAP and stop-loss orders (OD-68). The first-loss modifier carries two narrow roles: the operator Safe's, which redeems to the Aragon Agent, and Easy Track's, which burns by motion (OD-60, OD-67)."
+  why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator and emergency roles, and there the emergency role's revoke stops the operator (OD-57, OD-58). The first-loss modifier carries two narrow roles: the operator Safe's, which redeems to the Aragon Agent, and Easy Track's, which burns by motion (OD-60, OD-67)."
   owner: "The DAO, through the Asset Safe, the orders account and the first-loss Safe"
   sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#d25", "ADR-005#d27", "ADR-005#context", "ADR-007#d28", "ADR-007#d30",
     OD-57, OD-58, OD-60, OD-67]
@@ -116,8 +116,8 @@
   column: instance
   what: "Two registries from Easy Track's standard builder, and two instances of its top-up factory."
   why: "The same pattern already pays many Lido recipients. Each registry pays only the Asset Safe, within a monthly limit."
-  owner: "The DAO registers them; the Aragon Agent administers the registries"
-  sources: ["ADR-008#d4", "ADR-008#proposed-direction", OD-06]
+  owner: "The DAO registers them; Aragon Voting administers the registries"
+  sources: ["ADR-008#d4", "ADR-008#proposed-direction", OD-06, OD-73, "ADR-005#d28"]
 
 - name: The constellation
   column: instance
@@ -129,7 +129,7 @@
 # --- New code or configuration -------------------------------------------------------------------
 - name: The permission policy
   column: new
-  what: "The six roles and their permissions: what the operator, governance, emergency, exit-governance, first-loss and first-loss burn roles may call, and with which arguments. Three are built; the exit-governance role, the orders modifier's governance role and the two first-loss roles are specified (OD-49, OD-60, OD-67, OD-68)."
+  what: "The six roles and their permissions: what the operator, governance, emergency, exit-governance, first-loss and first-loss burn roles may call, and with which arguments. Three are built; the exit-governance role and the two first-loss roles are specified (OD-49, OD-60, OD-67)."
   why: "This is the heart of Clutch. Every permission traces back to a decision and forward to a test."
   owner: "`@lidofinance/defi-tech`; reviewers approve each change"
   sources: ["ADR-005#d6", "ADR-005#proposed-direction", "ADR-004#d3", "ADR-004#d7", "ADR-004#d12", INV-004, INV-018]
@@ -143,7 +143,7 @@
 
 - name: Template, budget and burn factories
   column: new
-  what: "Template factories (five that onboard, one that removes, one that restores, one that adds an orders token, and a claim template if needed), one budget factory and one first-loss burn factory for Easy Track: the only new contracts allowed."
+  what: "Template factories (five that onboard, one that removes, and a claim template if needed), one budget factory and one first-loss burn factory for Easy Track: the only new contracts allowed."
   why: "Motions then onboard protocols, remove a branch, add an orders token, change budgets after an event and burn first-loss shares without a DAO vote, but only through factories fixed at audit time."
   owner: "`@lidofinance/defi-tech`; an external audit in phase 3"
   sources: ["ADR-006#d1", "ADR-006#d2", "ADR-006#d5", "ADR-006#d12", "ADR-008#d23", "ADR-009#d31", "ADR-009#proposed-direction",

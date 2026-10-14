@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T19:25:23Z
+  at: 2026-10-14T20:11:35Z
 verified: []
 sources:
   - id: s1
@@ -95,6 +95,12 @@ EM decided on 2026-10-14, closing OD-77 [s1]:
 
 16. A restore writes the launch version of a permission, whatever changed since: it drops a branch that a later motion added, and it brings back a branch that a routine removal took away. The committee's forum disclosure of a restore motion shows the difference from the current permission, and the objection window is the control.
 
+EM decided on 2026-10-14, after a count of the launch, closing OD-78 [s1]:
+
+17. No restore template ships with the launch ([ADR 005](/adr/005-account-graph-and-roles.md) decision 30). A revoked permission comes back through an onboarding motion, if a template covers it, or by DAO vote.
+
+Decision 17 replaces decision 16.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
@@ -109,7 +115,6 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. The emergency Safe's switch also freezes it, because its write goes through the operator modifier. Enabling the modifier again re-arms it, because a motion does not expire, so the DAO's restart vote cancels it first ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 25 and 26). Once it is enacted, the emergency Safe can revoke the new permission at once.
 - **The exit-governance role.** It writes permissions only under the `emergency` key, through `scopeTarget`, `scopeFunction` and `allowFunction`, with the execution options None or Send (decision 9). It refuses the Asset Safe and every module of it as a target, the safety modifier included (decision 10). It holds no `assignRoles`, cannot reach the switch, and sets no allowance.
 - **Exit templates.** Each onboarding template also builds the emergency exit for its target: redeem, withdraw, claim and cancel with the receiver and owner pinned to the Asset Safe; a transfer of the new receipt token pinned to the Aragon Agent; and an approval of the new spender set to zero. It emits no entry, no deposit and no non-zero approval. The modifier cannot check that a tree is an exit, so the template's code, its tests and its audit carry that.
-- A restore template writes back exactly one permission tree of the committed launch artifact, under the `operator` key, without delegatecall: on the operator modifier through the governance role, and on the orders modifier through its governance role ([ADR 005](/adr/005-account-graph-and-roles.md) decision 29). Its trusted caller is the operator Safe. It never writes the order signer's permission and never enables a module.
 - A routine removal is a motion of the removal template (decision 14). It writes the function's complete tree without the removed branch, so the other branches stay, and it adds nothing. An emergency removal is the emergency role's `revokeTarget` or `revokeFunction`, pinned to the `operator` key, which acts at once. Every operator permission lives under that key, so one revoke on the operator modifier and one on the orders modifier reach all of them.
 
 ## Options considered
@@ -134,7 +139,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - Replacing the operator Safe means redeploying every factory with the new trusted caller and registering each one again by DAO vote [s7].
 - The committee proposes its own expansions. The objection window, the disclosure rule, the Emergency Brakes pause, and the emergency Safe's revoke and switch, which the committee cannot use alone, are the counterweights.
 - A routine removal waits for the objection window, like every motion, and the guard screens its creation once the launch cap lifts. An emergency removal happens at three of five on the emergency Safe, without screening and without notice in advance, and the forum post follows it. Monitoring pages a revoke-only emergency action at a lower severity than a transfer or a swap.
-- A removed strategy comes back only through an onboarding motion, a restore motion if the launch vote held it, or a DAO vote. A routine removal takes only its branch (decision 14). After an emergency revoke, the restore template writes a permission back exactly as launched, by motion; the order signer's delegatecall permission comes back only by vote ([ADR 005](/adr/005-account-graph-and-roles.md) decision 29). A restore writes the launch version, whatever changed since, and its disclosure shows the difference (decision 16).
+- A removed strategy comes back only through an onboarding motion or a DAO vote. A routine removal takes only its branch (decision 14). After an emergency revoke, a permission that no template writes, such as staking or a fixed-ceiling approval, comes back only by vote (decision 17).
 - The kit's toggle factory and its tests [s4][s5] are removed from the kit. INV-007 retires.
 
 ## Confirmation
