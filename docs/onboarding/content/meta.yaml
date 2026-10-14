@@ -13,8 +13,8 @@ outcomes:
   - "Find the source of any claim on this page."
 map_caption: >-
   Arrows point from the account that acts to the account it acts on. Colour shows who it is,
-  the border shows whether it is new, and the icon shows its kind. The Aragon Agent also owns the boxes
-  marked "Agent owns it"; only the Asset Safe's ownership has an arrow. Select a box to see its actors,
+  the border shows whether it is new, and the icon shows its kind. Aragon Voting also owns the boxes
+  marked "Voting owns it"; only the Asset Safe's ownership has an arrow. Select a box to see its actors,
   or play a flow to watch it move.
 lens_note: "Technical adds contract addresses, exact permissions, function signatures and implementation notes."
 panel_default: >-
@@ -69,19 +69,18 @@ quiz_note: "Pick an answer to see whether it is right and why. Nothing leaves th
 owed:
   - "EM accepts ADR 005 to ADR 011."
   - "A Snapshot appoints the emergency Safe's fifth signer, a member of neither the committee nor the Emergency Brakes multisig (OD-58, OD-65)."
-  - "EM decides how insurance funds for products other than Lido Earn join the vault, before the enabling vote (OD-66)."
   - "The committee's valuation policy sets the price waterfall's band and the share of the vault that its last level may price (OD-62)."
   - "[the screening vendor] confirms in writing that it accepts no standing approvals and agrees to be named."
-  - "[the screening vendor] says which rules it can check before execution: the liquidity buffer, the caps, an order's limit, a stop-loss order's expiry and a router swap's minimum output."
+  - "[the screening vendor] says which rules it can check before execution: the liquidity buffer, the caps, an order's limit and a router swap's minimum output."
   - "The policy provider answers the list of what the Zodiac UI must show, Lido's alerts included (OD-44, OD-62)."
   - "[the screening vendor] also says whether it records rule changes and whether it can delay a relaxation."
-  - "The mandate text owes eleven changes before the Snapshot vote."
-  - "Fork tests owed: CoW's order signer and fallback handler on Safe v1.5.0 behind a Roles modifier, before the orders account is relied on; the Morpho Blue template end to end; the rewritten payment permission; the first-loss share move, the burn motion and the first-loss role."
+  - "The mandate text owes twelve changes before the Snapshot vote."
+  - "Fork tests owed: CoW's order signer and fallback handler on Safe v1.5.0 behind a Roles modifier, before the orders account is relied on; the Morpho Blue template end to end; the rewritten payment permission; the first-loss share move, the burn motion and the first-loss role; Aragon Voting's owner actions on the three Safes (OD-73)."
   - "Figures owed from the attested computation once the mandate is approved: the budgets, the orders budgets, the funding limits and the liquidity buffer."
   - "The mandate's drafters owe the holder and the form of the Twyne position."
   - "Phase 2 builds the round-trip check, the orders account and its permissions, the first-loss Safe and its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the readings that the Zodiac UI shows, and the invariant-to-test check."
   - "No runbook is written yet. Each needs a fork drill before it counts."
-  - "No document describes the deployment sequence step by step yet."
+  - "The production deployment script is not written yet. The enabling-vote page lists what the one vote holds."
 footer: |-
   **Hypothetical draft.** Nothing on this page is ratified, deployed or advice. The Lido DAO and its committees have approved none of it, and every number can change.
 

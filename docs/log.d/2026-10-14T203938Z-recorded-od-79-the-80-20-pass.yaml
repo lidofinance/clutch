@@ -1,0 +1,3 @@
+date: '2026-10-14'
+kind: Decision
+text: 'Recorded OD-79, the 80/20 pass after OD-78. The launch has no stop-loss orders, so the orders policy pins no Chainlink feed and the vendor gets no stop-loss rule; TWAP orders stay. The template catalogue check keeps only the onboarding templates that a named protocol needs. The first-loss Safe, the budget factory and the removal template stay as designed.'

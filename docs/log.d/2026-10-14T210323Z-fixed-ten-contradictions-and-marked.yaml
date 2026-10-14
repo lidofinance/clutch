@@ -1,0 +1,3 @@
+date: '2026-10-14'
+kind: Update
+text: 'Fixed contradictions that a consolidation review found: the technical role in ADR 010, the Agent as approver in ADR 005 and the parameters register, two stale LIP lines, a guide source that cited a replaced decision, a stale source title, and the open-question changelogs of ADR 005, 006, 007 and 009. Added back-links to twelve replaced ODs. Moved the retired verification-requests register to an archived section, and marked four research notes on removed designs as superseded.'

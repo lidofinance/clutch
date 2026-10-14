@@ -1,0 +1,3 @@
+date: '2026-10-14'
+kind: Decision
+text: 'Recorded OD-76 and OD-77. OD-76: at launch, stop-loss orders cover only stETH, WETH, USDC, USDT and USDS, whose Chainlink proxies pass the Feed Registry check before the vote, WETH through the ETH/USD feed; wstETH and LDO get TWAP orders only. OD-77: a restore keeps writing the launch version, and its motion''s disclosure shows the difference from the current permission.'

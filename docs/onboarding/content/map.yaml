@@ -26,8 +26,9 @@ nodes:
   h: 84
 - id: dao
   label: Lido DAO
-  sub: LDO vote · Aragon Agent
-  summary: The final authority. The Aragon Agent is the only owner of the Asset Safe.
+  sub: LDO vote · Voting owns the vault
+  summary: The final authority. Aragon Voting is the only owner of the Asset Safe; the Aragon Agent, the treasury, receives
+    every recovered asset.
   domain: gov
   kind: body
   status: existing
@@ -143,8 +144,8 @@ nodes:
   h: 84
 - id: asset-safe
   label: Asset Safe
-  sub: holds the assets · Agent owns it
-  summary: The vault. A Safe that holds the assets. Only the Aragon Agent owns it; the roles act through the two modifiers.
+  sub: holds the assets · Voting owns it
+  summary: The vault. A Safe that holds the assets. Only Aragon Voting owns it; the roles act through the two modifiers.
   domain: vault
   kind: contract
   status: instance
@@ -154,8 +155,8 @@ nodes:
   h: 88
 - id: first-loss
   label: First-loss Safe
-  sub: two narrow roles · Agent owns it
-  summary: A Safe that the Aragon Agent owns. It holds only the DAO's first-loss Earn shares. On the Earn team's written
+  sub: two narrow roles · Voting owns it
+  summary: A Safe that Aragon Voting owns. It holds only the DAO's first-loss Earn shares. On the Earn team's written
     instruction, an Easy Track motion burns them, or a role of the operator Safe redeems them to the Agent.
   domain: vault
   kind: contract
@@ -177,8 +178,8 @@ nodes:
   h: 84
 - id: orders
   label: Orders account
-  sub: CoW orders · Agent owns it
-  summary: 'A Safe that the Aragon Agent owns, with one modifier of its own. The roles place CoW orders from it: the operator''s
+  sub: CoW orders · Voting owns it
+  summary: 'A Safe that Aragon Voting owns, with one modifier of its own. The roles place CoW orders from it: the operator''s
     orders pay the Asset Safe, and recovery orders pay the Aragon Agent.'
   domain: vault
   kind: contract
@@ -217,8 +218,8 @@ edges:
   to: asset-safe
   kind: owns
   short: owns · assets home
-  label: The Aragon Agent is the Asset Safe's only owner, at 1 of 1. In an emergency, assets go back to the Agent, a fixed
-    address.
+  label: Aragon Voting is the Asset Safe's only owner, at 1 of 1. In an emergency, assets go back to the Aragon Agent, the
+    DAO's treasury, a fixed address.
   label_at:
   - 590
   - 466

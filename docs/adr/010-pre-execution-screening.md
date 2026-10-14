@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T09:03:30Z
+  at: 2026-10-14T21:03:23Z
 verified: []
 sources:
   - id: s1
@@ -141,7 +141,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
   - Monitoring alerts on a top-up motion whose enactment would take the vault above the cap, while its objection window is open, and on a vault value above the cap at each fortnightly reading.
   - The lift: the guard instance of decision 10 is set on the operator Safe, the vendor's key turns its bypass mode off, the agreement of decision 9 is in place, and Lido's monitoring covers the instance (decision 12). A check confirms the guard's address, the bypass mode and the absence of standing approvals. The committee's forum post links the check and lifts the cap.
   - The vendor's name stays redacted until decision 13 ends the redaction.
-- **Rules requested from the vendor** (OD-39, OD-40, OD-43, OD-47): refuse an operator transaction that would take the liquidity buffer below its floor; refuse one that would breach a cap at the post-transaction state; refuse an order whose limit price, or a router swap whose minimum output, lies too far below a market price; refuse a stop-loss order whose expiry is more than 30 days ahead. The written list shows each one as requested until the vendor confirms that it can check it before execution. The vendor is also asked whether it records rule changes and whether it can delay a relaxation.
+- **Rules requested from the vendor** (OD-39, OD-40, OD-43, OD-47): refuse an operator transaction that would take the liquidity buffer below its floor; refuse one that would breach a cap at the post-transaction state; refuse an order whose limit price, or a router swap whose minimum output, lies too far below a market price. The written list shows each one as requested until the vendor confirms that it can check it before execution. The vendor is also asked whether it records rule changes and whether it can delay a relaxation.
 
 ## Options considered
 
@@ -161,7 +161,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - Fail closed: a vendor outage stops operator activity and new motions. Recovery is unaffected.
 - Until the cap lifts, no operator transaction and no motion creation is screened. A top-up above the cap is a breach of procedure, not a revert. Objections and monitoring are its controls.
 - The vendor is off the launch's critical path. The enabling vote no longer waits for the guard, the vendor's terms on standing approvals or the detector's support for Safe v1.5.0. The lift waits for them.
-- The guard is the one component that can stop operator activity and motion creation, and Lido does not write it. This narrows provider independence on purpose. The structural mitigations are that recovery never passes through it, the owners can remove it after ten days, and the technical role can disable the operator modifier.
+- The guard is the one component that can stop operator activity and motion creation, and Lido does not write it. This narrows provider independence on purpose. The structural mitigations are that recovery never passes through it, the owners can remove it after ten days, and the emergency role's switch can disable the operator modifier (OD-58).
 - The build adds one change after the audit's fix review: the 10-day timelocks. It is not on the vendor's main branch, and the vendor's documentation still says 1 day. Lido reviews the change, and the vendor is asked to merge and document it [s11]. An earlier version of this record counted two such changes. The second, an early return for callers other than the guarded Safe, is the commit that the report's fix review pins [s11].
 - The vendor's support for Safe v1.5.0 rests on EM's report of 2026-10-05. The confirmation itself is outside this repository.
 - If the vendor accepts the delegatecall request, the operator Safe can batch only through MultiSendCallOnly. Any other delegatecall then fails at screening.

@@ -101,10 +101,10 @@ flows:
 
   - id: standing-order
     group: operations
-    title: A TWAP or stop-loss order
+    title: A TWAP order
     label: specified
-    summary: "How the vault buys or sells over time, or sells when a price falls. ComposableCoW holds the order, and CoW's watch-tower posts it to the order book."
-    trigger: "The committee wants to average into a position over weeks, or to sell stETH if its price falls to a set level."
+    summary: "How the vault buys or sells over time. ComposableCoW holds the order, and CoW's watch-tower posts it to the order book."
+    trigger: "The committee wants to average into a position over weeks."
     time: "Until the last part fills or the order expires."
     steps:
       - who: "Operator"
@@ -112,13 +112,13 @@ flows:
         nodes: [operator-safe, operator-modifier, asset-safe, orders]
         edges: [op-role, own-op, swaps]
       - who: "Operator Safe"
-        text: "The operator Safe creates the order on ComposableCoW: a [[TWAP]] order in equal parts, or a [[stop-loss order]] with a strike. A TWAP order starts at once and ends within 90 days. The screening guard checks it, and is asked to refuse a stop-loss order that expires more than 90 days ahead."
+        text: "The operator Safe creates a [[TWAP]] order on ComposableCoW, in equal parts. It starts at once and ends within 90 days. The screening guard checks it."
         nodes: [operator-safe, screening, orders]
         edges: [screen]
-        check: "INV-022: the receiver is the Asset Safe, and a stop-loss order's oracles are Chainlink feeds that the policy pins."
-        tech: "`ComposableCoW.createWithContext` with a start of zero and CoW's current-timestamp value factory, so the order starts at its creation, and the handler pinned to the deployed TWAP or StopLoss handler. A TWAP order has at most 90 parts at most a day apart, or 12 parts at most 7 days apart (INV-024). The orders account's fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it (INV-023)."
+        check: "INV-022: the receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."
+        tech: "`ComposableCoW.createWithContext` with a start of zero and CoW's current-timestamp value factory, so the order starts at its creation, and the handler pinned to the deployed TWAP handler. A TWAP order has at most 90 parts at most a day apart, or 12 parts at most 7 days apart (INV-024). The orders account's fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it (INV-023)."
       - who: "CoW's watch-tower"
-        text: "The [[watch-tower]] posts each part of a TWAP order when it is due, or a stop-loss order once its price is met."
+        text: "The [[watch-tower]] posts each part of a TWAP order when it is due."
         nodes: [orders]
       - who: "CoW Protocol"
         text: "Each part fills at its minimum or better, and pays the Asset Safe directly."
@@ -132,7 +132,7 @@ flows:
       - "The emergency Safe can cancel every open order and sweep the orders account."
     sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d24", "ADR-007#d29", "ADR-007#proposed-direction", OD-43, OD-61,
       INV-022, INV-023, INV-024, "runbook:Re-affirm open orders",
-      "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
+      "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss", "ADR-007#d39", OD-79]
 
   # --- Governance ---------------------------------------------------------------------------------
   - id: onboard
@@ -150,6 +150,7 @@ flows:
         text: "The operator Safe creates the motion on the template factory, with typed values only: a target, an asset and a budget key. The screening guard checks this transaction."
         nodes: [operator-safe, screening, easytrack]
         edges: [motions, screen]
+        check: "The budget key must already be in the policy: a new spender takes one of the spare keys that the enabling vote holds (OD-69). A token new to the orders account needs a DAO vote (OD-46, OD-78)."
       - who: "LDO holders"
         text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails. This window is the timelock for every structural increase of exposure. The Emergency Brakes multisig can also pause Easy Track."
         nodes: [dao, easytrack, brakes]
@@ -180,7 +181,7 @@ flows:
     sources: ["ADR-006#d2", "ADR-006#d3", "ADR-006#d4", "ADR-006#d5", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9",
       "ADR-006#d10", "ADR-006#d11", "ADR-006#d13", "ADR-006#context", "ADR-006#proposed-direction", "ADR-005#d26",
       INV-004, INV-005, INV-025, OD-36, OD-38, OD-45, OD-49, OD-59, "lip:part-4",
-      "test:test_D1_substituted_script_rejected_at_enactment"]
+      "test:test_D1_substituted_script_rejected_at_enactment", OD-69, OD-78, "ADR-007#d38"]
 
   - id: budget
     group: governance
@@ -193,6 +194,7 @@ flows:
       - who: "Committee"
         text: "The attested computation derives the key's new budget, under that key's ceiling. The forum post names the event."
         nodes: [committee, asset-safe]
+        check: "A motion sets only a key that the policy already holds, so a new spender takes a spare key (OD-69). A new TM Floor Value also needs a DAO vote for the funding limits and the fixed approval ceilings, by design (OD-71)."
       - who: "Operator Safe"
         text: "The operator Safe creates a motion on the budget factory. The guard screens it, once the guard is set (OD-54)."
         nodes: [operator-safe, screening, easytrack]
@@ -205,8 +207,8 @@ flows:
       - who: "Monitoring"
         text: "Monitoring flags every budget motion, and checks that its forum post names an event."
         nodes: [monitoring]
-    sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d31", "ADR-009#proposed-direction", INV-011, INV-012, OD-56,
-      "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period"]
+    sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d31", "ADR-009#proposed-direction", "ADR-009#consequences", INV-011,
+      INV-012, OD-56, OD-69, OD-71, "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period"]
 
   - id: dao-change
     group: governance
@@ -214,16 +216,13 @@ flows:
     label: built
     summary: "The owner path. The DAO can do anything to the Asset Safe: replace the policy, change who holds a role, enable a module again or replace the operator Safe. It is also the only path that restarts after an emergency stop (OD-59). Each such change takes days."
     trigger: "A change outside the motions' limits, a repair after a defect in the safety modifier, or a restart after the switch."
-    time: "Days: the vote, then the Dual Governance delay."
+    time: "About five days: the Aragon Voting vote."
     steps:
       - who: "LDO holders"
         text: "LDO holders vote in Aragon Voting."
         nodes: [dao]
-      - who: "Dual Governance"
-        text: "Dual Governance holds the result for its delay. Then its admin executor runs the script as the Aragon Agent."
-        nodes: [dao]
-      - who: "Aragon Agent"
-        text: "The Agent approves the Asset Safe transaction by hash, or sends it itself, as the only owner."
+      - who: "Aragon Voting"
+        text: "Aragon Voting sends the Asset Safe transaction itself, or approves it by hash, as the only owner. Nothing passes Dual Governance (OD-73)."
         nodes: [dao, asset-safe]
         edges: [own]
       - who: "Asset Safe"
@@ -232,7 +231,7 @@ flows:
         edges: [own-op, own-sf]
     sources: ["ADR-005#d14", "ADR-005#d26", "ADR-005#context", "ADR-005#proposed-direction", OD-59, INV-001,
       "test:test_D2_direct_DAO_path", "runbook:Replace the operator Safe", "runbook:Replace the operator modifier",
-      "runbook:Restart after a stop"]
+      "runbook:Restart after a stop", OD-73, "ADR-005#d28", "ADR-005#d30"]
 
   - id: unlock
     group: governance
@@ -337,7 +336,7 @@ flows:
         text: "From then on, on the Earn team's written instruction, a burn motion burns the shares, and the operator Safe's first-loss role redeems them to the Agent. No other role reaches the first-loss Safe, and monitoring alerts on any change of its balance."
         nodes: [committee, first-loss, monitoring]
         edges: [first-loss-shares]
-        check: "INV-021: the first-loss Safe has the Agent as its only owner, and one modifier with two narrow roles. Specified, not built."
+        check: "INV-021: the first-loss Safe has Aragon Voting as its only owner, and one modifier with two narrow roles. Specified, not built."
     sources: ["ADR-008#d4", "ADR-008#d13", "ADR-008#d19", "ADR-008#d20", "ADR-008#d21", "ADR-008#d23",
       "ADR-008#proposed-direction", OD-21, OD-42, OD-54, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
 
@@ -494,10 +493,10 @@ flows:
       - "No recovery order can fill at a price that the signers accept: send the assets to the Agent instead."
     sources: ["ADR-005#d2", "ADR-005#d4", "ADR-005#d11", "ADR-005#d24", "ADR-005#d26", "ADR-005#context",
       "ADR-005#proposed-direction", "ADR-007#d19", "ADR-007#proposed-direction", OD-58, OD-59, INV-002, INV-018,
-      "runbook:Remove a strategy",
-      "test:test_D4_emergency_flow", "test:test_emergency_can_durably_stop_operator_reapproval",
-      "runbook:Revoke the operator", "runbook:Zero the approvals", "runbook:Exit positions to the Safe",
-      "runbook:Return assets to the Agent"]
+      "runbook:Remove a strategy", "test:test_D4_emergency_flow",
+      "test:test_emergency_can_durably_stop_operator_reapproval", "runbook:Revoke the operator",
+      "runbook:Zero the approvals", "runbook:Exit positions to the Safe", "runbook:Return assets to the Agent",
+      "ADR-005#d30"]
 
   - id: recovery-order
     group: emergencies
@@ -554,13 +553,13 @@ flows:
         nodes: [emergency-safe, safety-modifier]
         edges: [em-role]
       - who: "LDO holders"
-        text: "Only the DAO can enable the operator modifier again. Its vote first cancels the queued motions, because a motion does not expire (OD-59)."
-        nodes: [dao, asset-safe]
+        text: "Only the DAO can enable the operator modifier again. Its vote first cancels the queued motions, because a motion does not expire, and also grants again the operator's permissions on the orders account (OD-59)."
+        nodes: [dao, asset-safe, orders]
         edges: [own]
     sources: ["ADR-005#d25", "ADR-005#d26", "ADR-005#context", "ADR-005#proposed-direction", OD-58, OD-59, INV-009,
       INV-027, "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned",
       "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts", "runbook:Switch the operator off",
-      "runbook:Restart after a stop"]
+      "runbook:Restart after a stop", "ADR-005#d30"]
 
   - id: cap-breach
     group: emergencies
@@ -715,7 +714,7 @@ flows:
     group: deployment
     title: The enabling vote
     label: open
-    summary: "One DAO vote turns the system on. No document gives the full sequence of deployment and vote yet. These steps collect what the decisions already fix."
+    summary: "One DAO vote turns the system on. The enabling-vote page lists what it holds, what comes before it and what follows without a vote."
     trigger: "The mandate is approved and phase 3 is done."
     steps:
       - who: "Lido"
@@ -730,7 +729,7 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, operator-safe, emergency-safe]
       - who: "LDO holders"
-        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories and adds USDS to the payment permission."
+        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list. Aragon Voting runs every item itself when the vote executes, without Dual Governance (OD-73)."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
         edges: [own, own-op, own-sf]
       - who: "Growth Committee, then the operator Safe"
@@ -738,8 +737,11 @@ flows:
         nodes: [funding, first-loss, asset-safe, operator-safe, easytrack]
         edges: [topup, motions]
     sources: ["ADR-004#d14", "ADR-007#proposed-direction", "ADR-007#confirmation", "ADR-008#d9", "ADR-008#d13",
-      "ADR-008#d19", "ADR-008#d21", "ADR-008#proposed-direction", "ADR-010#d16", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22",
-      INV-022, INV-023, OD-54, "doc:ROADMAP.md#roadmap"]
+      "ADR-008#d19", "ADR-008#d21", "ADR-008#proposed-direction", "ADR-010#d16", "ADR-010#d20", "ADR-010#d21",
+      "ADR-010#d22", "ADR-008#d10", INV-022, INV-023, OD-54, "doc:ROADMAP.md#roadmap",
+      "doc:docs/specs/enabling-vote.md#the-vote",
+      "doc:docs/research/single-vote-review-2026-10-14.md#how-one-vote-carries-two-kinds-of-item", OD-73, "ADR-005#d28",
+      OD-78, OD-79]
 
   - id: signer-rotation
     group: deployment

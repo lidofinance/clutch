@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T17:15:09Z
+  at: 2026-10-14T20:39:38Z
 verified: []
 sources:
   - id: s1
@@ -43,6 +43,9 @@ sources:
   - id: s11
     resource: "urn:clutch:restricted:cfo-followup-2026-10-13"
     title: The CFO's follow-up questions and EM's answers in the committee's channel, 2026-10-13; outside the repository
+  - id: s12
+    resource: "urn:clutch:interview:2026-10-14"
+    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-79, 2026-10-14; the transcript is not in the repository
 ---
 
 # Decision log
@@ -52,6 +55,137 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-14 — OD-79: the 80/20 pass after OD-78
+
+The agent ran the 80/20 pass that EM asked for with OD-78 and offered O1 to O5, and O2b. EM answered:
+
+> O1: Let first-loss Earn shares to be on a separate "first loss Safe" still, but under operator Safe management; by default burn should not be allowed unless ET motion passes
+> O2: Agree on no stop-loss orders
+> O2b: Still need TWAP
+> O3: keep
+> O4: agree
+> O5: keep as you suggested
+
+Recorded as:
+
+- (OD-79, O1) The first-loss shares stay in the separate first-loss Safe. The operator Safe manages them through its `first-loss` role, and a burn runs only as an Easy Track motion. This is the design of OD-60 and OD-67, so nothing changes ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 21 to 23).
+- (OD-79, O2 and O2b) The launch has no stop-loss orders; TWAP orders stay ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 39).
+- (OD-79, O3) The budget factory stays.
+- (OD-79, O4) The catalogue check keeps only the onboarding templates whose shape a protocol in the committee's named pipeline needs. A later vote registers another template with its first protocol ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 18).
+- (OD-79, O5) The removal template stays. [s12]
+
+## 2026-10-14 — OD-78: a smaller launch
+
+EM asked how many Safes, actors, new Easy Track factories and launch vote items the design has, and said:
+
+> now I feel that complexity is large
+
+The agent counted them and listed three items as optional at launch: insurance funds; the token template, with the orders modifier's governance and approvals roles; and the restore template. EM answered:
+
+> I want cut, remove optional at launch; also run 80/20 pass even after that
+
+Recorded as:
+
+- (OD-78) Insurance funds do not ship with the launch: no fund roles, no fund templates, and no third funding registry or top-up factory. A later vote adds them; OD-66's framework, checklist, motions and exit describe them for that vote ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 31).
+- (OD-78) The token template does not ship, and the orders modifier has no governance role and no approvals role. A DAO vote adds a token to the orders account, for every order type, with its relayer approval, and sets again an approval that the emergency role set to zero ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 38).
+- (OD-78) The restore template does not ship. The DAO restarts by vote after each stop, as OD-59 decided ([ADR 005](/adr/005-account-graph-and-roles.md), decision 30; [ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 17).
+- The 80/20 pass on the smaller design follows; EM decides its options separately. [s12]
+
+## 2026-10-14 — OD-76 and OD-77: launch stop-loss feeds, and the restore's launch version
+
+After the interview, the agent reported three effects of OD-74 and OD-75, and asked for two picks: which launch tokens get stop-loss orders, because Chainlink's Feed Registry has no USD feed for wstETH, WETH or LDO; and whether a restore keeps writing the launch version. EM answered:
+
+> 1. (a)
+> 2. noted
+> 3. keep it
+
+Recorded as:
+
+- (OD-76, point 1) (a): at launch, stop-loss orders cover only the tokens whose proxies pass the registry check before the vote: stETH, USDC, USDT and USDS, and WETH through the registry's ETH/USD feed. wstETH and LDO get TWAP orders only ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 37).
+- (point 2) noted: the switch does not freeze a motion that writes only on the orders modifier. No change ([ADR 005](/adr/005-account-graph-and-roles.md), proposed direction, "Restart").
+- (OD-77, point 3) "keep it": a restore writes the launch version, whatever changed since. The restore motion's forum disclosure shows the difference from the current permission, and the objection window is the control ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 16). [s12]
+
+## 2026-10-14 — OD-74 and OD-75: the interview on OD-68
+
+EM asked for an interview on OD-68. The agent asked four cards on tokens that a motion adds to the orders account, and, at EM's request, reviewed every restart that needs a DAO vote. EM answered card by card:
+
+> 1. Enough
+
+> Card 1: A
+> Card 2: B works, because the DAO restarts CAN be "ET motion restarts"
+>
+> Read other places where you believe that DAO restart must be a DAO vote and reconsider it to be an ET motion wherever it doesn't hurt trust model too much
+
+> R1: vote
+> R2: motion
+> R3a: motion
+> R3b: vote, I am afraid of delegatecalls
+> R4: motion
+> R5: vote
+> R6: vote
+> R7: vote
+
+> 3: B
+
+> A
+
+Recorded as:
+
+- (OD-74, card 1) a token that a motion adds gets TWAP orders, and stop-loss orders only with feeds checked against Chainlink's Feed Registry; market, limit and recovery orders stay a vote. "Card 1: A": a stop-loss permission pins a Chainlink proxy, which the factory checks against the registry at creation and at enactment; the launch tokens pin proxies too ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decisions 32 and 33).
+- (OD-74, card 2) B: the Easy Track executor holds an approvals role that raises CoW's relayer approval for any listed token by motion, also after the emergency role set it to zero ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 34).
+- (OD-75, card 2b) a motion restores a permission to exactly its launch version, without delegatecall, on the operator modifier (R2) and on the orders modifier (R3a), and raises a relayer approval (R4). The operator modifier's restart after the switch (R1), the order signer's delegatecall permission (R3b), a funding limit that a vote set to zero (R5), an Easy Track unpause (R6) and a repair of the safety modifier (R7) stay votes ([ADR 005](/adr/005-account-graph-and-roles.md), decision 29).
+- (OD-74, card 3) B: a token that a motion adds also gets an emergency recovery TWAP, with no delegatecall, that sells it for USDC or USDT, pays the Aragon Agent and ends within 1 day ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 35).
+- (OD-74, card 4) "A": the token template ships with the launch, with fork tests and the phase-3 audit ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 36). [s12]
+
+## 2026-10-14 — OD-73: Aragon Voting owns the vault's Safes; OD-66 closed
+
+The agent explained OD-73 and the two open points of OD-66, and asked EM to confirm its reading of OD-66 point 1. EM answered:
+
+> OD-73: A confirmed
+> OD-66:
+> p. 2: A
+> p. 5: A
+> 1. Snapshot that sets a standing framework, then a motion per fund.
+> OD-68: interview me
+
+Recorded as:
+
+- (OD-73) A: Aragon Voting, not the Aragon Agent, is the only owner of the Asset Safe, the orders account and the first-loss Safe, and the admin of the vault's funding registries. Recovered assets still go to the Aragon Agent. A DAO action on the vault is a direct Voting item, without Dual Governance ([ADR 005](/adr/005-account-graph-and-roles.md), decision 28).
+- (OD-66, point 1) one Snapshot sets a standing framework for insurance funds, then each new fund needs one Easy Track motion. This corrects the agent's earlier reading, a Snapshot for each fund ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 25).
+- (OD-66, point 2) A: the framework fixes a checklist that every fund fills in. The option named each fund's Snapshot; with one standing framework, each fund's motion and its forum post fill it in ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 29).
+- (OD-66, point 5) A: a third funding registry and top-up factory pay only the first-loss Safe, within a limit, and ship with the launch ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 30). OD-66 closes.
+- (OD-68) EM asked for an interview. Decision 31 of [ADR 007](/adr/007-swapping-through-an-orders-account.md) stands until the interview changes it. [s12]
+
+## 2026-10-14 — OD-68 to OD-72 decided, OD-66 in part, OD-73 opened
+
+The agent reviewed whether Clutch launches with one Aragon vote and then runs on Easy Track alone. It asked EM to decide OD-68 to OD-72 and the open parts of OD-66, and it proposed OD-73: whether Aragon Voting, not the Aragon Agent, owns the vault's Safes, so that no Clutch action passes Dual Governance. EM answered:
+
+> OD-73: A
+> OD-66:
+> 1. Snapshot + motion
+> 2. Didn't get what should be decided?
+> 3. Decided
+> 4. Ship with launch
+> 5. Didn't get what should be decided?
+> 6. Confirmed
+>
+> OD-68: C
+> OD-69: A
+> OD-70: B
+> OD-71: A
+> OD-72: rec
+> OD-73: what it is about?
+
+Recorded as:
+
+- (OD-68) C: the orders modifier gets a governance role, held by the Easy Track executor, without delegatecall, and a motion adds a token for ComposableCoW's TWAP and stop-loss orders. A token for market, limit and recovery orders still needs a DAO vote ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 31).
+- (OD-69) A: the enabling vote holds spare budget keys for each token, with ceilings ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 39).
+- (OD-70) B: routine removals run as motions of a removal template, which waits for the objection window, and the emergency Safe's revoke stays for emergencies. This replaces part of OD-09 ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 14).
+- (OD-71) A: a new TM Floor Value is a mandate change, so its DAO vote is by design, and a shortfall in stETH is topped up in stablecoins, so a re-pin is optional ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 24).
+- (OD-72) "rec", the recommendation: before the vote, the template catalogue is checked against the protocols that the mandate allows, and a claim template, with the receiver pinned to the Asset Safe, ships only if a launch protocol pays rewards ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 15).
+- (OD-66, points 1, 3, 4 and 6) a new fund is approved by a Snapshot and then one Easy Track motion; the agent reads this as one Snapshot for each fund, which EM should confirm. Payouts run as Easy Track motions. The fund roles and factories ship with the launch. An exit from a fund stays with the operator Safe's direct role, paid to the Aragon Agent ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 25 to 28). Points 2 and 5 stay open, because EM asked what is to be decided there.
+- (OD-73) not recorded as a decision: EM answered "A" and also asked what OD-73 is about. It stays open until EM confirms. [s12]
 
 ## 2026-10-13 — OD-67: three readings confirmed
 

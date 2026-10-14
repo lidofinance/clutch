@@ -7,9 +7,12 @@ status: stable
 review_status: slop
 valid_as_of: 2026-10-08
 stale_after: 2026-12-31T00:00:00Z
+superseded_by:
+  ref: /registers/decision-log.md
+  note: "EM's answers of 2026-10-08 and 2026-10-09 (OD-54 to OD-57, and the withdrawal-queue cut), recorded in ADR 005 decisions 21 and 22, ADR 007 decisions 27 and 28, ADR 008 decision 20, ADR 009 decisions 31 to 33 and ADR 010 decisions 20 to 22."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-08T18:05:14Z
+  at: 2026-10-14T21:03:02Z
 verified: []
 sources:
   - id: s1
@@ -54,9 +57,14 @@ sources:
   - id: s14
     resource: /adr/009-budgets-caps-reporting-and-monitoring.md
     title: ADR 009 — budget keys, the fortnightly retune and the detective caps
+  - id: s15
+    resource: /registers/decision-log.md
+    title: Decision log — EM's answers on the simplification options, 2026-10-08 and 2026-10-09
 ---
 
 # Simplification options, 2026-10-08
+
+> **Closed:** EM answered these options on 2026-10-08 and 2026-10-09 (OD-54 to OD-57, and the withdrawal-queue cut), and the decisions are in ADR 005, ADR 007, ADR 008, ADR 009 and ADR 010 [s15]. This note stays as dated evidence.
 
 ## Answer
 

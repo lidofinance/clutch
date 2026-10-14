@@ -7,9 +7,12 @@ status: stable
 review_status: slop
 valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
+superseded_by:
+  ref: /adr/007-swapping-through-an-orders-account.md
+  note: "Decisions 17 to 20 of ADR 007 (OD-43, 2026-10-06): the vault no longer uses Stonks pricing."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:39:55Z
+  at: 2026-10-14T21:03:02Z
 verified: []
 sources:
   - id: s1
@@ -66,9 +69,14 @@ sources:
   - id: s18
     resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/src/policy/FullPolicy.sol#L219-L221"
     title: Kit policy at 370e20a — the emergency role redeems sUSDS and unwraps wstETH
+  - id: s19
+    resource: /adr/007-swapping-through-an-orders-account.md
+    title: ADR 007 — CoW orders from a dedicated orders account replaced the Stonks 2.0 instances, decisions 17 to 20
 ---
 
 # Stonks 2.0 pricing, 2026-10-05
+
+> **Superseded** on 2026-10-06: the vault no longer uses Stonks pricing, because CoW orders from a dedicated orders account replaced the instances (OD-43) [s19]. The Feed Registry table stays as dated evidence.
 
 An agent read the Stonks source at the audited commit `0669c4a` and ran every chain read on this page on 2026-10-05. The reads use Ethereum mainnet block 26126631, hash `0x1364e09dc56800192a827d3ca13f3e569936fba3d2785278ce9cd718730119d4`, time 2026-10-05T14:01:59Z [s14].
 

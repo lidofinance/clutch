@@ -40,10 +40,10 @@
 
 - name: Aragon Agent, Aragon Voting and Dual Governance
   column: reused
-  what: "The DAO path: the vote, the timelock and the treasury."
+  what: "The DAO path: Aragon Voting, which owns the vault's Safes, and the Aragon Agent, the treasury that receives recovered assets. Dual Governance gates only the Agent's own execution, which the vault does not use (OD-73)."
   why: "The DAO keeps custody and the final say. Clutch adds no authority over the Agent."
   owner: "The DAO"
-  sources: ["ADR-005#context", "ADR-005#proposed-direction"]
+  sources: ["ADR-005#context", "ADR-005#proposed-direction", OD-73, "ADR-005#d28"]
 
 - name: Aragon Finance and the shared payment permission
   column: reused
@@ -61,8 +61,8 @@
 
 - name: CoW Protocol, its order signer and ComposableCoW
   column: reused
-  what: "The exchange that settles every vault order; the deployed order signer for market and limit orders; ComposableCoW, its TWAP and stop-loss handlers and CoW's fallback handler for standing orders."
-  why: "Ackee audited ComposableCoW and the fallback handler, and Gnosis reviewed ComposableCoW. Whether the TWAP and StopLoss handlers are in scope is not checked, and the 40-line order signer has no audit that the repository found, so Lido reviews them in phase 3."
+  what: "The exchange that settles every vault order; the deployed order signer for market and limit orders; ComposableCoW, its TWAP handler and CoW's fallback handler for TWAP orders."
+  why: "Ackee audited ComposableCoW and the fallback handler, and Gnosis reviewed ComposableCoW. Whether the TWAP handler is in scope is not checked, and the 40-line order signer has no audit that the repository found, so Lido reviews them in phase 3."
   owner: "CoW Protocol"
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#proposed-direction", OD-43,
     "doc:docs/research/cow-orders-account-2026-10-06.md#the-chain-read-on-2026-10-06-at-block-26134502"]
@@ -116,8 +116,8 @@
   column: instance
   what: "Two registries from Easy Track's standard builder, and two instances of its top-up factory."
   why: "The same pattern already pays many Lido recipients. Each registry pays only the Asset Safe, within a monthly limit."
-  owner: "The DAO registers them; the Aragon Agent administers the registries"
-  sources: ["ADR-008#d4", "ADR-008#proposed-direction", OD-06]
+  owner: "The DAO registers them; Aragon Voting administers the registries"
+  sources: ["ADR-008#d4", "ADR-008#proposed-direction", OD-06, OD-73, "ADR-005#d28"]
 
 - name: The constellation
   column: instance
@@ -143,8 +143,8 @@
 
 - name: Template, budget and burn factories
   column: new
-  what: "Five template factories, one budget factory and one first-loss burn factory for Easy Track: the only new contracts allowed."
-  why: "Motions then onboard protocols, change budgets after an event and burn first-loss shares without a DAO vote, but only through factories fixed at audit time."
+  what: "Template factories (up to five that onboard, one that removes, and a claim template if needed), one budget factory and one first-loss burn factory for Easy Track: the only new contracts allowed."
+  why: "Motions then onboard protocols, remove a branch, add an orders token, change budgets after an event and burn first-loss shares without a DAO vote, but only through factories fixed at audit time."
   owner: "`@lidofinance/defi-tech`; an external audit in phase 3"
   sources: ["ADR-006#d1", "ADR-006#d2", "ADR-006#d5", "ADR-006#d12", "ADR-008#d23", "ADR-009#d31", "ADR-009#proposed-direction",
     OD-67, "lip:part-4"]

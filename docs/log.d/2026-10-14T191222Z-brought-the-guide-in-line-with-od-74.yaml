@@ -1,0 +1,3 @@
+date: '2026-10-14'
+kind: Update
+text: 'Brought the guide in line with OD-74 and OD-75, and recorded three consequences. Chainlink''s Feed Registry has no USD feed for wstETH, WETH or LDO, so the token template''s check cannot run for their launch pins; the enabling vote lists their proxies as a check. The switch does not freeze a motion that writes only on the orders modifier. A restore writes the launch version, so it drops what later motions added and brings back what routine removals took away.'

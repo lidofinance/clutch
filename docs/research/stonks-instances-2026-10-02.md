@@ -7,9 +7,12 @@ status: stable
 review_status: slop
 valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
+superseded_by:
+  ref: /adr/007-swapping-through-an-orders-account.md
+  note: "Decisions 17 to 20 of ADR 007 (OD-43, 2026-10-06): CoW orders from a dedicated orders account replaced the Stonks 2.0 instances."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:39:55Z
+  at: 2026-10-14T21:03:02Z
 verified: []
 sources:
   - id: s1
@@ -33,9 +36,14 @@ sources:
   - id: s7
     resource: "https://etherscan.io/address/0xf4F6A03E3dbf0aA22083be80fDD340943d275Ea5#readContract"
     title: Stonks v1 stETH to USDC instance — manager and recovery address, read at block 26104917
+  - id: s8
+    resource: /adr/007-swapping-through-an-orders-account.md
+    title: ADR 007 — CoW orders from a dedicated orders account replaced the Stonks 2.0 instances, decisions 17 to 20
 ---
 
 # Stonks 2.0 instances, 2026-10-02
+
+> **Superseded** on 2026-10-06: CoW orders from a dedicated orders account replaced the Stonks 2.0 instances (OD-43) [s8]. This note stays as dated evidence.
 
 An agent read the verified source and ran every chain read on this page on 2026-10-02.
 

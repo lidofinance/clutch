@@ -8,15 +8,16 @@ intro: >-
   approve, and this page reads the graph below from that artifact when it is built.
 planned:
   - name: Orders account
-    where: "A second Agent-owned Safe, with one modifier of its own"
-    what: "One orders modifier for the operator and emergency roles, with no governance role (OD-57, OD-58). The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
-    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d28", "ADR-007#d30", OD-43, OD-57, OD-58, INV-023]
+    where: "A second Voting-owned Safe, with one modifier of its own"
+    what: "One orders modifier for the operator and emergency roles, and no governance role: a DAO vote adds a token (OD-57, OD-58, OD-78). The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
+    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d28", "ADR-007#d30", OD-43, OD-57, OD-58, INV-023,
+      "ADR-007#d38", OD-78]
   - name: Exit-governance role
     where: "On the safety modifier, held by the Easy Track script executor"
     what: "The motion that onboards a protocol also writes the emergency role's exit for it. The role writes only under the emergency key."
     sources: ["ADR-006#d13", "ADR-006#proposed-direction", OD-49, INV-025]
   - name: First-loss Safe and its roles
-    where: "An Agent-owned Safe with one modifier of its own"
+    where: "A Voting-owned Safe with one modifier of its own"
     what: "One first-loss modifier with two roles. The first-loss burn role, held by the Easy Track script executor, burns the DAO's first-loss shares only in an enacted motion. The first-loss role, held by the operator Safe, redeems them to the Aragon Agent. No other role reaches them."
     sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", OD-42, OD-60, OD-67, INV-021]
 changes:
@@ -54,9 +55,10 @@ changes:
   - area: Asset Safe
     kind: changed
     provider: "Agent-owned, on the Safe v1.4.1 singleton. The constellation's Safe node cannot set a version, a guard or a fallback handler."
-    clutch: "Safe v1.5.0, the Aragon Agent as its only owner, no guard and no fallback handler. Clutch's own script deploys it."
+    clutch: "Safe v1.5.0, Aragon Voting as its only owner, no guard and no fallback handler. Clutch's own script deploys it."
     why: "Recovery must never pass through vendor code, and the vault stays off the parts of Safe that changed most."
-    sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#context", "ADR-005#proposed-direction", OD-17, INV-001]
+    sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#d28", "ADR-005#context", "ADR-005#proposed-direction", OD-17,
+      OD-73, INV-001]
   - area: Lending and savings
     kind: removed
     provider: "Aave v3 supply and withdraw, aToken transfers, and sDAI."

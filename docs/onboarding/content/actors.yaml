@@ -27,8 +27,8 @@
   numbers: ["Safe v1.3.0", "4 of 7", "rebalancing window: 2 working days", "two seats on the emergency Safe"]
   address: "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647"
   sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d24", "ADR-005#d26", "ADR-005#d27", "ADR-008#d21", "ADR-008#d22",
-    "ADR-008#d23", "ADR-009#d6", "ADR-009#d18", "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28", "ADR-010#d19",
-    "ADR-010#d23", "ADR-002#d1", OD-40, OD-41, OD-45, OD-58, OD-59, OD-60, OD-64, OD-67,
+    "ADR-008#d23", "ADR-009#d6", "ADR-009#d18", "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28",
+    "ADR-010#d19", "ADR-010#d23", "ADR-002#d1", OD-40, OD-41, OD-45, OD-58, OD-59, OD-60, OD-64, OD-67,
     "doc:docs/research/chain-reads-2026-09-30.md#committees"]
 
 # --- Lido DAO ----------------------------------------------------------------------------------
@@ -44,69 +44,74 @@
     - "Object to any Easy Track motion in its [[objection window]]. An objection of 0.5% of LDO stops it."
     - "Approve the mandate in a [[Snapshot vote]] before the on-chain vote."
   cannot:
-    - "Act on the vault directly. Every DAO action goes through [[Dual Governance]] to the Aragon Agent."
+    - "Act on the vault without a vote. A vote on the vault is a direct Aragon Voting item, about five days, without Dual Governance (OD-73)."
     - "Shorten a motion's objection window."
   numbers: ["objection threshold: 0.5% of LDO", "objection window: 72 h"]
-  sources: ["ADR-006#d4", "ADR-006#d6", "ADR-006#d8", "ADR-006#context", "ADR-005#context", "ADR-005#d24", "ADR-005#d26",
-    "ADR-005#proposed-direction", OD-58, OD-59, "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap"]
+  sources: ["ADR-006#d4", "ADR-006#d6", "ADR-006#d8", "ADR-006#context", "ADR-005#context", "ADR-005#d24",
+    "ADR-005#d26", "ADR-005#proposed-direction", OD-58, OD-59, "doc:docs/registers/parameters.md#parameters",
+    "doc:ROADMAP.md#roadmap", OD-73, "ADR-005#d28"]
 
 - id: aragon-voting
   node: dao
   name: Aragon Voting
   status: existing
   label: existing
-  what: "The DAO's on-chain voting contract. A passed vote goes through Dual Governance before the Aragon Agent executes it."
+  what: "The DAO's on-chain voting contract. It is the only owner of the Asset Safe, the [[orders account]] and the [[first-loss Safe]], and the admin of the vault's funding registries, so a vote acts on the vault directly, in about five days, without [[Dual Governance]] (OD-73)."
   controlled_by: "LDO holders."
   can:
-    - "Manage the shared payment permission of the Easy Track executor, and rewrite it as one unit."
-    - "Administer the shared stablecoin token list."
-    - "Hold Easy Track's pause, unpause and cancel roles itself. A vote item that unpauses Easy Track or cancels a queued motion runs when the vote runs, in five days, outside Dual Governance."
+    - "Do anything on the vault's Safes as their only owner: replace the policy, change a role's members, turn a [[module]] on or off, move any asset."
+    - "Restart after the switch, as a Voting item: enable the operator modifier again, and grant again the operator's permissions on the orders account and any relayer approval set to zero. This is the only restart (OD-59)."
+    - "Change or remove the two first-loss roles and the burn factory (OD-60, OD-67)."
+    - "Add a token to the orders account, with its relayer approval, because no motion writes there (OD-36, OD-46, OD-78)."
+    - "Grant the operator [[delegatecall]]. Only a DAO vote can do this (OD-36)."
+    - "Set a limit or a period on either of the vault's two funding registries, as their admin."
+    - "Manage the shared payment permission of the Easy Track executor, and rewrite it as one unit, and administer the shared stablecoin token list."
+    - "Hold Easy Track's admin, pause, unpause and cancel roles itself. A vote item that unpauses Easy Track or cancels a queued motion runs when the vote runs."
   cannot:
-    - "Reach the vault's Safes except through Dual Governance and the Aragon Agent."
+    - "Approve a vault transaction with a contract signature. It uses only `approveHash`, or it sends the transaction itself."
+    - "Gain power over the treasury from owning the vault: it already pays out of the Aragon Agent through Finance."
+  numbers: ["owns the Asset Safe, the orders account and the first-loss Safe, each at 1 of 1", "a vote: about 5 days"]
   address: "0x2e59A20f205bB85a89C53f1936454680651E618e"
-  sources: ["ADR-008#d9", "ADR-008#d10", "ADR-005#context", "ADR-005#d26", OD-59,
-    "doc:docs/research/chain-reads-2026-09-30.md#governance-authority",
-    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts"]
+  sources: ["ADR-005#d14", "ADR-005#d19", "ADR-005#d20", "ADR-005#d26", "ADR-005#d27", "ADR-005#d28",
+    "ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d12", "ADR-007#d19", "ADR-007#d21", "ADR-008#d9",
+    "ADR-008#d10", "ADR-008#d21", OD-36, OD-46, OD-59, OD-60, OD-67, OD-73, INV-001, INV-021, INV-023,
+    "doc:docs/research/single-vote-review-2026-10-14.md#decisions-of-2026-10-14",
+    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts", OD-78, "ADR-007#d38",
+    "ADR-005#d30"]
 
 - id: dual-governance
   node: dao
   name: Dual Governance and its admin executor
   status: existing
   label: existing
-  what: "The layer between a DAO vote and the Aragon Agent. It adds a delay, so every DAO action takes days."
+  what: "The layer between a DAO vote and the Aragon Agent's own scripts and calls. It adds a delay. The vault does not pass through it, because Aragon Voting owns the vault's Safes (OD-73)."
   controlled_by: "The results of Aragon Voting, through the Dual Governance timelock."
   can:
     - "Run scripts as the Aragon Agent. Its admin executor is the only holder of the Agent's `RUN_SCRIPT_ROLE` and `EXECUTE_ROLE`."
   cannot:
     - "Skip its own delay."
+    - "Hold up a vote on the vault. A vote on the vault is a direct Voting item (OD-73)."
   address: "0x23E0B465633FF5178808F4A75186E2F2F9537021"
-  sources: ["ADR-005#context", "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
+  sources: ["ADR-005#context", "ADR-005#d28", OD-73, "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
 
 - id: aragon-agent
   node: dao
   name: Aragon Agent
   status: existing
   label: existing
-  what: "The DAO treasury and its final authority. It is the only owner of the Asset Safe, the [[orders account]] and the [[first-loss Safe]], and every recovered asset comes back to it."
-  controlled_by: "The Dual Governance admin executor."
+  what: "The DAO treasury. Every recovered asset comes back to it, and Aragon Finance pays the vault's funding out of it. It owns none of the vault's Safes: Aragon Voting does (OD-73)."
+  controlled_by: "The Dual Governance admin executor runs its scripts and calls. Aragon Finance pays out of it."
   can:
-    - "Do anything on the Asset Safe as its only owner: replace the policy, change a role's members, turn a [[module]] on or off, move any asset."
-    - "Enable the operator modifier again after the switch, by vote through Dual Governance. This is the only restart (OD-59)."
-    - "Change or remove the two first-loss roles and the burn factory, by vote (OD-60, OD-67)."
-    - "Add a token to the orders account's lists, for the operator or for [[recovery order|recovery orders]], by vote. No motion can write the order signer's permission (OD-36, OD-46)."
-    - "Grant the operator [[delegatecall]]. Only a DAO vote can do this (OD-36)."
     - "Receive recovered assets: every emergency transfer out of the vault's accounts, and every recovery order, pays it."
-    - "Pay funding through Aragon Finance, and administer both funding registries."
+    - "Fund the vault through Aragon Finance, under the shared payment permission."
   cannot:
-    - "Approve an Asset Safe transaction with a contract signature. It uses only `approveHash`, or it sends the transaction itself."
+    - "Act on the vault's Safes. Aragon Voting owns them (OD-73)."
     - "Be reached by an Easy Track motion. Easy Track has no authority over it."
-  numbers: ["owns the Asset Safe, the orders account and the first-loss Safe, each at 1 of 1"]
+  numbers: ["receives every recovered asset"]
   address: "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
-  sources: ["ADR-005#d14", "ADR-005#d19", "ADR-005#d20", "ADR-005#d26", "ADR-005#d27", "ADR-005#proposed-direction",
-    "ADR-006#d9", "ADR-006#d12", "ADR-007#d19", "ADR-007#d21", "ADR-008#d21", "ADR-008#proposed-direction", OD-36,
-    OD-46, OD-59, OD-60, OD-67, INV-001, INV-021, INV-023]
+  sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-007#d19", "ADR-008#proposed-direction", OD-73,
+    "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
 
-# --- Funding path ------------------------------------------------------------------------------
 - id: finance
   node: funding
   name: Aragon Finance and the shared payment permission
@@ -146,9 +151,9 @@
   status: instance
   label: specified
   what: "Two new registries from Easy Track's standard builder, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a monthly limit."
-  controlled_by: "The Aragon Agent is the admin. The Easy Track executor spends the limit."
+  controlled_by: "Aragon Voting is the admin (OD-73). The Easy Track executor spends the limit."
   can:
-    - "Pay only the Asset Safe."
+    - "Pay only their one recipient: the Asset Safe, or the first-loss Safe."
     - "Check the remaining limit when a motion starts, and again at enactment."
   cannot:
     - "Take a new recipient from the executor. Only the DAO changes a recipient, a limit or a period."
@@ -157,7 +162,8 @@
   numbers: ["period: one calendar month", "limit: one TM Floor Value each, from the attested computation"]
   address: "To be deployed"
   sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d8", "ADR-008#proposed-direction", INV-017,
-    "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts"]
+    "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts", OD-73, "ADR-005#d28", OD-78,
+    "ADR-008#d31"]
 
 - id: topup-factories
   node: funding
@@ -165,7 +171,7 @@
   status: instance
   label: specified
   what: "Two new instances of Easy Track's top-up factory, one for stablecoins and one for stETH. They create the [[top-up]] motions that fund the vault."
-  controlled_by: "The operator Safe is the [[trusted caller]] of both. The DAO registers them by vote."
+  controlled_by: "The operator Safe is the [[trusted caller]] of all three. The DAO registers them by vote."
   can:
     - "Create a top-up motion that pays the Asset Safe, with several payments in one motion."
   cannot:
@@ -174,7 +180,7 @@
   numbers: ["top-ups expected on days 1–10 of a month", "objection window: 72 h"]
   address: "To be deployed"
   sources: ["ADR-008#d4", "ADR-008#d6", "ADR-008#proposed-direction",
-    "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries"]
+    "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries", OD-78, "ADR-008#d31"]
 
 - id: growth-committee
   node: funding
@@ -239,21 +245,22 @@
 
 - id: template-factories
   node: easytrack
-  name: Template factories (five)
+  name: Template factories
   status: new
   label: specified
-  what: "Five of the new Easy Track factories, the only kind of new contract that Clutch may add. Each factory owns one fixed [[template]]. A motion gives it typed values, such as a target, an asset and a budget key, and the factory builds the permission."
+  what: "The new Easy Track factories that own a fixed [[template]]: up to five that onboard a protocol, each only if a named protocol needs its shape (OD-79), one that removes a branch of a permission, and a claim template if a launch protocol pays rewards. Easy Track factories are the only kind of new contract that Clutch may add. A motion gives it typed values, such as a target, an asset and a budget key, and the factory builds the permission."
   controlled_by: "The operator Safe is the trusted caller, fixed at deployment. The DAO registers each factory by vote."
   can:
     - "Onboard a protocol without a DAO vote: wrap and unwrap, a tokenized vault, a queue vault, a spender approval or a Morpho Blue market."
     - "Onboard Lido Lend in one motion through the Morpho Blue template, once Lido Lend's own contract exists. The same motion adds its emergency exit (OD-49)."
   cannot:
     - "Accept a condition tree from a motion."
-    - "Remove a permission. Every removal is the emergency Safe's revoke (OD-09)."
-    - "Add a token to the orders account's lists. The order signer's permission is a delegatecall, which no motion can write (OD-36, OD-46)."
-  numbers: ["5 templates", "external audit in phase 3"]
+    - "Remove a permission at once. An emergency removal is the emergency Safe's revoke (OD-09)."
+    - "Add a token for market, limit or recovery orders. The order signer's permission is a delegatecall, which no motion can write (OD-36, OD-46)."
+  numbers: ["up to 5 onboarding templates (OD-79)", "1 removal template", "a claim template only if needed (OD-72)", "external audit in phase 3"]
   sources: ["ADR-006#d1", "ADR-006#d2", "ADR-006#d3", "ADR-006#d5", "ADR-006#d7", "ADR-006#d12", "ADR-006#d13",
-    "ADR-006#proposed-direction", "ADR-011#d3", "ADR-011#d13", OD-09, OD-36, OD-43, OD-46, OD-49, "lip:part-4"]
+    "ADR-006#d14", "ADR-006#d15", "ADR-006#proposed-direction", "ADR-011#d3", "ADR-011#d13", OD-09, OD-36, OD-43, OD-46,
+    OD-49, OD-70, OD-72, "lip:part-4", OD-78, OD-79, "ADR-006#d18"]
 
 - id: budget-factory
   node: easytrack
@@ -269,9 +276,10 @@
     - "Set a refill period below 30 days."
     - "Touch a key that is not the operator's."
     - "Use ceilings before the attested figures enter the repository."
+    - "Set a key that the policy does not already hold. The enabling vote holds spare keys for each token, so a new spender takes one (OD-69)."
   numbers: ["refill period: 30 days or more", "no routine retune: a motion only after an event (OD-56)", "every budget motion alerts"]
   sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d28", "ADR-009#d30", "ADR-009#d31", "ADR-009#proposed-direction",
-    INV-012, OD-41, OD-56, "lip:part-7"]
+    "ADR-009#d39", "ADR-009#consequences", INV-012, OD-41, OD-56, OD-69, "lip:part-7"]
 
 - id: first-loss-burn-factory
   node: easytrack
@@ -301,7 +309,7 @@
   can:
     - "Hold the operator role: change positions in approved protocols, within budgets."
     - "Create motions as the trusted caller of every Clutch factory, and cancel its own motions."
-    - "Hold the operator role on the [[orders account]]: place CoW market, [[limit order|limit]], [[TWAP]] and [[stop-loss order|stop-loss]] orders that pay the Asset Safe."
+    - "Hold the operator role on the [[orders account]]: place CoW market, [[limit order|limit]] and [[TWAP]] orders that pay the Asset Safe."
     - "Hold the first-loss role: redeem the DAO's [[first-loss shares]] to the Aragon Agent, on the Earn team's written instruction (OD-60)."
     - "Remove the screening guard, but only through a fixed 10-day timelock."
   cannot:
@@ -328,7 +336,7 @@
   can:
     - "Hold the emergency role: revoke the operator, zero approvals, exit positions and send assets to the Aragon Agent."
     - "Switch the operator off: disable the operator modifier, for a defect in the permission layer, on the cap-breach trigger, or when the committee is compromised or silent. The switch also freezes the vault's queued motions (OD-58)."
-    - "Make every removal of an operator permission. A forum post follows."
+    - "Make every emergency removal of an operator permission, at once. A forum post follows. A routine removal is a motion (OD-70)."
     - "Hold the emergency role on the orders account: revoke the operator there, cancel any order, send tokens to the Aragon Agent or the Asset Safe, and place [[recovery order|recovery orders]]."
     - "Overrule a silent or compromised committee: the two Emergency Brakes members and the fifth signer form a quorum."
   cannot:
@@ -341,7 +349,7 @@
   address: "To be deployed"
   sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d13", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26",
     "ADR-005#proposed-direction", "ADR-007#d13", "ADR-007#d19", "ADR-007#d25", "ADR-007#d30",
-    "ADR-007#proposed-direction", "ADR-009#d34", OD-42, OD-43, OD-58, OD-59, OD-67, INV-026, "lip:part-6",
+    "ADR-007#proposed-direction", "ADR-009#d34", OD-42, OD-43, OD-58, OD-59, OD-67, OD-70, INV-026, "lip:part-6",
     "doc:docs/registers/parameters.md#parameters"]
 
 # --- Emergency Brakes ---------------------------------------------------------------------------
@@ -446,7 +454,7 @@
   label: built
   role: operator
   what: "The permissions of the operator Safe on the operator modifier. Every receiver, owner and beneficiary is pinned to the Asset Safe, so the operator can change positions but cannot move assets out."
-  controlled_by: "Held by the operator Safe. The DAO writes it at the enabling vote. Motions widen it inside templates; a DAO vote can change it in any way."
+  controlled_by: "Held by the operator Safe. The DAO writes it at the enabling vote. Motions widen it inside templates, and a removal motion narrows it; a DAO vote can change it in any way."
   can:
     - "Stake ETH, and wrap and unwrap stETH and WETH."
     - "Deposit into and redeem from earnETH, earnUSD and sUSDS. Claims pay the Asset Safe."
@@ -473,7 +481,7 @@
   can:
     - "Write operator permissions for a target that a motion names, under the `operator` key only."
     - "Set the operator's budgets, with a refill period of at least 30 days."
-    - "Revoke an operator target or function. No factory plans to use this."
+    - "Revoke an operator target or function. The removal template uses this when a routine removal takes a whole target or function (OD-70)."
   cannot:
     - "Grant or remove a role, or touch the emergency role."
     - "Make the Asset Safe or any of its modules an operator target, the safety modifier included (OD-38). The compiler refuses a policy without this guard."
@@ -491,15 +499,15 @@
   status: new
   label: built
   what: "Refillable quotas on the operator modifier, counted in token units. An approval to a protocol spends the key of that spender. An approval of zero is always free."
-  controlled_by: "The DAO sets them first. A budget motion changes a key only after an event, such as a new floor or a product unlock (OD-56)."
+  controlled_by: "The DAO sets them first. A budget motion changes a key only after an event, such as a new floor or a product unlock (OD-56). A motion sets only a key that the policy already holds, so the enabling vote holds spare keys for each token, and a new spender takes one (OD-69)."
   can:
     - "Refill each period up to a maximum. Each successful call draws them down."
     - "Stay apart: the key of one asset never pays for another asset."
   cannot:
     - "See value. A key counts token units, so it drifts with price."
   numbers: ["amounts in the repository: dry-run stand-ins", "production figures: from the attested computation, after the mandate is approved"]
-  sources: ["ADR-009#d3", "ADR-009#d13", "ADR-009#d31", "ADR-009#proposed-direction", INV-011, OD-56,
-    "test:test_D5_budget_enforcement_and_refill", "test:test_budget_keys_of_different_assets_are_independent"]
+  sources: ["ADR-009#d3", "ADR-009#d13", "ADR-009#d31", "ADR-009#d39", "ADR-009#proposed-direction", "ADR-009#consequences", INV-011,
+    OD-56, OD-69, "test:test_D5_budget_enforcement_and_refill", "test:test_budget_keys_of_different_assets_are_independent"]
 
 # --- Safety modifier ----------------------------------------------------------------------------
 - id: safety-modifier
@@ -692,8 +700,8 @@
   name: Asset Safe
   status: instance
   label: built
-  what: "The vault. A new Safe that holds the assets. The Aragon Agent is its only owner. The roles act on it only through its two modifiers. The first-loss shares sit apart in the first-loss Safe, and a token for an order sits in the orders account until the fill."
-  controlled_by: "The Aragon Agent, at 1 of 1. Safe v1.5.0."
+  what: "The vault. A new Safe that holds the assets. Aragon Voting is its only owner. The roles act on it only through its two modifiers. The first-loss shares sit apart in the first-loss Safe, and a token for an order sits in the orders account until the fill."
+  controlled_by: "Aragon Voting, at 1 of 1 (OD-73). Safe v1.5.0."
   can:
     - "Own both modifiers, and run their permitted calls as itself: it is their [[avatar]]."
     - "Send a token to the orders account for an order, under the orders budgets. Specified, not built."
@@ -704,7 +712,7 @@
   numbers: ["Safe v1.5.0", "1 of 1", "no guard", "no fallback handler"]
   address: "To be deployed"
   sources: ["ADR-005#d6", "ADR-005#d12", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20", "ADR-005#context",
-    "ADR-005#proposed-direction", INV-001, "test:test_asset_safe_shape"]
+    "ADR-005#proposed-direction", INV-001, "test:test_asset_safe_shape", OD-73, "ADR-005#d28"]
 
 - id: safe-contracts
   node: asset-safe
@@ -737,7 +745,7 @@
     - "Be sold and bought in CoW orders by the operator, if on its lists: stETH, wstETH, WETH, USDC, USDT, USDS and LDO (OD-46)."
     - "Be sold by a [[recovery order]] into USDC, or into USDT: every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues."
   cannot:
-    - "Be traded by the operator if off its lists. DAI earns through Sky's converter and sUSDS through deposit and redeem, so both stay off (OD-22, OD-46). A new token needs a DAO vote."
+    - "Be traded by the operator if off its lists. DAI earns through Sky's converter and sUSDS through deposit and redeem, so both stay off (OD-22, OD-46). A new token needs a DAO vote (OD-78)."
   addresses:
     - {name: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}
     - {name: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7"}
@@ -746,7 +754,7 @@
     - {name: "LDO", address: "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32"}
   sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d5", "ADR-011#d7", "ADR-011#d11", "ADR-011#d12", "ADR-011#d14",
     "ADR-007#d5", "ADR-007#d21", "ADR-007#d22", "ADR-007#proposed-direction", OD-22, OD-26, OD-46,
-    "doc:docs/registers/parameters.md#parameters"]
+    "doc:docs/registers/parameters.md#parameters", OD-78, "ADR-007#d38"]
 
 # --- First-loss Safe ----------------------------------------------------------------------------
 - id: first-loss-safe
@@ -754,8 +762,8 @@
   name: First-loss Safe
   status: instance
   label: specified
-  what: "A new Safe that holds only the DAO's [[first-loss shares]] in earnETH and earnUSD. The Aragon Agent owns it. One modifier carries two narrow roles, so the committee can execute the first-loss terms without a DAO vote: a burn waits for an Easy Track motion's objection window, and an exit pays the Aragon Agent."
-  controlled_by: "The Aragon Agent, at 1 of 1. Safe v1.5.0, with no guard or fallback handler, and one modifier: the first-loss modifier."
+  what: "A new Safe that holds only the DAO's [[first-loss shares]] in earnETH and earnUSD. Aragon Voting owns it. One modifier carries two narrow roles, so the committee can execute the first-loss terms without a DAO vote: a burn waits for an Easy Track motion's objection window, and an exit pays the Aragon Agent."
+  controlled_by: "Aragon Voting, at 1 of 1 (OD-73). Safe v1.5.0, with no guard or fallback handler, and one modifier: the first-loss modifier."
   can:
     - "Receive the first-loss shares from the Growth Committee Safe, once, after the enabling vote."
     - "Burn the shares, but only in an enacted Easy Track motion, through the first-loss burn role (OD-67)."
@@ -767,7 +775,7 @@
   address: "To be deployed"
   sources: ["ADR-008#d13", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-008#proposed-direction",
     "ADR-005#d27", "ADR-005#proposed-direction", OD-42, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares",
-    "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares"]
+    "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares", OD-73, "ADR-005#d28"]
 
 - id: role-first-loss
   node: first-loss
@@ -890,10 +898,10 @@
   name: Orders account
   status: instance
   label: specified
-  what: "A new Safe that the Aragon Agent owns. Every vault swap is a [[CoW]] order placed from it. It holds only tokens in transit, between a transfer from the Asset Safe and a fill."
-  controlled_by: "The Aragon Agent, at 1 of 1. The roles act on it only through its own modifier (OD-57)."
+  what: "A new Safe that Aragon Voting owns. Every vault swap is a [[CoW]] order placed from it. It holds only tokens in transit, between a transfer from the Asset Safe and a fill."
+  controlled_by: "Aragon Voting, at 1 of 1 (OD-73). The roles act on it only through its own modifier (OD-57)."
   can:
-    - "Place CoW market and [[limit order|limit orders]] through CoW's order signer, and [[TWAP]] and [[stop-loss order|stop-loss orders]] through ComposableCoW."
+    - "Place CoW market and [[limit order|limit orders]] through CoW's order signer, and [[TWAP]] orders through ComposableCoW."
     - "Pay the Asset Safe for the operator's orders, and the Aragon Agent for [[recovery order|recovery orders]]. Each role's permissions pin the receiver."
     - "Use CoW's [[fallback handler]], which [[conditional order|conditional orders]] need. The Asset Safe has none, so this account carries it."
     - "Settle any role's order with the approvals of CoW's vault relayer that the enabling vote sets. No role can raise an approval here."
@@ -901,30 +909,31 @@
     - "Bound an order's price on chain. An order's limit is a number that the caller chooses. CoW's rules, screening, the orders budgets and monitoring of each fill take the place of a bound, and screening covers only the operator (OD-48)."
     - "Limit what the emergency role sends in. The operator's transfers spend the orders budgets; the emergency role's have no budget."
     - "Swap through a router at launch. Uniswap and 1inch wait until [the screening vendor] can check a swap's minimum output (OD-43)."
-  numbers: ["owner: the Aragon Agent, 1 of 1", "order life: 90 days; a recovery order: 1 day", "orders budgets: from the attested computation"]
+  numbers: ["owner: Aragon Voting, 1 of 1", "order life: 90 days; a recovery order: 1 day", "orders budgets: from the attested computation"]
   address: "To be deployed"
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d20", "ADR-007#d23", "ADR-007#d25", "ADR-007#d26",
     "ADR-007#d28", "ADR-007#d29", "ADR-007#d30", "ADR-007#proposed-direction", "ADR-005#d15", "ADR-005#d20",
     "ADR-005#d21", OD-43, OD-47, OD-48, OD-61, INV-013, INV-023,
-    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design"]
+    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design", OD-73, "ADR-005#d28"]
 
 - id: orders-modifiers
   node: orders
   name: The orders account's modifier
   status: instance
   label: specified
-  what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, and no governance role, because no motion writes on the orders account (OD-57, OD-58)."
+  what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, and no governance role (OD-57, OD-58, OD-78)."
   controlled_by: "Its owner, the orders account, so in the end the DAO."
   can:
-    - "Let the operator sign orders through the order signer and create TWAP and stop-loss orders. The receiver is the Asset Safe, and a stop-loss order's oracles are pinned to Chainlink feeds."
+    - "Let the operator sign orders through the order signer and create TWAP orders. The receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."
     - "Let the emergency role cancel any order, set a relayer approval to zero, send any listed token to the Aragon Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent."
     - "Let the emergency role stop the operator by revoking its targets and functions. The stop also cancels the operator's open orders, because a fill does not consult the policy (OD-58)."
   cannot:
-    - "Let a motion add a token to the lists. That needs a DAO vote (OD-46)."
-    - "Take a permission from a motion. It has no governance role; a DAO vote writes it (OD-57)."
+    - "Let a motion add a token or raise an approval. A DAO vote does both (OD-46, OD-78)."
+    - "Take the order signer's permission or a delegatecall from a motion (OD-36)."
   address: "To be deployed"
   sources: ["ADR-007#d19", "ADR-007#d21", "ADR-007#d25", "ADR-007#d28", "ADR-007#d30", "ADR-007#proposed-direction",
-    "ADR-005#d21", "ADR-005#d25", OD-43, OD-46, OD-57, OD-58, INV-014, INV-022]
+    "ADR-005#d21", "ADR-005#d25", OD-43, OD-46, OD-57, OD-58, INV-014, INV-022, OD-78, "ADR-007#d38", "ADR-007#d39",
+    OD-79]
 
 - id: cow-order-signer
   node: orders
@@ -945,23 +954,21 @@
 
 - id: composable-cow
   node: orders
-  name: ComposableCoW, its TWAP and stop-loss handlers, and CoW's fallback handler
+  name: ComposableCoW, its TWAP handler, and CoW's fallback handler
   status: existing
   label: existing
   what: "CoW's contracts for [[conditional order|conditional orders]]. The orders account sets CoW's fallback handler and names ComposableCoW as the verifier of CoW's settlement domain. A handler checks each order's terms."
   controlled_by: "External: CoW Protocol."
   can:
     - "Hold a TWAP order: equal parts at a fixed spacing, each with a minimum to receive. This is how the vault buys or sells a position over time."
-    - "Hold a stop-loss order. It becomes valid when the sell token's price, read from two oracles in the order, falls to the strike or below."
     - "Delete an order with `remove`."
   cannot:
     - "Post an order to CoW's order book. CoW's [[watch-tower]] does that."
     - "Work for a Safe without CoW's fallback handler. That is why the orders account exists."
-  numbers: ["ComposableCoW and the fallback handler: audited by Ackee, reviewed by Gnosis", "the TWAP and StopLoss handlers: audit scope not checked"]
+  numbers: ["ComposableCoW and the fallback handler: audited by Ackee, reviewed by Gnosis", "the TWAP handler: audit scope not checked"]
   addresses:
     - {name: "ComposableCoW", address: "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74"}
     - {name: "TWAP handler", address: "0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5"}
-    - {name: "StopLoss handler", address: "0x412c36e5011cd2517016d243a2dfb37f73a242e7"}
     - {name: "ExtensibleFallbackHandler", address: "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5"}
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d24", "ADR-007#proposed-direction", INV-022, INV-023,
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]

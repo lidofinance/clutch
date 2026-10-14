@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 007: Swapping through an orders account"
-description: Every swap, routine or emergency, is a CoW order placed from a dedicated orders account — a Safe owned by the Aragon Agent, with CoW's fallback handler and one modifier of its own; the operator funds it under budgets and places market, limit, TWAP and stop-loss orders that pay the Asset Safe; the emergency role places recovery orders that pay the Aragon Agent into USDC or USDT, or sends assets to the Agent; the launch uses CoW only; Stonks 2.0 is no longer used; staking stays, and the withdrawal queue left the design on 2026-10-08.
+description: Every swap, routine or emergency, is a CoW order placed from a dedicated orders account — a Safe owned by Aragon Voting, with CoW's fallback handler and one modifier of its own; the operator funds it under budgets and places market, limit and TWAP orders that pay the Asset Safe; the emergency role places recovery orders that pay the Aragon Agent into USDC or USDT, or sends assets to the Agent; the launch uses CoW only; Stonks 2.0 is no longer used; staking stays, and the withdrawal queue left the design on 2026-10-08.
 tags: [swaps, cow, orders, emergency, rebalancing]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T08:15:41Z
+  at: 2026-10-14T21:03:23Z
 verified: []
 sources:
   - id: s1
@@ -137,15 +137,49 @@ EM decided on 2026-10-13, closing OD-58 [s1]:
 
 30. The orders modifier carries the operator and emergency roles and no governance role. The technical role goes, and the emergency role's revoke stops the operator on the orders account ([ADR 005](/adr/005-account-graph-and-roles.md) decision 25). This replaces the technical role and the membership removal of decision 28.
 
+EM decided on 2026-10-14, closing OD-68 [s1]:
+
+31. The orders modifier gets a governance role, held by the Easy Track executor, without delegatecall. A motion adds a token for ComposableCoW's TWAP and stop-loss orders, which are plain calls.
+
+Decision 31 replaces "no governance role" in decisions 28 and 30, and, for TWAP and stop-loss orders, the DAO vote of decision 21. A token for market, limit and recovery orders still needs a DAO vote (decision 21), because their permission is a delegatecall (OD-36). A fork test comes before decision 31 is relied on.
+
+Since OD-73, Aragon Voting owns the orders account ([ADR 005](/adr/005-account-graph-and-roles.md) decision 28).
+
+EM decided on 2026-10-14, in an interview on OD-68, closing OD-74 [s1]:
+
+32. A token that a motion adds gets TWAP orders, and stop-loss orders only with feeds checked against Chainlink's Feed Registry. Market, limit and recovery orders through the order signer stay a DAO vote.
+33. A stop-loss permission pins a Chainlink proxy. The factory accepts a proxy only if its aggregator equals the Feed Registry's feed for the token in USD, at creation and again at enactment. The launch tokens pin proxies too.
+34. The Easy Track executor holds an approvals role on the orders modifier. Through it, a motion raises the approval of CoW's vault relayer for any listed token, also after the emergency role set the approval to zero.
+35. A token that a motion adds also gets an emergency recovery TWAP, with no delegatecall: it sells the token for USDC or USDT, pays the Aragon Agent and ends within 1 day.
+36. The token template ships with the launch. The enabling vote registers it; fork tests come before decision 31 is relied on, and the phase-3 audit covers it.
+
+Decisions 32 to 36 refine decision 31. Decision 34 replaces "no role can raise an approval on the orders account" and the DAO vote that set a zeroed approval again.
+
+EM decided on 2026-10-14, closing OD-76 [s1]:
+
+37. At launch, stop-loss orders cover only stETH, WETH, USDC, USDT and USDS. Before the vote, each of their proxies passes decision 33's check, with the registry's ETH/USD feed for WETH. The registry has no USD feed for wstETH or LDO [s6], so they get TWAP orders only.
+
+EM decided on 2026-10-14, after a count of the launch, closing OD-78 [s1]:
+
+38. The token template does not ship with the launch, and the orders modifier has no governance role and no approvals role. A DAO vote adds a token to the lists, for every order type, with its relayer approval (decision 21), and sets again an approval that the emergency role set to zero.
+
+Decision 38 replaces decisions 31, 32 and 34 to 36. Decision 33 stands for the proxies that the launch tokens pin, without a factory, and decision 37 stands.
+
+EM decided on 2026-10-14, in the 80/20 pass after OD-78, closing OD-79 [s1]:
+
+39. The launch has no stop-loss orders. The orders policy allows no StopLoss handler and pins no oracle, and the vendor gets no request for a stop-loss expiry rule. TWAP orders stay.
+
+Decision 39 replaces the stop-loss parts of decisions 18, 24 and 29, and decisions 33 and 37.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as text.
 
-- **The orders account.** A new Safe, owned by the Aragon Agent at one of one. Its fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it. It has one modifier, the orders modifier, with the `operator` and `emergency` roles and no `governance` role (decisions 28 and 30). Its owner, avatar and target is the orders account. The enabling vote sets it up.
+- **The orders account.** A new Safe, owned by Aragon Voting at one of one ([ADR 005](/adr/005-account-graph-and-roles.md) decision 28). Its fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it. It has one modifier, the orders modifier, with the `operator` and `emergency` roles and no `governance` role (decisions 28 and 30). Its owner, avatar and target is the orders account. The enabling vote sets it up.
 - **Operator, on the Asset Safe.** A transfer of a listed token to the orders account, pinned to it, spends that token's orders budget. The budgets are figures from the attested computation.
 - **Operator, on the orders account.**
   - A delegatecall to the order signer: sell and buy tokens from the lists, the Asset Safe as receiver, an order life of at most 90 days (decision 29), and a fee bound. The order signer refuses an order whose `validTo` lies beyond its `validDuration`. `unsignOrder` cancels.
-  - ComposableCoW orders: TWAP and stop-loss handlers only, the Asset Safe as receiver, tokens from the lists, and a stop-loss's oracles pinned to Chainlink feeds. A TWAP order is created with `createWithContext`, a start of zero and CoW's current-timestamp value factory, so it starts at its creation. Its parts and spacing take one of two shapes: at most 90 parts at most a day apart, or at most 12 parts at most 7 days apart, so it ends within 90 days (decision 29). `remove` cancels.
+  - ComposableCoW orders: the TWAP handler only, the Asset Safe as receiver, and tokens from the lists; no stop-loss orders (decision 39). A TWAP order is created with `createWithContext`, a start of zero and CoW's current-timestamp value factory, so it starts at its creation. Its parts and spacing take one of two shapes: at most 90 parts at most a day apart, or at most 12 parts at most 7 days apart, so it ends within 90 days (decision 29). `remove` cancels.
   - A transfer of any token back to the Asset Safe.
 - **Emergency role.**
   - On the Asset Safe: a transfer of any asset to the orders account, or to the Aragon Agent.
@@ -153,7 +187,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - **Stopping the operator.** The emergency role revokes the operator's targets and functions on the orders modifier (decision 30). Every operator permission there lives under the `operator` key, so the revoke reaches all of them. A revoke does not cancel a resting order, because a fill does not consult the policy. So the stop also cancels the operator's open orders. A fork probe showed the emergency role's revoke on a stand-in modifier on 2026-10-08.
 - **Re-affirmation.** An alert at 30 days asks the committee to confirm or cancel each open order, and the monthly report lists every open order with its limit, its age, its distance to the market price and the idle balance behind it (decision 29). Neither has an on-chain effect. A policy change that removes a token or tightens a bound also cancels the affected open orders, because a fill does not consult the policy.
 - **Relayer approvals.** The enabling vote has the orders account approve CoW's vault relayer for the maximum amount of every token on the lists, the recovery tokens included. No role can raise an approval on the orders account, so a recovery order settles even when the operator is revoked. If the emergency role sets an approval to zero, every order in that token stops, recovery orders included, until a DAO vote sets it again; sending the token to the Agent stays open.
-- **Governance role.** The orders account has none (decision 28). No motion writes there: a DAO vote adds a token (decision 21) and grants the order signer's delegatecall (OD-36). The Asset Safe's governance role refuses the orders account and its modifier as targets (OD-38).
+- **Governance role.** The orders account has none (decisions 28 and 38). No motion writes there: a DAO vote adds a token (decision 21) and grants the order signer's delegatecall (OD-36). The Asset Safe's governance role refuses the orders account and its modifier as targets (OD-38).
 - **Tokens.** The operator's lists start with decision 22's set. Recovery sells every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues. It buys USDC, or USDT as the second destination. The enabling vote sets both lists.
 - **Routers.** None at launch. If the screening vendor confirms a check of a swap's minimum output against a market price, routes to Uniswap and 1inch from the orders account follow, with the Asset Safe as recipient.
 - **Price protection.** An order's own terms, CoW's solver competition, the screening of every operator transaction, the budgets on the operator's transfers into the orders account, and monitoring of each fill against a market price. Nothing on chain bounds the price, but CoW's competition and EBBO rule hold a fill to the on-chain market (decision 26). The emergency role's orders have neither screening nor a budget, so paging and the limit alert cover them.
@@ -195,7 +229,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 
 - INV-002, INV-008, INV-013, INV-014, INV-022, INV-023 and INV-024 in the [invariants](/specs/invariants.md).
 - Kit tests that stand: the operator cannot pre-sign an order or approve the CoW relayer from the Asset Safe [s5]; staking works with the Asset Safe as owner [s7], and the withdrawal queue is refused to both roles (`test_D3_withdrawal_queue_is_out_of_scope`); WETH's unwrap pays the Asset Safe [s8].
-- Fork tests owed: the order signer by delegatecall from a Safe v1.5.0 through a roles modifier, with the receiver pinned; a TWAP and a stop-loss order from a Safe v1.5.0 with CoW's fallback handler; the conditions that pin the receiver and the oracles inside ComposableCoW's encoded order data; a refusal of every other receiver; the life bounds of decisions 25 and 29, including a refusal of a TWAP order outside both shapes; the emergency role's cancel, sweep and recovery order, settled with the relayer approval that the vote sets; and the emergency role's revoke on the orders modifier, with recovery still working (decision 30).
+- Fork tests owed: the order signer by delegatecall from a Safe v1.5.0 through a roles modifier, with the receiver pinned; a TWAP order from a Safe v1.5.0 with CoW's fallback handler; the conditions that pin the receiver inside ComposableCoW's encoded order data; a refusal of every other receiver; the life bounds of decisions 25 and 29, including a refusal of a TWAP order outside both shapes; the emergency role's cancel, sweep and recovery order, settled with the relayer approval that the vote sets; and the emergency role's revoke on the orders modifier, with recovery still working (decision 30).
 
 ## Reversal conditions
 
@@ -209,4 +243,4 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 ## Open questions
 
 
-OD-43, OD-46, OD-47, OD-48 and OD-49 were decided on 2026-10-06, OD-57 on 2026-10-09, and OD-58 and OD-61 on 2026-10-13. Owed: the fork tests above, the screening vendor's answer on output checks, and the orders budgets from the attested computation.
+OD-43, OD-46, OD-47, OD-48 and OD-49 were decided on 2026-10-06, OD-57 on 2026-10-09, OD-58 and OD-61 on 2026-10-13, and OD-68, OD-74, OD-76, OD-78 and OD-79 on 2026-10-14. Owed: the fork tests above, the screening vendor's answer on output checks, and the orders budgets from the attested computation.

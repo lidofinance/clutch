@@ -13,8 +13,8 @@
   sources: ["ADR-009#d13", "ADR-009#d14", INV-008]
 
 - term: Aragon Agent
-  plain: "The DAO's treasury contract and its final authority. It executes what DAO votes decide, and it is the only owner of the Asset Safe, the orders account and the first-loss Safe."
-  sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction"]
+  plain: "The DAO's treasury contract. Recovered assets come back to it, and Aragon Finance pays the vault's funding out of it. Aragon Voting, not the Agent, owns the vault's Safes."
+  sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#d28", "ADR-005#proposed-direction", OD-73]
 
 - term: Artifact
   plain: "The committed JSON file that reviewers approve. It holds the modifier calls in order, the expected condition tree for every role, target and function, and the budget keys."
@@ -47,7 +47,7 @@
   sources: ["ADR-004#d12", OD-33]
 
 - term: Conditional order
-  plain: "A CoW order that ComposableCoW holds and checks, such as a TWAP or a stop-loss order. CoW's watch-tower posts it to the order book when it is due."
+  plain: "A CoW order that ComposableCoW holds and checks, such as a TWAP order. CoW's watch-tower posts it to the order book when it is due."
   sources: ["ADR-007#d18", "ADR-007#proposed-direction",
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
@@ -80,8 +80,8 @@
   sources: ["doc:docs/specs/specification-policy.md#runbooks"]
 
 - term: Dual Governance
-  plain: "The layer that a DAO vote passes through before the Aragon Agent executes it. It adds a delay, so every DAO action takes days."
-  sources: ["ADR-005#context"]
+  plain: "The layer that a DAO vote passes through before the Aragon Agent executes it. It adds a delay. The vault does not use it: Aragon Voting owns the vault's Safes, so a vote on the vault runs directly."
+  sources: ["ADR-005#context", "ADR-005#d28", OD-73]
 
 - term: Easy Track
   plain: "Lido's optimistic governance. A proposal passes after a fixed window unless LDO holders object above a threshold of 0.5% of LDO."
@@ -92,8 +92,9 @@
   sources: [OD-48, "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
 
 - term: Enabling vote
-  plain: "The DAO vote that turns the system on. It applies the policy compiled for mainnet from the reviewed constellation, grants the roles, sets up the orders account and the first-loss Safe, registers the factories and adds USDS to the payment permission."
-  sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-008#d9", "ADR-008#d19"]
+  plain: "The DAO vote that turns the system on. It applies the policy compiled for mainnet from the reviewed constellation, grants the roles, sets up the orders account and the first-loss Safe, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list."
+  sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-008#d9", "ADR-008#d10", "ADR-008#d19",
+    "doc:docs/specs/enabling-vote.md#the-vote"]
 
 - term: Fail closed
   plain: "When a check cannot run, the action stops. The screening guard fails closed: with no approval, the operator's transaction reverts."
@@ -109,7 +110,7 @@
     OD-67]
 
 - term: First-loss Safe
-  plain: "A Safe that the Aragon Agent owns, which holds only the first-loss shares. Its one modifier carries two narrow roles: Easy Track's, which burns the shares only by enacted motion, and the operator Safe's, which redeems them to the Aragon Agent."
+  plain: "A Safe that Aragon Voting owns, which holds only the first-loss shares. Its one modifier carries two narrow roles: Easy Track's, which burns the shares only by enacted motion, and the operator Safe's, which redeems them to the Aragon Agent."
   sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", OD-42, OD-60, OD-67, INV-021]
 
 - term: Fortnightly snapshot
@@ -169,7 +170,7 @@
   sources: ["doc:docs/registers/open-decisions.md#open-decisions"]
 
 - term: Orders account
-  plain: "A Safe that the Aragon Agent owns, with CoW's fallback handler and one modifier of its own. The roles place CoW orders from it. It holds only tokens in transit."
+  plain: "A Safe that Aragon Voting owns, with CoW's fallback handler and one modifier of its own. The roles place CoW orders from it. It holds only tokens in transit."
   sources: ["ADR-007#d17", "ADR-007#d28", OD-43, OD-57, INV-023]
 
 - term: Permission
@@ -182,7 +183,8 @@
 
 - term: Recovery order
   plain: "An order that the emergency role places from the orders account. It sells an asset for USDC, or USDT as the second destination, and pays the Aragon Agent. No guard screens it."
-  sources: ["ADR-007#d5", "ADR-007#d19", "ADR-007#proposed-direction", OD-26, INV-014]
+  tech: "A delegatecall to CoW's order signer, which lives at most 1 day."
+  sources: ["ADR-007#d5", "ADR-007#d19", "ADR-007#proposed-direction", OD-26, INV-014, "ADR-007#d21", "ADR-007#d25"]
 
 - term: RFP
   plain: "Request for solution: the requirements that Lido contributors sent to the policy provider. It asked what the provider supports today, what needs work and what it cannot do. The RFP tab maps each ask to Clutch's answer."
@@ -194,8 +196,8 @@
   sources: ["ADR-005#proposed-direction", "lip:part-2"]
 
 - term: Roles modifier
-  plain: "A Zodiac module that checks each call against the caller's role, refuses anything not explicitly allowed, and runs the rest as the Safe. Clutch has three: an operator modifier and a safety modifier on the Asset Safe, and one orders modifier on the orders account."
-  sources: ["ADR-005#d6", "ADR-005#d21", OD-57]
+  plain: "A Zodiac module that checks each call against the caller's role, refuses anything not explicitly allowed, and runs the rest as the Safe. Clutch has four: an operator modifier and a safety modifier on the Asset Safe, one orders modifier on the orders account, and one first-loss modifier on the first-loss Safe."
+  sources: ["ADR-005#d6", "ADR-005#d21", OD-57, OD-60, "ADR-005#proposed-direction"]
 
 - term: Round-trip check
   plain: "A planned check that rebuilds the applied permissions from the modifier's on-chain events on a fork, and compares them with the artifact. The chain then checks the compiler."
@@ -218,12 +220,8 @@
   sources: ["doc:ROADMAP.md#roadmap"]
 
 - term: Stonks
-  plain: "Lido's treasury swap contracts. The design used Stonks 2.0 instances until 2026-10-06, when the orders account replaced them: they offered no limit, TWAP or stop-loss orders (OD-43)."
+  plain: "Lido's treasury swap contracts. The design used Stonks 2.0 instances until 2026-10-06, when the orders account replaced them: they offered no limit or TWAP orders (OD-43)."
   sources: ["ADR-007#d1", "ADR-007#d17", OD-43]
-
-- term: Stop-loss order
-  plain: "A CoW order that becomes valid when the sell token's price falls to a set strike, read from Chainlink feeds that the policy pins. For example: sell stETH if its price falls to a set level."
-  sources: ["ADR-007#d18", "ADR-007#proposed-direction", INV-022]
 
 - term: sUSDS
   plain: "Sky's savings token for USDS. The vault holds it as a savings position, and it counts toward the liquidity buffer."

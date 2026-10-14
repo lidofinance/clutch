@@ -1,0 +1,3 @@
+date: '2026-10-14'
+kind: Decision
+text: 'Recorded the interview on OD-68. OD-74: a token added by motion gets TWAP orders and stop-loss orders whose Chainlink proxy matches the Feed Registry, an approvals role raises CoW''s relayer approval by motion, the token gets an emergency recovery TWAP that pays the Agent, and the token template ships with the launch. OD-75: a motion restores exact launch permissions and relayer approvals; the operator modifier''s restart, the order signer''s permission, a zeroed funding limit, an Easy Track unpause and a safety-modifier repair stay votes.'

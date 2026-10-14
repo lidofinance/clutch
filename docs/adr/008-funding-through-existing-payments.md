@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T17:07:39Z
+  at: 2026-10-14T20:11:35Z
 verified: []
 sources:
   - id: s1
@@ -48,7 +48,7 @@ Facts from the chain reads were read at block 26092572 [s2]. Facts about the reg
 - Finance token budgets are off for USDC, DAI and stETH, so Finance adds no second cap [s2].
 - A registry's period is 1, 2, 3, 6 or 12 calendar months, and it starts on the 1st at 00:00 UTC. The limit is checked when a motion starts and again when it is enacted. Around a period boundary, two full limits can be paid within about 72 hours [s4].
 - A registry counts token units after scaling decimals, so 1 stETH counts as 1 USDC. One limit cannot hold stablecoins and stETH to a dollar figure [s4].
-- Only a registry's admin, the Aragon Agent, sets its limit and its period. A change is a DAO vote [s4].
+- Only a registry's admin sets its limit and its period; for the existing registries that is the Aragon Agent. A change is a DAO vote [s4].
 - No live registry uses a one-month period. Five use three months, four use six months and three use twelve months. The committee's Safe is already the trusted caller of two of them [s4].
 - The standard top-up factory writes a fixed payment reference. A motion cannot carry a report's identifier in it [s4].
 - The legacy Earn positions are the DAO's first-loss allocation to Lido Earn, approved by Snapshot in March 2026. A Growth Committee Safe holds 1,362.84 earnETH and 1,998,416.46 earnUSD shares. The shares transfer freely today, and their holder executes a burn. No Lido address checked holds a Twyne position [s6].
@@ -113,13 +113,31 @@ EM decided on 2026-10-13, closing OD-67 [s1]:
 
 Decision 23 replaces the burn in decision 21. The redemption and the claim stay as decision 21 says.
 
+EM decided on 2026-10-14, closing OD-71 and OD-66 [s1]:
+
+24. A new TM Floor Value is a mandate change, so its DAO vote is by design. A shortfall in stETH is topped up in stablecoins, so a re-pin of the stETH limit is optional.
+25. One Snapshot sets a standing framework for insurance funds. Then each new fund needs one Easy Track motion.
+26. Payouts from an insurance fund run as Easy Track motions.
+27. The roles and the factories for insurance funds ship with the launch.
+28. An exit from an insurance fund stays with the operator Safe's direct role, with the proceeds paid to the Aragon Agent.
+29. The framework fixes a checklist that every fund fills in, in its motion and its forum post: the product, and its share token or payout address; the template; the fund's cap; the loss trigger and a confirming party independent of the product team; the incident-update deadline; and the end of the terms.
+30. A third funding registry and top-up factory pay only the first-loss Safe, within a limit, and ship with the launch.
+
+Decision 24 makes the re-pin of decision 8 optional. Decisions 25 to 30 close OD-66; EM corrected the agent's first reading of decision 25 the same day. Since OD-73, Aragon Voting owns the first-loss Safe and administers the vault's funding registries ([ADR 005](/adr/005-account-graph-and-roles.md) decision 28).
+
+EM decided on 2026-10-14, after a count of the launch, closing OD-78 [s1]:
+
+31. Insurance funds do not ship with the launch: no fund roles on the first-loss modifier, no fund templates, and no third funding registry or top-up factory. A later vote adds them; decisions 25, 26, 28 and 29 describe them for that vote.
+
+Decision 31 replaces decisions 27 and 30.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 - **The shared permission gains USDS.** The vote rewrites the whole parameter array as one unit. The seven existing entries stay, and USDS joins with a ceiling of 2,000,000 per payment (decision 12). A fork test of the new array is owed before the vote.
 - **Several payments in one motion.** A motion repeats the Asset Safe as recipient, one payment per ceiling. The ceilings are per call, not per motion [s4].
-- **Two registries from the standard builder.** Each has the Asset Safe as its only recipient and the Aragon Agent as admin. As on the committee's registries, the Easy Track executor gets no role to add recipients [s4].
+- **Two registries from the standard builder.** Each has the Asset Safe as its only recipient and Aragon Voting as admin ([ADR 005](/adr/005-account-graph-and-roles.md) decision 28). As on the committee's registries, the Easy Track executor gets no role to add recipients [s4].
 - **Two top-up factories.** The stablecoin factory uses the shared stablecoin token list, after the vote adds USDS to it. The stETH factory is the single-token version. The operator Safe is the trusted caller of both, as of every factory ([ADR 006](/adr/006-governance-through-easy-track-factories.md)). The DAO registers them by vote.
 - **The figures.** The stablecoin limit is the TM Floor Value at par. The stETH limit is the floor divided by the pinned price. An attested computation produces both, and they enter this repository when the mandate is approved.
 - **The seed.** The same registries carry the seed. It is at most one floor, less the value of the first-loss shares that arrive from the Growth Committee, set by attested computation at the Earn oracle price. Twyne counts only when shown (decision 17). The seed motion follows the share transfer. Until the cap lifts, the seed is also at most the cap (decision 20).
@@ -189,4 +207,3 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 ## Open questions
 
 - Twyne: who holds the position, and in what form. The mandate's drafters owe the evidence (decision 17).
-- OD-66: how the vault adds and uses insurance funds for products other than Lido Earn. EM agreed on two templates, burnable shares and a fixed payout address. Every burn runs as an Easy Track motion (decision 23, OD-67), and EM prefers the same for payouts. Decisions 21 to 23 cover the earnETH and earnUSD shares only until OD-66 closes.
