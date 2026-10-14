@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T18:12:36Z
+  at: 2026-10-14T19:12:37Z
 verified: []
 sources:
   - id: s1
@@ -55,6 +55,38 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-14 — OD-74 and OD-75: the interview on OD-68
+
+EM asked for an interview on OD-68. The agent asked four cards on tokens that a motion adds to the orders account, and, at EM's request, reviewed every restart that needs a DAO vote. EM answered card by card:
+
+> 1. Enough
+
+> Card 1: A
+> Card 2: B works, because the DAO restarts CAN be "ET motion restarts"
+>
+> Read other places where you believe that DAO restart must be a DAO vote and reconsider it to be an ET motion wherever it doesn't hurt trust model too much
+
+> R1: vote
+> R2: motion
+> R3a: motion
+> R3b: vote, I am afraid of delegatecalls
+> R4: motion
+> R5: vote
+> R6: vote
+> R7: vote
+
+> 3: B
+
+> A
+
+Recorded as:
+
+- (OD-74, card 1) a token that a motion adds gets TWAP orders, and stop-loss orders only with feeds checked against Chainlink's Feed Registry; market, limit and recovery orders stay a vote. "Card 1: A": a stop-loss permission pins a Chainlink proxy, which the factory checks against the registry at creation and at enactment; the launch tokens pin proxies too ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decisions 32 and 33).
+- (OD-74, card 2) B: the Easy Track executor holds an approvals role that raises CoW's relayer approval for any listed token by motion, also after the emergency role set it to zero ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 34).
+- (OD-75, card 2b) a motion restores a permission to exactly its launch version, without delegatecall, on the operator modifier (R2) and on the orders modifier (R3a), and raises a relayer approval (R4). The operator modifier's restart after the switch (R1), the order signer's delegatecall permission (R3b), a funding limit that a vote set to zero (R5), an Easy Track unpause (R6) and a repair of the safety modifier (R7) stay votes ([ADR 005](/adr/005-account-graph-and-roles.md), decision 29).
+- (OD-74, card 3) B: a token that a motion adds also gets an emergency recovery TWAP, with no delegatecall, that sells it for USDC or USDT, pays the Aragon Agent and ends within 1 day ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 35).
+- (OD-74, card 4) "A": the token template ships with the launch, with fork tests and the phase-3 audit ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 36). [s12]
 
 ## 2026-10-14 — OD-73: Aragon Voting owns the vault's Safes; OD-66 closed
 

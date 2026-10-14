@@ -9,7 +9,7 @@ valid_as_of: 2026-10-14
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T18:14:18Z
+  at: 2026-10-14T18:57:48Z
 verified: []
 sources:
   - id: s1
@@ -114,6 +114,8 @@ EM then decided OD-73 [s1]: Aragon Voting, not the Aragon Agent, owns the vault'
 - Only Dual Governance's admin executor holds the Agent's `RUN_SCRIPT_ROLE` and `EXECUTE_ROLE`, and the Agent manages both.
 
 So one Voting vote can already pay any token out of the treasury, and owning the vault's Safes gives Aragon Voting no power that it lacked.
+
+In an interview on OD-68 the same day, EM decided OD-74 (what a token added by motion can do, its relayer approval, its emergency TWAP, and a token template with the launch) and OD-75 (a motion restores exact launch permissions and relayer approvals; the operator modifier's restart and the order signer's permission stay votes) [s1].
 
 ## How to reproduce
 

@@ -9,9 +9,9 @@ intro: >-
 planned:
   - name: Orders account
     where: "A second Voting-owned Safe, with one modifier of its own"
-    what: "One orders modifier for the operator and emergency roles, and a governance role through which a motion adds a token for TWAP and stop-loss orders (OD-57, OD-58, OD-68). The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
+    what: "One orders modifier for the operator and emergency roles, a governance role through which a motion adds a token for TWAP and stop-loss orders, and an approvals role through which a motion raises CoW's relayer approval (OD-57, OD-58, OD-68, OD-74). The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
     sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d28", "ADR-007#d30", "ADR-007#d31", OD-43, OD-57, OD-58,
-      OD-68, INV-023, INV-028]
+      OD-68, INV-023, INV-028, OD-74, "ADR-007#d34"]
   - name: Exit-governance role
     where: "On the safety modifier, held by the Easy Track script executor"
     what: "The motion that onboards a protocol also writes the emergency role's exit for it. The role writes only under the emergency key."

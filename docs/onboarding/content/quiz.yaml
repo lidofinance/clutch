@@ -51,9 +51,9 @@
     - "The DAO, by vote"
     - "The operator Safe"
   answer: 2
-  why: "No emergency body restores what it stopped. A DAO vote, a direct Aragon Voting item, enables the operator modifier again, and the same vote first cancels the queued motions, because a motion does not expire. It also grants again the operator's permissions on the orders account."
+  why: "No emergency body restores what it stopped. A DAO vote, a direct Aragon Voting item, enables the operator modifier again, and the same vote first cancels the queued motions, because a motion does not expire. It also grants again the order signer's permission. A restore motion can write back the other launch permissions, and a motion can raise a relayer approval again (OD-75)."
   sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59,
-    "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts"]
+    "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts", OD-75, "ADR-005#d29"]
 
 - id: vendor-offline
   question: "[the screening vendor] goes offline. What still works?"

@@ -23,13 +23,13 @@
     - "Hold the operator role on its own Safe. A dedicated operator Safe holds it."
     - "Relax a screening rule quietly. A relaxation is a reviewed change, with a notice on the forum (OD-45, OD-64)."
     - "Act alone in an emergency. Every quorum of the emergency Safe needs a signer from outside the committee (OD-58)."
-    - "Restart what an emergency body stopped. Only the DAO restarts (OD-59)."
+    - "Restart the operator modifier or the order signer's permission after a stop. Only a DAO vote does; a motion restores the other launch permissions (OD-59, OD-75)."
   numbers: ["Safe v1.3.0", "4 of 7", "rebalancing window: 2 working days", "two seats on the emergency Safe"]
   address: "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647"
   sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d24", "ADR-005#d26", "ADR-005#d27", "ADR-008#d21", "ADR-008#d22",
     "ADR-008#d23", "ADR-009#d6", "ADR-009#d18", "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28", "ADR-010#d19",
     "ADR-010#d23", "ADR-002#d1", OD-40, OD-41, OD-45, OD-58, OD-59, OD-60, OD-64, OD-67,
-    "doc:docs/research/chain-reads-2026-09-30.md#committees"]
+    "doc:docs/research/chain-reads-2026-09-30.md#committees", OD-75]
 
 # --- Lido DAO ----------------------------------------------------------------------------------
 - id: ldo-holders
@@ -39,7 +39,7 @@
   what: "The owners of Lido DAO governance. They vote on every change that only the DAO may make, and they can stop any Easy Track [[motion]]."
   controlled_by: "Token holders."
   can:
-    - "Vote in Aragon Voting: the [[enabling vote]], a policy replacement, a role membership change, a registry limit, and every restart after an emergency stop (OD-59)."
+    - "Vote in Aragon Voting: the [[enabling vote]], a policy replacement, a role membership change, a registry limit, and the restarts that stay votes: the operator modifier after the switch and the order signer's permission (OD-59, OD-75)."
     - "Appoint the emergency Safe's fifth signer by Snapshot: a member of neither the committee nor the Emergency Brakes multisig (OD-58)."
     - "Object to any Easy Track motion in its [[objection window]]. An objection of 0.5% of LDO stops it."
     - "Approve the mandate, with the standing framework for insurance funds, in a [[Snapshot vote]] before the on-chain vote (OD-66)."
@@ -48,7 +48,7 @@
     - "Shorten a motion's objection window."
   numbers: ["objection threshold: 0.5% of LDO", "objection window: 72 h"]
   sources: ["ADR-006#d4", "ADR-006#d6", "ADR-006#d8", "ADR-006#context", "ADR-005#context", "ADR-005#d24", "ADR-005#d26",
-    "ADR-005#proposed-direction", OD-58, OD-59, "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap", OD-66, OD-73, "ADR-005#d28"]
+    "ADR-005#proposed-direction", OD-58, OD-59, "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap", OD-66, OD-73, "ADR-005#d28", OD-75]
 
 - id: aragon-voting
   node: dao
@@ -59,7 +59,7 @@
   controlled_by: "LDO holders."
   can:
     - "Do anything on the vault's Safes as their only owner: replace the policy, change a role's members, turn a [[module]] on or off, move any asset."
-    - "Restart after the switch, as a Voting item: enable the operator modifier again, and grant again the operator's permissions on the orders account. This is the only restart (OD-59)."
+    - "Restart after the switch, as a Voting item: enable the operator modifier again, and grant again the order signer's permission. A motion restores the other launch permissions (OD-59, OD-75)."
     - "Change or remove the two first-loss roles and the burn factory (OD-60, OD-67)."
     - "Add a token to the orders account for market, limit and [[recovery order|recovery orders]], because no motion can write the order signer's permission (OD-36, OD-46). A motion adds a token for TWAP and stop-loss orders (OD-68)."
     - "Grant the operator [[delegatecall]]. Only a DAO vote can do this (OD-36)."
@@ -75,7 +75,7 @@
     "ADR-006#d9", "ADR-006#d12", "ADR-007#d19", "ADR-007#d21", "ADR-008#d9", "ADR-008#d10", "ADR-008#d21", OD-36, OD-46,
     OD-59, OD-60, OD-67, OD-68, OD-73, INV-001, INV-021, INV-023,
     "doc:docs/research/single-vote-review-2026-10-14.md#decisions-of-2026-10-14",
-    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts"]
+    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts", OD-75, "ADR-005#d29"]
 
 - id: dual-governance
   node: dao
@@ -224,12 +224,13 @@
   name: Easy Track script executor
   status: existing
   label: existing
-  what: "The contract that runs an enacted motion's script. In Clutch it holds the governance roles on the operator modifier and the orders modifier, the exit-governance role on the safety modifier and the first-loss burn role on the first-loss modifier."
+  what: "The contract that runs an enacted motion's script. In Clutch it holds the governance roles on the operator modifier and the orders modifier, the approvals role on the orders modifier, the exit-governance role on the safety modifier and the first-loss burn role on the first-loss modifier."
   controlled_by: "Easy Track. Only an enacted motion makes it act."
   can:
     - "Act as the governance role: write the operator's permissions and budgets, inside the limits that the policy sets."
     - "Act as the exit-governance role on the safety modifier: add the emergency exit for a protocol that a motion onboards (OD-49)."
     - "Act as the governance role on the orders modifier: add a token for TWAP and stop-loss orders (OD-68)."
+    - "Act as the approvals role on the orders modifier: raise CoW's relayer approval for a listed token, also after the emergency role set it to zero (OD-74)."
     - "Act as the first-loss burn role on the first-loss modifier: burn the DAO's [[first-loss shares]] in an enacted burn motion (OD-67)."
     - "Make payments through Aragon Finance, under the shared payment permission."
     - "Spend the funding registries' limits."
@@ -239,26 +240,27 @@
   address: "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977"
   sources: ["ADR-005#context", "ADR-005#proposed-direction", "ADR-006#d5", "ADR-006#d8", "ADR-006#d13", "ADR-008#d8",
     "ADR-008#d9", "ADR-008#d23", "ADR-008#proposed-direction", "ADR-007#d31", OD-49, OD-67, OD-68,
-    "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
+    "doc:docs/research/chain-reads-2026-09-30.md#easy-track", OD-74, "ADR-007#d34"]
 
 - id: template-factories
   node: easytrack
   name: Template factories
   status: new
   label: specified
-  what: "The new Easy Track factories that own a fixed [[template]]: five that onboard a protocol, one that removes a branch of a permission, one that adds a token to the orders account, and a claim template if a launch protocol pays rewards. Easy Track factories are the only kind of new contract that Clutch may add. A motion gives it typed values, such as a target, an asset and a budget key, and the factory builds the permission."
+  what: "The new Easy Track factories that own a fixed [[template]]: five that onboard a protocol, one that removes a branch of a permission, one that restores a launch permission exactly, one that adds a token to the orders account, and a claim template if a launch protocol pays rewards. Easy Track factories are the only kind of new contract that Clutch may add. A motion gives it typed values, such as a target, an asset and a budget key, and the factory builds the permission."
   controlled_by: "The operator Safe is the trusted caller, fixed at deployment. The DAO registers each factory by vote."
   can:
     - "Onboard a protocol without a DAO vote: wrap and unwrap, a tokenized vault, a queue vault, a spender approval or a Morpho Blue market."
     - "Onboard Lido Lend in one motion through the Morpho Blue template, once Lido Lend's own contract exists. The same motion adds its emergency exit (OD-49)."
+    - "Restore a permission exactly as the launch vote set it, after a revoke, without delegatecall. The launch version drops a branch that a later motion added, and brings back one that a routine removal took away (OD-75)."
   cannot:
     - "Accept a condition tree from a motion."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke (OD-09)."
     - "Add a token for market, limit or recovery orders. The order signer's permission is a delegatecall, which no motion can write (OD-36, OD-46)."
-  numbers: ["5 onboarding templates", "1 removal template", "1 orders token template", "a claim template only if needed (OD-72)", "external audit in phase 3"]
+  numbers: ["5 onboarding templates", "1 removal template", "1 restore template", "1 orders token template", "a claim template only if needed (OD-72)", "external audit in phase 3"]
   sources: ["ADR-006#d1", "ADR-006#d2", "ADR-006#d3", "ADR-006#d5", "ADR-006#d7", "ADR-006#d12", "ADR-006#d13",
     "ADR-006#d14", "ADR-006#d15", "ADR-006#proposed-direction", "ADR-007#d31", "ADR-011#d3", "ADR-011#d13", OD-09, OD-36,
-    OD-43, OD-46, OD-49, OD-68, OD-70, OD-72, "lip:part-4"]
+    OD-43, OD-46, OD-49, OD-68, OD-70, OD-72, "lip:part-4", OD-74, OD-75, "ADR-005#d29", "ADR-007#d36", INV-030, INV-031]
 
 - id: budget-factory
   node: easytrack
@@ -342,13 +344,13 @@
     - "Enter a protocol, except to stake ETH, or borrow."
     - "Reach the first-loss shares. They sit in the [[first-loss Safe]], where only a burn motion and the operator Safe's narrow first-loss role act."
     - "Disable the safety modifier or the orders modifier, or change where recovered assets go."
-    - "Restore what it stopped: enable a module again, grant a permission again or raise an approval. The DAO restarts (OD-59)."
+    - "Restore what it stopped: enable a module again, grant a permission again or raise an approval. The DAO restarts, by vote or by motion (OD-59, OD-75)."
   numbers: ["Safe v1.5.0", "3 of 5", "2 committee seats, 2 Emergency Brakes seats, 1 seat for neither", "initiate within 6 h"]
   address: "To be deployed"
   sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d13", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26",
     "ADR-005#proposed-direction", "ADR-007#d13", "ADR-007#d19", "ADR-007#d25", "ADR-007#d30",
     "ADR-007#proposed-direction", "ADR-009#d34", OD-42, OD-43, OD-58, OD-59, OD-67, OD-70, INV-026, "lip:part-6",
-    "doc:docs/registers/parameters.md#parameters"]
+    "doc:docs/registers/parameters.md#parameters", OD-75]
 
 # --- Emergency Brakes ---------------------------------------------------------------------------
 - id: emergency-brakes
@@ -480,6 +482,7 @@
     - "Write operator permissions for a target that a motion names, under the `operator` key only."
     - "Set the operator's budgets, with a refill period of at least 30 days."
     - "Revoke an operator target or function. The removal template uses this when a routine removal takes a whole target or function (OD-70)."
+    - "Write back an operator permission exactly as the launch vote set it, without delegatecall. The restore template uses this after a revoke (OD-75)."
   cannot:
     - "Grant or remove a role, or touch the emergency role."
     - "Make the Asset Safe or any of its modules an operator target, the safety modifier included (OD-38). The compiler refuses a policy without this guard."
@@ -489,7 +492,7 @@
   sources: ["ADR-006#d5", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-006#proposed-direction",
     "ADR-005#proposed-direction", INV-004, OD-36, OD-38,
     "test:test_policyadmin_cannot_grant_operator_the_safety_modifier",
-    "test:test_policyadmin_refuses_every_module_of_the_asset_safe"]
+    "test:test_policyadmin_refuses_every_module_of_the_asset_safe", OD-75, "ADR-005#d29", INV-031]
 
 - id: budget-keys
   node: operator-modifier
@@ -741,9 +744,9 @@
   controlled_by: "Each token's own issuer and governance."
   can:
     - "Be sold and bought in CoW orders by the operator, if on its lists: stETH, wstETH, WETH, USDC, USDT, USDS and LDO (OD-46)."
-    - "Be sold by a [[recovery order]] into USDC, or into USDT: every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues."
+    - "Be sold by a [[recovery order]] into USDC, or into USDT: every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues. A token that a motion adds is sold by a recovery TWAP (OD-74)."
   cannot:
-    - "Be traded by the operator if off its lists. DAI earns through Sky's converter and sUSDS through deposit and redeem, so both stay off (OD-22, OD-46). A motion adds a token for TWAP and stop-loss orders (OD-68); for market, limit and recovery orders, a new token needs a DAO vote."
+    - "Be traded by the operator if off its lists. DAI earns through Sky's converter and sUSDS through deposit and redeem, so both stay off (OD-22, OD-46). A motion adds a token for TWAP orders, and for stop-loss orders with a feed checked against Chainlink's Feed Registry (OD-68, OD-74). For market and limit orders, and for recovery orders through the order signer, a new token needs a DAO vote."
   addresses:
     - {name: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"}
     - {name: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7"}
@@ -752,7 +755,7 @@
     - {name: "LDO", address: "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32"}
   sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d5", "ADR-011#d7", "ADR-011#d11", "ADR-011#d12", "ADR-011#d14",
     "ADR-007#d5", "ADR-007#d21", "ADR-007#d22", "ADR-007#proposed-direction", OD-22, OD-26, OD-46,
-    "doc:docs/registers/parameters.md#parameters"]
+    "doc:docs/registers/parameters.md#parameters", OD-74, "ADR-007#d32", "ADR-007#d35"]
 
 # --- First-loss Safe ----------------------------------------------------------------------------
 - id: first-loss-safe
@@ -902,7 +905,7 @@
     - "Place CoW market and [[limit order|limit orders]] through CoW's order signer, and [[TWAP]] and [[stop-loss order|stop-loss orders]] through ComposableCoW."
     - "Pay the Asset Safe for the operator's orders, and the Aragon Agent for [[recovery order|recovery orders]]. Each role's permissions pin the receiver."
     - "Use CoW's [[fallback handler]], which [[conditional order|conditional orders]] need. The Asset Safe has none, so this account carries it."
-    - "Settle any role's order with the approvals of CoW's vault relayer that the enabling vote sets. No role can raise an approval here."
+    - "Settle any role's order with the approvals of CoW's vault relayer. Only the approvals role raises one, by motion, and only to the relayer (OD-74)."
   cannot:
     - "Bound an order's price on chain. An order's limit is a number that the caller chooses. CoW's rules, screening, the orders budgets and monitoring of each fill take the place of a bound, and screening covers only the operator (OD-48)."
     - "Limit what the emergency role sends in. The operator's transfers spend the orders budgets; the emergency role's have no budget."
@@ -912,25 +915,27 @@
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d20", "ADR-007#d23", "ADR-007#d25", "ADR-007#d26",
     "ADR-007#d28", "ADR-007#d29", "ADR-007#d30", "ADR-007#proposed-direction", "ADR-005#d15", "ADR-005#d20",
     "ADR-005#d21", OD-43, OD-47, OD-48, OD-61, INV-013, INV-023,
-    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design", OD-73, "ADR-005#d28"]
+    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design", OD-73, "ADR-005#d28", OD-74, "ADR-007#d34"]
 
 - id: orders-modifiers
   node: orders
   name: The orders account's modifier
   status: instance
   label: specified
-  what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, and a governance role through which a motion adds a token for TWAP and stop-loss orders (OD-57, OD-58, OD-68)."
+  what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, a governance role through which a motion adds a token for TWAP and stop-loss orders, and an approvals role through which a motion raises CoW's relayer approval (OD-57, OD-58, OD-68, OD-74)."
   controlled_by: "Its owner, the orders account, so in the end the DAO."
   can:
-    - "Let the operator sign orders through the order signer and create TWAP and stop-loss orders. The receiver is the Asset Safe, and a stop-loss order's oracles are pinned to Chainlink feeds."
+    - "Let the operator sign orders through the order signer and create TWAP and stop-loss orders. The receiver is the Asset Safe, and a stop-loss order's oracles are pinned to Chainlink proxies; for a token that a motion adds, the factory checks each proxy against Chainlink's Feed Registry (OD-74)."
     - "Let the emergency role cancel any order, set a relayer approval to zero, send any listed token to the Aragon Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent."
     - "Let the emergency role stop the operator by revoking its targets and functions. The stop also cancels the operator's open orders, because a fill does not consult the policy (OD-58)."
+    - "Let a motion raise CoW's relayer approval for a listed token, through the approvals role (OD-74)."
+    - "Let a motion give a new token an emergency recovery TWAP that sells it for USDC or USDT and pays the Aragon Agent within 1 day (OD-74)."
   cannot:
-    - "Let a motion add a token for market, limit or recovery orders. That needs a DAO vote (OD-46)."
+    - "Let a motion add a token for market or limit orders, or for recovery orders through the order signer. That needs a DAO vote (OD-46, OD-74)."
     - "Take the order signer's permission or a delegatecall from a motion (OD-36, OD-68)."
   address: "To be deployed"
   sources: ["ADR-007#d19", "ADR-007#d21", "ADR-007#d25", "ADR-007#d28", "ADR-007#d30", "ADR-007#proposed-direction",
-    "ADR-005#d21", "ADR-005#d25", "ADR-007#d31", OD-43, OD-46, OD-57, OD-58, OD-68, INV-014, INV-022, INV-028]
+    "ADR-005#d21", "ADR-005#d25", "ADR-007#d31", OD-43, OD-46, OD-57, OD-58, OD-68, INV-014, INV-022, INV-028, OD-74, "ADR-007#d34", "ADR-007#d35", INV-030, "ADR-007#d32", "ADR-007#d33"]
 
 - id: cow-order-signer
   node: orders

@@ -143,7 +143,7 @@
 
 - name: Template, budget and burn factories
   column: new
-  what: "Template factories (five that onboard, one that removes, one that adds an orders token, and a claim template if needed), one budget factory and one first-loss burn factory for Easy Track: the only new contracts allowed."
+  what: "Template factories (five that onboard, one that removes, one that restores, one that adds an orders token, and a claim template if needed), one budget factory and one first-loss burn factory for Easy Track: the only new contracts allowed."
   why: "Motions then onboard protocols, remove a branch, add an orders token, change budgets after an event and burn first-loss shares without a DAO vote, but only through factories fixed at audit time."
   owner: "`@lidofinance/defi-tech`; an external audit in phase 3"
   sources: ["ADR-006#d1", "ADR-006#d2", "ADR-006#d5", "ADR-006#d12", "ADR-008#d23", "ADR-009#d31", "ADR-009#proposed-direction",

@@ -135,7 +135,7 @@ blocks:
     says: "A dual-access emergency exit: the DAO, and an emergency committee independent of the Treasury Management Committee, can each return every asset to the treasury within six hours."
     kept:
       - "On chain: the emergency Safe revokes, exits and sends assets to the Agent through the safety modifier, which nothing screens. Its five signers are two committee members, two Emergency Brakes members and one member of neither body, at 3 of 5, so the committee cannot use it alone."
-      - "On chain: the emergency Safe can switch the operator off; the Emergency Brakes multisig can pause Easy Track; only a DAO vote restarts."
+      - "On chain: the emergency Safe can switch the operator off; the Emergency Brakes multisig can pause Easy Track; only a DAO vote restarts the operator, and a motion restores single launch permissions (OD-75)."
       - "Drills: fork drills must show every emergency action initiated within six hours."
     tech: "INV-002 and INV-009 fix the emergency powers, and INV-027 refuses any emergency call that restores authority. A motion that onboards a protocol also adds its emergency exit through the exit-governance role (INV-025)."
     changes:

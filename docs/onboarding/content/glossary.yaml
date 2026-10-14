@@ -183,7 +183,8 @@
 
 - term: Recovery order
   plain: "An order that the emergency role places from the orders account. It sells an asset for USDC, or USDT as the second destination, and pays the Aragon Agent. No guard screens it."
-  sources: ["ADR-007#d5", "ADR-007#d19", "ADR-007#proposed-direction", OD-26, INV-014]
+  tech: "A delegatecall to CoW's order signer, which lives at most 1 day. For a token that a motion added, a ComposableCoW TWAP order instead, with no delegatecall, which ends within 1 day (OD-74)."
+  sources: ["ADR-007#d5", "ADR-007#d19", "ADR-007#proposed-direction", OD-26, INV-014, "ADR-007#d21", "ADR-007#d25", "ADR-007#d35", OD-74]
 
 - term: RFP
   plain: "Request for solution: the requirements that Lido contributors sent to the policy provider. It asked what the provider supports today, what needs work and what it cannot do. The RFP tab maps each ask to Clutch's answer."
@@ -223,8 +224,8 @@
   sources: ["ADR-007#d1", "ADR-007#d17", OD-43]
 
 - term: Stop-loss order
-  plain: "A CoW order that becomes valid when the sell token's price falls to a set strike, read from Chainlink feeds that the policy pins. For example: sell stETH if its price falls to a set level."
-  sources: ["ADR-007#d18", "ADR-007#proposed-direction", INV-022]
+  plain: "A CoW order that becomes valid when the sell token's price falls to a set strike, read from Chainlink feeds that the policy pins. For a token that a motion adds, the factory checks each feed against Chainlink's Feed Registry. For example: sell stETH if its price falls to a set level."
+  sources: ["ADR-007#d18", "ADR-007#proposed-direction", INV-022, "ADR-007#d33", OD-74]
 
 - term: sUSDS
   plain: "Sky's savings token for USDS. The vault holds it as a savings position, and it counts toward the liquidity buffer."
