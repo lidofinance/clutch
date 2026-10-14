@@ -8,7 +8,7 @@
   name: Treasury Management Committee and its Safe
   status: existing
   label: existing
-  what: "The people who run the [[mandate]] day to day, and their existing Safe, which holds the operator role (OD-80). Two of the seven signers also sit on the emergency Safe. Once the launch cap lifts, every transaction of the Safe needs [the screening vendor]'s approval first, if the guard goes on it (OD-83). Until then the vault stays under a cap of one million dollars (OD-54, OD-55)."
+  what: "The people who run the [[mandate]] day to day, and their existing Safe, which holds the operator role (OD-80). Two of the seven signers also sit on the emergency Safe. Once the launch cap lifts, every transaction of the Safe needs [the screening vendor]'s approval first, the committee's other duties included (OD-83). Until then the vault stays under a cap of one million dollars (OD-54, OD-55)."
   controlled_by: "Seven signers, at 4 of 7. Safe v1.3.0."
   can:
     - "Hold the operator role: change positions in approved protocols, within budgets."
@@ -24,6 +24,7 @@
     - "Remove the screening guard, once set, but only through a fixed 10-day timelock."
   cannot:
     - "Run a transaction without [the screening vendor]'s single-use approval, once the guard is set. The guard [[fail closed|fails closed]]."
+    - "Enable a module on its Safe while the guard is set: a module's transaction would not be screened (INV-010)."
     - "Burn the first-loss shares at once. It only creates the burn motion, which waits for the objection window (OD-67)."
     - "Relax a screening rule quietly. A relaxation is a reviewed change, with a notice on the forum (OD-45, OD-64)."
     - "Act alone in an emergency. Every quorum of the emergency Safe needs a signer from outside the committee (OD-58)."
@@ -339,10 +340,10 @@
   name: "[the screening vendor]'s transaction guard"
   status: instance
   label: specified
-  what: "A [[guard]] contract that a Safe consults before every transaction: the Safe that holds the operator role, so the committee's Safe if OD-83 puts it there. It refuses a transaction that the vendor has not approved, once and exactly. It is set after the launch; the launch cap lifts once it is set with its bypass mode off (OD-54)."
-  controlled_by: "The vendor's key approves transactions. Only the owners of the guarded Safe can remove the guard, through a 10-day timelock."
+  what: "A [[guard]] contract on the committee's Safe, which consults it before every transaction (OD-83). It refuses a transaction that the vendor has not approved, once and exactly. It is set after the launch; the launch cap lifts once it is set with its bypass mode off (OD-54)."
+  controlled_by: "The vendor's key approves transactions. Only the owners of the committee's Safe can remove the guard, through a 10-day timelock."
   can:
-    - "Check every transaction of the guarded Safe: each operator action, each order on the orders account and each new motion. On the committee's Safe, the committee's other duties are checked too (OD-83)."
+    - "Check every transaction of the committee's Safe: each operator action, each order on the orders account, each new motion and the committee's other duties (OD-83)."
     - "Fail closed: with no approval, the transaction reverts."
   cannot:
     - "Touch the Asset Safe, the emergency Safe or the DAO path. Recovery and the switch never wait for the vendor."
@@ -359,7 +360,7 @@
   name: "[the screening vendor]'s approval service"
   status: existing
   label: existing
-  what: "The vendor's off-chain service. It reviews each transaction of the guarded Safe and approves it on chain, once."
+  what: "The vendor's off-chain service. It reviews each transaction of the committee's Safe and approves it on chain, once."
   controlled_by: "[the screening vendor]. The committee configures the vault's rules in it, with support from `@lidofinance/defi-tech`."
   can:
     - "Approve or refuse each exact transaction on its own, with no Lido co-signature."
@@ -369,7 +370,8 @@
     - "Sit on the recovery path."
     - "Relax a rule quietly. A relaxation is a reviewed change to the written list, with a notice on the forum (OD-45, OD-64)."
   sources: ["ADR-010#d1", "ADR-010#d5", "ADR-010#d19", "ADR-010#d23", "ADR-010#proposed-direction", "ADR-009#d18",
-    "ADR-009#d26", "ADR-009#d30", OD-39, OD-45, OD-64, "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
+    "ADR-009#d26", "ADR-009#d30", OD-39, OD-45, OD-64, "doc:docs/specs/control-matrix.md#the-screening-vendors-rules",
+    OD-83]
 
 # --- Operator modifier --------------------------------------------------------------------------
 - id: operator-modifier
@@ -740,7 +742,7 @@
   status: new
   label: specified
   what: "The committee's narrow role on the first-loss Safe. Under the first-loss terms of the March 2026 Earn allocation, it exits the shares to the Aragon Agent, in place of the Growth Committee. A burn uses another role, by motion only (OD-67)."
-  controlled_by: "Held by the committee's Safe, at 4 of 7. Once the launch cap lifts, the screening guard checks each action if OD-83 puts it on that Safe. It acts on the Earn team's written instruction. The DAO can change or remove the role by vote."
+  controlled_by: "Held by the committee's Safe, at 4 of 7. Once the launch cap lifts, the screening guard checks each action (OD-83). It acts on the Earn team's written instruction. The DAO can change or remove the role by vote."
   can:
     - "Request and claim the shares' redemption on a confirmed material risk, with the proceeds pinned to the Aragon Agent."
   cannot:

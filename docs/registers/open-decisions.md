@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-14T22:18:41Z
 verified: []
 sources:
   - id: s1
@@ -22,7 +22,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
 | OD-65 | Who holds the emergency Safe's fifth seat? The fifth signer is a member of neither the committee nor the Emergency Brakes multisig (OD-58), and a DAO Snapshot appoints them. | [ADR 005](/adr/005-account-graph-and-roles.md) | EM said on 2026-10-13 "yup, tentatively tho" to a member of the Tech team. Accept that as a criterion, not a name: a Tech-team member on neither body, whose key and seed are generated apart from the Emergency Brakes members' setup, who signs a written statement of independence, keeps on-call duty and takes part in the timed drill. Review the seat at the first rotation, because the only quorum without the committee is then all from the engineering organisation | EM; a DAO Snapshot appoints the signer |
-| OD-83 | Where does the screening guard go when the launch cap lifts, now that the committee's own Safe is the operator (OD-80)? A: on the committee's Safe, where it screens every transaction of that Safe, the committee's other duties included, and a vendor outage stops them too. B: on a new operator Safe from the lift; every factory then needs a new deployment, because its trusted caller is fixed. C: no guard; the cap stays. | [ADR 010](/adr/010-pre-execution-screening.md) | A: it keeps one Safe and one trusted caller; Lido's guard detector supports Safe v1.3.0, and the vendor's guard passed Lido's fork tests on it | EM |
 
 ## Closed
 
@@ -32,7 +31,7 @@ Generated from [closed-decisions.yaml](closed-decisions.yaml). EM's words are in
 
 | ID | Question | Closed | Record | State |
 |---|---|---|---|---|
-| OD-01 | Where does the screening hook live? | 2026-10-02 | [OD-01: the screening route](decision-log.md#2026-10-02--od-01-the-screening-route); [ADR 010](/adr/010-pre-execution-screening.md#decision) | In force; replaced in part by OD-80. |
+| OD-01 | Where does the screening hook live? | 2026-10-02 | [OD-01: the screening route](decision-log.md#2026-10-02--od-01-the-screening-route); [ADR 010](/adr/010-pre-execution-screening.md#decision) | In force; replaced in part by OD-80 and OD-83. |
 | OD-02 | Which Safe version do the two new Safes use? | 2026-10-02 | [OD-02 and OD-19: the two new Safes](decision-log.md#2026-10-02--od-02-and-od-19-the-two-new-safes); [research note](/research/safe-v150-guard-compatibility-2026-10-02.md) | In force; replaced in part by OD-80. |
 | OD-03 | What is the base of the yield-bearing cap? | 2026-10-02 | [OD-03: the base of the yield-bearing cap](decision-log.md#2026-10-02--od-03-the-base-of-the-yield-bearing-cap); [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md#decision) | In force. |
 | OD-04 | Does Lido Lend count against the protocol cap? | 2026-10-02 | [OD-04: Lido Lend and the protocol cap](decision-log.md#2026-10-02--od-04-lido-lend-and-the-protocol-cap); [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md#decision) | In force; replaced in part by OD-41. |
@@ -110,8 +109,9 @@ Generated from [closed-decisions.yaml](closed-decisions.yaml). EM's words are in
 | OD-77 | Does a restore keep writing the launch version, which drops later additions and brings back routine removals? | 2026-10-14 | [OD-76 and OD-77: launch stop-loss feeds, and the restore's launch version](decision-log.md#2026-10-14--od-76-and-od-77-launch-stop-loss-feeds-and-the-restores-launch-version); [ADR 006](/adr/006-governance-through-easy-track-factories.md#decision), decision 16 | Replaced by OD-78. It refines OD-75. |
 | OD-78 | Which items leave the launch, to cut its complexity? | 2026-10-14 | [OD-78: a smaller launch](decision-log.md#2026-10-14--od-78-a-smaller-launch); [ADR 005](/adr/005-account-graph-and-roles.md#decision), decision 30; [ADR 006](/adr/006-governance-through-easy-track-factories.md#decision), decision 17; [ADR 007](/adr/007-swapping-through-an-orders-account.md#decision), decision 38; [ADR 008](/adr/008-funding-through-existing-payments.md#decision), decision 31 | In force. It replaces OD-68, OD-75 and OD-77; it replaces in part OD-66 and OD-74. |
 | OD-79 | Which options of the 80/20 pass after OD-78 does the launch take? | 2026-10-14 | [OD-79: the 80/20 pass after OD-78](decision-log.md#2026-10-14--od-79-the-8020-pass-after-od-78); [ADR 007](/adr/007-swapping-through-an-orders-account.md#decision), decision 39; [ADR 006](/adr/006-governance-through-easy-track-factories.md#decision), decision 18 | In force. It replaces OD-74 and OD-76; it replaces in part OD-47; it refines OD-72. |
-| OD-80 | Does Clutch need its own operator Safe, or does the committee's existing Safe hold the operator role? | 2026-10-14 | [OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers](decision-log.md#2026-10-14--od-80-to-od-82-the-committees-safe-as-the-operator-the-emergency-brakes-multisig-in-the-guide-and-generated-registers); [ADR 005](/adr/005-account-graph-and-roles.md#decision), decision 31 | In force. It replaces in part OD-01, OD-02, OD-07 and OD-17. |
+| OD-80 | Does Clutch need its own operator Safe, or does the committee's existing Safe hold the operator role? | 2026-10-14 | [OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers](decision-log.md#2026-10-14--od-80-to-od-82-the-committees-safe-as-the-operator-the-emergency-brakes-multisig-in-the-guide-and-generated-registers); [ADR 005](/adr/005-account-graph-and-roles.md#decision), decision 31 | In force; refined by OD-83. It replaces in part OD-01, OD-02, OD-07 and OD-17. |
 | OD-81 | How do the guide and the diagrams show the Emergency Brakes multisig? | 2026-10-14 | [OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers](decision-log.md#2026-10-14--od-80-to-od-82-the-committees-safe-as-the-operator-the-emergency-brakes-multisig-in-the-guide-and-generated-registers); [ADR 012](/adr/012-contributing-with-many-agents.md#decision), decision 12 | In force. |
 | OD-82 | Which parts of the registers and the ADR pages does the validator generate, and which checks guard them? | 2026-10-14 | [OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers](decision-log.md#2026-10-14--od-80-to-od-82-the-committees-safe-as-the-operator-the-emergency-brakes-multisig-in-the-guide-and-generated-registers); [ADR 012](/adr/012-contributing-with-many-agents.md#decision), decision 13 | In force. |
+| OD-83 | Where does the screening guard go when the launch cap lifts, now that the committee's own Safe is the operator? | 2026-10-14 | [OD-83: the screening guard on the committee's Safe](decision-log.md#2026-10-14--od-83-the-screening-guard-on-the-committees-safe); [ADR 010](/adr/010-pre-execution-screening.md#decision), decision 24 | In force. It replaces in part OD-01; it refines OD-80. |
 
 <!-- end of generated block -->

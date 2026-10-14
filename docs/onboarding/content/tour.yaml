@@ -24,8 +24,8 @@
     "test:test_D3_operator_cannot_route_around_avatar", "ADR-005#d31", OD-80]
 
 - title: Every operator transaction is screened
-  text: "[the screening vendor]'s [[guard]] screens the operator. It refuses any transaction that the vendor has not approved, once and exactly. Where it sits is open: the committee's Safe is recommended, and there it also screens the committee's other duties (OD-83).\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nAt launch the guard is not set yet. The vault starts under a [[launch cap]] of one million dollars, and the cap lifts once the guard is live (OD-54)."
-  tech: "A transaction guard on the Safe that holds the operator role. The vendor's key approves each exact transaction on chain, once, before it runs; a transaction without an approval reverts. The owners can remove the guard only through a 10-day timelock. Its bypass mode stays off: turning it on needs the vendor's approval and a 10-day timelock (INV-010)."
+  text: "[the screening vendor]'s [[guard]] sits on the committee's Safe. It refuses any transaction that the vendor has not approved, once and exactly, the committee's other duties included (OD-83).\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nAt launch the guard is not set yet. The vault starts under a [[launch cap]] of one million dollars, and the cap lifts once the guard is live (OD-54)."
+  tech: "A transaction guard on the committee's Safe. The vendor's key approves each exact transaction on chain, once, before it runs; a transaction without an approval reverts. The owners can remove the guard only through a 10-day timelock. Its bypass mode stays off: turning it on needs the vendor's approval and a 10-day timelock (INV-010)."
   nodes: [screening, committee]
   edges: [screen]
   flows: [vendor-outage]

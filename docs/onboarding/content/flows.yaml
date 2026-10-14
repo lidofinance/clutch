@@ -38,7 +38,7 @@ flows:
         text: "The vendor reviews the exact transaction and approves it on chain, once. Without the approval, the guard makes the committee's Safe refuse it."
         nodes: [screening, committee]
         edges: [screen]
-        check: "The guard fails closed. Until the launch cap lifts, no guard is set and this step does not happen (OD-54). Where the guard goes at the lift is open; the committee's Safe is recommended (OD-83). INV-010 is pending: the harness has no guard yet."
+        check: "The guard fails closed. Until the launch cap lifts, no guard is set on the committee's Safe and this step does not happen (OD-54, OD-83). INV-010 is pending: the harness has no guard yet."
       - who: "Operator modifier"
         text: "The modifier checks the call against the operator's permissions and refuses anything that the policy does not list. An approval spends its spender's budget key."
         nodes: [committee, operator-modifier]
@@ -588,12 +588,12 @@ flows:
     group: emergencies
     title: "[the screening vendor] stops approving"
     label: specified
-    summary: "The guard fails closed. The operator stops, and no new motion can start. Recovery does not change."
+    summary: "The guard fails closed. The operator stops, no new motion can start, and the committee's other duties on its Safe stop too (OD-83). Recovery does not change."
     trigger: "Once the guard is set, the vendor's service is down or refuses everything (OD-54)."
     time: "Up to 10 days, the guard's removal timelock."
     steps:
       - who: "Guard"
-        text: "Operator transactions and new motions revert, because no approval arrives."
+        text: "Every transaction of the committee's Safe reverts, because no approval arrives: operator transactions, new motions and the committee's other duties."
         nodes: [screening, committee]
         edges: [screen]
       - who: "Emergency Safe"
@@ -607,8 +607,8 @@ flows:
         text: "The DAO can also give the operator role to another Safe by vote."
         nodes: [dao, asset-safe]
         edges: [own]
-    sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#d22", "ADR-010#proposed-direction", OD-54, "runbook:Remove the screening guard",
-      "runbook:Move the operator role to another Safe"]
+    sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#d22", "ADR-010#proposed-direction", OD-54,
+      "runbook:Remove the screening guard", "runbook:Move the operator role to another Safe", OD-83]
 
   - id: unsafe-motion
     group: emergencies

@@ -36,7 +36,7 @@ sections:
         sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#d28", "ADR-005#proposed-direction", OD-73, INV-001, INV-010]
       - asked: "An Operator Safe at 4 of 7 makes routine transactions through a restricted role. It cannot change its own permissions, block their removal, borrow, or use an asset or a function that a motion or the DAO did not approve."
         verdict: kept
-        clutch: "The committee's existing Safe, at 4 of 7, holds the operator role (OD-80). From the lift of the launch cap, the screening vendor's guard screens it if OD-83 puts the guard there. It cannot borrow, administer a modifier or a Safe, change its own permissions, or move assets out except into the orders account."
+        clutch: "The committee's existing Safe, at 4 of 7, holds the operator role (OD-80). From the lift of the launch cap, the screening vendor's guard screens it (OD-83). It cannot borrow, administer a modifier or a Safe, change its own permissions, or move assets out except into the orders account."
         sources: ["ADR-005#d9", "ADR-005#proposed-direction", "ADR-010#d1", "ADR-010#proposed-direction", OD-19,
           INV-002, "ADR-005#d31", OD-80, OD-83]
       - asked: "An Emergency Safe at 3 of 5, which the RFP links to the Emergency Brakes multisig, revokes approvals, exits approved positions and returns assets to the fixed DAO treasury address."
@@ -203,7 +203,7 @@ sections:
         sources: ["ADR-009#d8", "ADR-009#d17", "ADR-009#proposed-direction", OD-13]
       - asked: "Each operator transaction is simulated and checked before execution, and the answer names the service that checks it."
         verdict: changed
-        clutch: "From the lift of the launch cap, the screening vendor checks each operator transaction before it runs. Its transaction guard refuses any transaction that the vendor did not approve on chain, once, and it goes on the committee's Safe if OD-83 puts it there. Every motion is screened too, because that Safe creates it. Until the cap lifts, the vault runs without the guard under a cap of one million dollars, which the committee keeps by procedure. The repository does not record whether the vendor simulates each transaction."
+        clutch: "From the lift of the launch cap, the screening vendor checks each operator transaction before it runs. Its transaction guard on the committee's Safe refuses any transaction that the vendor did not approve on chain, once (OD-83). Every motion is screened too, because that Safe creates it. Until the cap lifts, the vault runs without the guard under a cap of one million dollars, which the committee keeps by procedure. The repository does not record whether the vendor simulates each transaction."
         why: "EM allowed a launch without the guard under this cap, so the vendor is not on the launch's critical path. Above the cap, blocking before execution stays a hard requirement."
         sources: ["ADR-010#d1", "ADR-010#d4", "ADR-010#d9", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22",
           "ADR-010#proposed-direction", OD-01, OD-54, OD-55, INV-010, "lip:part-9", OD-83]
@@ -211,9 +211,9 @@ sections:
         verdict: kept
         clutch: "The guard fails closed: the operator and new motions stop, and recovery is unaffected. The owners can remove the guard after ten days. If monitoring stops, the permissions on chain still hold and do not widen."
         sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#proposed-direction", "doc:docs/specs/lip-draft.md#failure-modes"]
-    tech: "The guard is set with `setGuard` on the Safe that holds the operator role, and its bypass mode stays off. The vendor's key approves each transaction hash once, and the guard holds no standing approval except its two built-in timelock approvals."
+    tech: "The guard is set on the committee's Safe with `setGuard`, and its bypass mode stays off. The vendor's key approves each transaction hash once, and the guard holds no standing approval except its two built-in timelock approvals."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#monitoring-and-transaction-blocking", "ADR-009#d7",
-      "ADR-010#d9", "ADR-010#d10", "ADR-010#proposed-direction"]
+      "ADR-010#d9", "ADR-010#d10", "ADR-010#proposed-direction", OD-83]
 
   - id: nav
     title: Net asset value

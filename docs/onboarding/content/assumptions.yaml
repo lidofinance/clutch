@@ -43,13 +43,13 @@
 - id: guard-single-use
   assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
   kind: trust
-  why: "Above the launch cap, on-chain blocking before execution is a hard requirement. Once the cap lifts, the guard screens every operator action and every new motion."
-  breaks: "One standing approval of the modifier's execution function would approve all vault activity. One approved stray delegatecall can replace the guarded Safe's code and drop the guard. An outage stops the operator and new motions for up to ten days."
+  why: "Above the launch cap, on-chain blocking before execution is a hard requirement. Once the cap lifts, the guard screens every transaction of the committee's Safe: every operator action, every new motion and the committee's other duties (OD-83)."
+  breaks: "One standing approval of the modifier's execution function would approve all vault activity. One approved stray delegatecall can replace the code of the committee's Safe and drop the guard, and a module on that Safe would skip it. An outage stops the operator and new motions for up to ten days."
   watched_by: []
   watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector supports Safe v1.3.0 and must add this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before the cap lifts, not before the launch (OD-54)."
   sources: ["ADR-010#d2", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d12", "ADR-010#d17", "ADR-010#d20",
     "ADR-010#d22", "ADR-010#proposed-direction", INV-010, OD-54,
-    "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
+    "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard", OD-83]
 
 - id: launch-cap
   assumption: "Until the guard is live, the committee keeps the vault under a cap of one million dollars by procedure."

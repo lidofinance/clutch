@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-14T22:18:41Z
 verified: []
 sources:
   - id: s1
@@ -73,7 +73,7 @@ Every item runs when the vote executes, about five days after it starts. The com
 - The Growth Committee's Safe moves the first-loss shares to the first-loss Safe [s5].
 - The committee's Safe creates the seed motion [s5].
 - Lido Lend joins by one onboarding motion, because its key is already in the policy [s6].
-- The owners of the committee's Safe set the screening guard where OD-83 puts it, and a forum post lifts the launch cap (OD-54, OD-55) [s7].
+- The owners of the committee's Safe set the screening guard on it (OD-83), and a forum post lifts the launch cap (OD-54, OD-55) [s7].
 - Each Safe's own owners rotate its signers. A Snapshot fills the fifth seat of the emergency Safe [s2].
 
 ## What still needs a vote after launch

@@ -52,8 +52,8 @@
     - "The emergency Safe and the DAO; the operator stops"
     - "Everything: the guard lets transactions through"
   answer: 2
-  why: "The guard fails closed, so the operator and new motions stop. No guard sits on the emergency path or the DAO path, so recovery does not change."
-  sources: ["ADR-010#d4", "ADR-010#proposed-direction"]
+  why: "The guard fails closed, so every transaction of the committee's Safe stops: the operator, new motions and the committee's other duties (OD-83). No guard sits on the emergency path or the DAO path, so recovery does not change."
+  sources: ["ADR-010#d4", "ADR-010#proposed-direction", OD-83]
 
 - id: new-code
   question: "Which of these is new code that Lido writes for Clutch?"

@@ -558,3 +558,12 @@
   log:
     - "2026-10-14 — OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers"
   adr: [ADR-012#d13]
+- id: OD-83
+  question: "Where does the screening guard go when the launch cap lifts, now that the committee's own Safe is the operator?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-83: the screening guard on the committee's Safe"
+  adr: [ADR-010#d24]
+  replaces:
+    - {od: OD-01, part: true}
+  refines: [OD-80]

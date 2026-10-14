@@ -75,7 +75,7 @@ nodes:
 - id: screening
   label: Screening guard
   sub: '[the screening vendor]'
-  summary: A transaction guard, on the committee's Safe if OD-83 puts it there. It refuses any transaction that the vendor has not approved once. It is set after the launch; the launch cap of one million dollars lifts once it is live (OD-54).
+  summary: A transaction guard on the committee's Safe (OD-83). It refuses any transaction that the vendor has not approved once. It is set after the launch; the launch cap of one million dollars lifts once it is live (OD-54).
   domain: ext
   kind: service
   status: instance
@@ -281,7 +281,7 @@ edges:
   to: committee
   kind: screens
   short: approves each transaction
-  label: From the lift of the launch cap, the vendor's guard refuses a transaction that the vendor has not approved, once and exactly; it goes on the committee's Safe if OD-83 puts it there.
+  label: From the lift of the launch cap, the vendor's guard on the committee's Safe refuses a transaction that the vendor has not approved, once and exactly.
   label_at:
   - 170
   - 330

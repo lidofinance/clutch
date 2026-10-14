@@ -118,7 +118,7 @@
   sources: ["ADR-009#d25", "ADR-009#d31", OD-32, OD-56]
 
 - term: Guard
-  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard, set after the launch and before the [[launch cap]] lifts, on the committee's Safe if OD-83 puts it there. A module guard does the same for module transactions; Clutch uses none."
+  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard on the committee's Safe, set after the launch and before the [[launch cap]] lifts (OD-83). A module guard does the same for module transactions; Clutch uses none."
   sources: ["ADR-010#d3", "ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction", OD-83]
 
 - term: Invariant

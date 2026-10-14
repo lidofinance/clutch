@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-14T22:18:41Z
 verified: []
 sources:
   - id: s1
@@ -45,7 +45,7 @@ sources:
     title: The CFO's follow-up questions and EM's answers in the committee's channel, 2026-10-13; outside the repository
   - id: s12
     resource: "urn:clutch:interview:2026-10-14"
-    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-82, 2026-10-14; the transcript is not in the repository
+    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-83, 2026-10-14; the transcript is not in the repository
 ---
 
 # Decision log
@@ -55,6 +55,16 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-14 — OD-83: the screening guard on the committee's Safe
+
+EM answered OD-83:
+
+> OD-83: A
+
+Recorded as:
+
+- (OD-83) When the launch cap lifts, the screening guard is set on the committee's Safe. It screens every transaction of that Safe, the committee's other duties included, and a vendor outage stops them too ([ADR 010](/adr/010-pre-execution-screening.md), decision 24). This is the option that EM did not choose on 2026-10-02 (Option 5), now that the committee's Safe holds the operator role (OD-80). [s12]
 
 ## 2026-10-14 — OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers
 

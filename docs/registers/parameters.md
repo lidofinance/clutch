@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-14T22:18:41Z
 verified: []
 sources:
   - id: s1
@@ -63,13 +63,13 @@ sources:
 | Ceiling per USDS payment | 2,000,000 | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Funding registries | two: stablecoins and stETH; the Asset Safe is the only recipient of each | EM decision of 2026-10-02 [s1] | ADR 008 |
 | Funding period | one calendar month | EM decision of 2026-10-02 [s1] | ADR 008 |
-| Launch cap without the guard | one million dollars on the Asset Safe and the orders account, at the report's price rule; the first-loss Safe is outside; held by procedure; a forum post lifts it once the guard is set with its bypass mode off, on the committee's Safe if OD-83 puts it there | EM decisions of 2026-10-08 and 2026-10-09 (OD-54, OD-55) [s1] | [ADR 010](/adr/010-pre-execution-screening.md), ADR 008 |
+| Launch cap without the guard | one million dollars on the Asset Safe and the orders account, at the report's price rule; the first-loss Safe is outside; held by procedure; a forum post lifts it once the guard is set on the committee's Safe with its bypass mode off | EM decisions of 2026-10-08, 2026-10-09 (OD-54, OD-55) and 2026-10-14 (OD-83) [s1] | [ADR 010](/adr/010-pre-execution-screening.md), ADR 008 |
 | Funding limit per period | one TM Floor Value in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared; the figures are not in this repository; a new TM Floor Value is a DAO vote by design, and a re-pin of the stETH limit is optional (OD-71) | EM decision of 2026-10-02 [s1]; figures by attested computation, entering when the mandate is approved | ADR 008 |
 | Registry admin | Aragon Voting, for each of the vault's two funding registries; it sets a limit and a period | EM decision of 2026-10-14 (OD-73) [s1] | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 008](/adr/008-funding-through-existing-payments.md) |
 | Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Funding assets | USDC, USDT, DAI, USDS, sUSDS, stETH; not ETH | EM decision of 2026-10-05 [s1] | ADR 008 |
 | First-loss Safe | a Safe owned by Aragon Voting at one of one, with no guard or fallback handler, and one modifier with two roles: `first-loss` for the committee's Safe and `first-loss-burn` for the Easy Track executor; it holds only the first-loss shares | EM decisions of 2026-10-06 (OD-42), 2026-10-13 (OD-60, OD-67) and 2026-10-14 (OD-73) [s1] | ADR 008, [ADR 005](/adr/005-account-graph-and-roles.md) |
-| First-loss role holder | the committee's Safe, four of seven: the redemption and the claim, paid to the Aragon Agent; its guard screens each action once the launch cap lifts, if OD-83 puts the guard there | EM decisions of 2026-10-13 (OD-60): "role is hold by TMC Safe" and "TMC Safe means operator safe"; the burn moved to motions (OD-67) [s1] | ADR 008, ADR 005 |
+| First-loss role holder | the committee's Safe, four of seven: the redemption and the claim, paid to the Aragon Agent; the guard screens each action once the launch cap lifts (OD-83) | EM decisions of 2026-10-13 (OD-60): "role is hold by TMC Safe" and "TMC Safe means operator safe"; the burn moved to motions (OD-67) [s1] | ADR 008, ADR 005 |
 | Legacy Earn first-loss shares | the earnETH and earnUSD shares that the Growth Committee Safe `0xf6F0732c1e9971497342C295141566E6F1A31e96` holds, 1,362.84 and 1,998,416.46 at block 26126791; transferred to the dedicated first-loss Safe after the enabling vote (OD-42) | EM decisions of 2026-10-05 and 2026-10-06 [s1]; read [s5] | ADR 008 |
 | First-loss burn | an Easy Track motion that the committee's Safe creates on the first-loss burn factory; after the 72-hour objection window, the Easy Track executor burns through the `first-loss-burn` role; on the Earn team's written instruction under the March 2026 terms; below the terms, after a Snapshot exception | EM decisions of 2026-10-13 (OD-60, OD-67) [s1], replacing the DAO vote of OD-42; the Snapshot step is the agent's proposal | ADR 008 |
 | Redemption of the first-loss shares | the `first-loss` role requests and claims the redemption, with the proceeds pinned to the Aragon Agent; it cannot transfer or approve the shares | EM decision of 2026-10-13 (OD-60) [s1], replacing the DAO vote of OD-42 | ADR 008 |
@@ -90,7 +90,7 @@ sources:
 | Level-5 share that holds a top-up | not set; the committee's valuation policy sets it | EM decision of 2026-10-13 (OD-62) [s1] | ADR 009 |
 | Zodiac UI | displays Lido's readings and Lido's alerts, which stay canonical; Lido builds both if the policy provider declines | EM decisions of 2026-10-06 (OD-44) and 2026-10-13 (OD-62) [s1] | ADR 009 |
 | Late-report flag | day 8 after month-end; no top-up motion while the report is late | EM decision of 2026-10-05 [s1] | ADR 009 |
-| Screening guard | the screening vendor's existing transaction guard, one instance, of the build that the Lido multisigs run; on the committee's Safe if OD-83 puts it there | EM decisions of 2026-10-02 [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
+| Screening guard | the screening vendor's existing transaction guard, one instance, of the build that the Lido multisigs run, on the committee's Safe from the lift of the launch cap | EM decisions of 2026-10-02 and 2026-10-14 (OD-83) [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
 | Screening rules | a written list in the [control matrix](/specs/control-matrix.md); a relaxation gets a notice on the forum, and the vendor's own delay if it has one | EM decisions of 2026-10-06 (OD-39, OD-45) and 2026-10-13 (OD-64) [s1]; the change by reviewed pull request is the agent's proposal | [ADR 010](/adr/010-pre-execution-screening.md) |
 | Guard removal and bypass timelocks | 10 days each, fixed in the chosen build | EM decision of 2026-10-02 [s1]; a constant in the vendor's code | ADR 010 |
 | Delegatecall target of the committee's Safe | only Safe's MultiSendCallOnly of its version, v1.3.0, pinned before the lift; a request to the vendor, not a gate | EM decisions of 2026-10-05 and 2026-10-14 (OD-80) [s1] | ADR 010 |
