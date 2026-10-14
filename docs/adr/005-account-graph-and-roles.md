@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T19:12:37Z
+  at: 2026-10-14T19:25:23Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM's design answers of 2026-09-22, and later decisions to OD-75 on 2026-10-14
+    title: Decision log — EM's design answers of 2026-09-22, and later decisions to OD-77 on 2026-10-14
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Agent authority, committee Safes, Roles mastercopy

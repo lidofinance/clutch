@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T19:12:37Z
+  at: 2026-10-14T19:25:23Z
 verified: []
 sources:
   - id: s1
@@ -55,7 +55,7 @@ sources:
 | Recovery order price | no on-chain floor; CoW's competition and EBBO rule hold a fill to the on-chain market; a high-severity page on every emergency swap and an alert on a limit far below a market price | EM decision of 2026-10-06 (OD-48) [s1] | ADR 007 |
 | Maximum order life | 90 days for every operator order: market and limit orders through the order signer's `validDuration`; a TWAP order starts at its creation with at most 90 daily or 12 weekly parts; a stop-loss expiry at most 90 days ahead, by a requested screening rule; 1 day for a recovery order; an alert at 30 days asks the committee to confirm or cancel | EM decisions of 2026-10-06 (OD-47) and 2026-10-13 (OD-61) [s1]; the part counts and the 30-day request are the agent's proposal | ADR 007 |
 | Order lists and relayer approvals | the enabling vote sets the lists; a motion adds a token for TWAP and stop-loss orders; a token for market, limit and recovery orders, with its relayer approval, emergency transfer and recovery orders, needs a DAO vote; only the approvals role raises an approval on the orders account, by motion, and only to CoW's vault relayer | EM decisions of 2026-10-06 (OD-46) and 2026-10-14 (OD-68, OD-74) [s1]; the approval rule is the agent's proposal | ADR 006, ADR 007 |
-| Stop-loss feeds | a Chainlink proxy; for a token that a motion adds, its aggregator must equal the Feed Registry's feed for the token in USD, at creation and at enactment; the launch tokens pin proxies too | EM decision of 2026-10-14 (OD-74) [s1] | ADR 007 |
+| Stop-loss feeds | a Chainlink proxy whose aggregator equals the Feed Registry's feed for the token in USD: for a token that a motion adds, checked at creation and at enactment; at launch, checked before the vote, for stETH, WETH (ETH/USD), USDC, USDT and USDS only; wstETH and LDO have no stop-loss orders | EM decisions of 2026-10-14 (OD-74, OD-76) [s1] | ADR 007 |
 | Emergency TWAP for a token added by motion | sells the token for USDC or USDT, pays the Aragon Agent, ends within 1 day | EM decision of 2026-10-14 (OD-74) [s1] | ADR 007 |
 | Spare budget keys | spare keys for each token, with ceilings, in the enabling vote; two for each token on the launch lists is the agent's proposal | EM decision of 2026-10-14 (OD-69) [s1] | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | DAI–USDS conversion | Sky's DaiUsds `0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`; the operator converts both ways, one to one; the receiver is pinned to the Asset Safe; DAI stays out of the operator's order tokens | EM decision of 2026-10-05 [s1]; read [s6] | [ADR 011](/adr/011-launch-scope.md) |

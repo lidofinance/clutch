@@ -224,8 +224,8 @@
   sources: ["ADR-007#d1", "ADR-007#d17", OD-43]
 
 - term: Stop-loss order
-  plain: "A CoW order that becomes valid when the sell token's price falls to a set strike, read from Chainlink feeds that the policy pins. For a token that a motion adds, the factory checks each feed against Chainlink's Feed Registry. For example: sell stETH if its price falls to a set level."
-  sources: ["ADR-007#d18", "ADR-007#proposed-direction", INV-022, "ADR-007#d33", OD-74]
+  plain: "A CoW order that becomes valid when the sell token's price falls to a set strike, read from Chainlink feeds that the policy pins and that match Chainlink's Feed Registry. At launch, stop-loss orders cover only stETH, WETH, USDC, USDT and USDS (OD-76). For example: sell stETH if its price falls to a set level."
+  sources: ["ADR-007#d18", "ADR-007#proposed-direction", INV-022, "ADR-007#d33", OD-74, OD-76, "ADR-007#d37"]
 
 - term: sUSDS
   plain: "Sky's savings token for USDS. The vault holds it as a savings position, and it counts toward the liquidity buffer."

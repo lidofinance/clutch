@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T19:12:37Z
+  at: 2026-10-14T19:25:23Z
 verified: []
 sources:
   - id: s1
@@ -155,6 +155,10 @@ EM decided on 2026-10-14, in an interview on OD-68, closing OD-74 [s1]:
 
 Decisions 32 to 36 refine decision 31. Decision 34 replaces "no role can raise an approval on the orders account" and the DAO vote that set a zeroed approval again.
 
+EM decided on 2026-10-14, closing OD-76 [s1]:
+
+37. At launch, stop-loss orders cover only stETH, WETH, USDC, USDT and USDS. Before the vote, each of their proxies passes decision 33's check, with the registry's ETH/USD feed for WETH. The registry has no USD feed for wstETH or LDO [s6], so they get TWAP orders only.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as text.
@@ -163,7 +167,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - **Operator, on the Asset Safe.** A transfer of a listed token to the orders account, pinned to it, spends that token's orders budget. The budgets are figures from the attested computation.
 - **Operator, on the orders account.**
   - A delegatecall to the order signer: sell and buy tokens from the lists, the Asset Safe as receiver, an order life of at most 90 days (decision 29), and a fee bound. The order signer refuses an order whose `validTo` lies beyond its `validDuration`. `unsignOrder` cancels.
-  - ComposableCoW orders: TWAP and stop-loss handlers only, the Asset Safe as receiver, tokens from the lists, and a stop-loss's oracles pinned to Chainlink proxies (decision 33). A TWAP order is created with `createWithContext`, a start of zero and CoW's current-timestamp value factory, so it starts at its creation. Its parts and spacing take one of two shapes: at most 90 parts at most a day apart, or at most 12 parts at most 7 days apart, so it ends within 90 days (decision 29). `remove` cancels.
+  - ComposableCoW orders: TWAP and stop-loss handlers only, the Asset Safe as receiver, tokens from the lists, and a stop-loss's oracles pinned to Chainlink proxies; at launch, stop-loss orders cover stETH, WETH, USDC, USDT and USDS (decisions 33 and 37). A TWAP order is created with `createWithContext`, a start of zero and CoW's current-timestamp value factory, so it starts at its creation. Its parts and spacing take one of two shapes: at most 90 parts at most a day apart, or at most 12 parts at most 7 days apart, so it ends within 90 days (decision 29). `remove` cancels.
   - A transfer of any token back to the Asset Safe.
 - **Emergency role.**
   - On the Asset Safe: a transfer of any asset to the orders account, or to the Aragon Agent.
@@ -200,7 +204,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - Decision 19's "always" holds for the tokens that the safety policy lists. A token that a motion onboards gets its emergency transfer to the Agent from that motion (OD-49); a recovery order for it through the order signer still needs a DAO vote (decision 21). A token that a motion adds to the orders account gets a recovery TWAP instead (decision 35).
 - Proceeds go straight to their receiver: the Asset Safe for the operator, the Aragon Agent for recovery. No recovered token goes to the treasury by accident.
 - A recovery order names its own limit, so it can fill in a depeg at a price that the emergency signers accept. The service level stays the time to initiate, not the time to fill.
-- The vault no longer depends on the shared Stonks router, or on the committee's Safe as the router's manager. The router's settings stop being an untimelocked lever on the vault (OD-45). Since decision 33, the token template reads Chainlink's Feed Registry when a motion pins a stop-loss feed. The registry has no USD feed for wstETH, WETH or LDO [s6], so that check cannot run for their launch pins, and [the enabling vote](/specs/enabling-vote.md) lists their proxies as a check.
+- The vault no longer depends on the shared Stonks router, or on the committee's Safe as the router's manager. The router's settings stop being an untimelocked lever on the vault (OD-45). Since decision 33, the token template reads Chainlink's Feed Registry when a motion pins a stop-loss feed, and the launch proxies pass the same check before the vote (decision 37).
 - Recovery can sell wstETH, WETH and sUSDS directly. The operator buys and sells WETH in CoW orders in minutes. Staking stays; unstaking goes through CoW orders only (decision 27).
 - A new token joins by motion for TWAP and stop-loss orders (decision 31). For market, limit and recovery orders it still waits for a DAO vote; the launch lists cover the mandate's assets, so this should be rare.
 - An order can rest for up to 90 days, so a larger price move can happen while it rests. A resting order is a standing authorisation: it keeps acting after its context changes. The 30-day alert and the monthly report ask the committee to confirm it. The tokens behind a resting order sit idle in the orders account.

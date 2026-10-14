@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T19:12:37Z
+  at: 2026-10-14T19:25:23Z
 verified: []
 sources:
   - id: s1
@@ -45,7 +45,7 @@ sources:
     title: The CFO's follow-up questions and EM's answers in the committee's channel, 2026-10-13; outside the repository
   - id: s12
     resource: "urn:clutch:interview:2026-10-14"
-    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-73, 2026-10-14; the transcript is not in the repository
+    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-77, 2026-10-14; the transcript is not in the repository
 ---
 
 # Decision log
@@ -55,6 +55,20 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-14 — OD-76 and OD-77: launch stop-loss feeds, and the restore's launch version
+
+After the interview, the agent reported three effects of OD-74 and OD-75, and asked for two picks: which launch tokens get stop-loss orders, because Chainlink's Feed Registry has no USD feed for wstETH, WETH or LDO; and whether a restore keeps writing the launch version. EM answered:
+
+> 1. (a)
+> 2. noted
+> 3. keep it
+
+Recorded as:
+
+- (OD-76, point 1) (a): at launch, stop-loss orders cover only the tokens whose proxies pass the registry check before the vote: stETH, USDC, USDT and USDS, and WETH through the registry's ETH/USD feed. wstETH and LDO get TWAP orders only ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 37).
+- (point 2) noted: the switch does not freeze a motion that writes only on the orders modifier. No change ([ADR 005](/adr/005-account-graph-and-roles.md), proposed direction, "Restart").
+- (OD-77, point 3) "keep it": a restore writes the launch version, whatever changed since. The restore motion's forum disclosure shows the difference from the current permission, and the objection window is the control ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 16). [s12]
 
 ## 2026-10-14 — OD-74 and OD-75: the interview on OD-68
 

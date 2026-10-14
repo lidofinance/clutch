@@ -115,7 +115,7 @@ flows:
         text: "The operator Safe creates the order on ComposableCoW: a [[TWAP]] order in equal parts, or a [[stop-loss order]] with a strike. A TWAP order starts at once and ends within 90 days. The screening guard checks it, and is asked to refuse a stop-loss order that expires more than 90 days ahead."
         nodes: [operator-safe, screening, orders]
         edges: [screen]
-        check: "INV-022: the receiver is the Asset Safe, and a stop-loss order's oracles are Chainlink proxies that the policy pins. For a token that a motion added, the factory checked each proxy against Chainlink's Feed Registry (INV-030)."
+        check: "INV-022: the receiver is the Asset Safe, and a stop-loss order's oracles are Chainlink proxies that the policy pins, checked against Chainlink's Feed Registry: before the vote for the launch tokens, and by the factory for a token that a motion added (INV-030). At launch, stop-loss orders cover stETH, WETH, USDC, USDT and USDS only (OD-76)."
         tech: "`ComposableCoW.createWithContext` with a start of zero and CoW's current-timestamp value factory, so the order starts at its creation, and the handler pinned to the deployed TWAP or StopLoss handler. A TWAP order has at most 90 parts at most a day apart, or 12 parts at most 7 days apart (INV-024). The orders account's fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it (INV-023)."
       - who: "CoW's watch-tower"
         text: "The [[watch-tower]] posts each part of a TWAP order when it is due, or a stop-loss order once its price is met."
@@ -132,7 +132,7 @@ flows:
       - "The emergency Safe can cancel every open order and sweep the orders account."
     sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d24", "ADR-007#d29", "ADR-007#proposed-direction", OD-43, OD-61,
       INV-022, INV-023, INV-024, "runbook:Re-affirm open orders",
-      "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss", OD-74, "ADR-007#d33", INV-030]
+      "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss", OD-74, "ADR-007#d33", INV-030, OD-76, "ADR-007#d37"]
 
   # --- Governance ---------------------------------------------------------------------------------
   - id: onboard
@@ -489,14 +489,14 @@ flows:
         text: "Post on the forum after the revoke."
         nodes: [committee, reporting]
     escapes:
-      - "A queued motion would restore a revoked permission: the emergency Safe's switch freezes it, or the Emergency Brakes multisig pauses Easy Track. Only the DAO restarts the operator, and its vote cancels the motion first; a motion restores single launch permissions (OD-59, OD-75)."
+      - "A queued motion would restore a revoked permission. The emergency Safe's switch freezes it if it writes through the operator modifier; a motion that writes only on the orders modifier stops only by an objection or the Easy Track pause, and the emergency Safe can revoke again after it enacts. Only the DAO restarts the operator, and its vote cancels the motion first; a motion restores single launch permissions (OD-59, OD-75)."
       - "No recovery order can fill at a price that the signers accept: send the assets to the Agent instead."
     sources: ["ADR-005#d2", "ADR-005#d4", "ADR-005#d11", "ADR-005#d24", "ADR-005#d26", "ADR-005#context",
       "ADR-005#proposed-direction", "ADR-007#d19", "ADR-007#proposed-direction", OD-58, OD-59, INV-002, INV-018,
       "runbook:Remove a strategy",
       "test:test_D4_emergency_flow", "test:test_emergency_can_durably_stop_operator_reapproval",
       "runbook:Revoke the operator", "runbook:Zero the approvals", "runbook:Exit positions to the Safe",
-      "runbook:Return assets to the Agent"]
+      "runbook:Return assets to the Agent", "ADR-005#d29", "ADR-007#d34", OD-74, OD-75]
 
   - id: recovery-order
     group: emergencies

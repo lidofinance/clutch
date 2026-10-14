@@ -252,7 +252,7 @@
   can:
     - "Onboard a protocol without a DAO vote: wrap and unwrap, a tokenized vault, a queue vault, a spender approval or a Morpho Blue market."
     - "Onboard Lido Lend in one motion through the Morpho Blue template, once Lido Lend's own contract exists. The same motion adds its emergency exit (OD-49)."
-    - "Restore a permission exactly as the launch vote set it, after a revoke, without delegatecall. The launch version drops a branch that a later motion added, and brings back one that a routine removal took away (OD-75)."
+    - "Restore a permission exactly as the launch vote set it, after a revoke, without delegatecall. The launch version drops a branch that a later motion added, and brings back one that a routine removal took away; the motion's disclosure shows the difference (OD-75, OD-77)."
   cannot:
     - "Accept a condition tree from a motion."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke (OD-09)."
@@ -260,7 +260,7 @@
   numbers: ["5 onboarding templates", "1 removal template", "1 restore template", "1 orders token template", "a claim template only if needed (OD-72)", "external audit in phase 3"]
   sources: ["ADR-006#d1", "ADR-006#d2", "ADR-006#d3", "ADR-006#d5", "ADR-006#d7", "ADR-006#d12", "ADR-006#d13",
     "ADR-006#d14", "ADR-006#d15", "ADR-006#proposed-direction", "ADR-007#d31", "ADR-011#d3", "ADR-011#d13", OD-09, OD-36,
-    OD-43, OD-46, OD-49, OD-68, OD-70, OD-72, "lip:part-4", OD-74, OD-75, "ADR-005#d29", "ADR-007#d36", INV-030, INV-031]
+    OD-43, OD-46, OD-49, OD-68, OD-70, OD-72, "lip:part-4", OD-74, OD-75, "ADR-005#d29", "ADR-007#d36", INV-030, INV-031, OD-77, "ADR-006#d16"]
 
 - id: budget-factory
   node: easytrack
@@ -743,7 +743,7 @@
   what: "The launch list: ETH, WETH, stETH, wstETH, USDC, USDT, DAI, USDS, sUSDS, LDO, and the earnETH and earnUSD shares. The Asset Safe holds them; the stablecoins, sUSDS and stETH also fund the vault."
   controlled_by: "Each token's own issuer and governance."
   can:
-    - "Be sold and bought in CoW orders by the operator, if on its lists: stETH, wstETH, WETH, USDC, USDT, USDS and LDO (OD-46)."
+    - "Be sold and bought in CoW orders by the operator, if on its lists: stETH, wstETH, WETH, USDC, USDT, USDS and LDO (OD-46). Stop-loss orders cover only stETH, WETH, USDC, USDT and USDS; Chainlink's Feed Registry has no USD feed for wstETH or LDO (OD-76)."
     - "Be sold by a [[recovery order]] into USDC, or into USDT: every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues. A token that a motion adds is sold by a recovery TWAP (OD-74)."
   cannot:
     - "Be traded by the operator if off its lists. DAI earns through Sky's converter and sUSDS through deposit and redeem, so both stay off (OD-22, OD-46). A motion adds a token for TWAP orders, and for stop-loss orders with a feed checked against Chainlink's Feed Registry (OD-68, OD-74). For market and limit orders, and for recovery orders through the order signer, a new token needs a DAO vote."
@@ -755,7 +755,7 @@
     - {name: "LDO", address: "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32"}
   sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d5", "ADR-011#d7", "ADR-011#d11", "ADR-011#d12", "ADR-011#d14",
     "ADR-007#d5", "ADR-007#d21", "ADR-007#d22", "ADR-007#proposed-direction", OD-22, OD-26, OD-46,
-    "doc:docs/registers/parameters.md#parameters", OD-74, "ADR-007#d32", "ADR-007#d35"]
+    "doc:docs/registers/parameters.md#parameters", OD-74, "ADR-007#d32", "ADR-007#d35", OD-76, "ADR-007#d37"]
 
 # --- First-loss Safe ----------------------------------------------------------------------------
 - id: first-loss-safe
@@ -925,7 +925,7 @@
   what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, a governance role through which a motion adds a token for TWAP and stop-loss orders, and an approvals role through which a motion raises CoW's relayer approval (OD-57, OD-58, OD-68, OD-74)."
   controlled_by: "Its owner, the orders account, so in the end the DAO."
   can:
-    - "Let the operator sign orders through the order signer and create TWAP and stop-loss orders. The receiver is the Asset Safe, and a stop-loss order's oracles are pinned to Chainlink proxies; for a token that a motion adds, the factory checks each proxy against Chainlink's Feed Registry (OD-74)."
+    - "Let the operator sign orders through the order signer and create TWAP and stop-loss orders. The receiver is the Asset Safe, and a stop-loss order's oracles are pinned to Chainlink proxies that match Chainlink's Feed Registry: at launch for stETH, WETH, USDC, USDT and USDS only, checked before the vote, and for a token that a motion adds, checked by the factory (OD-74, OD-76)."
     - "Let the emergency role cancel any order, set a relayer approval to zero, send any listed token to the Aragon Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent."
     - "Let the emergency role stop the operator by revoking its targets and functions. The stop also cancels the operator's open orders, because a fill does not consult the policy (OD-58)."
     - "Let a motion raise CoW's relayer approval for a listed token, through the approvals role (OD-74)."
@@ -935,7 +935,7 @@
     - "Take the order signer's permission or a delegatecall from a motion (OD-36, OD-68)."
   address: "To be deployed"
   sources: ["ADR-007#d19", "ADR-007#d21", "ADR-007#d25", "ADR-007#d28", "ADR-007#d30", "ADR-007#proposed-direction",
-    "ADR-005#d21", "ADR-005#d25", "ADR-007#d31", OD-43, OD-46, OD-57, OD-58, OD-68, INV-014, INV-022, INV-028, OD-74, "ADR-007#d34", "ADR-007#d35", INV-030, "ADR-007#d32", "ADR-007#d33"]
+    "ADR-005#d21", "ADR-005#d25", "ADR-007#d31", OD-43, OD-46, OD-57, OD-58, OD-68, INV-014, INV-022, INV-028, OD-74, "ADR-007#d34", "ADR-007#d35", INV-030, "ADR-007#d32", "ADR-007#d33", OD-76, "ADR-007#d37"]
 
 - id: cow-order-signer
   node: orders

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T19:12:37Z
+  at: 2026-10-14T19:25:23Z
 verified: []
 sources:
   - id: s1
@@ -91,6 +91,10 @@ EM decided on 2026-10-14, closing OD-70 and OD-72 [s1]:
 
 Decision 14 replaces decision 7 for routine removals: a removal template returns, so Easy Track no longer only expands. An emergency removal stays the emergency Safe's revoke.
 
+EM decided on 2026-10-14, closing OD-77 [s1]:
+
+16. A restore writes the launch version of a permission, whatever changed since: it drops a branch that a later motion added, and it brings back a branch that a routine removal took away. The committee's forum disclosure of a restore motion shows the difference from the current permission, and the objection window is the control.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
@@ -130,7 +134,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - Replacing the operator Safe means redeploying every factory with the new trusted caller and registering each one again by DAO vote [s7].
 - The committee proposes its own expansions. The objection window, the disclosure rule, the Emergency Brakes pause, and the emergency Safe's revoke and switch, which the committee cannot use alone, are the counterweights.
 - A routine removal waits for the objection window, like every motion, and the guard screens its creation once the launch cap lifts. An emergency removal happens at three of five on the emergency Safe, without screening and without notice in advance, and the forum post follows it. Monitoring pages a revoke-only emergency action at a lower severity than a transfer or a swap.
-- A removed strategy comes back only through an onboarding motion, a restore motion if the launch vote held it, or a DAO vote. A routine removal takes only its branch (decision 14). After an emergency revoke, the restore template writes a permission back exactly as launched, by motion; the order signer's delegatecall permission comes back only by vote ([ADR 005](/adr/005-account-graph-and-roles.md) decision 29). A restore writes the launch version, whatever changed since: it drops a branch that a later motion added, and it brings back a branch that a routine removal took away. The objection window is the control.
+- A removed strategy comes back only through an onboarding motion, a restore motion if the launch vote held it, or a DAO vote. A routine removal takes only its branch (decision 14). After an emergency revoke, the restore template writes a permission back exactly as launched, by motion; the order signer's delegatecall permission comes back only by vote ([ADR 005](/adr/005-account-graph-and-roles.md) decision 29). A restore writes the launch version, whatever changed since, and its disclosure shows the difference (decision 16).
 - The kit's toggle factory and its tests [s4][s5] are removed from the kit. INV-007 retires.
 
 ## Confirmation
