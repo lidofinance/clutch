@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:11:35Z
+  at: 2026-10-14T20:39:38Z
 verified: []
 sources:
   - id: s1
@@ -45,17 +45,16 @@ sources:
 | Easy Track objection period | 72 hours, 259,200 seconds, global | Read [s2] | — |
 | Easy Track objection threshold | 0.5 percent of LDO, 50 basis points | Read [s2] | — |
 | Trusted caller of every factory | the operator Safe | EM decision of 2026-10-02 [s1] | [ADR 006](/adr/006-governance-through-easy-track-factories.md) |
-| Swap venue | CoW orders from the orders account: market, limit, TWAP and stop-loss; no Stonks 2.0 instance | EM decision of 2026-10-06 (OD-43) [s1], replacing Stonks 2.0 (decided 2026-09-22, OD-05, OD-20) | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Orders account | a Safe owned by Aragon Voting at one of one, with CoW's fallback handler and one modifier of its own, carrying the operator and emergency roles, and a governance role for the Easy Track executor that adds a token for TWAP and stop-loss orders | EM decisions of 2026-10-06 (OD-43), 2026-10-09 (OD-57), 2026-10-13 (OD-58) and 2026-10-14 (OD-68, OD-73) [s1] | ADR 007, [ADR 005](/adr/005-account-graph-and-roles.md) |
+| Swap venue | CoW orders from the orders account: market, limit and TWAP, and no stop-loss at launch (OD-79); no Stonks 2.0 instance | EM decision of 2026-10-06 (OD-43) [s1], replacing Stonks 2.0 (decided 2026-09-22, OD-05, OD-20) | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
+| Orders account | a Safe owned by Aragon Voting at one of one, with CoW's fallback handler and one modifier of its own, carrying the operator and emergency roles and no governance role | EM decisions of 2026-10-06 (OD-43), 2026-10-09 (OD-57), 2026-10-13 (OD-58) and 2026-10-14 (OD-73, OD-78) [s1] | ADR 007, [ADR 005](/adr/005-account-graph-and-roles.md) |
 | Order receivers | the Asset Safe for the operator's orders; the Aragon Agent for the emergency role's orders | EM decision of 2026-10-06 (OD-43) [s1] | ADR 007 |
 | Router swaps (Uniswap, 1inch) | none at launch; only after the screening vendor can bound a swap's minimum output | EM decision of 2026-10-06 (OD-43) [s1] | ADR 007 |
 | Orders budgets | one budget key per listed token on transfers into the orders account; figures not in this repository | EM decision of 2026-10-06 (OD-43): budgets [s1]; one key per token is the agent's proposal; figures by attested computation | ADR 007, [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | Exit-governance role | on the safety modifier, held by the Easy Track script executor; writes only the emergency role's exits, from the onboarding templates | EM decision of 2026-10-06 (OD-49) [s1] | ADR 006, ADR 005 |
 | Lido Lend contract | a separate Morpho-Blue-compatible deployment; its address and its emergency exit enter with the onboarding motion | EM statement of 2026-10-06 (OD-49) [s1] | ADR 011 |
 | Recovery order price | no on-chain floor; CoW's competition and EBBO rule hold a fill to the on-chain market; a high-severity page on every emergency swap and an alert on a limit far below a market price | EM decision of 2026-10-06 (OD-48) [s1] | ADR 007 |
-| Maximum order life | 90 days for every operator order: market and limit orders through the order signer's `validDuration`; a TWAP order starts at its creation with at most 90 daily or 12 weekly parts; a stop-loss expiry at most 90 days ahead, by a requested screening rule; 1 day for a recovery order; an alert at 30 days asks the committee to confirm or cancel | EM decisions of 2026-10-06 (OD-47) and 2026-10-13 (OD-61) [s1]; the part counts and the 30-day request are the agent's proposal | ADR 007 |
+| Maximum order life | 90 days for every operator order: market and limit orders through the order signer's `validDuration`; a TWAP order starts at its creation with at most 90 daily or 12 weekly parts; 1 day for a recovery order; an alert at 30 days asks the committee to confirm or cancel | EM decisions of 2026-10-06 (OD-47) and 2026-10-13 (OD-61) [s1]; the part counts and the 30-day request are the agent's proposal | ADR 007 |
 | Order lists and relayer approvals | a DAO vote sets the lists, and adds a token with its relayer approval, emergency transfer and recovery orders; no motion adds a token, and no role can raise an approval on the orders account | EM decisions of 2026-10-06 (OD-46) and 2026-10-14 (OD-78) [s1]; the approval rule is the agent's proposal | ADR 006, ADR 007 |
-| Stop-loss feeds | a Chainlink proxy whose aggregator equals the Feed Registry's feed for the token in USD, checked before the vote; stETH, WETH (ETH/USD), USDC, USDT and USDS only; wstETH and LDO have no stop-loss orders | EM decisions of 2026-10-14 (OD-74, OD-76) [s1] | ADR 007 |
 | Spare budget keys | spare keys for each token, with ceilings, in the enabling vote; two for each token on the launch lists is the agent's proposal | EM decision of 2026-10-14 (OD-69) [s1] | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | DAI–USDS conversion | Sky's DaiUsds `0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`; the operator converts both ways, one to one; the receiver is pinned to the Asset Safe; DAI stays out of the operator's order tokens | EM decision of 2026-10-05 [s1]; read [s6] | [ADR 011](/adr/011-launch-scope.md) |
 | Operator's order tokens | stETH, wstETH, WETH, USDC, USDT, USDS, LDO; DAI and sUSDS stay out | EM decisions of 2026-09-22, 2026-10-05 and 2026-10-06 (the rebalancing set, OD-22, OD-46) [s1] | ADR 007, [ADR 011](/adr/011-launch-scope.md) |

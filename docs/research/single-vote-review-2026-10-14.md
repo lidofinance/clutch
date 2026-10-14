@@ -9,7 +9,7 @@ valid_as_of: 2026-10-14
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:11:35Z
+  at: 2026-10-14T20:39:38Z
 verified: []
 sources:
   - id: s1
@@ -115,7 +115,7 @@ EM then decided OD-73 [s1]: Aragon Voting, not the Aragon Agent, owns the vault'
 
 So one Voting vote can already pay any token out of the treasury, and owning the vault's Safes gives Aragon Voting no power that it lacked.
 
-In an interview on OD-68 the same day, EM decided OD-74 (what a token added by motion can do, its relayer approval, its emergency TWAP, and a token template with the launch) and OD-75 (a motion restores exact launch permissions and relayer approvals; the operator modifier's restart and the order signer's permission stay votes) [s1]. EM then decided OD-76 (at launch, stop-loss orders cover only stETH, WETH, USDC, USDT and USDS, whose proxies pass the Feed Registry check) and OD-77 (a restore keeps writing the launch version, and its disclosure shows the difference) [s1]. EM then cut the launch (OD-78): insurance funds, the token template with the orders modifier's governance and approvals roles, and the restore template leave it, so a new token for the orders account and every restart stay votes [s1].
+In an interview on OD-68 the same day, EM decided OD-74 (what a token added by motion can do, its relayer approval, its emergency TWAP, and a token template with the launch) and OD-75 (a motion restores exact launch permissions and relayer approvals; the operator modifier's restart and the order signer's permission stay votes) [s1]. EM then decided OD-76 (at launch, stop-loss orders cover only stETH, WETH, USDC, USDT and USDS, whose proxies pass the Feed Registry check) and OD-77 (a restore keeps writing the launch version, and its disclosure shows the difference) [s1]. EM then cut the launch (OD-78): insurance funds, the token template with the orders modifier's governance and approvals roles, and the restore template leave it, so a new token for the orders account and every restart stay votes [s1]. In the 80/20 pass that followed, EM removed stop-loss orders and kept TWAP, and the catalogue check keeps only the templates that a named protocol needs (OD-79) [s1].
 
 ## How to reproduce
 

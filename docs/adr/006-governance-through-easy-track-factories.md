@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:11:35Z
+  at: 2026-10-14T20:39:38Z
 verified: []
 sources:
   - id: s1
@@ -100,6 +100,10 @@ EM decided on 2026-10-14, after a count of the launch, closing OD-78 [s1]:
 17. No restore template ships with the launch ([ADR 005](/adr/005-account-graph-and-roles.md) decision 30). A revoked permission comes back through an onboarding motion, if a template covers it, or by DAO vote.
 
 Decision 17 replaces decision 16.
+
+EM decided on 2026-10-14, in the 80/20 pass after OD-78, closing OD-79 [s1]:
+
+18. The catalogue check of decision 15 also drops each onboarding template whose shape no protocol in the committee's named pipeline needs. A later vote registers such a template with its first protocol.
 
 ## Proposed direction
 

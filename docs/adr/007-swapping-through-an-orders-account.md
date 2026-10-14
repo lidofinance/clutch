@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 007: Swapping through an orders account"
-description: Every swap, routine or emergency, is a CoW order placed from a dedicated orders account — a Safe owned by Aragon Voting, with CoW's fallback handler and one modifier of its own; the operator funds it under budgets and places market, limit, TWAP and stop-loss orders that pay the Asset Safe; the emergency role places recovery orders that pay the Aragon Agent into USDC or USDT, or sends assets to the Agent; the launch uses CoW only; Stonks 2.0 is no longer used; staking stays, and the withdrawal queue left the design on 2026-10-08.
+description: Every swap, routine or emergency, is a CoW order placed from a dedicated orders account — a Safe owned by Aragon Voting, with CoW's fallback handler and one modifier of its own; the operator funds it under budgets and places market, limit and TWAP orders that pay the Asset Safe; the emergency role places recovery orders that pay the Aragon Agent into USDC or USDT, or sends assets to the Agent; the launch uses CoW only; Stonks 2.0 is no longer used; staking stays, and the withdrawal queue left the design on 2026-10-08.
 tags: [swaps, cow, orders, emergency, rebalancing]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:11:35Z
+  at: 2026-10-14T20:39:38Z
 verified: []
 sources:
   - id: s1
@@ -165,6 +165,12 @@ EM decided on 2026-10-14, after a count of the launch, closing OD-78 [s1]:
 
 Decision 38 replaces decisions 31, 32 and 34 to 36. Decision 33 stands for the proxies that the launch tokens pin, without a factory, and decision 37 stands.
 
+EM decided on 2026-10-14, in the 80/20 pass after OD-78, closing OD-79 [s1]:
+
+39. The launch has no stop-loss orders. The orders policy allows no StopLoss handler and pins no oracle, and the vendor gets no request for a stop-loss expiry rule. TWAP orders stay.
+
+Decision 39 replaces the stop-loss parts of decisions 18, 24 and 29, and decisions 33 and 37.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as text.
@@ -173,7 +179,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - **Operator, on the Asset Safe.** A transfer of a listed token to the orders account, pinned to it, spends that token's orders budget. The budgets are figures from the attested computation.
 - **Operator, on the orders account.**
   - A delegatecall to the order signer: sell and buy tokens from the lists, the Asset Safe as receiver, an order life of at most 90 days (decision 29), and a fee bound. The order signer refuses an order whose `validTo` lies beyond its `validDuration`. `unsignOrder` cancels.
-  - ComposableCoW orders: TWAP and stop-loss handlers only, the Asset Safe as receiver, tokens from the lists, and a stop-loss's oracles pinned to Chainlink proxies; at launch, stop-loss orders cover stETH, WETH, USDC, USDT and USDS (decisions 33 and 37). A TWAP order is created with `createWithContext`, a start of zero and CoW's current-timestamp value factory, so it starts at its creation. Its parts and spacing take one of two shapes: at most 90 parts at most a day apart, or at most 12 parts at most 7 days apart, so it ends within 90 days (decision 29). `remove` cancels.
+  - ComposableCoW orders: the TWAP handler only, the Asset Safe as receiver, and tokens from the lists; no stop-loss orders (decision 39). A TWAP order is created with `createWithContext`, a start of zero and CoW's current-timestamp value factory, so it starts at its creation. Its parts and spacing take one of two shapes: at most 90 parts at most a day apart, or at most 12 parts at most 7 days apart, so it ends within 90 days (decision 29). `remove` cancels.
   - A transfer of any token back to the Asset Safe.
 - **Emergency role.**
   - On the Asset Safe: a transfer of any asset to the orders account, or to the Aragon Agent.
@@ -210,7 +216,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - Decision 19's "always" holds for the tokens that the safety policy lists. A token that a motion onboards gets its emergency transfer to the Agent from that motion (OD-49); a recovery order for it still needs a DAO vote (decision 21).
 - Proceeds go straight to their receiver: the Asset Safe for the operator, the Aragon Agent for recovery. No recovered token goes to the treasury by accident.
 - A recovery order names its own limit, so it can fill in a depeg at a price that the emergency signers accept. The service level stays the time to initiate, not the time to fill.
-- The vault no longer depends on the shared Stonks router, or on the committee's Safe as the router's manager. The router's settings stop being an untimelocked lever on the vault (OD-45). Chainlink's Feed Registry is read once, before the vote, to check the launch stop-loss proxies (decision 37).
+- The vault no longer depends on Chainlink's Feed Registry, the shared Stonks router, or the committee's Safe as the router's manager. The router's settings stop being an untimelocked lever on the vault (OD-45).
 - Recovery can sell wstETH, WETH and sUSDS directly. The operator buys and sells WETH in CoW orders in minutes. Staking stays; unstaking goes through CoW orders only (decision 27).
 - A new token waits for a DAO vote. The launch lists cover the mandate's assets, so this should be rare.
 - An order can rest for up to 90 days, so a larger price move can happen while it rests. A resting order is a standing authorisation: it keeps acting after its context changes. The 30-day alert and the monthly report ask the committee to confirm it. The tokens behind a resting order sit idle in the orders account.
@@ -223,7 +229,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 
 - INV-002, INV-008, INV-013, INV-014, INV-022, INV-023 and INV-024 in the [invariants](/specs/invariants.md).
 - Kit tests that stand: the operator cannot pre-sign an order or approve the CoW relayer from the Asset Safe [s5]; staking works with the Asset Safe as owner [s7], and the withdrawal queue is refused to both roles (`test_D3_withdrawal_queue_is_out_of_scope`); WETH's unwrap pays the Asset Safe [s8].
-- Fork tests owed: the order signer by delegatecall from a Safe v1.5.0 through a roles modifier, with the receiver pinned; a TWAP and a stop-loss order from a Safe v1.5.0 with CoW's fallback handler; the conditions that pin the receiver and the oracles inside ComposableCoW's encoded order data; a refusal of every other receiver; the life bounds of decisions 25 and 29, including a refusal of a TWAP order outside both shapes; the emergency role's cancel, sweep and recovery order, settled with the relayer approval that the vote sets; and the emergency role's revoke on the orders modifier, with recovery still working (decision 30).
+- Fork tests owed: the order signer by delegatecall from a Safe v1.5.0 through a roles modifier, with the receiver pinned; a TWAP order from a Safe v1.5.0 with CoW's fallback handler; the conditions that pin the receiver inside ComposableCoW's encoded order data; a refusal of every other receiver; the life bounds of decisions 25 and 29, including a refusal of a TWAP order outside both shapes; the emergency role's cancel, sweep and recovery order, settled with the relayer approval that the vote sets; and the emergency role's revoke on the orders modifier, with recovery still working (decision 30).
 
 ## Reversal conditions
 

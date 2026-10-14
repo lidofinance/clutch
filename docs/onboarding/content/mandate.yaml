@@ -123,7 +123,7 @@ blocks:
         why: "USDS and DAI carry USDC risk through Sky's peg stability module, so they are no escape from a USDC depeg."
         state: owed
         sources: ["ADR-007#d5", "ADR-007#d15", OD-26]
-      - text: "The swap section names CoW's market, limit, TWAP and stop-loss orders through the orders account, says that nothing on chain bounds their price, and makes Uniswap and 1inch wait for a screening check of the output."
+      - text: "The swap section names CoW's market, limit and TWAP orders through the orders account, says that nothing on chain bounds their price, and makes Uniswap and 1inch wait for a screening check of the output."
         why: "The committee needs those order types, and a router swap without a bounded output loses value to front-running."
         state: owed
         sources: ["ADR-007#d18", "ADR-007#d20", "ADR-007#d26", OD-43, OD-48]

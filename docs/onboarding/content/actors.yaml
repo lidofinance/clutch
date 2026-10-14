@@ -248,7 +248,7 @@
   name: Template factories
   status: new
   label: specified
-  what: "The new Easy Track factories that own a fixed [[template]]: five that onboard a protocol, one that removes a branch of a permission, and a claim template if a launch protocol pays rewards. Easy Track factories are the only kind of new contract that Clutch may add. A motion gives it typed values, such as a target, an asset and a budget key, and the factory builds the permission."
+  what: "The new Easy Track factories that own a fixed [[template]]: up to five that onboard a protocol, each only if a named protocol needs its shape (OD-79), one that removes a branch of a permission, and a claim template if a launch protocol pays rewards. Easy Track factories are the only kind of new contract that Clutch may add. A motion gives it typed values, such as a target, an asset and a budget key, and the factory builds the permission."
   controlled_by: "The operator Safe is the trusted caller, fixed at deployment. The DAO registers each factory by vote."
   can:
     - "Onboard a protocol without a DAO vote: wrap and unwrap, a tokenized vault, a queue vault, a spender approval or a Morpho Blue market."
@@ -257,10 +257,10 @@
     - "Accept a condition tree from a motion."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke (OD-09)."
     - "Add a token for market, limit or recovery orders. The order signer's permission is a delegatecall, which no motion can write (OD-36, OD-46)."
-  numbers: ["5 onboarding templates", "1 removal template", "a claim template only if needed (OD-72)", "external audit in phase 3"]
+  numbers: ["up to 5 onboarding templates (OD-79)", "1 removal template", "a claim template only if needed (OD-72)", "external audit in phase 3"]
   sources: ["ADR-006#d1", "ADR-006#d2", "ADR-006#d3", "ADR-006#d5", "ADR-006#d7", "ADR-006#d12", "ADR-006#d13",
-    "ADR-006#d14", "ADR-006#d15", "ADR-006#proposed-direction", "ADR-011#d3", "ADR-011#d13", OD-09,
-    OD-36, OD-43, OD-46, OD-49, OD-70, OD-72, "lip:part-4", OD-78]
+    "ADR-006#d14", "ADR-006#d15", "ADR-006#proposed-direction", "ADR-011#d3", "ADR-011#d13", OD-09, OD-36, OD-43, OD-46,
+    OD-49, OD-70, OD-72, "lip:part-4", OD-78, OD-79, "ADR-006#d18"]
 
 - id: budget-factory
   node: easytrack
@@ -309,7 +309,7 @@
   can:
     - "Hold the operator role: change positions in approved protocols, within budgets."
     - "Create motions as the trusted caller of every Clutch factory, and cancel its own motions."
-    - "Hold the operator role on the [[orders account]]: place CoW market, [[limit order|limit]], [[TWAP]] and [[stop-loss order|stop-loss]] orders that pay the Asset Safe."
+    - "Hold the operator role on the [[orders account]]: place CoW market, [[limit order|limit]] and [[TWAP]] orders that pay the Asset Safe."
     - "Hold the first-loss role: redeem the DAO's [[first-loss shares]] to the Aragon Agent, on the Earn team's written instruction (OD-60)."
     - "Remove the screening guard, but only through a fixed 10-day timelock."
   cannot:
@@ -742,7 +742,7 @@
   what: "The launch list: ETH, WETH, stETH, wstETH, USDC, USDT, DAI, USDS, sUSDS, LDO, and the earnETH and earnUSD shares. The Asset Safe holds them; the stablecoins, sUSDS and stETH also fund the vault."
   controlled_by: "Each token's own issuer and governance."
   can:
-    - "Be sold and bought in CoW orders by the operator, if on its lists: stETH, wstETH, WETH, USDC, USDT, USDS and LDO (OD-46). Stop-loss orders cover only stETH, WETH, USDC, USDT and USDS; Chainlink's Feed Registry has no USD feed for wstETH or LDO (OD-76)."
+    - "Be sold and bought in CoW orders by the operator, if on its lists: stETH, wstETH, WETH, USDC, USDT, USDS and LDO (OD-46)."
     - "Be sold by a [[recovery order]] into USDC, or into USDT: every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues."
   cannot:
     - "Be traded by the operator if off its lists. DAI earns through Sky's converter and sUSDS through deposit and redeem, so both stay off (OD-22, OD-46). A new token needs a DAO vote (OD-78)."
@@ -754,7 +754,7 @@
     - {name: "LDO", address: "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32"}
   sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d5", "ADR-011#d7", "ADR-011#d11", "ADR-011#d12", "ADR-011#d14",
     "ADR-007#d5", "ADR-007#d21", "ADR-007#d22", "ADR-007#proposed-direction", OD-22, OD-26, OD-46,
-    "doc:docs/registers/parameters.md#parameters", OD-76, "ADR-007#d37", OD-78, "ADR-007#d38"]
+    "doc:docs/registers/parameters.md#parameters", OD-78, "ADR-007#d38"]
 
 # --- First-loss Safe ----------------------------------------------------------------------------
 - id: first-loss-safe
@@ -901,7 +901,7 @@
   what: "A new Safe that Aragon Voting owns. Every vault swap is a [[CoW]] order placed from it. It holds only tokens in transit, between a transfer from the Asset Safe and a fill."
   controlled_by: "Aragon Voting, at 1 of 1 (OD-73). The roles act on it only through its own modifier (OD-57)."
   can:
-    - "Place CoW market and [[limit order|limit orders]] through CoW's order signer, and [[TWAP]] and [[stop-loss order|stop-loss orders]] through ComposableCoW."
+    - "Place CoW market and [[limit order|limit orders]] through CoW's order signer, and [[TWAP]] orders through ComposableCoW."
     - "Pay the Asset Safe for the operator's orders, and the Aragon Agent for [[recovery order|recovery orders]]. Each role's permissions pin the receiver."
     - "Use CoW's [[fallback handler]], which [[conditional order|conditional orders]] need. The Asset Safe has none, so this account carries it."
     - "Settle any role's order with the approvals of CoW's vault relayer that the enabling vote sets. No role can raise an approval here."
@@ -924,7 +924,7 @@
   what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, and no governance role (OD-57, OD-58, OD-78)."
   controlled_by: "Its owner, the orders account, so in the end the DAO."
   can:
-    - "Let the operator sign orders through the order signer and create TWAP and stop-loss orders. The receiver is the Asset Safe, and a stop-loss order's oracles are pinned to Chainlink proxies that match Chainlink's Feed Registry, for stETH, WETH, USDC, USDT and USDS only (OD-76)."
+    - "Let the operator sign orders through the order signer and create TWAP orders. The receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."
     - "Let the emergency role cancel any order, set a relayer approval to zero, send any listed token to the Aragon Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent."
     - "Let the emergency role stop the operator by revoking its targets and functions. The stop also cancels the operator's open orders, because a fill does not consult the policy (OD-58)."
   cannot:
@@ -932,8 +932,8 @@
     - "Take the order signer's permission or a delegatecall from a motion (OD-36)."
   address: "To be deployed"
   sources: ["ADR-007#d19", "ADR-007#d21", "ADR-007#d25", "ADR-007#d28", "ADR-007#d30", "ADR-007#proposed-direction",
-    "ADR-005#d21", "ADR-005#d25", OD-43, OD-46, OD-57, OD-58, INV-014, INV-022, "ADR-007#d33", OD-76, "ADR-007#d37",
-    OD-78, "ADR-007#d38"]
+    "ADR-005#d21", "ADR-005#d25", OD-43, OD-46, OD-57, OD-58, INV-014, INV-022, OD-78, "ADR-007#d38", "ADR-007#d39",
+    OD-79]
 
 - id: cow-order-signer
   node: orders
@@ -954,23 +954,21 @@
 
 - id: composable-cow
   node: orders
-  name: ComposableCoW, its TWAP and stop-loss handlers, and CoW's fallback handler
+  name: ComposableCoW, its TWAP handler, and CoW's fallback handler
   status: existing
   label: existing
   what: "CoW's contracts for [[conditional order|conditional orders]]. The orders account sets CoW's fallback handler and names ComposableCoW as the verifier of CoW's settlement domain. A handler checks each order's terms."
   controlled_by: "External: CoW Protocol."
   can:
     - "Hold a TWAP order: equal parts at a fixed spacing, each with a minimum to receive. This is how the vault buys or sells a position over time."
-    - "Hold a stop-loss order. It becomes valid when the sell token's price, read from two oracles in the order, falls to the strike or below."
     - "Delete an order with `remove`."
   cannot:
     - "Post an order to CoW's order book. CoW's [[watch-tower]] does that."
     - "Work for a Safe without CoW's fallback handler. That is why the orders account exists."
-  numbers: ["ComposableCoW and the fallback handler: audited by Ackee, reviewed by Gnosis", "the TWAP and StopLoss handlers: audit scope not checked"]
+  numbers: ["ComposableCoW and the fallback handler: audited by Ackee, reviewed by Gnosis", "the TWAP handler: audit scope not checked"]
   addresses:
     - {name: "ComposableCoW", address: "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74"}
     - {name: "TWAP handler", address: "0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5"}
-    - {name: "StopLoss handler", address: "0x412c36e5011cd2517016d243a2dfb37f73a242e7"}
     - {name: "ExtensibleFallbackHandler", address: "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5"}
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d24", "ADR-007#proposed-direction", INV-022, INV-023,
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]

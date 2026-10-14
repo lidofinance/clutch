@@ -153,7 +153,7 @@
   assumption: "CoW's order signer, ComposableCoW and CoW's fallback handler work on Safe v1.5.0 behind a Roles modifier, and each role's orders pay only their pinned receiver."
   kind: design
   why: "Every swap runs through the orders account. The pinned receiver keeps the operator's proceeds in the vault and recovery proceeds at the Agent."
-  breaks: "If the fallback handler or the order signer fails on Safe v1.5.0, the vault has no limit, TWAP or stop-loss orders. If a receiver pin fails, an order could pay another account."
+  breaks: "If the fallback handler or the order signer fails on Safe v1.5.0, the vault has no limit or TWAP orders. If a receiver pin fails, an order could pay another account."
   watched_by: []
   watch_note: "INV-022 and INV-023 are pending. The fork tests are owed before the design is relied on."
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#confirmation", "ADR-007#reversal-conditions", OD-43,
@@ -173,8 +173,8 @@
 - id: watch-tower
   assumption: "CoW's watch-tower posts conditional orders on time."
   kind: trust
-  why: "TWAP and stop-loss orders reach the order book only through it."
-  breaks: "The orders wait, and a stop-loss order may not fill when the price falls. No funds move."
+  why: "TWAP orders reach the order book only through it."
+  breaks: "The orders wait. No funds move."
   watched_by: []
   watch_note: "The alert on a late part is not built. The committee can remove the orders and place ordinary ones."
   sources: ["ADR-007#proposed-direction",

@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:11:35Z
+  at: 2026-10-14T20:39:38Z
 verified: []
 sources:
   - id: s1
@@ -45,7 +45,7 @@ sources:
     title: The CFO's follow-up questions and EM's answers in the committee's channel, 2026-10-13; outside the repository
   - id: s12
     resource: "urn:clutch:interview:2026-10-14"
-    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-78, 2026-10-14; the transcript is not in the repository
+    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-79, 2026-10-14; the transcript is not in the repository
 ---
 
 # Decision log
@@ -55,6 +55,25 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-14 — OD-79: the 80/20 pass after OD-78
+
+The agent ran the 80/20 pass that EM asked for with OD-78 and offered O1 to O5, and O2b. EM answered:
+
+> O1: Let first-loss Earn shares to be on a separate "first loss Safe" still, but under operator Safe management; by default burn should not be allowed unless ET motion passes
+> O2: Agree on no stop-loss orders
+> O2b: Still need TWAP
+> O3: keep
+> O4: agree
+> O5: keep as you suggested
+
+Recorded as:
+
+- (OD-79, O1) The first-loss shares stay in the separate first-loss Safe. The operator Safe manages them through its `first-loss` role, and a burn runs only as an Easy Track motion. This is the design of OD-60 and OD-67, so nothing changes ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 21 to 23).
+- (OD-79, O2 and O2b) The launch has no stop-loss orders; TWAP orders stay ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 39).
+- (OD-79, O3) The budget factory stays.
+- (OD-79, O4) The catalogue check keeps only the onboarding templates whose shape a protocol in the committee's named pipeline needs. A later vote registers another template with its first protocol ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 18).
+- (OD-79, O5) The removal template stays. [s12]
 
 ## 2026-10-14 — OD-78: a smaller launch
 

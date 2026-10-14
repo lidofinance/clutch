@@ -43,8 +43,8 @@
     OD-38, OD-45, "doc:policy/constellation/constellation/roles/governance/permissions.ts"]
 
 - title: Swaps are CoW orders
-  text: "Every swap is a [[CoW]] order placed from the [[orders account]]. The operator sends a token there under a budget, then places a market, [[limit order|limit]], [[TWAP]] or [[stop-loss order|stop-loss]] order that pays the Asset Safe. A [[recovery order]] buys USDC or USDT and pays the Aragon Agent.\n\nNothing on chain bounds an order's price. CoW's competition rules, screening, the budgets and monitoring of each fill take its place."
-  tech: "Market and limit orders: a delegatecall from the orders account to CoW's order signer, `signOrder`, with tokens from the lists, the Asset Safe as receiver and a `validDuration` of at most 90 days. TWAP and stop-loss orders go through ComposableCoW, with only those two handlers; a TWAP order is created with `createWithContext`, so it starts at its creation. These permissions are ADR 007's proposed direction (INV-022, INV-024)."
+  text: "Every swap is a [[CoW]] order placed from the [[orders account]]. The operator sends a token there under a budget, then places a market, [[limit order|limit]] or [[TWAP]] order that pays the Asset Safe. A [[recovery order]] buys USDC or USDT and pays the Aragon Agent.\n\nNothing on chain bounds an order's price. CoW's competition rules, screening, the budgets and monitoring of each fill take its place."
+  tech: "Market and limit orders: a delegatecall from the orders account to CoW's order signer, `signOrder`, with tokens from the lists, the Asset Safe as receiver and a `validDuration` of at most 90 days. TWAP orders go through ComposableCoW, with only the TWAP handler; a TWAP order is created with `createWithContext`, so it starts at its creation. These permissions are ADR 007's proposed direction (INV-022, INV-024)."
   nodes: [asset-safe, orders]
   edges: [swaps]
   flows: [swap-order, standing-order, recovery-order]

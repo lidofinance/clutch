@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T09:03:30Z
+  at: 2026-10-14T20:39:38Z
 verified: []
 sources:
   - id: s1
@@ -141,7 +141,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
   - Monitoring alerts on a top-up motion whose enactment would take the vault above the cap, while its objection window is open, and on a vault value above the cap at each fortnightly reading.
   - The lift: the guard instance of decision 10 is set on the operator Safe, the vendor's key turns its bypass mode off, the agreement of decision 9 is in place, and Lido's monitoring covers the instance (decision 12). A check confirms the guard's address, the bypass mode and the absence of standing approvals. The committee's forum post links the check and lifts the cap.
   - The vendor's name stays redacted until decision 13 ends the redaction.
-- **Rules requested from the vendor** (OD-39, OD-40, OD-43, OD-47): refuse an operator transaction that would take the liquidity buffer below its floor; refuse one that would breach a cap at the post-transaction state; refuse an order whose limit price, or a router swap whose minimum output, lies too far below a market price; refuse a stop-loss order whose expiry is more than 30 days ahead. The written list shows each one as requested until the vendor confirms that it can check it before execution. The vendor is also asked whether it records rule changes and whether it can delay a relaxation.
+- **Rules requested from the vendor** (OD-39, OD-40, OD-43, OD-47): refuse an operator transaction that would take the liquidity buffer below its floor; refuse one that would breach a cap at the post-transaction state; refuse an order whose limit price, or a router swap whose minimum output, lies too far below a market price. The written list shows each one as requested until the vendor confirms that it can check it before execution. The vendor is also asked whether it records rule changes and whether it can delay a relaxation.
 
 ## Options considered
 

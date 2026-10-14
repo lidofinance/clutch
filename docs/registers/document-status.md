@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-14T20:11:35Z
+  at: 2026-10-14T20:39:38Z
 verified: []
 ---
 
@@ -29,7 +29,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/007-swapping-through-an-orders-account.md](/adr/007-swapping-through-an-orders-account.md) | Decision | slop | proposed | 2026-10-14 | none |
 | [adr/008-funding-through-existing-payments.md](/adr/008-funding-through-existing-payments.md) | Decision | slop | proposed | 2026-10-14 | none |
 | [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-10-14 | none |
-| [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-10-13 | none |
+| [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-10-14 | none |
 | [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-10-14 | none |
 | [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-10-12 | none |
 | [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-10-12 | none |

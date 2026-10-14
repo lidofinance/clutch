@@ -101,10 +101,10 @@ flows:
 
   - id: standing-order
     group: operations
-    title: A TWAP or stop-loss order
+    title: A TWAP order
     label: specified
-    summary: "How the vault buys or sells over time, or sells when a price falls. ComposableCoW holds the order, and CoW's watch-tower posts it to the order book."
-    trigger: "The committee wants to average into a position over weeks, or to sell stETH if its price falls to a set level."
+    summary: "How the vault buys or sells over time. ComposableCoW holds the order, and CoW's watch-tower posts it to the order book."
+    trigger: "The committee wants to average into a position over weeks."
     time: "Until the last part fills or the order expires."
     steps:
       - who: "Operator"
@@ -112,13 +112,13 @@ flows:
         nodes: [operator-safe, operator-modifier, asset-safe, orders]
         edges: [op-role, own-op, swaps]
       - who: "Operator Safe"
-        text: "The operator Safe creates the order on ComposableCoW: a [[TWAP]] order in equal parts, or a [[stop-loss order]] with a strike. A TWAP order starts at once and ends within 90 days. The screening guard checks it, and is asked to refuse a stop-loss order that expires more than 90 days ahead."
+        text: "The operator Safe creates a [[TWAP]] order on ComposableCoW, in equal parts. It starts at once and ends within 90 days. The screening guard checks it."
         nodes: [operator-safe, screening, orders]
         edges: [screen]
-        check: "INV-022: the receiver is the Asset Safe, and a stop-loss order's oracles are Chainlink proxies that the policy pins, checked against Chainlink's Feed Registry before the vote. Stop-loss orders cover stETH, WETH, USDC, USDT and USDS only (OD-76)."
-        tech: "`ComposableCoW.createWithContext` with a start of zero and CoW's current-timestamp value factory, so the order starts at its creation, and the handler pinned to the deployed TWAP or StopLoss handler. A TWAP order has at most 90 parts at most a day apart, or 12 parts at most 7 days apart (INV-024). The orders account's fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it (INV-023)."
+        check: "INV-022: the receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."
+        tech: "`ComposableCoW.createWithContext` with a start of zero and CoW's current-timestamp value factory, so the order starts at its creation, and the handler pinned to the deployed TWAP handler. A TWAP order has at most 90 parts at most a day apart, or 12 parts at most 7 days apart (INV-024). The orders account's fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it (INV-023)."
       - who: "CoW's watch-tower"
-        text: "The [[watch-tower]] posts each part of a TWAP order when it is due, or a stop-loss order once its price is met."
+        text: "The [[watch-tower]] posts each part of a TWAP order when it is due."
         nodes: [orders]
       - who: "CoW Protocol"
         text: "Each part fills at its minimum or better, and pays the Asset Safe directly."
@@ -132,7 +132,7 @@ flows:
       - "The emergency Safe can cancel every open order and sweep the orders account."
     sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d24", "ADR-007#d29", "ADR-007#proposed-direction", OD-43, OD-61,
       INV-022, INV-023, INV-024, "runbook:Re-affirm open orders",
-      "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss", OD-74, "ADR-007#d33", OD-76, "ADR-007#d37"]
+      "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss", "ADR-007#d39", OD-79]
 
   # --- Governance ---------------------------------------------------------------------------------
   - id: onboard
@@ -729,7 +729,7 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, operator-safe, emergency-safe]
       - who: "LDO holders"
-        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists, stop-loss proxies and relayer approvals, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list. Aragon Voting runs every item itself when the vote executes, without Dual Governance (OD-73)."
+        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list. Aragon Voting runs every item itself when the vote executes, without Dual Governance (OD-73)."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
         edges: [own, own-op, own-sf]
       - who: "Growth Committee, then the operator Safe"
@@ -741,7 +741,7 @@ flows:
       "ADR-010#d22", "ADR-008#d10", INV-022, INV-023, OD-54, "doc:ROADMAP.md#roadmap",
       "doc:docs/specs/enabling-vote.md#the-vote",
       "doc:docs/research/single-vote-review-2026-10-14.md#how-one-vote-carries-two-kinds-of-item", OD-73, "ADR-005#d28",
-      OD-76, "ADR-007#d37", OD-78]
+      OD-78, OD-79]
 
   - id: signer-rotation
     group: deployment

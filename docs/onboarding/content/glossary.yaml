@@ -47,7 +47,7 @@
   sources: ["ADR-004#d12", OD-33]
 
 - term: Conditional order
-  plain: "A CoW order that ComposableCoW holds and checks, such as a TWAP or a stop-loss order. CoW's watch-tower posts it to the order book when it is due."
+  plain: "A CoW order that ComposableCoW holds and checks, such as a TWAP order. CoW's watch-tower posts it to the order book when it is due."
   sources: ["ADR-007#d18", "ADR-007#proposed-direction",
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
@@ -220,12 +220,8 @@
   sources: ["doc:ROADMAP.md#roadmap"]
 
 - term: Stonks
-  plain: "Lido's treasury swap contracts. The design used Stonks 2.0 instances until 2026-10-06, when the orders account replaced them: they offered no limit, TWAP or stop-loss orders (OD-43)."
+  plain: "Lido's treasury swap contracts. The design used Stonks 2.0 instances until 2026-10-06, when the orders account replaced them: they offered no limit or TWAP orders (OD-43)."
   sources: ["ADR-007#d1", "ADR-007#d17", OD-43]
-
-- term: Stop-loss order
-  plain: "A CoW order that becomes valid when the sell token's price falls to a set strike, read from Chainlink feeds that the policy pins and that match Chainlink's Feed Registry. At launch, stop-loss orders cover only stETH, WETH, USDC, USDT and USDS (OD-76). For example: sell stETH if its price falls to a set level."
-  sources: ["ADR-007#d18", "ADR-007#proposed-direction", INV-022, "ADR-007#d33", OD-74, OD-76, "ADR-007#d37"]
 
 - term: sUSDS
   plain: "Sky's savings token for USDS. The vault holds it as a savings position, and it counts toward the liquidity buffer."

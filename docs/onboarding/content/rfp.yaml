@@ -68,10 +68,10 @@ sections:
     items:
       - asked: "Easy Track manages the operator allowlist: it adds or removes an asset, a protocol target or a function selector, and changes a parameter constraint inside an allowed function."
         verdict: changed
-        clutch: "Motions add and remove, but only through templates fixed at audit time. An onboarding motion fills one of five onboarding templates with typed parameters such as a target, an asset and a budget key; a removal motion takes one branch away; and a budget motion sets budgets within their ceilings. A token for the orders account needs a DAO vote, and an emergency removal is the emergency Safe's immediate revoke."
+        clutch: "Motions add and remove, but only through templates fixed at audit time. An onboarding motion fills one of up to five onboarding templates with typed parameters such as a target, an asset and a budget key; a removal motion takes one branch away; and a budget motion sets budgets within their ceilings. A token for the orders account needs a DAO vote, and an emergency removal is the emergency Safe's immediate revoke."
         why: "A motion that carried its own condition tree could widen authority past what the DAO approved, so every motion fills a template. The order signer's permission is a delegatecall, which no motion may write."
         sources: ["ADR-006#d5", "ADR-006#d6", "ADR-006#d7", "ADR-006#d12", "ADR-006#d14", "ADR-006#context",
-          "ADR-006#proposed-direction", OD-09, OD-46, OD-70, INV-004, "ADR-007#d38", OD-78]
+          "ADR-006#proposed-direction", OD-09, OD-46, OD-70, INV-004, "ADR-007#d38", OD-78, OD-79, "ADR-006#d18"]
       - asked: "Lido contributors design, build, audit, deploy and maintain the Easy Track helper contracts. The provider confirms that its access control exposes the administration functions and works safely with this path."
         verdict: kept
         clutch: "The Easy Track factories are the only new contracts. Lido builds them in phase 2, and an external audit covers them in phase 3. The governance role calls six administration functions of the Roles modifier, each one guarded."
