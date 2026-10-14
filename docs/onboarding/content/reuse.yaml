@@ -40,10 +40,10 @@
 
 - name: Aragon Agent, Aragon Voting and Dual Governance
   column: reused
-  what: "The DAO path: the vote, the timelock and the treasury."
+  what: "The DAO path: Aragon Voting, which owns the vault's Safes, and the Aragon Agent, the treasury that receives recovered assets. Dual Governance gates only the Agent's own execution, which the vault does not use (OD-73)."
   why: "The DAO keeps custody and the final say. Clutch adds no authority over the Agent."
   owner: "The DAO"
-  sources: ["ADR-005#context", "ADR-005#proposed-direction"]
+  sources: ["ADR-005#context", "ADR-005#proposed-direction", OD-73, "ADR-005#d28"]
 
 - name: Aragon Finance and the shared payment permission
   column: reused

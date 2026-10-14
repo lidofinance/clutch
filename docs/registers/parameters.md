@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T17:58:04Z
+  at: 2026-10-14T18:14:18Z
 verified: []
 sources:
   - id: s1
@@ -41,12 +41,12 @@ sources:
 | Emergency Safe | three of five: two committee members, two Emergency Brakes members and a fifth signer who is a member of neither body; the committee and the Emergency Brakes multisig appoint two seats each, and a DAO Snapshot appoints the fifth | EM decision of 2026-10-13 (OD-58) [s1], replacing threshold two with the committee's owners (OD-30) | ADR 005 |
 | Switch holder | the emergency Safe, through the emergency role; the module argument is pinned to the operator modifier; the technical role is gone | EM decision of 2026-10-13 (OD-58) [s1] | ADR 005 |
 | Emergency Brakes multisig in the vault | no role; it keeps only the global Easy Track pause | EM decision of 2026-10-13 (OD-58) [s1] | ADR 005 |
-| Restart after a stop | the DAO only: a Voting item unpauses Easy Track; an Agent item through Dual Governance enables the operator modifier again, after the same vote cancels the queued motions | EM decision of 2026-10-13 (OD-59) [s1]; the cancel step is the agent's proposal | ADR 005 |
+| Restart after a stop | the DAO only: Voting items unpause Easy Track, or enable the operator modifier again and grant again the operator's permissions on the orders account, after the same vote cancels the queued motions (OD-73) | EM decision of 2026-10-13 (OD-59) [s1]; the cancel step is the agent's proposal | ADR 005 |
 | Easy Track objection period | 72 hours, 259,200 seconds, global | Read [s2] | — |
 | Easy Track objection threshold | 0.5 percent of LDO, 50 basis points | Read [s2] | — |
 | Trusted caller of every factory | the operator Safe | EM decision of 2026-10-02 [s1] | [ADR 006](/adr/006-governance-through-easy-track-factories.md) |
 | Swap venue | CoW orders from the orders account: market, limit, TWAP and stop-loss; no Stonks 2.0 instance | EM decision of 2026-10-06 (OD-43) [s1], replacing Stonks 2.0 (decided 2026-09-22, OD-05, OD-20) | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Orders account | a Safe owned by the Aragon Agent at one of one, with CoW's fallback handler and one modifier of its own, carrying the operator and emergency roles, and a governance role for the Easy Track executor that adds a token for TWAP and stop-loss orders | EM decisions of 2026-10-06 (OD-43), 2026-10-09 (OD-57), 2026-10-13 (OD-58) and 2026-10-14 (OD-68) [s1] | ADR 007, [ADR 005](/adr/005-account-graph-and-roles.md) |
+| Orders account | a Safe owned by Aragon Voting at one of one, with CoW's fallback handler and one modifier of its own, carrying the operator and emergency roles, and a governance role for the Easy Track executor that adds a token for TWAP and stop-loss orders | EM decisions of 2026-10-06 (OD-43), 2026-10-09 (OD-57), 2026-10-13 (OD-58) and 2026-10-14 (OD-68, OD-73) [s1] | ADR 007, [ADR 005](/adr/005-account-graph-and-roles.md) |
 | Order receivers | the Asset Safe for the operator's orders; the Aragon Agent for the emergency role's orders | EM decision of 2026-10-06 (OD-43) [s1] | ADR 007 |
 | Router swaps (Uniswap, 1inch) | none at launch; only after the screening vendor can bound a swap's minimum output | EM decision of 2026-10-06 (OD-43) [s1] | ADR 007 |
 | Orders budgets | one budget key per listed token on transfers into the orders account; figures not in this repository | EM decision of 2026-10-06 (OD-43): budgets [s1]; one key per token is the agent's proposal; figures by attested computation | ADR 007, [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
@@ -65,9 +65,11 @@ sources:
 | Funding period | one calendar month | EM decision of 2026-10-02 [s1] | ADR 008 |
 | Launch cap without the guard | one million dollars on the Asset Safe and the orders account, at the report's price rule; the first-loss Safe is outside; held by procedure; a forum post lifts it once the guard is set on the operator Safe with its bypass mode off | EM decisions of 2026-10-08 and 2026-10-09 (OD-54, OD-55) [s1] | [ADR 010](/adr/010-pre-execution-screening.md), ADR 008 |
 | Funding limit per period | one TM Floor Value in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared; the figures are not in this repository; a new TM Floor Value is a DAO vote by design, and a re-pin of the stETH limit is optional (OD-71) | EM decision of 2026-10-02 [s1]; figures by attested computation, entering when the mandate is approved | ADR 008 |
+| Registry admin | Aragon Voting, for each of the vault's three funding registries; it sets a limit and a period | EM decision of 2026-10-14 (OD-73) [s1] | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 008](/adr/008-funding-through-existing-payments.md) |
+| Insurance-fund funding | a third funding registry and top-up factory that pay only the first-loss Safe, within a limit; the limit by attested computation | EM decision of 2026-10-14 (OD-66) [s1] | [ADR 008](/adr/008-funding-through-existing-payments.md) |
 | Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Funding assets | USDC, USDT, DAI, USDS, sUSDS, stETH; not ETH | EM decision of 2026-10-05 [s1] | ADR 008 |
-| First-loss Safe | a Safe owned by the Aragon Agent at one of one, with no guard or fallback handler, and one modifier with two roles: `first-loss` for the operator Safe and `first-loss-burn` for the Easy Track executor; it holds only the first-loss shares | EM decisions of 2026-10-06 (OD-42) and 2026-10-13 (OD-60, OD-67) [s1] | ADR 008, [ADR 005](/adr/005-account-graph-and-roles.md) |
+| First-loss Safe | a Safe owned by Aragon Voting at one of one, with no guard or fallback handler, and one modifier with two roles: `first-loss` for the operator Safe and `first-loss-burn` for the Easy Track executor; it holds only the first-loss shares | EM decisions of 2026-10-06 (OD-42), 2026-10-13 (OD-60, OD-67) and 2026-10-14 (OD-73) [s1] | ADR 008, [ADR 005](/adr/005-account-graph-and-roles.md) |
 | First-loss role holder | the operator Safe, four of seven: the redemption and the claim, paid to the Aragon Agent; its guard screens each action once the launch cap lifts | EM decisions of 2026-10-13 (OD-60): "role is hold by TMC Safe" and "TMC Safe means operator safe"; the burn moved to motions (OD-67) [s1] | ADR 008, ADR 005 |
 | Legacy Earn first-loss shares | the earnETH and earnUSD shares that the Growth Committee Safe `0xf6F0732c1e9971497342C295141566E6F1A31e96` holds, 1,362.84 and 1,998,416.46 at block 26126791; transferred to the dedicated first-loss Safe after the enabling vote (OD-42) | EM decisions of 2026-10-05 and 2026-10-06 [s1]; read [s5] | ADR 008 |
 | First-loss burn | an Easy Track motion that the operator Safe creates on the first-loss burn factory; after the 72-hour objection window, the Easy Track executor burns through the `first-loss-burn` role; on the Earn team's written instruction under the March 2026 terms; below the terms, after a Snapshot exception | EM decisions of 2026-10-13 (OD-60, OD-67) [s1], replacing the DAO vote of OD-42; the Snapshot step is the agent's proposal | ADR 008 |

@@ -9,7 +9,7 @@ valid_as_of: 2026-10-14
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T17:58:49Z
+  at: 2026-10-14T18:14:18Z
 verified: []
 sources:
   - id: s1
@@ -70,6 +70,7 @@ On 2026-10-14 EM asked whether Clutch needs only one Aragon vote to launch, and 
 - Aragon Voting holds Easy Track's admin role, and the Aragon Agent does not [s13]. Registering a factory is therefore a Voting item.
 - The Aragon Agent is the only owner of the Asset Safe, the orders account and the first-loss Safe. The owner enables their modifiers and applies their policies [s12][s2]. These are Agent items, which pass Dual Governance.
 - One vote carries both kinds. The Voting items run when the vote executes. The Agent items run after the Dual Governance timelock.
+- After OD-73, Aragon Voting owns the vault's Safes, so every item is a Voting item and none waits for Dual Governance [s1].
 - Easy Track's standard builder sets each registry's limit and period when it deploys the registry, and then gives that role up. The registry's admin keeps it, and the Easy Track executor never gets it [s9]. So the launch limits need no vote, and every later change does.
 
 ## Five places where routine operation still needs a vote
@@ -102,17 +103,17 @@ These change who holds power, or the DAO's own bounds [s2][s3][s5][s11]:
 - Stale text: ADR 005 gave the orders account a governance role; ADR 011 said that no role reaches the first-loss Safe; INV-023 named two modifiers on the orders account; the roadmap and the parameters register named only the `first-loss` role; the guide's summaries of the vote left out the shared token list.
 - No page said how a template adds a spender to a token's `approve` without dropping the others, although a write replaces the whole tree [s3]. ADR 006 now states the requirement.
 
-## Decisions of 2026-10-14, and OD-73
+## Decisions of 2026-10-14
 
 EM decided OD-68 to OD-72 the same day [s1]. A motion adds a token for TWAP and stop-loss orders (OD-68, C). The enabling vote holds spare budget keys (OD-69, A). A routine removal is a motion of a removal template (OD-70, B). A new TM Floor Value is a vote by design, and a re-pin of the stETH limit is optional (OD-71, A). The template catalogue is checked before the vote, with a claim template only if a launch protocol pays rewards (OD-72).
 
-OD-73 asks whether Aragon Voting, not the Aragon Agent, owns the vault's Safes, so that no Clutch action passes Dual Governance. The treasury already pays out without Dual Governance [s14]:
+EM then decided OD-73 [s1]: Aragon Voting, not the Aragon Agent, owns the vault's Safes and administers its funding registries, so that no Clutch action passes Dual Governance. The treasury already pays out without Dual Governance [s14]:
 
 - Aragon Voting holds Finance's payment permission with no parameters, and manages it.
 - Finance pays out of the Aragon Agent, and holds the Agent's transfer role, which Aragon Voting manages.
 - Only Dual Governance's admin executor holds the Agent's `RUN_SCRIPT_ROLE` and `EXECUTE_ROLE`, and the Agent manages both.
 
-So one Voting vote can already pay any token out of the treasury. If Aragon Voting owns the vault's Safes, it gains no power that it lacks today.
+So one Voting vote can already pay any token out of the treasury, and owning the vault's Safes gives Aragon Voting no power that it lacked.
 
 ## How to reproduce
 

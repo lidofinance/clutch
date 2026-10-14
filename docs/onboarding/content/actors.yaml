@@ -42,30 +42,39 @@
     - "Vote in Aragon Voting: the [[enabling vote]], a policy replacement, a role membership change, a registry limit, and every restart after an emergency stop (OD-59)."
     - "Appoint the emergency Safe's fifth signer by Snapshot: a member of neither the committee nor the Emergency Brakes multisig (OD-58)."
     - "Object to any Easy Track motion in its [[objection window]]. An objection of 0.5% of LDO stops it."
-    - "Approve the mandate in a [[Snapshot vote]] before the on-chain vote."
+    - "Approve the mandate, with the standing framework for insurance funds, in a [[Snapshot vote]] before the on-chain vote (OD-66)."
   cannot:
-    - "Act on the vault directly. Every DAO action goes through [[Dual Governance]] to the Aragon Agent."
+    - "Act on the vault without a vote. A vote on the vault is a direct Aragon Voting item, about five days, without Dual Governance (OD-73)."
     - "Shorten a motion's objection window."
   numbers: ["objection threshold: 0.5% of LDO", "objection window: 72 h"]
   sources: ["ADR-006#d4", "ADR-006#d6", "ADR-006#d8", "ADR-006#context", "ADR-005#context", "ADR-005#d24", "ADR-005#d26",
-    "ADR-005#proposed-direction", OD-58, OD-59, "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap"]
+    "ADR-005#proposed-direction", OD-58, OD-59, "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap", OD-66, OD-73, "ADR-005#d28"]
 
 - id: aragon-voting
   node: dao
   name: Aragon Voting
   status: existing
   label: existing
-  what: "The DAO's on-chain voting contract. A passed vote goes through Dual Governance before the Aragon Agent executes it."
+  what: "The DAO's on-chain voting contract. It is the only owner of the Asset Safe, the [[orders account]] and the [[first-loss Safe]], and the admin of the vault's funding registries, so a vote acts on the vault directly, in about five days, without [[Dual Governance]] (OD-73)."
   controlled_by: "LDO holders."
   can:
-    - "Manage the shared payment permission of the Easy Track executor, and rewrite it as one unit."
-    - "Administer the shared stablecoin token list."
-    - "Hold Easy Track's pause, unpause and cancel roles itself. A vote item that unpauses Easy Track or cancels a queued motion runs when the vote runs, in five days, outside Dual Governance."
+    - "Do anything on the vault's Safes as their only owner: replace the policy, change a role's members, turn a [[module]] on or off, move any asset."
+    - "Restart after the switch, as a Voting item: enable the operator modifier again, and grant again the operator's permissions on the orders account. This is the only restart (OD-59)."
+    - "Change or remove the two first-loss roles and the burn factory (OD-60, OD-67)."
+    - "Add a token to the orders account for market, limit and [[recovery order|recovery orders]], because no motion can write the order signer's permission (OD-36, OD-46). A motion adds a token for TWAP and stop-loss orders (OD-68)."
+    - "Grant the operator [[delegatecall]]. Only a DAO vote can do this (OD-36)."
+    - "Set a limit or a period on any of the vault's three funding registries, as their admin."
+    - "Manage the shared payment permission of the Easy Track executor, and rewrite it as one unit, and administer the shared stablecoin token list."
+    - "Hold Easy Track's admin, pause, unpause and cancel roles itself. A vote item that unpauses Easy Track or cancels a queued motion runs when the vote runs."
   cannot:
-    - "Reach the vault's Safes except through Dual Governance and the Aragon Agent."
+    - "Approve a vault transaction with a contract signature. It uses only `approveHash`, or it sends the transaction itself."
+    - "Gain power over the treasury from owning the vault: it already pays out of the Aragon Agent through Finance."
+  numbers: ["owns the Asset Safe, the orders account and the first-loss Safe, each at 1 of 1", "a vote: about 5 days"]
   address: "0x2e59A20f205bB85a89C53f1936454680651E618e"
-  sources: ["ADR-008#d9", "ADR-008#d10", "ADR-005#context", "ADR-005#d26", OD-59,
-    "doc:docs/research/chain-reads-2026-09-30.md#governance-authority",
+  sources: ["ADR-005#d14", "ADR-005#d19", "ADR-005#d20", "ADR-005#d26", "ADR-005#d27", "ADR-005#d28", "ADR-005#proposed-direction",
+    "ADR-006#d9", "ADR-006#d12", "ADR-007#d19", "ADR-007#d21", "ADR-008#d9", "ADR-008#d10", "ADR-008#d21", OD-36, OD-46,
+    OD-59, OD-60, OD-67, OD-68, OD-73, INV-001, INV-021, INV-023,
+    "doc:docs/research/single-vote-review-2026-10-14.md#decisions-of-2026-10-14",
     "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts"]
 
 - id: dual-governance
@@ -73,40 +82,34 @@
   name: Dual Governance and its admin executor
   status: existing
   label: existing
-  what: "The layer between a DAO vote and the Aragon Agent. It adds a delay, so every DAO action takes days."
+  what: "The layer between a DAO vote and the Aragon Agent's own scripts and calls. It adds a delay. The vault does not pass through it, because Aragon Voting owns the vault's Safes (OD-73)."
   controlled_by: "The results of Aragon Voting, through the Dual Governance timelock."
   can:
     - "Run scripts as the Aragon Agent. Its admin executor is the only holder of the Agent's `RUN_SCRIPT_ROLE` and `EXECUTE_ROLE`."
   cannot:
     - "Skip its own delay."
+    - "Hold up a vote on the vault. A vote on the vault is a direct Voting item (OD-73)."
   address: "0x23E0B465633FF5178808F4A75186E2F2F9537021"
-  sources: ["ADR-005#context", "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
+  sources: ["ADR-005#context", "ADR-005#d28", OD-73, "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
 
 - id: aragon-agent
   node: dao
   name: Aragon Agent
   status: existing
   label: existing
-  what: "The DAO treasury and its final authority. It is the only owner of the Asset Safe, the [[orders account]] and the [[first-loss Safe]], and every recovered asset comes back to it."
-  controlled_by: "The Dual Governance admin executor."
+  what: "The DAO treasury. Every recovered asset comes back to it, and Aragon Finance pays the vault's funding out of it. It owns none of the vault's Safes: Aragon Voting does (OD-73)."
+  controlled_by: "The Dual Governance admin executor runs its scripts and calls. Aragon Finance pays out of it."
   can:
-    - "Do anything on the Asset Safe as its only owner: replace the policy, change a role's members, turn a [[module]] on or off, move any asset."
-    - "Restart after the switch, by vote through Dual Governance: enable the operator modifier again, and grant again the operator's permissions on the orders account. This is the only restart (OD-59)."
-    - "Change or remove the two first-loss roles and the burn factory, by vote (OD-60, OD-67)."
-    - "Add a token to the orders account for market, limit and [[recovery order|recovery orders]], by vote, because no motion can write the order signer's permission (OD-36, OD-46). A motion adds a token for TWAP and stop-loss orders (OD-68)."
-    - "Grant the operator [[delegatecall]]. Only a DAO vote can do this (OD-36)."
     - "Receive recovered assets: every emergency transfer out of the vault's accounts, and every recovery order, pays it."
-    - "Pay funding through Aragon Finance, and administer both funding registries."
+    - "Fund the vault through Aragon Finance, under the shared payment permission."
   cannot:
-    - "Approve an Asset Safe transaction with a contract signature. It uses only `approveHash`, or it sends the transaction itself."
+    - "Act on the vault's Safes. Aragon Voting owns them (OD-73)."
     - "Be reached by an Easy Track motion. Easy Track has no authority over it."
-  numbers: ["owns the Asset Safe, the orders account and the first-loss Safe, each at 1 of 1"]
+  numbers: ["receives every recovered asset"]
   address: "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
-  sources: ["ADR-005#d14", "ADR-005#d19", "ADR-005#d20", "ADR-005#d26", "ADR-005#d27", "ADR-005#proposed-direction",
-    "ADR-006#d9", "ADR-006#d12", "ADR-007#d19", "ADR-007#d21", "ADR-008#d21", "ADR-008#proposed-direction", OD-36,
-    OD-46, OD-59, OD-60, OD-67, OD-68, INV-001, INV-021, INV-023]
+  sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-007#d19", "ADR-008#proposed-direction", OD-73,
+    "doc:docs/research/chain-reads-2026-09-30.md#governance-authority"]
 
-# --- Funding path ------------------------------------------------------------------------------
 - id: finance
   node: funding
   name: Aragon Finance and the shared payment permission
@@ -142,30 +145,30 @@
 
 - id: registries
   node: funding
-  name: Funding registries (two)
+  name: Funding registries (three)
   status: instance
   label: specified
-  what: "Two new registries from Easy Track's standard builder, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a monthly limit."
-  controlled_by: "The Aragon Agent is the admin. The Easy Track executor spends the limit."
+  what: "Three new registries from Easy Track's standard builder: one for stablecoins and one for stETH that pay the Asset Safe, and one that pays only the [[first-loss Safe]] for insurance funds (OD-66). Each has one recipient and a limit."
+  controlled_by: "Aragon Voting is the admin (OD-73). The Easy Track executor spends the limit."
   can:
-    - "Pay only the Asset Safe."
+    - "Pay only their one recipient: the Asset Safe, or the first-loss Safe."
     - "Check the remaining limit when a motion starts, and again at enactment."
   cannot:
     - "Take a new recipient from the executor. Only the DAO changes a recipient, a limit or a period."
     - "Enforce the mandate's rule that a Snapshot vote follows an objection."
     - "Stop two full monthly limits within about 72 hours around a month boundary."
-  numbers: ["period: one calendar month", "limit: one TM Floor Value each, from the attested computation"]
+  numbers: ["period: one calendar month", "limit: one TM Floor Value each for the vault's two, from the attested computation", "the insurance-fund registry's limit: from the attested computation"]
   address: "To be deployed"
   sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d8", "ADR-008#proposed-direction", INV-017,
-    "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts"]
+    "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts", OD-66, OD-73, "ADR-008#d30", "ADR-005#d28"]
 
 - id: topup-factories
   node: funding
-  name: Top-up factories (two)
+  name: Top-up factories (three)
   status: instance
   label: specified
-  what: "Two new instances of Easy Track's top-up factory, one for stablecoins and one for stETH. They create the [[top-up]] motions that fund the vault."
-  controlled_by: "The operator Safe is the [[trusted caller]] of both. The DAO registers them by vote."
+  what: "Three new instances of Easy Track's top-up factory: one for stablecoins and one for stETH that fund the vault, and one that funds an insurance fund in the first-loss Safe (OD-66). They create the [[top-up]] motions."
+  controlled_by: "The operator Safe is the [[trusted caller]] of all three. The DAO registers them by vote."
   can:
     - "Create a top-up motion that pays the Asset Safe, with several payments in one motion."
   cannot:
@@ -174,7 +177,7 @@
   numbers: ["top-ups expected on days 1–10 of a month", "objection window: 72 h"]
   address: "To be deployed"
   sources: ["ADR-008#d4", "ADR-008#d6", "ADR-008#proposed-direction",
-    "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries"]
+    "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries", OD-66, "ADR-008#d30"]
 
 - id: growth-committee
   node: funding
@@ -695,8 +698,8 @@
   name: Asset Safe
   status: instance
   label: built
-  what: "The vault. A new Safe that holds the assets. The Aragon Agent is its only owner. The roles act on it only through its two modifiers. The first-loss shares sit apart in the first-loss Safe, and a token for an order sits in the orders account until the fill."
-  controlled_by: "The Aragon Agent, at 1 of 1. Safe v1.5.0."
+  what: "The vault. A new Safe that holds the assets. Aragon Voting is its only owner. The roles act on it only through its two modifiers. The first-loss shares sit apart in the first-loss Safe, and a token for an order sits in the orders account until the fill."
+  controlled_by: "Aragon Voting, at 1 of 1 (OD-73). Safe v1.5.0."
   can:
     - "Own both modifiers, and run their permitted calls as itself: it is their [[avatar]]."
     - "Send a token to the orders account for an order, under the orders budgets. Specified, not built."
@@ -707,7 +710,7 @@
   numbers: ["Safe v1.5.0", "1 of 1", "no guard", "no fallback handler"]
   address: "To be deployed"
   sources: ["ADR-005#d6", "ADR-005#d12", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20", "ADR-005#context",
-    "ADR-005#proposed-direction", INV-001, "test:test_asset_safe_shape"]
+    "ADR-005#proposed-direction", INV-001, "test:test_asset_safe_shape", OD-73, "ADR-005#d28"]
 
 - id: safe-contracts
   node: asset-safe
@@ -757,8 +760,8 @@
   name: First-loss Safe
   status: instance
   label: specified
-  what: "A new Safe that holds only the DAO's [[first-loss shares]] in earnETH and earnUSD. The Aragon Agent owns it. One modifier carries two narrow roles, so the committee can execute the first-loss terms without a DAO vote: a burn waits for an Easy Track motion's objection window, and an exit pays the Aragon Agent."
-  controlled_by: "The Aragon Agent, at 1 of 1. Safe v1.5.0, with no guard or fallback handler, and one modifier: the first-loss modifier."
+  what: "A new Safe that holds only the DAO's [[first-loss shares]] in earnETH and earnUSD. Aragon Voting owns it. One modifier carries two narrow roles, so the committee can execute the first-loss terms without a DAO vote: a burn waits for an Easy Track motion's objection window, and an exit pays the Aragon Agent."
+  controlled_by: "Aragon Voting, at 1 of 1 (OD-73). Safe v1.5.0, with no guard or fallback handler, and one modifier: the first-loss modifier."
   can:
     - "Receive the first-loss shares from the Growth Committee Safe, once, after the enabling vote."
     - "Burn the shares, but only in an enacted Easy Track motion, through the first-loss burn role (OD-67)."
@@ -770,7 +773,7 @@
   address: "To be deployed"
   sources: ["ADR-008#d13", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-008#proposed-direction",
     "ADR-005#d27", "ADR-005#proposed-direction", OD-42, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares",
-    "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares"]
+    "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares", OD-73, "ADR-005#d28"]
 
 - id: role-first-loss
   node: first-loss
@@ -893,8 +896,8 @@
   name: Orders account
   status: instance
   label: specified
-  what: "A new Safe that the Aragon Agent owns. Every vault swap is a [[CoW]] order placed from it. It holds only tokens in transit, between a transfer from the Asset Safe and a fill."
-  controlled_by: "The Aragon Agent, at 1 of 1. The roles act on it only through its own modifier (OD-57)."
+  what: "A new Safe that Aragon Voting owns. Every vault swap is a [[CoW]] order placed from it. It holds only tokens in transit, between a transfer from the Asset Safe and a fill."
+  controlled_by: "Aragon Voting, at 1 of 1 (OD-73). The roles act on it only through its own modifier (OD-57)."
   can:
     - "Place CoW market and [[limit order|limit orders]] through CoW's order signer, and [[TWAP]] and [[stop-loss order|stop-loss orders]] through ComposableCoW."
     - "Pay the Asset Safe for the operator's orders, and the Aragon Agent for [[recovery order|recovery orders]]. Each role's permissions pin the receiver."
@@ -904,12 +907,12 @@
     - "Bound an order's price on chain. An order's limit is a number that the caller chooses. CoW's rules, screening, the orders budgets and monitoring of each fill take the place of a bound, and screening covers only the operator (OD-48)."
     - "Limit what the emergency role sends in. The operator's transfers spend the orders budgets; the emergency role's have no budget."
     - "Swap through a router at launch. Uniswap and 1inch wait until [the screening vendor] can check a swap's minimum output (OD-43)."
-  numbers: ["owner: the Aragon Agent, 1 of 1", "order life: 90 days; a recovery order: 1 day", "orders budgets: from the attested computation"]
+  numbers: ["owner: Aragon Voting, 1 of 1", "order life: 90 days; a recovery order: 1 day", "orders budgets: from the attested computation"]
   address: "To be deployed"
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d20", "ADR-007#d23", "ADR-007#d25", "ADR-007#d26",
     "ADR-007#d28", "ADR-007#d29", "ADR-007#d30", "ADR-007#proposed-direction", "ADR-005#d15", "ADR-005#d20",
     "ADR-005#d21", OD-43, OD-47, OD-48, OD-61, INV-013, INV-023,
-    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design"]
+    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design", OD-73, "ADR-005#d28"]
 
 - id: orders-modifiers
   node: orders

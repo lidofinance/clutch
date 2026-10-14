@@ -11,12 +11,16 @@ blocks:
     title: Purpose and custody
     says: "The committee puts a bounded part of the DAO treasury to work in approved protocols. The DAO keeps the assets, and no committee or service provider can take them."
     kept:
-      - "On chain: the Aragon Agent is the only owner of the Asset Safe, the orders account and the first-loss Safe."
+      - "On chain: Aragon Voting is the only owner of the Asset Safe, the orders account and the first-loss Safe, and recovered assets go to the Aragon Agent."
       - "On chain: every receiver, owner and beneficiary in the operator's permissions is the vault."
       - "Detection: alerts on any change of the owners, modules or singleton of every new Safe."
     tech: "INV-001, INV-021 and INV-023 fix the owners; INV-003 and INV-022 fix the receivers."
-    changes: []
-    sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction", INV-001, INV-003,
+    changes:
+      - text: "The custody section names Aragon Voting as the owner of the vault's Safes, and the Aragon Agent as the destination of recovered assets."
+        why: "A vote on the vault then runs without Dual Governance, which protects stETH holders, not the treasury. Aragon Voting already pays from the treasury through Finance, so it gains no new power."
+        state: owed
+        sources: ["ADR-005#d28", OD-73]
+    sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#d28", "ADR-005#proposed-direction", OD-73, INV-001, INV-003,
       "doc:docs/product/brief.md#the-system", "doc:docs/specs/lip-draft.md#simple-summary",
       "doc:docs/specs/control-matrix.md#the-matrix"]
 
@@ -173,6 +177,10 @@ blocks:
       - "Detection: alerts on any change of the first-loss Safe's balance, owners or modules, and a page on every burn motion and every action of the role."
     tech: "INV-021 fixes the first-loss Safe's shape and its two roles. The Growth Committee's Safe moves the shares once, after the enabling vote."
     changes:
+      - text: "The legacy section carries a standing framework for insurance funds of other products, with the checklist that each fund's motion fills in: the product and its share token or payout address, the template, the fund's cap, the loss trigger and an independent confirming party, the incident-update deadline, and the end of the terms."
+        why: "One Snapshot then approves the framework, and each new fund joins by one Easy Track motion, without a vote of its own."
+        state: owed
+        sources: ["ADR-008#d25", "ADR-008#d29", "ADR-008#d30", OD-66]
       - text: "The legacy section takes over the first-loss terms of the March 2026 Earn allocation, with the committee as executor in place of the Growth Committee: a burn as an Easy Track motion, and an exit through one narrow role on a first-loss Safe."
         why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart. A burn moves the shares' value to other depositors, so LDO holders get the objection window; an exit pays the DAO, so it stays fast."
         state: owed

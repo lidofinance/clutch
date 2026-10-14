@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T17:57:05Z
+  at: 2026-10-14T18:12:36Z
 verified: []
 sources:
   - id: s1
@@ -55,6 +55,25 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-14 — OD-73: Aragon Voting owns the vault's Safes; OD-66 closed
+
+The agent explained OD-73 and the two open points of OD-66, and asked EM to confirm its reading of OD-66 point 1. EM answered:
+
+> OD-73: A confirmed
+> OD-66:
+> p. 2: A
+> p. 5: A
+> 1. Snapshot that sets a standing framework, then a motion per fund.
+> OD-68: interview me
+
+Recorded as:
+
+- (OD-73) A: Aragon Voting, not the Aragon Agent, is the only owner of the Asset Safe, the orders account and the first-loss Safe, and the admin of the vault's funding registries. Recovered assets still go to the Aragon Agent. A DAO action on the vault is a direct Voting item, without Dual Governance ([ADR 005](/adr/005-account-graph-and-roles.md), decision 28).
+- (OD-66, point 1) one Snapshot sets a standing framework for insurance funds, then each new fund needs one Easy Track motion. This corrects the agent's earlier reading, a Snapshot for each fund ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 25).
+- (OD-66, point 2) A: the framework fixes a checklist that every fund fills in. The option named each fund's Snapshot; with one standing framework, each fund's motion and its forum post fill it in ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 29).
+- (OD-66, point 5) A: a third funding registry and top-up factory pay only the first-loss Safe, within a limit, and ship with the launch ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 30). OD-66 closes.
+- (OD-68) EM asked for an interview. Decision 31 of [ADR 007](/adr/007-swapping-through-an-orders-account.md) stands until the interview changes it. [s12]
 
 ## 2026-10-14 — OD-68 to OD-72 decided, OD-66 in part, OD-73 opened
 

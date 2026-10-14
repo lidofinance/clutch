@@ -3,12 +3,12 @@
   question: "Who owns the Asset Safe?"
   options:
     - "The Treasury Management Committee"
-    - "The Aragon Agent, for the DAO"
+    - "Aragon Voting, for the DAO"
     - "The operator Safe"
     - "[the screening vendor]"
   answer: 1
-  why: "The Aragon Agent is the only owner, at 1 of 1. The committee acts on the vault only through roles on the two modifiers."
-  sources: ["ADR-005#d6", "ADR-005#proposed-direction", INV-001]
+  why: "Aragon Voting is the only owner, at 1 of 1, and recovered assets go to the Aragon Agent, the DAO's treasury. The committee acts on the vault only through roles on the two modifiers."
+  sources: ["ADR-005#d6", "ADR-005#d28", "ADR-005#proposed-direction", OD-73, INV-001]
 
 - id: outside-transfer
   question: "The operator Safe tries to send USDC from the Asset Safe to an outside address. What stops it?"
@@ -51,7 +51,7 @@
     - "The DAO, by vote"
     - "The operator Safe"
   answer: 2
-  why: "No emergency body restores what it stopped. A DAO vote enables the operator modifier again through Dual Governance, and the same vote first cancels the queued motions, because a motion does not expire. It also grants again the operator's permissions on the orders account."
+  why: "No emergency body restores what it stopped. A DAO vote, a direct Aragon Voting item, enables the operator modifier again, and the same vote first cancels the queued motions, because a motion does not expire. It also grants again the operator's permissions on the orders account."
   sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59,
     "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts"]
 

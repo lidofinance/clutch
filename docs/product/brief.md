@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T11:33:11Z
+  at: 2026-10-14T18:16:52Z
 verified: []
 sources:
   - id: s1
@@ -26,7 +26,7 @@ sources:
 ## The system
 
 - Clutch is the Lido Active Treasury system. The Treasury Management Committee puts a bounded part of the DAO treasury to work in approved protocols [s2].
-- The DAO keeps custody. The Aragon Agent is the only owner of the Safe that holds the assets [s2].
+- The DAO keeps custody. Aragon Voting is the only owner of the Safe that holds the assets, and recovered assets go to the Aragon Agent (OD-73) [s2].
 - A default-deny permission policy decides what the committee can do. An emergency Safe can return the assets to the Agent [s2].
 - Easy Track motions change the policy only inside templates that are fixed at audit time [s2].
 

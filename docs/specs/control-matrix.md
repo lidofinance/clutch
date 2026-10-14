@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T17:58:04Z
+  at: 2026-10-14T18:14:02Z
 verified: []
 sources:
   - id: s1
@@ -51,7 +51,7 @@ Figures stay out of this page. They come from the attested computation once the 
 
 | Rule | On chain | Before execution | Detection | Display | Owner | Status |
 |---|---|---|---|---|---|---|
-| The DAO keeps custody | The Aragon Agent is the only owner of the Asset Safe, the orders account and the first-loss Safe (INV-001, INV-021, INV-023) [s5][s8] | — | Owner, module and singleton alerts on every new Safe | Account graph | The DAO; `@lidofinance/defi-tech` specifies the alerts | Built for the Asset Safe; the other accounts specified |
+| The DAO keeps custody | Aragon Voting is the only owner of the Asset Safe, the orders account and the first-loss Safe, and recovered assets go to the Aragon Agent (OD-73; INV-001, INV-021, INV-023) [s5][s8] | — | Owner, module and singleton alerts on every new Safe | Account graph | The DAO; `@lidofinance/defi-tech` specifies the alerts | Built for the Asset Safe; the other accounts specified |
 | Only approved protocols and actions | Default deny; a new target only through a template motion with a 72-hour objection window, or a DAO vote (INV-004, INV-005) [s6] | Every operator transaction and every new motion | Drift against the committed policy artifact | The policy and its difference from the chain | The committee proposes; LDO holders can object; the emergency Safe revokes | Built; templates and drift detector specified |
 | Every receiver is the vault | Receivers, owners and beneficiaries pinned (INV-003, INV-022) | Every operator transaction | Drift | — | `@lidofinance/defi-tech` | Built for positions; orders specified |
 | No borrowing and no leverage | No borrow function in any role's permissions; INV-015 keeps the operator inside the launch scope | — | Drift | — | `@lidofinance/defi-tech` | Built; no test names borrowing |
@@ -65,7 +65,7 @@ Figures stay out of this page. They come from the attested computation once the 
 | Funding only to the vault, within monthly limits | Two registries that pay only the Asset Safe (INV-017) [s7] | The creation of every top-up motion, once the launch cap lifts | Out-of-cycle top-ups, top-ups above the posted shortfall, a top-up after an objected one | Pending motions | The committee; LDO holders can object | Specified |
 | Until the guard is live, the vault stays under a cap of one million dollars (OD-54, OD-55) | None: the registries allow more | None until the lift | A top-up motion whose enactment would take the vault above the cap, while its objection window is open; the vault's value above the cap at each fortnightly reading | The vault's value against the cap | The committee; LDO holders can object; the committee's forum post lifts the cap once the guard is set with its bypass mode off | Decided by EM on 2026-10-09; monitoring owed |
 | No top-up while the monthly report is late | None | — | A missing report flagged on day 8 | Report status | The committee | Specified |
-| Structural increases of exposure wait for a timelock (OD-45) | Motions with a 72-hour objection window, or DAO votes with the Dual Governance delay [s6] | The creation of every motion | Motion lifecycle | Pending motions and their deadlines | LDO holders; the Emergency Brakes multisig can pause Easy Track; the emergency Safe's switch freezes the vault's queued motions | Built on a mock Easy Track; specified |
+| Structural increases of exposure wait for a timelock (OD-45) | Motions with a 72-hour objection window, or DAO votes, which run as direct Voting items (OD-73) [s6] | The creation of every motion | Motion lifecycle | Pending motions and their deadlines | LDO holders; the Emergency Brakes multisig can pause Easy Track; the emergency Safe's switch freezes the vault's queued motions | Built on a mock Easy Track; specified |
 | A relaxation of a screening rule is controlled (OD-45) | — | The written list below; the vendor's own delay, if it has one | A rule change, where the vendor reports one | — | The committee and `@lidofinance/defi-tech`; the forum gets notice (OD-64) | Specified |
 | A motion adds only exits to the emergency role (OD-49) | The exit-governance role writes only under the `emergency` key, with no delegatecall, no allowance and no administrative target (INV-025) | The creation of every motion | Drift on the safety policy | — | `@lidofinance/defi-tech` writes the templates; LDO holders can object | Specified |
 | No delegatecall by motion, and no vault account as a motion's target | The governance roles' guards on the operator modifier and the orders modifier (OD-36, OD-38, OD-68; INV-028) | — | Drift | — | `@lidofinance/defi-tech` | Built for the Asset Safe, and the compiler refuses a policy without the guard; the orders modifier's governance role specified |

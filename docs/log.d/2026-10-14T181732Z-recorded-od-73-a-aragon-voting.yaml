@@ -1,0 +1,3 @@
+date: '2026-10-14'
+kind: Decision
+text: 'Recorded OD-73 A: Aragon Voting, not the Aragon Agent, owns the Asset Safe, the orders account and the first-loss Safe and administers the vault''s funding registries, so a DAO action on the vault is a direct Voting item without Dual Governance; recovered assets still go to the Agent. Closed OD-66: one Snapshot sets a standing framework with a checklist, each fund joins by one motion, and a third registry and top-up factory pay only the first-loss Safe. EM asked for an interview on OD-68.'

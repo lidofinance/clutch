@@ -11,24 +11,24 @@
     OD-36, OD-38, OD-49, INV-025, "lip:part-2"]
 
 - id: agent-sole-owner
-  assumption: "The Aragon Agent is the only owner of the Asset Safe, which has no guard, no module guard and no fallback handler."
+  assumption: "Aragon Voting is the only owner of the Asset Safe, which has no guard, no module guard and no fallback handler."
   kind: design
   why: "Custody stays with the DAO, and recovery never passes through vendor code. The vault also stays off the parts of Safe v1.5.0 that changed most."
   breaks: "A guard there would put recovery behind vendor code that only a DAO vote can remove. A fallback handler or a contract signature would open the least-proven paths of v1.5.0. The accepted cost: no ERC-721 or ERC-1155 safe transfers, and no EIP-1271 signing."
   watched_by: [INV-001, "test:test_asset_safe_shape"]
-  watch_note: "No test checks that the Agent never signs as a contract. The owner, guard, module and singleton alerts are not built."
+  watch_note: "No test checks that Aragon Voting never signs as a contract. The owner, guard, module and singleton alerts are not built."
   sources: ["ADR-005#d14", "ADR-005#d15", "ADR-005#context", "ADR-005#proposed-direction", "ADR-010#d18",
-    "ADR-010#proposed-direction", INV-001]
+    "ADR-010#proposed-direction", INV-001, OD-73, "ADR-005#d28"]
 
 - id: dao-sound
   assumption: "The DAO stays sound and able to act."
   kind: trust
   why: "The DAO is the final authority. Only the DAO replaces the policy, enables a disabled modifier, unpauses Easy Track, replaces the operator Safe or sets registry limits. Every restart after an emergency stop is a DAO vote (OD-59)."
-  breaks: "Nothing restarts after a stop: the operator stays switched off, or Easy Track stays paused. Every DAO action takes days, and a defect in the safety modifier leaves only the DAO path."
+  breaks: "Nothing restarts after a stop: the operator stays switched off, or Easy Track stays paused. Every DAO action takes about five days, and a defect in the safety modifier leaves only the DAO path."
   watched_by: ["test:test_D2_direct_DAO_path", "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts"]
-  watch_note: "The tests run on a mock Agent and a mock Easy Track. The DAO runbooks are listed but not written."
+  watch_note: "The tests run on a mock owner and a mock Easy Track. The DAO runbooks are listed but not written."
   sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59, "lip:part-6", "runbook:Restart after a stop",
-    "doc:docs/runbooks/index.md#runbooks"]
+    "doc:docs/runbooks/index.md#runbooks", OD-73, "ADR-005#d28"]
 
 - id: signers-good-faith
   assumption: "The committee's signers act in good faith."
@@ -268,7 +268,7 @@
   assumption: "The test harness behaves like the real system for what the tests claim."
   kind: design
   why: "The LIP's Implemented parts rest on fork tests. Nothing is deployed, and no audit is done."
-  breaks: "Green tests can miss real behaviour: the Dual Governance delay, the real Easy Track and the screening guard."
+  breaks: "Green tests can miss real behaviour: the real Aragon Voting path, the real Easy Track and the screening guard."
   watched_by: []
   watch_note: "The harness mocks the Aragon Agent, Easy Track and its executor, and uses plain stand-in addresses for the operator Safe and the emergency Safe."
   sources: ["doc:test/README.md#what-is-real-and-what-is-mocked", "lip:part-1"]

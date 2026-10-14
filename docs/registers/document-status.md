@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-14T17:58:49Z
+  at: 2026-10-14T18:16:52Z
 verified: []
 ---
 
@@ -33,7 +33,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-10-14 | none |
 | [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-10-12 | none |
 | [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-10-12 | none |
-| [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-10-05 | none |
+| [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-10-14 | none |
 | [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-10-14 | none |
 | [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-10-14 | none |
 | [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-10-14 | none |

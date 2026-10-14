@@ -12,7 +12,7 @@ intro: >-
 properties_sources: ["doc:docs/research/request-for-solution-2026-10-07.md#what-to-send-back"]
 properties:
   - name: DAO ownership
-    how: "The Aragon Agent is the only owner of every account that holds assets. The Asset Safe owns both of its modifiers, which are proxies of a locked mastercopy."
+    how: "Aragon Voting is the only owner of every account that holds assets, and recovered assets go to the Aragon Agent. The Asset Safe owns both of its modifiers, which are proxies of a locked mastercopy."
     sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#context", "ADR-005#proposed-direction", INV-001, INV-021, INV-023]
   - name: Default-deny permissions
     how: "Each role reaches only named targets and functions, and every receiver is pinned to the vault. A motion adds a permission only through a template fixed at audit time, and never grants delegatecall or administration."
@@ -30,9 +30,10 @@ sections:
     title: Accounts
     items:
       - asked: "An Asset Safe holds the assets and the positions. The Aragon Agent is its only owner, and the DAO cannot lose that ownership because a provider service is unavailable."
-        verdict: kept
-        clutch: "The Asset Safe is a Safe v1.5.0 with the Aragon Agent as its only owner, at a threshold of one, with no guard and no fallback handler. No vendor code is on the DAO's path."
-        sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#proposed-direction", INV-001, INV-010]
+        verdict: changed
+        clutch: "The Asset Safe is a Safe v1.5.0 with Aragon Voting as its only owner, at a threshold of one, with no guard and no fallback handler. No vendor code is on the DAO's path, and the DAO cannot lose that ownership because a provider service is unavailable."
+        why: "A vote on the vault then runs without Dual Governance, which protects stETH holders, not the treasury. Aragon Voting already pays from the treasury through Finance, so it gains no new power (OD-73)."
+        sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#d28", "ADR-005#proposed-direction", OD-73, INV-001, INV-010]
       - asked: "An Operator Safe at 4 of 7 makes routine transactions through a restricted role. It cannot change its own permissions, block their removal, borrow, or use an asset or a function that a motion or the DAO did not approve."
         verdict: kept
         clutch: "A new operator Safe, the committee's signers at 4 of 7, holds the operator role behind the screening vendor's guard. It cannot borrow, administer a modifier or a Safe, change its own permissions, or move assets out except into the orders account."
@@ -52,10 +53,10 @@ sections:
       - text: "Two modifiers on the Asset Safe: the operator modifier for the operator and governance roles, and the safety modifier for the emergency and exit-governance roles."
         why: "Recovery must keep working when the operator is switched off, and no screening may sit in its way."
         sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction"]
-      - text: "An orders account, owned by the Aragon Agent, places CoW orders for the operator and for recovery."
+      - text: "An orders account, owned by Aragon Voting, places CoW orders for the operator and for recovery."
         why: "Conditional orders need CoW's fallback handler, and the Asset Safe has none."
         sources: ["ADR-007#d17", OD-43, "lip:part-6"]
-      - text: "A first-loss Safe, owned by the Aragon Agent, holds the DAO's first-loss Earn shares. An Easy Track motion burns them, and one narrow role of the operator Safe redeems them to the Agent."
+      - text: "A first-loss Safe, owned by Aragon Voting, holds the DAO's first-loss Earn shares. An Easy Track motion burns them, and one narrow role of the operator Safe redeems them to the Agent."
         why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart, and the committee executes the first-loss terms without a DAO vote."
         sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", OD-42, OD-60, OD-67, INV-021]
     tech: "The Asset Safe, the operator Safe, the emergency Safe and the first-loss Safe run Safe v1.5.0. Each modifier is an EIP-1167 minimal proxy of the locked Roles mastercopy, deployed through the Zodiac module proxy factory, with the Asset Safe as its owner, avatar and target."
@@ -76,18 +77,19 @@ sections:
         clutch: "The Easy Track factories are the only new contracts. Lido builds them in phase 2, and an external audit covers them in phase 3. The governance role calls six administration functions of the Roles modifier, each one guarded."
         sources: ["ADR-006#d1", "ADR-006#proposed-direction", INV-004, "doc:ROADMAP.md#roadmap"]
       - asked: "The Aragon Agent stays the only owner of the Asset Safe. Easy Track gets no ownership and no unrestricted execution, and it executes only the permission changes that the Operator Safe proposes in motions."
-        verdict: kept
-        clutch: "Easy Track never receives authority over the Agent. On the Asset Safe, its executor holds only the governance and exit-governance roles. Outside it, the executor also holds the governance role on the orders modifier, which adds a token for TWAP and stop-loss orders (OD-68), and the burn role on the first-loss Safe, so every first-loss burn is a motion (OD-67). The operator Safe, as the trusted caller of every factory, creates every motion."
-        sources: ["ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-008#d23", "ADR-010#proposed-direction", OD-67,
-          INV-004]
+        verdict: changed
+        clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe (OD-73). Easy Track never receives authority over the vault's owner or the Agent. On the Asset Safe, its executor holds only the governance and exit-governance roles. Outside it, the executor also holds the governance role on the orders modifier, which adds a token for TWAP and stop-loss orders (OD-68), and the burn role on the first-loss Safe, so every first-loss burn is a motion (OD-67). The operator Safe, as the trusted caller of every factory, creates every motion."
+        why: "A vote on the vault then runs without Dual Governance, and Aragon Voting gains no power over the treasury that it lacks today (OD-73)."
+        sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-008#d23", "ADR-010#proposed-direction",
+          OD-67, OD-73, INV-004]
       - asked: "A direct DAO path can make every change that Easy Track can make."
         verdict: kept
-        clutch: "A DAO vote, through Dual Governance, can do everything on the owner path: replace the policy, change membership and apply any change without Easy Track. A fork test runs that path."
+        clutch: "A DAO vote, a direct Aragon Voting item, can do everything on the owner path: replace the policy, change membership and apply any change without Easy Track. A fork test runs that path."
         sources: ["ADR-005#context", "ADR-005#proposed-direction", "doc:docs/specs/lip-draft.md#test-cases"]
       - asked: "The complete initial configuration is in place before ownership passes to the DAO, so no separate setup-only vote is needed."
         verdict: changed
-        clutch: "Ownership never passes: the Asset Safe is created with the Aragon Agent as its only owner. The enabling vote applies the committed policy artifact, grants every role, sets up the orders account and the first-loss Safe, and registers the factories, so no setup-only vote is needed."
-        why: "The Aragon Agent is the only owner of the Asset Safe at all times, so only the DAO can configure the vault, and its enabling vote does it in one step."
+        clutch: "Ownership never passes: the Asset Safe is created with Aragon Voting as its only owner. The enabling vote applies the committed policy artifact, grants every role, sets up the orders account and the first-loss Safe, and registers the factories, so no setup-only vote is needed."
+        why: "Aragon Voting is the only owner of the Asset Safe at all times, so only the DAO can configure the vault, and its enabling vote does it in one step (OD-73)."
         sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", INV-001, "doc:script/DeployDryRun.s.sol",
           "doc:docs/specs/enabling-vote.md#the-vote"]
     added:
@@ -138,7 +140,7 @@ sections:
         sources: ["ADR-009#d4", "ADR-009#d9", "ADR-011#d1"]
       - asked: "The answer explains which limits hold before execution and which depend on reporting and remediation."
         verdict: kept
-        clutch: "No limit reverts on chain, because the policy cannot see value. Budgets per spender bound how much can move each month, a screening rule is requested that refuses an operator transaction that breaks a cap, and monitoring publishes the cap reading every two weeks. If a breach is not fixed within two working days and is larger at the next reading, the Emergency Brakes multisig switches the operator off."
+        clutch: "No limit reverts on chain, because the policy cannot see value. Budgets per spender bound how much can move each month, a screening rule is requested that refuses an operator transaction that breaks a cap, and monitoring publishes the cap reading every two weeks. If a breach is not fixed within two working days and is larger at the next reading, the emergency Safe switches the operator off (OD-58)."
         sources: ["ADR-009#d1", "ADR-009#d13", "ADR-009#d24", "ADR-009#d25", "ADR-009#proposed-direction", OD-29, OD-32,
           OD-39, "doc:docs/specs/control-matrix.md#the-matrix"]
       - asked: "The Operator Safe cannot add a target, a function, an asset or a wider parameter range without the governance process."
@@ -167,7 +169,7 @@ sections:
       - asked: "Recovered assets go only to the fixed DAO treasury address."
         verdict: changed
         clutch: "Recovered assets go to the Aragon Agent, or to the orders account, whose recovery orders buy USDC or USDT and pay only the Agent. A recovery order lives at most one day."
-        why: "The mandate lets the emergency path swap assets into stablecoins, and a swap needs an order. The Aragon Agent owns the orders account, and its recovery orders pay only the Agent."
+        why: "The mandate lets the emergency path swap assets into stablecoins, and a swap needs an order. Aragon Voting owns the orders account, and its recovery orders pay only the Aragon Agent."
         sources: ["ADR-007#d19", "ADR-007#d25", "ADR-007#proposed-direction", OD-26, OD-43, INV-002, INV-024]
       - asked: "The Operator Safe cannot veto an emergency action."
         verdict: kept

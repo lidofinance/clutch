@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 007: Swapping through an orders account"
-description: Every swap, routine or emergency, is a CoW order placed from a dedicated orders account — a Safe owned by the Aragon Agent, with CoW's fallback handler and one modifier of its own; the operator funds it under budgets and places market, limit, TWAP and stop-loss orders that pay the Asset Safe; the emergency role places recovery orders that pay the Aragon Agent into USDC or USDT, or sends assets to the Agent; the launch uses CoW only; Stonks 2.0 is no longer used; staking stays, and the withdrawal queue left the design on 2026-10-08.
+description: Every swap, routine or emergency, is a CoW order placed from a dedicated orders account — a Safe owned by Aragon Voting, with CoW's fallback handler and one modifier of its own; the operator funds it under budgets and places market, limit, TWAP and stop-loss orders that pay the Asset Safe; the emergency role places recovery orders that pay the Aragon Agent into USDC or USDT, or sends assets to the Agent; the launch uses CoW only; Stonks 2.0 is no longer used; staking stays, and the withdrawal queue left the design on 2026-10-08.
 tags: [swaps, cow, orders, emergency, rebalancing]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T17:57:05Z
+  at: 2026-10-14T18:12:36Z
 verified: []
 sources:
   - id: s1
@@ -143,11 +143,13 @@ EM decided on 2026-10-14, closing OD-68 [s1]:
 
 Decision 31 replaces "no governance role" in decisions 28 and 30, and, for TWAP and stop-loss orders, the DAO vote of decision 21. A token for market, limit and recovery orders still needs a DAO vote (decision 21), because their permission is a delegatecall (OD-36). A fork test comes before decision 31 is relied on.
 
+Since OD-73, Aragon Voting owns the orders account ([ADR 005](/adr/005-account-graph-and-roles.md) decision 28).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as text.
 
-- **The orders account.** A new Safe, owned by the Aragon Agent at one of one. Its fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it. It has one modifier, the orders modifier, with the `operator` and `emergency` roles and no `governance` role (decisions 28 and 30). Its owner, avatar and target is the orders account. The enabling vote sets it up.
+- **The orders account.** A new Safe, owned by Aragon Voting at one of one ([ADR 005](/adr/005-account-graph-and-roles.md) decision 28). Its fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it. It has one modifier, the orders modifier, with the `operator` and `emergency` roles and no `governance` role (decisions 28 and 30). Its owner, avatar and target is the orders account. The enabling vote sets it up.
 - **Operator, on the Asset Safe.** A transfer of a listed token to the orders account, pinned to it, spends that token's orders budget. The budgets are figures from the attested computation.
 - **Operator, on the orders account.**
   - A delegatecall to the order signer: sell and buy tokens from the lists, the Asset Safe as receiver, an order life of at most 90 days (decision 29), and a fee bound. The order signer refuses an order whose `validTo` lies beyond its `validDuration`. `unsignOrder` cancels.

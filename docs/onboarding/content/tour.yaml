@@ -1,11 +1,11 @@
 # The guided tour: ten short scenes on the system map, for any reader.
 - title: The vault, and who owns it
-  text: "Clutch puts a bounded part of the DAO treasury to work in approved protocols. The assets sit in one new [[Safe]], the **Asset Safe**.\n\nThe Asset Safe has exactly one owner: the [[Aragon Agent]], the DAO's treasury. The DAO keeps custody. In an emergency, assets go back to the Agent, a fixed address.\n\nThe Agent also owns two smaller Safes: the [[orders account]], which places swap orders, and the [[first-loss Safe]], which holds the DAO's first-loss shares apart."
-  tech: "The Asset Safe is a Safe v1.5.0 proxy. The Aragon Agent is its only owner, at a threshold of one, and it has no guard and no fallback handler. The Agent approves each transaction by `approveHash`, or sends it itself (INV-001)."
+  text: "Clutch puts a bounded part of the DAO treasury to work in approved protocols. The assets sit in one new [[Safe]], the **Asset Safe**.\n\nThe Asset Safe has exactly one owner: Aragon Voting, the DAO's vote. The DAO keeps custody. In an emergency, assets go back to the [[Aragon Agent]], the DAO's treasury, a fixed address.\n\nAragon Voting also owns two smaller Safes: the [[orders account]], which places swap orders, and the [[first-loss Safe]], which holds the DAO's first-loss shares apart."
+  tech: "The Asset Safe is a Safe v1.5.0 proxy. Aragon Voting is its only owner, at a threshold of one, and it has no guard and no fallback handler. Voting approves each transaction by `approveHash`, or sends it itself, without Dual Governance (INV-001, OD-73)."
   nodes: [dao, asset-safe, orders, first-loss]
   edges: [own]
   sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction",
-    "ADR-007#d17", "ADR-008#d19", INV-001, "doc:docs/product/brief.md#the-system"]
+    "ADR-007#d17", "ADR-008#d19", INV-001, "doc:docs/product/brief.md#the-system", OD-73]
 
 - title: Nobody touches the vault directly
   text: "The Asset Safe switches on two [[Roles modifier|Roles modifiers]] from Zodiac. Each holder of a [[role]] calls a modifier. The modifier checks the call against the policy and, if it is allowed, runs it as the Asset Safe.\n\nThe policy is [[default-deny]]: a call that the policy does not list is refused."

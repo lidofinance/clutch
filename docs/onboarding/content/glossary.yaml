@@ -13,8 +13,8 @@
   sources: ["ADR-009#d13", "ADR-009#d14", INV-008]
 
 - term: Aragon Agent
-  plain: "The DAO's treasury contract and its final authority. It executes what DAO votes decide, and it is the only owner of the Asset Safe, the orders account and the first-loss Safe."
-  sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction"]
+  plain: "The DAO's treasury contract. Recovered assets come back to it, and Aragon Finance pays the vault's funding out of it. Aragon Voting, not the Agent, owns the vault's Safes."
+  sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#d28", "ADR-005#proposed-direction", OD-73]
 
 - term: Artifact
   plain: "The committed JSON file that reviewers approve. It holds the modifier calls in order, the expected condition tree for every role, target and function, and the budget keys."
@@ -80,8 +80,8 @@
   sources: ["doc:docs/specs/specification-policy.md#runbooks"]
 
 - term: Dual Governance
-  plain: "The layer that a DAO vote passes through before the Aragon Agent executes it. It adds a delay, so every DAO action takes days."
-  sources: ["ADR-005#context"]
+  plain: "The layer that a DAO vote passes through before the Aragon Agent executes it. It adds a delay. The vault does not use it: Aragon Voting owns the vault's Safes, so a vote on the vault runs directly."
+  sources: ["ADR-005#context", "ADR-005#d28", OD-73]
 
 - term: Easy Track
   plain: "Lido's optimistic governance. A proposal passes after a fixed window unless LDO holders object above a threshold of 0.5% of LDO."
@@ -110,7 +110,7 @@
     OD-67]
 
 - term: First-loss Safe
-  plain: "A Safe that the Aragon Agent owns, which holds only the first-loss shares. Its one modifier carries two narrow roles: Easy Track's, which burns the shares only by enacted motion, and the operator Safe's, which redeems them to the Aragon Agent."
+  plain: "A Safe that Aragon Voting owns, which holds only the first-loss shares. Its one modifier carries two narrow roles: Easy Track's, which burns the shares only by enacted motion, and the operator Safe's, which redeems them to the Aragon Agent."
   sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", OD-42, OD-60, OD-67, INV-021]
 
 - term: Fortnightly snapshot
@@ -170,7 +170,7 @@
   sources: ["doc:docs/registers/open-decisions.md#open-decisions"]
 
 - term: Orders account
-  plain: "A Safe that the Aragon Agent owns, with CoW's fallback handler and one modifier of its own. The roles place CoW orders from it. It holds only tokens in transit."
+  plain: "A Safe that Aragon Voting owns, with CoW's fallback handler and one modifier of its own. The roles place CoW orders from it. It holds only tokens in transit."
   sources: ["ADR-007#d17", "ADR-007#d28", OD-43, OD-57, INV-023]
 
 - term: Permission
