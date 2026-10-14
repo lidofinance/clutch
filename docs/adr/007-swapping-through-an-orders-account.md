@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T16:49:22Z
+  at: 2026-10-14T17:57:05Z
 verified: []
 sources:
   - id: s1
@@ -137,6 +137,12 @@ EM decided on 2026-10-13, closing OD-58 [s1]:
 
 30. The orders modifier carries the operator and emergency roles and no governance role. The technical role goes, and the emergency role's revoke stops the operator on the orders account ([ADR 005](/adr/005-account-graph-and-roles.md) decision 25). This replaces the technical role and the membership removal of decision 28.
 
+EM decided on 2026-10-14, closing OD-68 [s1]:
+
+31. The orders modifier gets a governance role, held by the Easy Track executor, without delegatecall. A motion adds a token for ComposableCoW's TWAP and stop-loss orders, which are plain calls.
+
+Decision 31 replaces "no governance role" in decisions 28 and 30, and, for TWAP and stop-loss orders, the DAO vote of decision 21. A token for market, limit and recovery orders still needs a DAO vote (decision 21), because their permission is a delegatecall (OD-36). A fork test comes before decision 31 is relied on.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as text.
@@ -153,7 +159,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - **Stopping the operator.** The emergency role revokes the operator's targets and functions on the orders modifier (decision 30). Every operator permission there lives under the `operator` key, so the revoke reaches all of them. A revoke does not cancel a resting order, because a fill does not consult the policy. So the stop also cancels the operator's open orders. A fork probe showed the emergency role's revoke on a stand-in modifier on 2026-10-08.
 - **Re-affirmation.** An alert at 30 days asks the committee to confirm or cancel each open order, and the monthly report lists every open order with its limit, its age, its distance to the market price and the idle balance behind it (decision 29). Neither has an on-chain effect. A policy change that removes a token or tightens a bound also cancels the affected open orders, because a fill does not consult the policy.
 - **Relayer approvals.** The enabling vote has the orders account approve CoW's vault relayer for the maximum amount of every token on the lists, the recovery tokens included. No role can raise an approval on the orders account, so a recovery order settles even when the operator is revoked. If the emergency role sets an approval to zero, every order in that token stops, recovery orders included, until a DAO vote sets it again; sending the token to the Agent stays open.
-- **Governance role.** The orders account has none (decision 28). No motion writes there: a DAO vote adds a token (decision 21) and grants the order signer's delegatecall (OD-36). The Asset Safe's governance role refuses the orders account and its modifier as targets (OD-38).
+- **Governance role.** The Easy Track executor holds the orders modifier's governance role (decision 31). It writes the operator's permission under the `operator` key and the emergency role's exits under the `emergency` key, with the execution options None or Send. It never writes the order signer's permission or a delegatecall, holds no membership setter and refuses the orders account and its modifier as targets. A token template writes, for one new token: the operator's TWAP and stop-loss permission with the token in its lists, as a complete tree; the emergency role's cancel and its transfer of the token to the Aragon Agent or the Asset Safe; and, through the Asset Safe's governance role, the operator's transfer of the token into the orders account under a spare key ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 39). Open: how the new token gets its relayer approval, which no role can raise today; one way is a script that grants a one-time permission, approves and revokes the permission in the same motion. The Asset Safe's governance role still refuses the orders account and its modifier as targets (OD-38).
 - **Tokens.** The operator's lists start with decision 22's set. Recovery sells every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues. It buys USDC, or USDT as the second destination. The enabling vote sets both lists.
 - **Routers.** None at launch. If the screening vendor confirms a check of a swap's minimum output against a market price, routes to Uniswap and 1inch from the orders account follow, with the Asset Safe as recipient.
 - **Price protection.** An order's own terms, CoW's solver competition, the screening of every operator transaction, the budgets on the operator's transfers into the orders account, and monitoring of each fill against a market price. Nothing on chain bounds the price, but CoW's competition and EBBO rule hold a fill to the on-chain market (decision 26). The emergency role's orders have neither screening nor a budget, so paging and the limit alert cover them.
@@ -184,7 +190,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - A recovery order names its own limit, so it can fill in a depeg at a price that the emergency signers accept. The service level stays the time to initiate, not the time to fill.
 - The vault no longer depends on Chainlink's Feed Registry, the shared Stonks router, or the committee's Safe as the router's manager. The router's settings stop being an untimelocked lever on the vault (OD-45).
 - Recovery can sell wstETH, WETH and sUSDS directly. The operator buys and sells WETH in CoW orders in minutes. Staking stays; unstaking goes through CoW orders only (decision 27).
-- A new token waits for a DAO vote. The launch lists cover the mandate's assets, so this should be rare. OD-68 asks whether a motion can add one.
+- A new token joins by motion for TWAP and stop-loss orders (decision 31). For market, limit and recovery orders it still waits for a DAO vote; the launch lists cover the mandate's assets, so this should be rare.
 - An order can rest for up to 90 days, so a larger price move can happen while it rests. A resting order is a standing authorisation: it keeps acting after its context changes. The 30-day alert and the monthly report ask the committee to confirm it. The tokens behind a resting order sit idle in the orders account.
 - The new components are one Safe and one modifier, both instances of existing code (decision 28). The delegatecall to the order signer comes from the enabling vote, because a motion cannot grant one (OD-36).
 - The order signer has no audit that this repository found. It is 40 lines long, and Lido reviews it in phase 3.
@@ -196,6 +202,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - INV-002, INV-008, INV-013, INV-014, INV-022, INV-023 and INV-024 in the [invariants](/specs/invariants.md).
 - Kit tests that stand: the operator cannot pre-sign an order or approve the CoW relayer from the Asset Safe [s5]; staking works with the Asset Safe as owner [s7], and the withdrawal queue is refused to both roles (`test_D3_withdrawal_queue_is_out_of_scope`); WETH's unwrap pays the Asset Safe [s8].
 - Fork tests owed: the order signer by delegatecall from a Safe v1.5.0 through a roles modifier, with the receiver pinned; a TWAP and a stop-loss order from a Safe v1.5.0 with CoW's fallback handler; the conditions that pin the receiver and the oracles inside ComposableCoW's encoded order data; a refusal of every other receiver; the life bounds of decisions 25 and 29, including a refusal of a TWAP order outside both shapes; the emergency role's cancel, sweep and recovery order, settled with the relayer approval that the vote sets; and the emergency role's revoke on the orders modifier, with recovery still working (decision 30).
+- Fork test owed for decision 31: a motion adds a token through the orders modifier's governance role, and the operator then places a TWAP order and a stop-loss order in it; the role cannot write the order signer's permission or a delegatecall.
 
 ## Reversal conditions
 

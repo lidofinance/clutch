@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T16:47:06Z
+  at: 2026-10-14T17:58:49Z
 verified: []
 sources:
   - id: s1
@@ -44,7 +44,7 @@ Clutch launches with one Aragon vote, the enabling vote. This page lists what th
 
 - **Snapshots.** The mandate, with its figures. The emergency Safe's fifth signer (OD-58, OD-65) [s1].
 - **Figures.** An attested computation sets every budget and its key's ceiling, the orders budgets, the funding limits, the fixed approval ceilings and the stETH limit at the pinned price [s5][s6].
-- **Decisions.** OD-66 closes, because its roles and factories ship in this vote. OD-68 to OD-72 close, because each one changes what the vote holds [s1].
+- **Decisions.** OD-66's open parts close, because the fund roles and factories ship in this vote. OD-73 decides who owns the vault's Safes, and so whether the Agent items below pass Dual Governance [s1].
 - **Deployments.** They need no authority. Clutch's script creates the Asset Safe, the orders account and the first-loss Safe with the Aragon Agent as only owner, and the operator Safe and the emergency Safe with their signers, on Safe v1.5.0; the orders account runs it only if its fork test passes. It deploys the four Roles modifiers as minimal proxies through the Zodiac module proxy factory, and the Easy Track factories with the operator Safe as their trusted caller. Easy Track's standard builder deploys the two funding registries and sets each limit and period [s2][s3][s5][s8].
 - **Checks.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 behind a Roles modifier [s4]. The external audit. The check of Safe's releases, advisories and bug-bounty records [s7]. The policy compiled for mainnet from the reviewed constellation.
 
@@ -54,16 +54,15 @@ Clutch launches with one Aragon vote, the enabling vote. This page lists what th
 
 Aragon Voting holds Easy Track's admin role and administers the shared token list [s8][s5].
 
-- Register every Clutch factory in Easy Track: the five template factories, the budget factory, the first-loss burn factory and the two top-up factories [s3][s5].
+- Register every Clutch factory in Easy Track: the five onboarding templates, the removal template, the orders token template, a claim template if the catalogue check finds a launch protocol that pays rewards, the budget factory, the first-loss burn factory, the two insurance-fund templates and the two top-up factories [s3][s4][s5].
 - Rewrite the shared payment permission of the Easy Track executor to add USDS, with a ceiling of 2,000,000 per payment (OD-11, OD-24) [s5].
 - Add USDS to the shared stablecoin token list [s5].
 
 ### Items that the Aragon Agent executes, through Dual Governance
 
-- **The Asset Safe.** Enable the operator modifier and the safety modifier, and apply the compiled policy on both: every permission, and every budget key with its ceiling, the Lido Lend key included. Grant `operator` to the operator Safe, `governance` and `exit-governance` to the Easy Track executor, and `emergency`, with the switch, to the emergency Safe [s2][s3][s6].
-- **The orders account.** Set CoW's fallback handler, and ComposableCoW as the verifier of CoW's settlement domain. Enable the orders modifier and apply its policy: the operator's orders on the launch lists, and the emergency role's recovery orders, transfers and cancels. Grant `operator` to the operator Safe and `emergency` to the emergency Safe. Approve CoW's vault relayer for every listed token, the recovery tokens included [s4].
-- **The first-loss Safe.** Enable the first-loss modifier and apply its policy. Grant `first-loss` to the operator Safe and `first-loss-burn` to the Easy Track executor [s5].
-- **OD-66.** If OD-66 closes as recommended: the roles and the factories for new insurance funds [s1].
+- **The Asset Safe.** Enable the operator modifier and the safety modifier, and apply the compiled policy on both: every permission, and every budget key with its ceiling, the Lido Lend key and the spare keys of each token included (OD-69). Grant `operator` to the operator Safe, `governance` and `exit-governance` to the Easy Track executor, and `emergency`, with the switch, to the emergency Safe [s2][s3][s6].
+- **The orders account.** Set CoW's fallback handler, and ComposableCoW as the verifier of CoW's settlement domain. Enable the orders modifier and apply its policy: the operator's orders on the launch lists, and the emergency role's recovery orders, transfers and cancels. Grant `operator` to the operator Safe, `emergency` to the emergency Safe, and `governance` to the Easy Track executor (OD-68). Approve CoW's vault relayer for every listed token, the recovery tokens included [s4].
+- **The first-loss Safe.** Enable the first-loss modifier and apply its policy. Grant `first-loss` to the operator Safe and `first-loss-burn` to the Easy Track executor, and the roles for insurance funds: a governance role that adds a fund, and an executor role for burns and payouts [s5].
 
 ### Order
 
@@ -81,12 +80,10 @@ The Voting items run when the vote executes. The Agent items run after the Dual 
 
 | Kind | What | Where |
 |---|---|---|
-| Open | A new token, or any other change, on the orders account | OD-68 |
-| Open | A budget key for a spender that the vote did not know | OD-69 |
-| Open | Granting again what a routine removal took | OD-70 |
-| Open | A new TM Floor Value, and a re-pinned stETH limit | OD-71 |
-| Open | A shape outside the five templates, and reward claims | OD-72 |
+| Still a vote | A token for market, limit or recovery orders | [s4] |
+| By design | A new TM Floor Value, and a re-pin of the stETH limit if wanted | [s5] |
 | By design | Role membership; replacing a Safe, a modifier or a factory; delegatecall for the operator; another module or a Safe version change; the shared payment permission or token list; ending the first-loss terms | [s2][s3][s5] |
-| After an emergency | The restart, which also grants the orders account's permissions and relayer approvals again; an Easy Track unpause | OD-59 [s2] |
+| After an emergency | The restart, which also grants the orders account's permissions and relayer approvals again; an Easy Track unpause; a permission that an emergency revoke took and that no template writes | OD-59 [s2][s3] |
+| Open | Who owns the vault's Safes. If Aragon Voting does, each vote above is a direct Voting item, without Dual Governance | OD-73 |
 
-The review behind this table is in the research note [s8].
+Motions cover the rest, since EM's decisions of 2026-10-14 (OD-68 to OD-72): a token for TWAP and stop-loss orders, a budget for a new spender from a spare key, a routine removal, and a claim template where one is needed [s1]. The review behind this table is in the research note [s8].

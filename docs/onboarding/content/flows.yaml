@@ -150,7 +150,7 @@ flows:
         text: "The operator Safe creates the motion on the template factory, with typed values only: a target, an asset and a budget key. The screening guard checks this transaction."
         nodes: [operator-safe, screening, easytrack]
         edges: [motions, screen]
-        check: "The budget key must already be in the policy. A new spender's key needs a DAO vote until OD-69 closes, and a token new to the orders account needs one too (OD-68)."
+        check: "The budget key must already be in the policy: a new spender takes one of the spare keys that the enabling vote holds (OD-69). A token new to the orders account joins by its own motion, for TWAP and stop-loss orders (OD-68)."
       - who: "LDO holders"
         text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails. This window is the timelock for every structural increase of exposure. The Emergency Brakes multisig can also pause Easy Track."
         nodes: [dao, easytrack, brakes]
@@ -194,7 +194,7 @@ flows:
       - who: "Committee"
         text: "The attested computation derives the key's new budget, under that key's ceiling. The forum post names the event."
         nodes: [committee, asset-safe]
-        check: "A motion sets only a key that the policy already holds, so a new spender's key needs a DAO vote until OD-69 closes. A new TM Floor Value also needs a DAO vote for the funding limits and the fixed approval ceilings (OD-71)."
+        check: "A motion sets only a key that the policy already holds, so a new spender takes a spare key (OD-69). A new TM Floor Value also needs a DAO vote for the funding limits and the fixed approval ceilings, by design (OD-71)."
       - who: "Operator Safe"
         text: "The operator Safe creates a motion on the budget factory. The guard screens it, once the guard is set (OD-54)."
         nodes: [operator-safe, screening, easytrack]
@@ -732,7 +732,7 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, operator-safe, emergency-safe]
       - who: "LDO holders"
-        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list. Aragon Voting runs the Easy Track and payment items when the vote executes; the Agent's items run after the Dual Governance timelock."
+        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role, the orders modifier's governance role, the two first-loss roles and the insurance-fund roles included, sets up the orders account with its order lists and relayer approvals, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list. Aragon Voting runs the Easy Track and payment items when the vote executes; the Agent's items run after the Dual Governance timelock."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
         edges: [own, own-op, own-sf]
       - who: "Growth Committee, then the operator Safe"

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T16:49:22Z
+  at: 2026-10-14T17:58:04Z
 verified: []
 sources:
   - id: s1
@@ -46,7 +46,7 @@ sources:
 | Easy Track objection threshold | 0.5 percent of LDO, 50 basis points | Read [s2] | — |
 | Trusted caller of every factory | the operator Safe | EM decision of 2026-10-02 [s1] | [ADR 006](/adr/006-governance-through-easy-track-factories.md) |
 | Swap venue | CoW orders from the orders account: market, limit, TWAP and stop-loss; no Stonks 2.0 instance | EM decision of 2026-10-06 (OD-43) [s1], replacing Stonks 2.0 (decided 2026-09-22, OD-05, OD-20) | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Orders account | a Safe owned by the Aragon Agent at one of one, with CoW's fallback handler and one modifier of its own, carrying the operator and emergency roles and no governance role | EM decisions of 2026-10-06 (OD-43), 2026-10-09 (OD-57) and 2026-10-13 (OD-58) [s1] | ADR 007, [ADR 005](/adr/005-account-graph-and-roles.md) |
+| Orders account | a Safe owned by the Aragon Agent at one of one, with CoW's fallback handler and one modifier of its own, carrying the operator and emergency roles, and a governance role for the Easy Track executor that adds a token for TWAP and stop-loss orders | EM decisions of 2026-10-06 (OD-43), 2026-10-09 (OD-57), 2026-10-13 (OD-58) and 2026-10-14 (OD-68) [s1] | ADR 007, [ADR 005](/adr/005-account-graph-and-roles.md) |
 | Order receivers | the Asset Safe for the operator's orders; the Aragon Agent for the emergency role's orders | EM decision of 2026-10-06 (OD-43) [s1] | ADR 007 |
 | Router swaps (Uniswap, 1inch) | none at launch; only after the screening vendor can bound a swap's minimum output | EM decision of 2026-10-06 (OD-43) [s1] | ADR 007 |
 | Orders budgets | one budget key per listed token on transfers into the orders account; figures not in this repository | EM decision of 2026-10-06 (OD-43): budgets [s1]; one key per token is the agent's proposal; figures by attested computation | ADR 007, [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
@@ -54,7 +54,8 @@ sources:
 | Lido Lend contract | a separate Morpho-Blue-compatible deployment; its address and its emergency exit enter with the onboarding motion | EM statement of 2026-10-06 (OD-49) [s1] | ADR 011 |
 | Recovery order price | no on-chain floor; CoW's competition and EBBO rule hold a fill to the on-chain market; a high-severity page on every emergency swap and an alert on a limit far below a market price | EM decision of 2026-10-06 (OD-48) [s1] | ADR 007 |
 | Maximum order life | 90 days for every operator order: market and limit orders through the order signer's `validDuration`; a TWAP order starts at its creation with at most 90 daily or 12 weekly parts; a stop-loss expiry at most 90 days ahead, by a requested screening rule; 1 day for a recovery order; an alert at 30 days asks the committee to confirm or cancel | EM decisions of 2026-10-06 (OD-47) and 2026-10-13 (OD-61) [s1]; the part counts and the 30-day request are the agent's proposal | ADR 007 |
-| Order lists and relayer approvals | a DAO vote sets the lists, and adds a token with its relayer approval, emergency transfer and recovery orders; no motion adds a token, and no role can raise an approval on the orders account | EM decision of 2026-10-06 (OD-46) [s1]; the approval rule is the agent's proposal | ADR 006, ADR 007 |
+| Order lists and relayer approvals | the enabling vote sets the lists; a motion adds a token for TWAP and stop-loss orders; a token for market, limit and recovery orders, with its relayer approval, emergency transfer and recovery orders, needs a DAO vote; no role can raise an approval on the orders account, and how a token added by motion gets its relayer approval is open | EM decisions of 2026-10-06 (OD-46) and 2026-10-14 (OD-68) [s1]; the approval rule is the agent's proposal | ADR 006, ADR 007 |
+| Spare budget keys | spare keys for each token, with ceilings, in the enabling vote; two for each token on the launch lists is the agent's proposal | EM decision of 2026-10-14 (OD-69) [s1] | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | DAI–USDS conversion | Sky's DaiUsds `0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`; the operator converts both ways, one to one; the receiver is pinned to the Asset Safe; DAI stays out of the operator's order tokens | EM decision of 2026-10-05 [s1]; read [s6] | [ADR 011](/adr/011-launch-scope.md) |
 | Operator's order tokens | stETH, wstETH, WETH, USDC, USDT, USDS, LDO; DAI and sUSDS stay out | EM decisions of 2026-09-22, 2026-10-05 and 2026-10-06 (the rebalancing set, OD-22, OD-46) [s1] | ADR 007, [ADR 011](/adr/011-launch-scope.md) |
 | Recovery buy tokens | USDC, or USDT as the second destination | EM decisions of 2026-09-22, 2026-10-05 and 2026-10-06 (OD-26, OD-43) [s1]; the sell list is an agent proposal in ADR 007 | ADR 007 |
@@ -63,7 +64,7 @@ sources:
 | Funding registries | two: stablecoins and stETH; the Asset Safe is the only recipient of each | EM decision of 2026-10-02 [s1] | ADR 008 |
 | Funding period | one calendar month | EM decision of 2026-10-02 [s1] | ADR 008 |
 | Launch cap without the guard | one million dollars on the Asset Safe and the orders account, at the report's price rule; the first-loss Safe is outside; held by procedure; a forum post lifts it once the guard is set on the operator Safe with its bypass mode off | EM decisions of 2026-10-08 and 2026-10-09 (OD-54, OD-55) [s1] | [ADR 010](/adr/010-pre-execution-screening.md), ADR 008 |
-| Funding limit per period | one TM Floor Value in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared; the figures are not in this repository | EM decision of 2026-10-02 [s1]; figures by attested computation, entering when the mandate is approved | ADR 008 |
+| Funding limit per period | one TM Floor Value in each registry; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared; the figures are not in this repository; a new TM Floor Value is a DAO vote by design, and a re-pin of the stETH limit is optional (OD-71) | EM decision of 2026-10-02 [s1]; figures by attested computation, entering when the mandate is approved | ADR 008 |
 | Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS | EM decision of 2026-10-05 [s1] | ADR 008 |
 | Funding assets | USDC, USDT, DAI, USDS, sUSDS, stETH; not ETH | EM decision of 2026-10-05 [s1] | ADR 008 |
 | First-loss Safe | a Safe owned by the Aragon Agent at one of one, with no guard or fallback handler, and one modifier with two roles: `first-loss` for the operator Safe and `first-loss-burn` for the Easy Track executor; it holds only the first-loss shares | EM decisions of 2026-10-06 (OD-42) and 2026-10-13 (OD-60, OD-67) [s1] | ADR 008, [ADR 005](/adr/005-account-graph-and-roles.md) |

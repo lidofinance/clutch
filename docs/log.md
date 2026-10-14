@@ -2,6 +2,7 @@
 
 ## 2026-10-14
 
+* **Decision**: Recorded EM's decisions of 2026-10-14. OD-68 C: the orders modifier gets a governance role without delegatecall, and a motion adds a token for TWAP and stop-loss orders. OD-69 A: the enabling vote holds spare budget keys for each token. OD-70 B: routine removals run as removal-template motions; the revoke stays for emergencies. OD-71 A: a new TM Floor Value is a vote by design, and a stETH re-pin is optional. OD-72: the template catalogue is checked before the vote, with a claim template only if needed. OD-66 in part: a Snapshot then a motion per fund, payouts by motion, fund roles with the launch, exits to the Agent. OD-73, owner of the vault's Safes (Agent or Voting), opened.
 * **Update**: Reviewed whether Clutch launches with one Aragon vote and then runs on Easy Track alone. Launch: yes, by design; a new spec page lists what the enabling vote holds, Voting items and Agent items. After launch: five gaps, opened as OD-68 to OD-72. Fixed the restart, which missed the orders account, and stale text in ADR 005, ADR 011, INV-023, the roadmap, the parameters register and the guide.
 
 ## 2026-10-13

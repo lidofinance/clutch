@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T17:07:39Z
+  at: 2026-10-14T17:57:05Z
 verified: []
 sources:
   - id: s1
@@ -113,6 +113,16 @@ EM decided on 2026-10-13, closing OD-67 [s1]:
 
 Decision 23 replaces the burn in decision 21. The redemption and the claim stay as decision 21 says.
 
+EM decided on 2026-10-14, closing OD-71 and part of OD-66 [s1]:
+
+24. A new TM Floor Value is a mandate change, so its DAO vote is by design. A shortfall in stETH is topped up in stablecoins, so a re-pin of the stETH limit is optional.
+25. A new insurance fund is approved by a Snapshot and then one Easy Track motion.
+26. Payouts from an insurance fund run as Easy Track motions.
+27. The roles and the factories for insurance funds ship with the launch.
+28. An exit from an insurance fund stays with the operator Safe's direct role, with the proceeds paid to the Aragon Agent.
+
+Decision 24 makes the re-pin of decision 8 optional. Decisions 25 to 28 close part of OD-66. What each fund's Snapshot must state, and how a fund's capital reaches the first-loss Safe, stay open.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
@@ -189,4 +199,4 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 ## Open questions
 
 - Twyne: who holds the position, and in what form. The mandate's drafters owe the evidence (decision 17).
-- OD-66: how the vault adds and uses insurance funds for products other than Lido Earn. EM agreed on two templates, burnable shares and a fixed payout address. Every burn runs as an Easy Track motion (decision 23, OD-67), and EM prefers the same for payouts. Decisions 21 to 23 cover the earnETH and earnUSD shares only until OD-66 closes.
+- OD-66: what each insurance fund's Snapshot must state, and how a fund's capital reaches the first-loss Safe. Decisions 25 to 28 settle the rest: two templates, burnable shares and a fixed payout address, burns and payouts as Easy Track motions, and the fund roles and factories with the launch. Decisions 21 to 23 cover the earnETH and earnUSD shares only until OD-66 closes.

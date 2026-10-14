@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: One Aragon vote to launch, Easy Track afterwards, 2026-10-14
-description: The evidence behind OD-68 to OD-72 — whether Clutch launches with one Aragon vote and then runs without another in non-emergency operation; how one vote carries Voting items and Agent items; the five places where routine operation still needs a vote; the votes that stay by design; and who holds Easy Track's admin role, read on chain.
+description: The evidence behind OD-68 to OD-73 — whether Clutch launches with one Aragon vote and then runs without another in non-emergency operation; the treasury's payment path outside Dual Governance; how one vote carries Voting items and Agent items; the five places where routine operation still needs a vote; the votes that stay by design; and who holds Easy Track's admin role, read on chain.
 tags: [governance, easy-track, enabling-vote, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-14
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T16:47:06Z
+  at: 2026-10-14T17:58:49Z
 verified: []
 sources:
   - id: s1
@@ -51,6 +51,9 @@ sources:
   - id: s13
     resource: "https://etherscan.io/address/0xF0211b7660680B49De1A7E9f25C65660F0a13Fea"
     title: Easy Track — its role holders, read at block 26192012 with the commands below
+  - id: s14
+    resource: "https://etherscan.io/address/0x9895F0F17cc1d1891b6f18ee0b483B6f221b37Bb"
+    title: Lido's Aragon ACL — Voting's payment permission on Finance and the Aragon Agent's roles, read at block 26192300 with the commands below
 ---
 
 # One Aragon vote to launch, Easy Track afterwards
@@ -99,6 +102,18 @@ These change who holds power, or the DAO's own bounds [s2][s3][s5][s11]:
 - Stale text: ADR 005 gave the orders account a governance role; ADR 011 said that no role reaches the first-loss Safe; INV-023 named two modifiers on the orders account; the roadmap and the parameters register named only the `first-loss` role; the guide's summaries of the vote left out the shared token list.
 - No page said how a template adds a spender to a token's `approve` without dropping the others, although a write replaces the whole tree [s3]. ADR 006 now states the requirement.
 
+## Decisions of 2026-10-14, and OD-73
+
+EM decided OD-68 to OD-72 the same day [s1]. A motion adds a token for TWAP and stop-loss orders (OD-68, C). The enabling vote holds spare budget keys (OD-69, A). A routine removal is a motion of a removal template (OD-70, B). A new TM Floor Value is a vote by design, and a re-pin of the stETH limit is optional (OD-71, A). The template catalogue is checked before the vote, with a claim template only if a launch protocol pays rewards (OD-72).
+
+OD-73 asks whether Aragon Voting, not the Aragon Agent, owns the vault's Safes, so that no Clutch action passes Dual Governance. The treasury already pays out without Dual Governance [s14]:
+
+- Aragon Voting holds Finance's payment permission with no parameters, and manages it.
+- Finance pays out of the Aragon Agent, and holds the Agent's transfer role, which Aragon Voting manages.
+- Only Dual Governance's admin executor holds the Agent's `RUN_SCRIPT_ROLE` and `EXECUTE_ROLE`, and the Agent manages both.
+
+So one Voting vote can already pay any token out of the treasury. If Aragon Voting owns the vault's Safes, it gains no power that it lacks today.
+
 ## How to reproduce
 
 Set `ETH_RPC_URL` in your shell. Never write the URL into a file.
@@ -111,4 +126,15 @@ ADMIN=0x0000000000000000000000000000000000000000000000000000000000000000
 cast call $ET 'hasRole(bytes32,address)(bool)' $ADMIN $VOTING --block 26192012   # true
 cast call $ET 'hasRole(bytes32,address)(bool)' $ADMIN $AGENT --block 26192012    # false
 cast call $ET 'evmScriptExecutor()(address)' --block 26192012                    # 0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977
+
+ACL=0x9895F0F17cc1d1891b6f18ee0b483B6f221b37Bb
+FIN=0xB9E5CBB9CA5b0d659238807E84D0176930753d86
+DG=0x23E0B465633FF5178808F4A75186E2F2F9537021   # Dual Governance admin executor
+PAY=$(cast keccak CREATE_PAYMENTS_ROLE)
+cast call $ACL 'hasPermission(address,address,bytes32)(bool)' $VOTING $FIN $PAY --block 26192300                          # true
+cast call $ACL 'getPermissionParamsLength(address,address,bytes32)(uint256)' $VOTING $FIN $PAY --block 26192300            # 0
+cast call $ACL 'hasPermission(address,address,bytes32)(bool)' $FIN $AGENT $(cast keccak TRANSFER_ROLE) --block 26192300    # true
+cast call $ACL 'hasPermission(address,address,bytes32)(bool)' $DG $AGENT $(cast keccak RUN_SCRIPT_ROLE) --block 26192300   # true
+cast call $ACL 'hasPermission(address,address,bytes32)(bool)' $VOTING $AGENT $(cast keccak RUN_SCRIPT_ROLE) --block 26192300   # false
+cast call $FIN 'vault()(address)' --block 26192300                                                                          # the Aragon Agent
 ```

@@ -69,8 +69,8 @@ quiz_note: "Pick an answer to see whether it is right and why. Nothing leaves th
 owed:
   - "EM accepts ADR 005 to ADR 011."
   - "A Snapshot appoints the emergency Safe's fifth signer, a member of neither the committee nor the Emergency Brakes multisig (OD-58, OD-65)."
-  - "EM decides how insurance funds for products other than Lido Earn join the vault, before the enabling vote (OD-66)."
-  - "EM decides OD-68 to OD-72, so that routine operation after launch needs no DAO vote: a new token on the orders account, budget keys for new spenders, routine removals, a new TM Floor Value, and shapes outside the templates."
+  - "EM decides OD-66's open parts before the enabling vote: what each insurance fund's Snapshot must state, and how a fund's capital reaches the first-loss Safe."
+  - "EM decides OD-73: whether Aragon Voting, not the Aragon Agent, owns the vault's Safes, so that no Clutch action passes Dual Governance."
   - "The committee's valuation policy sets the price waterfall's band and the share of the vault that its last level may price (OD-62)."
   - "[the screening vendor] confirms in writing that it accepts no standing approvals and agrees to be named."
   - "[the screening vendor] says which rules it can check before execution: the liquidity buffer, the caps, an order's limit, a stop-loss order's expiry and a router swap's minimum output."

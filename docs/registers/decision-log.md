@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T17:15:09Z
+  at: 2026-10-14T17:57:05Z
 verified: []
 sources:
   - id: s1
@@ -43,6 +43,9 @@ sources:
   - id: s11
     resource: "urn:clutch:restricted:cfo-followup-2026-10-13"
     title: The CFO's follow-up questions and EM's answers in the committee's channel, 2026-10-13; outside the repository
+  - id: s12
+    resource: "urn:clutch:interview:2026-10-14"
+    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-73, 2026-10-14; the transcript is not in the repository
 ---
 
 # Decision log
@@ -52,6 +55,36 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-14 — OD-68 to OD-72 decided, OD-66 in part, OD-73 opened
+
+The agent reviewed whether Clutch launches with one Aragon vote and then runs on Easy Track alone. It asked EM to decide OD-68 to OD-72 and the open parts of OD-66, and it proposed OD-73: whether Aragon Voting, not the Aragon Agent, owns the vault's Safes, so that no Clutch action passes Dual Governance. EM answered:
+
+> OD-73: A
+> OD-66:
+> 1. Snapshot + motion
+> 2. Didn't get what should be decided?
+> 3. Decided
+> 4. Ship with launch
+> 5. Didn't get what should be decided?
+> 6. Confirmed
+>
+> OD-68: C
+> OD-69: A
+> OD-70: B
+> OD-71: A
+> OD-72: rec
+> OD-73: what it is about?
+
+Recorded as:
+
+- (OD-68) C: the orders modifier gets a governance role, held by the Easy Track executor, without delegatecall, and a motion adds a token for ComposableCoW's TWAP and stop-loss orders. A token for market, limit and recovery orders still needs a DAO vote ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 31).
+- (OD-69) A: the enabling vote holds spare budget keys for each token, with ceilings ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 39).
+- (OD-70) B: routine removals run as motions of a removal template, which waits for the objection window, and the emergency Safe's revoke stays for emergencies. This replaces part of OD-09 ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 14).
+- (OD-71) A: a new TM Floor Value is a mandate change, so its DAO vote is by design, and a shortfall in stETH is topped up in stablecoins, so a re-pin is optional ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 24).
+- (OD-72) "rec", the recommendation: before the vote, the template catalogue is checked against the protocols that the mandate allows, and a claim template, with the receiver pinned to the Asset Safe, ships only if a launch protocol pays rewards ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 15).
+- (OD-66, points 1, 3, 4 and 6) a new fund is approved by a Snapshot and then one Easy Track motion; the agent reads this as one Snapshot for each fund, which EM should confirm. Payouts run as Easy Track motions. The fund roles and factories ship with the launch. An exit from a fund stays with the operator Safe's direct role, paid to the Aragon Agent ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 25 to 28). Points 2 and 5 stay open, because EM asked what is to be decided there.
+- (OD-73) not recorded as a decision: EM answered "A" and also asked what OD-73 is about. It stays open until EM confirms. [s12]
 
 ## 2026-10-13 — OD-67: three readings confirmed
 

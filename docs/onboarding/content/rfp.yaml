@@ -67,17 +67,17 @@ sections:
     items:
       - asked: "Easy Track manages the operator allowlist: it adds or removes an asset, a protocol target or a function selector, and changes a parameter constraint inside an allowed function."
         verdict: changed
-        clutch: "Motions only add. An onboarding motion fills one of five templates, fixed at audit time, with typed parameters such as a target, an asset and a budget key, and a budget motion sets budgets within their ceilings. A removal is the emergency Safe's immediate revoke, and a new token for the orders account needs a DAO vote."
-        why: "A motion that carried its own condition tree could widen authority past what the DAO approved. A removal by motion would wait at least 48 hours, because Easy Track cannot skip its objection window."
-        sources: ["ADR-006#d5", "ADR-006#d6", "ADR-006#d7", "ADR-006#d12", "ADR-006#context", "ADR-006#proposed-direction",
-          OD-09, OD-46, INV-004]
+        clutch: "Motions add and remove, but only through templates fixed at audit time. An onboarding motion fills one of five onboarding templates with typed parameters such as a target, an asset and a budget key; a removal motion takes one branch away; a budget motion sets budgets within their ceilings; and a token motion adds a token to the orders account for TWAP and stop-loss orders. A token for market, limit and recovery orders needs a DAO vote, and an emergency removal is the emergency Safe's immediate revoke."
+        why: "A motion that carried its own condition tree could widen authority past what the DAO approved, so every motion fills a template. The order signer's permission is a delegatecall, which no motion may write."
+        sources: ["ADR-006#d5", "ADR-006#d6", "ADR-006#d7", "ADR-006#d12", "ADR-006#d14", "ADR-006#context",
+          "ADR-006#proposed-direction", "ADR-007#d31", OD-09, OD-46, OD-68, OD-70, INV-004]
       - asked: "Lido contributors design, build, audit, deploy and maintain the Easy Track helper contracts. The provider confirms that its access control exposes the administration functions and works safely with this path."
         verdict: kept
         clutch: "The Easy Track factories are the only new contracts. Lido builds them in phase 2, and an external audit covers them in phase 3. The governance role calls six administration functions of the Roles modifier, each one guarded."
         sources: ["ADR-006#d1", "ADR-006#proposed-direction", INV-004, "doc:ROADMAP.md#roadmap"]
       - asked: "The Aragon Agent stays the only owner of the Asset Safe. Easy Track gets no ownership and no unrestricted execution, and it executes only the permission changes that the Operator Safe proposes in motions."
         verdict: kept
-        clutch: "Easy Track never receives authority over the Agent. On the Asset Safe, its executor holds only the governance and exit-governance roles. Outside it, the executor also holds the burn role on the first-loss Safe, so every first-loss burn is a motion (OD-67). The operator Safe, as the trusted caller of every factory, creates every motion."
+        clutch: "Easy Track never receives authority over the Agent. On the Asset Safe, its executor holds only the governance and exit-governance roles. Outside it, the executor also holds the governance role on the orders modifier, which adds a token for TWAP and stop-loss orders (OD-68), and the burn role on the first-loss Safe, so every first-loss burn is a motion (OD-67). The operator Safe, as the trusted caller of every factory, creates every motion."
         sources: ["ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-008#d23", "ADR-010#proposed-direction", OD-67,
           INV-004]
       - asked: "A direct DAO path can make every change that Easy Track can make."
@@ -103,17 +103,16 @@ sections:
     items:
       - asked: "Adding or widening a permission and removing one are separate actions. A removal cannot add or widen, and an expansion cannot make an arbitrary call."
         verdict: kept
-        clutch: "Easy Track only expands, through templates that cannot make an arbitrary call. A removal is a revoke, which the emergency role holds and which cannot grant anything."
-        sources: ["ADR-005#d11", "ADR-006#d7", "ADR-006#proposed-direction", INV-004]
+        clutch: "Onboarding templates only add, and the removal template only takes away: it writes the function's tree without the removed branch and adds nothing. No template can make an arbitrary call. An emergency removal is the emergency role's revoke, which cannot grant anything."
+        sources: ["ADR-005#d11", "ADR-006#d7", "ADR-006#d14", "ADR-006#proposed-direction", OD-70, INV-004, INV-029]
       - asked: "An expansion waits through a three-day objection period."
         verdict: kept
         clutch: "Every motion has a 72-hour objection window. Motions are the timelock for every structural increase of exposure, such as a new target or a higher budget."
         sources: ["ADR-006#d11", "ADR-006#context", "ADR-009#d30", OD-45]
       - asked: "A standard removal goes through an Easy Track removal motion, with the same three-day objection period."
-        verdict: changed
-        clutch: "No removal motion exists. Every removal is the emergency Safe's immediate revoke, posted on the forum afterwards."
-        why: "EM asked that removals skip the objection window, and Easy Track cannot skip it: the window is never shorter than 48 hours."
-        sources: ["ADR-006#d6", "ADR-006#d7", OD-09]
+        verdict: kept
+        clutch: "A routine removal is a motion of the removal template, with the same objection window. An emergency removal is the emergency Safe's immediate revoke, posted on the forum afterwards."
+        sources: ["ADR-006#d6", "ADR-006#d7", "ADR-006#d14", OD-09, OD-70]
       - asked: "For an urgent risk, the emergency authority blocks or revokes within hours, and a durable change follows later."
         verdict: kept
         clutch: "The emergency Safe revokes the operator's targets and functions on the operator modifier and the orders modifier at once, and it can switch the operator off. A revoke is durable: only a motion or a DAO vote grants the permission again, and only a DAO vote restarts the operator."
