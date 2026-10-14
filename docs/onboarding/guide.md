@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-12T07:50:11Z
+  at: 2026-10-14T21:55:03Z
 verified: []
 sources:
   - id: s1
@@ -95,7 +95,7 @@ just check-docs     # among other checks: fail if the page is stale, and test th
 
 ```sh
 just stale                       # each stale item, with the source changes
-just repin actor:operator-safe   # pin an item again, after the review
+just repin actor:committee   # pin an item again, after the review
 uv run --with pyyaml python scripts/build_onboarding.py --list-sources   # every decision and heading that content can cite
 ```
 

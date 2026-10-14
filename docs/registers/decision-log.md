@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:39:38Z
+  at: 2026-10-14T21:55:03Z
 verified: []
 sources:
   - id: s1
@@ -45,7 +45,7 @@ sources:
     title: The CFO's follow-up questions and EM's answers in the committee's channel, 2026-10-13; outside the repository
   - id: s12
     resource: "urn:clutch:interview:2026-10-14"
-    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-79, 2026-10-14; the transcript is not in the repository
+    title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-82, 2026-10-14; the transcript is not in the repository
 ---
 
 # Decision log
@@ -55,6 +55,28 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-14 — OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers
+
+After PR #38 merged, EM wrote:
+
+> now let's prepare the next one:
+> - let's get rid of extra msig for operator safe and just re-use the existing TMC multisig
+> - emergency brakes not exactly needed on visual schemes and we may just mention that:
+>   - they can pause ET
+>   - two folks in Emergency Safes are from that msig
+>   - and that's it!
+>
+> Also:
+> - do C2
+> - do C3
+> - the new build checks as needed
+
+Recorded as:
+
+- (OD-80) The committee's own Safe, the Treasury Management Committee's Safe at 4 of 7 on Safe v1.3.0, holds the operator role and the first-loss role, and it is the trusted caller of every Clutch factory. Clutch deploys no operator Safe ([ADR 005](/adr/005-account-graph-and-roles.md), decision 31). Where the screening guard goes when the launch cap lifts follows from it and is open as OD-83.
+- (OD-81) The diagrams, in the guide and in the LIP draft, carry no node for the Emergency Brakes multisig. The guide states two facts about it: it can pause Easy Track, and two of the emergency Safe's signers come from it ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 12).
+- (OD-82) C2 and C3 of the agent's consolidation review, with the checks that they need: the closed decisions move into a data file, and the validator generates the register's closed index with each OD's state, the ADR index and each proposed ADR's open decisions; the guide's build refuses a source that names a replaced OD, and an item whose text names an OD that it does not cite ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 13). [s12]
 
 ## 2026-10-14 — OD-79: the 80/20 pass after OD-78
 

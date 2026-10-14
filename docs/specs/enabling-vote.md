@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:39:38Z
+  at: 2026-10-14T21:55:03Z
 verified: []
 sources:
   - id: s1
@@ -45,7 +45,7 @@ Clutch launches with one Aragon vote, the enabling vote. This page lists what th
 - **Snapshots.** The mandate, with its figures. The emergency Safe's fifth signer (OD-58, OD-65) [s1].
 - **Figures.** An attested computation sets every budget and its key's ceiling, the orders budgets, the funding limits, the fixed approval ceilings and the stETH limit at the pinned price [s5][s6].
 - **Decisions.** OD-66 and OD-68 to OD-79 are decided. OD-65 closes at the fifth signer's Snapshot [s1].
-- **Deployments.** They need no authority. Clutch's script creates the Asset Safe, the orders account and the first-loss Safe with Aragon Voting as only owner, and the operator Safe and the emergency Safe with their signers, on Safe v1.5.0; the orders account runs it only if its fork test passes. It deploys the four Roles modifiers as minimal proxies through the Zodiac module proxy factory, and the Easy Track factories with the operator Safe as their trusted caller. Easy Track's standard builder deploys the two funding registries, with Aragon Voting as their admin, and sets each limit and period (OD-73) [s2][s3][s5][s8].
+- **Deployments.** They need no authority. Clutch's script creates the Asset Safe, the orders account and the first-loss Safe with Aragon Voting as only owner, and the emergency Safe with its signers, on Safe v1.5.0; the orders account runs it only if its fork test passes. It deploys the four Roles modifiers as minimal proxies through the Zodiac module proxy factory, and the Easy Track factories with the committee's Safe as their trusted caller (OD-80). Easy Track's standard builder deploys the two funding registries, with Aragon Voting as their admin, and sets each limit and period (OD-73) [s2][s3][s5][s8].
 - **Checks.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 behind a Roles modifier [s4]. The external audit. The check of Safe's releases, advisories and bug-bounty records [s7]. The policy compiled for mainnet from the reviewed constellation. The template catalogue against the mandate's protocols and the committee's named pipeline (OD-72, OD-79).
 
 ## The vote
@@ -60,20 +60,20 @@ Aragon Voting runs every item itself: it owns the vault's Safes (OD-73), holds E
 
 ### The vault's Safes
 
-- **The Asset Safe.** Enable the operator modifier and the safety modifier, and apply the compiled policy on both: every permission, and every budget key with its ceiling, the Lido Lend key and the spare keys of each token included (OD-69). Grant `operator` to the operator Safe, `governance` and `exit-governance` to the Easy Track executor, and `emergency`, with the switch, to the emergency Safe [s2][s3][s6].
-- **The orders account.** Set CoW's fallback handler, and ComposableCoW as the verifier of CoW's settlement domain. Enable the orders modifier and apply its policy: the operator's orders on the launch lists, and the emergency role's recovery orders, transfers and cancels. Grant `operator` to the operator Safe and `emergency` to the emergency Safe; the orders modifier has no governance role (OD-78). Approve CoW's vault relayer for every listed token, the recovery tokens included [s4].
-- **The first-loss Safe.** Enable the first-loss modifier and apply its policy. Grant `first-loss` to the operator Safe and `first-loss-burn` to the Easy Track executor [s5].
+- **The Asset Safe.** Enable the operator modifier and the safety modifier, and apply the compiled policy on both: every permission, and every budget key with its ceiling, the Lido Lend key and the spare keys of each token included (OD-69). Grant `operator` to the committee's Safe, `governance` and `exit-governance` to the Easy Track executor, and `emergency`, with the switch, to the emergency Safe [s2][s3][s6].
+- **The orders account.** Set CoW's fallback handler, and ComposableCoW as the verifier of CoW's settlement domain. Enable the orders modifier and apply its policy: the operator's orders on the launch lists, and the emergency role's recovery orders, transfers and cancels. Grant `operator` to the committee's Safe and `emergency` to the emergency Safe; the orders modifier has no governance role (OD-78). Approve CoW's vault relayer for every listed token, the recovery tokens included [s4].
+- **The first-loss Safe.** Enable the first-loss modifier and apply its policy. Grant `first-loss` to the committee's Safe and `first-loss-burn` to the Easy Track executor [s5].
 
 ### Order
 
-Every item runs when the vote executes, about five days after it starts. The operator Safe creates motions only after that.
+Every item runs when the vote executes, about five days after it starts. The committee's Safe creates motions only after that.
 
 ## After the vote, without another vote
 
 - The Growth Committee's Safe moves the first-loss shares to the first-loss Safe [s5].
-- The operator Safe creates the seed motion [s5].
+- The committee's Safe creates the seed motion [s5].
 - Lido Lend joins by one onboarding motion, because its key is already in the policy [s6].
-- The operator Safe's owners set the screening guard, and a forum post lifts the launch cap (OD-54, OD-55) [s7].
+- The owners of the committee's Safe set the screening guard where OD-83 puts it, and a forum post lifts the launch cap (OD-54, OD-55) [s7].
 - Each Safe's own owners rotate its signers. A Snapshot fills the fifth seat of the emergency Safe [s2].
 
 ## What still needs a vote after launch

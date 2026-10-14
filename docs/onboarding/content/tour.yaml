@@ -15,27 +15,27 @@
   sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1"]
 
 - title: "The operator: the committee at work"
-  text: "The Treasury Management Committee runs the vault through a new **operator Safe**, at 4 of 7. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its operator permissions is the Asset Safe. Its one other role, on the [[first-loss Safe]], redeems the first-loss shares to the Aragon Agent. A burn of them is an Easy Track motion that it creates."
-  tech: "The operator Safe calls `execTransactionWithRole` on the operator modifier with the role key `bytes32(\"operator\")`; a batch goes through MultiSendCallOnly v1.5.0. Every receiver, owner and beneficiary is pinned with `EqualToAvatar` (INV-003)."
-  nodes: [committee, operator-safe, operator-modifier, asset-safe, protocols]
-  edges: [signers-op, op-role, own-op, positions]
+  text: "The Treasury Management Committee runs the vault through its existing Safe, at 4 of 7, which holds the **operator role**. The operator can enter and leave approved protocols, within budgets.\n\nIt cannot move assets out: every receiver, owner and beneficiary in its operator permissions is the Asset Safe. Its one other role, on the [[first-loss Safe]], redeems the first-loss shares to the Aragon Agent. A burn of them is an Easy Track motion that it creates."
+  tech: "The committee's Safe, on Safe v1.3.0, calls `execTransactionWithRole` on the operator modifier with the role key `bytes32(\"operator\")`; a batch goes through Safe's MultiSendCallOnly v1.3.0. Every receiver, owner and beneficiary is pinned with `EqualToAvatar` (INV-003)."
+  nodes: [committee, operator-modifier, asset-safe, protocols]
+  edges: [op-role, own-op, positions]
   flows: [op-tx, swap-order]
-  sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#d27", "ADR-005#proposed-direction", "ADR-008#d23", OD-60, OD-67, INV-003,
-    "test:test_D3_operator_cannot_route_around_avatar"]
+  sources: ["ADR-005#d9", "ADR-005#d27", "ADR-005#proposed-direction", "ADR-008#d23", OD-60, OD-67, INV-003,
+    "test:test_D3_operator_cannot_route_around_avatar", "ADR-005#d31", OD-80]
 
 - title: Every operator transaction is screened
-  text: "[the screening vendor]'s [[guard]] sits on the operator Safe. It refuses any transaction that the vendor has not approved, once and exactly.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nAt launch the guard is not set yet. The vault starts under a [[launch cap]] of one million dollars, and the cap lifts once the guard is live (OD-54)."
-  tech: "A transaction guard on the operator Safe. The vendor's key approves each exact transaction on chain, once, before it runs; a transaction without an approval reverts. The owners can remove the guard only through a 10-day timelock. Its bypass mode stays off: turning it on needs the vendor's approval and a 10-day timelock (INV-010)."
-  nodes: [screening, operator-safe]
+  text: "[the screening vendor]'s [[guard]] screens the operator. It refuses any transaction that the vendor has not approved, once and exactly. Where it sits is open: the committee's Safe is recommended, and there it also screens the committee's other duties (OD-83).\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nAt launch the guard is not set yet. The vault starts under a [[launch cap]] of one million dollars, and the cap lifts once the guard is live (OD-54)."
+  tech: "A transaction guard on the Safe that holds the operator role. The vendor's key approves each exact transaction on chain, once, before it runs; a transaction without an approval reverts. The owners can remove the guard only through a 10-day timelock. Its bypass mode stays off: turning it on needs the vendor's approval and a 10-day timelock (INV-010)."
+  nodes: [screening, committee]
   edges: [screen]
   flows: [vendor-outage]
   sources: ["ADR-010#d1", "ADR-010#d3", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d20", "ADR-010#d21",
-    "ADR-010#d22", "ADR-010#proposed-direction", INV-010, OD-54]
+    "ADR-010#d22", "ADR-010#proposed-direction", INV-010, OD-54, OD-83]
 
 - title: Changes by motion, inside templates
   text: "The committee can widen its own permissions only through Easy Track [[motion|motions]], each built by a fixed [[template]]. LDO holders have 72 hours to object, and 0.5% of LDO stops a motion. This window is the timelock for every structural increase of exposure, such as a new target or a higher budget.\n\nAt enactment, the governance role writes the change. The modifier checks that write again: no role change, no [[delegatecall]], and no administrative target. The Asset Safe and its modifiers are refused as targets. The same motion gives the emergency role an exit from what it onboards."
   tech: "The governance role may call six functions on the operator modifier: `scopeTarget`, `revokeTarget`, `allowFunction`, `revokeFunction`, `scopeFunction` and `setAllowance`. The role key is pinned to `operator`, and a `Nor` condition refuses the Asset Safe and its modules as targets. The execution option must be below 2, so no delegatecall. `setAllowance` takes only the operator's budget keys, with a refill period of at least 30 days (INV-004, INV-012)."
-  nodes: [operator-safe, easytrack, dao, operator-modifier]
+  nodes: [committee, easytrack, dao, operator-modifier]
   edges: [motions, object, gov-role]
   flows: [onboard, budget, unlock]
   sources: ["ADR-006#d2", "ADR-006#d3", "ADR-006#d4", "ADR-006#d5", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10",
@@ -52,9 +52,9 @@
     "ADR-007#proposed-direction", OD-43, INV-013, INV-014, INV-022, INV-024]
 
 - title: "Money in: top-ups"
-  text: "Funding comes from the DAO treasury through the existing payment path. Once a month, the operator Safe creates a [[top-up]] motion. LDO holders can object for 72 hours.\n\nTwo funding registries pay only the Asset Safe, each within a monthly limit. The objection is the control; the limit is the backstop."
-  tech: "Two allowed-recipients registries from Easy Track's standard builder, each with the Asset Safe as its only recipient and a one-month period. Two top-up factories create the motions, with the operator Safe as their trusted caller (INV-017)."
-  nodes: [operator-safe, easytrack, funding, dao, asset-safe]
+  text: "Funding comes from the DAO treasury through the existing payment path. Once a month, the committee's Safe creates a [[top-up]] motion. LDO holders can object for 72 hours.\n\nTwo funding registries pay only the Asset Safe, each within a monthly limit. The objection is the control; the limit is the backstop."
+  tech: "Two allowed-recipients registries from Easy Track's standard builder, each with the Asset Safe as its only recipient and a one-month period. Two top-up factories create the motions, with the committee's Safe as their trusted caller (INV-017)."
+  nodes: [committee, easytrack, funding, dao, asset-safe]
   edges: [motions, topup-motion, treasury, topup]
   flows: [topup, seed]
   sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#proposed-direction", INV-017]
@@ -62,8 +62,8 @@
 - title: "Emergencies: two fast stops, one slow restart"
   text: "The **emergency Safe** has five signers: two committee members, two members of the Emergency Brakes multisig and one member of neither body. Three must sign, so the committee cannot use it alone. Through the safety modifier it revokes the operator, switches the operator modifier off, exits positions and sends assets to the Aragon Agent.\n\nThe **Emergency Brakes multisig** keeps only the Easy Track pause, and touches no funds. No emergency body restarts what it stopped: only a DAO vote does, in days."
   tech: "Target: initiate any emergency action within six hours. Drills on a fork must prove it before launch. The switch is `disableModule` on the Asset Safe, pinned to the operator modifier (INV-009); the emergency role holds no call that restores authority (INV-027)."
-  nodes: [emergency-safe, safety-modifier, operator-modifier, brakes, dao, asset-safe]
-  edges: [signers-em, em-role, revoke, pause, own]
+  nodes: [emergency-safe, safety-modifier, operator-modifier, dao, asset-safe]
+  edges: [signers-em, em-role, revoke, own]
   flows: [financial-incident, recovery-order, technical-defect, unsafe-motion]
   sources: ["ADR-005#d2", "ADR-005#d4", "ADR-005#d11", "ADR-005#d23", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26",
     "ADR-005#context", "ADR-005#proposed-direction", OD-58, OD-59, INV-002, INV-009, INV-027, "lip:part-6",

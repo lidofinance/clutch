@@ -110,7 +110,7 @@
     OD-67]
 
 - term: First-loss Safe
-  plain: "A Safe that Aragon Voting owns, which holds only the first-loss shares. Its one modifier carries two narrow roles: Easy Track's, which burns the shares only by enacted motion, and the operator Safe's, which redeems them to the Aragon Agent."
+  plain: "A Safe that Aragon Voting owns, which holds only the first-loss shares. Its one modifier carries two narrow roles: Easy Track's, which burns the shares only by enacted motion, and a role of the committee's Safe, which redeems them to the Aragon Agent."
   sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", OD-42, OD-60, OD-67, INV-021]
 
 - term: Fortnightly snapshot
@@ -118,8 +118,8 @@
   sources: ["ADR-009#d25", "ADR-009#d31", OD-32, OD-56]
 
 - term: Guard
-  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard on the operator Safe, set after the launch and before the [[launch cap]] lifts. A module guard does the same for module transactions; Clutch uses none."
-  sources: ["ADR-010#d3", "ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction"]
+  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard, set after the launch and before the [[launch cap]] lifts, on the committee's Safe if OD-83 puts it there. A module guard does the same for module transactions; Clutch uses none."
+  sources: ["ADR-010#d3", "ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction", OD-83]
 
 - term: Invariant
   plain: "A property that must always hold, stated so that a test can check it. Each has an ID, `INV-NNN`, that is never reused."
@@ -245,8 +245,8 @@
   sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d6"]
 
 - term: Trusted caller
-  plain: "The only address that may create motions on an Easy Track factory, fixed when the factory is deployed. For every Clutch factory it is the operator Safe."
-  sources: ["ADR-006#d3", "ADR-006#proposed-direction"]
+  plain: "The only address that may create motions on an Easy Track factory, fixed when the factory is deployed. For every Clutch factory it is the committee's Safe (OD-80)."
+  sources: ["ADR-006#d3", "ADR-006#proposed-direction", OD-80]
 
 - term: TWAP
   plain: "Time-weighted average price: a CoW order in equal parts at a fixed spacing. It buys or sells a position over time, which is how the vault averages its cost."

@@ -3,6 +3,8 @@
 // and the approval rule of OD-08. See PROVENANCE.md.
 // Changed for Clutch on 2026-10-09: the withdrawal queue left the scope
 // (ADR 007, decision 27).
+// Changed for Clutch on 2026-10-14: the committee's own Safe holds the
+// operator role (ADR 005, decision 31).
 import { c, call, callWithValue } from "../../lib";
 import {
   DAI,
@@ -42,7 +44,7 @@ export const APPROVALS: readonly { token: string; spender: string; budget?: stri
 ];
 
 /**
- * What the operator Safe may do with the Asset Safe. Default deny: anything
+ * What the committee's Safe, as the operator, may do with the Asset Safe. Default deny: anything
  * absent here is refused. Every receiver and owner is pinned to the Asset
  * Safe (`c.avatar`), and the operator holds no `transfer`, so assets can
  * move into and out of the approved venues but not leave the Asset Safe.

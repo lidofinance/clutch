@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Negative tests for validate_docs.py: recorded verifications (ADR 003, OD-31), authors and
-verifiers, and the register IDs (ADR 012).
+verifiers, the register IDs (ADR 012), and the closed decisions with their generated blocks (OD-82).
 
 Run:
   uv run --with pyyaml==6.0.2 python scripts/test_validate_docs.py
@@ -55,6 +55,18 @@ def _errors(validator, root: Path, entry: str) -> list[str]:
 
 
 ADR = "docs/adr/011-launch-scope.md"
+CLOSED = "docs/registers/closed-decisions.yaml"
+
+
+def _entry_text(text: str, od: str) -> str:
+    """One entry of the closed-decision file, from its `- id:` line to the next entry."""
+    start = text.index(f"- id: {od}\n")
+    end = text.find("\n- id: ", start + 1)
+    return text[start:] if end < 0 else text[start:end + 1]
+
+
+def _without_entry(text: str, od: str) -> str:
+    return text.replace(_entry_text(text, od), "", 1)
 OPEN_ROW = "\n## Closed"
 
 
@@ -126,6 +138,16 @@ EDIT_CASES = [
     ("an invariant ID is used once", [("docs/specs/invariants.md", lambda t: t + "\n" + _first_inv_row(t) + "\n")],
      "appears in more than one row"),
     ("an ADR number is used once", [("docs/adr/011-a-copy.md", ADR)], "ADR 011 is taken by"),
+    ("a closed decision names a known log heading", [(CLOSED, lambda t: t.replace(
+        '"2026-10-02 — OD-01: the screening route"', '"2026-10-02 — no such heading"', 1))], "no decision-log heading"),
+    ("a closed decision names an existing ADR decision", [(CLOSED, lambda t: t.replace(
+        "  adr: [ADR-010]\n", "  adr: [ADR-010#d999]\n", 1))], "ADR 010 has no decision 999"),
+    ("a decision replaces only earlier ODs", [(CLOSED, lambda t: t.replace(
+        "  adr: [ADR-010]\n", "  adr: [ADR-010]\n  replaces:\n    - {od: OD-79}\n", 1))], "can only replace an earlier OD"),
+    ("an OD is open or closed, not both", [(CLOSED, lambda t: t + '- id: OD-65\n  question: "A copy"\n  closed: 2026-10-14\n  note: "x"\n')],
+     "OD-65 is both open and closed"),
+    ("no OD number is skipped", [(CLOSED, lambda t: _without_entry(t, "OD-03"))], "OD-03 is neither open nor closed"),
+    ("a closed decision is listed once", [(CLOSED, lambda t: t + _entry_text(t, "OD-03"))], "OD-03 is listed more than once"),
 ]
 
 
@@ -202,7 +224,30 @@ def main() -> int:
         failures += not ok
         print(f"{'PASS' if ok else 'FAIL'}  the status register marks a recorded entry")
 
-    print(f"{len(cases) + len(edit_cases) + 1 - failures} passed, {failures} failed")
+    states = validator.od_states(validator.load_closed(ROOT))
+    checks = [
+        ("an OD that a later one replaced shows the replacement", states["OD-68"]["replaced_by"] == ["OD-78"]),
+        ("a replaced OD no longer replaces what it replaced", states["OD-46"] == {"replaced_by": [], "in_part_by": [], "refined_by": []}),
+        ("a replaced OD no longer refines what it refined", states["OD-59"] == {"replaced_by": [], "in_part_by": [], "refined_by": []}),
+        ("a replacement in part and in full both show", states["OD-74"]["replaced_by"] == ["OD-79"] and states["OD-74"]["in_part_by"] == ["OD-78"]),
+    ]
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _copy(root)
+        clean = not validator.generated_issues(root)
+        register = root / "docs" / "registers" / "open-decisions.md"
+        register.write_text(register.read_text(encoding="utf-8").replace("| OD-01 | Where", "| OD-01 | Whither", 1), encoding="utf-8")
+        adr = root / "docs" / "adr" / "006-governance-through-easy-track-factories.md"
+        adr.write_text(adr.read_text(encoding="utf-8").replace("No open decision closes in this record.", "Nothing.", 1), encoding="utf-8")
+        stale = {i.path for i in validator.generated_issues(root)}
+        checks.append(("the committed generated blocks are current", clean))
+        checks.append(("a hand edit of a generated block is caught", {
+            "docs/registers/open-decisions.md", "docs/adr/006-governance-through-easy-track-factories.md"} <= stale))
+    for name, ok in checks:
+        failures += not ok
+        print(f"{'PASS' if ok else 'FAIL'}  {name}")
+
+    print(f"{len(cases) + len(edit_cases) + 1 + len(checks) - failures} passed, {failures} failed")
     return 1 if failures else 0
 
 

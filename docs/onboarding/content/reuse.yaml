@@ -23,13 +23,13 @@
   owner: "The policy provider"
   sources: ["ADR-004#d10", "ADR-004#d11", "ADR-009#d38", OD-33, OD-44, OD-62]
 
-- name: Safe v1.5.0 singleton, proxy factory and MultiSendCallOnly
+- name: Safe v1.5.0 singleton and proxy factory
   column: reused
-  what: "The audited Safe code for the new Safes, and Safe's batching contract."
+  what: "The audited Safe code for the new Safes."
   why: "Certora (with formal verification) and Ackee audited v1.5.0. Its record is short, so the vault avoids the paths that changed most, and Safe's advisories are checked again before the vote."
   owner: "Safe"
-  sources: ["ADR-005#d8", "ADR-005#d12", "ADR-005#d13", "ADR-005#d14", "ADR-005#d15", "ADR-005#context", "ADR-010#d15",
-    "ADR-010#d16", "ADR-010#d17", "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
+  sources: ["ADR-005#d8", "ADR-005#d12", "ADR-005#d13", "ADR-005#d14", "ADR-005#d15", "ADR-005#context", "ADR-010#d16",
+    "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
 - name: Easy Track and its script executor
   column: reused
@@ -89,18 +89,18 @@
   sources: ["ADR-010#d1", "ADR-010#d2", "ADR-010#d14", "ADR-010#d20", "ADR-009#d7", "ADR-009#proposed-direction", OD-54]
 
 # --- New instance of existing code --------------------------------------------------------------
-- name: The five Safes
+- name: The four new Safes
   column: instance
-  what: "The Asset Safe, the operator Safe, the emergency Safe, the orders account and the first-loss Safe: proxies of the Safe singleton."
-  why: "Each Safe has one job: custody, screened operation, unscreened recovery, orders in transit, or the first-loss shares held apart. Clutch's own script deploys them, because the Zodiac Safe node cannot set the version, the guard or the fallback handler."
-  owner: "The DAO; the committee's signers"
-  sources: ["ADR-005#d7", "ADR-005#d12", "ADR-005#d13", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20",
-    "ADR-005#proposed-direction", "ADR-007#d17", "ADR-008#d19", "ADR-010#d15", "ADR-010#proposed-direction"]
+  what: "The Asset Safe, the emergency Safe, the orders account and the first-loss Safe: proxies of the Safe singleton."
+  why: "Each Safe has one job: custody, unscreened recovery, orders in transit, or the first-loss shares held apart. The committee's existing Safe holds the operator role, so Clutch deploys no operator Safe (OD-80). Clutch's own script deploys the four, because the Zodiac Safe node cannot set the version or the fallback handler."
+  owner: "The DAO; the emergency Safe's signers"
+  sources: ["ADR-005#d12", "ADR-005#d13", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction",
+    "ADR-007#d17", "ADR-008#d19", "ADR-010#proposed-direction", "ADR-005#d31", OD-80]
 
 - name: The four Roles modifiers
   column: instance
   what: "Two minimal proxies of the Roles mastercopy on the Asset Safe, one on the orders account and one on the first-loss Safe."
-  why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator and emergency roles, and there the emergency role's revoke stops the operator (OD-57, OD-58). The first-loss modifier carries two narrow roles: the operator Safe's, which redeems to the Aragon Agent, and Easy Track's, which burns by motion (OD-60, OD-67)."
+  why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator and emergency roles, and there the emergency role's revoke stops the operator (OD-57, OD-58). The first-loss modifier carries two narrow roles: one for the committee's Safe, which redeems to the Aragon Agent, and Easy Track's, which burns by motion (OD-60, OD-67)."
   owner: "The DAO, through the Asset Safe, the orders account and the first-loss Safe"
   sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#d25", "ADR-005#d27", "ADR-005#context", "ADR-007#d28", "ADR-007#d30",
     OD-57, OD-58, OD-60, OD-67]
@@ -132,7 +132,8 @@
   what: "The six roles and their permissions: what the operator, governance, emergency, exit-governance, first-loss and first-loss burn roles may call, and with which arguments. Three are built; the exit-governance role and the two first-loss roles are specified (OD-49, OD-60, OD-67)."
   why: "This is the heart of Clutch. Every permission traces back to a decision and forward to a test."
   owner: "`@lidofinance/defi-tech`; reviewers approve each change"
-  sources: ["ADR-005#d6", "ADR-005#proposed-direction", "ADR-004#d3", "ADR-004#d7", "ADR-004#d12", INV-004, INV-018]
+  sources: ["ADR-005#d6", "ADR-005#proposed-direction", "ADR-004#d3", "ADR-004#d7", "ADR-004#d12", INV-004, INV-018,
+    OD-49, OD-60, OD-67]
 
 - name: The policy compiler and artifact
   column: new
