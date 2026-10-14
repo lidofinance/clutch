@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:39:38Z
+  at: 2026-10-14T21:03:23Z
 verified: []
 sources:
   - id: s1
@@ -231,4 +231,4 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 ## Open questions
 
-None open. OD-08, OD-12, OD-13 and OD-14 were decided on 2026-10-02 and 2026-10-05, OD-39, OD-40, OD-41, OD-44 and OD-45 on 2026-10-06, OD-56 on 2026-10-09, and OD-58 and OD-62 on 2026-10-13. The committee's valuation policy owes the band of level 2 and the level-5 share (decision 37). Owed: the screening vendor's answer on which rules it can check before execution, and the policy provider's answer on the requirement list.
+None open. OD-08, OD-12, OD-13 and OD-14 were decided on 2026-10-02 and 2026-10-05, OD-39, OD-40, OD-41, OD-44 and OD-45 on 2026-10-06, OD-56 on 2026-10-09, OD-58 and OD-62 on 2026-10-13, and OD-69 on 2026-10-14. The committee's valuation policy owes the band of level 2 and the level-5 share (decision 37). Owed: the screening vendor's answer on which rules it can check before execution, and the policy provider's answer on the requirement list.

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:39:38Z
+  at: 2026-10-14T21:03:23Z
 verified: []
 sources:
   - id: s1
@@ -243,4 +243,4 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 ## Open questions
 
 
-OD-43, OD-46, OD-47, OD-48 and OD-49 were decided on 2026-10-06, OD-57 on 2026-10-09, and OD-58 and OD-61 on 2026-10-13. Owed: the fork tests above, the screening vendor's answer on output checks, and the orders budgets from the attested computation.
+OD-43, OD-46, OD-47, OD-48 and OD-49 were decided on 2026-10-06, OD-57 on 2026-10-09, OD-58 and OD-61 on 2026-10-13, and OD-68, OD-74, OD-76, OD-78 and OD-79 on 2026-10-14. Owed: the fork tests above, the screening vendor's answer on output checks, and the orders budgets from the attested computation.

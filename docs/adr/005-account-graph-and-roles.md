@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:11:35Z
+  at: 2026-10-14T21:03:23Z
 verified: []
 sources:
   - id: s1
@@ -157,7 +157,7 @@ Decision 30 replaces decision 29.
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
-- **Asset Safe.** A new Safe owned one-of-one by Aragon Voting (decision 28). It holds the assets, apart from the first-loss shares and the tokens in transit in the orders account. No guard and no fallback handler are set on it. It runs Safe v1.5.0. The Agent approves the hash of each transaction, or sends the transaction itself, so the Safe checks a type-1 signature (decision 14).
+- **Asset Safe.** A new Safe owned one-of-one by Aragon Voting (decision 28). It holds the assets, apart from the first-loss shares and the tokens in transit in the orders account. No guard and no fallback handler are set on it. It runs Safe v1.5.0. Aragon Voting approves the hash of each transaction, or sends the transaction itself, so the Safe checks a type-1 signature (decisions 14 and 28).
 - **Operator Safe.** A new Safe with the committee's signers. It holds no assets and has no modules. It carries the screening guard, holds the operator role and is the trusted caller of every factory. It also holds the first-loss role, which redeems first-loss shares to the Aragon Agent, and it creates every first-loss burn motion (decision 27; [ADR 008](/adr/008-funding-through-existing-payments.md) decision 23). It runs Safe v1.5.0, with a threshold of 4 of 7.
 - **Emergency Safe.** A new Safe with five signers and a threshold of three: two committee members, two Emergency Brakes members and one member of neither body (decision 24). It holds no assets and has no guard. It holds the emergency role on the safety modifier and on the orders modifier, the switch included (decision 25). It runs Safe v1.5.0. Exactly two of its owners are owners of the committee's Safe, exactly two are owners of the Emergency Brakes Safe, and one is an owner of neither. One person can hold several addresses, so the fifth signer also states in writing that they belong to neither body. An owner change is a critical alert, and a DAO vote can replace the role's holder.
 - **Operator modifier.** A minimal proxy of the Roles mastercopy. Owner, avatar and target are the Asset Safe. It carries the `operator` and `governance` roles.
@@ -237,4 +237,4 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 
 ## Open questions
 
-None open. OD-42, OD-43 and OD-49 were decided on 2026-10-06, OD-57 on 2026-10-09, and OD-58 to OD-60 on 2026-10-13. The orders account's fallback handler on Safe v1.5.0 needs a fork test before it is relied on ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). OD-65 asks who holds the emergency Safe's fifth seat. EM said on 2026-10-13 that a member of the Tech team may hold it, tentatively. A Snapshot appoints the signer before the emergency Safe is deployed. OD-73 was decided on 2026-10-14 (decision 28), and OD-78 the same day (decision 30).
+None open. OD-42, OD-43 and OD-49 were decided on 2026-10-06, OD-57 on 2026-10-09, and OD-58 to OD-60 on 2026-10-13. The orders account's fallback handler on Safe v1.5.0 needs a fork test before it is relied on ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). OD-65 asks who holds the emergency Safe's fifth seat. EM said on 2026-10-13 that a member of the Tech team may hold it, tentatively. A Snapshot appoints the signer before the emergency Safe is deployed. OD-73, OD-75 and OD-78 were decided on 2026-10-14 (decisions 28 to 30).

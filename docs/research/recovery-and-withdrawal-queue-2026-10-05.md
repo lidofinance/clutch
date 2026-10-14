@@ -7,9 +7,12 @@ status: stable
 review_status: slop
 valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
+superseded_by:
+  ref: /adr/007-swapping-through-an-orders-account.md
+  note: "In part: decision 27 of ADR 007 (2026-10-08) took the withdrawal queue out of the design. Recovery into USDC or USDT stands (OD-26)."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:58:30Z
+  at: 2026-10-14T21:03:02Z
 verified: []
 sources:
   - id: s1
@@ -33,9 +36,14 @@ sources:
   - id: s7
     resource: "https://etherscan.io/block/26128295"
     title: Ethereum block 26128295, used for every chain read on this page
+  - id: s8
+    resource: /adr/007-swapping-through-an-orders-account.md
+    title: ADR 007 — the withdrawal queue leaves the design, decision 27
 ---
 
 # Recovery into USDT and the withdrawal-queue approval, 2026-10-05
+
+> **Superseded in part** on 2026-10-08: the vault no longer uses Lido's withdrawal queue [s8]. Recovery into USDC or USDT stands (OD-26).
 
 An agent ran every chain read on this page on 2026-10-05. The reads use Ethereum mainnet block 26128295, hash `0x08a472b1b87fab25173d5e2101050989c068ee6a128b80e0cd98170639d4bf74`, time 2026-10-05T19:35:23Z [s7].
 

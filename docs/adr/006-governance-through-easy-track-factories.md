@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:39:38Z
+  at: 2026-10-14T21:03:23Z
 verified: []
 sources:
   - id: s1
@@ -19,7 +19,7 @@ sources:
     title: Chain reads, 2026-09-30 — Easy Track settings, global duration, hash check, script format
   - id: s3
     resource: /specs/lip-draft.md
-    title: LIP draft — governance, the toggle factory and the template factories
+    title: LIP draft — governance and the template factories
   - id: s4
     resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/src/gov/RoleToggleEVMScriptFactory.sol"
     title: Kit role-toggle factory at 370e20a, retired by OD-09
@@ -161,4 +161,4 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 ## Open questions
 
-None open. OD-38, OD-41, OD-43, OD-45, OD-46 and OD-49 were decided on 2026-10-06.
+None open. OD-38, OD-41, OD-43, OD-45, OD-46 and OD-49 were decided on 2026-10-06, and OD-70, OD-72 and OD-77 to OD-79 on 2026-10-14.

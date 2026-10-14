@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:39:38Z
+  at: 2026-10-14T21:03:23Z
 verified: []
 sources:
   - id: s1
@@ -37,7 +37,7 @@ sources:
 | Operator Safe threshold | four of seven | EM decision of 2026-10-02 [s1] | ADR 005 |
 | Safe version of the Asset Safe, the operator Safe and the emergency Safe | v1.5.0 | EM decisions of 2026-10-02 and 2026-10-05: the compatibility check met the condition; EM reported the vendor's confirmation of v1.5.0 support, which closed the gate; the due diligence found no blocker (OD-17) [s1][s3] | ADR 005 |
 | Asset Safe fallback handler | none; a protocol that needs one comes back to EM | EM decision of 2026-10-05 [s1] | ADR 005 |
-| How the Aragon Agent authorizes an Asset Safe transaction | `approveHash`, or the Agent sends the transaction itself; never a contract signature | EM decision of 2026-10-05 [s1] | ADR 005 |
+| How Aragon Voting authorizes an Asset Safe transaction | `approveHash`, or Aragon Voting sends the transaction itself; never a contract signature | EM decisions of 2026-10-05 and 2026-10-14 (OD-73) [s1] | ADR 005 |
 | Emergency Safe | three of five: two committee members, two Emergency Brakes members and a fifth signer who is a member of neither body; the committee and the Emergency Brakes multisig appoint two seats each, and a DAO Snapshot appoints the fifth | EM decision of 2026-10-13 (OD-58) [s1], replacing threshold two with the committee's owners (OD-30) | ADR 005 |
 | Switch holder | the emergency Safe, through the emergency role; the module argument is pinned to the operator modifier; the technical role is gone | EM decision of 2026-10-13 (OD-58) [s1] | ADR 005 |
 | Emergency Brakes multisig in the vault | no role; it keeps only the global Easy Track pause | EM decision of 2026-10-13 (OD-58) [s1] | ADR 005 |
