@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T08:15:41Z
+  at: 2026-10-14T16:49:22Z
 verified: []
 sources:
   - id: s1
@@ -184,7 +184,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - A recovery order names its own limit, so it can fill in a depeg at a price that the emergency signers accept. The service level stays the time to initiate, not the time to fill.
 - The vault no longer depends on Chainlink's Feed Registry, the shared Stonks router, or the committee's Safe as the router's manager. The router's settings stop being an untimelocked lever on the vault (OD-45).
 - Recovery can sell wstETH, WETH and sUSDS directly. The operator buys and sells WETH in CoW orders in minutes. Staking stays; unstaking goes through CoW orders only (decision 27).
-- A new token waits for a DAO vote. The launch lists cover the mandate's assets, so this should be rare.
+- A new token waits for a DAO vote. The launch lists cover the mandate's assets, so this should be rare. OD-68 asks whether a motion can add one.
 - An order can rest for up to 90 days, so a larger price move can happen while it rests. A resting order is a standing authorisation: it keeps acting after its context changes. The 30-day alert and the monthly report ask the committee to confirm it. The tokens behind a resting order sit idle in the orders account.
 - The new components are one Safe and one modifier, both instances of existing code (decision 28). The delegatecall to the order signer comes from the enabling vote, because a motion cannot grant one (OD-36).
 - The order signer has no audit that this repository found. It is 40 lines long, and Lido reviews it in phase 3.

@@ -86,9 +86,10 @@ sections:
         sources: ["ADR-005#context", "ADR-005#proposed-direction", "doc:docs/specs/lip-draft.md#test-cases"]
       - asked: "The complete initial configuration is in place before ownership passes to the DAO, so no separate setup-only vote is needed."
         verdict: changed
-        clutch: "Ownership never passes: the Asset Safe is created with the Aragon Agent as its only owner. The enabling vote applies the committed policy artifact, grants the operator role and registers the factories, so no setup-only vote is needed."
+        clutch: "Ownership never passes: the Asset Safe is created with the Aragon Agent as its only owner. The enabling vote applies the committed policy artifact, grants every role, sets up the orders account and the first-loss Safe, and registers the factories, so no setup-only vote is needed."
         why: "The Aragon Agent is the only owner of the Asset Safe at all times, so only the DAO can configure the vault, and its enabling vote does it in one step."
-        sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", INV-001, "doc:script/DeployDryRun.s.sol"]
+        sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", INV-001, "doc:script/DeployDryRun.s.sol",
+          "doc:docs/specs/enabling-vote.md#the-vote"]
     added:
       - text: "An exit-governance role on the safety modifier: the motion that onboards a protocol also writes the emergency role's exit from it."
         why: "Without it, a protocol that a motion onboards would have no emergency exit until a DAO vote added one."

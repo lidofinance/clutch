@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T16:49:45Z
+  at: 2026-10-14T16:49:22Z
 verified: []
 sources:
   - id: s1
@@ -666,6 +666,8 @@ The [open-decisions register](/registers/open-decisions.md) tracks every open it
 3. **Twyne.** The mandate lists a Twyne investment. No Lido address checked holds a Twyne position, and its form is not known. It reduces the seed only when its holder and form are shown (OD-21).
 4. **The orders account.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 come before the design is relied on.
 5. **The emergency Safe's fifth signer.** A Snapshot appoints a signer who is a member of neither the committee nor the Emergency Brakes multisig, before the emergency Safe is deployed (OD-58).
+6. **Insurance funds for other products (OD-66).** Their roles and factories ship in the enabling vote, or adding them later is itself a DAO vote.
+7. **One vote, then Easy Track (OD-68 to OD-72).** After launch, a new token on the orders account, a budget key for a new spender, granting again what a routine removal took, a new TM Floor Value, and a shape outside the five templates still need a DAO vote. [The enabling vote](/specs/enabling-vote.md) lists what the one vote holds.
 
 ## Links
 

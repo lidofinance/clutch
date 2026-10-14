@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T17:15:09Z
+  at: 2026-10-14T16:49:22Z
 verified: []
 sources:
   - id: s1
@@ -89,6 +89,7 @@ EM confirmed on 2026-10-13 [s1] that decision 7's "Easy Track only expands" is a
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
 
 - Each factory owns one template. A motion carries typed parameters only, such as a target, an asset and a budget key. The factory builds the tree.
+- A template that adds a branch to a function that already has branches, such as a token's `approve` with several spenders, writes the complete tree: every existing branch and the new one, because a write replaces the slot. How the factory learns the existing branches is open (OD-69).
 - Every factory's trusted caller is the operator Safe. Easy Track fixes the trusted caller at deployment [s7].
 - Every permission factory hard-codes the `operator` role key and refuses the Asset Safe, the orders account and their modules as a target.
 - The first-loss burn factory writes no permission. Its motion names an amount and one of the two share tokens that the factory pins, earnETH or earnUSD, and burns that amount through the `first-loss-burn` role on the first-loss modifier ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23). It is the only Clutch motion that moves value away from the DAO.
@@ -121,7 +122,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - Replacing the operator Safe means redeploying every factory with the new trusted caller and registering each one again by DAO vote [s7].
 - The committee proposes its own expansions. The objection window, the disclosure rule, the Emergency Brakes pause, and the emergency Safe's revoke and switch, which the committee cannot use alone, are the counterweights.
 - Routine removals happen at three of five on the emergency Safe, without screening and without notice in advance. The forum post follows the removal. Monitoring pages a revoke-only emergency action at a lower severity than a transfer or a swap.
-- A removed strategy comes back only through an onboarding motion or a DAO vote.
+- A removed strategy comes back only through an onboarding motion or a DAO vote. A permission that no template writes, such as staking or a fixed-ceiling approval, comes back only by vote (OD-70).
 - The kit's toggle factory and its tests [s4][s5] are removed from the kit. INV-007 retires.
 
 ## Confirmation

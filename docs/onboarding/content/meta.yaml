@@ -70,6 +70,7 @@ owed:
   - "EM accepts ADR 005 to ADR 011."
   - "A Snapshot appoints the emergency Safe's fifth signer, a member of neither the committee nor the Emergency Brakes multisig (OD-58, OD-65)."
   - "EM decides how insurance funds for products other than Lido Earn join the vault, before the enabling vote (OD-66)."
+  - "EM decides OD-68 to OD-72, so that routine operation after launch needs no DAO vote: a new token on the orders account, budget keys for new spenders, routine removals, a new TM Floor Value, and shapes outside the templates."
   - "The committee's valuation policy sets the price waterfall's band and the share of the vault that its last level may price (OD-62)."
   - "[the screening vendor] confirms in writing that it accepts no standing approvals and agrees to be named."
   - "[the screening vendor] says which rules it can check before execution: the liquidity buffer, the caps, an order's limit, a stop-loss order's expiry and a router swap's minimum output."
@@ -81,7 +82,7 @@ owed:
   - "The mandate's drafters owe the holder and the form of the Twyne position."
   - "Phase 2 builds the round-trip check, the orders account and its permissions, the first-loss Safe and its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the readings that the Zodiac UI shows, and the invariant-to-test check."
   - "No runbook is written yet. Each needs a fork drill before it counts."
-  - "No document describes the deployment sequence step by step yet."
+  - "The production deployment script is not written yet. The enabling-vote page lists what the one vote holds."
 footer: |-
   **Hypothetical draft.** Nothing on this page is ratified, deployed or advice. The Lido DAO and its committees have approved none of it, and every number can change.
 

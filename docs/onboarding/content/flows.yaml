@@ -150,6 +150,7 @@ flows:
         text: "The operator Safe creates the motion on the template factory, with typed values only: a target, an asset and a budget key. The screening guard checks this transaction."
         nodes: [operator-safe, screening, easytrack]
         edges: [motions, screen]
+        check: "The budget key must already be in the policy. A new spender's key needs a DAO vote until OD-69 closes, and a token new to the orders account needs one too (OD-68)."
       - who: "LDO holders"
         text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails. This window is the timelock for every structural increase of exposure. The Emergency Brakes multisig can also pause Easy Track."
         nodes: [dao, easytrack, brakes]
@@ -180,7 +181,7 @@ flows:
     sources: ["ADR-006#d2", "ADR-006#d3", "ADR-006#d4", "ADR-006#d5", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9",
       "ADR-006#d10", "ADR-006#d11", "ADR-006#d13", "ADR-006#context", "ADR-006#proposed-direction", "ADR-005#d26",
       INV-004, INV-005, INV-025, OD-36, OD-38, OD-45, OD-49, OD-59, "lip:part-4",
-      "test:test_D1_substituted_script_rejected_at_enactment"]
+      "test:test_D1_substituted_script_rejected_at_enactment", OD-68, OD-69]
 
   - id: budget
     group: governance
@@ -193,6 +194,7 @@ flows:
       - who: "Committee"
         text: "The attested computation derives the key's new budget, under that key's ceiling. The forum post names the event."
         nodes: [committee, asset-safe]
+        check: "A motion sets only a key that the policy already holds, so a new spender's key needs a DAO vote until OD-69 closes. A new TM Floor Value also needs a DAO vote for the funding limits and the fixed approval ceilings (OD-71)."
       - who: "Operator Safe"
         text: "The operator Safe creates a motion on the budget factory. The guard screens it, once the guard is set (OD-54)."
         nodes: [operator-safe, screening, easytrack]
@@ -205,8 +207,8 @@ flows:
       - who: "Monitoring"
         text: "Monitoring flags every budget motion, and checks that its forum post names an event."
         nodes: [monitoring]
-    sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d31", "ADR-009#proposed-direction", INV-011, INV-012, OD-56,
-      "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period"]
+    sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d31", "ADR-009#proposed-direction", "ADR-009#consequences", INV-011,
+      INV-012, OD-56, OD-69, OD-71, "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period"]
 
   - id: dao-change
     group: governance
@@ -554,8 +556,8 @@ flows:
         nodes: [emergency-safe, safety-modifier]
         edges: [em-role]
       - who: "LDO holders"
-        text: "Only the DAO can enable the operator modifier again. Its vote first cancels the queued motions, because a motion does not expire (OD-59)."
-        nodes: [dao, asset-safe]
+        text: "Only the DAO can enable the operator modifier again. Its vote first cancels the queued motions, because a motion does not expire, and also grants again the operator's permissions on the orders account (OD-59)."
+        nodes: [dao, asset-safe, orders]
         edges: [own]
     sources: ["ADR-005#d25", "ADR-005#d26", "ADR-005#context", "ADR-005#proposed-direction", OD-58, OD-59, INV-009,
       INV-027, "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned",
@@ -715,7 +717,7 @@ flows:
     group: deployment
     title: The enabling vote
     label: open
-    summary: "One DAO vote turns the system on. No document gives the full sequence of deployment and vote yet. These steps collect what the decisions already fix."
+    summary: "One DAO vote turns the system on. The enabling-vote page lists what it holds, what comes before it and what follows without a vote."
     trigger: "The mandate is approved and phase 3 is done."
     steps:
       - who: "Lido"
@@ -730,7 +732,7 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, operator-safe, emergency-safe]
       - who: "LDO holders"
-        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories and adds USDS to the payment permission."
+        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list. Aragon Voting runs the Easy Track and payment items when the vote executes; the Agent's items run after the Dual Governance timelock."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
         edges: [own, own-op, own-sf]
       - who: "Growth Committee, then the operator Safe"
@@ -739,7 +741,8 @@ flows:
         edges: [topup, motions]
     sources: ["ADR-004#d14", "ADR-007#proposed-direction", "ADR-007#confirmation", "ADR-008#d9", "ADR-008#d13",
       "ADR-008#d19", "ADR-008#d21", "ADR-008#proposed-direction", "ADR-010#d16", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22",
-      INV-022, INV-023, OD-54, "doc:ROADMAP.md#roadmap"]
+      "ADR-008#d10", INV-022, INV-023, OD-54, "doc:ROADMAP.md#roadmap", "doc:docs/specs/enabling-vote.md#the-vote",
+      "doc:docs/research/single-vote-review-2026-10-14.md#how-one-vote-carries-two-kinds-of-item"]
 
   - id: signer-rotation
     group: deployment

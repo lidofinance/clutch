@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-14
+
+* **Update**: Reviewed whether Clutch launches with one Aragon vote and then runs on Easy Track alone. Launch: yes, by design; a new spec page lists what the enabling vote holds, Voting items and Agent items. After launch: five gaps, opened as OD-68 to OD-72. Fixed the restart, which missed the orders account, and stale text in ADR 005, ADR 011, INV-023, the roadmap, the parameters register and the guide.
+
 ## 2026-10-13
 
 * **Decision**: Recorded EM's confirmation of three OD-67 points: only the burn moves to motions, and the exit to the Aragon Agent stays direct; ADR 006 decision 7, "Easy Track only expands", is a rule for permissions, which the burn motion does not change; the burn factory's shape and the pause advice stay as agent-drafted proposals that EM agrees with.

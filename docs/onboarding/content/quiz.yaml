@@ -51,7 +51,7 @@
     - "The DAO, by vote"
     - "The operator Safe"
   answer: 2
-  why: "No emergency body restores what it stopped. A DAO vote enables the operator modifier again through Dual Governance, and the same vote first cancels the queued motions, because a motion does not expire."
+  why: "No emergency body restores what it stopped. A DAO vote enables the operator modifier again through Dual Governance, and the same vote first cancels the queued motions, because a motion does not expire. It also grants again the operator's permissions on the orders account."
   sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59,
     "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts"]
 
