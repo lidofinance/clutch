@@ -6,6 +6,8 @@
 // (ADR 007, decision 27).
 // Changed for Clutch on 2026-10-13: the Emergency Brakes multisig holds no
 // role in the policy (ADR 005, decision 23).
+// Changed for Clutch on 2026-10-14: the committee's own Safe holds the
+// operator role (ADR 005, decision 31).
 import { readFileSync } from "node:fs";
 
 /**
@@ -33,7 +35,7 @@ export type Manifest = {
    * compiled again.
    */
   modules: string[];
-  /** The operator Safe: the committee's signers, 4 of 7, with the screening guard. */
+  /** The holder of the operator role: the committee's own Safe, 4 of 7 (ADR 005, decision 31). */
   operatorSafe: string;
   /**
    * The emergency Safe, 3 of 5: two committee members, two Emergency Brakes
@@ -95,7 +97,7 @@ export const NAMES: Record<string, string> = {
   [manifest.assetSafe]: "Asset Safe",
   [manifest.operatorModifier]: "operator modifier",
   [manifest.safetyModifier]: "safety modifier",
-  [manifest.operatorSafe]: "operator Safe",
+  [manifest.operatorSafe]: "committee's Safe",
   [manifest.emergencySafe]: "emergency Safe",
   [manifest.easyTrackExecutor]: "Easy Track script executor",
 };

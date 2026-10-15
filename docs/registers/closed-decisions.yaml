@@ -1,0 +1,571 @@
+# Closed decisions of the open-decision register (ADR 012, OD-82).
+# `python3 scripts/validate_docs.py --write-status` generates the register's closed index from this
+# file, and each OD's state from `replaces` and `refines`; `--check-status` fails when the index is stale.
+# Fields: id; question; closed (date); log (the decision-log headings that record it, where EM's words stay);
+# adr (ADR-NNN#dN, or ADR-NNN for a record without numbered decisions); see (other pages);
+# replaces / refines (earlier ODs; `part: true` for a replacement in part); note (a short remark).
+
+- id: OD-01
+  question: "Where does the screening hook live?"
+  closed: 2026-10-02
+  log:
+    - "2026-10-02 — OD-01: the screening route"
+  adr: [ADR-010]
+- id: OD-02
+  question: "Which Safe version do the two new Safes use?"
+  closed: 2026-10-02
+  log:
+    - "2026-10-02 — OD-02 and OD-19: the two new Safes"
+  see: [/research/safe-v150-guard-compatibility-2026-10-02.md]
+- id: OD-03
+  question: "What is the base of the yield-bearing cap?"
+  closed: 2026-10-02
+  log:
+    - "2026-10-02 — OD-03: the base of the yield-bearing cap"
+  adr: [ADR-009]
+- id: OD-04
+  question: "Does Lido Lend count against the protocol cap?"
+  closed: 2026-10-02
+  log:
+    - "2026-10-02 — OD-04: Lido Lend and the protocol cap"
+  adr: [ADR-009]
+- id: OD-05
+  question: "How are the swap instances configured?"
+  closed: 2026-10-02
+  log:
+    - "2026-10-02 — OD-05 Q1 and Q2: instance managers and parameters"
+    - "2026-10-02 — OD-05 Q3: where recovered rebalancing tokens go"
+  adr: [ADR-007]
+- id: OD-06
+  question: "The period and the limit of the funding registry"
+  closed: 2026-10-02
+  log:
+    - "2026-10-02 — OD-06 Q1: the period"
+    - "2026-10-02 — OD-06 Q2: the limit"
+  adr: [ADR-008]
+- id: OD-07
+  question: "The screening vendor's guard: the agreement, the build, the confirmations and the announcement"
+  closed: 2026-10-02
+  log:
+    - "2026-10-02 — OD-07: the screening vendor's guard"
+  adr: [ADR-010]
+- id: OD-08
+  question: "The approval ceiling per token and the budget refill-period floor"
+  closed: 2026-10-02
+  log:
+    - "2026-10-02 — OD-08: approvals and the refill-period floor"
+  adr: [ADR-009]
+- id: OD-09
+  question: "How does an immediate removal work?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-09 Q1: the removal path"
+    - "2026-10-05 — OD-09 Q2: DAO-scoped role keys"
+  adr: [ADR-006]
+- id: OD-10
+  question: "Which team owns the repository in CODEOWNERS?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-10: code owners and the branch rule"
+  adr: [ADR-003]
+- id: OD-11
+  question: "Do the shared payment ACL parameters stay unchanged, which token list does the stablecoin registry use, and is ETH a funding asset?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-11: the payment permission, the token list and ETH"
+  adr: [ADR-008]
+- id: OD-12
+  question: "Confirm four recorded readings: the vision answer, the acceptor answer, the start of Lido Lend's capped months, and who signs the vendor agreement"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-12: four recorded readings"
+  adr: [ADR-002, ADR-009, ADR-010]
+- id: OD-13
+  question: "Who writes and maintains the vault's detectors in each monitoring estate?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-13: who writes and maintains the detectors"
+  adr: [ADR-009]
+- id: OD-14
+  question: "Reporting operations: who publishes, on what schedule, what happens on a stale or missing price, who answers for a late report, and where a report's identifier is anchored"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-14: reporting operations and the anchor"
+    - "2026-10-05 — OD-14: the mandate text"
+  adr: [ADR-009]
+- id: OD-15
+  question: "How do the committee and the Emergency Brakes multisig record a verification of a page?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-15: how a body records a verification"
+  adr: [ADR-002]
+- id: OD-16
+  question: "The policy data format and the compiler toolchain"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-16: the policy data format and the compiler"
+  adr: [ADR-004]
+- id: OD-17
+  question: "Does Safe v1.5.0 hold up to due diligence on its audits and incident history?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-17: Safe v1.5.0 after the due diligence"
+  adr: [ADR-005, ADR-010]
+  see: [/research/safe-v150-due-diligence-2026-10-05.md]
+- id: OD-18
+  question: "Does the Stonks price source cover every pair?"
+  closed: 2026-10-02
+  see: [/research/stonks-instances-2026-10-02.md]
+  note: "Answered by evidence, not by a decision: the deployed Stonks stack prices only stETH and LDO, and the configuration moved to OD-20."
+- id: OD-19
+  question: "The operator Safe's threshold"
+  closed: 2026-10-02
+  log:
+    - "2026-10-02 — OD-02 and OD-19: the two new Safes"
+- id: OD-20
+  question: "Who configures the swap pricing before launch, and when?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-20: swap pricing"
+  adr: [ADR-007, ADR-007#d27]
+  see: [/research/stonks-pricing-2026-10-05.md]
+  note: "The withdrawal-queue route left the design on 2026-10-08 (ADR 007, decision 27)."
+- id: OD-21
+  question: "How do the legacy investments that the mandate carries over move into the vault, and who holds them now?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-21: the legacy investments"
+  adr: [ADR-008]
+  see: [/research/legacy-investments-2026-10-05.md]
+- id: OD-22
+  question: "Should DAI earn, or stay idle?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-22: DAI"
+  adr: [ADR-011]
+  see: [/research/dai-usds-conversion-2026-10-05.md]
+- id: OD-23
+  question: "When does the agent get its own GitHub identity?"
+  closed: 2026-10-07
+  log:
+    - "2026-10-07 — many contributors and their agents"
+  adr: [ADR-012#d5]
+- id: OD-24
+  question: "The ceiling per USDS payment in the rewritten payment permission"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-24: the USDS ceiling"
+  adr: [ADR-008]
+- id: OD-25
+  question: "Does decision 6 of ADR 003 cover the kit's dry-run values, and what comes before the acceptance of ADR 001 to ADR 004?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-25 to OD-30: acceptance round 1 and the emergency exit"
+  adr: [ADR-003]
+- id: OD-26
+  question: "In a USDC depeg, which stablecoins can recovery swap into USDT?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-25 to OD-30: acceptance round 1 and the emergency exit"
+  adr: [ADR-007]
+  see: [/research/recovery-and-withdrawal-queue-2026-10-05.md]
+- id: OD-27
+  question: "Does the stETH approval to Lido's withdrawal queue spend a budget key, or have a fixed ceiling?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-25 to OD-30: acceptance round 1 and the emergency exit"
+  adr: [ADR-007]
+  see: [/research/recovery-and-withdrawal-queue-2026-10-05.md]
+- id: OD-28
+  question: "Does the no-redeem rule for the first-loss Earn shares bind the emergency role?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-25 to OD-30: acceptance round 1 and the emergency exit"
+  adr: [ADR-008]
+- id: OD-29
+  question: "What does \"a pause of the whole module\" in decision 6 of ADR 009 mean?"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-25 to OD-30: acceptance round 1 and the emergency exit"
+  adr: [ADR-009]
+- id: OD-30
+  question: "The mandate draft promises an emergency exit that is independent of the committee, but the emergency Safe is a subset of the committee"
+  closed: 2026-10-05
+  log:
+    - "2026-10-05 — OD-25 to OD-30: acceptance round 1 and the emergency exit"
+  adr: [ADR-005]
+- id: OD-31
+  question: "May an agent record a human's own acceptance and verification on that human's instruction, and how is such an entry marked?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-31: recording a human's own verification"
+  adr: [ADR-002, ADR-003]
+- id: OD-32
+  question: "Who publishes the fortnightly cap reading that the trigger of OD-29 needs?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-32: the fortnightly cap reading"
+  adr: [ADR-009]
+- id: OD-33
+  question: "Is the Zodiac constellation the source of the permission policy?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-33: the constellation as the policy source"
+  adr: [ADR-004]
+  see: [/research/zodiac-constellation-2026-10-06.md]
+- id: OD-34
+  question: "May the files copied from the constellation keep LGPL-3.0-only?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-34 and OD-35: the constellation's licence and the Zodiac workspace"
+  adr: [ADR-001]
+- id: OD-35
+  question: "Who owns the Lido Zodiac workspace and its API key?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-34 and OD-35: the constellation's licence and the Zodiac workspace"
+  adr: [ADR-004]
+- id: OD-36
+  question: "May a governance motion grant the operator delegatecall?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-36: no delegatecall through governance, and the policy CI job"
+  adr: [ADR-006, ADR-005]
+- id: OD-37
+  question: "How does Clutch teach the system to new readers, and keep that material true?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-37: the onboarding guide"
+  see: [/specs/specification-policy.md]
+- id: OD-38
+  question: "May a motion give the operator the safety modifier, or another module of the Asset Safe, as a target?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-38: the governance role refuses every module of the Asset Safe"
+  adr: [ADR-006, ADR-005]
+- id: OD-39
+  question: "How does Clutch cover the mandate rules that the permission layer cannot enforce?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-39 to OD-45: the committee's meeting on controls, buffer, product tiers, first-loss, swaps, NAV and timelocks"
+  adr: [ADR-009]
+  see: [/specs/control-matrix.md]
+- id: OD-40
+  question: "How is the liquidity buffer of at least one month of baseline spend kept?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-39 to OD-45: the committee's meeting on controls, buffer, product tiers, first-loss, swaps, NAV and timelocks"
+  adr: [ADR-009]
+- id: OD-41
+  question: "When does a new Lido product leave the protocol and counterparty cap?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-39 to OD-45: the committee's meeting on controls, buffer, product tiers, first-loss, swaps, NAV and timelocks"
+  adr: [ADR-009]
+  replaces:
+    - {od: OD-04, part: true}
+    - {od: OD-12, part: true}
+- id: OD-42
+  question: "How are the DAO's first-loss Earn shares kept apart from the vault's other shares?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-39 to OD-45: the committee's meeting on controls, buffer, product tiers, first-loss, swaps, NAV and timelocks"
+  adr: [ADR-008, ADR-005]
+  replaces:
+    - {od: OD-21, part: true}
+- id: OD-43
+  question: "How does the vault swap, given the committee's need for DCA, standing limit orders, stop-loss orders, and 1inch and Uniswap?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-39 to OD-45: the committee's meeting on controls, buffer, product tiers, first-loss, swaps, NAV and timelocks"
+  adr: [ADR-007]
+  see: [/research/cow-orders-account-2026-10-06.md]
+  replaces:
+    - {od: OD-05, part: true}
+    - {od: OD-18, part: true}
+    - {od: OD-20, part: true}
+- id: OD-44
+  question: "What does the Zodiac UI show about the vault's value and limits, and from which data?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-39 to OD-45: the committee's meeting on controls, buffer, product tiers, first-loss, swaps, NAV and timelocks"
+  adr: [ADR-009]
+- id: OD-45
+  question: "Are all structural increases of exposure timelocked?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-39 to OD-45: the committee's meeting on controls, buffer, product tiers, first-loss, swaps, NAV and timelocks"
+  adr: [ADR-009, ADR-010]
+- id: OD-46
+  question: "How does a new token join the orders account's lists, given that a motion cannot write the order signer's delegatecall permission?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-46: how a new token joins the orders account's lists"
+  adr: [ADR-006, ADR-007]
+- id: OD-47
+  question: "What is the maximum life of an order from the orders account?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-47: the maximum order life"
+  adr: [ADR-007]
+- id: OD-48
+  question: "Do recovery orders need an on-chain price floor?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-48: the price risk of recovery orders"
+  adr: [ADR-007]
+  see: [/research/cow-orders-account-2026-10-06.md]
+- id: OD-49
+  question: "How does the emergency role exit a position that a motion onboarded?"
+  closed: 2026-10-06
+  log:
+    - "2026-10-06 — OD-49: emergency exits for positions that a motion onboards"
+  adr: [ADR-006, ADR-005, ADR-011]
+- id: OD-50
+  question: "Which human ids may verify a page, besides EM, the committee and the Emergency Brakes multisig?"
+  closed: 2026-10-07
+  log:
+    - "2026-10-07 — OD-50 to OD-53: reviewers, verification locks, the fork suite and the request's figures"
+  adr: [ADR-012#d6]
+- id: OD-51
+  question: "Does a verification lock the page's text?"
+  closed: 2026-10-07
+  log:
+    - "2026-10-07 — OD-50 to OD-53: reviewers, verification locks, the fork suite and the request's figures"
+  adr: [ADR-012#d7]
+- id: OD-52
+  question: "Where does the fork suite run in CI?"
+  closed: 2026-10-07
+  log:
+    - "2026-10-07 — OD-50 to OD-53: reviewers, verification locks, the fork suite and the request's figures"
+  adr: [ADR-012#d8]
+- id: OD-53
+  question: "Are the request for solution's allocation figures restricted, like the mandate's?"
+  closed: 2026-10-07
+  log:
+    - "2026-10-07 — OD-50 to OD-53: reviewers, verification locks, the fork suite and the request's figures"
+  adr: [ADR-012#d9]
+- id: OD-54
+  question: "How does a launch without the screening guard stay under its cap, and what lifts the cap?"
+  closed: 2026-10-09
+  log:
+    - "2026-10-09 — OD-54 to OD-56: the capped launch, its figure and the budgets"
+  adr: [ADR-010#d20, ADR-010#d21, ADR-010#d22, ADR-008#d20]
+- id: OD-55
+  question: "Which figure caps a launch without the guard?"
+  closed: 2026-10-09
+  log:
+    - "2026-10-09 — OD-54 to OD-56: the capped launch, its figure and the budgets"
+  adr: [ADR-010#d20]
+- id: OD-56
+  question: "How often do budgets follow the caps?"
+  closed: 2026-10-09
+  log:
+    - "2026-10-09 — OD-54 to OD-56: the capped launch, its figure and the budgets"
+    - "2026-10-09 — OD-56's reason, and OD-57: one modifier on the orders account"
+  adr: [ADR-009#d31, ADR-009#d32, ADR-009#d33]
+- id: OD-57
+  question: "How many Roles modifiers does each account carry?"
+  closed: 2026-10-09
+  log:
+    - "2026-10-09 — OD-56's reason, and OD-57: one modifier on the orders account"
+  adr: [ADR-005#d21, ADR-007#d28]
+- id: OD-58
+  question: "Who holds the emergency powers? May the Emergency Brakes multisig exit positions and send assets home, and does the emergency Safe stay?"
+  closed: 2026-10-13
+  log:
+    - "2026-10-13 — OD-58 and OD-63: the emergency Safe and the switch"
+  adr: [ADR-005#d23, ADR-005#d24, ADR-005#d25, ADR-007#d30, ADR-009#d34]
+  replaces:
+    - {od: OD-29, part: true}
+    - {od: OD-30}
+    - {od: OD-57, part: true}
+- id: OD-59
+  question: "May an emergency body restart what it stopped, for example unpause Easy Track?"
+  closed: 2026-10-13
+  log:
+    - "2026-10-13 — OD-59: no resume by an emergency body"
+  adr: [ADR-005#d26]
+- id: OD-60
+  question: "Who burns or redeems the first-loss shares under the March 2026 terms?"
+  closed: 2026-10-13
+  log:
+    - "2026-10-13 — OD-60: the first-loss role"
+  adr: [ADR-008#d21, ADR-008#d22, ADR-005#d27]
+  replaces:
+    - {od: OD-21, part: true}
+    - {od: OD-42, part: true}
+- id: OD-61
+  question: "How long may an operator order live?"
+  closed: 2026-10-13
+  log:
+    - "2026-10-13 — OD-61: the order life"
+  adr: [ADR-007#d29]
+  replaces:
+    - {od: OD-47, part: true}
+- id: OD-62
+  question: "Which price does a report use when a source is missing or wrong, and what does the Zodiac UI show?"
+  closed: 2026-10-13
+  log:
+    - "2026-10-13 — OD-62: prices and the Zodiac UI; the protected files"
+  adr: [ADR-009#d35, ADR-009#d36, ADR-009#d37, ADR-009#d38]
+  refines: [OD-14, OD-44]
+- id: OD-63
+  question: "Does the Emergency Brakes multisig still verify the records that constrain the operator?"
+  closed: 2026-10-13
+  log:
+    - "2026-10-13 — OD-58 and OD-63: the emergency Safe and the switch"
+  adr: [ADR-002#d12]
+- id: OD-64
+  question: "Does the Emergency Brakes multisig keep the notice of a relaxed screening rule and its view of the Lido Zodiac workspace?"
+  closed: 2026-10-13
+  log:
+    - "2026-10-13 — ADR 002 verified again, the first-loss holder and OD-64"
+  adr: [ADR-010#d23, ADR-004#d17]
+- id: OD-66
+  question: "How does the vault add and use insurance funds for products other than Lido Earn?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-68 to OD-72 decided, OD-66 in part, OD-73 opened"
+    - "2026-10-14 — OD-73: Aragon Voting owns the vault's Safes; OD-66 closed"
+  adr: [ADR-008#d25, ADR-008#d26, ADR-008#d27, ADR-008#d28, ADR-008#d29, ADR-008#d30]
+- id: OD-67
+  question: "Does a first-loss burn run without the objection window, as OD-60 allowed?"
+  closed: 2026-10-13
+  log:
+    - "2026-10-13 — OD-67: no first-loss burn without the objection window"
+    - "2026-10-13 — OD-67: three readings confirmed"
+  adr: [ADR-008#d23]
+  replaces:
+    - {od: OD-60, part: true}
+- id: OD-68
+  question: "How does a new token join the orders account after launch?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-68 to OD-72 decided, OD-66 in part, OD-73 opened"
+  adr: [ADR-007#d31]
+  replaces:
+    - {od: OD-46, part: true}
+    - {od: OD-57, part: true}
+    - {od: OD-58, part: true}
+- id: OD-69
+  question: "How does a motion give a budget to a spender that the enabling vote did not know?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-68 to OD-72 decided, OD-66 in part, OD-73 opened"
+  adr: [ADR-009#d39]
+- id: OD-70
+  question: "Do routine removals stay the emergency Safe's revoke?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-68 to OD-72 decided, OD-66 in part, OD-73 opened"
+  adr: [ADR-006#d14]
+  replaces:
+    - {od: OD-09, part: true}
+- id: OD-71
+  question: "What follows a new TM Floor Value, or a fall in the stETH price?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-68 to OD-72 decided, OD-66 in part, OD-73 opened"
+  adr: [ADR-008#d24]
+- id: OD-72
+  question: "Which protocol shapes and reward claims must the templates cover before the enabling vote?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-68 to OD-72 decided, OD-66 in part, OD-73 opened"
+  adr: [ADR-006#d15]
+- id: OD-73
+  question: "Who owns the vault's Safes and administers its funding registries: the Aragon Agent, through Dual Governance, or Aragon Voting, directly?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-73: Aragon Voting owns the vault's Safes; OD-66 closed"
+  adr: [ADR-005#d28]
+  replaces:
+    - {od: OD-42, part: true}
+    - {od: OD-43, part: true}
+    - {od: OD-60, part: true}
+- id: OD-74
+  question: "What can a token that a motion adds do on the orders account, how does it get CoW's approval, how does it leave in an emergency, and does its template ship with the launch?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-74 and OD-75: the interview on OD-68"
+  adr: [ADR-007#d32, ADR-007#d33, ADR-007#d34, ADR-007#d35, ADR-007#d36]
+  refines: [OD-68]
+- id: OD-75
+  question: "Which restarts after an emergency stop run as Easy Track motions?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-74 and OD-75: the interview on OD-68"
+  adr: [ADR-005#d29]
+  refines: [OD-59]
+- id: OD-76
+  question: "Which launch tokens get stop-loss orders, when Chainlink's Feed Registry has no USD feed for wstETH, WETH or LDO?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-76 and OD-77: launch stop-loss feeds, and the restore's launch version"
+  adr: [ADR-007#d37]
+  refines: [OD-74]
+- id: OD-77
+  question: "Does a restore keep writing the launch version, which drops later additions and brings back routine removals?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-76 and OD-77: launch stop-loss feeds, and the restore's launch version"
+  adr: [ADR-006#d16]
+  refines: [OD-75]
+- id: OD-78
+  question: "Which items leave the launch, to cut its complexity?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-78: a smaller launch"
+  adr: [ADR-005#d30, ADR-006#d17, ADR-007#d38, ADR-008#d31]
+  replaces:
+    - {od: OD-66, part: true}
+    - {od: OD-68}
+    - {od: OD-74, part: true}
+    - {od: OD-75}
+    - {od: OD-77}
+- id: OD-79
+  question: "Which options of the 80/20 pass after OD-78 does the launch take?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-79: the 80/20 pass after OD-78"
+  adr: [ADR-007#d39, ADR-006#d18]
+  replaces:
+    - {od: OD-47, part: true}
+    - {od: OD-74}
+    - {od: OD-76}
+  refines: [OD-72]
+- id: OD-80
+  question: "Does Clutch need its own operator Safe, or does the committee's existing Safe hold the operator role?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers"
+    - "2026-10-15 — OD-80 and OD-83 kept after a review of the operator Safe"
+  adr: [ADR-005#d31]
+  replaces:
+    - {od: OD-01, part: true}
+    - {od: OD-02, part: true}
+    - {od: OD-07, part: true}
+    - {od: OD-17, part: true}
+- id: OD-81
+  question: "How do the guide and the diagrams show the Emergency Brakes multisig?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers"
+  adr: [ADR-012#d12]
+- id: OD-82
+  question: "Which parts of the registers and the ADR pages does the validator generate, and which checks guard them?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers"
+  adr: [ADR-012#d13]
+- id: OD-83
+  question: "Where does the screening guard go when the launch cap lifts, now that the committee's own Safe is the operator?"
+  closed: 2026-10-14
+  log:
+    - "2026-10-14 — OD-83: the screening guard on the committee's Safe"
+    - "2026-10-15 — OD-80 and OD-83 kept after a review of the operator Safe"
+  adr: [ADR-010#d24]
+  replaces:
+    - {od: OD-01, part: true}
+  refines: [OD-80]

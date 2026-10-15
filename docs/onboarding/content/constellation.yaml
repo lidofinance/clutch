@@ -18,7 +18,7 @@ planned:
     sources: ["ADR-006#d13", "ADR-006#proposed-direction", OD-49, INV-025]
   - name: First-loss Safe and its roles
     where: "A Voting-owned Safe with one modifier of its own"
-    what: "One first-loss modifier with two roles. The first-loss burn role, held by the Easy Track script executor, burns the DAO's first-loss shares only in an enacted motion. The first-loss role, held by the operator Safe, redeems them to the Aragon Agent. No other role reaches them."
+    what: "One first-loss modifier with two roles. The first-loss burn role, held by the Easy Track script executor, burns the DAO's first-loss shares only in an enacted motion. The first-loss role, held by the committee's Safe, redeems them to the Aragon Agent. No other role reaches them."
     sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", OD-42, OD-60, OD-67, INV-021]
 changes:
   - area: Modifiers
@@ -28,12 +28,6 @@ changes:
     why: "Recovery must keep working when the operator is switched off, and no screening may sit in its way."
     sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction",
       "doc:docs/research/zodiac-constellation-2026-10-06.md#4-differences-from-the-decided-design"]
-  - area: Operator holder
-    kind: changed
-    provider: "The committee's existing Safe."
-    clutch: "A new operator Safe at 4 of 7, with the screening vendor's guard, which is also the trusted caller of every factory."
-    why: "Above the launch cap, blocking a transaction before it runs is a hard requirement. A dedicated Safe carries the guard and creates every motion, so each one is screened. The vault may launch without the guard under a cap of one million dollars; the guard comes before the cap lifts (OD-54, OD-55)."
-    sources: ["ADR-010#d2", "ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction", OD-01, OD-19, OD-54, OD-55]
   - area: Emergency holder
     kind: changed
     provider: "The Emergency Brakes multisig."
@@ -92,7 +86,7 @@ changes:
   - area: First-loss shares
     kind: changed
     provider: "Both roles can redeem Earn shares."
-    clutch: "The first-loss shares sit in a first-loss Safe. Only an enacted motion burns them, and only a narrow role of the operator Safe redeems them to the Agent; the vault's other roles never see them."
+    clutch: "The first-loss shares sit in a first-loss Safe. Only an enacted motion burns them, and only a narrow role of the committee's Safe redeems them to the Agent; the vault's other roles never see them."
     why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart. The narrow roles let the committee execute the first-loss terms without a DAO vote, and a burn waits for the objection window."
     sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", OD-42, OD-60, OD-67]
   - area: Compiling and pushing

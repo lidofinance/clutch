@@ -2,7 +2,7 @@
   "network": "fork-25946643",
   "chainId": 1,
   "forkBlock": 25946643,
-  "note": "The fork fixture's deployment (test/utils/Fixture.sol): mocked governance heads, stand-in addresses for the operator Safe and the emergency Safe, and a Safe and two Roles proxies from the deployed singletons. Not mainnet addresses.",
+  "note": "The fork fixture's deployment (test/utils/Fixture.sol): mocked governance heads, stand-in addresses for the committee's Safe and the emergency Safe, and a Safe and two Roles proxies from the deployed singletons. Not mainnet addresses.",
   "agent": "0x66eda24622120758687AAb57575F29534D74270f",
   "assetSafe": "0xB546CB43ECfEf2d9C1078a17f7a0bE1e7e2EbD50",
   "operatorModifier": "0x699Da4F4ED5e0e86265b4BeAfe011d28F4a52b8b",

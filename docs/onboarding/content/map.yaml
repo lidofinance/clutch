@@ -4,24 +4,24 @@
 width: 1180
 height: 750
 description: The Lido DAO owns the Asset Safe; it also owns the orders account and the first-loss Safe, which the map
-  shows without an arrow. The Asset Safe owns two Roles modifiers. The operator Safe holds the operator role and Easy Track holds the governance role on the operator modifier.
+  shows without an arrow. The Asset Safe owns two Roles modifiers. The committee's Safe holds the operator role and Easy Track holds the governance role on the operator modifier.
   The emergency Safe holds the emergency role on the safety modifier, the switch included. Two of its five signers come
-  from the committee and two from the Emergency Brakes multisig, which itself holds only the Easy Track pause. Easy Track
+  from the committee and two from the Emergency Brakes multisig, which can pause Easy Track. Easy Track
   also holds the exit-governance role there, the operator and emergency roles act on the orders account through its own
-  modifier, the operator Safe also holds the first-loss role, and Easy Track holds the first-loss burn role; the map draws no arrow for these. The screening guard approves each operator Safe transaction. The Asset Safe uses approved protocols and swaps
+  modifier, the committee's Safe also holds the first-loss role, and Easy Track holds the first-loss burn role; the map draws no arrow for these. Once the launch cap lifts, the screening guard approves each transaction of the committee's Safe (OD-83). The Asset Safe uses approved protocols and swaps
   through CoW orders from the orders account. The first-loss Safe holds the DAO's first-loss Earn shares. Monitoring
   watches the vault and pages the emergency Safe. Reporting publishes from the vault's snapshots.
 nodes:
 - id: committee
-  label: Committee
+  label: Committee Safe
   sub: Treasury Management · 4 of 7
-  summary: The people who run the mandate. The same signers sign the operator Safe, and two of them sit on the emergency
-    Safe.
+  summary: The committee's existing Safe. It holds the operator role and is the trusted caller of every factory. Two of
+    its signers sit on the emergency Safe.
   domain: ops
   kind: multisig
   status: existing
-  x: 40
-  y: 44
+  x: 330
+  y: 192
   w: 240
   h: 84
 - id: dao
@@ -59,17 +59,6 @@ nodes:
   y: 192
   w: 240
   h: 84
-- id: operator-safe
-  label: Operator Safe
-  sub: 4 of 7 · screened
-  summary: Holds the operator role. Each of its transactions needs the screening vendor's approval first.
-  domain: ops
-  kind: multisig
-  status: instance
-  x: 330
-  y: 192
-  w: 240
-  h: 84
 - id: emergency-safe
   label: Emergency Safe
   sub: 3 of 5 · two bodies and one
@@ -83,22 +72,10 @@ nodes:
   y: 192
   w: 240
   h: 84
-- id: brakes
-  label: Emergency Brakes
-  sub: Easy Track pause · 3 of 5
-  summary: Outside the committee. It holds only the Easy Track pause and touches no funds. Two of its members sit on the
-    emergency Safe.
-  domain: ops
-  kind: multisig
-  status: existing
-  x: 900
-  y: 192
-  w: 240
-  h: 84
 - id: screening
   label: Screening guard
   sub: '[the screening vendor]'
-  summary: A transaction guard on the operator Safe. It refuses any transaction that the vendor has not approved once. It is set after the launch; the launch cap of one million dollars lifts once it is live (OD-54).
+  summary: A transaction guard on the committee's Safe (OD-83). It refuses any transaction that the vendor has not approved once. It is set after the launch; the launch cap of one million dollars lifts once it is live (OD-54).
   domain: ext
   kind: service
   status: instance
@@ -157,7 +134,7 @@ nodes:
   label: First-loss Safe
   sub: two narrow roles · Voting owns it
   summary: A Safe that Aragon Voting owns. It holds only the DAO's first-loss Earn shares. On the Earn team's written
-    instruction, an Easy Track motion burns them, or a role of the operator Safe redeems them to the Agent.
+    instruction, an Easy Track motion burns them, or a role of the committee's Safe redeems them to the Agent.
   domain: vault
   kind: contract
   status: instance
@@ -243,11 +220,11 @@ edges:
   - 722
   - 432
 - id: op-role
-  from: operator-safe
+  from: committee
   to: operator-modifier
   kind: role
   short: operator role
-  label: The operator Safe holds the operator role on the operator modifier.
+  label: The committee's Safe holds the operator role on the operator modifier.
   label_at:
   - 450
   - 300
@@ -270,11 +247,11 @@ edges:
   - 322
   - 318
 - id: motions
-  from: operator-safe
+  from: committee
   to: easytrack
   kind: governs
   short: ''
-  label: 'The operator Safe is the trusted caller of every Clutch factory: it creates the motions.'
+  label: 'The committee''s Safe is the trusted caller of every Clutch factory: it creates the motions.'
 - id: object
   from: dao
   to: easytrack
@@ -284,29 +261,6 @@ edges:
   label_at:
   - 388
   - 141
-- id: pause
-  from: brakes
-  to: easytrack
-  kind: safety
-  short: can pause Easy Track
-  label: The Emergency Brakes multisig can pause Easy Track. Only the DAO can resume it.
-  via:
-  - - 1020
-    - 174
-  - - 160
-    - 174
-  label_at:
-  - 960
-  - 168
-- id: signers-op
-  from: committee
-  to: operator-safe
-  kind: signers
-  short: same signers
-  label: The operator Safe has the committee's signers, at 4 of 7.
-  label_at:
-  - 305
-  - 160
 - id: signers-em
   from: committee
   to: emergency-safe
@@ -315,19 +269,19 @@ edges:
   label: Two of the committee's signers sit on the emergency Safe, at 3 of 5 with two Emergency Brakes members and one
     member of neither body. The committee cannot act alone there.
   via:
-  - - 160
-    - 148
+  - - 450
+    - 170
   - - 730
-    - 148
+    - 170
   label_at:
   - 660
-  - 142
+  - 164
 - id: screen
   from: screening
-  to: operator-safe
+  to: committee
   kind: screens
   short: approves each transaction
-  label: The vendor's guard on the operator Safe refuses a transaction that the vendor has not approved, once and exactly.
+  label: From the lift of the launch cap, the vendor's guard on the committee's Safe refuses a transaction that the vendor has not approved, once and exactly.
   label_at:
   - 170
   - 330
@@ -367,7 +321,7 @@ edges:
   to: funding
   kind: governs
   short: top-up motions
-  label: A top-up is an Easy Track motion created by the operator Safe.
+  label: A top-up is an Easy Track motion created by the committee's Safe.
   label_at:
   - 800
   - 15

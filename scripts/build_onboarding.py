@@ -14,8 +14,10 @@ repository already states are read at build time: ADR titles and states, open
 decisions, invariants, runbooks, the LIP's status labels, the roadmap, the
 review state of every page, and the roles and permissions of the compiled
 policy artifact. Every reference in the content must resolve, or the build
-fails. Every ADR, invariant, LIP part and runbook must be cited by the guide or
-excluded with a reason, and every box and arrow of the map must be used.
+fails. An OD that an item's text names must be among its sources, and a source
+may not name an OD that a later one replaced. Every ADR, invariant, LIP part and
+runbook must be cited by the guide or excluded with a reason, and every box and
+arrow of the map must be used.
 
 Every item of the guide is pinned to the hash of its content and of the text of
 each source that it cites (docs/onboarding/pins.json). When a source changes,
@@ -249,6 +251,9 @@ def facts() -> dict[str, Any]:
         ods[cells[0]] = {"question": _plain(cells[1]), "state": "open"}
     for cells in _rows(closed_part, r"OD-\d{2}"):
         ods[cells[0]] = {"question": _plain(cells[1]), "state": "closed", "closed": cells[2]}
+    for od, state in V.od_states(V.load_closed(ROOT)).items():
+        if od in ods:
+            ods[od]["replaced_by"] = state["replaced_by"]
 
     inv_text = (docs / "specs" / "invariants.md").read_text(encoding="utf-8")
     invariants = {}
@@ -332,6 +337,19 @@ def policy() -> list[dict[str, Any]]:
 # References
 # --------------------------------------------------------------------------
 
+def named_ods(item: Any, top: bool = True) -> set[str]:
+    """The ODs that an item's own text names. A part with sources of its own answers for itself."""
+    if isinstance(item, str):
+        return set(re.findall(r"\bOD-\d{2}\b", item))
+    if isinstance(item, dict):
+        if not top and "sources" in item:
+            return set()
+        return {od for key, value in item.items() if key != "sources" for od in named_ods(value, False)}
+    if isinstance(item, list):
+        return {od for value in item for od in named_ods(value, False)}
+    return set()
+
+
 def resolve(ref: str, f: dict[str, Any]) -> dict[str, str]:
     """A source reference as a label and a link. Raises BuildError if it does not resolve."""
     match = re.fullmatch(r"(ADR-\d{3})(?:#(.+))?", ref)
@@ -361,6 +379,8 @@ def resolve(ref: str, f: dict[str, Any]) -> dict[str, str]:
     if re.fullmatch(r"OD-\d{2}", ref):
         if ref not in f["ods"]:
             raise BuildError(f"unknown open decision {ref}")
+        if f["ods"][ref].get("replaced_by"):
+            raise BuildError(f"{ref} was replaced by {', '.join(f['ods'][ref]['replaced_by'])}; cite the decision in force (OD-82)")
         return {"label": ref, "href": REPO_URL + "docs/registers/open-decisions.md", "title": f["ods"][ref]["question"]}
     if re.fullmatch(r"INV-\d{3}", ref):
         if ref not in f["invariants"]:
@@ -583,7 +603,7 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
     errors: list[str] = []
     refs: dict[str, dict[str, str]] = {}
 
-    def sources(where: str, items: Any) -> None:
+    def sources(where: str, items: Any, item: Any = None) -> None:
         if not items:
             errors.append(f"{where}: no sources")
             return
@@ -592,6 +612,10 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
                 refs[ref] = resolve(ref, f)
             except BuildError as exc:
                 errors.append(f"{where}: {exc}")
+        # The OD that a sentence names is the OD that the item cites (OD-82).
+        missing = sorted(named_ods(item) - set(items)) if item is not None else []
+        if missing:
+            errors.append(f"{where}: the text names {', '.join(missing)}, which its sources do not cite")
 
     nodes = {n["id"]: n for n in c["map"]["nodes"]}
     edges = {e["id"]: e for e in c["map"]["edges"]}
@@ -618,7 +642,7 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
             errors.append(f"actor {a['id']}: bad label {a['label']}")
         if a.get("role") and a["role"] not in roles:
             errors.append(f"actor {a['id']}: no role {a['role']} in the policy artifact")
-        sources(f"actor {a['id']}", a.get("sources"))
+        sources(f"actor {a['id']}", a.get("sources"), a)
 
     flow_ids = set()
     for fl in c["flows"]["flows"]:
@@ -634,7 +658,7 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
             for e in step.get("edges", []):
                 if e not in edges:
                     errors.append(f"flow {fl['id']} step {i}: unknown edge {e}")
-        sources(f"flow {fl['id']}", fl.get("sources"))
+        sources(f"flow {fl['id']}", fl.get("sources"), fl)
 
     for kind, entries in (("assumption", c["assumptions"]), ("quiz", c["quiz"])):
         ids = [e.get("id") for e in entries]
@@ -645,7 +669,7 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
             if value and count > 1:
                 errors.append(f"{kind} {value}: duplicate id")
     for i, a in enumerate(c["assumptions"], 1):
-        sources(f"assumption {i}", a.get("sources"))
+        sources(f"assumption {i}", a.get("sources"), a)
         for ref in a.get("watched_by", []):
             try:
                 refs[ref] = resolve(ref, f)
@@ -654,11 +678,11 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
     for r in c["reuse"]:
         if r["column"] not in {"reused", "instance", "new"}:
             errors.append(f"reuse {r['name']}: bad column")
-        sources(f"reuse {r['name']}", r.get("sources"))
+        sources(f"reuse {r['name']}", r.get("sources"), r)
 
     terms = {t["term"].lower() for t in c["glossary"]}
     for t in c["glossary"]:
-        sources(f"term {t['term']}", t.get("sources"))
+        sources(f"term {t['term']}", t.get("sources"), t)
     for s in c["tour"]:
         for n in s.get("nodes", []):
             if n not in nodes:
@@ -669,18 +693,18 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
         for fl in s.get("flows", []):
             if fl not in flow_ids:
                 errors.append(f"tour {s['title']}: unknown flow {fl}")
-        sources(f"tour {s['title']}", s.get("sources"))
+        sources(f"tour {s['title']}", s.get("sources"), s)
     for q in c["quiz"]:
         if not 0 <= q["answer"] < len(q["options"]):
             errors.append(f"quiz {q['question']}: answer out of range")
-        sources(f"quiz {q['question'][:30]}", q.get("sources"))
+        sources(f"quiz {q['question'][:30]}", q.get("sources"), q)
 
     block_ids = set()
     for b in c["mandate"]["blocks"]:
         if b["id"] in block_ids:
             errors.append(f"mandate {b['id']}: duplicate id")
         block_ids.add(b["id"])
-        sources(f"mandate {b['id']}", b.get("sources"))
+        sources(f"mandate {b['id']}", b.get("sources"), b)
         for line in b["kept"]:
             head, sep, _ = line.partition(": ")
             if sep and len(head) <= 20 and head not in LAYERS:
@@ -688,16 +712,16 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
         for i, ch in enumerate(b.get("changes", []), 1):
             if ch.get("state") not in CHANGE_STATES:
                 errors.append(f"mandate {b['id']} change {i}: bad state {ch.get('state')}")
-            sources(f"mandate {b['id']} change {i}", ch.get("sources"))
+            sources(f"mandate {b['id']} change {i}", ch.get("sources"), ch)
     # The mandate is not approved: no figure from it reaches the page.
     if re.search(r"[$€£%]", json.dumps(c["mandate"], ensure_ascii=False)):
         errors.append("mandate: a currency sign or a percentage must not appear; the draft's figures stay out")
     for item in c["constellation"]["planned"]:
-        sources(f"constellation planned {item['name']}", item.get("sources"))
+        sources(f"constellation planned {item['name']}", item.get("sources"), item)
     for ch in c["constellation"]["changes"]:
         if ch.get("kind") not in CHANGE_KINDS:
             errors.append(f"constellation {ch.get('area')}: bad kind {ch.get('kind')}")
-        sources(f"constellation {ch.get('area')}", ch.get("sources"))
+        sources(f"constellation {ch.get('area')}", ch.get("sources"), ch)
 
     # The disclaimer: the page is published, so it must say that it is a draft.
     for key, phrases in DISCLAIMERS.items():
@@ -717,13 +741,13 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
         errors.append(f"rfp: missing note {rfp['note']}")
     sources("rfp properties", rfp.get("properties_sources"))
     for prop in rfp["properties"]:
-        sources(f"rfp property {prop['name']}", prop.get("sources"))
+        sources(f"rfp property {prop['name']}", prop.get("sources"), prop)
     rfp_ids = set()
     for sec in rfp["sections"]:
         if sec["id"] in rfp_ids:
             errors.append(f"rfp {sec['id']}: duplicate id")
         rfp_ids.add(sec["id"])
-        sources(f"rfp {sec['id']}", sec.get("sources"))
+        sources(f"rfp {sec['id']}", sec.get("sources"), sec)
         for i, ask in enumerate(sec.get("items", []), 1):
             where = f"rfp {sec['id']} ask {i}"
             if ask.get("verdict") not in RFP_VERDICTS:
@@ -732,9 +756,9 @@ def check(c: dict[str, Any], f: dict[str, Any], pinned: dict[str, Any] | None = 
                 errors.append(f"{where}: a change needs a why")
             if note and " ".join(ask["asked"].split()) not in note:
                 errors.append(f"{where}: the ask is not in {rfp['note']}")
-            sources(where, ask.get("sources"))
+            sources(where, ask.get("sources"), ask)
         for i, ad in enumerate(sec.get("added", []), 1):
-            sources(f"rfp {sec['id']} addition {i}", ad.get("sources"))
+            sources(f"rfp {sec['id']} addition {i}", ad.get("sources"), ad)
 
     # Every [[term]] in the text must be a glossary term.
     blob = json.dumps(c, ensure_ascii=False)

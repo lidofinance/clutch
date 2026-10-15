@@ -4,14 +4,14 @@
   options:
     - "The Treasury Management Committee"
     - "Aragon Voting, for the DAO"
-    - "The operator Safe"
+    - "The committee's Safe"
     - "[the screening vendor]"
   answer: 1
   why: "Aragon Voting is the only owner, at 1 of 1, and recovered assets go to the Aragon Agent, the DAO's treasury. The committee acts on the vault only through roles on the two modifiers."
   sources: ["ADR-005#d6", "ADR-005#d28", "ADR-005#proposed-direction", OD-73, INV-001]
 
 - id: outside-transfer
-  question: "The operator Safe tries to send USDC from the Asset Safe to an outside address. What stops it?"
+  question: "The committee's Safe tries to send USDC from the Asset Safe to an outside address. What stops it?"
   options:
     - "Nothing, if 4 of 7 signers sign"
     - "Only [the screening vendor]"
@@ -26,30 +26,19 @@
   options:
     - "The DAO, by vote, within days"
     - "The emergency Safe, at 3 of 5, within six hours"
-    - "The Emergency Brakes multisig, by swapping the assets"
+    - "Easy Track, by a motion"
     - "[the screening vendor], by freezing the vault"
   answer: 1
   why: "Financial emergencies go to the emergency Safe: two committee members, two Emergency Brakes members and one member of neither body, at 3 of 5. They revoke the operator, exit and send assets to the Agent. Six hours is the mandate's ceiling to start, and drills must prove it."
   sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d24", "ADR-005#context", "ADR-005#proposed-direction", OD-58, "lip:part-6"]
 
-- id: brakes-powers
-  question: "What can the Emergency Brakes multisig do?"
-  options:
-    - "Send the vault's assets to the Aragon Agent"
-    - "Pause Easy Track, and nothing in the vault itself"
-    - "Revoke one permission at a time"
-    - "Unpause Easy Track after an incident"
-  answer: 1
-  why: "In Clutch it keeps only the global Easy Track pause, and it touches no funds. The switch that stops the operator belongs to the emergency Safe, where two of its members sit. Only the DAO can unpause Easy Track."
-  sources: ["ADR-005#d4", "ADR-005#d23", "ADR-005#d24", "ADR-005#d26", "ADR-005#context", OD-58, OD-59]
-
 - id: restart
   question: "The emergency Safe has switched the operator off. Who turns it on again?"
   options:
     - "The emergency Safe, once the incident is over"
-    - "The Emergency Brakes multisig"
+    - "Easy Track, by a motion"
     - "The DAO, by vote"
-    - "The operator Safe"
+    - "The committee's Safe"
   answer: 2
   why: "No emergency body restores what it stopped. A DAO vote, a direct Aragon Voting item, enables the operator modifier again, and the same vote first cancels the queued motions, because a motion does not expire. It also grants again the operator's permissions on the orders account."
   sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59,
@@ -60,11 +49,11 @@
   options:
     - "Nothing, until the vendor returns"
     - "Only the operator"
-    - "The emergency Safe, the Emergency Brakes multisig and the DAO; the operator stops"
+    - "The emergency Safe and the DAO; the operator stops"
     - "Everything: the guard lets transactions through"
   answer: 2
-  why: "The guard fails closed, so the operator and new motions stop. No guard sits on the emergency path or the DAO path, so recovery does not change."
-  sources: ["ADR-010#d4", "ADR-010#proposed-direction"]
+  why: "The guard fails closed, so every transaction of the committee's Safe stops: the operator, new motions and the committee's other duties (OD-83). No guard sits on the emergency path or the DAO path, so recovery does not change."
+  sources: ["ADR-010#d4", "ADR-010#proposed-direction", OD-83]
 
 - id: new-code
   question: "Which of these is new code that Lido writes for Clutch?"
@@ -101,12 +90,13 @@
     OD-58]
 
 - id: operator-threshold
-  question: "A colleague says that the operator Safe signs at 3 of 5. Where do you check?"
+  question: "A colleague says that the committee's Safe signs at 3 of 5. Where do you check?"
   options:
     - "Ask the committee in a chat"
-    - "The source link on the operator Safe's card: ADR 005 and the parameters register"
+    - "The source link on the committee's card: ADR 005 and the parameters register"
     - "The Zodiac app"
     - "The forum"
   answer: 1
-  why: "Every claim on this page links to its source. The operator Safe is 4 of 7 (ADR 005). The Emergency Brakes multisig and the emergency Safe are the ones at 3 of 5."
-  sources: ["ADR-005#d9", "ADR-005#d24", "ADR-005#context", "doc:docs/registers/parameters.md#parameters"]
+  why: "Every claim on this page links to its source. The committee's Safe is 4 of 7 (ADR 005). The emergency Safe is the one at 3 of 5."
+  sources: ["ADR-005#d9", "ADR-005#d24", "ADR-005#context", "doc:docs/registers/parameters.md#parameters",
+    "ADR-005#d31"]

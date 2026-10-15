@@ -1,0 +1,3 @@
+date: '2026-10-14'
+kind: Decision
+text: 'Recorded OD-83: when the launch cap lifts, the screening guard goes on the committee''s Safe. It screens every transaction of that Safe, the committee''s other duties included, and a vendor outage stops them too (ADR 010, decision 24). The committee''s Safe keeps no module while the guard is set.'

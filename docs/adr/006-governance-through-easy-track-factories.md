@@ -1,19 +1,19 @@
 ---
 type: Decision
 title: "ADR 006: Governance through Easy Track factories"
-description: Easy Track factories are the only new contracts; the committee's dedicated operator Safe is their trusted caller; each factory builds a permission tree from a template fixed at audit time, so a motion carries parameters, never a tree; the motion that onboards a protocol also adds its emergency exit through an exit-governance role on the safety modifier; a routine removal is a removal-template motion, and an emergency removal is the emergency Safe's immediate revoke.
+description: Easy Track factories are the only new contracts; the committee's own Safe is their trusted caller; each factory builds a permission tree from a template fixed at audit time, so a motion carries parameters, never a tree; the motion that onboards a protocol also adds its emergency exit through an exit-governance role on the safety modifier; a routine removal is a removal-template motion, and an emergency removal is the emergency Safe's immediate revoke.
 tags: [governance, easy-track, factories, templates]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:03:23Z
+  at: 2026-10-14T21:55:03Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on factories, trusted caller, disclosure and templates, 2026-09-22, on the operator Safe, 2026-10-02, on removals, 2026-10-05, and on the scope of decision 7, 2026-10-13
+    title: Decision log — EM on factories, trusted caller, disclosure and templates, 2026-09-22, on the operator Safe, 2026-10-02, on removals, 2026-10-05, on the scope of decision 7, 2026-10-13, and on the committee's Safe as trusted caller, 2026-10-14
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Easy Track settings, global duration, hash check, script format
@@ -105,18 +105,20 @@ EM decided on 2026-10-14, in the 80/20 pass after OD-78, closing OD-79 [s1]:
 
 18. The catalogue check of decision 15 also drops each onboarding template whose shape no protocol in the committee's named pipeline needs. A later vote registers such a template with its first protocol.
 
+Since OD-80, the committee's own Safe is the trusted caller of decision 3 ([ADR 005](/adr/005-account-graph-and-roles.md) decision 31).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
 
 - Each factory owns one template. A motion carries typed parameters only, such as a target, an asset and a budget key. The factory builds the tree.
 - A template that adds a branch to a function that already has branches, such as a token's `approve` with several spenders, writes the complete tree: every existing branch and the new one, because a write replaces the slot. How the factory learns the existing branches is open; the templates of OD-69 and decision 14 both need it.
-- Every factory's trusted caller is the operator Safe. Easy Track fixes the trusted caller at deployment [s7].
+- Every factory's trusted caller is the committee's Safe. Easy Track fixes the trusted caller at deployment [s7].
 - Every permission factory hard-codes the `operator` role key and refuses the Asset Safe, the orders account and their modules as a target.
 - The first-loss burn factory writes no permission. Its motion names an amount and one of the two share tokens that the factory pins, earnETH or earnUSD, and burns that amount through the `first-loss-burn` role on the first-loss modifier ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23). It is the only Clutch motion that moves value away from the DAO.
 - The kit's role-toggle factory [s4] left the design (decision 8) and the kit on 2026-10-05. The budget factory and the template factories are not built.
 - The modifier constrains the governance role again, so a factory bug cannot reach administration. The governance role cannot change membership, cannot touch the emergency role, cannot grant the operator the Asset Safe or one of its modules as a target (decision 10), nor the orders account or one of its modules, cannot set an allowance outside the operator's budget keys, and cannot set a refill period below 30 days [s6]. A factory bug can still grant the operator a call on an ordinary target, such as a token transfer; the template and the objection window are the controls for that.
-- A queued onboarding motion stops by an objection, by the Easy Track pause, or by the operator Safe cancelling its own motion. The emergency Safe's switch also freezes it, because its write goes through the operator modifier. Enabling the modifier again re-arms it, because a motion does not expire, so the DAO's restart vote cancels it first ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 25 and 26). Once it is enacted, the emergency Safe can revoke the new permission at once.
+- A queued onboarding motion stops by an objection, by the Easy Track pause, or by the committee's Safe cancelling its own motion. The emergency Safe's switch also freezes it, because its write goes through the operator modifier. Enabling the modifier again re-arms it, because a motion does not expire, so the DAO's restart vote cancels it first ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 25 and 26). Once it is enacted, the emergency Safe can revoke the new permission at once.
 - **The exit-governance role.** It writes permissions only under the `emergency` key, through `scopeTarget`, `scopeFunction` and `allowFunction`, with the execution options None or Send (decision 9). It refuses the Asset Safe and every module of it as a target, the safety modifier included (decision 10). It holds no `assignRoles`, cannot reach the switch, and sets no allowance.
 - **Exit templates.** Each onboarding template also builds the emergency exit for its target: redeem, withdraw, claim and cancel with the receiver and owner pinned to the Asset Safe; a transfer of the new receipt token pinned to the Aragon Agent; and an approval of the new spender set to zero. It emits no entry, no deposit and no non-zero approval. The modifier cannot check that a tree is an exit, so the template's code, its tests and its audit carry that.
 - A routine removal is a motion of the removal template (decision 14). It writes the function's complete tree without the removed branch, so the other branches stay, and it adds nothing. An emergency removal is the emergency role's `revokeTarget` or `revokeFunction`, pinned to the `operator` key, which acts at once. Every operator permission lives under that key, so one revoke on the operator modifier and one on the orders modifier reach all of them.
@@ -140,7 +142,7 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 - A position that a motion onboards has an emergency exit from the day the motion enacts, and the exit survives the switch, because it lives on the safety modifier.
 - The audit question becomes "can this template ever emit something unsafe". Each template must pin every receiver, owner and beneficiary field, bound every value-moving amount, never emit an administrative selector, and produce a script in the production format.
 - A motion can point the operator at a contract that no one has audited. The template bounds how the vault interacts with it, so the loss ceiling is the attached budget. The controls are the objection window, the disclosure and monitoring. The LIP must say so plainly.
-- Replacing the operator Safe means redeploying every factory with the new trusted caller and registering each one again by DAO vote [s7].
+- Replacing the committee's Safe means redeploying every factory with the new trusted caller and registering each one again by DAO vote [s7].
 - The committee proposes its own expansions. The objection window, the disclosure rule, the Emergency Brakes pause, and the emergency Safe's revoke and switch, which the committee cannot use alone, are the counterweights.
 - A routine removal waits for the objection window, like every motion, and the guard screens its creation once the launch cap lifts. An emergency removal happens at three of five on the emergency Safe, without screening and without notice in advance, and the forum post follows it. Monitoring pages a revoke-only emergency action at a lower severity than a transfer or a swap.
 - A removed strategy comes back only through an onboarding motion or a DAO vote. A routine removal takes only its branch (decision 14). After an emergency revoke, a permission that no template writes, such as staking or a fixed-ceiling approval, comes back only by vote (decision 17).
@@ -161,4 +163,8 @@ The rest of this section is agent-drafted from the design [s3]. EM has not accep
 
 ## Open questions
 
-None open. OD-38, OD-41, OD-43, OD-45, OD-46 and OD-49 were decided on 2026-10-06, and OD-70, OD-72 and OD-77 to OD-79 on 2026-10-14.
+<!-- generated by scripts/validate_docs.py --write-status; edit the sources, not this block -->
+
+No open decision closes in this record.
+
+<!-- end of generated block -->

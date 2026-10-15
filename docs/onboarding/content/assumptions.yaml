@@ -23,7 +23,7 @@
 - id: dao-sound
   assumption: "The DAO stays sound and able to act."
   kind: trust
-  why: "The DAO is the final authority. Only the DAO replaces the policy, enables a disabled modifier, unpauses Easy Track, replaces the operator Safe or sets registry limits. Every restart after an emergency stop is a DAO vote (OD-59)."
+  why: "The DAO is the final authority. Only the DAO replaces the policy, enables a disabled modifier, unpauses Easy Track, moves the operator role to another Safe or sets registry limits. Every restart after an emergency stop is a DAO vote (OD-59)."
   breaks: "Nothing restarts after a stop: the operator stays switched off, or Easy Track stays paused. Every DAO action takes about five days, and a defect in the safety modifier leaves only the DAO path."
   watched_by: ["test:test_D2_direct_DAO_path", "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts"]
   watch_note: "The tests run on a mock owner and a mock Easy Track. The DAO runbooks are listed but not written."
@@ -33,23 +33,23 @@
 - id: signers-good-faith
   assumption: "The committee's signers act in good faith."
   kind: trust
-  why: "The same people sign the committee's Safe and the operator Safe at 4 of 7, and the operator Safe also holds the first-loss role. Two of them sit on the emergency Safe."
-  breaks: "The committee proposes its own expansions and executes the first-loss terms. A captured operator Safe can redeem the first-loss shares to the Aragon Agent, and can propose a burn, which LDO holders see for 72 hours before it moves the shares' value to the vault's other depositors. Two compromised committee keys do not reach the emergency role (OD-58)."
+  why: "The committee's own Safe, at 4 of 7, holds the operator role and the first-loss role (OD-80). Two of its signers sit on the emergency Safe."
+  breaks: "The committee proposes its own expansions and executes the first-loss terms. A captured quorum of the committee's Safe can redeem the first-loss shares to the Aragon Agent, and can propose a burn, which LDO holders see for 72 hours before it moves the shares' value to the vault's other depositors. Two compromised committee keys do not reach the emergency role (OD-58)."
   watched_by: ["test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval"]
   watch_note: "INV-002, INV-014 and INV-021 are pending. Paging on every emergency action, every burn motion and every action of the first-loss role is not built."
-  sources: ["ADR-005#d2", "ADR-005#d9", "ADR-005#d24", "ADR-005#d27", "ADR-008#d21", "ADR-008#d23", "ADR-008#consequences", OD-67, "ADR-006#d3",
-    OD-58, OD-60, INV-002, INV-014, INV-021]
+  sources: ["ADR-005#d2", "ADR-005#d9", "ADR-005#d24", "ADR-005#d27", "ADR-008#d21", "ADR-008#d23",
+    "ADR-008#consequences", OD-67, "ADR-006#d3", OD-58, OD-60, INV-002, INV-014, INV-021, "ADR-005#d31", OD-80]
 
 - id: guard-single-use
   assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
   kind: trust
-  why: "Above the launch cap, on-chain blocking before execution is a hard requirement. Once the cap lifts, the guard screens every operator action and every new motion."
-  breaks: "One standing approval of the modifier's execution function would approve all vault activity. One approved stray delegatecall can replace the operator Safe's code and drop the guard. An outage stops the operator and new motions for up to ten days."
+  why: "Above the launch cap, on-chain blocking before execution is a hard requirement. Once the cap lifts, the guard screens every transaction of the committee's Safe: every operator action, every new motion and the committee's other duties (OD-83)."
+  breaks: "One standing approval of the modifier's execution function would approve all vault activity. One approved stray delegatecall can replace the code of the committee's Safe and drop the guard, and a module on that Safe would skip it. An outage stops the operator and new motions for up to ten days."
   watched_by: []
-  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector must add Safe v1.5.0 and this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before the cap lifts, not before the launch (OD-54)."
+  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector supports Safe v1.3.0 and must add this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before the cap lifts, not before the launch (OD-54)."
   sources: ["ADR-010#d2", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d12", "ADR-010#d17", "ADR-010#d20",
     "ADR-010#d22", "ADR-010#proposed-direction", INV-010, OD-54,
-    "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
+    "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard", OD-83]
 
 - id: launch-cap
   assumption: "Until the guard is live, the committee keeps the vault under a cap of one million dollars by procedure."
@@ -82,13 +82,12 @@
 - id: safe-v150-sound
   assumption: "Safe v1.5.0 has no defect on the paths that the vault uses."
   kind: trust
-  why: "The new Safes run it: execution, `approveHash`, module execution, the guard and owner management. The orders account also uses a fallback handler and contract signatures. Its record of holding value is short."
-  breaks: "Custody or screening could fail. A delegatecall can replace a Safe's code without any Safe event."
+  why: "The new Safes run it: execution, `approveHash`, module execution and owner management. The orders account also uses a fallback handler and contract signatures. Its record of holding value is short."
+  breaks: "Custody or recovery could fail. A delegatecall can replace a Safe's code without any Safe event."
   watched_by: [INV-019, "test:test_asset_safe_shape"]
   watch_note: "Safe's releases, advisories and bug-bounty records are checked again before the enabling vote. The critical alert on a singleton change is not built."
-  sources: ["ADR-005#d8", "ADR-005#d12", "ADR-005#d13", "ADR-005#d20", "ADR-005#context", "ADR-010#d15", "ADR-010#d16",
-    "ADR-010#d18", "ADR-010#proposed-direction", INV-019,
-    "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
+  sources: ["ADR-005#d8", "ADR-005#d12", "ADR-005#d13", "ADR-005#d20", "ADR-005#context", "ADR-010#d16", "ADR-010#d18",
+    "ADR-010#proposed-direction", INV-019, "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
 - id: templates-safe
   assumption: "Every template pins each receiver, owner and beneficiary, bounds each amount that moves value, never emits an administrative function, and gives the emergency role only exits."
@@ -127,17 +126,6 @@
   watch_note: "The emergency Safe is not deployed, and its fifth signer is not chosen. The owner-change alert and the paging alert on the trigger are not built."
   sources: ["ADR-005#d24", "ADR-005#d25", "ADR-005#proposed-direction", "ADR-005#consequences", "ADR-009#d34", OD-58,
     INV-026]
-
-- id: brakes-independent
-  assumption: "The Emergency Brakes multisig stays independent of the committee and answers pages."
-  kind: trust
-  why: "It holds the Easy Track pause, which freezes every motion of the DAO, and two of its members sit on the emergency Safe."
-  breaks: "A queued motion that the switch cannot reach, such as a top-up or an exit write, could not be frozen. The quorum without the committee would weaken."
-  watched_by: []
-  watch_note: "A chain read found no owner address that it shares with the committee's Safe. On 2026-10-13 it held Easy Track's pause role, and neither the unpause role nor the cancel role."
-  sources: ["ADR-005#d4", "ADR-005#d23", "ADR-005#d24", OD-58,
-    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts",
-    "doc:docs/research/chain-reads-2026-09-30.md#committees"]
 
 - id: cap-breach-fixed
   assumption: "Monitoring detects a cap breach, and the committee fixes it within two working days."
@@ -193,7 +181,7 @@
   assumption: "The 72-hour objection on each top-up keeps funding inside the mandate. The registry limit is only the backstop."
   kind: design
   why: "The mandate makes the objection the control of a top-up."
-  breaks: "Without an objection, the operator Safe can pull one TM Floor Value per registry per month, and two within about 72 hours around a month boundary."
+  breaks: "Without an objection, the committee's Safe can pull one TM Floor Value per registry per month, and two within about 72 hours around a month boundary."
   watched_by: []
   watch_note: "INV-017 is pending: no registry, factory or test exists. The funding flags are not built."
   sources: ["ADR-008#d4", "ADR-008#d5", "ADR-008#d6", INV-017]
@@ -246,9 +234,9 @@
   sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#reversal-conditions", OD-14]
 
 - id: signer-rotation
-  assumption: "Every signer rotation reaches each Safe that carries the signer: the committee's Safe, the operator Safe and, for a seat holder, the emergency Safe."
+  assumption: "Every rotation of a seat holder reaches the emergency Safe: a signer who leaves the committee or the Emergency Brakes multisig leaves the seat."
   kind: operational
-  why: "Nothing on chain keeps the committee's Safe, the operator Safe and the emergency Safe's seats in step."
+  why: "Nothing on chain keeps the emergency Safe's seats in step with the committee's Safe and the Emergency Brakes multisig."
   breaks: "A departed signer keeps operator or emergency power, or a quorum becomes unreachable."
   watched_by: []
   watch_note: "The runbook to rotate a signer is listed, not written. Owner-change alerts are not built."
@@ -270,7 +258,7 @@
   why: "The LIP's Implemented parts rest on fork tests. Nothing is deployed, and no audit is done."
   breaks: "Green tests can miss real behaviour: the real Aragon Voting path, the real Easy Track and the screening guard."
   watched_by: []
-  watch_note: "The harness mocks the Aragon Agent, Easy Track and its executor, and uses plain stand-in addresses for the operator Safe and the emergency Safe."
+  watch_note: "The harness mocks the Aragon Agent, Easy Track and its executor, and uses plain stand-in addresses for the committee's Safe and the emergency Safe."
   sources: ["doc:test/README.md#what-is-real-and-what-is-mocked", "lip:part-1"]
 
 - id: branch-rule

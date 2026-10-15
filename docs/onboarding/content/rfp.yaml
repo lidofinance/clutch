@@ -36,9 +36,9 @@ sections:
         sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#d28", "ADR-005#proposed-direction", OD-73, INV-001, INV-010]
       - asked: "An Operator Safe at 4 of 7 makes routine transactions through a restricted role. It cannot change its own permissions, block their removal, borrow, or use an asset or a function that a motion or the DAO did not approve."
         verdict: kept
-        clutch: "A new operator Safe, the committee's signers at 4 of 7, holds the operator role behind the screening vendor's guard. It cannot borrow, administer a modifier or a Safe, change its own permissions, or move assets out except into the orders account."
-        sources: ["ADR-005#d7", "ADR-005#d9", "ADR-005#proposed-direction", "ADR-010#d1", "ADR-010#proposed-direction", OD-19,
-          INV-002]
+        clutch: "The committee's existing Safe, at 4 of 7, holds the operator role (OD-80). From the lift of the launch cap, the screening vendor's guard screens it (OD-83). It cannot borrow, administer a modifier or a Safe, change its own permissions, or move assets out except into the orders account."
+        sources: ["ADR-005#d9", "ADR-005#proposed-direction", "ADR-010#d1", "ADR-010#proposed-direction", OD-19,
+          INV-002, "ADR-005#d31", OD-80, OD-83]
       - asked: "An Emergency Safe at 3 of 5, which the RFP links to the Emergency Brakes multisig, revokes approvals, exits approved positions and returns assets to the fixed DAO treasury address."
         verdict: changed
         clutch: "A new emergency Safe at 3 of 5 holds the emergency role and the switch: two Emergency Brakes members, two committee members and one member of neither body. The Emergency Brakes multisig itself keeps only the Easy Track pause."
@@ -56,12 +56,12 @@ sections:
       - text: "An orders account, owned by Aragon Voting, places CoW orders for the operator and for recovery."
         why: "Conditional orders need CoW's fallback handler, and the Asset Safe has none."
         sources: ["ADR-007#d17", OD-43, "lip:part-6"]
-      - text: "A first-loss Safe, owned by Aragon Voting, holds the DAO's first-loss Earn shares. An Easy Track motion burns them, and one narrow role of the operator Safe redeems them to the Agent."
+      - text: "A first-loss Safe, owned by Aragon Voting, holds the DAO's first-loss Earn shares. An Easy Track motion burns them, and one narrow role of the committee's Safe redeems them to the Agent."
         why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart, and the committee executes the first-loss terms without a DAO vote."
         sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", OD-42, OD-60, OD-67, INV-021]
-    tech: "The Asset Safe, the operator Safe, the emergency Safe and the first-loss Safe run Safe v1.5.0. Each modifier is an EIP-1167 minimal proxy of the locked Roles mastercopy, deployed through the Zodiac module proxy factory, with the Asset Safe as its owner, avatar and target."
+    tech: "The Asset Safe, the emergency Safe and the first-loss Safe run Safe v1.5.0, and the committee's Safe runs Safe v1.3.0 (OD-80). Each modifier is an EIP-1167 minimal proxy of the locked Roles mastercopy, deployed through the Zodiac module proxy factory, with the Asset Safe as its owner, avatar and target."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#accounts", "ADR-005#d12", "ADR-005#d13",
-      "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1"]
+      "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1", OD-80]
 
   - id: governance
     title: Governance and Easy Track
@@ -78,7 +78,7 @@ sections:
         sources: ["ADR-006#d1", "ADR-006#proposed-direction", INV-004, "doc:ROADMAP.md#roadmap"]
       - asked: "The Aragon Agent stays the only owner of the Asset Safe. Easy Track gets no ownership and no unrestricted execution, and it executes only the permission changes that the Operator Safe proposes in motions."
         verdict: changed
-        clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe (OD-73). Easy Track never receives authority over the vault's owner or the Agent. On the Asset Safe, its executor holds only the governance and exit-governance roles. Outside it, the executor holds only the burn role on the first-loss Safe, so every first-loss burn is a motion (OD-67). The operator Safe, as the trusted caller of every factory, creates every motion."
+        clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe (OD-73). Easy Track never receives authority over the vault's owner or the Agent. On the Asset Safe, its executor holds only the governance and exit-governance roles. Outside it, the executor holds only the burn role on the first-loss Safe, so every first-loss burn is a motion (OD-67). The committee's Safe, as the trusted caller of every factory, creates every motion."
         why: "A vote on the vault then runs without Dual Governance, and Aragon Voting gains no power over the treasury that it lacks today (OD-73)."
         sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-008#d23",
           "ADR-010#proposed-direction", OD-67, OD-73, INV-004]
@@ -91,7 +91,7 @@ sections:
         clutch: "Ownership never passes: the Asset Safe is created with Aragon Voting as its only owner. The enabling vote applies the committed policy artifact, grants every role, sets up the orders account and the first-loss Safe, and registers the factories, so no setup-only vote is needed."
         why: "Aragon Voting is the only owner of the Asset Safe at all times, so only the DAO can configure the vault, and its enabling vote does it in one step (OD-73)."
         sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", INV-001, "doc:script/DeployDryRun.s.sol",
-          "doc:docs/specs/enabling-vote.md#the-vote"]
+          "doc:docs/specs/enabling-vote.md#the-vote", OD-73]
     added:
       - text: "An exit-governance role on the safety modifier: the motion that onboards a protocol also writes the emergency role's exit from it."
         why: "Without it, a protocol that a motion onboards would have no emergency exit until a DAO vote added one."
@@ -143,7 +143,7 @@ sections:
         verdict: kept
         clutch: "No limit reverts on chain, because the policy cannot see value. Budgets per spender bound how much can move each month, a screening rule is requested that refuses an operator transaction that breaks a cap, and monitoring publishes the cap reading every two weeks. If a breach is not fixed within two working days and is larger at the next reading, the emergency Safe switches the operator off (OD-58)."
         sources: ["ADR-009#d1", "ADR-009#d13", "ADR-009#d24", "ADR-009#d25", "ADR-009#proposed-direction", OD-29, OD-32,
-          OD-39, "doc:docs/specs/control-matrix.md#the-matrix"]
+          OD-39, "doc:docs/specs/control-matrix.md#the-matrix", OD-58]
       - asked: "The Operator Safe cannot add a target, a function, an asset or a wider parameter range without the governance process."
         verdict: kept
         clutch: "The operator holds no administration function, and only motions and DAO votes write its permissions. A fork test checks that the operator cannot widen its own scope or reach administration."
@@ -203,17 +203,18 @@ sections:
         sources: ["ADR-009#d8", "ADR-009#d17", "ADR-009#proposed-direction", OD-13]
       - asked: "Each operator transaction is simulated and checked before execution, and the answer names the service that checks it."
         verdict: changed
-        clutch: "From the lift of the launch cap, the screening vendor checks each operator transaction before it runs. Its transaction guard on the operator Safe refuses any transaction that the vendor did not approve on chain, once. Every motion is screened too, because the operator Safe creates it. Until the cap lifts, the vault runs without the guard under a cap of one million dollars, which the committee keeps by procedure. The repository does not record whether the vendor simulates each transaction."
+        clutch: "From the lift of the launch cap, the screening vendor checks each operator transaction before it runs. Its transaction guard on the committee's Safe refuses any transaction that the vendor did not approve on chain, once (OD-83). Every motion is screened too, because that Safe creates it. Until the cap lifts, the vault runs without the guard under a cap of one million dollars, which the committee keeps by procedure. The repository does not record whether the vendor simulates each transaction."
         why: "EM allowed a launch without the guard under this cap, so the vendor is not on the launch's critical path. Above the cap, blocking before execution stays a hard requirement."
         sources: ["ADR-010#d1", "ADR-010#d4", "ADR-010#d9", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22",
-          "ADR-010#proposed-direction", OD-01, OD-54, OD-55, INV-010, "lip:part-9"]
+          "ADR-010#proposed-direction", OD-01, OD-54, OD-55, INV-010, "lip:part-9", OD-83]
       - asked: "The answer explains what happens when the monitoring or blocking service is unavailable. On-chain permissions stay the final enforcement layer, and losing monitoring never widens them."
         verdict: kept
-        clutch: "The guard fails closed: the operator and new motions stop, and recovery is unaffected. The owners can remove the guard after ten days. If monitoring stops, the permissions on chain still hold and do not widen."
-        sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#proposed-direction", "doc:docs/specs/lip-draft.md#failure-modes"]
-    tech: "The guard is set on the operator Safe with `setGuard`, and its bypass mode stays off. The vendor's key approves each transaction hash once, and the guard holds no standing approval except its two built-in timelock approvals."
+        clutch: "The guard fails closed: the operator, new motions and the committee's other duties on its Safe stop, and recovery is unaffected (OD-83). The owners can remove the guard after ten days. If monitoring stops, the permissions on chain still hold and do not widen."
+        sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#proposed-direction",
+          "doc:docs/specs/lip-draft.md#failure-modes", OD-83]
+    tech: "The guard is set on the committee's Safe with `setGuard`, and its bypass mode stays off. The vendor's key approves each transaction hash once, and the guard holds no standing approval except its two built-in timelock approvals."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#monitoring-and-transaction-blocking", "ADR-009#d7",
-      "ADR-010#d9", "ADR-010#d10", "ADR-010#proposed-direction"]
+      "ADR-010#d9", "ADR-010#d10", "ADR-010#proposed-direction", OD-83]
 
   - id: nav
     title: Net asset value

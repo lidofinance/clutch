@@ -479,9 +479,9 @@ def test_boxes(browser: Browser, run: Run) -> None:
         run.check(not wrong, f"every box opens its actors and lights its arrows ({len(NODES)} boxes)", wrong[:2])
         for key, name in (("Enter", "Enter"), (" ", "Space")):
             page.keyboard.press("Escape")
-            page.focus("#node-brakes")
+            page.focus("#node-emergency-safe")
             page.keyboard.press(key)
-            run.check(player(page)["title"] == label("brakes") and active(page) == "player-title", f"{name} on a focused box opens it and moves focus to the panel")
+            run.check(player(page)["title"] == label("emergency-safe") and active(page) == "player-title", f"{name} on a focused box opens it and moves focus to the panel")
 
 
 def test_tooltips(browser: Browser, run: Run) -> None:
