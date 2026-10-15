@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-15
+
+* **Decision**: Kept OD-80 and OD-83 after a review of the operator Safe. EM chose the recorded design over an operator Safe owned by the committee's Safe, and the agent advised against a return to a new Safe with the same signers. ADR 010 lists the owned Safe as not chosen, and ADR 010 and the LIP draft now name the duties of the committee's Safe that the guard also screens: Stonks orders and top-up motions, the Stonks 2.0 price router, and the LDO buyback roles. A new research note keeps the evidence.
+
 ## 2026-10-14
 
 * **Decision**: Recorded OD-83: when the launch cap lifts, the screening guard goes on the committee's Safe. It screens every transaction of that Safe, the committee's other duties included, and a vendor outage stops them too (ADR 010, decision 24). The committee's Safe keeps no module while the guard is set.

@@ -209,8 +209,9 @@ sections:
           "ADR-010#proposed-direction", OD-01, OD-54, OD-55, INV-010, "lip:part-9", OD-83]
       - asked: "The answer explains what happens when the monitoring or blocking service is unavailable. On-chain permissions stay the final enforcement layer, and losing monitoring never widens them."
         verdict: kept
-        clutch: "The guard fails closed: the operator and new motions stop, and recovery is unaffected. The owners can remove the guard after ten days. If monitoring stops, the permissions on chain still hold and do not widen."
-        sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#proposed-direction", "doc:docs/specs/lip-draft.md#failure-modes"]
+        clutch: "The guard fails closed: the operator, new motions and the committee's other duties on its Safe stop, and recovery is unaffected (OD-83). The owners can remove the guard after ten days. If monitoring stops, the permissions on chain still hold and do not widen."
+        sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#proposed-direction",
+          "doc:docs/specs/lip-draft.md#failure-modes", OD-83]
     tech: "The guard is set on the committee's Safe with `setGuard`, and its bypass mode stays off. The vendor's key approves each transaction hash once, and the guard holds no standing approval except its two built-in timelock approvals."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#monitoring-and-transaction-blocking", "ADR-009#d7",
       "ADR-010#d9", "ADR-010#d10", "ADR-010#proposed-direction", OD-83]

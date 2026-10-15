@@ -540,6 +540,7 @@
   closed: 2026-10-14
   log:
     - "2026-10-14 — OD-80 to OD-82: the committee's Safe as the operator, the Emergency Brakes multisig in the guide, and generated registers"
+    - "2026-10-15 — OD-80 and OD-83 kept after a review of the operator Safe"
   adr: [ADR-005#d31]
   replaces:
     - {od: OD-01, part: true}
@@ -563,6 +564,7 @@
   closed: 2026-10-14
   log:
     - "2026-10-14 — OD-83: the screening guard on the committee's Safe"
+    - "2026-10-15 — OD-80 and OD-83 kept after a review of the operator Safe"
   adr: [ADR-010#d24]
   replaces:
     - {od: OD-01, part: true}

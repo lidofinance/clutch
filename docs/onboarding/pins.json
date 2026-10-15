@@ -171,8 +171,8 @@
         "OD-60": "903b6a2b8b51c92c",
         "OD-64": "206d90757ee445fb",
         "OD-67": "290431c4a2358686",
-        "OD-80": "014bea1477f1ddb3",
-        "OD-83": "a8d33d6485090616",
+        "OD-80": "20f31e0406d6c372",
+        "OD-83": "33d07557651dd2a7",
         "doc:docs/registers/parameters.md#parameters": "b198136fc12bc3d7",
         "doc:docs/research/chain-reads-2026-09-30.md#committees": "9b585660acc680d2"
       }
@@ -265,7 +265,7 @@
         "ADR-002#d1": "fbef8c1e24375017",
         "ADR-002#d7": "04f2137680376c15",
         "OD-63": "182b61c7ee7d26f8",
-        "doc:docs/registers/open-decisions.md#open-decisions": "1219209bfff1e30f"
+        "doc:docs/registers/open-decisions.md#open-decisions": "24fedd2cb5f7a104"
       }
     },
     "actor:emergency-safe": {
@@ -599,7 +599,7 @@
         "OD-41": "b377699a4544f042",
         "OD-61": "a7aa4de25fc5378d",
         "OD-62": "55522b13a3279faa",
-        "lip:part-9": "de27a71038550175"
+        "lip:part-9": "0f98e74795495bf2"
       }
     },
     "actor:repository": {
@@ -657,7 +657,7 @@
         "INV-021": "9367d2b92f7a5245",
         "OD-60": "903b6a2b8b51c92c",
         "OD-67": "290431c4a2358686",
-        "OD-83": "a8d33d6485090616",
+        "OD-83": "33d07557651dd2a7",
         "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms": "1886f5abf041a398",
         "runbook:Exit the first-loss shares": "b662e336fb95704d"
       }
@@ -710,7 +710,7 @@
         "OD-43": "738c2e83c5b42ff0",
         "OD-60": "903b6a2b8b51c92c",
         "OD-67": "290431c4a2358686",
-        "OD-80": "014bea1477f1ddb3",
+        "OD-80": "20f31e0406d6c372",
         "test:test_D3_operator_cannot_route_around_avatar": "109c8b32ddee05bb"
       }
     },
@@ -858,7 +858,7 @@
         "ADR-010#proposed-direction": "517e2450ce4580e5",
         "INV-010": "d4eeb2c45e3b4a57",
         "OD-54": "7d0273b499ddb141",
-        "OD-83": "a8d33d6485090616",
+        "OD-83": "33d07557651dd2a7",
         "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard": "472d8dd018fa8990"
       }
     },
@@ -885,7 +885,7 @@
         "OD-39": "270eb53392632cc2",
         "OD-45": "0f1bfbb3e7d90f53",
         "OD-64": "206d90757ee445fb",
-        "OD-83": "a8d33d6485090616",
+        "OD-83": "33d07557651dd2a7",
         "doc:docs/specs/control-matrix.md#the-screening-vendors-rules": "81455dc5cefed9f0"
       }
     },
@@ -986,7 +986,7 @@
         "ADR-009#proposed-direction": "eea0cd12278375b3",
         "OD-29": "f0338b92b7e00621",
         "OD-32": "2c42c5be98c2fc52",
-        "lip:part-9": "de27a71038550175"
+        "lip:part-9": "0f98e74795495bf2"
       }
     },
     "assumption:cow-on-v150": {
@@ -1082,7 +1082,7 @@
         "ADR-010#proposed-direction": "517e2450ce4580e5",
         "INV-010": "d4eeb2c45e3b4a57",
         "OD-54": "7d0273b499ddb141",
-        "OD-83": "a8d33d6485090616",
+        "OD-83": "33d07557651dd2a7",
         "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard": "472d8dd018fa8990"
       }
     },
@@ -1222,7 +1222,7 @@
         "OD-58": "5d6ddc895d9f980c",
         "OD-60": "903b6a2b8b51c92c",
         "OD-67": "290431c4a2358686",
-        "OD-80": "014bea1477f1ddb3",
+        "OD-80": "20f31e0406d6c372",
         "test:test_D4_emergency_flow": "361fef9856637f01",
         "test:test_emergency_cannot_give_a_non_zero_approval": "652aa99a29f4ec60"
       }
@@ -1550,7 +1550,7 @@
         "ADR-009#d6": "5e80a0de83eb84a2",
         "OD-32": "2c42c5be98c2fc52",
         "OD-56": "255eb47895dd1e89",
-        "lip:part-9": "de27a71038550175"
+        "lip:part-9": "0f98e74795495bf2"
       }
     },
     "flow:monthly-report": {
@@ -1566,7 +1566,7 @@
         "OD-14": "a488edd9a19e5100",
         "OD-61": "a7aa4de25fc5378d",
         "OD-62": "55522b13a3279faa",
-        "lip:part-9": "de27a71038550175"
+        "lip:part-9": "0f98e74795495bf2"
       }
     },
     "flow:onboard": {
@@ -1619,8 +1619,8 @@
         "INV-003": "ae7570f337217693",
         "INV-010": "d4eeb2c45e3b4a57",
         "OD-54": "7d0273b499ddb141",
-        "OD-80": "014bea1477f1ddb3",
-        "OD-83": "a8d33d6485090616",
+        "OD-80": "20f31e0406d6c372",
+        "OD-83": "33d07557651dd2a7",
         "test:test_D3_operator_lifecycle": "4fee6a257217394f",
         "test:test_D3b_earn_deposit_policy_layer": "410dc7bf630395e7"
       }
@@ -1829,7 +1829,7 @@
         "ADR-010#d4": "888a22d15453731d",
         "ADR-010#proposed-direction": "517e2450ce4580e5",
         "OD-54": "7d0273b499ddb141",
-        "OD-83": "a8d33d6485090616",
+        "OD-83": "33d07557651dd2a7",
         "runbook:Move the operator role to another Safe": "2374c1a47587cc6d",
         "runbook:Remove the screening guard": "7348629587a21494"
       }
@@ -1889,7 +1889,7 @@
         "OD-56": "255eb47895dd1e89",
         "OD-58": "5d6ddc895d9f980c",
         "doc:docs/specs/control-matrix.md#the-matrix": "d86313105fc80dc9",
-        "lip:part-9": "de27a71038550175"
+        "lip:part-9": "0f98e74795495bf2"
       }
     },
     "mandate:controls": {
@@ -2147,7 +2147,7 @@
       "sources": {
         "ADR-010#d4": "888a22d15453731d",
         "ADR-010#proposed-direction": "517e2450ce4580e5",
-        "OD-83": "a8d33d6485090616"
+        "OD-83": "33d07557651dd2a7"
       }
     },
     "reuse:aragon-agent-aragon-voting-and-dual-governance": {
@@ -2309,7 +2309,7 @@
         "ADR-007#d17": "7f3cc0d10b5a521f",
         "ADR-008#d19": "4050e810bac1cf60",
         "ADR-010#proposed-direction": "517e2450ce4580e5",
-        "OD-80": "014bea1477f1ddb3"
+        "OD-80": "20f31e0406d6c372"
       }
     },
     "reuse:the-four-roles-modifiers": {
@@ -2474,8 +2474,8 @@
         "OD-60": "903b6a2b8b51c92c",
         "OD-67": "290431c4a2358686",
         "OD-73": "5a02bb22b753eecc",
-        "OD-80": "014bea1477f1ddb3",
-        "OD-83": "a8d33d6485090616",
+        "OD-80": "20f31e0406d6c372",
+        "OD-83": "33d07557651dd2a7",
         "doc:docs/research/request-for-solution-2026-10-07.md#accounts": "cb8e49254de3465a",
         "lip:part-1": "7b90800d6fb09441",
         "lip:part-2": "2491eec53ab6e2d0",
@@ -2636,7 +2636,7 @@
       }
     },
     "rfp:monitoring": {
-      "content": "801c62552866015c",
+      "content": "d5992dfa54c34e90",
       "sources": {
         "ADR-009#d17": "bd1b54527158edf4",
         "ADR-009#d7": "91e4e5e7ef9c3b01",
@@ -2655,11 +2655,11 @@
         "OD-13": "f538306f02833379",
         "OD-54": "7d0273b499ddb141",
         "OD-55": "5ca56059ac95fd76",
-        "OD-83": "a8d33d6485090616",
+        "OD-83": "33d07557651dd2a7",
         "doc:docs/research/request-for-solution-2026-10-07.md#monitoring-and-transaction-blocking": "bd1a024b754100e1",
-        "doc:docs/specs/lip-draft.md#failure-modes": "4e9457d8ffe5d592",
+        "doc:docs/specs/lip-draft.md#failure-modes": "418f1d3e6a933521",
         "lip:part-4": "1032d62e6cd06242",
-        "lip:part-9": "de27a71038550175"
+        "lip:part-9": "0f98e74795495bf2"
       }
     },
     "rfp:nav": {
@@ -2803,7 +2803,7 @@
         "ADR-010#proposed-direction": "517e2450ce4580e5",
         "INV-010": "d4eeb2c45e3b4a57",
         "OD-54": "7d0273b499ddb141",
-        "OD-83": "a8d33d6485090616"
+        "OD-83": "33d07557651dd2a7"
       }
     },
     "scene:little-new-code-and-where-it-stands": {
@@ -2862,7 +2862,7 @@
         "INV-003": "ae7570f337217693",
         "OD-60": "903b6a2b8b51c92c",
         "OD-67": "290431c4a2358686",
-        "OD-80": "014bea1477f1ddb3",
+        "OD-80": "20f31e0406d6c372",
         "test:test_D3_operator_cannot_route_around_avatar": "109c8b32ddee05bb"
       }
     },
@@ -3112,7 +3112,7 @@
         "ADR-010#d22": "e3628e779b50830c",
         "ADR-010#d3": "dc921cd63a0f298d",
         "ADR-010#proposed-direction": "517e2450ce4580e5",
-        "OD-83": "a8d33d6485090616"
+        "OD-83": "33d07557651dd2a7"
       }
     },
     "term:invariant": {
@@ -3202,7 +3202,7 @@
     "term:open-decision": {
       "content": "c96ba21de127cccb",
       "sources": {
-        "doc:docs/registers/open-decisions.md#open-decisions": "1219209bfff1e30f"
+        "doc:docs/registers/open-decisions.md#open-decisions": "24fedd2cb5f7a104"
       }
     },
     "term:orders-account": {
@@ -3355,7 +3355,7 @@
       "sources": {
         "ADR-006#d3": "e0dbeaf23dcc7086",
         "ADR-006#proposed-direction": "59fed5bd4b1f5309",
-        "OD-80": "014bea1477f1ddb3"
+        "OD-80": "20f31e0406d6c372"
       }
     },
     "term:twap": {

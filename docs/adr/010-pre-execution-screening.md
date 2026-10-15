@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T22:18:41Z
+  at: 2026-10-15T06:46:39Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on on-chain blocking and the guard, 2026-09-22, on the route and the vendor's guard, 2026-10-02, on Safe v1.5.0, 2026-10-05, on the notice of a relaxed rule, 2026-10-13, and on the guard's Safe, 2026-10-14
+    title: Decision log — EM on on-chain blocking and the guard, 2026-09-22, on the route and the vendor's guard, 2026-10-02, on Safe v1.5.0, 2026-10-05, on the notice of a relaxed rule, 2026-10-13, and on the guard's Safe, 2026-10-14, kept on 2026-10-15
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — guard hooks per Safe version, the committee Safe, Safe v1.5.0 provenance and audits
@@ -47,6 +47,9 @@ sources:
   - id: s12
     resource: /research/safe-v150-due-diligence-2026-10-05.md
     title: Safe v1.5.0 due diligence, 2026-10-05 — audits, advisories, use and value on mainnet, incidents, and MultiSendCallOnly v1.5.0
+  - id: s13
+    resource: /research/operator-safe-review-2026-10-15.md
+    title: The committee's Safe as the operator, reviewed again on 2026-10-15 — its other duties, Lido's practice and the alternatives
 ---
 
 # ADR 010: Pre-execution screening
@@ -158,6 +161,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **Option 3: a dedicated operator Safe, with the committee's Safe kept as trusted caller.** Not chosen. It pins fewer addresses, but motions would not be screened.
 - **OD-83 B: a new operator Safe from the lift.** Not chosen by EM. Every factory would need a new deployment, because its trusted caller is fixed.
 - **OD-83 C: no guard, and the cap stays.** Not chosen by EM.
+- **An operator Safe owned 1 of 1 by the committee's Safe, with the guard on it only (2026-10-15).** Not chosen by EM: "I don't like to have a nested interim safe" [s1]. It would keep the guard on vault activity, and one owner swap could move the operator. It costs one more Safe, and every operator action becomes a nested execution [s13].
 - **A guard written by Lido.** Rejected: it would be a new contract other than a factory.
 - **Detection and response only, or advisory screening in the signing flow.** Rejected: EM made on-chain blocking a hard requirement. On 2026-10-08 EM allowed a launch without the guard under a cap (decision 20).
 - **A capped launch whose cap holds in the funding registries, lifted by a DAO vote (OD-54 A).** Not chosen by EM. It would hold on chain, at the cost of one more DAO vote at the lift.
@@ -169,7 +173,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - Two Safes share the committee's signers: the committee's Safe and the emergency Safe. A signer rotation that touches a seat updates both.
 - The address of the committee's Safe is pinned in several places. It is the immutable trusted caller of every factory [s8] and the operator role's holder. Replacing it needs a DAO vote that re-registers every factory. A vendor fault does not force a replacement, because the owners can remove the guard after ten days.
 - Fail closed: a vendor outage stops operator activity and new motions. Recovery is unaffected.
-- From the lift, every transaction of the committee's Safe needs the vendor's approval, its duties outside the vault included. A vendor outage stops those duties too, for at most the ten days of the removal timelock (decision 24).
+- From the lift, every transaction of the committee's Safe needs the vendor's approval, its duties outside the vault included. A vendor outage stops those duties too, for at most the ten days of the removal timelock (decision 24). They are the Stonks orders and their top-up motions, the Stonks 2.0 price router, and the manager and emergency roles of the LDO buyback contracts. The Emergency Brakes multisig also holds the buyback executor's emergency role, and no guard screens it [s13].
 - The committee cannot enable a module on its Safe while the guard is set (INV-010).
 - Until the cap lifts, no operator transaction and no motion creation is screened. A top-up above the cap is a breach of procedure, not a revert. Objections and monitoring are its controls.
 - The vendor is off the launch's critical path. The enabling vote no longer waits for the guard or the vendor's terms on standing approvals. The lift waits for them.

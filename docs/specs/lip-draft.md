@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T22:18:41Z
+  at: 2026-10-15T06:46:39Z
 verified: []
 sources:
   - id: s1
@@ -46,6 +46,9 @@ sources:
   - id: s10
     resource: /research/legacy-investments-2026-10-05.md
     title: Legacy investments, 2026-10-05 — the first-loss Earn shares and their Growth Committee holder
+  - id: s13
+    resource: /research/operator-safe-review-2026-10-15.md
+    title: The committee's Safe as the operator, reviewed again on 2026-10-15 — its other duties under the guard
 ---
 
 # LIP-XX: Active Treasury Management Vault
@@ -537,7 +540,7 @@ Safe v1.5.0 calls a module guard for every enabled module, the safety modifier i
 
 **Modifier replacement is a documented procedure, not an automatic one.** The safety modifier pins the operator modifier's address in the emergency role's revoke and switch permissions. Replacing the operator modifier therefore invalidates those pins, and the safety policy must be rewritten by DAO vote in the same action. This is accepted and belongs in the runbook; it is the cost of pinning, and pinning is what makes the switch safe.
 
-Costs: two policy applications, two sets of role keys, two modules enabled on the Asset Safe, a module argument pinned per instance, and the committee's Safe pinned as the immutable trusted caller of every factory. The guard also screens the committee's other duties, and a vendor outage stops them too (OD-83).
+Costs: two policy applications, two sets of role keys, two modules enabled on the Asset Safe, a module argument pinned per instance, and the committee's Safe pinned as the immutable trusted caller of every factory. The guard also screens the committee's other duties: its Stonks orders and their top-up motions, the Stonks 2.0 price router, and the manager and emergency roles of the LDO buyback contracts. A vendor outage stops them too (OD-83) [s13].
 
 ### Test Cases
 
@@ -652,7 +655,7 @@ The direct DAO path is a Voting item, because Aragon Voting owns the vault's Saf
 | First-loss shares misused | A burn or a redemption without an instruction | A burn needs an enacted motion, so LDO holders can block it for 72 hours (OD-67); the first-loss role of the committee's Safe can only redeem to the Agent, and it cannot transfer, approve or burn (OD-60); the Earn team's written instruction and the forum post come first | Alert on every action of the first-loss role, and on any change of the first-loss Safe's balance, owners, modules or singleton |
 | An order fills far below the market | An order with a poor limit, or a solver that fills at the limit while the market is better | The order's own limit; CoW's solver competition; screening of operator orders; the orders budgets | Alert on each fill below a market price, and on open orders and tokens left in the orders account |
 | CoW's watch-tower stops | Conditional orders are not posted to the order book | The orders wait and no funds move; the committee can cancel them and place ordinary orders | Alert when a conditional order's part is not posted on time |
-| Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity and new motions stop; recovery is unaffected; the owners can remove the guard after ten days | Approval-latency and vendor-heartbeat monitoring |
+| Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity, new motions and the committee's other duties stop; recovery is unaffected, and the Emergency Brakes multisig keeps its pause of the LDO buyback executor; the owners can remove the guard after ten days (OD-83) [s13] | Approval-latency and vendor-heartbeat monitoring |
 | Cap breach gets worse | The committee does not rebalance within its window | The emergency Safe disables the operator modifier on the fixed trigger; the safety modifier keeps working, so recovery stays available | Monitoring's fortnightly cap reading on IPFS; its alert pages the emergency Safe when the trigger is met |
 | Monitoring unavailable | Service outage | On-chain permissions are the enforcement layer and do not widen when monitoring stops | Heartbeat on the monitor itself |
 

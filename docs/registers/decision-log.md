@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T22:18:41Z
+  at: 2026-10-15T06:46:39Z
 verified: []
 sources:
   - id: s1
@@ -46,6 +46,9 @@ sources:
   - id: s12
     resource: "urn:clutch:interview:2026-10-14"
     title: EM's question on one Aragon vote, and EM's answers on OD-66 and OD-68 to OD-83, 2026-10-14; the transcript is not in the repository
+  - id: s13
+    resource: "urn:clutch:interview:2026-10-15"
+    title: EM's question on the operator Safe and EM's answer, 2026-10-15; the transcript is not in the repository
 ---
 
 # Decision log
@@ -55,6 +58,20 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-15 — OD-80 and OD-83 kept after a review of the operator Safe
+
+EM wrote:
+
+> I woke up today and not sure whether it's good to have TMC safe re-used directly or previous design with a new operator safe (with the same composition) was better, can you do a corridor test, strawman vs steelman, research previous practice and find out what is more justified on the scale of future proof vs design simplicity and maintenability
+
+The agent's review advised against a return to a new Safe with the same seven signers. It offered two contrast blocks: A, the recorded design, and B, an operator Safe owned 1 of 1 by the committee's Safe, with the guard on it only. EM answered:
+
+> let it be A still, I don't like to have a nested interim safe
+
+Recorded as:
+
+- OD-80 and OD-83 stand. The committee's Safe holds the operator role and the first-loss role, it is the trusted caller of every Clutch factory, and from the lift it carries the screening guard ([ADR 010](/adr/010-pre-execution-screening.md), decision 24). The owned operator Safe goes to ADR 010's options as not chosen. ADR 010 and the LIP draft now name the other duties of the committee's Safe that the guard screens. The evidence is in a [research note](/research/operator-safe-review-2026-10-15.md). [s13]
 
 ## 2026-10-14 — OD-83: the screening guard on the committee's Safe
 
