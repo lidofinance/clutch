@@ -1,15 +1,15 @@
 ---
 type: Decision
 title: "ADR 003: Agent operating model"
-description: AGENTS.md is the single source of truth, at most 60 lines of rules, capped by the validator; skills hold procedures; agents never merge, never touch deployed records and never set parameters.
+description: Agent rules, instruction-file limits, skills, protected files and human review requirements.
 tags: [agents, process, security]
 status: draft
-review_status: human-reviewed
+review_status: slop
 decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T06:22:07Z
+  at: 2026-10-19T20:43:10Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -32,10 +32,10 @@ sources:
 
 ## Context
 
-- Context files did not generally improve agent success, and they raised inference cost. Agent-written context files reduced success in most settings. Repository overviews did not help. Specific non-standard rules were followed well [s2].
-- Half of the instruction files in one study never changed after their first commit [s2].
-- Instruction files and CI workflows are attack surface. A February 2026 campaign rewrote repositories' `CLAUDE.md` files through GitHub Actions [s2].
-- Agent Skills are a portable format for procedures. A skill that fails to trigger is the main weakness [s2].
+- Context files generally did not improve agent success and increased inference cost. Agent-written files reduced success in most settings; overviews did not help. Agents followed specific non-standard rules well [s2].
+- Half the instruction files in one study never changed after their first commit [s2].
+- Instruction files and CI are attack surfaces. A February 2026 campaign rewrote `CLAUDE.md` through GitHub Actions [s2].
+- Agent Skills provide portable procedures; failure to trigger is their main weakness [s2].
 
 ## Decision
 
@@ -71,19 +71,19 @@ An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Options considered
 
-- A long `AGENTS.md` with an architecture tour, as in lido-lend-markets. Not chosen: overviews do not help agents [s2].
-- No cap. Not chosen: instruction files grow and go stale [s2].
+- A long `AGENTS.md` with an architecture tour, as in lido-lend-markets: rejected because overviews did not help agents [s2].
+- No cap: rejected because instruction files grow and become stale [s2].
 
 ## Consequences
 
-- An agent reads `docs/` on demand instead of loading a long instruction file.
-- Parameters stay a human decision. An agent can draft options, never pick one.
-- The first `AGENTS.md` is agent-written until EM prunes it. The subgoal "human-written instruction files" is unmet until then.
-- A freshness check for instruction files is owed: it must fail on a broken path or on a command that no longer exists. Until it exists, that subgoal is also unmet.
-- Of the four skills, only `skills/adr-draft/` exists. The three Clutch-specific skills arrive with the tools they drive in phase 2.
-- Until the agent has its own GitHub identity, the agent pushes under the creator's git identity, so the creator's own approval never counts. Another member of the owning team approves.
-- The rules bind only while both owner teams have write access and the branch rule is on. Neither can be checked from the agent's environment.
-- A `human:` entry alone no longer proves that the human typed it. `recorded_by` and the quoted instruction show when an agent did (decision 14), and the status register marks those entries `(recorded)`.
+- Agents read `docs/` on demand.
+- Humans choose parameters. Agents can draft options.
+- The human-written instruction-file goal remains unmet until EM prunes the initial agent draft.
+- The freshness goal needs a check for broken paths and obsolete commands.
+- Of the four planned skills, only `skills/adr-draft/` exists. The three Clutch-specific skills arrive with their tools in phase 2.
+- Until an agent has its own GitHub identity, it uses the creator's git identity. Another owning-team member must approve; the creator's approval does not count.
+- The rules require write access for both owner teams and an active branch rule. The agent's environment cannot check either.
+- A `human:` entry does not prove human authorship. `recorded_by` and the quoted instruction identify agent-recorded entries (decision 14); the register marks them `(recorded)`.
 
 ## Confirmation
 
