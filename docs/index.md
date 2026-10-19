@@ -29,5 +29,3 @@ The [product brief](product/brief.md) explains the goals and users.
 
 - [Decision records](adr/): the choices, alternatives and consequences.
 - [Research](research/): dated evidence and reproduction commands.
-
-These routes follow [Diátaxis](https://diataxis.fr/): learning, tasks, reference and explanation. Existing paths preserve source links.

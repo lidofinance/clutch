@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:43:10Z
+  at: 2026-10-19T20:46:17Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -100,8 +100,6 @@ EM decided on 2026-10-06, closing OD-35 [s1]:
 EM decided on 2026-10-13, closing OD-64 [s1]:
 
 17. The Emergency Brakes multisig does not get access to view the workspace. This replaces the Emergency Brakes multisig in decision 16.
-
-An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Options considered
 

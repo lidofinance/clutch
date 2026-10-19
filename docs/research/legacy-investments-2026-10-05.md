@@ -9,7 +9,7 @@ valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-10-19T20:46:17Z
 verified: []
 sources:
   - id: s1
@@ -112,4 +112,4 @@ cast call <Twyne vault> 'balanceOf(address)(uint256)' <address> --block $B
 
 - Every read describes its block.
 - The Twyne search covers the addresses named above. It does not prove that no Lido address holds a Twyne position.
-- This page records evidence. EM's decision is in the [decision log](/registers/decision-log.md).
+- EM's decision is in the [decision log](/registers/decision-log.md).

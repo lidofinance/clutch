@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-10-19T20:46:17Z
 verified: []
 sources:
   - id: s1
@@ -75,8 +75,6 @@ EM decided on 2026-10-14, closing OD-81 and OD-82 [s9]:
 
 12. The diagrams, in the guide and in the LIP draft, carry no node for the Emergency Brakes multisig. The guide states two facts about it: it can pause Easy Track, and two of the emergency Safe's five signers come from it.
 13. The closed decisions live in `docs/registers/closed-decisions.yaml`, each with its question, date, decision-log headings, ADR decisions and the earlier ODs that it replaces or refines. `validate_docs.py --write-status` generates the register's closed index with each OD's state, the ADR index from each record's description, and each proposed ADR's open decisions; `--check-status` fails on a stale block. The validator fails on an unknown heading, decision or OD in the data, on a replacement of a later OD and on a skipped OD number, and the guide's build refuses a source that names a replaced OD, and an item whose text names an OD that its sources do not cite.
-
-An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Proposed direction
 

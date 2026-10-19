@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:43:10Z
+  at: 2026-10-19T20:46:17Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -66,8 +66,6 @@ EM confirmed on 2026-10-05, closing OD-25 [s1]:
 EM decided on 2026-10-06, closing OD-31 [s1]:
 
 14. Decision 6 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The decision log quotes the instruction, the entry names the agent in `recorded_by` and links the quote in `ref`, and the commit message says that the agent made the edit. An agent never records a body's verification ([ADR 002](/adr/002-decision-and-review-process.md) point 10).
-
-An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Options considered
 

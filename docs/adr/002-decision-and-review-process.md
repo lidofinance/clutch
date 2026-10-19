@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:43:10Z
+  at: 2026-10-19T20:46:17Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -78,8 +78,6 @@ EM decided on 2026-10-06, closing OD-31 [s1]:
 EM decided on 2026-10-13, closing OD-63 [s1]:
 
 12. The Emergency Brakes multisig no longer verifies an ADR before it is accepted, and nothing replaces it. This replaces decision 2. Decision 10 now covers the committee only.
-
-An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## How the validator enforces it
 
