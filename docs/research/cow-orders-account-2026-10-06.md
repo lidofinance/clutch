@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: CoW orders from a dedicated orders account, 2026-10-06
-description: The evidence behind OD-43 and OD-48 — what the deployed CoW order signer and ComposableCoW enforce, what a Safe needs for TWAP and stop-loss orders, how CoW's rules hold a fill to the market, why GoodAfterTime's price check does not fit recovery orders yet, what Zodiac's own kit covers for CoW, Uniswap and 1inch, why the roles modifier cannot bound a price, and what the hosted Zodiac app shows today.
+description: OD-43 and OD-48 evidence on CoW order enforcement, conditional orders, pricing constraints and Zodiac support.
 tags: [swaps, cow, composable-cow, orders, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-06
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T18:32:34Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

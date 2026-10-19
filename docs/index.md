@@ -2,34 +2,32 @@
 okf_version: "0.2"
 ---
 
-# Clutch knowledge bundle
+# Clutch documentation
 
-The system of record for Clutch, the Lido Active Treasury system. Every page carries its sources, who produced it, who verified it, and a review status. Agent-drafted pages stay `slop` until a human reviews them.
+Clutch is the Lido Active Treasury system. This bundle records its design, requirements, operating procedures and evidence.
 
-# Product
+## Learn the system
 
-* [Product brief](product/brief.md) - the system, the problem, the vision, four goals, the North Star Metric, three hard gates, the ranked readers and the system's users.
+Start with the [interactive onboarding guide](onboarding/clutch-onboarding.html). Follow its tour, explore the flows and use the self-check.
+The [product brief](product/brief.md) explains the goals and users.
 
-# Onboarding
+## Complete a task
 
-* [Onboarding guide](onboarding/) - one interactive page that explains Clutch to new readers, generated from this repository; open `onboarding/clutch-onboarding.html` in a browser.
+- [Contribute a change](../CONTRIBUTING.md): setup, checks, review and decision procedures.
+- [Maintain the onboarding guide](onboarding/guide.md): build, source pins and browser tests.
+- [Run the fork harness](../test/README.md): policy checks against production contracts on a mainnet fork.
+- [Find an operating procedure](runbooks/): the runbook backlog; no runbook is written yet.
 
-# Decisions
+## Find a requirement or status
 
-* [Decision records](adr/) - one global sequence. EM accepts in the interim; the Treasury Management Committee is the permanent acceptor.
+- [Specifications](specs/): invariants, controls, the enabling vote and the LIP draft.
+- [Permission policy](../policy/constellation/PROVENANCE.md): source layout, compiler and committed artifacts.
+- [Registers](registers/): parameters, open decisions, decision history and document status.
+- [Roadmap](../ROADMAP.md): phases and their completion gates.
 
-# Specifications
+## Understand a decision
 
-* [Specifications](specs/) - the specification policy, the invariants, the control matrix and the LIP draft.
+- [Decision records](adr/): the choices, alternatives and consequences.
+- [Research](research/): dated evidence and reproduction commands.
 
-# Runbooks
-
-* [Runbooks](runbooks/) - one per emergency or technical action, each mapped to a permission and a fork drill.
-
-# Registers
-
-* [Registers](registers/) - decision log, open decisions, parameters, the retired verification requests and the generated document-status table.
-
-# Research
-
-* [Research](research/) - dated evidence behind the decisions.
+These routes follow [Diátaxis](https://diataxis.fr/): learning, tasks, reference and explanation. Existing paths preserve source links.

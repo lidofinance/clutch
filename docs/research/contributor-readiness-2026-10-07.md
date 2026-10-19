@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: The repository and many contributors with agents, 2026-10-07
-description: The evidence behind ADR 012 — how often changes touch the same files, who the validator let author and verify, what CI ran, the unsafe defaults for an agent, the fifteen steps that EM answered by number, and the keystore rehearsal of the mainnet recipes.
+description: ADR 012 evidence on shared-file changes, actors, CI, agent defaults and the keystore rehearsal.
 tags: [contributors, agents, process, ci, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-07
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T07:49:32Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

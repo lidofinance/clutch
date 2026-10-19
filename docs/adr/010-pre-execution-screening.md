@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 010: Pre-execution screening"
-description: A suspicious operator transaction is blocked on chain before it executes, by the screening vendor's existing transaction guard on the committee's own Safe, which holds the operator role and is the trusted caller of every factory (OD-80, OD-83), so the guard also screens the committee's other duties; it fails closed, and recovery never passes through vendor code; the committee's Safe runs Safe v1.3.0, which the vendor's guard and Lido's detector support, and the vendor is asked to refuse delegatecalls except to Safe's batching library. The vault may launch without the guard under a cap of one million dollars, held by procedure; a forum post lifts the cap once the guard is live.
+description: Transaction screening on the committee's Safe, vendor controls, outage behaviour and conditions for lifting the launch cap.
 tags: [screening, guard, safe, security]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-15T06:46:39Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 012: Contributing with many agents"
-description: Many contributors may run their own agents here — any agent may author a page, and only listed humans and teams verify, with a hash that locks the page's body; agents own no GitHub accounts; changes land through a merge queue; decisions enter as complete open-decision rows and are decided in batched interviews; safe defaults, one command for setup, checks and generated files, and checks for restricted terms, licences, invariants and IDs; the onboarding guide is checked in every presentation state, and each of its items is pinned to the decisions that it cites.
+description: Contribution, human verification, decision interviews, CI, generated files and guide source pins.
 tags: [agents, contributors, process, security, ci]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

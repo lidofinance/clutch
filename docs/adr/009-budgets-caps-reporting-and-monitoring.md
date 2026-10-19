@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 009: Budgets, exposure caps, reporting and monitoring"
-description: Every mandate rule gets a control on each layer that can carry it — on-chain policy, screening, monitoring, display — mapped in a control matrix; exposure caps and the liquidity buffer are detected, reported on IPFS, screened where the vendor can check them, and shown in the Zodiac UI from Lido's readings and alerts; prices follow a five-level waterfall, so no asset is unpriced; a new Lido product stays in the protocol cap until it matures and a motion unlocks it; budgets derive from the mandate by attested computation, are set once, and change by motion only after an event; detectors run in two monitoring estates; the committee owns remediation.
+description: Budgets, exposure caps, pricing, reports, monitoring and responsibility for remediation.
 tags: [budgets, caps, reporting, monitoring, mandate]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

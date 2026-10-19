@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: The onboarding guide's tests and pins, 2026-10-12
-description: The evidence behind ADR 012 decision 11 — two defect classes that the review of another Lido guide found, probed on this guide's page; the churn of pins on whole ADRs; the move to decision-level references; and the drift that the move found.
+description: ADR 012 evidence on presentation defects, source-pin scope, pin churn and guide drift.
 tags: [onboarding, testing, accessibility, provenance, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-12
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-12T07:53:08Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1
