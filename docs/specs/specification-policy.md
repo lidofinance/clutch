@@ -1,13 +1,13 @@
 ---
 type: Policy
 title: Specification policy
-description: How Clutch specifications are written and kept true — three layers, invariant IDs that map to tests, when-then scenarios, runbooks with drill records, the policy data file with a round-trip check, the same-commit rule, and the generated onboarding guide.
+description: Rules for specification layers, invariant tests, runbooks, policy artifacts and the generated guide.
 tags: [specs, invariants, testing, runbooks, policy]
 status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T08:22:39Z
+  at: 2026-10-19T22:36:19Z
 verified: []
 sources:
   - id: s1
@@ -33,47 +33,54 @@ This policy applies [ADR 004](/adr/004-specifications-and-policy-as-data.md) [s1
 
 ## Three layers
 
-- **Conceptual specifications** are written by hand. They hold the architecture, the roles matrix, the permission model, the invariants and the threat model: what a reviewer needs before reading code [s1][s2].
-- **The API reference** is generated from NatSpec once the factories exist. Nobody edits it by hand. A change to a function's behaviour changes its NatSpec, and the reference is regenerated [s1].
-- **The LIP** is the external layer for delegates. It summarises and cites the conceptual specifications. It must never contradict them. When the two disagree, the conceptual specification wins and the LIP is fixed in the same commit [s1].
+| Layer | Content and maintenance |
+|---|---|
+| Conceptual specifications | Hand-written architecture, roles, permissions, invariants and threat model. Reviewers read these before code [s1][s2]. |
+| API reference | Generated from NatSpec once the factories exist. Behaviour changes update NatSpec and regenerate the reference. Do not edit it by hand [s1]. |
+| LIP | Summary for delegates, with links to the conceptual specifications. If they disagree, fix the LIP in the same commit [s1]. |
 
 ## Invariants
 
-- Each invariant has an ID `INV-NNN`. An ID is never reused.
-- Each invariant states one property that a test can check.
-- Each invariant maps to at least one named test. CI fails when an invariant names a test that does not exist, or when a Draft invariant names none [s5]. A pending invariant may wait for its test until the end of phase 2, when CI fails on any invariant without a test [s1].
-- Each invariant names the ADR that sets it. An invariant that depends on an open decision is marked "pending".
+- Give each invariant a unique `INV-NNN` ID. Never reuse an ID.
+- State one testable property and name its ADR. Mark it pending if it depends on an open decision.
+- Map each invariant to a named test. CI rejects a missing test or a Draft invariant without one [s5].
+- Pending invariants can wait for tests until the end of phase 2. Then CI must reject any invariant without a test [s1].
 
 ## Behaviour scenarios
 
-Behaviour is written as "WHEN a condition, THEN an expected result". A scenario maps to a scenario test or a fork test [s1].
+Write scenarios as "WHEN a condition, THEN an expected result". Map each to a scenario test or fork test [s1].
 
 ## Runbooks
 
-- Each emergency or technical action has one runbook under `docs/runbooks/`, with `type: Runbook` [s1].
-- A runbook names the `permission` it exercises and gives the exact transaction for each step.
-- A runbook rises above `slop` only with a `drill` record: when, on which network and block, the time to initiate, and a passing result. The time to initiate must not exceed six hours. The validator enforces this [s3].
+Give each emergency or technical action a runbook under `docs/runbooks/`, with `type: Runbook` [s1].
+Name its `permission` and give the exact transaction for each step.
+
+A runbook can rise above `slop` only with a passing fork `drill` record [s3].
+Record the time, network, block and time to initiate, which must be at most six hours. The validator enforces these drill requirements [s3].
 
 ## The permission policy
 
-- The policy is written as a Zodiac constellation in TypeScript. Clutch's compiler turns it into one committed artifact: the modifier calls, the expected trees and the allowances [s1].
-- The compiler emits one complete tree per role, target and selector, because a write replaces the slot.
-- CI fails when the committed artifact differs from a fresh compile. Reviewers approve the artifact.
-- The team works in the Zodiac UI. Local tooling verifies everything that the UI produces before anything is signed.
-- A round-trip check reads the applied conditions back from the modifier on a fork and compares them with the committed artifact.
-- Behaviour tests assert what each role can and cannot do, independent of the encoding.
-- A policy change rises above `slop` only with the output of the verification procedure [s3].
+Write the policy as a Zodiac constellation in TypeScript.
+Clutch's compiler produces one committed artifact with modifier calls, expected trees and allowances [s1].
+Each role, target and selector needs one complete tree: a write replaces its slot.
+
+CI rejects an artifact that differs from a fresh compile. Reviewers approve the artifact.
+The team uses the Zodiac UI; local tooling must verify its output before signing.
+A round-trip check compares the modifier's conditions on a fork with the artifact.
+Behaviour tests check each role's allowed and refused actions independently of the encoding.
+A policy change can rise above `slop` only with verification output [s3].
 
 ## Keeping specifications true
 
-- Tests derive from the specifications, never from the implementation. Expected values are recomputed independently [s1][s2].
-- A pull request that changes behaviour changes the affected specification and invariants in the same commit [s1].
-- Specifications reference the code. Contract NatSpec never references specifications, ADRs or tests.
+- Derive tests from specifications, never from implementation. Recompute expected values independently [s1][s2].
+- Update affected specifications and invariants in the same commit as a behaviour change [s1].
+- Specifications reference code. Contract NatSpec must not reference specifications, ADRs or tests.
 
 ## The onboarding guide
 
-- The [onboarding guide](/onboarding/guide.md) is generated from the repository, like the policy artifact. Its text lives in `docs/onboarding/content/`, and the build reads the decisions, invariants, runbooks, LIP labels, roadmap and compiled policy [s4].
-- A pull request that changes a decision, a role, a permission, a flow or a runbook updates the guide's content and commits the rebuilt page in the same pull request.
-- CI fails when the committed page differs from a fresh build, or when a reference in the guide does not resolve [s4].
-- Browser tests drive every control of the page, and CI runs them on every pull request [s4].
-- CI publishes the page on GitHub Pages from `main`, after it checks that the page is a fresh build and keeps its draft disclaimer [s5].
+The [guide](/onboarding/guide.md) is generated from `docs/onboarding/content/` and repository sources [s4].
+A change to a decision, role, permission, flow or runbook must update the guide in the same pull request.
+Commit the rebuilt page. CI rejects stale output and unresolved references [s4].
+
+Browser tests exercise every control on each pull request [s4].
+CI publishes the page from `main` after it checks freshness and the draft disclaimer [s5].

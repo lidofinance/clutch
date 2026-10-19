@@ -1,15 +1,15 @@
 ---
 type: Decision
 title: "ADR 002: Decision and review process"
-description: EM accepts decisions in the interim and the Treasury Management Committee permanently; no other body verifies an ADR, since the Emergency Brakes multisig's verification ended on 2026-10-13; pages carry OKF 0.2 trust fields and a review ladder that an edit resets.
+description: ADR acceptance, human verification, review states and validator limits.
 tags: [process, review, okf, trust]
 status: draft
-review_status: human-reviewed
+review_status: slop
 decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T08:15:41Z
+  at: 2026-10-19T22:29:31Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -43,12 +43,12 @@ sources:
 
 ## Context
 
-- Agents draft most text in this repository. A reader must see what a human has checked.
-- lido-lend-markets marks every agent-drafted document with a review status from `slop` to `finalized`, and resets it after a substantial rewrite [s2].
-- OKF 0.2 records who generated a page, who verified it, and its sources [s3].
-- The Treasury Management Committee operates the vault. The emergency Safe carries the committee's own signers. Without an outside verifier, the committee would approve its own limits.
-- The Emergency Brakes multisig is a separate Safe with a quorum of three of five. At block 26092572 it shares no owner address with the committee's Safe [s4]. Until 2026-10-13 it held the technical role in [ADR 005](/adr/005-account-graph-and-roles.md).
-- On 2026-10-13 the emergency Safe became three of five, with two committee members, two Emergency Brakes members and one member of neither body, and the Emergency Brakes multisig lost every role in the vault ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 23 and 24).
+- Readers must distinguish agent drafts from human-reviewed text.
+- lido-lend-markets uses review states from `slop` to `finalized` and resets them after substantial rewrites [s2].
+- OKF 0.2 records a page's author, verifiers and sources [s3].
+- The committee operates the vault and supplies two emergency signers. Without outside verification, it would approve its own limits.
+- At block 26092572, the three-of-five Emergency Brakes Safe shared no owner address with the committee's Safe [s4]. It held ADR 005's technical role until 2026-10-13.
+- On 2026-10-13, the emergency Safe became three-of-five: two committee members, two Emergency Brakes members and one member of neither body. The Emergency Brakes multisig lost all vault roles ([ADR 005](/adr/005-account-graph-and-roles.md), decisions 23 and 24).
 
 ## Decision
 
@@ -79,33 +79,32 @@ EM decided on 2026-10-13, closing OD-63 [s1]:
 
 12. The Emergency Brakes multisig no longer verifies an ADR before it is accepted, and nothing replaces it. This replaces decision 2. Decision 10 now covers the committee only.
 
-An agent drafted this record. It stays `proposed` until EM accepts the text.
-
 ## How the validator enforces it
 
-`scripts/validate_docs.py` enforces points 3 to 6 and the runbook half of point 9:
+`scripts/validate_docs.py` enforces decisions 3–6 and the runbook part of decision 9:
 
-- A Runbook names the `permission` it exercises. Above `slop`, it needs a `drill` record with `at`, `network`, `block`, `time_to_initiate_seconds` and `result: pass`, and the time to initiate must not exceed six hours.
-- A verification by `human:tmc` needs `ref`, an https or urn link to the committee's decision record. Without it, the entry does not count (point 10).
-- A verification with `recorded_by` must name an agent and must link, in `ref`, a heading of the decision log. The validator refuses it on a body's actor. The status register marks it `(recorded)` (point 11).
+- A Runbook names its `permission`. Above `slop`, its `drill` needs `at`, `network`, `block`, `time_to_initiate_seconds` and `result: pass`. The time must not exceed six hours.
+- A `human:tmc` verification needs an https or urn `ref` to the committee's decision record; otherwise it does not count (decision 10).
+- A recorded verification names an agent in `recorded_by` and links a decision-log heading in `ref`. The validator rejects it for a body's actor. The status register marks it `(recorded)` (decision 11).
 
-The validator does not yet check the verification-procedure output for a policy change. That check arrives with the procedure in phase 2 of the [roadmap](https://github.com/lidofinance/clutch/blob/main/ROADMAP.md).
+The validator does not yet check policy-verification output. That check arrives with the procedure in [roadmap](https://github.com/lidofinance/clutch/blob/main/ROADMAP.md) phase 2.
 
 ## Options considered
 
-- The committee accepts alone. Not chosen: the constrained party would approve its own limits.
-- A body's quorum signature: each body signs a Safe message over the page, and a script checks it on chain. Not chosen by EM: every verification would need a signing round.
-- The whole DAO accepts every ADR. Not chosen: an ADR authorises nothing on chain, and on-chain changes already need a vote or a motion.
-- OKF fields without a review ladder. Not chosen: there is then no review depth between unverified and reviewed.
-- The Emergency Brakes multisig keeps verifying the records that constrain the operator, the design until 2026-10-13. Replaced by EM (decision 12): the multisig holds no role in the vault now, and an accepted ADR authorises nothing on chain (decision 7).
+- Committee-only acceptance: rejected because the committee would approve its own limits.
+- Each body's quorum signs a Safe message over the page, which a script checks on chain. EM rejected this because each verification would need a signing round.
+- DAO acceptance of each ADR: rejected because ADRs authorize no on-chain action; votes and motions already govern those actions.
+- OKF fields without review states: rejected because they would not distinguish review depth.
+- Emergency Brakes verification of constraining ADRs: EM replaced this on 2026-10-13 (decision 12). The multisig has no vault role, and ADR acceptance authorizes no on-chain action.
 
 ## Consequences
 
-- Every agent edit to a reviewed page is visible, because the page drops back to `slop`.
-- EM accepts a decision with one explicit edit, not in conversation.
-- The committee re-ratifies what EM accepted in the interim.
-- Known gap: the validator cannot see an edit that leaves `generated.at` unchanged. A CI step that compares each changed page with the base branch closes it. The step is planned for phase 1.
-- Known gap: the validator cannot tell who wrote a `human:` entry. Human review of the pull request is the control. CODEOWNERS and the branch rule on `main` enforce it (OD-10, decided 2026-10-05). For the committee, the `ref` link makes each entry checkable against its own record (point 10). The entry is still a member's claim, not a proof. An entry that an agent records on instruction says so in `recorded_by` (point 11); an entry that does not say so still depends on that review.
+- Agent edits reset reviewed pages to `slop`.
+- EM accepts through one explicit edit, not in conversation. The committee re-ratifies interim acceptances.
+- The validator cannot detect an edit that leaves `generated.at` unchanged. A base-branch comparison is planned for phase 1.
+- The validator cannot identify who wrote a `human:` entry. Human pull request review is the control; CODEOWNERS and the `main` branch rule enforce it (OD-10, 2026-10-05).
+- A committee verification's `ref` makes the member's claim checkable against the decision record (decision 10). The entry remains a member's claim, not proof.
+- `recorded_by` identifies an entry made on instruction (decision 11). Entries without it still depend on human review.
 
 ## Confirmation
 

@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: The request for solution against the decided design, 2026-10-07
-description: What the request for solution that Lido contributors sent to the policy provider asked, part by part, paraphrased; the onboarding guide's RFP tab maps each ask to the decided design.
+description: Paraphrased asks that Lido contributors sent to the policy provider; the guide's RFP tab maps them to the design.
 tags: [rfp, policy-provider, requirements, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-07
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-07T08:02:59Z
+  at: 2026-10-19T22:36:19Z
 verified: []
 sources:
   - id: s1

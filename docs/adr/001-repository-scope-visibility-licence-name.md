@@ -1,15 +1,15 @@
 ---
 type: Decision
 title: "ADR 001: Repository scope, visibility, licence and name"
-description: One repository for the Active Treasury system, private until deployment at the latest, AGPL-3.0-or-later with GPL-3.0 kept for files derived from Easy Track and LGPL-3.0-only for files derived from the policy provider's constellation, named Clutch.
+description: Repository scope, publication rules, licences, name and token-symbol restriction.
 tags: [repository, licence, visibility, naming]
 status: draft
-review_status: human-reviewed
+review_status: slop
 decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T08:12:59Z
+  at: 2026-10-19T22:29:31Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -53,10 +53,10 @@ sources:
 
 ## Context
 
-- The system needs one place where decisions, specifications, the permission policy, code, tests and deployment records stay consistent.
-- The Easy Track factories will reuse Easy Track's audited base contracts. Those files are GPL-3.0 [s3].
-- The dry-run kit already exists, with six commits whose messages explain each correction.
-- The design names a screening vendor that is not announced.
+- Decisions, specifications, policy, code, tests and deployment records need one consistent source.
+- The factories will reuse Easy Track's audited GPL-3.0 base contracts [s3].
+- The dry-run kit has six commits whose messages explain the corrections.
+- The design names an unannounced screening vendor.
 
 ## Decision
 
@@ -78,24 +78,22 @@ EM decided on 2026-10-06, closing OD-34 [s1]:
 
 9. **The constellation's licence.** Files derived from the policy provider's Zodiac constellation keep LGPL-3.0-only. A derived file gets `SPDX-License-Identifier: LGPL-3.0-only` when it changes. New files use AGPL-3.0-or-later, the policy compiler among them. LGPL-3.0 is GPL-3.0 with added permissions [s9], so the reasoning of decision 5 applies.
 
-An agent drafted this record. It stays `proposed` until EM accepts the text.
-
 ## Options considered
 
-- Separate repositories for documents and code. Not chosen: a specification and its tests must change in the same commit.
-- Import the kit without its history. Not chosen: the commit messages record why each correction was made.
-- GPL-3.0 for the whole repository. Not chosen: AGPL-3.0-or-later matches Gaggle, and GPL-3.0 section 13 lets the Easy Track-derived files keep their licence [s2].
-- Other names: roost, aerie and active-treasury. EM chose Clutch.
-- Write every file of the policy port fresh under AGPL-3.0-or-later and delete the copied constellation. Not chosen by EM: a file that follows the copy can still count as derived.
+- Separate documentation and code repositories: rejected because specifications and tests must change in the same commit.
+- Import without history: rejected because commit messages explain the corrections.
+- GPL-3.0 throughout: rejected because AGPL-3.0-or-later matches Gaggle. GPL-3.0 section 13 permits Easy Track-derived files to keep their licence [s2].
+- Roost, aerie or active-treasury: EM chose Clutch.
+- Rewrite the policy port under AGPL-3.0-or-later and delete the copy: EM rejected this because a rewrite that follows the copy can still count as derived.
 
 ## Consequences
 
-- The publication test applies to every file and to every commit message.
-- Every source file carries `SPDX-License-Identifier: AGPL-3.0-or-later`, except files derived from Easy Track, which keep `GPL-3.0`, and files derived from the provider's constellation, which keep `LGPL-3.0-only` (decision 9).
-- `policy/constellation/LICENSE` carries the LGPL text, which must travel with the derived files. The reading in decision 9 is not a legal review.
-- The kit's history names the policy provider of the original proposal. The provider's own proposal repository is public, so the history passes the publication test.
-- AGPL-3.0 section 13 requires that users who interact with a modified version over a network can receive its source [s4]. Public source at deployment, with explorer verification, is the planned answer.
-- The decision log redacts the screening vendor's name and the mandate size. The vendor's name enters when the mandate is posted on the forum (decision 8).
+- The publication test covers files and commit messages.
+- Source files use `SPDX-License-Identifier: AGPL-3.0-or-later`. Easy Track-derived files keep `GPL-3.0`; constellation-derived files keep `LGPL-3.0-only` (decision 9).
+- The LGPL text in `policy/constellation/LICENSE` must accompany derived files. The licence reading in decision 9 is not a legal review.
+- The kit's history names the policy provider. Its proposal repository is public, so the history passes the publication test.
+- AGPL-3.0 section 13 requires source access for users of a modified version over a network [s4]. Public source and explorer verification at deployment are the planned response.
+- The decision log redacts the screening vendor's name and mandate size. The name enters when the mandate is posted, under decision 8.
 
 ## Confirmation
 

@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: Stonks 2.0 instances, 2026-10-02
-description: What the deployed Stonks 2.0 code lets each role do, how an order lives and ends, what the factory fixes, how the earlier instances were funded, and which tokens the deployed price stack can price — the evidence behind OD-05 and OD-18.
+description: OD-05 and OD-18 evidence on Stonks roles, order lifecycle, factories, funding and price coverage.
 tags: [stonks, swaps, cow, evidence]
 status: stable
 review_status: slop
@@ -12,7 +12,7 @@ superseded_by:
   note: "Decisions 17 to 20 of ADR 007 (OD-43, 2026-10-06): CoW orders from a dedicated orders account replaced the Stonks 2.0 instances."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:03:02Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: Recovery into USDT and the withdrawal-queue approval, 2026-10-05
-description: The evidence behind OD-26 and OD-27 — how USDS and DAI carry USDC risk through Sky's peg stability module, the recovery topology before the decision, and who can upgrade Lido's withdrawal queue, how much one request takes, and whether a request can be cancelled.
+description: OD-26 and OD-27 evidence on stablecoin exposure, recovery routes and withdrawal-queue constraints.
 tags: [recovery, usdt, withdrawal-queue, evidence]
 status: stable
 review_status: slop
@@ -12,7 +12,7 @@ superseded_by:
   note: "In part: decision 27 of ADR 007 (2026-10-08) took the withdrawal queue out of the design. Recovery into USDC or USDT stands (OD-26)."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:03:02Z
+  at: 2026-10-19T20:46:17Z
 verified: []
 sources:
   - id: s1
@@ -90,4 +90,4 @@ The function list comes from the implementation's verified ABI, through the Ethe
 
 - Every read describes its block. The peg stability module's balance changes daily.
 - The CoinDesk report is a press source, not a price record.
-- This page records evidence. EM's decisions are in the [decision log](/registers/decision-log.md).
+- EM's decisions are in the [decision log](/registers/decision-log.md).

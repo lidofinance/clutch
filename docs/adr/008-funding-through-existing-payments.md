@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 008: Funding through the existing payment path"
-description: The vault is seeded and topped up through Aragon Finance and two dedicated allowed-recipients registries, one for stablecoins and one for stETH, each with a one-month period and a limit of one TM Floor Value; the objection is the control and the registry is the backstop; a DAO vote adds USDS to the shared payment permission and to the shared stablecoin token list; ETH is not a funding asset; the DAO's first-loss Earn shares move from the Growth Committee into a dedicated first-loss Safe, where a burn runs only as an Easy Track motion and one narrow role of the committee's Safe redeems them to the Aragon Agent, on the Earn team's instruction, and they reduce the seed; until the screening guard is live, the committee keeps the vault under a cap of one million dollars by procedure.
+description: Funding through Finance and registries, first-loss shares and the procedural launch cap.
 tags: [funding, finance, easy-track, acl]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-19T22:33:22Z
 verified: []
 sources:
   - id: s1
@@ -38,24 +38,22 @@ sources:
 
 ## Context
 
-Facts from the chain reads were read at block 26092572 [s2]. Facts about the registries were read at block 26105012 [s4].
+Chain reads use block 26092572 [s2]; registry reads use 26105012 [s4].
 
-- Aragon Finance pays out of the Aragon Agent [s2].
-- The Easy Track executor holds the payment permission on Finance with 22 ACL parameters. They bind argument 0, the token, and argument 2, the amount. Argument 1, the receiver, is not constrained [s2].
-- The per-payment ceilings are stETH 1,000, ETH 1,000, DAI 2,000,000, USDC 2,000,000, USDT 2,000,000, sUSDS 2,000,000 and LDO 5,000,000. Every other token is denied. USDS is not in the chain [s2]. The chain was unchanged at block 26125804, when the Agent held no USDS and some sUSDS [s4].
-- The shared stablecoin token list allows DAI, USDT, USDC and sUSDS, and Aragon Voting administers it [s4].
-- Aragon Voting manages the permission. A change rewrites the whole parameter array by vote [s2].
-- Finance token budgets are off for USDC, DAI and stETH, so Finance adds no second cap [s2].
-- A registry's period is 1, 2, 3, 6 or 12 calendar months, and it starts on the 1st at 00:00 UTC. The limit is checked when a motion starts and again when it is enacted. Around a period boundary, two full limits can be paid within about 72 hours [s4].
-- A registry counts token units after scaling decimals, so 1 stETH counts as 1 USDC. One limit cannot hold stablecoins and stETH to a dollar figure [s4].
-- Only a registry's admin sets its limit and its period; for the existing registries that is the Aragon Agent. A change is a DAO vote [s4].
-- No live registry uses a one-month period. Five use three months, four use six months and three use twelve months. The committee's Safe is already the trusted caller of two of them [s4].
-- The standard top-up factory writes a fixed payment reference. A motion cannot carry a report's identifier in it [s4].
-- The legacy Earn positions are the DAO's first-loss allocation to Lido Earn, approved by Snapshot in March 2026. A Growth Committee Safe holds 1,362.84 earnETH and 1,998,416.46 earnUSD shares. The shares transfer freely today, and their holder executes a burn. No Lido address checked holds a Twyne position [s6].
-- The first-loss terms of March 2026: after a loss of at least 1% that the curators confirm, the Earn team may instruct the executing committee to burn up to all of the DAO's shares in that vault; on a confirmed material risk, it may instruct a withdrawal through the vault's normal redemption. No vote is needed. An incident update is due within seven days, and the DAO may change or end the authorisation at any time [s7].
-- After the Kelp incident of April 2026 the loss stayed below 1%, so a Snapshot approved a one-time exception, and the burn ran on 2026-05-15 as one `burn` call [s7].
-- A DAO vote that has the Aragon Agent act passes Dual Governance: about nine days, plus a slot in an omnibus vote [s7].
-- The mandate's funding rules [s5]. A motion seeds the vault in stETH or stablecoins, up to the TM Floor Value. The legacy investments carry over into the vault and reduce the seed. After each month-end snapshot, a top-up may refill the vault to the floor within ten calendar days. Under the runway protection, that top-up may be paid in stETH, up to the floor. A non-stablecoin balance is valued at the motion, at the Coingecko price. The objection is the control of a top-up.
+- Finance pays from the Aragon Agent [s2]. Easy Track's payment permission has 22 ACL parameters, constraining token argument 0 and amount argument 2, but not receiver argument 1 [s2].
+- Per-payment ceilings: stETH 1,000; ETH 1,000; DAI, USDC, USDT and sUSDS 2,000,000 each; LDO 5,000,000. Other tokens, including USDS, are denied [s2]. At block 26125804 this was unchanged; the Agent held no USDS and some sUSDS [s4].
+- Voting administers the shared DAI/USDT/USDC/sUSDS token list [s4] and the payment permission. A vote rewrites the whole parameter array [s2].
+- Finance budgets are off for USDC, DAI and stETH, adding no second cap [s2].
+- Registry periods are 1, 2, 3, 6 or 12 calendar months, starting on the 1st at 00:00 UTC. Limits apply at creation and enactment. A boundary permits two full limits within about 72 hours [s4].
+- Registries scale decimals, so 1 stETH counts as 1 USDC. A shared limit cannot express a dollar cap for both [s4].
+- Only the admin changes limits or periods, by DAO vote. Existing registries use the Agent as admin [s4].
+- No live registry uses one month: five use three, four use six and three use twelve. The committee's Safe is trusted caller for two [s4].
+- Top-up factories fix the payment reference; motions cannot include a report identifier [s4].
+- The March 2026 Snapshot approved the DAO's first-loss Earn allocation. A Growth Committee Safe holds 1,362.84 earnETH and 1,998,416.46 earnUSD shares. At the read, shares transfer freely and the holder can burn them. Checked Lido addresses hold no Twyne position [s6].
+- March 2026 terms let the Earn team instruct the executing committee to burn up to all of the DAO's shares in that vault after a curator-confirmed loss of at least 1%. On confirmed material risk, the Earn team may instruct normal redemption. Neither action needs a vote. An incident update is due within seven days; the DAO can change or end authorization at any time [s7].
+- Kelp's April 2026 loss was below 1%. A Snapshot allowed a one-time exception, executed on 2026-05-15 as one `burn` call [s7].
+- Agent actions through a DAO vote take about nine days through Dual Governance, plus an omnibus slot [s7].
+- The mandate permits seeding in stETH or stablecoins up to the TM Floor Value, less carried-over investments [s5]. Monthly snapshots permit top-ups to the floor within ten calendar days. Runway protection allows stETH funding up to that floor. Non-stablecoins use the motion-time Coingecko price; objection controls the top-up.
 
 ## Decision
 
@@ -137,64 +135,71 @@ Since OD-80, the committee's own Safe holds the first-loss role of decisions 21 
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
-- **The shared permission gains USDS.** The vote rewrites the whole parameter array as one unit. The seven existing entries stay, and USDS joins with a ceiling of 2,000,000 per payment (decision 12). A fork test of the new array is owed before the vote.
-- **Several payments in one motion.** A motion repeats the Asset Safe as recipient, one payment per ceiling. The ceilings are per call, not per motion [s4].
-- **Two registries from the standard builder.** Each has the Asset Safe as its only recipient and Aragon Voting as admin ([ADR 005](/adr/005-account-graph-and-roles.md) decision 28). As on the committee's registries, the Easy Track executor gets no role to add recipients [s4].
-- **Two top-up factories.** The stablecoin factory uses the shared stablecoin token list, after the vote adds USDS to it. The stETH factory is the single-token version. The committee's Safe is the trusted caller of both, as of every factory ([ADR 006](/adr/006-governance-through-easy-track-factories.md)). The DAO registers them by vote.
-- **The figures.** The stablecoin limit is the TM Floor Value at par. The stETH limit is the floor divided by the pinned price. An attested computation produces both, and they enter this repository when the mandate is approved.
-- **The seed.** The same registries carry the seed. It is at most one floor, less the value of the first-loss shares that arrive from the Growth Committee, set by attested computation at the Earn oracle price. Twyne counts only when shown (decision 17). The seed motion follows the share transfer. Until the cap lifts, the seed is also at most the cap (decision 20).
-- **The capped phase.** Each top-up's forum post states the vault's value at the latest snapshot and the room left under the cap, at the price rule of [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 20. Monitoring flags a top-up motion whose enactment would take the vault above the cap, while its objection window is open. The first-loss Safe is outside the cap.
-- **The first-loss shares.** The first-loss Safe receives them by plain transfer and needs no permission for it. The first-loss modifier's owner, avatar and target is the first-loss Safe. A burn is an Easy Track motion: the committee's Safe creates it on the first-loss burn factory, naming an amount and one of the two share tokens that the factory pins, earnETH or earnUSD; after 72 hours without an objection, the Easy Track executor calls `burn` through the `first-loss-burn` role (decision 23). The `first-loss` role of the committee's Safe calls `redeem` and `claim` on that vault's redeem queue, with the receiver pinned to the Aragon Agent (decision 21). The committee acts on the Earn team's written instruction: a burn after a loss of at least 1% that the curators confirm, or an exit on a confirmed material risk. The instruction and the curators' confirmation go on the forum with the motion. The incident update follows within seven days, as the terms say [s7]; a burn waits for the objection window even when time is short. Below the terms, a Snapshot exception comes first, as after the Kelp incident. The first-loss amount is the shares received, less any burn. Reports show the first-loss Safe as a sub-allocation of the vault. Monitoring alerts on any change of the first-loss Safe's balance, owners, modules or singleton, and pages on every burn motion and every action of the first-loss role ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
-- **The report.** The factory fixes the payment reference, so a top-up's report identifier goes in the forum post that the mandate requires before each top-up. There is no on-chain anchor. No top-up motion starts while the monthly report is late or the snapshot has an unpriced asset ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
-- **Funding assets.** USDC, USDT, DAI, USDS, sUSDS and stETH. ETH is not a funding asset: the Agent holds less than 8 ETH [s4].
+- **USDS permission.** One vote rewrites the array, retaining seven entries and adding USDS at 2,000,000 per payment (decision 12). Fork-test the array before the vote.
+- **Multiple payments.** A motion can repeat the Asset Safe as recipient, respecting each call's ceiling. Ceilings apply per call, not per motion [s4].
+- **Registries.** Two standard-builder registries pay only the Asset Safe, with Voting as admin ([ADR 005](/adr/005-account-graph-and-roles.md), decision 28). As in the committee's registries, the executor cannot add recipients [s4].
+- **Factories.** One uses the shared stablecoin list after USDS is added; one is stETH-only. Both fix the committee's Safe as trusted caller, as [ADR 006](/adr/006-governance-through-easy-track-factories.md) requires. The DAO registers them.
+- **Limits.** Stablecoins use the TM Floor Value at par; stETH uses the floor divided by pinned price. Attested computation produces both; they enter this repository when the mandate is approved.
+- **Seed.** Use the same registries, up to one floor less transferred first-loss shares at the attested Earn oracle valuation. Count Twyne only when evidenced (decision 17). Transfer shares before the seed motion. Before lift, the seed also stays within the cap (decision 20).
+- **Capped top-ups.** The forum post states snapshot value and cap headroom under [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 20. During objection, monitoring flags motions that would exceed the cap. First-loss is outside it.
+- **First-loss custody.** Plain transfers fund the first-loss Safe without a permission. That Safe is its modifier's owner, avatar and target.
+- **First-loss burn.** The committee creates a motion naming an amount and pinned earnETH or earnUSD. After 72 hours without objection, the executor calls `burn` through `first-loss-burn` (decision 23). Burns always wait, including urgent ones.
+- **First-loss exit.** The committee's `first-loss` role calls `redeem` and `claim` on the vault's queue, paying only the Agent (decision 21).
+- **Instructions and reporting.** The Earn team's written instruction is required: curator-confirmed loss of at least 1% for burns, confirmed material risk for exits. Publish the instruction and curator confirmation with the motion; update the incident within seven days [s7]. Below the terms, obtain a Snapshot exception first, as for Kelp. First-loss equals received shares less burns; reports show it as a sub-allocation. Monitor balance, owner, module and singleton changes; page on every burn motion and first-loss-role action ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+- **Top-up reports.** Put the report identifier in the required pre-top-up forum post; the fixed payment reference provides no on-chain anchor. No top-up motion starts with a late monthly report or unpriced snapshot asset ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+- **Funding assets.** USDC, USDT, DAI, USDS, sUSDS and stETH. Exclude ETH; the Agent holds less than 8 ETH [s4].
 
 ## Options considered
 
-- Raise the shared ceilings by vote. Not chosen by EM: the vote adds USDS and keeps the other ceilings (OD-11). Raising them widens a grant that other setups share.
-- A new payment permission for the vault alone. Not chosen by EM: the vote rewrites the shared permission instead (OD-11). A separate grant adds an ACL entry where configuration is enough.
-- Fund by DAO vote only. Not chosen by EM: the funding runs through two Easy Track registries (OD-06). Every top-up would otherwise carry the vote and the Dual Governance delay, and the mandate puts seeding and top-ups on Easy Track [s5].
-- A period of three months. Not chosen by EM: a refill that the mandate allows in one month could wait for the next quarter.
-- A stETH limit at a stress price. Not chosen: it buys refill speed that the mandate does not require, with capacity beyond one floor.
-- One floor split between the two registries. Not chosen: neither asset could then carry a full refill, which the mandate permits.
-- One registry with one dollar limit, through a token registry that counts stETH at a DAO-pinned rate. Not chosen by EM: it needs a new contract. A live rate would block enactment, because Easy Track rebuilds the script and checks its hash [s4].
-- Keep the shared permission unchanged. Not chosen by EM: USDS could then never fund the vault.
-- A token list for the vault alone, with USDC, USDT and DAI. Not chosen by EM: EM added USDS and sUSDS to the funding assets and kept the shared list.
-- ETH as a funding asset, with a third registry and factory. Not chosen: the Agent holds less than 8 ETH.
-- The first-loss shares stay with the Growth Committee and only count toward the vault. Not chosen by EM. The agent had recommended it, because it keeps the first-loss terms as approved and needs no written rule.
-- The first-loss shares in the Asset Safe under a written no-redeem rule, the design until 2026-10-06. Replaced by EM (OD-42): the chain could not tell them apart from shares that the operator buys, so monitoring was the rule's only check.
-- The Growth Committee redeems the shares, and the seed is funded in full. Not chosen: it ends the first-loss protection that the DAO approved.
-- Every burn or redemption by DAO vote, the design until 2026-10-13 (OD-42). Replaced by EM (decision 21): a vote through Dual Governance takes about nine days, which is slower than the terms that the mandate takes over [s7].
-- A first-loss Safe that the committee's signers own, as the Growth Committee holds the shares today. Not chosen by EM: the committee would hold the first-loss stake in full custody.
-- The emergency role may redeem the first-loss shares in an incident. Not chosen by EM: a redemption ahead of a flagged loss would front-run the depositors that the first-loss terms protect.
-- Twyne counts against the seed now, as the mandate states. Not chosen by EM: no holder or form has been shown.
+- Raise shared ceilings: EM rejected this under OD-11; retain them and add USDS. Higher ceilings would widen other setups' grants.
+- Add a vault-only payment permission: EM rejected under OD-11 because shared configuration avoids another ACL entry.
+- Fund only by DAO vote: EM rejected under OD-06. The mandate uses Easy Track [s5]; votes add Dual Governance delay to each payment.
+- Three-month periods: EM rejected because a permitted monthly refill could wait until the next quarter.
+- Price stETH limits for stress: rejected because it adds capacity above one floor for speed the mandate does not require.
+- Split one floor between registries: rejected because neither asset could provide a full permitted refill.
+- One dollar registry with a DAO-pinned stETH rate: EM rejected as new contract code. A live rate would break enactment's rebuilt-script hash check [s4].
+- Leave the shared permission unchanged: EM rejected because USDS could never fund the vault.
+- Vault-only USDC/USDT/DAI list: rejected because EM added USDS and sUSDS and retained the shared list.
+- ETH funding with a third registry/factory: rejected because the Agent holds less than 8 ETH.
+- Leave first-loss shares with Growth: EM rejected the agent's recommendation, which preserved existing terms without a written rule.
+- Hold first-loss in the Asset Safe with a written no-redeem rule: EM replaced this on 2026-10-06 (OD-42). Shares were indistinguishable from purchased shares, leaving only monitoring.
+- Growth redeems first-loss and seeds in full: rejected because it ends approved protection.
+- DAO votes for every burn/redemption: EM replaced on 2026-10-13 (decision 21). Roughly nine days through Dual Governance exceeds the inherited terms' timing [s7].
+- Committee-owned first-loss Safe: EM rejected because the committee would take full custody.
+- Emergency first-loss redemption: EM rejected because exit before a flagged loss would front-run protected depositors.
+- Deduct Twyne now, as the mandate states: EM rejected because its holder and form remain unproved.
 
 ## Consequences
 
-- Without an objection, the committee's Safe can pull one floor per registry each month, and two per registry within about 72 hours around a month boundary. The mandate's limit on size is a procedure, not code. The LIP must say so.
-- After an ETH fall, a refill in stETH alone reaches less than the floor in one month. The rest follows the next month or in stablecoins. After an ETH rise, the stETH limit is worth more than a floor.
-- The committee's Safe creates every top-up motion, so each one passes the screening guard and the 72-hour objection window.
-- The registry cannot enforce the mandate's rule that, after an objection, the manager needs a Snapshot vote to pull more funds. The controls are monitoring, a further objection, and a DAO vote that sets the limit to zero.
-- A change of a limit or the period is a DAO vote.
-- A per-payment ceiling is not a per-motion ceiling. The registry limit is the backstop that matters.
-- USDS can fund the vault once the vote rewrites the permission.
-- The rewrite is DAO-wide. Every Easy Track payment setup shares the permission, and every stablecoin setup that shares the token list can then pay USDS too. The vote must say so.
-- Aragon Voting administers the shared token list, so a change made for another setup also changes the vault's funding assets.
-- sUSDS is a yield-bearing stablecoin. A top-up in sUSDS counts at once against its yield-bearing cap ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). The registry counts it at par, although one sUSDS is worth more than one dollar, so the limit admits slightly more value in sUSDS.
-- The mandate limits funding to stETH and the top-four stablecoins, and sUSDS is not one of them. The mandate text owes a change.
-- Until the cap lifts, the registries allow more than the cap. The procedure, the objection window and monitoring keep the vault under it (decision 20). The mandate text owes the capped phase: the cap, what it counts, and the forum post that lifts it.
-- The receiver is bound one layer above the ACL, in the registry and the factory. Both layers are needed.
-- The first-loss capital sits apart from every other share the vault holds. Any earnETH or earnUSD share in the Asset Safe is the vault's own, and the no-redeem rule needs no written check, because only the two first-loss roles reach the first-loss Safe: one burns by enacted motion, and the other redeems to the Agent (decisions 21 and 23).
-- In an Earn incident, the committee proposes a burn or exits on the Earn team's instruction, without a DAO vote, as the terms allow. The capital still takes losses first. A curator can freeze a vault, so an exit can wait for the vault [s7].
-- A first-loss burn waits at least 72 hours, the objection window, so it comes later than a burn by the Growth Committee would, and LDO holders can block it. A public notice of a coming burn lets depositors time their entries and exits, so the vault should pause deposits and redemptions until the burn, as Lido Earn did after the Kelp incident [s7]. The March 2026 terms let a time-sensitive burn run before it is posted [s7]. A burn motion is public for 72 hours before it runs, so that option is gone.
-- A compromise of the quorum of the committee's Safe cannot burn the first-loss shares at once: it can only create a motion that LDO holders see for 72 hours. It can still redeem them, and the proceeds go to the Aragon Agent. A burn moves the shares' value to the vault's other depositors, so monitoring pages on every burn motion. The emergency role does not reach the first-loss modifier; the DAO can remove both roles.
-- A burn lowers the vault's value, and the next monthly top-up refills the vault to the floor from the treasury.
-- The move needs the Earn vaults to keep share transfers open until it happens. Their administrators can restrict transfers [s6].
-- Until a Twyne holder is shown, Twyne does not reduce the seed, so the seed can be larger than the mandate's figure.
+- Without objection, the committee can draw one floor per registry per month, or two within about 72 hours across a boundary. The mandate's size rule is procedural; the LIP must disclose this.
+- After an ETH fall, stETH alone cannot refill to the floor in one month; use stablecoins or wait. After a rise, its limit exceeds one floor in value.
+- Every top-up uses the committee's Safe and the 72-hour objection window. After cap lift, the guard also screens it.
+- Registries cannot require a Snapshot after an objected top-up. Monitoring, further objections and a DAO vote zeroing the limit provide the controls.
+- Limit or period changes require DAO votes. Per-call ceilings do not limit whole motions; registry limits provide that backstop.
+- Adding USDS changes the DAO-wide payment permission and every setup sharing the stablecoin list. The vote must disclose this. Voting's later list changes also change Clutch's funding assets.
+- sUSDS funding immediately counts against the yield-bearing cap ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)). Registries count it at par despite its value above one dollar, admitting slightly more value. The mandate must add sUSDS beyond its stETH/top-four stablecoin list.
+- Before lift, registry limits exceed the cap. Procedure, objection and monitoring enforce it (decision 20). The mandate must state the capped phase, its scope and the lifting forum post.
+- The ACL leaves the receiver open; the registry and factory bind it one layer above. Both layers are necessary.
+- Separate first-loss custody distinguishes protected shares from ordinary Asset Safe positions. Only enacted burns or Agent-only redemptions can reach the first-loss Safe (decisions 21 and 23); the no-redeem rule needs no written check.
+- On Earn instructions, the committee proposes burns or exits without a DAO vote. Capital still absorbs losses first; curator freezes can delay redemption [s7].
+- Burns wait at least 72 hours, later than a Growth Committee burn would, and LDO holders can block them by objection. Public notice lets depositors time entry or exit. The vault should pause deposits and redemptions until burn, as after Kelp [s7]. March 2026 terms allowed urgent burns before notice; public motions remove that option [s7].
+- A compromised committee quorum cannot burn immediately. It can propose a publicly visible 72-hour motion or redeem only to the Agent. Burns transfer value to other depositors, so each motion pages monitoring. Emergency cannot reach the first-loss Safe; the DAO can remove both roles.
+- Burns reduce vault value; the next monthly treasury top-up restores the floor.
+- The move depends on Earn administrators keeping share transfers open until it happens; they can restrict transfers [s6].
+- Without evidence of a Twyne holder, Twyne does not reduce the seed; the seed can exceed the mandate's figure.
 
 ## Confirmation
 
 - INV-017 and INV-021 in the [invariants](/specs/invariants.md).
-- Fork tests owed: the first-loss shares transfer from the Growth Committee Safe to the first-loss Safe; a burn motion burns them there through the `first-loss-burn` role, and no other caller can burn them; the `first-loss` role of the committee's Safe redeems them with the proceeds to the Aragon Agent only, and cannot transfer, approve or burn them; no role of the Asset Safe's modifiers can reach the first-loss Safe; a top-up motion pays the Asset Safe and fails for any other recipient; the limit holds at motion start and at enactment; a motion created in the last 72 hours of a month counts against the next month; a stETH motion with several payments, each under the per-payment ceiling; only the committee's Safe can create a motion.
+- Fork tests still owed:
+  - Growth-to-first-loss share transfers.
+  - Burns only through enacted `first-loss-burn` motions, with all other callers refused.
+  - Committee `first-loss` redemption pays only the Agent and cannot transfer, approve or burn.
+  - Asset Safe modifier roles cannot reach the first-loss Safe.
+  - Top-ups pay only the Asset Safe; limits hold at creation and enactment.
+  - Motions from a month's last 72 hours count against the next month.
+  - Multi-payment stETH motions respect each per-payment ceiling.
+  - Only the committee's Safe can create motions.
 
 ## Reversal conditions
 
