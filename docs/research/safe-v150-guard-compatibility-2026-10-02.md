@@ -9,7 +9,7 @@ valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-10-19T20:46:17Z
 verified: []
 sources:
   - id: s1
@@ -46,7 +46,7 @@ sources:
 
 # Safe v1.5.0 and the screening guard, 2026-10-02
 
-EM chose Safe v1.5.0 for both new Safes on 2026-10-02, on one condition: the screening vendor's guard must be compatible with v1.5.0. This page records the check. An agent ran every step on 2026-10-02.
+EM chose Safe v1.5.0 for both new Safes on 2026-10-02, on one condition: the screening vendor's guard must be compatible with v1.5.0. An agent ran every step on 2026-10-02.
 
 ## What the guard needs from the Safe
 

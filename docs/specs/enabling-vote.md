@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-10-19T20:46:17Z
 verified: []
 sources:
   - id: s1
@@ -38,7 +38,7 @@ sources:
 
 # The enabling vote
 
-Clutch launches with one Aragon vote, the enabling vote. This page lists what the vote holds, what comes before it and what follows it without a vote. The agent drafted it from the decisions [s8]. EM has not accepted it as text.
+Clutch launches with one Aragon vote, the enabling vote [s8].
 
 ## Before the vote
 

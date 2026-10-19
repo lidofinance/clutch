@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:43:10Z
+  at: 2026-10-19T20:46:17Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -77,8 +77,6 @@ EM decided on 2026-10-02, closing OD-07 [s1]:
 EM decided on 2026-10-06, closing OD-34 [s1]:
 
 9. **The constellation's licence.** Files derived from the policy provider's Zodiac constellation keep LGPL-3.0-only. A derived file gets `SPDX-License-Identifier: LGPL-3.0-only` when it changes. New files use AGPL-3.0-or-later, the policy compiler among them. LGPL-3.0 is GPL-3.0 with added permissions [s9], so the reasoning of decision 5 applies.
-
-An agent drafted this record. It stays `proposed` until EM accepts the text.
 
 ## Options considered
 

@@ -12,7 +12,7 @@ superseded_by:
   note: "Decisions 17 to 20 of ADR 007 (OD-43, 2026-10-06): the vault no longer uses Stonks pricing."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-10-19T20:46:17Z
 verified: []
 sources:
   - id: s1
@@ -158,4 +158,4 @@ cast call 0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1 'isPaused()(bool)' --block 
 - Every read describes its block. The manager or Aragon Voting can change the router's settings at any time.
 - The heartbeats come from Chainlink's published feed list, read on 2026-10-05.
 - The source review covers the functions named above. It is not an audit.
-- This page records evidence. EM's decision is in the [decision log](/registers/decision-log.md).
+- EM's decision is in the [decision log](/registers/decision-log.md).
