@@ -2,6 +2,7 @@
 
 ## 2026-10-19
 
+* **Update**: Shortened explanations in ADR 001–004. Decisions and prior verifications are unchanged; the revised pages await human verification.
 * **Update**: Shortened documentation, organized reading routes by Diataxis, and aligned two guide summaries with the decisions.
 
 ## 2026-10-15
