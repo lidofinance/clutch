@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: AI-first repository practice, September 2026
-description: The evidence behind Clutch's decision process and agent operating model, from Lido's own repositories and from public practice in September 2026.
+description: Evidence from Lido and public practice for the decision process and agent operating model.
 tags: [ai-first, agents, repository, okf, security]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-09-30
 stale_after: 2027-03-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

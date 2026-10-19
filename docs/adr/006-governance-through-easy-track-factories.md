@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 006: Governance through Easy Track factories"
-description: Easy Track factories are the only new contracts; the committee's own Safe is their trusted caller; each factory builds a permission tree from a template fixed at audit time, so a motion carries parameters, never a tree; the motion that onboards a protocol also adds its emergency exit through an exit-governance role on the safety modifier; a routine removal is a removal-template motion, and an emergency removal is the emergency Safe's immediate revoke.
+description: Fixed Easy Track templates for permission changes, emergency exits and routine removals.
 tags: [governance, easy-track, factories, templates]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

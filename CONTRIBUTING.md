@@ -1,65 +1,101 @@
 # Contributing to Clutch
 
-Many contributors work here, each with their own agents. This page is the workflow. [AGENTS.md](AGENTS.md) holds the rules, and it wins where the two differ. [ADR 012](docs/adr/012-contributing-with-many-agents.md) records the decisions behind this page.
+[AGENTS.md](AGENTS.md) holds the rules and takes precedence over this workflow.
+[ADR 012](docs/adr/012-contributing-with-many-agents.md) records the decisions behind it.
 
 ## Who does what
 
-- EM decides in the interim. The Treasury Management Committee is the permanent acceptor ([ADR 002](docs/adr/002-decision-and-review-process.md)). No other body verifies an ADR before it is accepted (OD-63).
-- Humans review, verify and merge. Agents draft text, code and tests.
-- Agents own no GitHub accounts. The human who runs an agent opens its pull request and answers for it. Each commit carries a `Co-Authored-By` trailer for the agent, and each page names the agent in `generated.by`.
-- Any agent may author a page. Only the humans that [config/actors.yaml](config/actors.yaml) lists verify a page.
+EM accepts decisions in the interim. The Treasury Management Committee is the permanent acceptor.
+No other body verifies an ADR before acceptance (OD-63).
+
+Humans decide, review, verify and merge. Agents draft text, code and tests.
+Only actors in `config/actors.yaml` can verify pages.
+Agents use the contributor's GitHub account; the contributor opens and answers for the pull request.
+Each commit carries the agent's `Co-Authored-By` trailer. Pages record authors in `generated.by`.
 
 ## Set up once
 
-1. Install uv, bun 1.3.0, Foundry and git. `just` is optional: `uvx --from rust-just==1.58.0 just <recipe>` runs any recipe.
-2. Run `just setup`. It fetches forge-std, installs the policy's packages and a headless Chromium, and builds the contracts.
-3. For the fork suite, put `RPC=<archive mainnet RPC>` in `.env`, which git ignores. Bring your own archive RPC. Never commit an RPC URL that carries a key.
-4. Run `just doctor` to see the tool versions.
+1. Install uv, bun 1.3.0, Foundry and git.
+2. Run `just setup` to install dependencies and headless Chromium, then build the contracts.
+3. For fork tests, set `RPC=<archive mainnet RPC>` in the git-ignored `.env`.
+4. Run `just doctor` to check tool versions.
+
+`just` is optional. Use `uvx --from rust-just==1.58.0 just <recipe>` instead.
+Never commit a key or an RPC URL that contains one.
 
 ## Make a change
 
-1. Use one worktree per task, from the current `main`: `git worktree add ../clutch-<topic> -b <kind>/<date>-<topic> origin/main`. The kinds are `decisions`, `docs`, `policy`, `fix` and `research`. Never run a bare `git stash`: the stash is shared by every worktree.
-2. Keep to one decision or one feature per pull request. Commit the generated files with the change that caused them.
-3. Take a new OD, ADR or INV number from `main` when you open the pull request. If another pull request takes the same number first, the validator fails, and you take the next number.
-4. Add the log entry: `just log Update "What changed, in one line."`. Never edit `docs/log.md`.
-5. Run `just regen`, then `just check`. Also run `just test-fork` when the change touches `src/`, `script/`, `test/` or `policy/`: CI does not run the fork suite until phase 2 (OD-52).
-6. Open the pull request with the template. A human merges it through the merge queue, which runs the checks again on the merged result.
+1. Create one worktree per task from current `main`:
+
+   ```sh
+   git worktree add ../clutch-<topic> -b <kind>/<date>-<topic> origin/main
+   ```
+
+   Use `decisions`, `docs`, `policy`, `fix` or `research` as the kind.
+   Do not run bare `git stash`: worktrees share the stash.
+2. Keep one decision or feature per pull request.
+3. Allocate new OD, ADR and INV numbers from `main` when you open the pull request.
+   If another pull request takes a number first, take the next one.
+4. Add a log fragment with `just log Update "What changed, in one line."`.
+5. Run `just regen`, then `just check`. Commit generated files with their source changes.
+6. If you changed `src/`, `script/`, `test/` or `policy/`, run `just test-fork` too.
+   CI does not run the fork suite until phase 2 (OD-52).
+7. Open a pull request with the template. A human merges through the merge queue, which repeats the checks.
 
 ## Verify a page
 
-- Only the humans and teams that `config/actors.yaml` lists verify a page. Agents never verify.
-- Run `just verify <page> <your id>`. It writes your entry with the time and the hash of the page's body. Add `--review human-reviewed` to set the review status as well.
-- A team member, such as one of `human:defi-tech`, adds `--ref <the pull request that you approve>`. A member of the committee adds `--ref <the committee's decision record>`.
-- Any later edit to the page's body fails the check until someone verifies the page again (OD-51).
-- A team's verification raises a page's review status. Only EM or the committee accepts an ADR (OD-50).
+Only listed humans and teams verify pages. Agents cannot verify them.
+
+Run `just verify <page> <your id>` to record the date and body hash.
+Add `--review human-reviewed` to set the review status.
+A team member adds `--ref <approved pull request>`; a committee member adds `--ref <committee decision record>`.
+
+A later body edit requires verification again (OD-51).
+Team verification raises review status; only EM or the committee accepts an ADR (OD-50).
 
 ## Generated files
 
-- `docs/log.md`, `docs/registers/document-status.md` and `docs/onboarding/clutch-onboarding.html` come from scripts. Never edit them by hand. On a merge conflict, take either side, run `just regen` and commit the result.
-- The policy artifact is generated too, but reviewers approve its diff ([ADR 004](docs/adr/004-specifications-and-policy-as-data.md), decision 14).
+Do not edit these files by hand:
+
+- `docs/log.md`
+- `docs/registers/document-status.md`
+- `docs/onboarding/clutch-onboarding.html`
+- Policy artifacts in `policy/constellation/artifacts/`
+
+After a merge conflict, take either version, run `just regen` and commit the result.
+Reviewers must approve the policy artifact's diff (ADR 004, decision 14).
 
 ## Change the onboarding guide
 
-- The guide's text is in `docs/onboarding/content/`. Run `just regen` after a change, and commit the rebuilt page with it. The [guide-update skill](skills/guide-update/SKILL.md) has the steps.
-- Cite what a claim rests on: `ADR-007#d27` for a decision, `ADR-007#proposed-direction` for a section. The build refuses a whole ADR. `uv run --with pyyaml python scripts/build_onboarding.py --list-sources` lists every decision and heading.
-- Each item of the guide is pinned to the text of its sources in `docs/onboarding/pins.json`. A change to an ADR, a register, a runbook, a test or a page that an item cites makes the build fail. Run `just stale`, read each item next to its source change, and fix the item if it is wrong. Then run `just repin <item>` and commit `pins.json` with your change. Never pin an item again without that review.
-- On a merge conflict in `pins.json`, take `main`'s version, run `just stale` and pin your items again.
-- A new ADR, invariant, LIP part or runbook needs a citation in the guide, or an entry with a reason in `docs/onboarding/content/coverage.yaml`.
+For guide content, source pins, coverage and browser tests, follow [guide maintenance](docs/onboarding/guide.md).
+Text lives in `docs/onboarding/content/`. Cite an ADR decision or heading, such as `ADR-007#d27`; whole-ADR citations fail.
+After a source change, review affected guide items before `just repin <item>`.
+For a `pins.json` conflict, take `main`'s version and use `just stale` to repeat that review.
+The [guide-update procedure](skills/guide-update/SKILL.md) gives the steps.
 
 ## Decisions
 
-- A question that needs a decision becomes a row of [the open-decision register](docs/registers/open-decisions.md): the question with its options, the page that closes it, the agent's recommendation and who decides. The validator refuses an incomplete row.
-- EM triages the open decisions and decides them in batched interviews. Only one decisions branch is open at a time, so two decisions never conflict.
-- The decision log quotes EM exactly, from the interview that EM gave. Never write a quote from memory or from another source.
+Add a complete row to the [open-decisions register](docs/registers/open-decisions.md):
+question, options, closing page, recommendation and decider. The validator rejects incomplete rows.
+
+EM decides in batched interviews, with one decisions branch at a time.
+The decision log quotes the interview exactly. Do not reconstruct a quote from memory or another source.
 
 ## Restricted material and secrets
 
-- Nothing enters the repository that could not be published at deployment ([ADR 001](docs/adr/001-repository-scope-visibility-licence-name.md)). The screening vendor stays "the screening vendor", and no figure comes from the unapproved mandate.
-- Restricted material reaches you from EM, outside the repository. Cite it with a `urn:clutch:restricted:` source, and paraphrase it.
-- `scripts/check_redaction.py` refuses restricted terms and secrets in every file. Its list holds only hashes. If it refuses a line, remove the term. Only a human changes the list.
-- Never commit a key, a seed, a token, a keystore password or an RPC URL with a key.
+Content must be suitable for publication at deployment (ADR 001).
+EM supplies restricted material outside the repository. Paraphrase it and cite a `urn:clutch:restricted:` source.
+Call the unannounced screening vendor "the screening vendor". Do not include figures from the unapproved mandate.
+
+`scripts/check_redaction.py` rejects restricted terms and secrets through a hash-only list.
+Remove a rejected term. Only a human changes the list.
+Never commit keys, seeds, tokens, keystore passwords or RPC URLs with keys.
 
 ## Mainnet and the hosted app
 
-- `mainnet.just` broadcasts real transactions. Agents never run it. A human runs a recipe with `CLUTCH_MAINNET=1 just --justfile mainnet.just <recipe>`, signs with a Foundry keystore after a password prompt, and confirms. `.env` holds the keystore's name and address, never a private key or a password.
-- The package scripts that call the hosted Zodiac app refuse to run unless a member of the repository-owner team sets `CLUTCH_OWNER_PUSH=1` on a clean `main` ([ADR 004](docs/adr/004-specifications-and-policy-as-data.md), decision 16).
+`mainnet.just` broadcasts real transactions. Agents must not run it.
+A human sets `CLUTCH_MAINNET=1` and runs `just --justfile mainnet.just <recipe>`, then signs with a Foundry keystore and confirms.
+Keep only the keystore name and address in `.env`; never store its password or private key there.
+
+Only a repository-owner team member can run package scripts that call the hosted Zodiac app.
+They require a clean `main` and `CLUTCH_OWNER_PUSH=1` (ADR 004, decision 16).

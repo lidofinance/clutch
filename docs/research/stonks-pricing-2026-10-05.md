@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: Stonks 2.0 pricing, 2026-10-05
-description: The evidence behind OD-20 — how a Stonks 2.0 instance gets its price, who can configure the shared oracle router, which vault tokens Chainlink's Feed Registry covers, how often Chainlink replaced the vault's feeds, and the Lido staking and withdrawal-queue checks behind the WETH route.
+description: OD-20 evidence on Stonks pricing, router control, Chainlink coverage, feed replacements and the WETH route.
 tags: [stonks, pricing, oracle, chainlink, evidence]
 status: stable
 review_status: slop
@@ -12,7 +12,7 @@ superseded_by:
   note: "Decisions 17 to 20 of ADR 007 (OD-43, 2026-10-06): the vault no longer uses Stonks pricing."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:03:02Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

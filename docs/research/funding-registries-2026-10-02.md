@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: Easy Track funding registries, 2026-10-02
-description: How an Easy Track allowed-recipients registry counts its limit and its period, what the standard top-up factory writes, and which periods, limits and roles the twelve live top-up registries use — the evidence behind OD-06.
+description: OD-06 evidence on registry limits, calendar periods, payment references and twelve live registries.
 tags: [funding, easy-track, registry, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T16:07:52Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

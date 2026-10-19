@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: One Aragon vote to launch, Easy Track afterwards, 2026-10-14
-description: The evidence behind OD-68 to OD-73 — whether Clutch launches with one Aragon vote and then runs without another in non-emergency operation; the treasury's payment path outside Dual Governance; how one vote carries Voting items and Agent items; the five places where routine operation still needs a vote; the votes that stay by design; and who holds Easy Track's admin role, read on chain.
+description: OD-68–OD-73 evidence on vote composition, payment authority and actions that still require a vote.
 tags: [governance, easy-track, enabling-vote, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-14
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T20:39:38Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

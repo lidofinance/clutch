@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 011: Launch scope"
-description: The launch assets and venues; Lido Lend is onboarded by motion through a Morpho Blue template that ships at launch with end-to-end tests, and stays in the protocol cap until it matures; swaps are CoW orders from the orders account; DAI earns through Sky's DAI–USDS converter; sDAI, third-party lending markets, and router swaps on Uniswap and 1inch are out at launch.
+description: Launch assets and venues, the later Lido Lend onboarding and excluded integrations.
 tags: [scope, assets, launch, lido-lend]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

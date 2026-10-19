@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: The committee's feedback of 2026-10-12
-description: The evidence behind OD-58 to OD-67 — six points of feedback from the CFO, a member of the committee; Lido's pause-or-disable rule and its emergency bodies; how Easy Track pauses and restarts; the 2026 incidents that bear on emergency powers; the first-loss terms of March 2026; CoW's order life; prices under stress; the quorums of the new emergency Safe; what the new model simplifies; and a drill that shows the switch freezing a queued motion.
+description: OD-58–OD-67 evidence on emergency powers, first-loss terms, order life, pricing and the queued-motion drill.
 tags: [emergency, governance, easy-track, first-loss, orders, prices, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-13
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-13T17:07:39Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

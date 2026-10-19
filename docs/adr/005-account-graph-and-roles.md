@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 005: Account graph and roles"
-description: A Safe owned only by Aragon Voting holds the assets; two Roles modifiers split the operator and governance roles from the emergency role; the committee's own Safe holds the operator role; the emergency Safe, three of five with two committee members, two Emergency Brakes members and one member of neither body, holds the emergency role and its switch; the Emergency Brakes multisig touches no funds and keeps only the Easy Track pause; no emergency body resumes what it stopped; a Voting-owned orders account with one modifier of its own places every CoW order, and a Voting-owned first-loss Safe holds the first-loss shares, which burn only by Easy Track motion and redeem to the Agent through one narrow role of the committee's Safe; the Asset Safe, the committee's Safe and the emergency Safe run Safe v1.5.0, and the Asset Safe has no fallback handler.
+description: Account ownership, operator and emergency roles, recovery powers and first-loss access.
 tags: [architecture, roles, safe, zodiac, emergency]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T22:18:41Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

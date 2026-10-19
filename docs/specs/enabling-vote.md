@@ -1,13 +1,13 @@
 ---
 type: Specification
 title: The enabling vote
-description: What Clutch's one Aragon vote must hold — every item a direct Aragon Voting item, without Dual Governance — what must be done before it, what follows without a vote, and what still needs a vote after it.
+description: Prerequisites, direct Aragon Voting items, post-vote actions and later changes that still require a vote.
 tags: [governance, enabling-vote, deployment, specs]
 status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T22:18:41Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

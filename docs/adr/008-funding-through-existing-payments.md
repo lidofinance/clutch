@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 008: Funding through the existing payment path"
-description: The vault is seeded and topped up through Aragon Finance and two dedicated allowed-recipients registries, one for stablecoins and one for stETH, each with a one-month period and a limit of one TM Floor Value; the objection is the control and the registry is the backstop; a DAO vote adds USDS to the shared payment permission and to the shared stablecoin token list; ETH is not a funding asset; the DAO's first-loss Earn shares move from the Growth Committee into a dedicated first-loss Safe, where a burn runs only as an Easy Track motion and one narrow role of the committee's Safe redeems them to the Aragon Agent, on the Earn team's instruction, and they reduce the seed; until the screening guard is live, the committee keeps the vault under a cap of one million dollars by procedure.
+description: Funding through Finance and registries, first-loss shares and the procedural launch cap.
 tags: [funding, finance, easy-track, acl]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

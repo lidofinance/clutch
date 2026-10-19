@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-19
+
+* **Update**: Shortened documentation, organized reading routes by Diataxis, and aligned two guide summaries with the decisions.
+
 ## 2026-10-15
 
 * **Decision**: Kept OD-80 and OD-83 after a review of the operator Safe. EM chose the recorded design over an operator Safe owned by the committee's Safe, and the agent advised against a return to a new Safe with the same signers. ADR 010 lists the owned Safe as not chosen, and ADR 010 and the LIP draft now name the duties of the committee's Safe that the guard also screens: Stonks orders and top-up motions, the Stonks 2.0 price router, and the LDO buyback roles. A new research note keeps the evidence.

@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: DAI and the DAI–USDS converter, 2026-10-05
-description: The evidence behind OD-22 — the treasury's stablecoin balances, Sky's DAI–USDS converter and what it lets a caller do, and how the DAI and USDS tokens differ in upgradeability.
+description: OD-22 evidence on treasury stablecoins, converter behaviour and DAI versus USDS upgradeability.
 tags: [dai, usds, conversion, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T19:30:52Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1
