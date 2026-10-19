@@ -1,7 +1,7 @@
 # Decision records
 
 EM accepts ADRs in the interim. The Treasury Management Committee is the permanent acceptor.
-No other body verifies an ADR before acceptance ([ADR 002](002-decision-and-review-process.md), OD-63).
+Since 2026-10-13, no other body verifies an ADR before acceptance ([ADR 002](002-decision-and-review-process.md), OD-63).
 Each ADR records its decision and review status. Pending questions are in the [open-decisions register](/registers/open-decisions.md).
 
 ## Repository and process

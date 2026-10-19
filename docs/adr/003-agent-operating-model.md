@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  at: 2026-10-19T22:29:31Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -34,7 +34,7 @@ sources:
 
 - Context files generally did not improve agent success and increased inference cost. Agent-written files reduced success in most settings; overviews did not help. Agents followed specific non-standard rules well [s2].
 - Half the instruction files in one study never changed after their first commit [s2].
-- Instruction files and CI are attack surfaces. A February 2026 campaign rewrote `CLAUDE.md` through GitHub Actions [s2].
+- Instruction files and CI are attack surfaces. A February 2026 campaign rewrote repositories' `CLAUDE.md` files through GitHub Actions [s2].
 - Agent Skills provide portable procedures; failure to trigger is their main weakness [s2].
 
 ## Decision
@@ -75,13 +75,13 @@ EM decided on 2026-10-06, closing OD-31 [s1]:
 ## Consequences
 
 - Agents read `docs/` on demand.
-- Humans choose parameters. Agents can draft options.
+- Humans choose parameters. Agents can draft options but never pick one.
 - The human-written instruction-file goal remains unmet until EM prunes the initial agent draft.
-- The freshness goal needs a check for broken paths and obsolete commands.
+- A freshness check is owed; it must fail on broken paths and obsolete commands. Until it exists, that goal remains unmet.
 - Of the four planned skills, only `skills/adr-draft/` exists. The three Clutch-specific skills arrive with their tools in phase 2.
 - Until an agent has its own GitHub identity, it uses the creator's git identity. Another owning-team member must approve; the creator's approval does not count.
-- The rules require write access for both owner teams and an active branch rule. The agent's environment cannot check either.
-- A `human:` entry does not prove human authorship. `recorded_by` and the quoted instruction identify agent-recorded entries (decision 14); the register marks them `(recorded)`.
+- The rules bind only while both owner teams have write access and the branch rule is active. The agent's environment cannot check either.
+- A `human:` entry alone no longer proves human authorship. `recorded_by` and the quoted instruction identify agent-recorded entries (decision 14); the register marks them `(recorded)`.
 
 ## Confirmation
 

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-10-19T22:36:19Z
 verified: []
 sources:
   - id: s1
@@ -62,15 +62,15 @@ sources:
 | discussions-to | a thread on https://research.lido.fi/, to be created |
 | created | 2026-09-22 |
 
-> **Draft.** Written during the design review of 2026-09-10 to 2026-09-22; imported on 2026-09-30. The [ADRs](/adr/index.md) govern this draft [s2]. Chain facts used by the ADRs were re-read at block 26092572 [s3]. Other chain claims remain unverified design-review claims. Section 9.1 records the screening choice of 2026-10-02; section 5.2 records that day's funding decisions. See [open decisions](/registers/open-decisions.md).
+> **Draft.** Written during the design review of 2026-09-10 to 2026-09-22; imported on 2026-09-30. The [ADRs](/adr/index.md) govern this draft [s2]. Chain facts used by the ADRs were re-read at block 26092572 [s3]. Other chain claims come from the design review and were not re-run. Section 9.1 records the screening choice of 2026-10-02; section 5.2 records that day's funding decisions. See [open decisions](/registers/open-decisions.md).
 
 > **Status labels.** **[Implemented]** means built and tested against deployed bytecode on a pinned mainnet fork. **[Specified]** means designed but unbuilt. **[Open]** means a decision is required. Nothing is deployed to mainnet. No audit has been performed.
 
 ## Simple Summary
 
-The Treasury Management Committee can use a bounded part of the DAO treasury in approved DeFi protocols. The DAO keeps ownership.
+The Treasury Management Committee can use a bounded part of the DAO treasury in approved DeFi protocols. The DAO keeps ownership; neither the committee nor a service provider can take the assets.
 On-chain permissions limit the committee's actions. An emergency Safe can return assets and disable the operator; only the DAO can restart it.
-Easy Track motions onboard and remove strategies through fixed templates. The emergency Safe can revoke permissions immediately (OD-70).
+Easy Track motions onboard and remove strategies through templates fixed at audit time. The emergency Safe can revoke permissions immediately (OD-70).
 
 ## Abstract
 
@@ -84,7 +84,7 @@ The committee cannot form the emergency quorum alone. The Emergency Brakes multi
 No emergency body can restart what it stopped.
 
 All swaps use CoW orders from a dedicated account owned by Aragon Voting.
-Operator orders pay the Asset Safe; recovery orders pay the Agent.
+Each role's permissions pin the receiver: the Asset Safe for operator orders, the Agent for recovery orders.
 Prices have no on-chain bound. CoW's competition rules, screening, budgets and fill monitoring provide the controls.
 
 Easy Track motions onboard protocols and assets and adjust budgets within ceilings.
@@ -93,7 +93,7 @@ Routine removal uses a removal-template motion. Emergency removal uses immediate
 
 Easy Track EVM script factories are the only new contracts.
 No bespoke access-control, vault or accounting contract is introduced.
-Funding reuses Finance and allowed-recipients machinery.
+Funding reuses the existing Finance application and allowed-recipients machinery already in production.
 
 ## Motivation
 
@@ -163,24 +163,24 @@ The Safe owns the modifier, so scoped emergency and governance roles can adminis
 ### Rationale
 
 **Modifier ownership.** A role executes with the Safe avatar's authority.
-The Safe owns its modifiers, so scoped roles can administer them: emergency revokes permissions, and governance changes policy without Agent authority.
+The Safe owns its modifiers, so scoped roles can administer them without a DAO vote. Emergency can revoke the operator in minutes, and governance changes policy without Agent authority. This ownership arrangement is required for those paths.
 
 **No Easy Track authority over the Agent.** At block 26092572, only the Dual Governance admin executor holds the Agent's `RUN_SCRIPT_ROLE` and `EXECUTE_ROLE` [s3].
 Giving either to Easy Track would let motions forward arbitrary Agent scripts.
 The governance role supplies only the required modifier authority.
 
 **Fixed templates.** A permission write replaces the entire role/target/selector slot.
-Accepting motion-authored trees would require on-chain checks that each replacement stays within approved authority.
+Accepting motion-authored trees would require on-chain checks that each replacement is strictly narrower than what it replaces. That requires a tree comparison during the objection window.
 Instead, factories accept typed parameters, such as target, asset and budget key, and build complete trees from fixed templates.
 The audit covers that finite set of templates.
 A motion cannot express permissions outside its template.
 
-**Emergency quorum.** A lower quorum shortens response time for revocation, exits and returns to the Agent.
+**Emergency quorum.** The emergency role is easier to reach than the operator role. A lower quorum shortens response time for its one-way revocation, exits and returns to the Agent without widening those powers.
 These powers only reduce exposure, but recovery orders can lose value: they have no on-chain price floor.
-CoW's rules constrain their fill against the on-chain market (OD-43, OD-48).
+Only CoW's rules hold their fill to the on-chain market (OD-43, OD-48).
 
 **No bespoke controller.** Easy Track re-invokes the factory at enactment and requires the script hash to match.
-The factory's allowlist therefore also blocks stale motions. Native conditions express budget ceilings and refill floors; modifier permissions enforce escalation guards.
+The factory's allowlist therefore also blocks stale motions. Native conditions can express budget ceilings and refill floors; modifier permissions enforce escalation guards.
 These controls replace the earlier controller's allowlist, stale-motion counter and budget ceilings.
 
 **Separate orders account.** Direct pre-signing exposes only a hash, which hides tokens, amounts and receiver from the permission layer.
@@ -193,7 +193,7 @@ The committee needs limit and TWAP orders, which the previous treasury swap cont
 The launch excludes stop-loss orders (OD-79).
 
 **Budgeted approvals.** A spender can pull funds without a deposit call, and an operator can restore an approval.
-Each approval to a protocol spender spends that spender's budget key, which bounds total approvals per period regardless of spender behaviour (OD-08).
+Each approval to a protocol spender spends that spender's budget key, which bounds total approvals per key per period regardless of spender behaviour (OD-08).
 
 ### Technical Specification
 
@@ -287,7 +287,7 @@ They build scripts; the modifier checks the resulting calls.
 
 ##### 4.1 `RoleToggleEVMScriptFactory` **[Retired, OD-09]**
 
-EM retired the kit's tested role-toggle factory on 2026-10-05.
+EM retired the kit's tested role-toggle factory on 2026-10-05; the kit no longer contains it.
 All operator permissions now use the `operator` key, which emergency revocation reaches. Governance has no `assignRoles` permission.
 
 Every remaining factory emits the production script format, `[specId(4)][to(20)][calldataLength(uint32)][calldata]`, where the length covers the selector and the arguments. This matches `EVMScriptCreator` in the Easy Track source. A 32-byte length field is **not** the production format and must be rejected.
@@ -325,7 +325,7 @@ The catalogue below is the set that EM accepted on 2026-09-22 [s1]. EM dropped i
 
 A lending-pool template for markets such as Aave is not in the catalogue, because third-party lending markets are outside the launch scope.
 
-**Each template also writes the emergency exit (OD-49).** The same script uses exit-governance on the safety modifier to grant:
+**Each template also writes the emergency exit (OD-49).** The same script uses exit-governance on the safety modifier to grant the emergency role its target's exits:
 
 - Redeem, withdraw, claim and cancel, with receiver and owner pinned to the avatar.
 - Transfer of the new receipt token to the Agent.
@@ -337,7 +337,7 @@ The trusted caller on every factory is the **operator multisig**, matching the p
 
 **Onboarding disclosure.** Before the motion, publish the target, template, initial budget and diligence on the forum.
 Configure monitoring and alerts before enactment, and update the incident runbook.
-LDO holders can object; the Emergency Brakes multisig can pause Easy Track.
+The objection threshold stops the motion. If that fails, the Emergency Brakes multisig can use the global Easy Track pause.
 
 **Routine removal (OD-70).** As decided on 2026-10-14, a removal-template motion writes the complete tree without the removed branch.
 It preserves other branches and waits for the objection window.

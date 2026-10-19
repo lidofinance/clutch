@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:31:21Z
+  at: 2026-10-19T22:36:19Z
 verified: []
 sources:
   - id: s1
@@ -56,7 +56,7 @@ Give each emergency or technical action a runbook under `docs/runbooks/`, with `
 Name its `permission` and give the exact transaction for each step.
 
 A runbook can rise above `slop` only with a passing fork `drill` record [s3].
-Record the date, network, block and time to initiate. The validator requires that time to be at most six hours [s3].
+Record the time, network, block and time to initiate, which must be at most six hours. The validator enforces these drill requirements [s3].
 
 ## The permission policy
 

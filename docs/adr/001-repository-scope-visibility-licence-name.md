@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  at: 2026-10-19T22:29:31Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -56,7 +56,7 @@ sources:
 - Decisions, specifications, policy, code, tests and deployment records need one consistent source.
 - The factories will reuse Easy Track's audited GPL-3.0 base contracts [s3].
 - The dry-run kit has six commits whose messages explain the corrections.
-- The design uses an unannounced screening vendor.
+- The design names an unannounced screening vendor.
 
 ## Decision
 
@@ -84,13 +84,13 @@ EM decided on 2026-10-06, closing OD-34 [s1]:
 - Import without history: rejected because commit messages explain the corrections.
 - GPL-3.0 throughout: rejected because AGPL-3.0-or-later matches Gaggle. GPL-3.0 section 13 permits Easy Track-derived files to keep their licence [s2].
 - Roost, aerie or active-treasury: EM chose Clutch.
-- Rewrite the policy port under AGPL-3.0-or-later and delete the copy: EM rejected this because a rewrite can still be derived.
+- Rewrite the policy port under AGPL-3.0-or-later and delete the copy: EM rejected this because a rewrite that follows the copy can still count as derived.
 
 ## Consequences
 
 - The publication test covers files and commit messages.
 - Source files use `SPDX-License-Identifier: AGPL-3.0-or-later`. Easy Track-derived files keep `GPL-3.0`; constellation-derived files keep `LGPL-3.0-only` (decision 9).
-- The LGPL text in `policy/constellation/LICENSE` must accompany derived files. Decision 9 is not a legal review.
+- The LGPL text in `policy/constellation/LICENSE` must accompany derived files. The licence reading in decision 9 is not a legal review.
 - The kit's history names the policy provider. Its proposal repository is public, so the history passes the publication test.
 - AGPL-3.0 section 13 requires source access for users of a modified version over a network [s4]. Public source and explorer verification at deployment are the planned response.
 - The decision log redacts the screening vendor's name and mandate size. The name enters when the mandate is posted, under decision 8.

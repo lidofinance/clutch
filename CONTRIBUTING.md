@@ -9,9 +9,9 @@ EM accepts decisions in the interim. The Treasury Management Committee is the pe
 No other body verifies an ADR before acceptance (OD-63).
 
 Humans decide, review, verify and merge. Agents draft text, code and tests.
-Only actors in `config/actors.yaml` can verify pages.
-Agents use the contributor's GitHub account; the contributor opens and answers for the pull request.
-Each commit carries the agent's `Co-Authored-By` trailer. Pages record authors in `generated.by`.
+Any agent may author a page. Only humans and teams listed in `config/actors.yaml` can verify pages.
+Agents own no GitHub accounts. They use the contributor's account; the contributor opens and answers for the pull request.
+Each commit carries the agent's `Co-Authored-By` trailer. Pages name their agent authors in `generated.by`.
 
 ## Set up once
 
@@ -35,22 +35,22 @@ Never commit a key or an RPC URL that contains one.
    Do not run bare `git stash`: worktrees share the stash.
 2. Keep one decision or feature per pull request.
 3. Allocate new OD, ADR and INV numbers from `main` when you open the pull request.
-   If another pull request takes a number first, take the next one.
+   If another pull request takes a number first, the validator fails; take the next one.
 4. Add a log fragment with `just log Update "What changed, in one line."`.
 5. Run `just regen`, then `just check`. Commit generated files with their source changes.
 6. If you changed `src/`, `script/`, `test/` or `policy/`, run `just test-fork` too.
    CI does not run the fork suite until phase 2 (OD-52).
-7. Open a pull request with the template. A human merges through the merge queue, which repeats the checks.
+7. Open a pull request with the template. A human merges through the merge queue, which repeats the checks on the merged result.
 
 ## Verify a page
 
 Only listed humans and teams verify pages. Agents cannot verify them.
 
-Run `just verify <page> <your id>` to record the date and body hash.
+Run `just verify <page> <your id>` to record the time and body hash.
 Add `--review human-reviewed` to set the review status.
 A team member adds `--ref <approved pull request>`; a committee member adds `--ref <committee decision record>`.
 
-A later body edit requires verification again (OD-51).
+A later body edit fails the check until the page is verified again (OD-51).
 Team verification raises review status; only EM or the committee accepts an ADR (OD-50).
 
 ## Generated files
@@ -78,7 +78,7 @@ The [guide-update procedure](skills/guide-update/SKILL.md) gives the steps.
 Add a complete row to the [open-decisions register](docs/registers/open-decisions.md):
 question, options, closing page, recommendation and decider. The validator rejects incomplete rows.
 
-EM decides in batched interviews, with one decisions branch at a time.
+EM triages open decisions and decides in batched interviews, with one decisions branch at a time.
 The decision log quotes the interview exactly. Do not reconstruct a quote from memory or another source.
 
 ## Restricted material and secrets
@@ -87,14 +87,14 @@ Content must be suitable for publication at deployment (ADR 001).
 EM supplies restricted material outside the repository. Paraphrase it and cite a `urn:clutch:restricted:` source.
 Call the unannounced screening vendor "the screening vendor". Do not include figures from the unapproved mandate.
 
-`scripts/check_redaction.py` rejects restricted terms and secrets through a hash-only list.
+`scripts/check_redaction.py` rejects restricted terms and secrets in tracked and new files through a hash-only list.
 Remove a rejected term. Only a human changes the list.
 Never commit keys, seeds, tokens, keystore passwords or RPC URLs with keys.
 
 ## Mainnet and the hosted app
 
 `mainnet.just` broadcasts real transactions. Agents must not run it.
-A human sets `CLUTCH_MAINNET=1` and runs `just --justfile mainnet.just <recipe>`, then signs with a Foundry keystore and confirms.
+A human sets `CLUTCH_MAINNET=1` and runs `just --justfile mainnet.just <recipe>`, then signs with a Foundry keystore after a password prompt and confirms.
 Keep only the keystore name and address in `.env`; never store its password or private key there.
 
 Only a repository-owner team member can run package scripts that call the hosted Zodiac app.

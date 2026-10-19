@@ -1,13 +1,13 @@
 ---
 type: Specification
 title: Control matrix
-description: Mandate controls across policy, screening, monitoring and UI, with owners, status and vendor rule changes.
+description: Mandate controls across policy, screening, monitoring and UI, with owners, status and the screening vendor's written rule list and change control.
 tags: [controls, mandate, monitoring, screening, specs]
 status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-10-19T22:36:19Z
 verified: []
 sources:
   - id: s1
