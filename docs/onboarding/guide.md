@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:31:21Z
+  at: 2026-10-19T22:36:19Z
 verified: []
 sources:
   - id: s1
@@ -58,7 +58,7 @@ Open the published address from the repository's Pages settings: `https://lidofi
 CI publishes it from `main` [s10]. Or download `clutch-onboarding.html` and open it in a browser; GitHub shows HTML as source [s1].
 
 The file works offline, makes no network request and stores nothing.
-EM authorized publication ahead of the private repository on 2026-10-07 [s3][s10].
+EM decided to publish the guide ahead of the private repository on 2026-10-07 [s3][s10].
 The banner and footer identify a hypothetical draft: nothing is deployed or ratified, figures can change, and the page is not advice.
 The build requires this disclaimer. The page asks search engines not to index it.
 
@@ -96,7 +96,7 @@ It rejects these inputs [s11]:
 - RFP asks that differ from the research note, unknown verdicts or changed asks without reasons.
 
 The guide must cite each ADR, invariant, LIP part and runbook, or exclude it with a reason in `content/coverage.yaml` [s11].
-A flow or tour scene must light each map box and traverse each arrow [s11].
+Each map box must be lit and each arrow traversed by at least one flow step or tour scene [s11].
 CI rejects HTML that differs from a fresh build [s2].
 
 ```sh
@@ -126,7 +126,7 @@ If an item or source changes, the build fails. To resolve it:
 4. Commit `pins.json` with the change.
 
 For a `pins.json` merge conflict, take `main`'s version and repeat these steps.
-The pull request summary lists changed pins, with unchanged items whose sources changed first.
+The CI job summary on a pull request lists changed pins, with unchanged items whose sources changed first.
 The author confirms that these items remain true; the reviewer checks that claim.
 
 ```sh
@@ -148,13 +148,13 @@ uv run --with pyyaml python scripts/build_onboarding.py --list-sources
 
 Two groups check presentation invariants [s11][s12]:
 
-- `matrix`: axe-core checks all content in twelve states across screen/print, system colours, Auto/opposite themes and JavaScript availability. It also rejects text with its background's colour, even if axe-core marks the result incomplete.
-- `static`: without JavaScript, visible elements cannot have inactive widget roles, non-native tab stops, pressed/selected/expanded/controls states or links without targets. JavaScript adds button and tab roles.
+- `matrix`: axe-core checks all content in twelve states. Each state combines screen or print, light or dark system colours, and one of three configurations: JavaScript in Auto, JavaScript in the opposite theme, or no JavaScript in Auto. It also rejects text with its background's colour, which axe-core reports only as incomplete.
+- `static`: without JavaScript, visible elements cannot have widget roles, non-native tab stops, pressed/selected/expanded/controls states or links without targets. JavaScript adds button and tab roles.
 
 Each group first proves that it catches a planted defect.
 Set `ONBOARDING_PAGE` for another HTML copy, or `ONBOARDING_CHROMIUM` for another Chromium.
 
-CI runs both scripts on each pull request, retains the built page for 14 days and reports pin changes.
+CI runs both scripts on each pull request, attaches the built page for 14 days and reports pin changes in the CI job summary.
 A scheduled job checks external links each Monday [s11].
 
 ```sh

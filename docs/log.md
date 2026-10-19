@@ -2,6 +2,7 @@
 
 ## 2026-10-19
 
+* **Update**: Restored decision actors, conditions, scope and verification limits after the documentation review.
 * **Update**: Shortened the main prose of ADR 005–012, preserved recorded decisions, and aligned funding cards with ADR 008.
 * **Update**: Removed navigation-method notes and redundant page-status narration.
 * **Update**: Shortened explanations in ADR 001–004. Decisions and prior verifications are unchanged; the revised pages await human verification.

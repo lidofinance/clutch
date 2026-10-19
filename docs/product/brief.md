@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:31:21Z
+  at: 2026-10-19T22:36:19Z
 verified: []
 sources:
   - id: s1
@@ -42,10 +42,11 @@ No existing Lido component provides all three [s2].
 
 ## Vision
 
-EM accepted this vision on 2026-09-30 and confirmed it on 2026-10-05 [s1]:
+EM accepted this vision on 2026-09-30 and confirmed that reading of the answer on 2026-10-05 [s1]:
 
 One repository specifies, builds, verifies, deploys and governs the Active Treasury system.
 Every permission that can move DAO funds traces to an approved decision and a passing test.
+The repository records decisions and verification alongside code [s1].
 
 ## Goals
 
@@ -53,26 +54,26 @@ EM accepted these goals on 2026-09-30 [s1].
 
 | Goal | Required result |
 |---|---|
-| Audit-ready | An auditor can reconstruct intent from specifications and ADRs. Each invariant maps to a test. The generated API reference matches the code. |
-| Governance-ready | Delegates can read each on-chain action's specification and reproduce its check. The LIP agrees with the specifications. An immutable per-run artifact records deployed addresses and parameters. |
-| Agent-operable, human-certified | Agents draft and test. Humans review and finalize. The validator enforces verification rules. Human-written instruction files stay short and current; CI checks them. |
-| Operable | Signers can follow runbooks without code. Each emergency or technical step gives the exact transaction and has a fork drill. Alerts map to steps, and steps map to permissions. |
+| Audit-ready | An auditor can reconstruct intent from specifications and ADRs without asking the team. Each invariant maps to a test. The generated API reference matches the code. |
+| Governance-ready | Delegates can read each on-chain action's specification. Anyone can reproduce its check. The LIP agrees with the specifications. An immutable per-run artifact records deployed addresses and parameters. |
+| Agent-operable, human-certified | Agents draft and test. Only humans review and finalize pages. Agents cannot verify them. The validator enforces verification rules. Instruction files must be short, human-written and current; CI checks them. |
+| Operable | Signers can act under pressure without reading code. Every emergency or technical action has a runbook step with the exact transaction and a fork drill. Every alert maps to a step, and every step maps to a permission. |
 
-The general Lido incident process owns paging and escalation. This repository supplies the vault-specific steps and transactions [s1].
+The general Lido incident process owns paging and escalation. This repository owns the vault-specific steps and transactions [s1].
 
 ## North Star Metric
 
 Measure the time for a reviewer who did not write a permission change to verify it end to end [s1].
 One command reproduces the permission diff, runs the affected tests and checks traceability.
 Time starts with the procedure and ends with the verdict; it excludes the review queue.
-Review is the bottleneck when agents write most code. Each Easy Track permission change needs that review [s3][s1].
+Review is the bottleneck where agents write much of the code [s3]. Each Easy Track permission change needs that review [s1].
 
 ## Hard gates
 
 Each gate must hold at 100 percent [s1]:
 
 - **Traceability:** each permission traces to a specification clause, ADR, test and deployed artifact.
-- **One-command verification:** one command verifies a permission change.
+- **One-command verification:** one command verifies every permission change.
 - **Six hours:** a fork drill proves that each emergency action starts within the mandate's six-hour ceiling.
 
 ## Submetrics
@@ -90,7 +91,7 @@ Track these measures [s1]:
 Prioritize readers by the cost of a misreading. If their needs conflict, the higher-ranked reader takes priority [s1]:
 
 1. **Signers:** operator and emergency runbooks. A misread during a depeg can lose funds in minutes.
-2. **Auditors and reviewers:** missed defects can cause later losses.
+2. **Auditors and reviewers:** missed defects can cause losses later and less often.
 3. **DAO voters and delegates:** the LIP supports the final human check.
 4. **Coding agents:** human review must catch their errors.
 

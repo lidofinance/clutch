@@ -1,13 +1,13 @@
 ---
 type: Specification
 title: The enabling vote
-description: Prerequisites, direct Aragon Voting items, post-vote actions and later changes that still require a vote.
+description: Prerequisites, direct Aragon Voting items without Dual Governance, post-vote actions and later changes that still require a vote.
 tags: [governance, enabling-vote, deployment, specs]
 status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  at: 2026-10-19T22:36:19Z
 verified: []
 sources:
   - id: s1

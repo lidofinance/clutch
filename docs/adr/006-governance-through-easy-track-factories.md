@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:50:20Z
+  at: 2026-10-19T22:29:31Z
 verified: []
 sources:
   - id: s1
@@ -111,37 +111,37 @@ Since OD-80, the committee's own Safe is the trusted caller of decision 3 ([ADR 
 
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
 
-- Each factory builds one template from typed motion parameters, such as target, asset and budget key.
-- Adding an `approve` spender requires the complete tree, including existing branches: a write replaces the slot. How factories obtain existing branches remains open for OD-69 and decision 14.
+- Each factory owns one template and builds the permission tree. A motion carries only typed parameters, such as target, asset and budget key.
+- Adding a branch to any function with existing branches, such as an `approve` spender, requires the complete tree: a write replaces the slot. How factories obtain existing branches remains open for OD-69 and decision 14.
 - Every factory fixes the committee's Safe as trusted caller at deployment [s7]. Permission factories pin `operator` and refuse the Asset Safe, orders account and their modules as targets.
 - The first-loss burn factory writes no permission. Its motion burns an amount of pinned earnETH or earnUSD shares through `first-loss-burn` on the first-loss modifier ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 23). This is the only Clutch motion that moves value away from the DAO.
 - The role-toggle factory left the design and kit on 2026-10-05 (decision 8) [s4]. Budget and template factories remain unbuilt.
-- Modifier guards independently prevent governance from changing membership or emergency powers, granting administrative targets, using foreign budget keys or setting periods below 30 days [s6]. Refused targets include both accounts and their modules (decision 10). Ordinary-target grants, such as token transfers, still depend on templates and objections.
+- Modifier conditions independently prevent governance from changing membership or emergency powers, granting administrative targets, using foreign budget keys or setting refill periods below 30 days [s6]. Refused targets include both accounts and their modules (decision 10). A factory bug can still grant calls on ordinary targets, such as token transfers. Templates and objections control that risk.
 - An objection, Easy Track pause or committee cancellation stops a queued onboarding motion. The emergency switch freezes its operator-modifier write; restart would re-arm it because motions never expire. The restart vote must cancel it first ([ADR 005](/adr/005-account-graph-and-roles.md), decisions 25 and 26). After enactment, emergency can revoke the new permission immediately.
 - **Exit-governance** writes only `emergency`, through `scopeTarget`, `scopeFunction` and `allowFunction`, with None or Send (decision 9). It refuses the Asset Safe and all its modules, including safety (decision 10). It has no `assignRoles`, switch access or allowances.
-- **Exit templates** add redeem, withdraw, claim and cancel pinned to the Asset Safe; receipt-token transfer pinned to the Agent; and zero spender approval. They add no entry, deposit or non-zero approval. The modifier cannot identify an exit tree, so code, tests and audit must enforce this.
+- **Exit templates.** Each onboarding template also builds its target's emergency exit: redeem, withdraw, claim and cancel with receiver and owner pinned to the Asset Safe; receipt-token transfer pinned to the Agent; and zero spender approval. They add no entry, deposit or non-zero approval. The modifier cannot identify an exit tree, so code, tests and audit must enforce this.
 - **Routine removal** writes the complete function tree without the removed branch and adds nothing (decision 14). Emergency uses immediate `revokeTarget` or `revokeFunction`, pinned to `operator`. All operator permissions use that key; revokes on the operator and orders modifiers cover them.
 
 ## Options considered
 
 - Grant existing emergency exits in the enabling vote, then wait for DAO votes for later exits: EM rejected this under OD-49. Lido Lend's contract does not exist before the vote, leaving it without a first-day exit.
-- Onboard value-holding protocols only by vote, with exits: rejected because Lido Lend must join by motion on its first day ([ADR 011](/adr/011-launch-scope.md), decision 3).
-- Pre-scope a role per strategy and toggle by motion: rejected because each new protocol would need a vote.
+- Onboard value-holding protocols only by vote, with exits: EM rejected this because Lido Lend must join by motion on its first day ([ADR 011](/adr/011-launch-scope.md), decision 3).
+- Pre-scope a role per strategy and toggle by motion: EM rejected this because each new protocol would need a vote.
 - Accept motion-supplied trees: rejected because each needs a narrowing proof during the objection window.
 - Add a controller for allowlists, stale motions and ceilings: removed because enactment rebuilds handle staleness and native modifier conditions express ceilings.
 - Give Easy Track Agent authority: rejected because motions could run arbitrary Agent scripts.
-- Removal-template motions with emergency revocation: EM initially rejected the 72-hour wait for a narrowing change.
+- Removal-template motions with emergency revocation: EM rejected the 72-hour wait for a narrowing change, then adopted routine removal motions in decision 14.
 - Shorten the global window or create another Easy Track for removals: windows below 48 hours are refused [s8].
-- DAO-scoped keys with emergency unassignment: rejected because they add an administrative emergency permission to an already rejected model.
+- DAO-scoped keys with emergency unassignment: EM rejected because they add an administrative emergency permission to an already rejected model.
 
 ## Consequences
 
-- Exit templates can widen the unscreened emergency role. Only objection, Easy Track pause or a DAO vote stops such a write. Audit must cover each exit template; drift detection must cover safety policy.
+- The unscreened emergency path gains its first motion writer. A flaw in an exit template can widen the emergency role. Only objection, Easy Track pause or a DAO vote stops such a write. Audit must cover each exit template; drift detection must cover safety policy.
 - Onboarding adds an emergency exit at enactment. Its safety-modifier permission survives the operator switch.
 - Each template must pin receivers, owners and beneficiaries, bound value-moving amounts, exclude administrative selectors and emit the production script format.
 - A motion can select an unaudited contract. Templates limit interactions and loss to the attached budget; objection, disclosure and monitoring provide the controls. The LIP must state this risk.
 - Replacing the committee's Safe requires new factories with the new trusted caller and DAO registration [s7].
-- The committee proposes its own expansions. Disclosure, objection, Emergency Brakes pause and the independent emergency quorum's revoke and switch constrain them.
+- The committee proposes its own expansions. Disclosure, objection and Emergency Brakes pause constrain them, as do the emergency Safe's revoke and switch, which the committee cannot use alone.
 - Routine removals wait for objection and, after the cap lifts, screening at creation. Emergency removals require three-of-five, without screening or advance notice, followed by a forum post. Revoke-only paging is less severe than transfer or swap paging.
 - Reinstatement needs onboarding or a vote. Routine removal deletes only its branch (decision 14). After emergency revocation, permissions without a template, such as staking or fixed-ceiling approval, require a vote (decision 17).
 - The toggle factory and its tests are removed [s4][s5]. INV-007 retires.

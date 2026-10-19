@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  at: 2026-10-19T22:29:31Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -58,7 +58,7 @@ sources:
 - The kit at `7a8c661` builds condition trees in Solidity [s3]. Since 2026-10-05 it follows the launch scope and approval rule, without swap instances or factories [s5].
 - A write replaces the role/target/selector tree. A kit regression test checks this [s4].
 - Implementation-derived tests inherit implementation bugs. lido-lend-markets derives tests from requirements and uses two specification layers [s2].
-- `ScopeFunction` emits the applied tree [s6]. The last write wins and revokes clear entries, so events can reconstruct the policy without storage decoding. The mastercopy's event signatures are known [s8]; real-event decoding remains untested.
+- `ScopeFunction` emits the applied tree [s6]. The last write per role, target and selector wins, and revokes clear entries, so events can reconstruct the policy without storage decoding. The event signatures are in the deployed mastercopy's code [s8]; real-event decoding remains untested.
 - The repository uses Foundry for fork tests and Python with uv for document validation. Lido's DAO vote scripts use Python [s7].
 - On 2026-10-06, EM requested Zodiac constellation as the project backbone [s1]. The provider's copy builds after a one-line fix. Its roles SDK produces the kit's flat condition arrays, and its ABI matches the deployed mastercopy [s8].
 - The hosted Zodiac app compiles some entries server-side and needs an API key. It has no Aragon vote or Easy Track hand-off [s8].
@@ -119,12 +119,12 @@ EM decided on 2026-10-13, closing OD-64 [s1]:
 - The round-trip check must use the mastercopy's enum values and `Allowance` order: `refill`, `maxRefill`, `period`, `balance`, `timestamp`.
 - The port deletes Solidity builders (decision 15). Until then, [test/README.md](https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/README.md) records their design differences [s5].
 - TypeScript compiles; Solidity tests. The round-trip check compares chain state with the artifact independently of both.
-- Compilation runs the SDK's npm dependencies. CI compiles offline from the frozen lockfile; the vote consumes the reviewed artifact (decision 14).
+- Compilation runs the SDK's npm dependencies. CI compiles offline from the frozen lockfile; the vote consumes only the reviewed artifact (decision 14).
 - Clutch must build the vote and motion hand-off around that artifact; the hosted app provides none [s8].
-- The UI displays chain differences. ADR 009's detector supplies canonical drift alerts against the same artifact.
-- The repository-owner team holds the Lido Zodiac workspace and API key (decision 16). The key stays outside the repository, CI and votes. Agents must not use it.
+- The UI's chain diff is a view. ADR 009's detector remains the source of drift alerts against the same artifact.
+- Clutch needs a Lido Zodiac workspace and API key, held by the repository-owner team (decision 16). The key stays outside the repository, CI and votes. Agents must not use it.
 - The hosted app may require a provider plan. Unannounced terms stay outside the repository.
-- Operator transactions through the UI still require ADR 010's screening. A pre-launch fork drill must prove this.
+- If the committee executes operator transactions through the UI, ADR 010's screening guard checks each Safe transaction. A pre-launch fork drill must prove this.
 - Constellation-derived files keep LGPL-3.0-only ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md), decision 9).
 - SDK event signatures match the mastercopy [s8]. Verify real-event decoding before relying on the round-trip check.
 - Start the port, compiler and artifact format at once (decision 15). Build the round-trip check in phase 2.

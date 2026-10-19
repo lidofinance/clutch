@@ -8,7 +8,7 @@
 * [Chain reads for the design ADRs, 2026-09-30](chain-reads-2026-09-30.md) - Pinned on-chain reads and the commands used by the design ADRs.
 * [The Zodiac constellation as the policy backbone, 2026-10-06](zodiac-constellation-2026-10-06.md) - OD-33 and OD-34: upstream policy, local tooling and differences from the design.
 * [The repository and many contributors with agents, 2026-10-07](contributor-readiness-2026-10-07.md) - ADR 012: contributor workflow, CI coverage and the keystore rehearsal.
-* [The request for solution against the decided design, 2026-10-07](request-for-solution-2026-10-07.md) - The original asks and their mapping to the design, without allocation figures.
+* [The request for solution against the decided design, 2026-10-07](request-for-solution-2026-10-07.md) - Lido's asks to the policy provider, without allocation figures; the guide maps them to the design.
 * [CoW orders from a dedicated orders account, 2026-10-06](cow-orders-account-2026-10-06.md) - OD-43: order signer, conditional orders, fallback handler and UI limits.
 * [Safe v1.5.0 and the screening guard, 2026-10-02](safe-v150-guard-compatibility-2026-10-02.md) - OD-02: guard compatibility, support and the restricted fork test.
 * [Safe v1.5.0 due diligence, 2026-10-05](safe-v150-due-diligence-2026-10-05.md) - OD-17: audit scope, advisories, incidents and the Safe paths Clutch uses.

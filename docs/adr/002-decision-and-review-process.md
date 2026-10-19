@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  at: 2026-10-19T22:29:31Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -46,7 +46,7 @@ sources:
 - Readers must distinguish agent drafts from human-reviewed text.
 - lido-lend-markets uses review states from `slop` to `finalized` and resets them after substantial rewrites [s2].
 - OKF 0.2 records a page's author, verifiers and sources [s3].
-- The committee operates the vault and supplies emergency signers. Without outside verification, it would approve its own limits.
+- The committee operates the vault and supplies two emergency signers. Without outside verification, it would approve its own limits.
 - At block 26092572, the three-of-five Emergency Brakes Safe shared no owner address with the committee's Safe [s4]. It held ADR 005's technical role until 2026-10-13.
 - On 2026-10-13, the emergency Safe became three-of-five: two committee members, two Emergency Brakes members and one member of neither body. The Emergency Brakes multisig lost all vault roles ([ADR 005](/adr/005-account-graph-and-roles.md), decisions 23 and 24).
 
@@ -92,7 +92,7 @@ The validator does not yet check policy-verification output. That check arrives 
 ## Options considered
 
 - Committee-only acceptance: rejected because the committee would approve its own limits.
-- Quorum signatures over pages: EM rejected this because each verification would need a Safe signing round and an on-chain check.
+- Each body's quorum signs a Safe message over the page, which a script checks on chain. EM rejected this because each verification would need a signing round.
 - DAO acceptance of each ADR: rejected because ADRs authorize no on-chain action; votes and motions already govern those actions.
 - OKF fields without review states: rejected because they would not distinguish review depth.
 - Emergency Brakes verification of constraining ADRs: EM replaced this on 2026-10-13 (decision 12). The multisig has no vault role, and ADR acceptance authorizes no on-chain action.
@@ -100,10 +100,10 @@ The validator does not yet check policy-verification output. That check arrives 
 ## Consequences
 
 - Agent edits reset reviewed pages to `slop`.
-- EM accepts through an explicit edit. The committee re-ratifies interim acceptances.
-- The validator cannot detect a body edit that leaves `generated.at` unchanged. A base-branch comparison is planned for phase 1.
-- The validator cannot identify who wrote a `human:` entry. Pull request review, CODEOWNERS and the `main` branch rule provide that control (OD-10, 2026-10-05).
-- A committee verification's `ref` makes the member's claim checkable against the decision record (decision 10). It is not proof of authorship.
+- EM accepts through one explicit edit, not in conversation. The committee re-ratifies interim acceptances.
+- The validator cannot detect an edit that leaves `generated.at` unchanged. A base-branch comparison is planned for phase 1.
+- The validator cannot identify who wrote a `human:` entry. Human pull request review is the control; CODEOWNERS and the `main` branch rule enforce it (OD-10, 2026-10-05).
+- A committee verification's `ref` makes the member's claim checkable against the decision record (decision 10). The entry remains a member's claim, not proof.
 - `recorded_by` identifies an entry made on instruction (decision 11). Entries without it still depend on human review.
 
 ## Confirmation

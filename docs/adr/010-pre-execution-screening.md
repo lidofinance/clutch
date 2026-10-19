@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:53:49Z
+  at: 2026-10-19T22:33:22Z
 verified: []
 sources:
   - id: s1
@@ -60,9 +60,9 @@ sources:
 - Module guards begin in v1.5.0 and see every enabled module, including safety [s3]. Recovery would depend on guard code admitting safety; the kit models this with one line [s9].
 - The screening vendor's existing transaction guard is deployed on other Lido multisigs and enforcing on one. An external firm audited it in late 2025 [s7].
   - It cannot serve as a module guard; v1.5.0 refuses that assignment [s4][s7].
-  - The vendor approves each exact transaction once on chain. Unapproved transactions revert [s7].
-  - Owners remove it through a fixed 10-day timelock that the vendor cannot block [s7].
-  - The deployed build adds 10-day rather than 1-day timelocks after the audit's pinned fix review. This change is on a vendor branch, not `main`; documentation still says 1 day [s11].
+  - In practice, the vendor's key approves each exact transaction once on chain. Unapproved transactions revert [s7].
+  - Owners remove it only through a fixed 10-day timelock that the vendor cannot block [s7].
+  - After the audit's pinned fix review, the deployed build adds one change: both timelocks rise from 1 day to 10 days. This change is on a vendor branch, not `main`; documentation still says 1 day [s11].
   - Approval hashes can authorize one transaction once, one call at any nonce, or one function/target with any arguments. Only the first is transaction-specific [s11].
   - Lido's detector supports v1.3.0/v1.4.1 only. It watches standing approvals, both timelocks, bypass, policy contracts, keepers and guarded-Safe owner/guard/module changes [s11].
 - Easy Track fixes trusted callers at deployment [s8].
@@ -166,14 +166,14 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - **Route A, Asset Safe module guard:** rejected because recovery would depend on vendor code removable only by DAO vote. The existing guard cannot serve this role, requiring new vendor code and audit.
 - **Option 3, dedicated operator with committee motion creation:** rejected because motions would escape screening despite fewer pinned addresses.
-- **OD-83 B, new operator Safe at lift:** rejected because fixed trusted callers require redeploying all factories.
-- **OD-83 C, permanent cap without guard:** rejected.
-- **Committee-owned one-of-one operator Safe (2026-10-15):** EM rejected it: "I don't like to have a nested interim safe" [s1]. It confines screening to vault activity and permits an owner swap, but adds a Safe and nested execution for each action [s13].
+- **OD-83 B, new operator Safe at lift:** EM rejected because fixed trusted callers require redeploying all factories.
+- **OD-83 C, cap without guard:** EM rejected.
+- **Committee-owned one-of-one operator Safe (2026-10-15):** EM rejected it: "I don't like to have a nested interim safe" [s1]. It confines screening to vault activity, and one owner swap could move the operator role, but adds a Safe and nested execution for each action [s13].
 - **Lido-written guard:** rejected as new non-factory code.
-- **Detection or advisory screening only:** rejected because blocking is a hard requirement. EM permitted a capped unguarded launch on 2026-10-08 (decision 20).
-- **Registry-enforced cap, lifted by vote (OD-54 A):** rejected because it adds a lift vote.
-- **Second registry pair gated on guard installation (OD-54 B):** rejected because it adds a factory coupled to vendor code.
-- **Three-million-dollar cap or mandate-set figure (OD-55 B/C):** rejected.
+- **Detection or advisory screening only:** rejected because EM made on-chain blocking a hard requirement. EM permitted a capped unguarded launch on 2026-10-08 (decision 20).
+- **Registry-enforced cap, lifted by vote (OD-54 A):** EM rejected. It would hold on chain at the cost of another DAO vote to lift it.
+- **Second registry pair gated on guard installation (OD-54 B):** EM rejected because it adds a factory coupled to vendor code.
+- **Three-million-dollar cap or mandate-set figure (OD-55 B/C):** EM rejected.
 
 ## Consequences
 
@@ -184,13 +184,13 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - No committee Safe module is allowed while guarded (INV-010).
 - Before lift, operator actions and motion creation are unscreened. Above-cap top-ups breach procedure but do not revert; objection and monitoring are the controls.
 - Guard setup and standing-approval terms gate cap lift, not launch.
-- The external guard can stop operator and motion creation. Recovery independence, ten-day removal and the emergency switch constrain this dependency (OD-58).
+- Lido does not write the guard, which can stop operator activity and motion creation. This deliberately narrows provider independence. Recovery independence, ten-day removal and the emergency switch, which disables the operator modifier, constrain this dependency (OD-58).
 - Lido must review the post-audit 10-day timelock change; ask the vendor to merge and document it [s11]. It remains off `main`, with 1-day documentation. Earlier text wrongly counted the non-Safe-caller early return as another post-audit change; the fix-review commit already includes it [s11].
 - v1.5.0 support rests on EM's 2026-10-05 report; the confirmation is outside this repository.
 - If the vendor accepts the request, batching uses only MultiSendCallOnly; other delegatecalls fail screening.
 - Naming requires mandate publication and written vendor consent. Restricted fork tests then enter the harness.
-- Asset and emergency Safes use v1.5.0, the first among the six checked Lido Safes. The committee keeps v1.3.0, supported by the restricted guard tests [s10] and detector [s11].
-- The mock module guard and route-A tests were removed on 2026-10-05. The harness needs transaction-guard coverage on a committee stand-in, preferably using deployed vendor bytecode.
+- Asset and emergency Safes use v1.5.0, the first among the six checked Lido Safes. The committee keeps v1.3.0: the guard passed Lido's fork tests on it [s10], and the detector supports it [s11].
+- The mock module guard and route-A tests were removed on 2026-10-05. The harness has no screening test now. It needs transaction-guard coverage on a committee stand-in, preferably using deployed vendor bytecode.
 
 ## Confirmation
 
