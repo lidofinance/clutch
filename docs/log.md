@@ -2,6 +2,7 @@
 
 ## 2026-10-19
 
+* **Update**: Shortened the main prose of ADR 005–012, preserved recorded decisions, and aligned funding cards with ADR 008.
 * **Update**: Removed navigation-method notes and redundant page-status narration.
 * **Update**: Shortened explanations in ADR 001–004. Decisions and prior verifications are unchanged; the revised pages await human verification.
 * **Update**: Shortened documentation, organized reading routes by Diataxis, and aligned two guide summaries with the decisions.
