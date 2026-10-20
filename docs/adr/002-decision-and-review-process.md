@@ -4,7 +4,7 @@ title: "ADR 002: Decision and review process"
 description: ADR acceptance, human verification, review states and validator limits.
 tags: [process, review, okf, trust]
 status: draft
-review_status: slop
+review_status: human-reviewed
 decision: accepted
 accepted_by: human:em
 generated:
@@ -24,6 +24,11 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-13--adr-002-verified-again-the-first-loss-holder-and-od-64
     sha256: eb19c8a2f7b4ce5a182f4f5760a7d5e80459a801b201278d7cbdba684cb0c7e5
+  - by: human:em
+    at: 2026-10-20T18:46:48Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-20--adr-001-to-adr-004-verified-again-and-yt-registered
+    sha256: d808f1c17061264a7585c626eb516cf8f810a62d590c851585a63c1ae9f5b253
 sources:
   - id: s1
     resource: /registers/decision-log.md

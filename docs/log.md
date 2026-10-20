@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-20
+
+* **Update**: Recorded EM's verification of ADR 001 to ADR 004 after the edits of pull request #41, at EM's written instruction, and EM's approval of the YT registration as a decision proposer and page verifier.
+
 ## 2026-10-19
 
 * **Update**: Added YT as a decision proposer and page verifier; ADR acceptors remain EM and the committee.

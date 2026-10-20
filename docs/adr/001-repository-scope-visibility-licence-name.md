@@ -4,7 +4,7 @@ title: "ADR 001: Repository scope, visibility, licence and name"
 description: Repository scope, publication rules, licences, name and token-symbol restriction.
 tags: [repository, licence, visibility, naming]
 status: draft
-review_status: slop
+review_status: human-reviewed
 decision: accepted
 accepted_by: human:em
 generated:
@@ -19,6 +19,11 @@ verified:
     at: 2026-10-06T08:16:51Z
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-06--adr-001-and-adr-004-verified-again
+  - by: human:em
+    at: 2026-10-20T18:46:48Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-20--adr-001-to-adr-004-verified-again-and-yt-registered
+    sha256: 01803ac13d0dd11559df48adc5d0509bd03120cc310c588f6d83373243e852fd
 sources:
   - id: s1
     resource: /registers/decision-log.md

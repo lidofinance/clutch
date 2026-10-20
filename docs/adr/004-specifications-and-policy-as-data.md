@@ -4,7 +4,7 @@ title: "ADR 004: Specifications and the permission policy as data"
 description: Specification layers, invariant tests, policy compilation, committed artifacts, local verification and the Zodiac workspace.
 tags: [specs, policy, invariants, testing, runbooks]
 status: draft
-review_status: slop
+review_status: human-reviewed
 decision: accepted
 accepted_by: human:em
 generated:
@@ -24,6 +24,11 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-13--adr-004-verified-again
     sha256: 889927fc006912dd3a4ea63794b9fb280a36f2255b634d4f1c51717a8f96fcd9
+  - by: human:em
+    at: 2026-10-20T18:46:48Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-20--adr-001-to-adr-004-verified-again-and-yt-registered
+    sha256: 74b99987b2dc29b343e59ba7b447fe67d89d5bfba7f20e4dc6761e72854f4862
 sources:
   - id: s1
     resource: /registers/decision-log.md

@@ -4,7 +4,7 @@ title: "ADR 003: Agent operating model"
 description: Agent rules, instruction-file limits, skills, protected files and human review requirements.
 tags: [agents, process, security]
 status: draft
-review_status: slop
+review_status: human-reviewed
 decision: accepted
 accepted_by: human:em
 generated:
@@ -19,6 +19,11 @@ verified:
     at: 2026-10-06T06:23:50Z
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-06--adr-002-and-adr-003-verified-again
+  - by: human:em
+    at: 2026-10-20T18:46:48Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-20--adr-001-to-adr-004-verified-again-and-yt-registered
+    sha256: cc807121e2ac9a378d6cce9cfbaa1c9fb347e9c3d0d2f4d021d13a9fecb901be
 sources:
   - id: s1
     resource: /registers/decision-log.md
