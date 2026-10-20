@@ -7,15 +7,15 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:36:19Z
+  at: 2026-10-20T18:34:06Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on OD-39 to OD-45, 2026-10-06
+    title: Decision log — EM on OD-39 to OD-45, 2026-10-06, and on OD-84 to OD-88, 2026-10-20
   - id: s2
     resource: /adr/009-budgets-caps-reporting-and-monitoring.md
-    title: ADR 009 — layered controls, the buffer, the cap tier of new products, the detectors and the Zodiac UI's display
+    title: ADR 009 — layered controls, the buffer, the cap tier of new products, the detectors, and the two readings
   - id: s3
     resource: /adr/007-swapping-through-an-orders-account.md
     title: ADR 007 — swaps through the orders account, and the absence of an on-chain price bound
@@ -41,9 +41,9 @@ sources:
 Every mandate rule gets a control on each layer that can carry it (OD-39) [s1][s2]:
 
 - **On chain:** the permission policy refuses the transaction.
-- **Before execution:** the screening vendor refuses an operator transaction. The emergency path and the DAO path are never screened [s4].
+- **Before execution:** the screening vendor refuses an operator transaction. The Zodiac UI's signing flow also refuses one that breaches a cap or the buffer's floor, in its own interface only (OD-86). The emergency path and the DAO path are never screened or refused [s2][s4].
 - **Detection:** monitoring finds a breach and alerts the person who must act.
-- **Display:** the Zodiac UI shows the state and warns before signing (OD-44). Lido's readings are the canonical figures [s2].
+- **Display:** the Zodiac UI shows the policy provider's own reading of the vault, and Lido's report generator publishes Lido's. The two readings are independent, and both count (OD-84) [s2].
 
 Figures stay out of this page. They come from the attested computation once the mandate is approved. "Built" means built and tested on a fork; nothing is deployed.
 
@@ -56,9 +56,9 @@ Figures stay out of this page. They come from the attested computation once the 
 | Every receiver is the vault | Receivers, owners and beneficiaries pinned (INV-003, INV-022) | Every operator transaction | Drift | — | `@lidofinance/defi-tech` | Built for positions; orders specified |
 | No borrowing and no leverage | No borrow function in any role's permissions; INV-015 keeps the operator inside the launch scope | — | Drift | — | `@lidofinance/defi-tech` | Built; no test names borrowing |
 | Spending per protocol spender is bounded | Budget keys per spender, and fixed ceilings (INV-008, INV-011, INV-012) [s2] | — | Budget burn; every budget motion, whose forum post names its event (OD-56) | Budget left per key | The committee files a budget motion after an event; no routine retune | Built with dry-run figures |
-| Exposure caps | None: the policy cannot see value | Requested: refuse an operator transaction that breaches a cap at its post-transaction state | Fortnightly cap reading on IPFS; the emergency Safe's switch stops the operator when a breach gets worse (OD-29, OD-32, OD-58) | Each cap against its limit, with warnings | The committee rebalances; the emergency Safe switches off on the trigger | Specified; screening requested |
+| Exposure caps | None: the policy cannot see value | The Zodiac UI refuses an operator transaction that breaches a cap at its post-transaction state, in its interface only (OD-86). Requested from the screening vendor: the same refusal | Fortnightly cap readings on IPFS, Lido's and the provider's; a breach in either counts (OD-84); the emergency Safe's switch stops the operator when a breach gets worse (OD-29, OD-32, OD-58) | Each cap against its limit, with headroom | The committee rebalances; the emergency Safe switches off on the trigger | Specified; screening requested |
 | A new Lido product stays in the protocol cap until it matures (OD-41) | The product's budget key; the unlock is a budget motion with a forum post | — | The product's exposure against the protocol cap until the unlock | The product's tier | The committee proposes the unlock; LDO holders can object | Specified |
-| Liquidity buffer of at least one month of baseline spend (OD-40) | None | Requested: refuse an operator transaction that takes the buffer below its floor | Continuous detector with an early-warning margin; a line in every report | The buffer against its floor | The committee restores it | Specified; screening requested |
+| Liquidity buffer of at least one month of baseline spend (OD-40) | None | The Zodiac UI refuses an operator transaction that takes the buffer below its floor, in its interface only (OD-86). Requested from the screening vendor: the same refusal | Continuous detector with an early-warning margin; a line in every report of both readings | The buffer against its floor | The committee restores it | Specified; screening requested |
 | The first-loss shares move only under the March 2026 terms (OD-42, OD-60) | In the first-loss Safe: a burn needs an enacted Easy Track motion, and the first-loss role of the committee's Safe only redeems to the Aragon Agent; no role can transfer or approve the shares (INV-021) [s7] | The objection window of every burn motion; the screening guard on its actions once the launch cap lifts (OD-83) | Every burn motion and every action of the first-loss role; any change of the first-loss Safe's balance, owners, modules or singleton | A separate sub-allocation | The committee, on the Earn team's written instruction; the DAO changes or removes the role | Specified |
 | Swaps pay the vault and stay inside the mandate (OD-43) | Orders only from the orders account, receivers pinned, no stop-loss orders (OD-79); an order lives at most 90 days, a recovery order 1 day (INV-013, INV-014, INV-022, INV-023, INV-024) [s3] | Requested: refuse an operator order whose limit price lies too far below a market price. Recovery orders are never screened | Each fill against a market price; open orders, with an alert at 30 days that asks the committee to confirm or cancel each one, and every open order in the monthly report (OD-61); tokens left in the orders account; the watch-tower's posting; a high-severity page on every emergency swap; an alert on a recovery order whose limit sits far below a market price | Open orders | The committee; the emergency Safe cancels and sweeps | Specified; no price bound on chain: CoW's competition and EBBO rule hold fills to the on-chain market (OD-48) |
 | Router swaps on Uniswap and 1inch only with an output bound (OD-43) | No permission at launch | Required before any router is added: a check of the minimum output against a market price | — | — | EM, once the vendor answers | Waits for the vendor |
@@ -72,8 +72,11 @@ Figures stay out of this page. They come from the attested computation once the 
 | An emergency action starts within six hours | The emergency role, with its switch (INV-002, INV-009) | Never screened | Paging through the general Lido incident process | — | The emergency Safe; the Emergency Brakes multisig for the Easy Track pause | Built for the listed positions; a position that a motion onboards gets its emergency exit from that motion (OD-49), specified; runbooks and drills owed |
 | The emergency Safe keeps its seat rule (OD-58) | — | — | Owner-change alerts, critical on the emergency Safe (INV-026) | Signer sets | The committee and the Emergency Brakes multisig, for their seats | Specified; runbook owed |
 | No emergency body restores what it stopped (OD-59) | The emergency role holds only calls that remove authority, and the compiler refuses a grant or a budget for it (INV-027) | — | Drift; any change of Easy Track's roles | — | The DAO restarts, by vote (OD-78) | Built for the Asset Safe; the Easy Track roles are a chain check before the enabling vote |
-| Every asset has a price, with its level and source (OD-62) | None | — | The report generator's five-level waterfall; a top-up post names every price below level 2; a top-up waits while level 5 covers more than the set share | Lido's readings, with each price's level and source | The committee's valuation policy sets the band and the level-5 share | Specified; the figures are not set |
-| Reports can be reproduced | — | — | The report generator at a pinned block | Lido's readings | `@lidofinance/defi-tech` builds the generator; the committee publishes | Specified |
+| Every asset has a price, with its level and source (OD-62) | None | — | The report generator's five-level waterfall; a top-up post names every price below level 2; a top-up waits while level 5 covers more than the set share | Lido's reading, with each price's level and source; the provider's reading, with its own sources (OD-84) | The committee's valuation policy sets the band and the level-5 share | Specified; the figures are not set |
+| Reports can be reproduced | — | — | The report generator at a pinned block | Lido's reading; the provider's report, on IPFS next to it (OD-85) | `@lidofinance/defi-tech` builds the generator; the committee publishes | Specified |
+| The two readings agree within a band (OD-84) | None | — | Both published readings compared at each snapshot; a top-up motion that starts while they differ by more than the band | Both readings and their difference | The committee explains a difference; `@lidofinance/defi-tech` specifies the comparison | Specified; the band is not set |
+| Both readings use this repository's rules (OD-87) | — | — | A change of the mandate's rules made in the Zodiac UI is drift | The rules' version | `@lidofinance/defi-tech` sends each version after the Snapshot vote, motion or vote that changes a rule | Specified; the rule data is owed |
+| The screening vendor approves in time (OD-88) | The guard fails closed (INV-010) | From the lift, the Zodiac UI requests the vendor's approval for each transaction of the committee's Safe that it builds | A transaction of the committee's Safe that waits for approval longer than the set time | The approval state | The committee; `@lidofinance/defi-tech` specifies the alert | Specified; applies from the lift |
 
 The owner is who acts when the rule is at risk. `@lidofinance/defi-tech` writes the detector specification, and `@lidofinance/lido-valset-vroom` runs the monitoring platform (OD-13).
 

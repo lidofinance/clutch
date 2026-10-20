@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:33:22Z
+  at: 2026-10-20T18:34:06Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on on-chain blocking and the guard, 2026-09-22, on the route and the vendor's guard, 2026-10-02, on Safe v1.5.0, 2026-10-05, on the notice of a relaxed rule, 2026-10-13, and on the guard's Safe, 2026-10-14, kept on 2026-10-15
+    title: Decision log — EM on on-chain blocking and the guard, 2026-09-22, on the route and the vendor's guard, 2026-10-02, on Safe v1.5.0, 2026-10-05, on the notice of a relaxed rule, 2026-10-13, on the guard's Safe, 2026-10-14, kept on 2026-10-15, and on the approval in the Zodiac UI, 2026-10-20
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — guard hooks per Safe version, the committee Safe, Safe v1.5.0 provenance and audits
@@ -130,6 +130,11 @@ EM decided on 2026-10-14, closing OD-83 [s1]:
 
 Decision 24 takes Option 5, which was not chosen on 2026-10-02. The committee's Safe now holds the operator role (OD-80), so the guard of decisions 8, 10 and 22 is on it.
 
+EM decided on 2026-10-20, closing OD-88 [s1]:
+
+25. From the lift, the Zodiac UI's signing flow sends each transaction of the committee's Safe that it builds to the screening vendor for its single-use approval, and shows the approval state.
+26. Lido's monitoring alerts when a transaction of the committee's Safe waits for the vendor's approval longer than a set time. The detector specification, which `@lidofinance/defi-tech` writes (OD-13), sets the time.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
@@ -141,6 +146,8 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **No modules.** The guarded committee Safe must have none: v1.3.0 lacks a module guard, so module execution would bypass screening [s2].
 - **Removal.** Only committee Safe owners can remove the guard, after ten days. Outages stop operation for at most that delay; hostile removal remains visible throughout it.
 - **Monitoring.** Add the new instance to the existing v1.3.0 detector (decision 12) [s11]. Watch both timelocks, bypass activation, standing approvals, keepers, added policy contracts and Safe module/guard/owner changes. One standing approval of the shared modifier execution function would approve all vault activity; the agreement forbids it (decision 9). Also alert critically on new Safes' singleton changes: delegatecall can replace implementations without Safe events (decision 18) [s12].
+- **Signing flow.** From the lift, the Zodiac UI requests the vendor's approval for each committee transaction that it builds and shows the approval state (decision 25). A transaction built elsewhere needs the same approval, because the guard checks every transaction of the Safe.
+- **Late approvals.** Watch pending transactions of the committee's Safe against the vendor's approvals, and alert when one waits longer than the set time (decision 26). The alert measures the latency in the reversal conditions.
 - **Delegatecalls.** Batching needs only the committee Safe's v1.3.0 MultiSendCallOnly. Ask the vendor to refuse other targets (decision 17); one approved stray delegatecall could replace the implementation and remove the guard.
 - **Pre-vote check.** Repeat due-diligence advisory, release and bounty checks shortly before the enabling vote. Return changes on Clutch's Safe paths to EM (decision 16) [s12].
 - **Tooling.** Add the instance to existing bytecode-verification and state-check configurations.

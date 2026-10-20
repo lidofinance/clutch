@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:33:22Z
+  at: 2026-10-20T18:34:06Z
 verified: []
 sources:
   - id: s1
@@ -149,6 +149,16 @@ EM decided on 2026-10-14, closing OD-69 [s1]:
 
 39. The enabling vote holds spare budget keys for each token, with ceilings, so that a motion can budget a spender that the vote did not know.
 
+EM decided on 2026-10-20, closing OD-84 to OD-87 [s1]:
+
+40. Two readings watch the vault: Lido's, from the report generator and monitoring, and the policy provider's own, in the Zodiac UI. Neither reads the other's data. Each reading checks the other.
+41. Both readings count. A cap breach in either published reading is a published cap breach for the trigger of decision 24. No top-up motion starts while the two readings differ by more than a band, on the vault's value or on a cap ratio. The committee's valuation policy sets the band, as it sets the bands of decision 37.
+42. The policy provider publishes its reports to IPFS with a pin-only key of a separate Lido pinning project, which Lido can revoke. The key is an admin setting of Lido's account in the Zodiac UI. The forum post that cites a reading links both reports.
+43. The Zodiac UI's signing flow refuses an operator transaction that would breach a cap, or take the liquidity buffer below its floor, at its post-transaction state by the provider's reading, and it shows each cap's headroom. It never refuses an emergency, recovery or DAO transaction. The gate is in the interface only: a signer can still execute through another Safe interface.
+44. This repository holds the mandate's rules as data: the rubrics, the assets by address, each cap with its base, the product tiers, the vault's three Safes, the buffer's base and the launch cap. Figures enter when the mandate is approved. Both readings use these rules. After the Snapshot vote, motion or vote that changes a rule, `@lidofinance/defi-tech` sends the new version to the provider, as it pushes the policy ([ADR 004](/adr/004-specifications-and-policy-as-data.md) decision 16). A change made in the Zodiac UI is drift, and an alert follows.
+
+Decisions 40 and 43 replace the first sentence of decision 29. Decision 40 also replaces decision 38, which misread EM's answer of 2026-10-13: EM wanted the provider's own display and monitoring, not Lido's data in the provider's tools [s1]. Decision 29 keeps its requirement list and its fallback: if the provider declines, Lido builds the display of its own reading. Decision 42 adds a second report to decisions 2 and 22. The screening vendor's part of the provider's signing flow is OD-88, in [ADR 010](/adr/010-pre-execution-screening.md).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
@@ -162,11 +172,12 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 - **Budget events.** Each motion's forum post names its event: a new TM Floor Value; onboarding a spender and setting its key; product maturity/unlock (decision 28); or launch-cap lift ([ADR 010](/adr/010-pre-execution-screening.md), decision 22). Price changes are not events under decision 31. Floor changes also require DAO votes for funding limits and fixed approval ceilings ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 24).
 - **Yield-bearing keys.** Use an attested fixed monthly figure (decision 32). Cap headroom no longer sets it, so no holdings snapshot is required.
 - **New Lido products.** Lido Lend remains protocol-capped until maturity and a budget motion raises its key to the own-product bound. The forum post identifies satisfied criteria (decision 28). earnETH and earnUSD are own-product keys from the start.
-- **Zodiac display.** Request account/asset/protocol value, with first-loss as a sub-allocation; buffer and cap limits with warnings; remaining budgets; open-order age and limits; motion deadlines; guard state; pre-signing breach warnings; and Lido alerts with their state (decision 38). Canonical figures come from Lido's report generator and monitoring. Third-party live values must be labelled indicative and must not feed caps, top-ups or reports.
+- **The provider's reading.** The requirement list asks the Zodiac UI for its own reading of the vault's three Safes as one whole, with the mandate's rubrics: the first-loss Safe as a rubric outside the caps and the launch cap, and the orders account in the value but not in the buffer. It shows value per account, asset and protocol; each cap and the buffer against its limit, with headroom; the launch cap until the lift; budget left per key; open orders with their age and limit; pending motions with their deadlines; and the guard's state. It takes a reading at each Snapshot Date and fortnightly snapshot and publishes it (decisions 41 and 42). Its alerts go to a Lido Slack channel by webhook and do not page; Lido's own monitoring pages (decision 8). It refuses breaching operator transactions at signing (decision 43), requests the screening vendor's approval (OD-88, [ADR 010](/adr/010-pre-execution-screening.md)), and alerts on any change of the mandate's rules made in its interface (decision 44).
+- **The rule data.** One file in this repository carries the mandate's rules for both readings (decision 44): rubrics, assets by address, caps with bases (decision 9 for the yield-bearing cap), product tiers (decision 28), the three Safes, the buffer's base and the launch cap. A check in CI validates it. Figures enter when the mandate is approved.
 - **Attestation.** The computation ran on 2026-09-22 with pinned inputs and an independent attester, then again on 2026-10-02 with the literal base. Decision 32 requires a fixed yield-bearing figure after mandate approval. Results stay outside this repository until approval because inputs include unapproved terms.
 - **Approvals.** Each spender branch uses its own key; two spenders use two keys. On the Asset Safe, approve only the deposit amount in the same transaction, leaving no standing approval. Orders-account CoW approvals stand, are set by vote and cannot be raised by roles ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). Converter approvals for DAI/USDS use the stETH-to-wstETH fixed ceiling (decision 14; [ADR 011](/adr/011-launch-scope.md)). No withdrawal-queue approval is allowed (ADR 007, decision 27).
 - **Budget factory.** One branch per key bounds `balance`, `maxRefill` and `refill` by its ceiling and `period` below by 30 days. A kit test demonstrates native conditions [s4].
-- **Reports.** IPFS payloads contain balances, positions, exposures, ratio numerators/denominators, and each price's level, source and timestamp (decision 36). Monthly reports list all open orders ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 29). Reports show first-loss as a sub-allocation ([ADR 008](/adr/008-funding-through-existing-payments.md)). Report identifiers go in forum posts: fixed top-up payment references [s6] provide no on-chain anchor (decision 22).
+- **Reports.** IPFS payloads contain balances, positions, exposures, ratio numerators/denominators, and each price's level, source and timestamp (decision 36). Monthly reports list all open orders ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 29). Reports show first-loss as a sub-allocation ([ADR 008](/adr/008-funding-through-existing-payments.md)). Report identifiers go in forum posts: fixed top-up payment references [s6] provide no on-chain anchor (decision 22). The provider's report goes to IPFS too, and the post links both (decision 42).
 - **Monitoring responsibilities.** Lido monitors policy drift, approvals, budget burn, Safe changes and motions. The screening vendor covers depegs, protocol compromise and counterparty anomalies. Findings use existing notification and incident channels.
 - **Funding alerts.** Flag top-ups outside days 1–10 except the seed, monthly totals above the posted shortfall, and motions after an objected top-up ([ADR 008](/adr/008-funding-through-existing-payments.md)). Flag every budget motion and check its stated event.
 
@@ -180,6 +191,8 @@ The phase-1 detector specification gives each detector an ID, watched state, sev
 - First-loss balance, owner, module and singleton changes; every burn motion and first-loss-role action ([ADR 008](/adr/008-funding-through-existing-payments.md)).
 - Buffer versus floor (decision 27); new-product exposure versus protocol cap until unlock (decision 28); vendor-reported rule changes (decision 30).
 - Monthly reports missing on day 8; fortnightly IPFS cap readings (decision 25), paging emergency on decision 24's trigger (decision 34).
+- The two published readings compared at each snapshot; a top-up motion that starts while they differ by more than the band; a breach in the provider's reading counted for decision 24's trigger (decision 41).
+- A change of the mandate's rules made in the Zodiac UI (decision 44).
 
 ## Options considered
 
@@ -196,10 +209,15 @@ The phase-1 detector specification gives each detector an ID, watched state, sev
 - A 14-day refill floor: rejected because conditions cannot compare refill and period, doubling monthly refill.
 - Uncap Lido Lend after three calendar months (OD-04, OD-12): EM replaced by maturity criteria for all new Lido products (OD-41).
 - Buffer checks only in periodic readings: EM rejected under OD-40 because intervening breaches would be missed.
-- Third-party operating valuations: EM rejected under OD-44 because caps, top-ups and reports require pinned-block reproduction.
+- Third-party valuations alone: EM rejected under OD-44 because caps, top-ups and reports require pinned-block reproduction. Since 2026-10-20 the provider's reading counts next to Lido's, not instead of it (decision 41).
 - Omit unpriced assets: EM replaced on 2026-10-13 (decisions 35 and 36). Prices must remain available, and sources can be wrong as well as missing.
 - Unranked committee-chosen price sources: EM rejected because reports need a checkable rule.
-- Zodiac as canonical figures/alerts source: EM rejected under OD-44 and decision 38; it displays Lido's outputs.
+- Lido's readings and alerts shown in the Zodiac UI (decision 38, the record until 2026-10-20): replaced by EM, who did not want Lido's data in the provider's tools (decision 40).
+- Lido's reading as the record and the provider's as a check only (OD-84 A): EM chose both readings to count (decision 41).
+- The provider pins on its own account and Lido pins the same identifier (OD-85 B): not chosen by EM (decision 42).
+- A warning at signing with a typed confirmation (OD-86 B): not chosen by EM (decision 43).
+- A cap check on chain by the provider: not possible. The committee's Safe has one guard slot, which the screening vendor takes from the lift (OD-83), and only Easy Track factories may be new contracts.
+- Separate rule sets for the two readings (OD-87 B): not chosen by EM. One rule set makes the cross-check test data and prices, and a rule error is caught once, in review (decision 44).
 - Controls without a matrix: EM rejected under OD-39 because uncontrolled rules could remain invisible.
 
 ## Consequences
@@ -240,7 +258,13 @@ Further requirements:
 - Monitoring publishes fortnightly readings independently of the committee; anyone can reproduce them at the same block (decision 25).
 - Include all assets in vault value. Lower-level prices can still be wrong: top-up posts name prices below level 2, and top-ups wait if level 5 covers too much value (decision 36).
 - The generator needs a second aggregator, pinned-block Chainlink/pool prices and recorded level-5 inputs.
-- Zodiac display depends on the policy provider; canonical readings and alerts remain Lido's. Lido builds them if the provider declines (decisions 29 and 38).
+- The provider's reading depends on the policy provider; Lido's does not. Without the provider's reading, Lido's governs alone, and Lido builds the display of its own reading (decisions 29 and 41).
+- A breach in either reading triggers the switch (decision 41). A wrong price in one reading can therefore stop the operator. The band, the two working days and the larger breach at the next fortnightly snapshot (decision 24) bound that risk.
+- A difference above the band stops top-ups until the readings agree, so a wrong price in either reading delays funding.
+- Redundancy is full for balances and positions, which two indexers read. It is partial for prices: a wrapper can rest on the same upstream rate in both readings.
+- The refusal at signing is an interface gate (decision 43). Another Safe interface bypasses it; the published readings and, after the lift, the screening vendor still catch a breach.
+- A Lido pinning key sits in the provider's app. It can only pin, and Lido can revoke it (decision 42).
+- One rule set serves both readings, so an error in the rules affects both. Review of the rule data in this repository must catch it (decision 44).
 - Late reports stop top-ups. sUSDS funding immediately counts against the literal-base yield-bearing cap.
 
 ## Confirmation
@@ -261,4 +285,4 @@ No open decision closes in this record.
 
 <!-- end of generated block -->
 
-The committee's valuation policy owes the band of level 2 and the level-5 share (decision 37). Owed: the screening vendor's answer on which rules it can check before execution, and the policy provider's answer on the requirement list.
+The committee's valuation policy owes the band of level 2, the level-5 share (decision 37) and the band between the two readings (decision 41). Owed: the screening vendor's answer on which rules it can check before execution, and the policy provider's answer on the requirement list. The rule data of decision 44 is owed with the report generator.

@@ -72,7 +72,7 @@ owed:
   - "The committee's valuation policy sets the price waterfall's band and the share of the vault that its last level may price (OD-62)."
   - "[the screening vendor] confirms in writing that it accepts no standing approvals and agrees to be named."
   - "[the screening vendor] says which rules it can check before execution: the liquidity buffer, the caps, an order's limit and a router swap's minimum output."
-  - "The policy provider answers the list of what the Zodiac UI must show, Lido's alerts included (OD-44, OD-62)."
+  - "The policy provider answers the requirement list: its own reading of the three Safes, its reports on IPFS, its refusal at signing, the mandate's rules from this repository, and the screening vendor's approval in its signing flow (OD-44, OD-84 to OD-88)."
   - "[the screening vendor] also says whether it records rule changes and whether it can delay a relaxation."
   - "The mandate text owes twelve changes before the Snapshot vote."
   - "Fork tests owed: CoW's order signer and fallback handler on Safe v1.5.0 behind a Roles modifier, before the orders account is relied on; the Morpho Blue template end to end; the rewritten payment permission; the first-loss share move, the burn motion and the first-loss role; Aragon Voting's owner actions on the three Safes (OD-73)."

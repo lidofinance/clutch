@@ -287,9 +287,9 @@ flows:
     time: "72 hours, on days 1–10 of the month."
     steps:
       - who: "Committee"
-        text: "The committee publishes the monthly report, then posts the shortfall on the forum before the top-up."
+        text: "The committee publishes the monthly report, then posts the shortfall on the forum before the top-up. The post links both readings' reports (OD-85)."
         nodes: [committee, reporting]
-        check: "No top-up starts while the report is late, or while the committee's estimate prices more than the set share of the vault (OD-62). Until the launch cap lifts, the committee asks for a top-up only while the vault stays at or below the cap, and the post states the room left under it (OD-54)."
+        check: "No top-up starts while the report is late, while the committee's estimate prices more than the set share of the vault (OD-62), or while Lido's reading and the policy provider's differ by more than the band (OD-84). Until the launch cap lifts, the committee asks for a top-up only while the vault stays at or below the cap, and the post states the room left under it (OD-54)."
       - who: "Committee Safe"
         text: "The committee's Safe creates a top-up motion. The guard screens it, once the guard is set (OD-54)."
         nodes: [committee, screening, easytrack]
@@ -310,7 +310,7 @@ flows:
       - "An objection stops the top-up. The mandate then asks for a Snapshot vote."
       - "The registry refuses a payment above its remaining limit."
     sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d20", "ADR-008#proposed-direction",
-      "ADR-009#d19", "ADR-009#d21", "ADR-009#d36", OD-54, OD-62, INV-017, "runbook:Top up the vault",
+      "ADR-009#d19", "ADR-009#d21", "ADR-009#d36", "ADR-009#d41", "ADR-009#d42", OD-54, OD-62, OD-84, OD-85, INV-017, "runbook:Top up the vault",
       "runbook:Re-set a funding limit", "lip:part-5"]
 
   - id: seed
@@ -381,7 +381,7 @@ flows:
     group: reporting
     title: The fortnightly snapshot
     label: specified
-    summary: "Every two weeks, a reading of the vault at a pinned block drives the published cap reading. Budgets no longer follow it (OD-56)."
+    summary: "Every two weeks, two readings of the vault drive the published cap readings: Lido's, at a pinned block, and the policy provider's own. Budgets no longer follow them (OD-56)."
     trigger: "Every two weeks."
     steps:
       - who: "Monitoring"
@@ -391,10 +391,14 @@ flows:
       - who: "Monitoring"
         text: "It publishes the cap ratios to IPFS."
         nodes: [monitoring, reporting]
+      - who: "Policy provider"
+        text: "The Zodiac UI publishes its own reading of the same snapshot to IPFS, and monitoring compares the two (OD-84, OD-85)."
+        nodes: [policy, monitoring, reporting]
       - who: "Committee"
-        text: "If a cap is breached, the committee rebalances within two working days."
+        text: "If a cap is breached in either reading, the committee rebalances within two working days."
         nodes: [committee]
-    sources: ["ADR-009#d6", "ADR-009#d24", "ADR-009#d25", "ADR-009#d31", "ADR-009#d33", OD-32, OD-56, "lip:part-9"]
+    sources: ["ADR-009#d6", "ADR-009#d24", "ADR-009#d25", "ADR-009#d31", "ADR-009#d33", "ADR-009#d40", "ADR-009#d41", "ADR-009#d42",
+      OD-32, OD-56, OD-84, OD-85, "lip:part-9"]
 
   - id: monthly-report
     group: reporting
@@ -412,13 +416,13 @@ flows:
         text: "The committee reviews the report and publishes it on IPFS."
         nodes: [committee, reporting]
       - who: "Committee"
-        text: "The forum post cites the report's IPFS identifier. It is the report's only anchor."
+        text: "The forum post cites the report's IPFS identifier, and the policy provider's report next to it. The post is the reports' only anchor (OD-85)."
         nodes: [reporting]
       - who: "Monitoring"
         text: "If the report is late, no top-up starts. Monitoring flags it on day 8, and the committee explains the delay on the forum."
         nodes: [monitoring, funding]
-    sources: ["ADR-009#d2", "ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#d35", "ADR-009#d36", "ADR-007#d29",
-      OD-14, OD-61, OD-62, "lip:part-9"]
+    sources: ["ADR-009#d2", "ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#d35", "ADR-009#d36", "ADR-009#d42", "ADR-007#d29",
+      OD-14, OD-61, OD-62, OD-85, "lip:part-9"]
 
   - id: buffer-low
     group: reporting
@@ -437,14 +441,17 @@ flows:
         nodes: [screening, committee]
         edges: [screen]
         check: "Requested from the vendor, not confirmed."
+      - who: "Zodiac UI"
+        text: "The UI's signing flow refuses an operator transaction that would take the buffer below its floor, in its own interface only (OD-86)."
+        nodes: [policy, committee]
       - who: "Committee"
         text: "The committee restores the buffer: it exits a position, or sells through a CoW order into a stablecoin."
         nodes: [committee, operator-modifier, asset-safe, protocols, orders]
         edges: [op-role, own-op, positions, swaps]
       - who: "Reporting"
-        text: "Every report shows the buffer against its floor, and the Zodiac UI is asked to show it too."
+        text: "Every report of both readings shows the buffer against its floor (OD-84)."
         nodes: [reporting, policy]
-    sources: ["ADR-009#d27", "ADR-009#d29", "ADR-009#proposed-direction", OD-40, OD-44,
+    sources: ["ADR-009#d27", "ADR-009#d29", "ADR-009#d40", "ADR-009#d43", "ADR-009#proposed-direction", OD-40, OD-44, OD-84, OD-86,
       "runbook:Restore the liquidity buffer", "doc:docs/specs/control-matrix.md#the-matrix"]
 
   # --- Emergencies --------------------------------------------------------------------------------
@@ -564,11 +571,11 @@ flows:
     title: A cap breach that gets worse
     label: specified
     summary: "No contract reverts on a cap. Monitoring publishes the breach, the committee fixes it, and the emergency Safe stops the operator if the breach gets worse."
-    trigger: "A fortnightly cap reading shows a breach."
+    trigger: "A fortnightly cap reading, Lido's or the policy provider's, shows a breach."
     time: "Two working days to fix, then the next fortnightly snapshot."
     steps:
       - who: "Monitoring"
-        text: "Monitoring publishes the cap reading to IPFS. The reading shows a breach."
+        text: "Monitoring publishes Lido's cap reading to IPFS, and the policy provider publishes its own. A breach in either reading counts (OD-84)."
         nodes: [monitoring, reporting]
       - who: "Committee"
         text: "The committee has two working days to rebalance."
@@ -581,8 +588,8 @@ flows:
         text: "The emergency Safe switches the Asset Safe's operator modifier off. Once the orders account exists, it also revokes the operator there (OD-58). The trigger is fixed, so the duty needs no judgment."
         nodes: [emergency-safe, safety-modifier, asset-safe, operator-modifier, orders]
         edges: [em-role, own-sf]
-    sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d25", "ADR-009#d33", "ADR-009#d34", "ADR-005#d25",
-      OD-29, OD-32, OD-58, "runbook:Switch the operator off"]
+    sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d25", "ADR-009#d33", "ADR-009#d34", "ADR-009#d41", "ADR-005#d25",
+      OD-29, OD-32, OD-58, OD-84, "runbook:Switch the operator off"]
 
   - id: vendor-outage
     group: emergencies
@@ -596,6 +603,9 @@ flows:
         text: "Every transaction of the committee's Safe reverts, because no approval arrives: operator transactions, new motions and the committee's other duties."
         nodes: [screening, committee]
         edges: [screen]
+      - who: "Monitoring"
+        text: "Monitoring alerts when a transaction of the committee's Safe waits for the approval longer than the set time (OD-88)."
+        nodes: [monitoring, committee]
       - who: "Emergency Safe"
         text: "It acts as before. No guard screens it."
         nodes: [emergency-safe, safety-modifier]
@@ -607,8 +617,8 @@ flows:
         text: "The DAO can also give the operator role to another Safe by vote."
         nodes: [dao, asset-safe]
         edges: [own]
-    sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#d22", "ADR-010#proposed-direction", OD-54,
-      "runbook:Remove the screening guard", "runbook:Move the operator role to another Safe", OD-83]
+    sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#d22", "ADR-010#d26", "ADR-010#proposed-direction", OD-54,
+      "runbook:Remove the screening guard", "runbook:Move the operator role to another Safe", OD-83, OD-88]
 
   - id: unsafe-motion
     group: emergencies
@@ -693,7 +703,7 @@ flows:
         text: "The specifications and the detector specification, the control matrix and the screening rule list with the vendor's questions, the Zodiac UI requirement list, the orders account's fork tests, the runbook drafts and the Lido Zodiac workspace."
         nodes: [policy, monitoring, screening, orders]
       - who: "Phase 2: build"
-        text: "The round-trip check, the orders account and its permissions, the first-loss Safe with its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the readings that the Zodiac UI shows, and the invariant-to-test check."
+        text: "The round-trip check, the orders account and its permissions, the first-loss Safe with its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the mandate's rule data, the comparison of the two readings, and the invariant-to-test check."
         nodes: [policy, orders, first-loss, easytrack, funding, reporting, monitoring]
       - who: "Phase 3: assurance"
         text: "An external audit, Lido's review of the guard change and of CoW's order signer, and fork drills that initiate within 6 hours."

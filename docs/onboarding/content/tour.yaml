@@ -70,13 +70,13 @@
     "ADR-005#d30"]
 
 - title: Caps are watched, not enforced
-  text: "No contract reverts on a [[cap]] or on the [[liquidity buffer]]. Monitoring watches the buffer all the time and publishes the cap reading to IPFS every two weeks. Each month, the committee publishes a report that anyone can reproduce.\n\nIf a breach is not fixed within two working days and is larger at the next reading, monitoring pages the emergency Safe, which switches the operator off. The [[control matrix]] lists each rule's controls on every layer."
-  tech: "The cap reading is the report generator's output at the fortnightly snapshot's pinned block, published to IPFS. The alert that pages the emergency Safe links it (OD-32, OD-58)."
+  text: "No contract reverts on a [[cap]] or on the [[liquidity buffer]]. Monitoring watches the buffer all the time and publishes the cap reading to IPFS every two weeks, and the policy provider publishes its own reading of the vault; a breach in either counts. The Zodiac UI refuses an operator transaction that would breach a cap, but only in its own interface. Each month, the committee publishes a report that anyone can reproduce.\n\nIf a breach is not fixed within two working days and is larger at the next reading, monitoring pages the emergency Safe, which switches the operator off. The [[control matrix]] lists each rule's controls on every layer."
+  tech: "The cap reading is the report generator's output at the fortnightly snapshot's pinned block, published to IPFS. The alert that pages the emergency Safe links it (OD-32, OD-58). The two readings use the same rule data from this repository (OD-84, OD-86, OD-87)."
   nodes: [monitoring, reporting, asset-safe, emergency-safe, committee]
   edges: [watch, report, page]
   flows: [fortnightly, monthly-report, buffer-low, cap-breach]
   sources: ["ADR-009#d1", "ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d26", "ADR-009#d27", "ADR-009#d33",
-    "ADR-009#d34", OD-29, OD-32, OD-39, OD-40, OD-58]
+    "ADR-009#d34", "ADR-009#d40", "ADR-009#d41", "ADR-009#d43", "ADR-009#d44", OD-29, OD-32, OD-39, OD-40, OD-58, OD-84, OD-86, OD-87]
 
 - title: Little new code, and where it stands
   text: "Clutch reuses deployed code that already runs: Safe, Zodiac Roles, Easy Track, CoW's order contracts and Lido's monitoring. It adds Easy Track factories, the permission policy with its compiler, the vault's detectors and a report generator.\n\nToday the design is in phase 0. Nothing is deployed, no audit is done and no runbook is written. The **Built or reused** and **Status** tabs show each part."

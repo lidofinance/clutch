@@ -569,3 +569,41 @@
   replaces:
     - {od: OD-01, part: true}
   refines: [OD-80]
+- id: OD-84
+  question: "Which reading of the vault counts: Lido's, the policy provider's, or both?"
+  closed: 2026-10-20
+  log:
+    - "2026-10-20 — OD-84 to OD-88: two readings, the provider's reports and its checks"
+  adr: [ADR-009#d40, ADR-009#d41]
+  replaces:
+    - {od: OD-44, part: true}
+    - {od: OD-62, part: true}
+- id: OD-85
+  question: "How do the policy provider's reports reach IPFS?"
+  closed: 2026-10-20
+  log:
+    - "2026-10-20 — OD-84 to OD-88: two readings, the provider's reports and its checks"
+  adr: [ADR-009#d42]
+  refines: [OD-14]
+- id: OD-86
+  question: "What does the Zodiac UI do at signing when a transaction would breach a cap or the liquidity buffer's floor?"
+  closed: 2026-10-20
+  log:
+    - "2026-10-20 — OD-84 to OD-88: two readings, the provider's reports and its checks"
+  adr: [ADR-009#d43]
+  replaces:
+    - {od: OD-44, part: true}
+- id: OD-87
+  question: "Where do the two readings get the mandate's rules, and how does a change reach the policy provider?"
+  closed: 2026-10-20
+  log:
+    - "2026-10-20 — OD-84 to OD-88: two readings, the provider's reports and its checks"
+  adr: [ADR-009#d44]
+  refines: [OD-84]
+- id: OD-88
+  question: "What does the screening vendor's integration still lack: the approval in the Zodiac UI's signing flow, and an alert on a late approval?"
+  closed: 2026-10-20
+  log:
+    - "2026-10-20 — OD-84 to OD-88: two readings, the provider's reports and its checks"
+  adr: [ADR-010#d25, ADR-010#d26]
+  refines: [OD-83]

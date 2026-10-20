@@ -85,9 +85,9 @@
     - "Yes, but only for stablecoins"
     - "Yes, Easy Track checks it"
   answer: 1
-  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the emergency Safe to switch the operator off. Screening may also refuse an operator transaction that breaches a cap, if the vendor confirms that it can check that."
-  sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d33", "ADR-009#d34", "ADR-009#proposed-direction", OD-29,
-    OD-58]
+  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the emergency Safe to switch the operator off. The Zodiac UI refuses to build an operator transaction that would breach a cap, but only in its own interface (OD-86). Screening may also refuse an operator transaction that breaches a cap, if the vendor confirms that it can check that."
+  sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d33", "ADR-009#d34", "ADR-009#d43", "ADR-009#proposed-direction", OD-29,
+    OD-58, OD-86]
 
 - id: operator-threshold
   question: "A colleague says that the committee's Safe signs at 3 of 5. Where do you check?"
