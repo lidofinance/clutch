@@ -141,9 +141,9 @@ sections:
         sources: ["ADR-009#d4", "ADR-009#d9", "ADR-011#d1"]
       - asked: "The answer explains which limits hold before execution and which depend on reporting and remediation."
         verdict: kept
-        clutch: "No limit reverts on chain, because the policy cannot see value. Budgets per spender bound how much can move each month, a screening rule is requested that refuses an operator transaction that breaks a cap, and monitoring publishes the cap reading every two weeks. If a breach is not fixed within two working days and is larger at the next reading, the emergency Safe switches the operator off (OD-58)."
-        sources: ["ADR-009#d1", "ADR-009#d13", "ADR-009#d24", "ADR-009#d25", "ADR-009#proposed-direction", OD-29, OD-32,
-          OD-39, "doc:docs/specs/control-matrix.md#the-matrix", OD-58]
+        clutch: "No limit reverts on chain, because the policy cannot see value. Budgets per spender bound how much can move each month, a screening rule is requested that refuses an operator transaction that breaks a cap, and the Zodiac UI refuses one in its own interface (OD-86). Monitoring publishes the cap reading every two weeks, next to the policy provider's own, and a breach in either counts (OD-84). If a breach is not fixed within two working days and is larger at the next reading, the emergency Safe switches the operator off (OD-58)."
+        sources: ["ADR-009#d1", "ADR-009#d13", "ADR-009#d24", "ADR-009#d25", "ADR-009#d41", "ADR-009#d43", "ADR-009#proposed-direction",
+          OD-29, OD-32, OD-39, "doc:docs/specs/control-matrix.md#the-matrix", OD-58, OD-84, OD-86]
       - asked: "The Operator Safe cannot add a target, a function, an asset or a wider parameter range without the governance process."
         verdict: kept
         clutch: "The operator holds no administration function, and only motions and DAO votes write its permissions. A fork test checks that the operator cannot widen its own scope or reach administration."
@@ -203,10 +203,10 @@ sections:
         sources: ["ADR-009#d8", "ADR-009#d17", "ADR-009#proposed-direction", OD-13]
       - asked: "Each operator transaction is simulated and checked before execution, and the answer names the service that checks it."
         verdict: changed
-        clutch: "From the lift of the launch cap, the screening vendor checks each operator transaction before it runs. Its transaction guard on the committee's Safe refuses any transaction that the vendor did not approve on chain, once (OD-83). Every motion is screened too, because that Safe creates it. Until the cap lifts, the vault runs without the guard under a cap of one million dollars, which the committee keeps by procedure. The repository does not record whether the vendor simulates each transaction."
+        clutch: "From the lift of the launch cap, the screening vendor checks each operator transaction before it runs. Its transaction guard on the committee's Safe refuses any transaction that the vendor did not approve on chain, once (OD-83). Every motion is screened too, because that Safe creates it. Until the cap lifts, the vault runs without the guard under a cap of one million dollars, which the committee keeps by procedure. The repository does not record whether the vendor simulates each transaction. From the launch, the Zodiac UI's signing flow refuses an operator transaction that would breach a cap or the buffer's floor, in its own interface only (OD-86), and from the lift it requests the vendor's approval for each transaction it builds (OD-88)."
         why: "EM allowed a launch without the guard under this cap, so the vendor is not on the launch's critical path. Above the cap, blocking before execution stays a hard requirement."
         sources: ["ADR-010#d1", "ADR-010#d4", "ADR-010#d9", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22",
-          "ADR-010#proposed-direction", OD-01, OD-54, OD-55, INV-010, "lip:part-9", OD-83]
+          "ADR-010#proposed-direction", "ADR-010#d25", "ADR-009#d43", OD-01, OD-54, OD-55, INV-010, "lip:part-9", OD-83, OD-86, OD-88]
       - asked: "The answer explains what happens when the monitoring or blocking service is unavailable. On-chain permissions stay the final enforcement layer, and losing monitoring never widens them."
         verdict: kept
         clutch: "The guard fails closed: the operator, new motions and the committee's other duties on its Safe stop, and recovery is unaffected (OD-83). The owners can remove the guard after ten days. If monitoring stops, the permissions on chain still hold and do not widen."
@@ -221,15 +221,15 @@ sections:
     items:
       - asked: "The NAV shows the total in USD, the valuation time and the freshness of the data, by asset, protocol, strategy and position. The answer says whether NAV is the provider's product, a partner's or custom work."
         verdict: changed
-        clutch: "Lido's report generator makes the canonical figures at a pinned block, with each price's source and timestamp. The Zodiac UI shows the value per account, asset and protocol from Lido's readings, labels a live value as indicative, and warns before signing. Lido builds the readings, and the policy provider gets a written requirement list."
-        why: "Anyone must be able to re-run every figure, so the canonical readings are Lido's own, and the UI only shows them."
-        sources: ["ADR-009#d19", "ADR-009#d29", "ADR-009#proposed-direction", OD-14, OD-44, "ADR-009#d35",
-          "ADR-009#d36"]
+        clutch: "Two readings. Lido's report generator reads the vault at a pinned block, with each price's source and timestamp. The policy provider makes its own reading in the Zodiac UI, with the same rules, and shows the value per account, asset and protocol. Neither reads the other's data, both go to IPFS, and both count: a breach in either triggers the switch, and no top-up starts while they differ by more than a band."
+        why: "Two independent readings check each other, and anyone can re-run Lido's at a pinned block."
+        sources: ["ADR-009#d19", "ADR-009#d40", "ADR-009#d41", "ADR-009#d42", "ADR-009#d44", "ADR-009#proposed-direction",
+          OD-14, OD-84, OD-85, OD-87, "ADR-009#d35", "ADR-009#d36"]
       - asked: "The launch design permits no debt, but the NAV still detects and shows any unexpected liability."
         verdict: owed
         clutch: "No role can borrow, so the design has no source of debt. The report and the Zodiac UI's requirement list do not name a liability line yet."
         sources: ["ADR-009#proposed-direction", "doc:docs/specs/control-matrix.md#the-matrix"]
-    sources: ["doc:docs/research/request-for-solution-2026-10-07.md#net-asset-value", "ADR-009#d19", "ADR-009#d29"]
+    sources: ["doc:docs/research/request-for-solution-2026-10-07.md#net-asset-value", "ADR-009#d19", "ADR-009#d40"]
 
   - id: independence
     title: Provider independence
@@ -259,9 +259,10 @@ sections:
       - text: "Budgets: each approval to a protocol spender spends that spender's budget key, which refills no more often than every 30 days."
         why: "A spender can pull an approval without any deposit, so the approval is what must be bounded."
         sources: ["ADR-009#d13", "ADR-009#d15", OD-08, INV-008, INV-012]
-      - text: "Reports: a monthly report that anyone can re-run at a pinned block, and a cap reading every two weeks on IPFS."
-        why: "Tokenholders hold the committee to the mandate through its reports, and a breach in the cap reading is what makes the emergency Safe switch the operator off."
-        sources: ["ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", OD-14, OD-32, OD-58]
+      - text: "Reports: a monthly report that anyone can re-run at a pinned block, and a cap reading every two weeks on IPFS. The policy provider publishes its own reading next to Lido's, with the same rules, and both count."
+        why: "Tokenholders hold the committee to the mandate through its reports, and a breach in either cap reading is what makes the emergency Safe switch the operator off. Two independent readings check each other."
+        sources: ["ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", "ADR-009#d40", "ADR-009#d41", "ADR-009#d42", OD-14, OD-32,
+          OD-58, OD-84, OD-85]
       - text: "A control matrix that gives every rule of the mandate a control on each layer that can carry it, with an owner."
         why: "Much of the mandate cannot be enforced on chain, so each rule needs a named control and owner."
         sources: ["ADR-009#d26", OD-39, "doc:docs/specs/control-matrix.md#the-matrix"]

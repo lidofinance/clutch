@@ -3,6 +3,7 @@
 ## 2026-10-20
 
 * **Update**: Recorded EM's verification of ADR 001 to ADR 004 after the edits of pull request #41, at EM's written instruction, and EM's approval of the YT registration as a decision proposer and page verifier.
+* **Decision**: Recorded EM's decisions of 2026-10-20 on the two readings of the vault. EM corrected the record of OD-44 and OD-62: Lido's data does not feed the policy provider's tools; the provider makes its own reading, Lido makes its own, and both count (OD-84). The provider's reports go to IPFS with a revocable Lido pinning key set in Lido's account (OD-85); the Zodiac UI refuses an operator transaction that breaches a cap or the buffer's floor, in its interface only (OD-86); both readings use the mandate's rules as data from this repository (OD-87); and from the lift the Zodiac UI requests the screening vendor's approval, with an alert on a late approval (OD-88). Updated ADR 009, ADR 010, the control matrix, the parameters, the LIP draft, the roadmap and the guide.
 
 ## 2026-10-19
 
