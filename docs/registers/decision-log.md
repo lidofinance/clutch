@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-20T18:50:17Z
+  at: 2026-10-21T15:57:51Z
 verified: []
 sources:
   - id: s1
@@ -52,6 +52,9 @@ sources:
   - id: s14
     resource: "urn:clutch:interview:2026-10-20"
     title: EM's correction of the record of OD-44 and OD-62, EM's answers on the two readings, EM's verification of ADR 001 to ADR 004, and EM's answer on the YT registration, 2026-10-20; the transcript is not in the repository
+  - id: s15
+    resource: "urn:clutch:interview:2026-10-21"
+    title: EM's request to update pull request #42, 2026-10-21; the transcript is not in the repository
 ---
 
 # Decision log
@@ -61,6 +64,16 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-21 — AGENTS.md names YT
+
+After pull request #41 merged, EM asked:
+
+> I merged #41, now update my https://github.com/lidofinance/clutch/pull/42 to fix inconsistencies and open things
+
+Recorded as:
+
+- EM's request is the explicit request that `AGENTS.md` needs before an agent edits it ([ADR 003](/adr/003-agent-operating-model.md)). The agent changed one rule to match the registration of `human:yt` of 2026-10-20: the only names used are EM and YT, the two people that `config/actors.yaml` lists. [s15]
 
 ## 2026-10-20 — ADR 001 to ADR 004 verified again, and YT registered
 

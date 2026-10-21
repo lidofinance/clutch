@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-21
+
+* **Update**: Fixed three inconsistencies after pull request #41: AGENTS.md now names EM and YT, at EM's request; the guide's banner no longer says that the public repository is not public; and the guide's phase-2 line names the mandate's rule data and the comparison of the two readings.
+
 ## 2026-10-20
 
 * **Update**: Recorded EM's verification of ADR 001 to ADR 004 after the edits of pull request #41, at EM's written instruction, and EM's approval of the YT registration as a decision proposer and page verifier.

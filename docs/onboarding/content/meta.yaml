@@ -5,7 +5,7 @@ banner: >-
   **Hypothetical draft.** This page shows a design under discussion for an active treasury vault of the Lido DAO.
   Nothing is deployed, and nothing is ratified: no Lido body has approved it, and it authorises no action. Every
   number, address and parameter is a draft that can change. It is not financial, legal or investment advice. Every
-  element carries its status, and every claim links to its source in the repository, which is not public yet.
+  element carries its status, and every claim links to its source in the public repository.
 outcomes:
   - "Name who can move the vault's funds, and who can stop them."
   - "Walk any emergency to its first action, and say how long it takes."
@@ -78,7 +78,7 @@ owed:
   - "Fork tests owed: CoW's order signer and fallback handler on Safe v1.5.0 behind a Roles modifier, before the orders account is relied on; the Morpho Blue template end to end; the rewritten payment permission; the first-loss share move, the burn motion and the first-loss role; Aragon Voting's owner actions on the three Safes (OD-73)."
   - "Figures owed from the attested computation once the mandate is approved: the budgets, the orders budgets, the funding limits and the liquidity buffer."
   - "The mandate's drafters owe the holder and the form of the Twyne position."
-  - "Phase 2 builds the round-trip check, the orders account and its permissions, the first-loss Safe and its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the readings that the Zodiac UI shows, and the invariant-to-test check."
+  - "Phase 2 builds the round-trip check, the orders account and its permissions, the first-loss Safe and its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the mandate's rule data, the comparison of the two readings, and the invariant-to-test check."
   - "No runbook is written yet. Each needs a fork drill before it counts."
   - "The production deployment script is not written yet. The enabling-vote page lists what the one vote holds."
 footer: |-
