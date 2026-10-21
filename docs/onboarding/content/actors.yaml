@@ -18,6 +18,7 @@
     - "Act in an emergency through its two seats on the emergency Safe, at 3 of 5 with two Emergency Brakes members and one member of neither body (OD-58)."
     - "Configure the vault's rules in [the screening vendor]'s monitoring service."
     - "Review and publish the monthly report, and fix a [[cap]] breach within two working days."
+    - "Explain on the forum a difference above the band between Lido's reading and the policy provider's; no top-up starts until they agree (OD-84)."
     - "Restore the [[liquidity buffer]] within the mandate's window when it falls below its floor (OD-40)."
     - "Unlock a matured Lido product by a forum post and a budget motion (OD-41)."
     - "Accept decision records as the permanent acceptor, after EM's interim period."
@@ -34,10 +35,10 @@
   address: "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647"
   sources: ["ADR-005#d9", "ADR-005#d21", "ADR-005#d24", "ADR-005#d26", "ADR-005#d27", "ADR-005#d31",
     "ADR-005#proposed-direction", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-009#d6", "ADR-009#d18",
-    "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10",
+    "ADR-009#d19", "ADR-009#d24", "ADR-009#d27", "ADR-009#d28", "ADR-009#d41", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10",
     "ADR-010#d19", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "ADR-010#d23", "ADR-010#proposed-direction",
     "ADR-006#d3", "ADR-006#proposed-direction", "ADR-007#d18", "ADR-002#d1", INV-010, OD-40, OD-41, OD-45, OD-54, OD-58,
-    OD-59, OD-60, OD-64, OD-67, OD-80, OD-83, "doc:docs/registers/parameters.md#parameters",
+    OD-59, OD-60, OD-64, OD-67, OD-80, OD-83, OD-84, "doc:docs/registers/parameters.md#parameters",
     "doc:docs/research/chain-reads-2026-09-30.md#committees", OD-55]
 
 # --- Lido DAO ----------------------------------------------------------------------------------
@@ -593,20 +594,23 @@
   name: Zodiac app and the Lido workspace
   status: mixed
   label: planned
-  what: "The policy provider's hosted app. The team pushes the constellation to a Lido workspace there. The app shows the account graph, the policy, the difference from the chain and the transactions that a change needs. Lido gives the provider a written list of what the UI must also show, from Lido's readings and Lido's alerts, and Lido builds that display and monitoring itself if the provider declines (OD-44, OD-62)."
+  what: "The policy provider's hosted app. The team pushes the constellation to a Lido workspace there. The app shows the account graph, the policy, the difference from the chain and the transactions that a change needs. The app also makes the provider's own reading of the vault's three Safes, with the mandate's rules from this repository; Lido makes its own reading, and neither reads the other's data (OD-84, OD-87)."
   controlled_by: "The app: the policy provider. The workspace and its key: `@lidofinance/defi-tech` (OD-35). The committee can view it (OD-64)."
   can:
     - "Show the system and its drift in a UI."
+    - "Show its own reading of the three Safes as one whole, with the mandate's rubrics, and publish its reports to IPFS with Lido's pinning key (OD-84, OD-85)."
+    - "Refuse, in its signing flow, an operator transaction that would breach a cap or the [[liquidity buffer]]'s floor (OD-86)."
+    - "From the lift, send each transaction of the committee's Safe that it builds to [the screening vendor] for approval, and show the approval state (OD-88)."
     - "Take a push from a team member, from the merged `main`, with the key in a local file that git ignores."
   cannot:
-    - "Change the policy. A change made in the UI is drift."
+    - "Change the policy or the mandate's rules. A change made in the UI is drift (OD-87)."
     - "Give signers, a vote or a motion a transaction, unless Clutch's compiler makes the same calls from the same commit."
     - "Set a Safe's version, guard or fallback handler."
     - "Be used by CI or by an agent. Neither holds the key."
-    - "Show the vault's value today. The hosted app shows no balances, value or alerts. The list asks for the value per account, asset and protocol, the [[liquidity buffer]], each cap, the budget left, open orders, pending motions, Lido's alerts, and warnings before signing."
-    - "Make a third party's live value count. Such a value is labelled as indicative and never feeds a cap, a top-up or a report (OD-44)."
-  sources: ["ADR-004#d10", "ADR-004#d11", "ADR-004#d16", "ADR-004#d17", "ADR-009#d29", "ADR-009#d38", "ADR-009#proposed-direction",
-    OD-33, OD-35, OD-44, OD-62, OD-64,
+    - "Stop a signer who uses another Safe interface. Its refusal at signing is a gate in its own interface (OD-86)."
+    - "Read Lido's data. The two readings stay independent (OD-84)."
+  sources: ["ADR-004#d10", "ADR-004#d11", "ADR-004#d16", "ADR-004#d17", "ADR-009#d29", "ADR-009#d40", "ADR-009#d42", "ADR-009#d43",
+    "ADR-009#d44", "ADR-009#proposed-direction", "ADR-010#d25", OD-33, OD-35, OD-44, OD-64, OD-84, OD-85, OD-86, OD-87, OD-88,
     "doc:docs/research/zodiac-constellation-2026-10-06.md#2-what-runs-locally-and-what-only-the-hosted-app-runs",
     "doc:docs/research/cow-orders-account-2026-10-06.md#the-hosted-zodiac-app"]
 
@@ -981,7 +985,9 @@
     - "Page at high severity on every emergency swap (OD-48)."
     - "Follow a new Lido product's exposure against the protocol cap until a motion unlocks it, and record the changes of the screening rules that the vendor reports (OD-41, OD-45)."
     - "Follow every motion, flag odd top-ups and repeated budget motions, and grade emergency actions."
-    - "Publish the cap reading of each [[fortnightly snapshot]] to IPFS, and page the emergency Safe on the cap-breach trigger (OD-58)."
+    - "Publish the cap reading of each [[fortnightly snapshot]] to IPFS, and page the emergency Safe on the cap-breach trigger, met in either reading (OD-58, OD-84)."
+    - "Compare Lido's published readings with the policy provider's at each snapshot, and flag a top-up motion that starts while they differ by more than the band (OD-84)."
+    - "Alert on a change of the mandate's rules made in the Zodiac UI (OD-87), and on a transaction of the committee's Safe that waits too long for [the screening vendor]'s approval (OD-88)."
     - "Flag a monthly report that is still missing on day 8."
   cannot:
     - "Block a transaction. If it stops, no permission widens."
@@ -989,7 +995,8 @@
   sources: ["ADR-009#d1", "ADR-009#d7", "ADR-009#d17", "ADR-009#d21", "ADR-009#d24", "ADR-009#d25", "ADR-009#d27",
     "ADR-009#d28", "ADR-009#d30", "ADR-009#proposed-direction", "ADR-010#d12", "ADR-010#d18", "ADR-007#d24",
     "ADR-007#d26", "ADR-007#d29", "ADR-007#proposed-direction", "ADR-009#d34", "ADR-008#proposed-direction", OD-13,
-    OD-32, OD-40, OD-41, OD-42, OD-43, OD-45, OD-48, OD-49, OD-58, OD-60, OD-61, OD-67, "doc:ROADMAP.md#roadmap"]
+    OD-32, OD-40, OD-41, OD-42, OD-43, OD-45, OD-48, OD-49, OD-58, OD-60, OD-61, OD-67, "ADR-009#d41", "ADR-009#d44",
+    "ADR-010#d26", OD-84, OD-87, OD-88, "doc:ROADMAP.md#roadmap"]
 
 - id: vendor-monitoring
   node: monitoring
@@ -1032,12 +1039,13 @@
     - "Show the first-loss Safe as a sub-allocation of the vault."
     - "Show the liquidity buffer against its floor in every report (OD-40)."
     - "Count a new Lido product in the protocol cap until a motion unlocks it (OD-41)."
+    - "Read the mandate's rules from the rule data in this repository, the same rules that the policy provider's reading uses (OD-87)."
   cannot:
     - "Carry an old price over silently. A price older than 24 hours counts as missing."
     - "Anchor a report on chain."
   numbers: ["monthly report: within 7 days after month-end", "incident report: within 72 h", "build: phase 2"]
   sources: ["ADR-009#d19", "ADR-009#d22", "ADR-009#d25", "ADR-009#d27", "ADR-009#d28", "ADR-009#d35", "ADR-009#d36",
-    "ADR-009#proposed-direction", "ADR-007#d29", OD-14, OD-32, OD-40, OD-41, OD-61, OD-62, "lip:part-9"]
+    "ADR-009#proposed-direction", "ADR-009#d44", "ADR-007#d29", OD-14, OD-32, OD-40, OD-41, OD-61, OD-62, OD-87, "lip:part-9"]
 
 - id: ipfs-forum
   node: reporting
@@ -1047,11 +1055,11 @@
   what: "Where reports and readings live. IPFS stores each report by its content. The forum post is the only anchor of a report's identifier."
   controlled_by: "IPFS: content addressing. The forum: Lido's research forum."
   can:
-    - "Hold the monthly reports and the fortnightly cap readings."
+    - "Hold the monthly reports and the fortnightly cap readings, Lido's and the policy provider's; the forum post links both (OD-85)."
     - "Carry the disclosure before each motion, the post after each revoke, the post before each top-up, and the mandate."
   cannot:
     - "Give the guarantee of a chain. No report is anchored on chain."
-  sources: ["ADR-009#d2", "ADR-009#d19", "ADR-009#d22", "ADR-009#d25", "ADR-006#d4", "ADR-006#d7", "ADR-008#proposed-direction"]
+  sources: ["ADR-009#d2", "ADR-009#d19", "ADR-009#d22", "ADR-009#d25", "ADR-009#d42", "ADR-006#d4", "ADR-006#d7", "ADR-008#proposed-direction", OD-85]
 
 - id: coingecko
   node: reporting

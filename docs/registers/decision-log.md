@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-20T18:46:55Z
+  at: 2026-10-21T15:57:51Z
 verified: []
 sources:
   - id: s1
@@ -51,7 +51,10 @@ sources:
     title: EM's question on the operator Safe and EM's answer, 2026-10-15; the transcript is not in the repository
   - id: s14
     resource: "urn:clutch:interview:2026-10-20"
-    title: EM's verification of ADR 001 to ADR 004 and EM's answer on the YT registration, 2026-10-20; the transcript is not in the repository
+    title: EM's correction of the record of OD-44 and OD-62, EM's answers on the two readings, EM's verification of ADR 001 to ADR 004, and EM's answer on the YT registration, 2026-10-20; the transcript is not in the repository
+  - id: s15
+    resource: "urn:clutch:interview:2026-10-21"
+    title: EM's request to update pull request #42, 2026-10-21; the transcript is not in the repository
 ---
 
 # Decision log
@@ -61,6 +64,16 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-21 — AGENTS.md names YT
+
+After pull request #41 merged, EM asked:
+
+> I merged #41, now update my https://github.com/lidofinance/clutch/pull/42 to fix inconsistencies and open things
+
+Recorded as:
+
+- EM's request is the explicit request that `AGENTS.md` needs before an agent edits it ([ADR 003](/adr/003-agent-operating-model.md)). The agent changed one rule to match the registration of `human:yt` of 2026-10-20: the only names used are EM and YT, the two people that `config/actors.yaml` lists. [s15]
 
 ## 2026-10-20 — ADR 001 to ADR 004 verified again, and YT registered
 
@@ -72,6 +85,31 @@ Recorded as:
 
 - EM verifies ADR 001 to ADR 004 again after the edits of pull request #41, so they stay accepted. At this instruction, the agent recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verifications are EM's.
 - EM allows the registration of `human:yt` as a decision proposer and page verifier. ADR acceptance stays with EM and the committee ([ADR 002](/adr/002-decision-and-review-process.md)). EM's answer is the explicit request that `config/actors.yaml` needs ([ADR 003](/adr/003-agent-operating-model.md)). [s14]
+
+## 2026-10-20 — OD-84 to OD-88: two readings, the provider's reports and its checks
+
+EM wrote, on the record that the Zodiac UI shows Lido's readings and alerts:
+
+> I didn't want to feed their tools with our data, I meant that they have their version, and we have ours so that it's a cross-check and redundancy is justified
+
+EM's answer of 2026-10-13 to the first question on OD-62 was "keep OD-44, still add more demand from Zodiac UI to have display and monitoring there". The agent recorded it as Lido's alerts shown in the Zodiac UI, next to Lido's readings ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 38). EM's words above say that this was not meant.
+
+The agent asked five questions: which reading governs when the two readings differ (Q1); how the policy provider's reports reach IPFS (Q2); what the Zodiac UI does at signing (Q3); where the provider gets the mandate's rules (Q4); and what the screening vendor's integration still lacks (Q5). EM answered:
+
+> Q1: B
+> Q2: A, can be an admin setting for our account
+> Q3: A
+> Q4: A
+> Q5: A
+
+Recorded as, by question:
+
+- (Q1, OD-84) Two readings watch the vault: Lido's, from the report generator and monitoring, and the policy provider's own, in the Zodiac UI. Neither reads the other's data. Both count: a cap breach in either published reading is a published cap breach for the switch's trigger, and no top-up motion starts while the two readings differ by more than a band. The committee's valuation policy sets the band. This replaces OD-44 in part and the first answer of OD-62 ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 40 and 41).
+- (Q2, OD-85) The policy provider publishes its reports to IPFS with a pin-only key of a separate Lido pinning project, which Lido can revoke. The key is an admin setting of Lido's account in the Zodiac UI. The forum post links both reports ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 42).
+- (Q3, OD-86) The Zodiac UI's signing flow refuses an operator transaction that would breach a cap, or take the liquidity buffer below its floor, at its post-transaction state by the provider's reading. It never refuses an emergency, recovery or DAO transaction. The gate is in the interface only. This replaces the warnings before signing of OD-44 ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 43).
+- (Q4, OD-87) This repository holds the mandate's rules as data, and both readings use them. `@lidofinance/defi-tech` sends each version to the provider after the Snapshot vote, motion or vote that changes a rule. A change made in the Zodiac UI is drift ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 44).
+- (Q5, OD-88) From the lift of the launch cap, the Zodiac UI's signing flow sends each transaction of the committee's Safe that it builds to the screening vendor for its approval, and shows the approval state. Lido's monitoring alerts when such a transaction waits for the approval longer than a set time ([ADR 010](/adr/010-pre-execution-screening.md), decisions 25 and 26).
+- Without a question, the agent also recorded three points of the requirement list, and EM did not object: the Zodiac UI shows the vault's three Safes as one whole, with the mandate's rubrics, the first-loss Safe outside the caps and the launch cap, and the orders account outside the liquidity buffer; its alerts go to a Lido Slack channel by webhook and do not page; and the mandate's rules reach the provider only as OD-87 says. [s14]
 
 ## 2026-10-15 — OD-80 and OD-83 kept after a review of the operator Safe
 
