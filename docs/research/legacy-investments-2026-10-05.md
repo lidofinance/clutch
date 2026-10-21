@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: Legacy investments, 2026-10-05
-description: The evidence behind OD-21 — the DAO's first-loss shares in EarnETH and EarnUSD, the Growth Committee Safe that holds them, how they arrived and were once burned, whether they can move, and the search for the Twyne position.
+description: OD-21 evidence on first-loss Earn shares, their holder, transfers, prior burn and the Twyne search.
 tags: [funding, earn, first-loss, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T16:07:52Z
+  at: 2026-10-19T20:46:17Z
 verified: []
 sources:
   - id: s1
@@ -112,4 +112,4 @@ cast call <Twyne vault> 'balanceOf(address)(uint256)' <address> --block $B
 
 - Every read describes its block.
 - The Twyne search covers the addresses named above. It does not prove that no Lido address holds a Twyne position.
-- This page records evidence. EM's decision is in the [decision log](/registers/decision-log.md).
+- EM's decision is in the [decision log](/registers/decision-log.md).

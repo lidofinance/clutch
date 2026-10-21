@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 012: Contributing with many agents"
-description: Many contributors may run their own agents here — any agent may author a page, and only listed humans and teams verify, with a hash that locks the page's body; agents own no GitHub accounts; changes land through a merge queue; decisions enter as complete open-decision rows and are decided in batched interviews; safe defaults, one command for setup, checks and generated files, and checks for restricted terms, licences, invariants and IDs; the onboarding guide is checked in every presentation state, and each of its items is pinned to the decisions that it cites.
+description: Contribution, human verification, decision interviews, CI, generated files and guide source pins.
 tags: [agents, contributors, process, security, ci]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-19T22:33:22Z
 verified: []
 sources:
   - id: s1
@@ -42,9 +42,9 @@ sources:
 
 ## Context
 
-- EM wants more contributors to run their own agents in this repository, without hectic merges [s1].
-- The repository was built for one operator. The validator let one agent author pages. Most changes edited the same shared files, and two of them insert at the top. Mainnet recipes and hosted-app scripts sat next to safe ones, and restricted terms stayed out by convention [s2].
-- ADR 003 holds the agent rules. Its decision 12 deferred the agent's own GitHub identity as OD-23 [s3]. ADR 002 sets who accepts and who verifies [s4].
+- EM wants more contributors using their own agents without conflicting merges [s1].
+- The initial single-operator repository allowed one agent author. Changes repeatedly touched shared files, two with top insertions. Mainnet and hosted-app scripts sat beside safe commands; restricted terms were excluded by convention [s2].
+- [ADR 003](/adr/003-agent-operating-model.md) holds agent rules and deferred GitHub identity as OD-23 (decision 12) [s3]. [ADR 002](/adr/002-decision-and-review-process.md) defines acceptance and verification [s4].
 
 ## Decision
 
@@ -76,65 +76,62 @@ EM decided on 2026-10-14, closing OD-81 and OD-82 [s9]:
 12. The diagrams, in the guide and in the LIP draft, carry no node for the Emergency Brakes multisig. The guide states two facts about it: it can pause Easy Track, and two of the emergency Safe's five signers come from it.
 13. The closed decisions live in `docs/registers/closed-decisions.yaml`, each with its question, date, decision-log headings, ADR decisions and the earlier ODs that it replaces or refines. `validate_docs.py --write-status` generates the register's closed index with each OD's state, the ADR index from each record's description, and each proposed ADR's open decisions; `--check-status` fails on a stale block. The validator fails on an unknown heading, decision or OD in the data, on a replacement of a later OD and on a skipped OD number, and the guide's build refuses a source that names a replaced OD, and an item whose text names an OD that its sources do not cite.
 
-An agent drafted this record. It stays `proposed` until EM accepts the text.
-
 ## Proposed direction
 
-EM asked the agent to implement every step that needs no further decision [s1]. The rest of this section is agent-drafted.
+EM requested implementation of steps needing no further decision [s1]. The proposals below are agent-drafted.
 
-- **Safe defaults (step 1).** `mainnet.just` holds the mainnet recipes, and the `Justfile` never loads it. A recipe runs only with `CLUTCH_MAINNET=1`, outside CI, without `PRIVATE_KEY`, after a prompt, and it signs with a Foundry keystore, which asks for its password. The dry-run scripts take their signer from the command line. The package scripts that call the hosted app run an owner guard first: they refuse unless a member of the repository-owner team sets `CLUTCH_OWNER_PUSH=1` on a clean `main`, and they refuse in CI [s5].
-- **Identity (step 2).** Only agents that `config/actors.yaml` lists may record a human's verification on that human's instruction (ADR 003, decision 14). The rule is unchanged, because writing a human's entry is the sensitive path. Teams are a separate list in `config/actors.yaml`; an agent never records a team's verification.
-- **Verification (decision 7).** `scripts/verify_page.py`, through `just verify <page> <human>`, writes a verification with the time, the body's hash and, where needed, `ref` and `--review`. It refuses an agent as the verifier. The body is the page after its frontmatter, so a bump of `generated.at` or a new source keeps the lock, and any edit to the text breaks it.
-- **Commands (step 3).** `just setup`, `just check`, `just regen`, `just log` and `just test-fork`. Without just installed, `uvx --from rust-just==1.58.0 just <recipe>` runs any recipe. `AGENTS.md`, the README and `CONTRIBUTING.md` use these commands.
-- **Restricted terms and secrets (step 5).** `scripts/check_redaction.py` reads every tracked and new file. It refuses the screening vendor's identity, the addresses that reveal it and figures from the unapproved mandate, through a list of salted hashes in `config/redaction.yaml`, and it refuses private keys, RPC URLs with a key and API tokens. A finding names the file, the line and the kind, never the value.
-- **The log from fragments (step 6).** Each change adds one file to `docs/log.d/`, and `scripts/build_log.py` builds `docs/log.md`. CI fails when the log is not a fresh build.
-- **Merge queue (step 7).** The workflows also run on `merge_group`. An admin turns the merge queue on in the branch rule, or requires branches to be up to date.
-- **Generated files (step 8).** `.gitattributes` marks the log, the status register and the guide as generated. On a conflict, a contributor takes either side and runs `just regen`. The policy artifact is not marked, because reviewers approve its diff.
-- **IDs (step 9).** The validator refuses an OD, ADR or INV number that is used twice, and an open decision with an empty cell. A contributor takes the next number from `main`.
-- **Pull requests (step 11).** A pull-request template asks for the agent, what a human must check, the commands that ran and a restricted-data statement. One decision or one feature goes in each pull request.
-- **Procedures (step 12).** `CONTRIBUTING.md` holds the workflow. Four skills join `adr-draft`: `decision-interview`, `record-decision`, `guide-update` and `research-note`.
-- **The guide on GitHub Pages (decision 10).** `.github/workflows/pages.yml` runs on a push to `main` that changes the page, or by hand. It checks that the committed page is a fresh build and still carries its disclaimer, then deploys the page as `index.html`, with a `robots.txt` that asks crawlers to stay away. The page also carries a `noindex` tag. Only the deploy job may write to Pages; a pull request never deploys. The build refuses a banner or a footer that drops the disclaimer.
-- **The guide's checks (decision 11).** The research note has the evidence [s8].
-  - Browser: the `matrix` group runs axe-core in twelve presentation states and also fails on text with the colour of its own background. The `static` group fails when the page without its script has anything that looks interactive and does nothing. Each group first proves that it catches a planted defect. `ONBOARDING_PAGE` runs the tests on another copy of the page.
-  - Fixes: the dark palette applies only on screens. Only the script gives the tabs, the panels and the map boxes their widget roles.
-  - Pins: `docs/onboarding/pins.json` holds the hash of each item's content and of the text that each source pins. `ADR-NNN#dN` pins decision N and every other block of the Decision section that names it, so a later decision that replaces it changes the pin. `ADR-NNN#<heading>` pins that section. The build refuses a whole ADR, fails on a stale pin, and names the command that pins the item again. The map's layout is not pinned. `just stale` shows each change; `just repin <item>` pins the item after a review.
-  - Coverage: `docs/onboarding/content/coverage.yaml` excludes ADR 012, INV-007 and INV-020, each with its reason. The build also fails on a map box or arrow that no flow step or tour scene uses.
-  - CI: the `docs` workflow attaches the page to each pull request for 14 days, writes the pin report of `scripts/pin_report.py` into the job summary, and lists the stale items when the build check fails. A `workflows` job runs zizmor 1.30.1. The `links` workflow runs `scripts/check_links.py` every Monday and by hand. `just check` also runs actionlint and zizmor, offline.
-- **CI gaps (step 13).** `scripts/check_licences.py` replaces ADR 001's grep command: every source file carries AGPL-3.0-or-later, a changed provider file carries LGPL-3.0-only, and an unchanged provider file matches its blob hash in `policy/constellation/provenance.lock`. `scripts/check_invariants.py` fails when an invariant names a test that does not exist, or when a Draft invariant names none. The fork suite stays a local check until phase 2 (decision 8).
+- **Safe defaults (step 1).** The `Justfile` never loads `mainnet.just`. Mainnet recipes require `CLUTCH_MAINNET=1`, no CI or `PRIVATE_KEY`, confirmation and Foundry-keystore signing with a password prompt. Dry-run scripts take a command-line signer. Hosted-app scripts first require an owner-team member's `CLUTCH_OWNER_PUSH=1` on clean `main` and refuse CI [s5].
+- **Identity (step 2).** Only listed agents can record a human's verification on that human's explicit instruction (ADR 003, decision 14). Teams have a separate `config/actors.yaml` list; agents cannot record team verification.
+- **Verification (decision 7).** `just verify <page> <human>` runs `scripts/verify_page.py`, recording time, body hash and required `ref`/`--review`. Agents cannot be verifiers. Hashing excludes frontmatter: `generated.at` or source-metadata edits preserve the lock; body edits break it.
+- **Commands (step 3).** Use `just setup`, `just check`, `just regen`, `just log` and `just test-fork`. Without just, run `uvx --from rust-just==1.58.0 just <recipe>`. `AGENTS.md`, the README and `CONTRIBUTING.md` use this interface.
+- **Redaction (step 5).** `scripts/check_redaction.py` scans tracked/new files. Salted hashes in `config/redaction.yaml` identify restricted vendor names, revealing addresses and figures from the unapproved mandate. It also rejects private keys, keyed RPC URLs and API tokens. Findings show file, line and kind, never values.
+- **Log (step 6).** Add one fragment in `docs/log.d/` per change. `scripts/build_log.py` generates `docs/log.md`; CI rejects stale output.
+- **Merge queue (step 7).** Workflows run on `merge_group`. An admin enables the queue or requires up-to-date branches.
+- **Generated files (step 8).** `.gitattributes` marks log, status register and guide. Resolve conflicts by taking either side and running `just regen`. Policy artifacts stay unmarked because reviewers must inspect their diffs.
+- **IDs (step 9).** Take the next number from `main`. The validator rejects duplicate OD/ADR/INV IDs and incomplete open-decision rows.
+- **Pull requests (step 11).** One decision or feature per pull request. The template asks for agent identity, human checks, commands run and restricted-data confirmation.
+- **Procedures (step 12).** CONTRIBUTING holds the workflow. `decision-interview`, `record-decision`, `guide-update` and `research-note` join `adr-draft`.
+- **GitHub Pages (decision 10).** `.github/workflows/pages.yml` runs for page changes on `main` or manually. It checks freshness and disclaimer, then deploys `index.html` and a `robots.txt` that asks crawlers to stay away. HTML also uses `noindex`. Only the deploy job writes Pages; pull requests never deploy. Missing banner/footer disclaimers fail the build.
+- **Guide checks (decision 11)** follow the research evidence [s8]:
+  - `matrix` runs axe-core in twelve states and rejects text matching its background. `static` rejects controls that look interactive but do nothing without JavaScript. Each first catches a planted defect. `ONBOARDING_PAGE` selects another HTML copy.
+  - Dark styles apply only to screens. Only JavaScript adds widget roles to tabs, panels and map boxes.
+  - `docs/onboarding/pins.json` hashes item content and source text. `ADR-NNN#dN` pins a decision and blocks naming it, including replacements; `ADR-NNN#<heading>` pins a section. Whole ADRs are refused; map layout is unpinned. Stale pins fail with the repair command. Review `just stale` before `just repin <item>`.
+  - `docs/onboarding/content/coverage.yaml` excludes ADR 012, INV-007 and INV-020 with reasons. Unused map boxes or arrows fail the build.
+  - The `docs` workflow retains HTML for 14 days, reports pin changes through `scripts/pin_report.py` and lists stale items when the build check fails. The `workflows` job uses zizmor 1.30.1. The `links` workflow runs `scripts/check_links.py` on Mondays and manually. `just check` runs `actionlint` and zizmor offline.
+- **CI gaps (step 13).** `scripts/check_licences.py` replaces ADR 001's grep: AGPL-3.0-or-later for source, LGPL-3.0-only for changed provider files, and blob hashes in `policy/constellation/provenance.lock` for unchanged ones. `scripts/check_invariants.py` rejects missing named tests and Draft invariants without tests. Fork tests remain local until phase 2 (decision 8).
 
 ## Options considered
 
-- Keep one listed agent and add each new one by hand. Not chosen by EM (step 2): every new contributor would wait for a change to a protected file.
-- Give each agent its own GitHub account (OD-23). Not chosen by EM (step 15): agents own no accounts.
-- `CODEOWNERS` by risk: decisions to EM, policy and contracts to policy reviewers. Deferred by EM (step 4): "don't edit codeowners yet".
-- Fix collisions after they happen, without a merge queue. Not chosen by EM (step 7): two green pull requests can still turn `main` red.
-- Let any contributor open a decision as free text. Not chosen by EM (step 14): EM would receive questions without options or a recommendation.
-- One verifier id per reviewer, or no new ids (OD-50 B and C). Not chosen by EM: a team id names no person, and its pull request shows who approved.
-- A content check from the git history, or the rule as text only (OD-51 B and C). Not chosen by EM: the hash needs no history and catches every edit.
-- The fork suite on every pull request, with the key (OD-52 B). Not chosen by EM: a pull request's code could read the key. The merge-queue option waits for phase 2.
-- The request for solution's figures as restricted terms (OD-53 A). Not chosen by EM: they went to the policy provider, and the README marks every figure as a draft.
+- List each agent manually: EM rejected under step 2 because contributors would need protected-file edits.
+- Separate agent GitHub accounts (OD-23): EM rejected under step 15; agents own none.
+- Risk-based CODEOWNERS: EM deferred under step 4, "don't edit codeowners yet".
+- Resolve collisions without a queue: EM rejected under step 7 because two green pull requests can produce a failing `main`.
+- Free-text decisions: EM rejected under step 14 because questions need options and recommendations.
+- Per-reviewer IDs or no new IDs (OD-50 B/C): EM rejected because team IDs avoid names while pull requests identify approvers.
+- Git-history checks or prose-only rules (OD-51 B/C): EM rejected because hashes detect edits without history.
+- Keyed fork tests on pull requests (OD-52 B): EM rejected because submitted code could read the key. Merge-queue tests wait for phase 2.
+- Restrict RFP figures (OD-53 A): EM rejected because they were sent to the provider and README labels figures as drafts.
 
 ## Consequences
 
-- An unknown agent's page passes the validator. The reviewer sees the agent in `generated.by` and the human in the commit.
-- Merges take longer in a queue, and `main` stays green.
-- EM remains the bottleneck for decisions, by design. Batched interviews reduce the interruptions.
-- The redaction list hides its terms from a casual reader, not from someone who guesses them.
-- A verified page cannot change silently. A typo fix on it needs a new verification.
-- Until phase 2, a pull request can break the fork suite without a red check. The template asks its author to run `just test-fork`.
-- A local rehearsal on an anvil fork may still set `PRIVATE_KEY` to one of anvil's public keys, for one command. `mainnet.just` refuses to run while it is set.
-- A contributor needs uv, bun, Foundry and git, and an archive RPC for the fork suite.
-
-- Anyone with the address can read the guide. Its source links point into the private repository, so a reader without access gets an error page there.
+- Unlisted agents can author pages; reviewers see `generated.by` and the human commit author.
+- The queue increases merge time to keep `main` green.
+- EM remains the decision bottleneck; batched interviews reduce interruptions.
+- Hashed redaction lists deter casual discovery, not guessing.
+- Any verified-body edit, including a typo, requires re-verification.
+- Until phase 2, broken fork tests need not make CI red. The template asks authors to run `just test-fork`.
+- Local anvil rehearsals may use one public test `PRIVATE_KEY` for one command. `mainnet.just` refuses it.
+- Contributors need uv, bun, Foundry, git and an archive RPC for fork tests.
+- The guide is readable by anyone with its URL. Private repository source links require access.
 
 ## Confirmation
 
-- `scripts/test_validate_docs.py`: any agent may author; an unlisted human cannot author or verify; an agent never verifies; an OD, an INV and an ADR number are each used once; an open decision needs every cell; a team verifies only with its pull request and never accepts an ADR; a verification from 2026-10-07 on needs the body's hash, and an edit after it fails.
-- `scripts/test_checks.py`: the log build and its fragments, restricted words, addresses and figures, secrets, licences and invariants.
-- `bun test compiler`: the owner guard refuses without the owner's confirmation, in CI, outside `main` and with local changes.
-- The keystore rehearsal of `mainnet.just` on an anvil fork, 2026-10-07: deploy, apply, fund and teardown, and the refusals [s2].
-- `scripts/test_build_onboarding.py`: a banner or a footer without the draft disclaimer fails the build. The browser tests check the disclaimer and the `noindex` tag. `actionlint` 1.7.12 finds nothing in the workflows, and the page works when served over HTTP, with no outside request and no console message (2026-10-07).
-- Decision 11, on 2026-10-12: `scripts/test_build_onboarding.py` passes 85 cases, among them the coverage and map rules, a whole ADR refused, the six pin cases, a decision's pin that covers the note that replaces it, and one chip for the decisions of one ADR. `scripts/test_onboarding_page.py` passes 193 checks, and on the page of 5c7e68b its `matrix` and `static` groups fail in the four checks that the research note describes [s8]. `scripts/test_checks.py` passes the ten cases of the pin report. Planted defects in the pin report and in the builder's new rules each fail a test. actionlint 1.7.12 and zizmor 1.30.1 find nothing in the workflows.
+- `scripts/test_validate_docs.py` permits any agent author and rejects unlisted human authors/verifiers and agent verifiers. It checks unique OD/INV/ADR IDs, complete decision rows, team verification through pull requests and refusal of team acceptance. Verifications from 2026-10-07 need hashes; later edits fail.
+- `scripts/test_checks.py` covers log fragments/builds, restricted content, secrets, licences and invariants.
+- `bun test compiler` checks owner-guard refusal without confirmation, in CI, outside `main` and with local changes.
+- The 2026-10-07 anvil-keystore rehearsal covered deploy, apply, fund, teardown and refusals [s2].
+- On 2026-10-07, `scripts/test_build_onboarding.py` rejected missing disclaimers; the browser tests checked disclaimer and `noindex`. actionlint 1.7.12 found no workflow issues. HTTP-served HTML made no outside requests or console messages.
+- On 2026-10-12, decision-11 validation passed 85 build cases and 193 browser checks. Cases included coverage, map rules, whole-ADR refusal, six pin cases, replacement-note pinning and shared ADR chips. On `5c7e68b`, `matrix`/`static` caught the research note's four defects [s8]. Pin-report tests passed ten cases; planted pin-report and builder defects each failed a test. actionlint 1.7.12 and zizmor 1.30.1 found no issues.
 
 ## Reversal conditions
 

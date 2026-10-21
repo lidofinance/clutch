@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: Safe v1.5.0 due diligence, 2026-10-05
-description: The evidence behind OD-17 — what the two audits of Safe v1.5.0 cover, the advisory and bug-bounty records, the changes after the release, how much use and value v1.5.0 has had on Ethereum mainnet, the incidents at Safe accounts, and the Safe paths that the vault uses.
+description: OD-17 evidence on Safe v1.5.0 audits, advisories, bounties, adoption, incidents and the paths Clutch uses.
 tags: [safe, audit, incidents, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-05T14:04:03Z
+  at: 2026-10-19T20:46:17Z
 verified: []
 sources:
   - id: s1
@@ -214,4 +214,4 @@ The run of 2026-10-05 wrote a creations file with sha256 `76198f484daaaf7e1a7a1b
 - The value reads cover seven assets and no DeFi positions, and they give no prices.
 - The incident list holds the large and recent cases at Safe accounts that the agent found. It is not complete, and three of its sources are news reports.
 - The deployer sample has 40 transactions.
-- This page records evidence. EM's decision is in the [decision log](/registers/decision-log.md).
+- EM's decision is in the [decision log](/registers/decision-log.md).

@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: Chain reads for the design ADRs, 2026-09-30
-description: Every on-chain fact that the design ADRs rely on, read at Ethereum block 26092572 with the exact command, so that anyone can reproduce it.
+description: Reproducible on-chain evidence for the design ADRs at Ethereum block 26092572.
 tags: [chain, evidence, governance, funding, swaps, safe]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-09-30
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-09-30T20:28:17Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

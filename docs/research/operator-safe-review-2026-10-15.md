@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: The committee's Safe as the operator, reviewed again, 2026-10-15
-description: The evidence behind keeping OD-80 and OD-83 on 2026-10-15 — the other duties and the activity of the committee's Safe, Lido's practice for trusted callers, the two alternatives (a new Safe with the same signers, and a Safe owned by the committee's Safe), and EM's answer.
+description: OD-80 and OD-83 review of operator account alternatives, existing Safe duties, Lido practice and EM's answer.
 tags: [safe, screening, governance, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-15
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-15T06:46:39Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

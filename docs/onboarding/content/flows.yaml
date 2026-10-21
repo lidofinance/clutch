@@ -687,7 +687,7 @@ flows:
     trigger: "The roadmap."
     steps:
       - who: "Phase 0: decisions"
-        text: "EM accepts ADR 005 to ADR 011. [the screening vendor] confirms its terms in writing."
+        text: "EM accepts the setup and design ADRs. [the screening vendor]'s written terms are due before the launch cap lifts (OD-54)."
         nodes: [committee, screening]
       - who: "Phase 1: specification"
         text: "The specifications and the detector specification, the control matrix and the screening rule list with the vendor's questions, the Zodiac UI requirement list, the orders account's fork tests, the runbook drafts and the Lido Zodiac workspace."
@@ -704,7 +704,7 @@ flows:
       - who: "Phase 5: operation"
         text: "Monthly reports, the fortnightly cap reading, budget motions after events and recurring drills. Once the guard is set with its bypass mode off, the committee's forum post lifts the launch cap."
         nodes: [committee, reporting, monitoring]
-    sources: ["doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates"]
+    sources: ["doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates", OD-54]
 
   - id: enabling-vote
     group: deployment

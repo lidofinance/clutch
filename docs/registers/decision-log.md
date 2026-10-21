@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-15T06:46:39Z
+  at: 2026-10-20T18:46:55Z
 verified: []
 sources:
   - id: s1
@@ -49,6 +49,9 @@ sources:
   - id: s13
     resource: "urn:clutch:interview:2026-10-15"
     title: EM's question on the operator Safe and EM's answer, 2026-10-15; the transcript is not in the repository
+  - id: s14
+    resource: "urn:clutch:interview:2026-10-20"
+    title: EM's verification of ADR 001 to ADR 004 and EM's answer on the YT registration, 2026-10-20; the transcript is not in the repository
 ---
 
 # Decision log
@@ -58,6 +61,17 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-20 — ADR 001 to ADR 004 verified again, and YT registered
+
+Pull request #41 shortened the explanations of ADR 001 to ADR 004, which EM had accepted, and registered `human:yt` in `config/actors.yaml`. The agent asked EM to verify the four ADRs again and to decide on the registration. EM answered:
+
+> I verify ADR 001-004, I allow YT registration; do a push
+
+Recorded as:
+
+- EM verifies ADR 001 to ADR 004 again after the edits of pull request #41, so they stay accepted. At this instruction, the agent recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verifications are EM's.
+- EM allows the registration of `human:yt` as a decision proposer and page verifier. ADR acceptance stays with EM and the committee ([ADR 002](/adr/002-decision-and-review-process.md)). EM's answer is the explicit request that `config/actors.yaml` needs ([ADR 003](/adr/003-agent-operating-model.md)). [s14]
 
 ## 2026-10-15 — OD-80 and OD-83 kept after a review of the operator Safe
 

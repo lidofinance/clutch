@@ -1,13 +1,13 @@
 ---
 type: Specification
 title: Control matrix
-description: Every mandate rule that this repository records, with its control on each layer that can carry it — the on-chain policy, screening before execution, monitoring with alerts, and display in the Zodiac UI — its owner and its status; and the written list of the screening vendor's rules, with their change control.
+description: Mandate controls across policy, screening, monitoring and UI, with owners, status and the screening vendor's written rule list and change control.
 tags: [controls, mandate, monitoring, screening, specs]
 status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T22:18:41Z
+  at: 2026-10-19T22:36:19Z
 verified: []
 sources:
   - id: s1

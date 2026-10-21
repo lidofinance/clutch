@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 010: Pre-execution screening"
-description: A suspicious operator transaction is blocked on chain before it executes, by the screening vendor's existing transaction guard on the committee's own Safe, which holds the operator role and is the trusted caller of every factory (OD-80, OD-83), so the guard also screens the committee's other duties; it fails closed, and recovery never passes through vendor code; the committee's Safe runs Safe v1.3.0, which the vendor's guard and Lido's detector support, and the vendor is asked to refuse delegatecalls except to Safe's batching library. The vault may launch without the guard under a cap of one million dollars, held by procedure; a forum post lifts the cap once the guard is live.
+description: Transaction screening on the committee's Safe, vendor controls, outage behaviour and conditions for lifting the launch cap.
 tags: [screening, guard, safe, security]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-15T06:46:39Z
+  at: 2026-10-19T22:33:22Z
 verified: []
 sources:
   - id: s1
@@ -56,17 +56,17 @@ sources:
 
 ## Context
 
-- A transaction guard sits on a Safe's own `execTransaction`. It receives the signatures and the sender, and it runs after the signature check and before execution [s5][s6]. Safe v1.3.0, v1.4.1 and v1.5.0 all have it [s2].
-- A module guard exists only from Safe v1.5.0. The Safe calls it for every enabled module, the safety modifier included [s3]. With a module guard on the Asset Safe, recovery would pass only because the guard's own code lets the safety modifier through. In the kit, that is one line of mock code [s9].
-- The screening vendor already has a transaction guard. It is deployed for other Lido multisigs and enforcing on one of them, and an external firm audited it in late 2025 [s7].
-  - It is not a module guard, and Safe v1.5.0 refuses to set it as one [s4][s7].
-  - In practice the vendor's key approves each exact transaction on chain, once, before it executes. A transaction without an approval reverts [s7].
-  - The owners can remove the guard only through a fixed 10-day timelock that the vendor cannot block [s7].
-  - The audit report pins the commit of its fix review. The build that the Lido multisigs run adds one later change: both timelocks, from 1 day to 10 days. That change is on a branch of the vendor's repository, not on its main branch, and the vendor's documentation still says 1 day [s11].
-  - The vendor's key can approve three kinds of hash: one exact transaction, once; one exact call, at any nonce; or one function on one target, with any arguments. Only the first is bound to one transaction [s11].
-  - Lido's on-chain monitoring already has a detector for this guard. It alerts on standing approvals, the start of either timelock, the bypass mode, policy contracts, keeper changes, and owner, guard and module changes on the guarded Safe. It supports Safe v1.3.0 and v1.4.1 only [s11].
-- Easy Track's trusted caller is immutable [s8].
-- The due diligence on Safe v1.5.0 found no advisory and no paid bounty that concerns v1.5.0. No loss in its list of incidents at Safe accounts came from a defect in Safe's contracts. At Bybit in 2025, one signed delegatecall replaced a Safe's implementation. A Safe emits no event of its own for such a change [s12].
+- A transaction guard checks the Safe's `execTransaction` after signatures and before execution, receiving signatures and sender [s5][s6]. Versions v1.3.0, v1.4.1 and v1.5.0 support it [s2].
+- Module guards begin in v1.5.0 and see every enabled module, including safety [s3]. Recovery would depend on guard code admitting safety; the kit models this with one line [s9].
+- The screening vendor's existing transaction guard is deployed on other Lido multisigs and enforcing on one. An external firm audited it in late 2025 [s7].
+  - It cannot serve as a module guard; v1.5.0 refuses that assignment [s4][s7].
+  - In practice, the vendor's key approves each exact transaction once on chain. Unapproved transactions revert [s7].
+  - Owners remove it only through a fixed 10-day timelock that the vendor cannot block [s7].
+  - After the audit's pinned fix review, the deployed build adds one change: both timelocks rise from 1 day to 10 days. This change is on a vendor branch, not `main`; documentation still says 1 day [s11].
+  - Approval hashes can authorize one transaction once, one call at any nonce, or one function/target with any arguments. Only the first is transaction-specific [s11].
+  - Lido's detector supports v1.3.0/v1.4.1 only. It watches standing approvals, both timelocks, bypass, policy contracts, keepers and guarded-Safe owner/guard/module changes [s11].
+- Easy Track fixes trusted callers at deployment [s8].
+- Due diligence found no v1.5.0 advisory or paid bounty and no Safe-contract defect behind its listed losses. Bybit's 2025 signed delegatecall replaced a Safe implementation; the Safe emits no event for that change [s12].
 
 ## Decision
 
@@ -134,56 +134,63 @@ Decision 24 takes Option 5, which was not chosen on 2026-10-02. The committee's 
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
-- **Committee's Safe.** The committee's existing Safe holds the operator role on the operator modifier, and it is the trusted caller of every factory (OD-80). It runs Safe v1.3.0, with a threshold of 4 of 7. From the lift of the cap, it carries the guard (decision 24).
-- **Guard.** One instance of the vendor's guard, of the build that the Lido multisigs run, set on the committee's Safe with `setGuard`. The vendor's key then turns the bypass mode off. The owners cannot turn it on again without the vendor's approval and the 10-day bypass timelock [s11]. Only then does the cap lift (decision 22).
-- **What it screens.** Every transaction of the committee's Safe: every operator action, on the Asset Safe and on the orders account, every action of the first-loss role ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 21), the creation of every motion, and the committee's duties outside the vault (decision 24). Motion enactment is not screened, but Easy Track's hash check fixes a motion's content at creation.
-- **What it never touches.** The emergency Safe and the DAO path act through the safety modifier or the owner path, and no guard is set on the Asset Safe. The Emergency Brakes multisig holds no role in the vault ([ADR 005](/adr/005-account-graph-and-roles.md) decision 23). Recovery is therefore unscreened by construction.
-- **No modules.** The committee's Safe keeps no module while the guard is set. Safe v1.3.0 has no module guard [s2], so a module's transaction would not be screened.
-- **Removal.** Only the owners of the committee's Safe can remove the guard, through the 10-day timelock. A vendor outage therefore stops the operator for at most ten days, and a hostile removal stays visible for ten days.
-- **Monitoring.** Lido's existing detector for this guard carries the alerts the vault needs: the start of either timelock, the bypass mode turning on, a standing approval, a keeper change, an added policy contract, and module, guard or owner changes on the committee's Safe [s11]. It already supports Safe v1.3.0 [s11], so it adds only the new instance (decision 12). Every operator transaction calls the same modifier function, so one standing approval of that function would approve all vault activity. The agreement forbids such approvals (decision 9). Lido's monitoring also needs a critical alert on any change of the singleton of the new Safes (decision 18), because a delegatecall can replace a Safe's implementation without any Safe event [s12].
-- **Delegatecalls.** The committee's Safe needs a delegatecall only to batch calls through Safe's MultiSendCallOnly of its own version, v1.3.0. The vendor is asked to refuse every other delegatecall (decision 17). One approved delegatecall to another target could replace the Safe's implementation and remove the guard.
-- **The check before the vote.** The advisory, release and bug-bounty reads of the due-diligence note [s12] run again shortly before the enabling vote starts. A change on the vault's Safe paths goes to EM (decision 16).
-- **Tooling.** Add the new instance to the estate's existing bytecode-verification and state-check configurations for this guard.
-- **The rule list.** The list changes in a reviewed pull request, as the permission policy does, and the vendor's name stays redacted until it is announced.
-- **The capped launch (OD-54, OD-55).**
-  - From the enabling vote to the lift, the committee's Safe has no guard. The enabling vote still creates it, grants it the operator role and registers the factories with it as their trusted caller. Its owners set the guard later with one Safe transaction, and no factory changes.
-  - Until the lift, the controls are the operator's policy, the four-of-seven threshold, monitoring, the emergency revoke and the switch. The cap bounds what they protect.
-  - The cap counts the Asset Safe and the orders account at the price rule of [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 20. The first-loss Safe is outside it, because no role can reach it.
-  - The cap limits what the treasury puts in. A rise in prices that takes the vault above the cap needs no action, and monitoring reports it.
-  - Monitoring alerts on a top-up motion whose enactment would take the vault above the cap, while its objection window is open, and on a vault value above the cap at each fortnightly reading.
-  - The lift: the guard instance of decision 10 is set on the committee's Safe, the vendor's key turns its bypass mode off, the agreement of decision 9 is in place, and Lido's monitoring covers the instance (decision 12). A check confirms the guard's address, the bypass mode and the absence of standing approvals. The committee's forum post links the check and lifts the cap.
-  - The vendor's name stays redacted until decision 13 ends the redaction.
-- **Rules requested from the vendor** (OD-39, OD-40, OD-43, OD-47): refuse an operator transaction that would take the liquidity buffer below its floor; refuse one that would breach a cap at the post-transaction state; refuse an order whose limit price, or a router swap whose minimum output, lies too far below a market price. The written list shows each one as requested until the vendor confirms that it can check it before execution. The vendor is also asked whether it records rule changes and whether it can delay a relaxation.
+- **Committee's Safe.** The existing four-of-seven v1.3.0 Safe holds `operator` and is every factory's trusted caller (OD-80). Its guard starts at cap lift (decision 24).
+- **Guard setup.** Use the same build as Lido's guarded multisigs, set with `setGuard`. The vendor disables bypass. Re-enabling it needs vendor approval and a 10-day timelock [s11]. Only then can the cap lift (decision 22).
+- **Screened actions.** Every committee Safe transaction: Asset Safe and orders activity, first-loss actions ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 21), motion creation and non-vault duties (decision 24). Enactment is unscreened; Easy Track's hash check fixes content at creation.
+- **Unscreened paths.** Emergency and DAO use safety or owner authority. No guard sits on the Asset Safe, and Emergency Brakes has no vault role ([ADR 005](/adr/005-account-graph-and-roles.md), decision 23). Recovery never depends on guard code.
+- **No modules.** The guarded committee Safe must have none: v1.3.0 lacks a module guard, so module execution would bypass screening [s2].
+- **Removal.** Only committee Safe owners can remove the guard, after ten days. Outages stop operation for at most that delay; hostile removal remains visible throughout it.
+- **Monitoring.** Add the new instance to the existing v1.3.0 detector (decision 12) [s11]. Watch both timelocks, bypass activation, standing approvals, keepers, added policy contracts and Safe module/guard/owner changes. One standing approval of the shared modifier execution function would approve all vault activity; the agreement forbids it (decision 9). Also alert critically on new Safes' singleton changes: delegatecall can replace implementations without Safe events (decision 18) [s12].
+- **Delegatecalls.** Batching needs only the committee Safe's v1.3.0 MultiSendCallOnly. Ask the vendor to refuse other targets (decision 17); one approved stray delegatecall could replace the implementation and remove the guard.
+- **Pre-vote check.** Repeat due-diligence advisory, release and bounty checks shortly before the enabling vote. Return changes on Clutch's Safe paths to EM (decision 16) [s12].
+- **Tooling.** Add the instance to existing bytecode-verification and state-check configurations.
+- **Rule changes.** Use reviewed pull requests, as for policy. Keep the vendor anonymous until announced.
+
+**Capped launch (OD-54, OD-55):**
+
+- The existing committee Safe remains unguarded until lift. The enabling vote grants `operator` and registers it as trusted caller. Owners add the guard later in one transaction; factories stay unchanged.
+- Until then, permissions, four-of-seven signing, monitoring, emergency revocation and the switch protect funds within the cap.
+- Count Asset Safe and orders value using [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 20. Exclude first-loss, which those roles cannot reach.
+- The cap limits treasury funding. Price-driven excess requires reporting, not action.
+- Alert during objection if a top-up would exceed the cap; report excess at each fortnightly reading.
+- Before lift, set decision 10's guard, disable bypass, put decision 9's agreement in place and activate monitoring (decision 12). Check address, bypass and absent standing approvals. The committee's forum post links the check and lifts the cap.
+- Vendor redaction ends only under decision 13.
+
+**Requested screening rules (OD-39, OD-40, OD-43, OD-47):**
+
+- Refuse operator transactions that breach the buffer floor or post-transaction cap.
+- Refuse orders or router swaps whose limit/minimum output is too far below market.
+- Mark each rule requested until the vendor confirms pre-execution support. Ask whether it records changes and can delay relaxations.
 
 ## Options considered
 
-- **Route A: a module guard on the Asset Safe.** Rejected. Recovery would depend on vendor code, and only a DAO vote could remove a failed guard. The vendor's existing guard cannot be set as a module guard, so route A would need new vendor code and a new audit.
-- **Option 3: a dedicated operator Safe, with the committee's Safe kept as trusted caller.** Not chosen. It pins fewer addresses, but motions would not be screened.
-- **OD-83 B: a new operator Safe from the lift.** Not chosen by EM. Every factory would need a new deployment, because its trusted caller is fixed.
-- **OD-83 C: no guard, and the cap stays.** Not chosen by EM.
-- **An operator Safe owned 1 of 1 by the committee's Safe, with the guard on it only (2026-10-15).** Not chosen by EM: "I don't like to have a nested interim safe" [s1]. It would keep the guard on vault activity, and one owner swap could move the operator. It costs one more Safe, and every operator action becomes a nested execution [s13].
-- **A guard written by Lido.** Rejected: it would be a new contract other than a factory.
-- **Detection and response only, or advisory screening in the signing flow.** Rejected: EM made on-chain blocking a hard requirement. On 2026-10-08 EM allowed a launch without the guard under a cap (decision 20).
-- **A capped launch whose cap holds in the funding registries, lifted by a DAO vote (OD-54 A).** Not chosen by EM. It would hold on chain, at the cost of one more DAO vote at the lift.
-- **A capped launch lifted by a second registry pair whose top-up factory refuses a motion until the guard is set (OD-54 B).** Not chosen by EM. It adds a factory that reads the vendor's guard.
-- **A cap of three million dollars, or a figure set with the mandate (OD-55 B and C).** Not chosen by EM.
+- **Route A, Asset Safe module guard:** rejected because recovery would depend on vendor code removable only by DAO vote. The existing guard cannot serve this role, requiring new vendor code and audit.
+- **Option 3, dedicated operator with committee motion creation:** rejected because motions would escape screening despite fewer pinned addresses.
+- **OD-83 B, new operator Safe at lift:** EM rejected because fixed trusted callers require redeploying all factories.
+- **OD-83 C, cap without guard:** EM rejected.
+- **Committee-owned one-of-one operator Safe (2026-10-15):** EM rejected it: "I don't like to have a nested interim safe" [s1]. It confines screening to vault activity, and one owner swap could move the operator role, but adds a Safe and nested execution for each action [s13].
+- **Lido-written guard:** rejected as new non-factory code.
+- **Detection or advisory screening only:** rejected because EM made on-chain blocking a hard requirement. EM permitted a capped unguarded launch on 2026-10-08 (decision 20).
+- **Registry-enforced cap, lifted by vote (OD-54 A):** EM rejected. It would hold on chain at the cost of another DAO vote to lift it.
+- **Second registry pair gated on guard installation (OD-54 B):** EM rejected because it adds a factory coupled to vendor code.
+- **Three-million-dollar cap or mandate-set figure (OD-55 B/C):** EM rejected.
 
 ## Consequences
 
-- Two Safes share the committee's signers: the committee's Safe and the emergency Safe. A signer rotation that touches a seat updates both.
-- The address of the committee's Safe is pinned in several places. It is the immutable trusted caller of every factory [s8] and the operator role's holder. Replacing it needs a DAO vote that re-registers every factory. A vendor fault does not force a replacement, because the owners can remove the guard after ten days.
-- Fail closed: a vendor outage stops operator activity and new motions. Recovery is unaffected.
-- From the lift, every transaction of the committee's Safe needs the vendor's approval, its duties outside the vault included. A vendor outage stops those duties too, for at most the ten days of the removal timelock (decision 24). They are the Stonks orders and their top-up motions, the Stonks 2.0 price router, and the manager and emergency roles of the LDO buyback contracts. The Emergency Brakes multisig also holds the buyback executor's emergency role, and no guard screens it [s13].
-- The committee cannot enable a module on its Safe while the guard is set (INV-010).
-- Until the cap lifts, no operator transaction and no motion creation is screened. A top-up above the cap is a breach of procedure, not a revert. Objections and monitoring are its controls.
-- The vendor is off the launch's critical path. The enabling vote no longer waits for the guard or the vendor's terms on standing approvals. The lift waits for them.
-- The guard is the one component that can stop operator activity and motion creation, and Lido does not write it. This narrows provider independence on purpose. The structural mitigations are that recovery never passes through it, the owners can remove it after ten days, and the emergency role's switch can disable the operator modifier (OD-58).
-- The build adds one change after the audit's fix review: the 10-day timelocks. It is not on the vendor's main branch, and the vendor's documentation still says 1 day. Lido reviews the change, and the vendor is asked to merge and document it [s11]. An earlier version of this record counted two such changes. The second, an early return for callers other than the guarded Safe, is the commit that the report's fix review pins [s11].
-- The vendor's support for Safe v1.5.0 rests on EM's report of 2026-10-05. The confirmation itself is outside this repository.
-- If the vendor accepts the delegatecall request, the committee's Safe can batch only through MultiSendCallOnly. Any other delegatecall then fails at screening.
-- The vendor's name enters this repository when the mandate is posted on the forum, with the vendor's written consent. The restricted fork tests then move into the harness.
-- The Asset Safe and the emergency Safe run v1.5.0, the first in the Lido estate as far as the six Lido Safes checked show. The committee's Safe runs v1.3.0: the guard passed Lido's fork tests on it [s10], and Lido's detector supports it [s11].
-- The kit's mock module guard and its tests of the rejected route A were removed on 2026-10-05. The harness has no screening test now. It needs a transaction guard on a stand-in for the committee's Safe, preferably the vendor's deployed bytecode on a fork.
+- Committee and emergency Safes share committee signers. Seat-affecting rotations update both.
+- The committee Safe is the pinned operator and immutable factory caller [s8]. Replacement requires DAO re-registration of all factories. Guard removal after ten days avoids replacement for a vendor fault.
+- The guard fails closed: outages stop operator activity and new motions, without affecting recovery.
+- After lift, screening also covers Stonks orders/top-ups, the Stonks 2.0 price router, and LDO buyback manager/emergency duties (decision 24). Outages stop them for up to the removal delay. Emergency Brakes retains unscreened buyback-executor emergency authority [s13].
+- No committee Safe module is allowed while guarded (INV-010).
+- Before lift, operator actions and motion creation are unscreened. Above-cap top-ups breach procedure but do not revert; objection and monitoring are the controls.
+- Guard setup and standing-approval terms gate cap lift, not launch.
+- Lido does not write the guard, which can stop operator activity and motion creation. This deliberately narrows provider independence. Recovery independence, ten-day removal and the emergency switch, which disables the operator modifier, constrain this dependency (OD-58).
+- Lido must review the post-audit 10-day timelock change; ask the vendor to merge and document it [s11]. It remains off `main`, with 1-day documentation. Earlier text wrongly counted the non-Safe-caller early return as another post-audit change; the fix-review commit already includes it [s11].
+- v1.5.0 support rests on EM's 2026-10-05 report; the confirmation is outside this repository.
+- If the vendor accepts the request, batching uses only MultiSendCallOnly; other delegatecalls fail screening.
+- Naming requires mandate publication and written vendor consent. Restricted fork tests then enter the harness.
+- Asset and emergency Safes use v1.5.0, the first among the six checked Lido Safes. The committee keeps v1.3.0: the guard passed Lido's fork tests on it [s10], and the detector supports it [s11].
+- The mock module guard and route-A tests were removed on 2026-10-05. The harness has no screening test now. It needs transaction-guard coverage on a committee stand-in, preferably using deployed vendor bytecode.
 
 ## Confirmation
 

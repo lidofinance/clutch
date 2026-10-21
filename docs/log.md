@@ -1,5 +1,18 @@
 # Log
 
+## 2026-10-20
+
+* **Update**: Recorded EM's verification of ADR 001 to ADR 004 after the edits of pull request #41, at EM's written instruction, and EM's approval of the YT registration as a decision proposer and page verifier.
+
+## 2026-10-19
+
+* **Update**: Added YT as a decision proposer and page verifier; ADR acceptors remain EM and the committee.
+* **Update**: Restored decision actors, conditions, scope and verification limits after the documentation review.
+* **Update**: Shortened the main prose of ADR 005–012, preserved recorded decisions, and aligned funding cards with ADR 008.
+* **Update**: Removed navigation-method notes and redundant page-status narration.
+* **Update**: Shortened explanations in ADR 001–004. Decisions and prior verifications are unchanged; the revised pages await human verification.
+* **Update**: Shortened documentation, organized reading routes by Diataxis, and aligned two guide summaries with the decisions.
+
 ## 2026-10-15
 
 * **Decision**: Kept OD-80 and OD-83 after a review of the operator Safe. EM chose the recorded design over an operator Safe owned by the committee's Safe, and the agent advised against a return to a new Safe with the same signers. ADR 010 lists the owned Safe as not chosen, and ADR 010 and the LIP draft now name the duties of the committee's Safe that the guard also screens: Stonks orders and top-up motions, the Stonks 2.0 price router, and the LDO buyback roles. A new research note keeps the evidence.

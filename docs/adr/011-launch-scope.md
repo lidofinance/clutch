@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 011: Launch scope"
-description: The launch assets and venues; Lido Lend is onboarded by motion through a Morpho Blue template that ships at launch with end-to-end tests, and stays in the protocol cap until it matures; swaps are CoW orders from the orders account; DAI earns through Sky's DAI–USDS converter; sDAI, third-party lending markets, and router swaps on Uniswap and 1inch are out at launch.
+description: Launch assets and venues, the later Lido Lend onboarding and excluded integrations.
 tags: [scope, assets, launch, lido-lend]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-14T21:55:03Z
+  at: 2026-10-19T22:33:22Z
 verified: []
 sources:
   - id: s1
@@ -41,11 +41,11 @@ sources:
 
 ## Context
 
-- Lido Lend is expected in October 2026 and is compatible with Morpho Blue [s1].
-- USDS cannot be paid out through the existing payment path [s4]. EM decided on 2026-10-05 that a DAO vote adds it (decision 5).
-- Since 2026-10-05 the kit's policy follows this scope [s3].
-- The mandate names four main stablecoins: USDC, USDT, USDS and DAI. It caps the vault's holding of any one of them at a share of its stablecoins, and it requires a stablecoin buffer of one month of baseline spend [s6].
-- Sky's DAI–USDS converter turns DAI into USDS one to one, and back. It has no admin and no fee, and it pays a receiver that the caller names. USDS is an upgradeable proxy under Sky governance; DAI is not. The Agent holds 4,673,791.03 DAI [s5].
+- Lido Lend is expected in October 2026 with Morpho Blue compatibility [s1].
+- Existing payments exclude USDS [s4]; EM chose its addition by vote on 2026-10-05 (decision 5).
+- The kit follows this scope since 2026-10-05 [s3].
+- The mandate caps each of USDC, USDT, USDS and DAI as a share of stablecoins, with one month of baseline spend as a stablecoin buffer [s6].
+- Sky converts DAI/USDS one-to-one in either direction, without admin or fee, to a caller-named receiver. USDS is upgradeable by Sky; DAI is not. The Agent holds 4,673,791.03 DAI [s5].
 
 ## Decision
 
@@ -110,25 +110,24 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market, 
 
 ## Options considered
 
-- Wait for Lido Lend before launch. Not chosen by EM: it arrives later by motion.
-- Keep Aave v3 and sDAI from the original proposal. Not chosen: they are not in EM's list.
-- DAI in the Stonks rebalancing set. Not chosen by EM: every conversion would pay the stablecoin-pair margin.
-- DAI idle as part of the liquidity buffer. Not chosen by EM: DAI would earn nothing, and a share above the mandate's per-stablecoin cap could only be fixed by recovery or a vote.
+- Wait for Lido Lend: EM rejected; onboard it later by motion.
+- Keep Aave v3/sDAI: rejected because EM's list excludes them.
+- Rebalance DAI through Stonks: EM rejected because each conversion pays stablecoin-pair margin.
+- Leave DAI idle in the buffer: EM rejected because it earns nothing, and excess above its cap could only be fixed by recovery or a vote.
 
 ## Consequences
 
-- The Morpho Blue template ships before the market it will point at exists. Its acceptance needs end-to-end tests against the deployed Morpho Blue contract on a fork.
-- The kit's policy no longer grants Aave v3, sDAI or order pre-signing, and a fork test refuses them [s8].
-- Asynchronous vault deposits are authorised at the policy layer in the kit. Their settlement is not tested.
-- DAI earns only after conversion. Converted value is exposed to USDS, which Sky governance can upgrade [s5].
-- The operator can keep each stablecoin under the mandate's per-stablecoin cap, by converting between DAI and USDS and by selling USDS through CoW orders.
-- The converter is one more target in the operator's policy. Its approvals are bounded like the stETH approval to wstETH.
+- The Morpho Blue template ships before its target market exists. Acceptance requires end-to-end fork tests against deployed Morpho Blue.
+- The kit's policy no longer grants Aave v3, sDAI or order pre-signing; fork tests refuse them [s8].
+- The kit authorizes asynchronous vault deposits at the policy layer; settlement is untested.
+- DAI earns only after conversion into upgradeable USDS [s5]. The operator can keep each stablecoin within its cap through DAI/USDS conversion and CoW sales of USDS.
+- The converter adds a policy target with fixed-ceiling approvals, like stETH-to-wstETH.
 
 ## Confirmation
 
-- INV-015 in the [invariants](/specs/invariants.md). Kit tests refuse every out-of-scope venue [s8].
-- The end-to-end test of the Morpho Blue template. It does not exist yet.
-- Kit test: a conversion pays the Asset Safe in both directions; a conversion with any other receiver is refused; an approval to the converter at or above the ceiling is refused [s7]. The ceiling in the kit is a dry-run stand-in for one TM Floor Value.
+- INV-015 in the [invariants](/specs/invariants.md); tests refuse every out-of-scope venue [s8].
+- The Morpho Blue template's end-to-end test remains unbuilt.
+- Converter tests pay the Asset Safe in both directions, refuse other receivers and refuse approvals at or above the ceiling [s7]. The kit ceiling stands in for one TM Floor Value.
 
 ## Reversal conditions
 

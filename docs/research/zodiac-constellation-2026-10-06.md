@@ -1,7 +1,7 @@
 ---
 type: Research Note
 title: The Zodiac constellation as the policy backbone, 2026-10-06
-description: The evidence behind OD-33 and OD-34 — whether the policy provider's constellation still builds and still matches the chain, how far it is from the decided design, which steps run locally and which only the hosted app runs, and what Clutch must build to use the constellation as the source of the permission policy.
+description: OD-33 and OD-34 evidence on upstream policy, local and hosted tooling, design differences and required Clutch work.
 tags: [policy, zodiac, constellation, toolchain, evidence]
 status: stable
 review_status: slop
@@ -9,7 +9,7 @@ valid_as_of: 2026-10-06
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-06T17:59:00Z
+  at: 2026-10-19T20:35:44Z
 verified: []
 sources:
   - id: s1

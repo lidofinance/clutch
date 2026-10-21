@@ -162,7 +162,7 @@
   what: "Two new registries from Easy Track's standard builder, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a monthly limit."
   controlled_by: "Aragon Voting is the admin (OD-73). The Easy Track executor spends the limit."
   can:
-    - "Pay only their one recipient: the Asset Safe, or the first-loss Safe."
+    - "Pay only the Asset Safe."
     - "Check the remaining limit when a motion starts, and again at enactment."
   cannot:
     - "Take a new recipient from the executor. Only the DAO changes a recipient, a limit or a period."
@@ -180,7 +180,7 @@
   status: instance
   label: specified
   what: "Two new instances of Easy Track's top-up factory, one for stablecoins and one for stETH. They create the [[top-up]] motions that fund the vault."
-  controlled_by: "The committee's Safe is the [[trusted caller]] of all three. The DAO registers them by vote."
+  controlled_by: "The committee's Safe is the [[trusted caller]] of both. The DAO registers them by vote."
   can:
     - "Create a top-up motion that pays the Asset Safe, with several payments in one motion."
   cannot:
