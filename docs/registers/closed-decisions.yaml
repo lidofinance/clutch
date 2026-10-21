@@ -607,3 +607,19 @@
     - "2026-10-20 — OD-84 to OD-88: two readings, the provider's reports and its checks"
   adr: [ADR-010#d25, ADR-010#d26]
   refines: [OD-83]
+- id: OD-89
+  question: "What does the mandate size mean: a floor that top-ups refill, or a ceiling?"
+  closed: 2026-10-21
+  log:
+    - "2026-10-21 — OD-89 and OD-90 decided, OD-91 opened: the mandate size, the mandate's owed text, and LDO"
+  adr: [ADR-008#d32, ADR-008#d33, ADR-008#d34]
+  replaces:
+    - {od: OD-06, part: true}
+  refines: [OD-42, OD-71]
+- id: OD-90
+  question: "Where does each item that the mandate text owes go: the Snapshot text, the forum post, or the LIP alone?"
+  closed: 2026-10-21
+  log:
+    - "2026-10-21 — OD-89 and OD-90 decided, OD-91 opened: the mandate size, the mandate's owed text, and LDO"
+  see: [/specs/lip-draft.md]
+  refines: [OD-14, OD-26, OD-39, OD-40, OD-58, OD-62]

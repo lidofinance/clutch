@@ -2,6 +2,7 @@
 
 ## 2026-10-21
 
+* **Decision**: Recorded EM's choices for OD-89 and OD-90, and opened OD-91. The mandate size is a ceiling, as the mandate's draft text writes it: each funding counts at its value when funded, the legacy positions count, the vault never holds more than the mandate's share of the DAO's non-LDO treasury, and more funding needs a DAO approval. The TM Floor Value becomes the mandate size across the repository, and the funding alerts follow the headroom under the size. The mandate's owed items now go to its Snapshot text, its forum post or the LIP alone. OD-91 asks whether the operator needs LDO.
 * **Update**: Fixed three inconsistencies after pull request #41: AGENTS.md now names EM and YT, at EM's request; the guide's banner no longer says that the public repository is not public; and the guide's phase-2 line names the mandate's rule data and the comparison of the two readings.
 
 ## 2026-10-20

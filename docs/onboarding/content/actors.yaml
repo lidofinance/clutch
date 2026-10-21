@@ -160,7 +160,7 @@
   name: Funding registries (two)
   status: instance
   label: specified
-  what: "Two new registries from Easy Track's standard builder, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a monthly limit."
+  what: "Two new registries from Easy Track's standard builder, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a limit per month that is a backstop under the mandate size."
   controlled_by: "Aragon Voting is the admin (OD-73). The Easy Track executor spends the limit."
   can:
     - "Pay only the Asset Safe."
@@ -169,11 +169,11 @@
     - "Take a new recipient from the executor. Only the DAO changes a recipient, a limit or a period."
     - "Enforce the mandate's rule that a Snapshot vote follows an objection."
     - "Stop two full monthly limits within about 72 hours around a month boundary."
-  numbers: ["period: one calendar month", "limit: one TM Floor Value each, from the attested computation"]
+  numbers: ["period: one calendar month", "limit: one mandate size each, from the attested computation"]
   address: "To be deployed"
   sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d8", "ADR-008#proposed-direction", INV-017,
     "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts", OD-73, "ADR-005#d28", OD-78,
-    "ADR-008#d31"]
+    "ADR-008#d31", "ADR-008#d32", OD-89]
 
 - id: topup-factories
   node: funding
@@ -187,9 +187,9 @@
   cannot:
     - "Pay any other recipient."
     - "Carry a report identifier. The payment reference is fixed, so the forum post carries the identifier."
-  numbers: ["top-ups expected on days 1–10 of a month", "objection window: 72 h"]
+  numbers: ["top-ups only under the mandate's published conditions", "objection window: 72 h"]
   address: "To be deployed"
-  sources: ["ADR-008#d4", "ADR-008#d6", "ADR-008#proposed-direction",
+  sources: ["ADR-008#d4", "ADR-008#d6", "ADR-008#d34", "ADR-008#proposed-direction", OD-89,
     "doc:docs/research/funding-registries-2026-10-02.md#the-live-top-up-registries", OD-78, "ADR-008#d31"]
 
 - id: growth-committee
@@ -461,7 +461,7 @@
   status: new
   label: built
   what: "Refillable quotas on the operator modifier, counted in token units. An approval to a protocol spends the key of that spender. An approval of zero is always free."
-  controlled_by: "The DAO sets them first. A budget motion changes a key only after an event, such as a new floor or a product unlock (OD-56). A motion sets only a key that the policy already holds, so the enabling vote holds spare keys for each token, and a new spender takes one (OD-69)."
+  controlled_by: "The DAO sets them first. A budget motion changes a key only after an event, such as a new mandate size or a product unlock (OD-56). A motion sets only a key that the policy already holds, so the enabling vote holds spare keys for each token, and a new spender takes one (OD-69)."
   can:
     - "Refill each period up to a maximum. Each successful call draws them down."
     - "Stay apart: the key of one asset never pays for another asset."
