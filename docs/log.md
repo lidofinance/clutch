@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Decision**: Recorded EM's choices for OD-92 to OD-94. The enabling vote approves the hash of each Safe batch, and anyone executes the batches after it; the registry factories deploy the registries with Voting as admin, and a check before the vote proves every role; the vote keeps the four USDS items, against the agent's recommendation; monitoring warns when few Easy Track motion slots are free, and the budget factory can set several keys in one motion.
+* **Evidence**: Ran the enabling-vote rehearsal again on a fork of block 26249900, after OD-89 to OD-91. All eight tests pass. LDO left the Asset Safe policy and the orders account's relayer approvals, so the largest batch fell to 6,304,514 gas and 60,292 bytes; a vote with the batches inside still needs 37,606,772 gas. The Agent still holds no USDS, the shared payment permission still has 22 params, and one Easy Track motion was open. The rehearsal's open decisions are now OD-92 to OD-94.
 * **Decision**: Recorded EM's choice for OD-91: LDO leaves the launch list, the operator's order lists and the recovery sell list. The emergency role no longer transfers LDO to the Aragon Agent, and the dry run no longer buys LDO.
 
 ## 2026-10-21
@@ -25,6 +27,7 @@
 
 ## 2026-10-15
 
+* **Evidence**: Rehearsed the enabling vote end to end on a mainnet fork of block 26196400, with the live Aragon Voting, ACL, Finance, Easy Track and its executor. The vote as the spec describes it cannot start under EIP-7825; a vote in which Voting approves the hash of each Safe batch fits. The rehearsal also found that the standard builders make the Agent the registries' admin, that Voting must take the token list's add-token role to add USDS, that the USDS items fund nothing at launch, and that Easy Track's shared limit of open motions was nearly full in September 2026. Added the research note with a ramp-up plan, opened OD-92 to OD-94, pointed the enabling-vote spec at the findings, and made the policy checks cover the rehearsal's artifact.
 * **Decision**: Kept OD-80 and OD-83 after a review of the operator Safe. EM chose the recorded design over an operator Safe owned by the committee's Safe, and the agent advised against a return to a new Safe with the same signers. ADR 010 lists the owned Safe as not chosen, and ADR 010 and the LIP draft now name the duties of the committee's Safe that the guard also screens: Stonks orders and top-up motions, the Stonks 2.0 price router, and the LDO buyback roles. A new research note keeps the evidence.
 
 ## 2026-10-14

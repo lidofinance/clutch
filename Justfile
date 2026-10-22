@@ -49,9 +49,9 @@ check-docs:
 	{{py}} scripts/check_invariants.py
 	{{py}} scripts/test_checks.py
 
-# The policy artifact equals a fresh compile; the compiler's tests; the type check
+# The policy artifacts equal a fresh compile; the compiler's tests; the type check
 check-policy:
-	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun test compiler && ./node_modules/.bin/tsc --noEmit -p .
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json --check && bun test compiler && ./node_modules/.bin/tsc --noEmit -p .
 
 # Every control of the onboarding guide, in headless Chromium
 check-browser:
@@ -90,10 +90,10 @@ verify page by *flags:
 build:
 	forge build
 
-# Policy (ADR 004): compile the constellation into the committed fork artifact
+# Policy (ADR 004): compile the constellation into the committed fork artifact and the enabling-vote rehearsal's artifact
 policy-compile:
-	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json
 
-# Policy: fail if the committed artifact differs from a fresh compile; run the compiler tests
+# Policy: fail if a committed artifact differs from a fresh compile; run the compiler tests
 policy-check:
-	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun test compiler
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json --check && bun test compiler

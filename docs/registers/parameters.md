@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T18:22:59Z
+  at: 2026-10-22T19:14:25Z
 verified: []
 sources:
   - id: s1
@@ -37,7 +37,7 @@ sources:
 | Committee's Safe threshold | four of seven, its existing threshold | EM decisions of 2026-10-02 and 2026-10-14 (OD-80) [s1] | ADR 005 |
 | Safe version of the Asset Safe and the emergency Safe | v1.5.0; the committee's Safe stays on v1.3.0 (OD-80) | EM decisions of 2026-10-02 and 2026-10-05: the compatibility check met the condition; EM reported the vendor's confirmation of v1.5.0 support, which closed the gate; the due diligence found no blocker (OD-17) [s1][s3] | ADR 005 |
 | Asset Safe fallback handler | none; a protocol that needs one comes back to EM | EM decision of 2026-10-05 [s1] | ADR 005 |
-| How Aragon Voting authorizes an Asset Safe transaction | `approveHash`, or Aragon Voting sends the transaction itself; never a contract signature | EM decisions of 2026-10-05 and 2026-10-14 (OD-73) [s1] | ADR 005 |
+| How Aragon Voting authorizes an Asset Safe transaction | `approveHash`, or Aragon Voting sends the transaction itself; never a contract signature; in the enabling vote, Voting approves the hash of each Safe batch, and anyone executes the batches after the vote | EM decisions of 2026-10-05, 2026-10-14 (OD-73) and 2026-10-22 (OD-92) [s1] | ADR 005 |
 | Emergency Safe | three of five: two committee members, two Emergency Brakes members and a fifth signer who is a member of neither body; the committee and the Emergency Brakes multisig appoint two seats each, and a DAO Snapshot appoints the fifth | EM decision of 2026-10-13 (OD-58) [s1], replacing threshold two with the committee's owners (OD-30) | ADR 005 |
 | Switch holder | the emergency Safe, through the emergency role; the module argument is pinned to the operator modifier; the technical role is gone | EM decision of 2026-10-13 (OD-58) [s1] | ADR 005 |
 | Emergency Brakes multisig in the vault | no role; it keeps only the global Easy Track pause | EM decision of 2026-10-13 (OD-58) [s1] | ADR 005 |
@@ -68,8 +68,9 @@ sources:
 | Mandate size | a ceiling: the vault holds up to it in assets; each funding counts in US dollars at its value when funded, and the legacy positions count too; more funding needs a separate DAO approval; a replenishment needs the mandate's published eligibility conditions and its disclosure; the figure is not in this repository | EM decision of 2026-10-21 (OD-89) [s1], replacing the floor of mandate draft v0.1 | ADR 008 |
 | Treasury share | the vault never holds more than the mandate's share of the DAO's non-LDO treasury; the figure is not in this repository | EM decision of 2026-10-21 (OD-89) [s1]; open: the mandate owes the share's base, the time of its test and the remedy for a breach that no vault transaction causes | ADR 008 |
 | Funded value | the first-loss shares at their value on the day of the transfer, plus each top-up at its value on the day of its enactment, by the report's price rule; each top-up's forum post states it, with the headroom under the mandate size | Proposed, following OD-89 | ADR 008, [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
-| Registry admin | Aragon Voting, for each of the vault's two funding registries; it sets a limit and a period | EM decision of 2026-10-14 (OD-73) [s1] | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 008](/adr/008-funding-through-existing-payments.md) |
-| Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS | EM decision of 2026-10-05 [s1] | ADR 008 |
+| Registry admin | Aragon Voting, for each of the vault's two funding registries; it sets a limit and a period; the registry factories deploy both registries with Voting as admin, the deployer adds the Asset Safe and sets each limit, then gives up its roles, and a check before the vote proves every role | EM decisions of 2026-10-14 (OD-73) and 2026-10-22 (OD-92) [s1] | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 008](/adr/008-funding-through-existing-payments.md) |
+| Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS; the enabling vote adds USDS: Voting takes the list's add-token role, adds USDS and gives the role up | EM decisions of 2026-10-05 and 2026-10-22 (OD-93) [s1] | ADR 008 |
+| Easy Track motion slots | Easy Track's limit of 20 open motions stays as it is; every committee shares it; monitoring warns when few slots are free; the budget factory can set several keys in one motion; the warning threshold is not set | EM decision of 2026-10-22 (OD-94) [s1]; the detector specification sets the threshold | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | Funding assets | USDC, USDT, DAI, USDS, sUSDS, stETH; not ETH | EM decision of 2026-10-05 [s1] | ADR 008 |
 | First-loss Safe | a Safe owned by Aragon Voting at one of one, with no guard or fallback handler, and one modifier with two roles: `first-loss` for the committee's Safe and `first-loss-burn` for the Easy Track executor; it holds only the first-loss shares | EM decisions of 2026-10-06 (OD-42), 2026-10-13 (OD-60, OD-67) and 2026-10-14 (OD-73) [s1] | ADR 008, [ADR 005](/adr/005-account-graph-and-roles.md) |
 | First-loss role holder | the committee's Safe, four of seven: the redemption and the claim, paid to the Aragon Agent; the guard screens each action once the launch cap lifts (OD-83) | EM decisions of 2026-10-13 (OD-60): "role is hold by TMC Safe" and "TMC Safe means operator safe"; the burn moved to motions (OD-67) [s1] | ADR 008, ADR 005 |

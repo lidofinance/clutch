@@ -77,6 +77,7 @@
     - "Set a limit or a period on either of the vault's two funding registries, as their admin."
     - "Manage the shared payment permission of the Easy Track executor, and rewrite it as one unit, and administer the shared stablecoin token list."
     - "Hold Easy Track's admin, pause, unpause and cancel roles itself. A vote item that unpauses Easy Track or cancels a queued motion runs when the vote runs."
+    - "Approve the hash of each Safe batch in the enabling vote. Anyone then sends the batch, with that approval as Voting's signature (OD-92)."
   cannot:
     - "Approve a vault transaction with a contract signature. It uses only `approveHash`, or it sends the transaction itself."
     - "Gain power over the treasury from owning the vault: it already pays out of the Aragon Agent through Finance."
@@ -87,7 +88,7 @@
     "ADR-008#d10", "ADR-008#d21", OD-36, OD-46, OD-59, OD-60, OD-67, OD-73, INV-001, INV-021, INV-023,
     "doc:docs/research/single-vote-review-2026-10-14.md#decisions-of-2026-10-14",
     "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts", OD-78, "ADR-007#d38",
-    "ADR-005#d30"]
+    "ADR-005#d30", "ADR-005#d32", OD-92]
 
 - id: dual-governance
   node: dao
@@ -160,7 +161,7 @@
   name: Funding registries (two)
   status: instance
   label: specified
-  what: "Two new registries from Easy Track's standard builder, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a limit per month that is a backstop under the mandate size."
+  what: "Two new registries from Easy Track's registry factories, with Aragon Voting as their admin, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a limit per month that is a backstop under the mandate size."
   controlled_by: "Aragon Voting is the admin (OD-73). The Easy Track executor spends the limit."
   can:
     - "Pay only the Asset Safe."
@@ -169,11 +170,12 @@
     - "Take a new recipient from the executor. Only the DAO changes a recipient, a limit or a period."
     - "Enforce the mandate's rule that a Snapshot vote follows an objection."
     - "Stop two full monthly limits within about 72 hours around a month boundary."
+    - "Keep a role with the deployer. It sets each registry up and gives up its roles, and a check before the vote proves every role (OD-92)."
   numbers: ["period: one calendar month", "limit: one mandate size each, from the attested computation"]
   address: "To be deployed"
   sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d8", "ADR-008#proposed-direction", INV-017,
     "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts", OD-73, "ADR-005#d28", OD-78,
-    "ADR-008#d31", "ADR-008#d32", OD-89]
+    "ADR-008#d31", "ADR-008#d32", OD-89, "ADR-008#d35", OD-92]
 
 - id: topup-factories
   node: funding
@@ -226,11 +228,12 @@
     - "Shorten a motion's window. The global window can never go below 48 hours."
     - "Expire a motion. After a pause or the switch, a queued motion can still enact, so the DAO's restart vote cancels the queued motions first (OD-59)."
     - "Reach the Aragon Agent."
-  numbers: ["window: 72 h", "objection: 0.5% of LDO", "window floor: 48 h"]
+    - "Hold more than 20 open motions at once. Every committee shares the limit, so monitoring warns when few slots are free (OD-94)."
+  numbers: ["window: 72 h", "objection: 0.5% of LDO", "window floor: 48 h", "open motions: at most 20, shared"]
   address: "0xF0211b7660680B49De1A7E9f25C65660F0a13Fea"
   sources: ["ADR-006#d1", "ADR-006#d4", "ADR-006#d6", "ADR-006#d11", "ADR-006#context", "ADR-006#proposed-direction",
     INV-005, OD-45, OD-59, "doc:docs/research/chain-reads-2026-09-30.md#easy-track",
-    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts"]
+    "doc:docs/research/cfo-feedback-2026-10-13.md#easy-track-who-pauses-who-restarts", "ADR-009#d45", OD-94]
 
 - id: evmscript-executor
   node: easytrack
@@ -280,7 +283,7 @@
   what: "A new Easy Track factory that sets an operator [[budget key]]. Each key has its own ceilings."
   controlled_by: "The committee's Safe is the trusted caller. The DAO registers it by vote."
   can:
-    - "Set the balance, the maximum and the refill of one of the operator's keys, below that key's ceilings."
+    - "Set the balance, the maximum and the refill of the operator's keys, each below its own ceilings. One motion can set several keys (OD-94)."
     - "Carry the unlock of a matured Lido product: a forum post, then a budget motion that raises the product's key (OD-41)."
   cannot:
     - "Set a refill period below 30 days."
@@ -289,7 +292,7 @@
     - "Set a key that the policy does not already hold. The enabling vote holds spare keys for each token, so a new spender takes one (OD-69)."
   numbers: ["refill period: 30 days or more", "no routine retune: a motion only after an event (OD-56)", "every budget motion alerts"]
   sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d28", "ADR-009#d30", "ADR-009#d31", "ADR-009#proposed-direction",
-    "ADR-009#d39", "ADR-009#consequences", INV-012, OD-41, OD-56, OD-69, "lip:part-7"]
+    "ADR-009#d39", "ADR-009#consequences", INV-012, OD-41, OD-56, OD-69, "lip:part-7", "ADR-009#d45", OD-94]
 
 - id: first-loss-burn-factory
   node: easytrack

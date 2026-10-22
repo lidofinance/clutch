@@ -114,10 +114,10 @@
 
 - name: Funding registries and top-up factories
   column: instance
-  what: "Two registries from Easy Track's standard builder, and two instances of its top-up factory."
+  what: "Two registries from Easy Track's registry factories, with Aragon Voting as their admin, and two instances of its top-up factory. The deployer sets each registry up and gives up its roles, and a check before the vote proves every role (OD-92)."
   why: "The same pattern already pays many Lido recipients. Each registry pays only the Asset Safe, within a monthly limit."
   owner: "The DAO registers them; Aragon Voting administers the registries"
-  sources: ["ADR-008#d4", "ADR-008#proposed-direction", OD-06, OD-73, "ADR-005#d28"]
+  sources: ["ADR-008#d4", "ADR-008#proposed-direction", OD-06, OD-73, "ADR-005#d28", "ADR-008#d35", OD-92]
 
 - name: The constellation
   column: instance
