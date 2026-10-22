@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-21T20:40:44Z
+  at: 2026-10-22T18:22:59Z
 verified: []
 sources:
   - id: s1
@@ -468,7 +468,7 @@ What it costs, and what must be planned:
 - **Assets sit in the orders account between transfer and fill.** This is a short custody excursion out of the Asset Safe and should be stated plainly rather than glossed.
 - **A recovery order names its own limit,** so it can fill in a depeg at a price that the emergency signers accept. The emergency service level remains time to initiate. Nothing on chain stops a bad limit either: three emergency signers, unscreened, choose the limit, and they need not include a committee member. CoW's rules hold the fill to the on-chain market, every emergency swap pages at high severity, and monitoring alerts on a limit far below a market price (OD-48).
 - **The order signer has no known audit.** It is 40 lines long and in the scope of Lido's phase-3 review. Ackee audited ComposableCoW and CoW's fallback handler, and Gnosis reviewed ComposableCoW. Whether the TWAP handler is in those reports' scope is not checked, so it joins the phase-3 review [s11].
-- **Tokens.** The operator's lists start with stETH, wstETH, WETH, USDC, USDT, USDS and LDO; DAI and sUSDS stay off (OD-22, OD-46). LDO stays only if the team confirms a need (OD-91, open). The launch has no stop-loss orders (OD-79). Recovery sells every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues. A DAO vote adds a token to the orders account, with its relayer approval, emergency transfer and recovery orders; no motion writes there (OD-36, OD-46, OD-78). Staking stays; the withdrawal queue left the design on 2026-10-08, so unstaking goes through CoW orders (ADR 007, decision 27).
+- **Tokens.** The operator's lists start with stETH, wstETH, WETH, USDC, USDT and USDS; DAI and sUSDS stay off (OD-22, OD-46), and LDO left the launch list (OD-91). The launch has no stop-loss orders (OD-79). Recovery sells every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues. A DAO vote adds a token to the orders account, with its relayer approval, emergency transfer and recovery orders; no motion writes there (OD-36, OD-46, OD-78). Staking stays; the withdrawal queue left the design on 2026-10-08, so unstaking goes through CoW orders (ADR 007, decision 27).
 - **What it replaced.** Until 2026-10-06 the design used eighteen Stonks 2.0 instances, a converter, and four feeds on the shared Stonks price router [s9]. That bounded the price on chain, but it offered no limit, TWAP or stop-loss order, and its band could stop a recovery order in a real depeg (OD-43).
 
 ##### 6.2 Module disabling — the emergency role's switch **[Implemented]**
@@ -517,11 +517,10 @@ The `Allowance` struct field order in the deployed mastercopy is `refill, maxRef
 | sUSDS | Held, savings position, funding inbound | Template: tokenized vault. In the payment chain, ceiling 2,000,000 per payment (OD-11) |
 | earnETH | Held, vault position | Asynchronous deposit and redeem queues |
 | earnUSD | Held, vault position | Asynchronous deposit and redeem queues |
-| LDO | Held, on the operator's order lists | Open: LDO leaves the launch list unless the team confirms a need (OD-91) |
 | Orders account | Swap venue | CoW market, limit and TWAP orders. The operator's orders pay the Asset Safe; recovery orders buy USDC or USDT and pay the Agent. No price bound exists on chain, and no router swap at launch (OD-43) |
 | Lido Lend | Lending venue | Expected October 2026, Morpho-Blue-compatible. **Zero-day ready by design:** the Morpho-Blue template ships at launch with end-to-end tests against the live Morpho Blue deployment, so onboarding is one Easy Track motion carrying the market address once it exists. No vote, no new contract, no policy migration. The protocol cap applies until it matures and a budget motion with a forum post unlocks it (OD-41) |
 
-Assets explicitly **not** in the launch set: sDAI and third-party lending markets other than Lido Lend. Router swaps on Uniswap and 1inch wait until the screening vendor can bound a swap's minimum output (OD-43).
+Assets explicitly **not** in the launch set: sDAI, LDO (OD-91) and third-party lending markets other than Lido Lend. Router swaps on Uniswap and 1inch wait until the screening vendor can bound a swap's minimum output (OD-43).
 
 After OD-11, **seeding and top-ups use USDC, USDT, DAI, USDS, sUSDS or stETH**. USDS needs the enabling vote to add it to the payment chain. ETH is not a funding asset.
 

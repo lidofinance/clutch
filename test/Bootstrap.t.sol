@@ -26,7 +26,7 @@ contract BootstrapDrill is Test {
         assertGt(IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48).balanceOf(safe), 0, "USDC");
         assertGt(IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7).balanceOf(safe), 0, "USDT");
         assertGt(IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F).balanceOf(safe), 0, "DAI");
-        assertGt(IERC20(0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32).balanceOf(safe), 0, "LDO");
+        assertEq(IERC20(0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32).balanceOf(safe), 0, "LDO is outside the launch scope");
         assertGt(IERC20(0xdC035D45d973E3EC169d2276DDab16f1e407384F).balanceOf(safe), 0, "USDS");
         assertGt(IERC20(0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD).balanceOf(safe), 0, "sUSDS");
         // gas reserve preserved

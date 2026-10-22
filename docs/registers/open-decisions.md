@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-21T20:39:15Z
+  at: 2026-10-22T18:22:59Z
 verified: []
 sources:
   - id: s1
@@ -22,7 +22,6 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
 | OD-65 | Who holds the emergency Safe's fifth seat? The fifth signer is a member of neither the committee nor the Emergency Brakes multisig (OD-58), and a DAO Snapshot appoints them. | [ADR 005](/adr/005-account-graph-and-roles.md) | EM said on 2026-10-13 "yup, tentatively tho" to a member of the Tech team. Accept that as a criterion, not a name: a Tech-team member on neither body, whose key and seed are generated apart from the Emergency Brakes members' setup, who signs a written statement of independence, keeps on-call duty and takes part in the timed drill. Review the seat at the first rotation, because the only quorum without the committee is then all from the engineering organisation | EM; a DAO Snapshot appoints the signer |
-| OD-91 | Does the operator need LDO? LDO is not a funding asset (OD-11), so it enters the vault only through a buy order or a DAO vote, and a buy order reads as an LDO buyback. (A) LDO leaves the launch list, the operator's order lists and the recovery sell list. (B) LDO stays on the sell lists only. (C) LDO stays as EM decided on 2026-09-22. EM asked the team on 2026-10-21. | [ADR 011](/adr/011-launch-scope.md) | A, unless the team names a need. Record the team's answer explicitly before the policy changes | EM |
 
 ## Closed
 
@@ -121,5 +120,6 @@ Generated from [closed-decisions.yaml](closed-decisions.yaml). EM's words are in
 | OD-88 | What does the screening vendor's integration still lack: the approval in the Zodiac UI's signing flow, and an alert on a late approval? | 2026-10-20 | [OD-84 to OD-88: two readings, the provider's reports and its checks](decision-log.md#2026-10-20--od-84-to-od-88-two-readings-the-providers-reports-and-its-checks); [ADR 010](/adr/010-pre-execution-screening.md#decision), decisions 25 and 26 | In force. It refines OD-83. |
 | OD-89 | What does the mandate size mean: a floor that top-ups refill, or a ceiling? | 2026-10-21 | [OD-89 and OD-90 decided, OD-91 opened: the mandate size, the mandate's owed text, and LDO](decision-log.md#2026-10-21--od-89-and-od-90-decided-od-91-opened-the-mandate-size-the-mandates-owed-text-and-ldo); [ADR 008](/adr/008-funding-through-existing-payments.md#decision), decisions 32 to 34 | In force. It replaces in part OD-06; it refines OD-42 and OD-71. |
 | OD-90 | Where does each item that the mandate text owes go: the Snapshot text, the forum post, or the LIP alone? | 2026-10-21 | [OD-89 and OD-90 decided, OD-91 opened: the mandate size, the mandate's owed text, and LDO](decision-log.md#2026-10-21--od-89-and-od-90-decided-od-91-opened-the-mandate-size-the-mandates-owed-text-and-ldo); [specification](/specs/lip-draft.md) | In force. It refines OD-14, OD-26, OD-39, OD-40, OD-58 and OD-62. |
+| OD-91 | Does the operator need LDO? | 2026-10-22 | [OD-91 decided: LDO leaves the launch list](decision-log.md#2026-10-22--od-91-decided-ldo-leaves-the-launch-list); [ADR 011](/adr/011-launch-scope.md#decision), decision 15 | In force. |
 
 <!-- end of generated block -->

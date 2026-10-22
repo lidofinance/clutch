@@ -702,10 +702,10 @@
   name: The tokens that the vault holds
   status: existing
   label: existing
-  what: "The launch list: ETH, WETH, stETH, wstETH, USDC, USDT, DAI, USDS, sUSDS, LDO, and the earnETH and earnUSD shares. The Asset Safe holds them; the stablecoins, sUSDS and stETH also fund the vault."
+  what: "The launch list: ETH, WETH, stETH, wstETH, USDC, USDT, DAI, USDS, sUSDS, and the earnETH and earnUSD shares. The Asset Safe holds them; the stablecoins, sUSDS and stETH also fund the vault."
   controlled_by: "Each token's own issuer and governance."
   can:
-    - "Be sold and bought in CoW orders by the operator, if on its lists: stETH, wstETH, WETH, USDC, USDT, USDS and LDO (OD-46)."
+    - "Be sold and bought in CoW orders by the operator, if on its lists: stETH, wstETH, WETH, USDC, USDT and USDS (OD-46). LDO left the launch list (OD-91)."
     - "Be sold by a [[recovery order]] into USDC, or into USDT: every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues."
   cannot:
     - "Be traded by the operator if off its lists. DAI earns through Sky's converter and sUSDS through deposit and redeem, so both stay off (OD-22, OD-46). A new token needs a DAO vote (OD-78)."
@@ -714,10 +714,9 @@
     - {name: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7"}
     - {name: "DAI", address: "0x6B175474E89094C44Da98b954EedeAC495271d0F"}
     - {name: "USDS", address: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"}
-    - {name: "LDO", address: "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32"}
   sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d5", "ADR-011#d7", "ADR-011#d11", "ADR-011#d12", "ADR-011#d14",
     "ADR-007#d5", "ADR-007#d21", "ADR-007#d22", "ADR-007#proposed-direction", OD-22, OD-26, OD-46,
-    "doc:docs/registers/parameters.md#parameters", OD-78, "ADR-007#d38"]
+    "doc:docs/registers/parameters.md#parameters", OD-78, "ADR-007#d38", "ADR-011#d15", OD-91]
 
 # --- First-loss Safe ----------------------------------------------------------------------------
 - id: first-loss-safe

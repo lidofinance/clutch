@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-21T20:43:08Z
+  at: 2026-10-22T18:22:59Z
 verified: []
 sources:
   - id: s1
@@ -170,6 +170,8 @@ EM decided on 2026-10-14, in the 80/20 pass after OD-78, closing OD-79 [s1]:
 39. The launch has no stop-loss orders. The orders policy allows no StopLoss handler and pins no oracle, and the vendor gets no request for a stop-loss expiry rule. TWAP orders stay.
 
 Decision 39 replaces the stop-loss parts of decisions 18, 24 and 29, and decisions 33 and 37.
+
+Since OD-91, LDO is out of the launch list, so it leaves the rebalancing set of decision 4 and the operator's lists of decision 22 ([ADR 011](/adr/011-launch-scope.md), decision 15).
 
 Since OD-89, the TM Floor Value of decision 16 means one mandate size ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 32 to 34).
 

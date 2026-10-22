@@ -79,7 +79,6 @@ owed:
   - "Figures owed from the attested computation once the mandate is approved: the budgets, the orders budgets, the funding limits and the liquidity buffer."
   - "The mandate's drafters owe the holder and the form of the Twyne position."
   - "The mandate's drafters owe the treasury share's base, the time of its test, the remedy for a breach that no vault transaction causes, and the eligibility conditions of a replenishment (OD-89)."
-  - "The team confirms whether the operator needs LDO. If not, LDO leaves the launch list and the order lists (OD-91)."
   - "Phase 2 builds the round-trip check, the orders account and its permissions, the first-loss Safe and its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the mandate's rule data, the comparison of the two readings, and the invariant-to-test check."
   - "No runbook is written yet. Each needs a fork drill before it counts."
   - "The production deployment script is not written yet. The enabling-vote page lists what the one vote holds."

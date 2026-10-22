@@ -27,7 +27,7 @@ blocks:
 
   - id: assets
     title: Assets and venues
-    says: "A launch list of assets and venues: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access, Lido Lend access and LDO. It names four main stablecoins: USDC, USDT, USDS and DAI."
+    says: "A launch list of assets and venues: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access and Lido Lend access. It names four main stablecoins: USDC, USDT, USDS and DAI."
     kept:
       - "On chain: default deny. A new target needs a template motion with a 72-hour objection window, or a DAO vote."
       - "Before execution: the screening vendor checks every operator transaction and every new motion, once the launch cap lifts (OD-54)."
@@ -46,11 +46,11 @@ blocks:
         why: "The vault stakes ETH, trades WETH in CoW orders and earns on DAI through the converter, so the list must name what the launch uses."
         state: owed
         sources: ["ADR-011#d7", "ADR-011#d12", "ADR-011#d14", OD-90]
-      - text: "LDO leaves the launch list and the operator's order lists, unless the team confirms a need."
-        why: "LDO is not a funding asset, so it would enter the vault only through a buy order or a DAO vote, and a buy order reads as an LDO buyback. The answer is open (OD-91)."
-        state: proposed
-        sources: [OD-91, "ADR-011#d1", "ADR-007#d22"]
-    sources: ["ADR-011#d1", "ADR-011#d2", "ADR-006#d2", "ADR-006#d3", "ADR-006#d11", "ADR-006#context", INV-004,
+      - text: "LDO leaves the launch list, the operator's order lists and the recovery sell list."
+        why: "LDO is not a funding asset, so it would enter the vault only through a buy order or a DAO vote, and a buy order reads as an LDO buyback. EM removed it on 2026-10-22."
+        state: design
+        sources: [OD-91, "ADR-011#d15", "ADR-011#d1", "ADR-007#d22"]
+    sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d15", "ADR-006#d2", "ADR-006#d3", "ADR-006#d11", "ADR-006#context", INV-004,
       INV-015, "lip:part-8", "doc:docs/specs/control-matrix.md#the-matrix", OD-54]
 
   - id: caps

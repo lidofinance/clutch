@@ -623,3 +623,9 @@
     - "2026-10-21 — OD-89 and OD-90 decided, OD-91 opened: the mandate size, the mandate's owed text, and LDO"
   see: [/specs/lip-draft.md]
   refines: [OD-14, OD-26, OD-39, OD-40, OD-58, OD-62]
+- id: OD-91
+  question: "Does the operator need LDO?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-91 decided: LDO leaves the launch list"
+  adr: [ADR-011#d15]

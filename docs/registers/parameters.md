@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-21T20:39:52Z
+  at: 2026-10-22T18:22:59Z
 verified: []
 sources:
   - id: s1
@@ -57,7 +57,7 @@ sources:
 | Order lists and relayer approvals | a DAO vote sets the lists, and adds a token with its relayer approval, emergency transfer and recovery orders; no motion adds a token, and no role can raise an approval on the orders account | EM decisions of 2026-10-06 (OD-46) and 2026-10-14 (OD-78) [s1]; the approval rule is the agent's proposal | ADR 006, ADR 007 |
 | Spare budget keys | spare keys for each token, with ceilings, in the enabling vote; two for each token on the launch lists is the agent's proposal | EM decision of 2026-10-14 (OD-69) [s1] | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | DAI–USDS conversion | Sky's DaiUsds `0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`; the operator converts both ways, one to one; the receiver is pinned to the Asset Safe; DAI stays out of the operator's order tokens | EM decision of 2026-10-05 [s1]; read [s6] | [ADR 011](/adr/011-launch-scope.md) |
-| Operator's order tokens | stETH, wstETH, WETH, USDC, USDT, USDS, LDO; DAI and sUSDS stay out | EM decisions of 2026-09-22, 2026-10-05 and 2026-10-06 (the rebalancing set, OD-22, OD-46) [s1] | ADR 007, [ADR 011](/adr/011-launch-scope.md) |
+| Operator's order tokens | stETH, wstETH, WETH, USDC, USDT, USDS; DAI and sUSDS stay out; LDO left the launch list | EM decisions of 2026-09-22, 2026-10-05, 2026-10-06 and 2026-10-22 (the rebalancing set, OD-22, OD-46, OD-91) [s1] | ADR 007, [ADR 011](/adr/011-launch-scope.md) |
 | Recovery buy tokens | USDC, or USDT as the second destination | EM decisions of 2026-09-22, 2026-10-05 and 2026-10-06 (OD-26, OD-43) [s1]; the sell list is an agent proposal in ADR 007 | ADR 007 |
 | Per-payment ceilings of the shared ACL | stETH 1,000; ETH 1,000; DAI 2,000,000; USDC 2,000,000; USDT 2,000,000; sUSDS 2,000,000; LDO 5,000,000 | Read [s2]; EM decision of 2026-10-05 [s1]: a DAO vote adds USDS and keeps the other entries | [ADR 008](/adr/008-funding-through-existing-payments.md) |
 | Ceiling per USDS payment | 2,000,000 | EM decision of 2026-10-05 [s1] | ADR 008 |

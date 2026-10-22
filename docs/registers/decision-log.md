@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-21T20:39:15Z
+  at: 2026-10-22T18:22:59Z
 verified: []
 sources:
   - id: s1
@@ -58,6 +58,9 @@ sources:
   - id: s16
     resource: "urn:clutch:interview:2026-10-21-mandate-size"
     title: EM's answers on the mandate size, LDO and the mandate's owed text, 2026-10-21; the transcript is not in the repository
+  - id: s17
+    resource: "urn:clutch:interview:2026-10-22"
+    title: EM's answer on OD-91 and the go-ahead to push, 2026-10-22; the transcript is not in the repository
 ---
 
 # Decision log
@@ -67,6 +70,18 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-22 — OD-91 decided: LDO leaves the launch list
+
+EM answered OD-91:
+
+> 1. remove LDO from the launch list
+> 2. commit and push
+
+Recorded as:
+
+- (1, OD-91) A: LDO leaves the launch list, and with it the operator's order lists and the recovery sell list ([ADR 011](/adr/011-launch-scope.md), decision 15). So that the policy and the kit follow the launch list, the agent also removed LDO from the emergency role's transfers to the Aragon Agent and from the dry run's bootstrap. The dry run's teardown still sweeps any LDO that the Asset Safe holds.
+- (2) EM's go-ahead to commit and push the decisions branch of OD-89 to OD-91. [s17]
 
 ## 2026-10-21 — OD-89 and OD-90 decided, OD-91 opened: the mandate size, the mandate's owed text, and LDO
 
