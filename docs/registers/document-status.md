@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-22T18:22:59Z
+  at: 2026-10-22T18:45:16Z
 verified: []
 ---
 
@@ -44,6 +44,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/contributor-readiness-2026-10-07.md](/research/contributor-readiness-2026-10-07.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/cow-orders-account-2026-10-06.md](/research/cow-orders-account-2026-10-06.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/dai-usds-conversion-2026-10-05.md](/research/dai-usds-conversion-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
+| [research/enabling-vote-rehearsal-2026-10-15.md](/research/enabling-vote-rehearsal-2026-10-15.md) | Research Note | slop |  | 2026-10-22 | none |
 | [research/funding-registries-2026-10-02.md](/research/funding-registries-2026-10-02.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/guide-invariants-2026-10-12.md](/research/guide-invariants-2026-10-12.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/legacy-investments-2026-10-05.md](/research/legacy-investments-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
@@ -58,7 +59,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/stonks-pricing-2026-10-05.md](/research/stonks-pricing-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-10-19 | none |
 | [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-10-21 | none |
-| [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-10-21 | none |
+| [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-10-22 | none |
 | [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-10-21 | none |
 | [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-10-22 | none |
 | [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-10-19 | none |

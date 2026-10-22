@@ -1,0 +1,3 @@
+date: '2026-10-22'
+kind: Evidence
+text: Ran the enabling-vote rehearsal again on a fork of block 26249900, after OD-89 to OD-91. All eight tests pass. LDO left the Asset Safe policy and the orders account's relayer approvals, so the largest batch fell to 6,304,514 gas and 60,292 bytes; a vote with the batches inside still needs 37,606,772 gas. The Agent still holds no USDS, the shared payment permission still has 22 params, and one Easy Track motion was open. The rehearsal's open decisions are now OD-92 to OD-94.

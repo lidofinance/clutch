@@ -1,0 +1,17 @@
+{
+  "network": "rehearsal-26249900",
+  "chainId": 1,
+  "forkBlock": 26249900,
+  "note": "The enabling-vote rehearsal on a fork of block 26249900 (test/EnablingVoteRehearsal.t.sol): the live Aragon Voting owns the Safes, and the live committee's Safe and Easy Track executor are members. Not a mainnet deployment.",
+  "agent": "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+  "assetSafe": "0x6A093EdE9B87EE0248beFd38e4B2Cd9F34973D35",
+  "operatorModifier": "0x35f1dBb95f84cbf9f6FEF5a94Fb944db8E544d8B",
+  "safetyModifier": "0xb46FA3970E90C374a703c852B58625eb7C419efc",
+  "modules": [
+    "0x35f1dBb95f84cbf9f6FEF5a94Fb944db8E544d8B",
+    "0xb46FA3970E90C374a703c852B58625eb7C419efc"
+  ],
+  "operatorSafe": "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647",
+  "emergencySafe": "0x23BAb8FFEBD5E626B9e5CdE837Cce99B77365C46",
+  "easyTrackExecutor": "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977"
+}

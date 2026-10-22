@@ -1,0 +1,3 @@
+date: '2026-10-15'
+kind: Evidence
+text: Rehearsed the enabling vote end to end on a mainnet fork of block 26196400, with the live Aragon Voting, ACL, Finance, Easy Track and its executor. The vote as the spec describes it cannot start under EIP-7825; a vote in which Voting approves the hash of each Safe batch fits. The rehearsal also found that the standard builders make the Agent the registries' admin, that Voting must take the token list's add-token role to add USDS, that the USDS items fund nothing at launch, and that Easy Track's shared limit of open motions was nearly full in September 2026. Added the research note with a ramp-up plan, opened OD-92 to OD-94, pointed the enabling-vote spec at the findings, and made the policy checks cover the rehearsal's artifact.

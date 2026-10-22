@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-21T20:39:52Z
+  at: 2026-10-22T18:45:16Z
 verified: []
 sources:
   - id: s1
@@ -34,11 +34,16 @@ sources:
   - id: s8
     resource: /research/single-vote-review-2026-10-14.md
     title: One Aragon vote to launch, Easy Track afterwards, 2026-10-14 — the review, and Easy Track's admin role read on chain
+  - id: s9
+    resource: /research/enabling-vote-rehearsal-2026-10-15.md
+    title: The enabling vote rehearsed on a mainnet fork, 2026-10-15 and 2026-10-22 — why this vote cannot start as written, and the vote that fits
 ---
 
 # The enabling vote
 
 Clutch launches with one Aragon vote, the enabling vote [s8].
+
+A fork rehearsal on 2026-10-15, run again on 2026-10-22, found that this vote cannot start as written [s9]. Aragon Voting stores the whole script when a vote starts, and with the Safe batches inside, that transaction needs more gas than EIP-7825 lets one transaction use. The rehearsal also found that the standard builder cannot make Voting a registry's admin, and that Voting must take the token list's add-token role before it adds USDS. OD-92 and OD-93 ask EM to decide the changes. Until EM decides, this page keeps the decided text.
 
 ## Before the vote
 
