@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T21:39:40Z
+  at: 2026-10-22T21:59:44Z
 verified: []
 sources:
   - id: s1
@@ -67,6 +67,9 @@ sources:
   - id: s19
     resource: "urn:clutch:interview:2026-10-22-sweep"
     title: EM's answers on the documentation sweep's open items, 2026-10-22; the transcript is not in the repository
+  - id: s20
+    resource: "urn:clutch:interview:2026-10-22-verify"
+    title: EM's verification of ADR 001, ADR 003 and ADR 004, and the go-ahead to push, 2026-10-22; the transcript is not in the repository
 ---
 
 # Decision log
@@ -76,6 +79,17 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-22 — ADR 001, ADR 003 and ADR 004 verified again
+
+At EM's request (the entry below), the agent fixed the stale text of the accepted ADR 001, ADR 003 and ADR 004, and asked EM to verify the three pages again. EM wrote:
+
+> I verify the changes of ADR001-004; commit and push
+
+Recorded as:
+
+- EM verifies ADR 001, ADR 003 and ADR 004 again after the fixes of 2026-10-22, so they stay accepted. At this instruction, the agent recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verifications are EM's. ADR 002 did not change, so its verification of 2026-10-20 stands.
+- EM's go-ahead to commit and push the branch of the documentation sweep, OD-95 to OD-99 and the harness fix. [s20]
 
 ## 2026-10-22 — OD-95 to OD-99 decided: the public repository, the order signer as new code, re-grants by motion, the seed's price rule and security reports
 
