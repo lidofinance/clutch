@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T18:22:59Z
+  at: 2026-10-22T20:15:25Z
 verified: []
 sources:
   - id: s1
@@ -127,6 +127,8 @@ EM decided on 2026-10-09, closing OD-57 [s1]:
 
 28. The orders account carries one modifier, with the operator, emergency and technical roles and no governance role. The technical role stops the operator there by removing the operator Safe's membership of the operator role, with every argument pinned ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 21 and 22).
 
+Decision 28 replaces "its own modifiers" in decision 17.
+
 EM decided on 2026-10-13, after the committee's feedback, closing OD-61 [s1]:
 
 29. Every operator order lives at most 90 days: a market or limit order through the order signer's `validDuration`, a TWAP order through its parts and their spacing, and a stop-loss order through the screening rule of decision 24. Each monthly report lists every open order, with its limit, its age and the idle balance behind it.
@@ -173,8 +175,6 @@ Decision 39 replaces the stop-loss parts of decisions 18, 24 and 29, and decisio
 
 Since OD-91, LDO is out of the launch list, so it leaves the rebalancing set of decision 4 and the operator's lists of decision 22 ([ADR 011](/adr/011-launch-scope.md), decision 15).
 
-Since OD-89, the TM Floor Value of decision 16 means one mandate size ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 32 to 34).
-
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as text.
@@ -190,9 +190,9 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - **Re-affirmation.** At 30 days, alert the committee to confirm or cancel each open order. Monthly reports list its limit, age, distance to market and idle balance (decision 29). Neither control acts on chain. Removing a token or tightening a bound also requires cancellation of affected orders.
 - **Relayer approvals.** The enabling vote has the orders account approve CoW's vault relayer for the maximum amount of all listed tokens, including recovery tokens. No role can raise an orders-account approval, so operator revocation leaves recovery settlement available. Zeroing an approval stops all orders in that token until a DAO vote restores it; transfer to the Agent remains available.
 - **Governance.** The orders account has no `governance` role (decisions 28 and 38). Tokens require DAO votes (decision 21), as does the signer's delegatecall (OD-36). Asset Safe governance refuses the orders account and its modifier (OD-38).
-- **Tokens.** Operator lists start with decision 22. Recovery sells the launch list except ETH, which is staked first, and Earn shares, which use redeem queues. Recovery buys USDC, with USDT second. The enabling vote sets both lists.
+- **Tokens.** Operator lists start with stETH, wstETH, WETH, USDC, USDT and USDS (decision 22; OD-91). Recovery sells the launch list except ETH, which is staked first, and Earn shares, which use redeem queues. Recovery buys USDC, with USDT second. The enabling vote sets both lists.
 - **Routers.** None at launch. Uniswap and 1inch routes from the orders account, paying the Asset Safe, wait for the screening vendor's confirmation of a market-relative minimum-output check.
-- **Price controls.** Controls are order terms, CoW competition and EBBO, operator screening, funding budgets and fill monitoring (decision 26). Nothing on chain bounds the price; CoW competition and EBBO hold a fill to the on-chain market. Emergency orders have neither screening nor budgets; paging and limit alerts cover them.
+- **Price controls.** Controls are order terms, CoW competition and EBBO, operator screening after the lift, funding budgets and fill monitoring (decision 26). Nothing on chain bounds the price; CoW competition and EBBO hold a fill to the on-chain market. Emergency orders have neither screening nor budgets; paging and limit alerts cover them.
 - **Monitoring.** Watch open and conditional orders, 30-day confirmations, low recovery limits, idle tokens and each fill against market. Owner, threshold, module, fallback-handler and domain-verifier changes are critical. Watch relayer approvals and posting by the watch-tower.
 
 ## Options considered
@@ -210,21 +210,20 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 
 ## Consequences
 
-- The LIP and mandate must disclose the absent on-chain price bound and the replacement controls.
 - The orders account holds assets between transfer and fill, through fallback and contract-signature paths avoided by the Asset Safe. Operator funding is budgeted; emergency funding is not, so incident exposure can approach the vault's holdings. Fallback-handler and domain-verifier changes are critical alerts. The LIP must disclose custody in transit.
 - If the watch-tower stops, conditional orders wait and no funds move.
-- Operator transactions come from the committee's Safe, so the screening guard checks them. Three emergency signers, possibly without a committee member, choose unscreened recovery limits without an oracle floor ([ADR 005](/adr/005-account-graph-and-roles.md), decision 24). CoW's rules for the on-chain market, high-severity swap paging and low-limit alerts are the controls (decision 26).
+- Operator transactions come from the committee's Safe, so the screening guard checks them after the launch cap lifts ([ADR 010](/adr/010-pre-execution-screening.md) decision 24). Three emergency signers, possibly without a committee member, choose unscreened recovery limits without an oracle floor ([ADR 005](/adr/005-account-graph-and-roles.md), decision 24). CoW's rules for the on-chain market, high-severity swap paging and low-limit alerts are the controls (decision 26).
 - Decision 19's "always" applies to safety-listed tokens. Each onboarding motion adds its token's emergency transfer to the Agent (OD-49); recovery orders for new tokens still need a vote (decision 21).
 - Operator proceeds pay the Asset Safe; recovery pays the Agent. These destinations are explicit.
 - A recovery order names its own limit, so it can fill in a depeg at a price the emergency signers accept. The service level measures initiation, not fill time.
-- Chainlink's Feed Registry, the shared Stonks router and its committee manager no longer affect the vault (OD-45). Router settings no longer provide an untimelocked lever on the vault.
+- Since OD-43 and decision 39, Chainlink's Feed Registry, the shared Stonks router and its committee manager do not affect the vault. Router settings therefore give no untimelocked lever on the vault (OD-45).
 - Recovery sells wstETH, WETH and sUSDS directly. Operator WETH swaps can complete in minutes. Staking remains; unstaking uses CoW only (decision 27).
 - New tokens require DAO votes. The launch lists cover mandate assets, so additions should be rare.
 - Resting orders remain authorized for up to 90 days despite changes in price or context. The 30-day alert and monthly report prompt confirmation. Their backing tokens remain idle in orders.
 - The new Safe and modifier reuse existing code (decision 28). The enabling vote grants the signer's delegatecall; a motion cannot (OD-36).
 - This repository found no audit of the 40-line order signer. Lido reviews it in phase 3.
-- Without the withdrawal queue, neither operator error nor a captured quorum can create uncancellable stETH requests [s9]. Large unstaking trades at CoW market prices rather than queue par (decision 27).
-- The mandate must update venues, order types, the missing on-chain price bound and USDC/USDT recovery [s10] ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
+- Without the withdrawal queue, neither operator error nor a captured quorum can create uncancellable stETH requests [s9].
+- Mandate draft v0.1 lets the emergency path swap into any of the four main stablecoins [s10]. Since OD-90, the Snapshot text names CoW orders through the orders account as the only venue and states that nothing on chain bounds their price. The forum post names USDC, then USDT, as the recovery destinations and carries the control matrix.
 
 ## Confirmation
 

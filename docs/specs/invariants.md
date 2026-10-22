@@ -7,23 +7,23 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-21T20:39:52Z
+  at: 2026-10-22T20:25:16Z
 verified: []
 sources:
   - id: s1
     resource: /adr/index.md
     title: Decision records that set each invariant
   - id: s2
-    resource: "https://github.com/lidofinance/clutch/tree/7a8c6613602a0078807298b1cebb513af2d74bd5/test"
-    title: Kit test suites at 7a8c661
+    resource: "https://github.com/lidofinance/clutch/tree/32e43fe53fd9e6dca7cccf11d8e7bbc059b0b038/test"
+    title: Kit test suites at 32e43fe
   - id: s3
-    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/README.md"
-    title: Kit harness README at 7a8c661 — what the policy follows, and what the kit still lacks
+    resource: "https://github.com/lidofinance/clutch/blob/32e43fe53fd9e6dca7cccf11d8e7bbc059b0b038/test/README.md"
+    title: Kit harness README at 32e43fe — what the policy follows, and what the kit still lacks
 ---
 
 # Invariants
 
-The invariants below come from ADR 004 to ADR 011 [s1]. On 2026-10-05 the kit's policy and tests were brought in line with the decisions. The mapping pairs each invariant with the kit test that checks it, by name and by a read of the test body [s2]. It is not yet a CI check.
+The invariants below come from ADR 004 to ADR 011 [s1]. On 2026-10-05 the kit's policy and tests were brought in line with the decisions. The mapping pairs each invariant with the kit test that checks it, by name and by a read of the test body [s2]. CI checks that every named test exists and that every Draft invariant names a test.
 
 State "Draft" means the ADR is proposed. State "Retired" means a decision removed what the invariant protected. State "Pending" means the invariant depends on an open decision or on work that is not built. "Violated" would mean that the kit's policy breaks the invariant; no invariant is in that state. The harness README lists what the kit still lacks [s3].
 
@@ -37,7 +37,7 @@ State "Draft" means the ADR is proposed. State "Retired" means a decision remove
 | INV-006 | Every emitted script uses the production format: spec id `0x00000001` and a `uint32` length per call. Any other encoding is rejected. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Draft | `test_D1_production_callscript_encoding_accepted`, `test_D1_nonstandard_length_encoding_rejected`, `test_D1_malformed_length_rejected` |
 | INV-007 | Retired on 2026-10-05: the design has no role-toggle factory (OD-09). It said that withdrawing a key from the toggle factory's allowlist makes every queued motion for that key fail at enactment. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Retired | None: the toggle factory and its tests left the kit on 2026-10-05 |
 | INV-008 | On the Asset Safe, an operator approval to a protocol spender is zero, or it spends the budget of the key that the spender serves. On the orders account, only a DAO vote raises an approval, and only to CoW's vault relayer; the emergency role can set one to zero (specified, OD-78). The stETH approval to the wstETH contract, and the DAI and USDS approvals to Sky's DAI–USDS converter, are zero or below one mandate size in that token. No role can approve Lido's withdrawal queue. After the emergency role revokes the approve permission, the operator cannot restore any approval. | [ADR 007](/adr/007-swapping-through-an-orders-account.md), [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), [ADR 011](/adr/011-launch-scope.md) | Draft | `test_operator_approval_is_bounded_by_key_or_ceiling`, `test_D5_budget_enforcement_and_refill`, `test_D3_dai_usds_conversion_pays_the_asset_safe`, `test_D3_withdrawal_queue_is_out_of_scope`, with dry-run stand-ins for the ceilings; `test_emergency_can_durably_stop_operator_reapproval` covers the last sentence |
-| INV-009 | Only the emergency role can switch the operator off. On the Asset Safe it disables the operator modifier, with the module argument pinned, and the safety modifier stays enabled and working afterwards. On the orders account the emergency role's revoke stops the operator, and the emergency role keeps working there (specified; OD-58). | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | `test_D4_the_switch_is_the_emergency_role_s_and_pinned`; the compiler test `the emergency role holds the switch, pinned to the operator modifier`; the revoke on one modifier, on a stand-in: `test_C5_emergency_revoke_on_its_own_modifier` |
+| INV-009 | Only the emergency role, and the DAO as the owner, can switch the operator off. On the Asset Safe it disables the operator modifier, with the module argument pinned, and the safety modifier stays enabled and working afterwards. On the orders account the emergency role's revoke stops the operator, and the emergency role keeps working there (specified; OD-58). | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | `test_D4_the_switch_is_the_emergency_role_s_and_pinned`; the compiler test `the emergency role holds the switch, pinned to the operator modifier`; the revoke on one modifier, on a stand-in: `test_C5_emergency_revoke_on_its_own_modifier` |
 | INV-010 | From the lift of the launch cap (OD-54), the committee's Safe (OD-83) executes a transaction only with the screening vendor's single-use approval, or through the guard's 10-day removal path. Its guard's bypass mode is off, and the guard holds no standing approval except its two built-in timelock approvals. It has no modules. No vendor code is on the path of the safety modifier or the DAO. | [ADR 010](/adr/010-pre-execution-screening.md) | Pending: the harness has no guard, and its operator is a plain address | None |
 | INV-011 | A budget is consumed only by a successful call, never beyond its balance, and it refills per elapsed period up to its maximum. Keys of different assets and decimals are independent. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Draft | `test_D5_budget_enforcement_and_refill`, `test_budget_keys_of_different_assets_are_independent` |
 | INV-012 | A budget change by motion stays within the ceilings of its key and cannot set a refill period below 30 days. | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) | Pending: the per-key ceilings need the attested figures | `test_policyadmin_cannot_set_a_refill_period_below_30_days` and `test_D1_budget_motion_cannot_shorten_the_refill_period` cover the floor; `test_budget_motion_bounds_are_expressible_per_key` shows per-key ceilings |

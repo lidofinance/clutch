@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T18:22:59Z
+  at: 2026-10-22T20:15:25Z
 verified: []
 sources:
   - id: s1
@@ -109,7 +109,7 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 | DAI | held; converted to USDS and back through Sky's converter, one to one | can seed the vault; recovery sells it into USDC or USDT (OD-26) |
 | USDS | held; receives converted DAI | can fund the vault once a DAO vote adds it to the payment permission |
 | sUSDS | savings position | tokenized-vault template; can also fund the vault; the operator redeems it, and recovery can sell it in a CoW order |
-| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares go from the Growth Committee to the first-loss Safe, where a burn runs only by Easy Track motion and the narrow role of the committee's Safe redeems them to the Aragon Agent (OD-21, OD-28, OD-42, OD-60, OD-67) |
+| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares go from the Growth Committee to the first-loss Safe, where a burn runs only by Easy Track motion and the narrow role of the committee's Safe redeems them to the Aragon Agent (OD-21, OD-42, OD-60, OD-67) |
 | Orders account | CoW market, limit and TWAP orders for the operator, and no stop-loss orders ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 39); recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
 | Lido Lend | lending, after launch | one motion through the Morpho Blue template once Lido Lend's own contract exists, which also adds its emergency exit (OD-49); the protocol cap applies until it matures and a budget motion unlocks it (OD-41) |
 

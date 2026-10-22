@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:29:31Z
+  at: 2026-10-22T20:15:25Z
 verified: []
 sources:
   - id: s1
@@ -89,7 +89,7 @@ EM decided on 2026-10-14, closing OD-70 and OD-72 [s1]:
 14. Routine removals run as motions of a removal template, which waits for the objection window. The emergency Safe's immediate revoke stays for emergencies.
 15. Before the enabling vote, the template catalogue is checked against the protocols that the mandate allows. A claim template, with the receiver pinned to the Asset Safe, ships only if a launch protocol pays rewards.
 
-Decision 14 replaces decision 7 for routine removals: a removal template returns, so Easy Track no longer only expands. An emergency removal stays the emergency Safe's revoke.
+Decision 14 replaces decision 7 for routine removals: a removal template returns, so Easy Track no longer only expands. An emergency removal stays the emergency Safe's revoke. Decision 14 also replaces [ADR 005](/adr/005-account-graph-and-roles.md) decision 11 for routine removals.
 
 EM decided on 2026-10-14, closing OD-77 [s1]:
 
@@ -105,14 +105,14 @@ EM decided on 2026-10-14, in the 80/20 pass after OD-78, closing OD-79 [s1]:
 
 18. The catalogue check of decision 15 also drops each onboarding template whose shape no protocol in the committee's named pipeline needs. A later vote registers such a template with its first protocol.
 
-Since OD-80, the committee's own Safe is the trusted caller of decision 3 ([ADR 005](/adr/005-account-graph-and-roles.md) decision 31).
+Since OD-80, the committee's own Safe is the trusted caller of decision 3 ([ADR 005](/adr/005-account-graph-and-roles.md) decision 31). Until the launch cap lifts, the guard does not screen motion creation ([ADR 010](/adr/010-pre-execution-screening.md) decisions 20 to 22 and 24).
 
 ## Proposed direction
 
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
 
 - Each factory owns one template and builds the permission tree. A motion carries only typed parameters, such as target, asset and budget key.
-- Adding a branch to any function with existing branches, such as an `approve` spender, requires the complete tree: a write replaces the slot. How factories obtain existing branches remains open for OD-69 and decision 14.
+- Adding a branch to any function with existing branches, such as an `approve` spender, requires the complete tree: a write replaces the slot. How a factory reads the existing branches is owed design work. The spender-approval template (OD-69) and the removal template (decision 14) need it.
 - Every factory fixes the committee's Safe as trusted caller at deployment [s7]. Permission factories pin `operator` and refuse the Asset Safe, orders account and their modules as targets.
 - The first-loss burn factory writes no permission. Its motion burns an amount of pinned earnETH or earnUSD shares through `first-loss-burn` on the first-loss modifier ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 23). This is the only Clutch motion that moves value away from the DAO.
 - The role-toggle factory left the design and kit on 2026-10-05 (decision 8) [s4]. Budget and template factories remain unbuilt.

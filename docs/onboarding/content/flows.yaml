@@ -6,7 +6,7 @@ groups:
     summary: "What the committee does on a normal day. The policy checks every operator transaction before it runs, and so does the screening guard once the launch cap lifts (OD-54)."
   - id: governance
     title: Changing what the operator may do
-    summary: "Motions widen the operator's permissions only through fixed templates, with 72 hours for LDO holders to object. Everything else is a DAO vote."
+    summary: "Motions change the operator's permissions only through fixed templates, with 72 hours for LDO holders to object. A change outside the templates is a DAO vote, and a screening rule changes by review and a forum notice."
   - id: funding
     title: Funding the vault
     summary: "Money comes from the DAO treasury through Easy Track top-ups. The objection window is the control; the registry limit is the backstop."
@@ -26,9 +26,9 @@ flows:
     group: operations
     title: An operator transaction
     label: built
-    summary: "How the committee changes a position, for example a USDS deposit into sUSDS. The screening guard and the policy both check the transaction before it runs."
+    summary: "How the committee changes a position, for example a USDS deposit into sUSDS. The policy checks the transaction before it runs, and so does the screening guard once the launch cap lifts."
     trigger: "The committee decides to change a position within the mandate."
-    time: "Minutes, after [the screening vendor] approves."
+    time: "Minutes. Once the launch cap lifts, [the screening vendor] approves first."
     steps:
       - who: "Committee Safe signers, 4 of 7"
         text: "The signers build the transaction in the Zodiac UI or with local tooling. It calls the operator modifier with the operator role."
@@ -75,7 +75,7 @@ flows:
         edges: [op-role, own-op, swaps]
         check: "Specified: the orders account and its permissions are not in the policy yet."
       - who: "Committee Safe"
-        text: "On the orders account, the committee's Safe signs a market or [[limit order]] through CoW's order signer. The screening guard checks this transaction too."
+        text: "On the orders account, the committee's Safe signs a market or [[limit order]] through CoW's order signer. Once the launch cap lifts, the screening guard checks this transaction too."
         nodes: [committee, screening, orders]
         edges: [screen]
         check: "INV-022: the order's receiver is the Asset Safe."
@@ -111,7 +111,7 @@ flows:
         nodes: [committee, operator-modifier, asset-safe, orders]
         edges: [op-role, own-op, swaps]
       - who: "Committee Safe"
-        text: "The committee's Safe creates a [[TWAP]] order on ComposableCoW, in equal parts. It starts at once and ends within 90 days. The screening guard checks it."
+        text: "The committee's Safe creates a [[TWAP]] order on ComposableCoW, in equal parts. It starts at once and ends within 90 days. Once the launch cap lifts, the screening guard checks it."
         nodes: [committee, screening, orders]
         edges: [screen]
         check: "INV-022: the receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."
@@ -146,7 +146,7 @@ flows:
         text: "The committee posts a disclosure on the forum. It sets up monitoring for the new target and updates the runbooks."
         nodes: [committee, reporting, monitoring]
       - who: "Committee Safe"
-        text: "The committee's Safe creates the motion on the template factory, with typed values only: a target, an asset and a budget key. The screening guard checks this transaction."
+        text: "The committee's Safe creates the motion on the template factory, with typed values only: a target, an asset and a budget key. Once the launch cap lifts, the screening guard checks this transaction."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
         check: "The budget key must already be in the policy: a new spender takes one of the spare keys that the enabling vote holds (OD-69). A token new to the orders account needs a DAO vote (OD-46, OD-78)."
@@ -244,7 +244,7 @@ flows:
         text: "The committee posts on the forum which maturity criteria the product meets."
         nodes: [committee, reporting]
       - who: "Committee Safe"
-        text: "The committee's Safe creates a budget motion that raises the product's budget key. The screening guard checks it."
+        text: "The committee's Safe creates a budget motion that raises the product's budget key. Once the launch cap lifts, the screening guard checks it."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
       - who: "LDO holders"
@@ -437,7 +437,7 @@ flows:
         nodes: [monitoring, asset-safe]
         edges: [watch]
       - who: "[the screening vendor]"
-        text: "If the vendor can check it, screening refuses an operator transaction that would take the buffer below its floor."
+        text: "Once the launch cap lifts, and if the vendor can check it, screening refuses an operator transaction that would take the buffer below its floor."
         nodes: [screening, committee]
         edges: [screen]
         check: "Requested from the vendor, not confirmed."
@@ -697,7 +697,7 @@ flows:
     trigger: "The roadmap."
     steps:
       - who: "Phase 0: decisions"
-        text: "EM accepts the setup and design ADRs. [the screening vendor]'s written terms are due before the launch cap lifts (OD-54)."
+        text: "EM has accepted the setup ADRs, 001 to 004, and accepts ADR 005 to ADR 012. [the screening vendor]'s written terms are due before the launch cap lifts (OD-54)."
         nodes: [committee, screening]
       - who: "Phase 1: specification"
         text: "The specifications and the detector specification, the control matrix and the screening rule list with the vendor's questions, the Zodiac UI requirement list, the orders account's fork tests, the runbook drafts and the Lido Zodiac workspace."
@@ -709,7 +709,7 @@ flows:
         text: "An external audit, Lido's review of the guard change and of CoW's order signer, and fork drills that initiate within 6 hours."
         nodes: [policy, screening, orders]
       - who: "Phase 4: governance and deployment"
-        text: "The mandate's Snapshot vote, a Snapshot that appoints the emergency Safe's fifth signer, the LIP, the enabling vote and deployment without the guard under a cap of one million dollars, the share transfer to the first-loss Safe and the seed motion."
+        text: "The mandate's Snapshot vote, a Snapshot that appoints the emergency Safe's fifth signer, the LIP, the enabling vote and deployment without the guard under the [[launch cap]], the share transfer to the first-loss Safe and the seed motion."
         nodes: [dao, asset-safe, first-loss, funding]
       - who: "Phase 5: operation"
         text: "Monthly reports, the fortnightly cap reading, budget motions after events and recurring drills. Once the guard is set with its bypass mode off, the committee's forum post lifts the launch cap."
@@ -728,7 +728,7 @@ flows:
         nodes: [orders]
         check: "INV-022 and INV-023 are pending."
       - who: "Committee"
-        text: "The vote does not wait for the guard. The vault launches under a cap of one million dollars, which the committee keeps by procedure until the guard is set with its bypass mode off and its forum post lifts the cap (OD-54, OD-55)."
+        text: "The vote does not wait for the guard. The vault launches under the [[launch cap]] (OD-54, OD-55)."
         nodes: [screening, committee]
         edges: [screen]
       - who: "Lido"

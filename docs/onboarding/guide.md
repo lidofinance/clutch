@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:36:19Z
+  at: 2026-10-22T20:27:26Z
 verified: []
 sources:
   - id: s1
@@ -26,8 +26,8 @@ sources:
     resource: /registers/decision-log.md
     title: Decision log — EM's request for the mandate and constellation tabs, the detail switch and the console error, 2026-10-06
   - id: s6
-    resource: /adr/009-budgets-caps-reporting-and-monitoring.md
-    title: ADR 009 — the eleven changes that the mandate text owes, and the control on each layer
+    resource: /specs/lip-draft.md
+    title: LIP draft, open item 2 — the mandate text owed, sorted into the Snapshot text and the forum post (OD-90)
   - id: s7
     resource: /research/zodiac-constellation-2026-10-06.md
     title: Research note — the policy provider's constellation and its differences from the decided design
@@ -69,7 +69,7 @@ Flows play on the map step by step. Each claim links to its source and shows its
 
 | Tab | Content |
 |---|---|
-| Mandate | Each block's rule, controls, changes and reasons. Badges distinguish text owed, design choices and proposals [s5][s6]. The tab paraphrases only repository evidence about the private draft. The build rejects currency signs and percentages [s3]. |
+| Mandate | Each block's rule, controls, changes and reasons. Badges distinguish Snapshot text owed, forum-post items, design choices and proposals [s5][s6]. The tab paraphrases only repository evidence about the private draft. The build rejects currency signs and percentages [s3]. |
 | Constellation | Accounts, modifiers, roles, holders, target and call counts from the committed artifact [s4]. Specified but unbuilt parts and changes from the provider's constellation appear separately, with reasons [s5][s7]. |
 | RFP | Each original ask, its answer and verdict: asked, changed or unanswered. Changed asks have reasons; each part lists additions. The research note records the asks [s8][s9]. |
 
@@ -78,7 +78,7 @@ Technical adds addresses, permissions, signatures and implementation notes [s5].
 A text list repeats the map's boxes and arrows, so tooltips contain no exclusive facts.
 The full page works without JavaScript and prints with all sections open. On phones, tabs scroll in one row.
 
-The guide omits personal names, unannounced counterparties, financial figures and fork stand-in addresses.
+The guide omits personal names, unannounced counterparties, figures from the mandate or the attested computation, and fork stand-in addresses. Its only dollar figure is the launch cap, which EM set (OD-55).
 The screening vendor stays "[the screening vendor]".
 
 ## How it is built

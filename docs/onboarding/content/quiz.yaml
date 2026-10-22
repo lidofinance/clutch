@@ -7,7 +7,7 @@
     - "The committee's Safe"
     - "[the screening vendor]"
   answer: 1
-  why: "Aragon Voting is the only owner, at 1 of 1, and recovered assets go to the Aragon Agent, the DAO's treasury. The committee acts on the vault only through roles on the two modifiers."
+  why: "Aragon Voting is the only owner, at 1 of 1, and recovered assets go to the Aragon Agent, the DAO's treasury. The committee acts on the vault only through its roles: the operator role on the operator and orders modifiers, and the first-loss role on the first-loss modifier."
   sources: ["ADR-005#d6", "ADR-005#d28", "ADR-005#proposed-direction", OD-73, INV-001]
 
 - id: outside-transfer
@@ -18,7 +18,7 @@
     - "The operator modifier: the policy has no such transfer, and every receiver is pinned to the Asset Safe"
     - "The objection window"
   answer: 2
-  why: "The operator role holds no transfer to an outside address: its one planned transfer goes to the orders account, and every receiver, owner and beneficiary in its permissions is the Asset Safe. The screening guard is a second, independent check."
+  why: "The operator role holds no transfer to an outside address: its one planned transfer goes to the orders account, and every receiver, owner and beneficiary in its permissions is the Asset Safe. Once the launch cap lifts, the screening guard is a second, independent check."
   sources: [INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
 
 - id: depeg-first
@@ -74,7 +74,7 @@
     - "The orders budget on what enters the orders account, the screening of the order, and monitoring of the fill"
     - "CoW refuses the order"
   answer: 2
-  why: "Nothing on chain bounds a CoW order's price: its limit is a number that the caller chooses. The orders budgets bound what the operator can move into the orders account, screening checks every operator order, and monitoring alerts on a fill below the market. CoW's EBBO rule also holds the fill to the on-chain market."
+  why: "Nothing on chain bounds a CoW order's price: its limit is a number that the caller chooses. The orders budgets bound what the operator can move into the orders account, screening checks every operator order once the launch cap lifts, and monitoring alerts on a fill below the market. CoW's EBBO rule also holds the fill to the on-chain market."
   sources: ["ADR-007#d18", "ADR-007#d26", "ADR-007#proposed-direction", OD-43, "doc:docs/specs/control-matrix.md#the-matrix"]
 
 - id: cap-breach-revert

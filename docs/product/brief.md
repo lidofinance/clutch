@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:36:19Z
+  at: 2026-10-22T20:29:40Z
 verified: []
 sources:
   - id: s1
@@ -26,7 +26,7 @@ sources:
 ## The system
 
 The Treasury Management Committee puts a bounded part of the DAO treasury to work in approved protocols [s2].
-Aragon Voting is the sole owner of the Asset Safe. Recovered assets go to the Aragon Agent (OD-73) [s2].
+Aragon Voting is the sole owner of the vault's three Safes. Recovered assets go to the Aragon Agent (OD-73) [s2].
 A default-deny policy limits the committee's actions. An emergency Safe can return assets to the Agent.
 Easy Track motions change permissions only through templates fixed at audit time [s2].
 

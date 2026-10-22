@@ -4,7 +4,7 @@
 # --- Reused as it is ---------------------------------------------------------------------------
 - name: Zodiac Roles mastercopy and module proxy factory
   column: reused
-  what: "The deployed, locked Roles code behind both modifiers, and the factory that makes their proxies."
+  what: "The deployed, locked Roles code behind all four modifiers, and the factory that makes their proxies."
   why: "Audited, permission code that is already in production. The deployed mastercopy is older than the upstream source, so an audit must pin the deployed bytecode."
   owner: "Nobody: the mastercopy is locked"
   sources: ["ADR-005#context", "doc:docs/research/chain-reads-2026-09-30.md#safe-and-zodiac"]
@@ -70,7 +70,7 @@
 - name: The protocols of the launch scope
   column: reused
   what: "stETH, wstETH, WETH, Lido Earn, sUSDS and Sky's DAI–USDS converter. Lido Lend comes later through the Morpho Blue template. The withdrawal queue left the design on 2026-10-08."
-  why: "The mandate's launch list. Clutch adds permissions only, never code, to these protocols."
+  why: "EM's launch list (ADR 011). Clutch adds permissions only, never code, to these protocols."
   owner: "Their own governance"
   sources: ["ADR-011#d1", "ADR-011#d3", "ADR-011#d7", "ADR-011#d14"]
 

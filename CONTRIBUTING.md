@@ -59,6 +59,8 @@ Do not edit these files by hand:
 
 - `docs/log.md`
 - `docs/registers/document-status.md`
+- `docs/adr/index.md`
+- The generated blocks: the closed index of `docs/registers/open-decisions.md`, and the open questions of each proposed ADR
 - `docs/onboarding/clutch-onboarding.html`
 - Policy artifacts in `policy/constellation/artifacts/`
 
@@ -77,6 +79,7 @@ The [guide-update procedure](skills/guide-update/SKILL.md) gives the steps.
 
 Add a complete row to the [open-decisions register](docs/registers/open-decisions.md):
 question, options, closing page, recommendation and decider. The validator rejects incomplete rows.
+To close a decision, remove its row, add its entry to `docs/registers/closed-decisions.yaml` and run `just regen`. The validator writes the closed index.
 
 EM triages open decisions and decides in batched interviews, with one decisions branch at a time.
 The decision log quotes the interview exactly. Do not reconstruct a quote from memory or another source.

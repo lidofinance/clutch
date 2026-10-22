@@ -8,7 +8,7 @@
   name: Treasury Management Committee and its Safe
   status: existing
   label: existing
-  what: "The people who run the [[mandate]] day to day, and their existing Safe, which holds the operator role (OD-80). Two of the seven signers also sit on the emergency Safe. Once the launch cap lifts, every transaction of the Safe needs [the screening vendor]'s approval first, the committee's other duties included (OD-83). Until then the vault stays under a cap of one million dollars (OD-54, OD-55)."
+  what: "The people who run the [[mandate]] day to day, and their existing Safe, which holds the operator role (OD-80). Two of the seven signers also sit on the emergency Safe. Once the launch cap lifts, every transaction of the Safe needs [the screening vendor]'s approval first, the committee's other duties included (OD-83). Until then the [[launch cap]] applies (OD-54, OD-55)."
   controlled_by: "Seven signers, at 4 of 7. Safe v1.3.0."
   can:
     - "Hold the operator role: change positions in approved protocols, within budgets."
@@ -161,7 +161,7 @@
   name: Funding registries (two)
   status: instance
   label: specified
-  what: "Two new registries from Easy Track's registry factories, with Aragon Voting as their admin, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a limit per month that is a backstop under the mandate size."
+  what: "Two new registries from Easy Track's registry factories, with Aragon Voting as their admin, one for stablecoins and one for stETH. Each has one recipient, the Asset Safe, and a limit per month of one mandate size, as a backstop."
   controlled_by: "Aragon Voting is the admin (OD-73). The Easy Track executor spends the limit."
   can:
     - "Pay only the Asset Safe."
@@ -400,10 +400,10 @@
   name: Zodiac Roles mastercopy and module proxy factory
   status: existing
   label: existing
-  what: "The audited Zodiac code behind both modifiers. Each modifier is a small proxy of this mastercopy, made by the Zodiac module proxy factory."
+  what: "The audited Zodiac code behind all four modifiers. Each modifier is a small proxy of this mastercopy, made by the Zodiac module proxy factory."
   controlled_by: "Nobody. The mastercopy is locked."
   can:
-    - "Serve as the code of both modifiers, through EIP-1167 minimal proxies."
+    - "Serve as the code of all four modifiers, through EIP-1167 minimal proxies."
   cannot:
     - "Work behind a Safe-style proxy. Such a proxy bricks the modifier, so only the Zodiac factory deploys it."
   numbers: ["locked: owner 0x…01"]

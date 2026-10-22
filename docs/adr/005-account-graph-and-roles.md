@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T19:14:25Z
+  at: 2026-10-22T20:15:25Z
 verified: []
 sources:
   - id: s1
@@ -116,7 +116,7 @@ EM decided on 2026-10-09, closing OD-57 [s1]:
 21. The orders account carries one modifier, with the operator, emergency and technical roles and no governance role. The Asset Safe keeps its two modifiers (decision 6).
 22. On the orders account, the technical role stops the operator by removing the operator Safe's membership of the operator role, with every argument pinned.
 
-Decisions 21 and 22 narrow decision 6 to the Asset Safe, and decision 18's switch on the orders account becomes the membership removal.
+Decisions 21 and 22 narrow decision 6 to the Asset Safe, and decision 18's switch on the orders account becomes the membership removal. Decision 21 also replaces "its own modifiers" in decision 20 with one modifier.
 
 EM decided on 2026-10-13, after the committee's feedback, closing OD-58 and OD-59 [s1]:
 
@@ -134,6 +134,8 @@ EM decided on 2026-10-13, closing OD-60 [s1]:
 Decision 27's burn runs only as an Easy Track motion since OD-67 ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23). The operator Safe's role keeps the redemption to the Aragon Agent.
 
 OD-68 gave the orders modifier a governance role ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 31), and OD-78 took it away again ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 38), so decision 21's "no governance role" stands.
+
+Since OD-70, a routine removal runs as a motion of the removal template ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 14). Decision 11's revoke stays for emergencies.
 
 EM decided on 2026-10-14, closing OD-73 [s1]:
 
@@ -174,8 +176,8 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - **Emergency Safe.** A new Safe v1.5.0 at three-of-five, without assets or a guard. It holds `emergency` on the safety and orders modifiers, including the switch (decision 25). Exactly two owners belong to the committee's Safe, two to Emergency Brakes and one to neither (decision 24). Because one person can use several addresses, the fifth signer must also confirm their independence in writing. Owner changes trigger critical alerts; a DAO vote can replace the role holder.
 - **Operator modifier.** A Roles minimal proxy with the Asset Safe as owner, avatar and target; it carries `operator` and `governance`.
 - **Safety modifier.** A second proxy with the same settings. It carries `emergency` and exit-governance, which adds emergency exits by motion ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 13).
-- The Asset Safe owns both modifiers. A narrowly scoped role can administer a modifier as the Safe without Agent authority. This enables emergency revocation.
-- **Orders account.** A new Voting-owned Safe, one-of-one, with CoW's fallback handler. It holds tokens only between transfer and fill. It runs Safe v1.5.0 only if a fork test shows CoW's fallback handler works; this remains unchecked. Its single modifier carries `operator` and `emergency`, with no `governance` role (decisions 21 and 25). Tokens and the order signer's delegatecall require DAO votes ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). Emergency stops the operator by revoking targets and functions (decision 25).
+- The Asset Safe owns both modifiers. A narrowly scoped role can administer a modifier as the Safe without a vote. This enables emergency revocation.
+- **Orders account.** A new Voting-owned Safe, one-of-one, with CoW's fallback handler. It holds tokens only between transfer and fill. Its single modifier carries `operator` and `emergency`, with no `governance` role (decisions 21 and 25). Tokens and the order signer's delegatecall require DAO votes ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). Emergency stops the operator by revoking targets and functions (decision 25).
 - **First-loss Safe.** A new Voting-owned Safe v1.5.0, one-of-one, without a guard or fallback handler. It holds only first-loss Earn shares and owns its modifier as owner, avatar and target. The committee's `first-loss` role redeems to the Agent (decision 27). The executor's `first-loss-burn` role burns only by enacted motion ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 23). Both require the Earn team's written instruction (ADR 008, decision 22).
 - **Restart.** A Voting item restores the operator modifier (decision 28). First, the same vote uses Voting's cancel role to cancel queued motions that write through the operator modifier: the switch freezes them, but they never expire and restart would re-arm them. The vote also restores revoked orders-account permissions and any zeroed relayer approval (decision 30). An Easy Track unpause is also a Voting item (decision 26). No motion writes on the orders account, and no emergency body restores authority.
 - Easy Track receives no Agent authority.
@@ -207,7 +209,7 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 - **One modifier for all roles:** rejected because a guard could not separate recovery, and disabling it would stop recovery.
 - **One modifier per account, including the Asset Safe (OD-57 A):** EM rejected this. Governance and exit-governance would share a contract with emergency and technical roles, separated only by role-key pins. The switch would depend on that modifier's membership check.
 - **Two orders modifiers (OD-57 C):** EM replaced this on 2026-10-09. No motion writes there, so the split added no protection.
-- **Agent ownership of modifiers:** rejected because emergency revocation would need Agent authority.
+- **Agent ownership of modifiers:** rejected because emergency revocation would need a DAO vote.
 
 - One vote for each Safe batch: EM chose approved hashes in one vote instead (OD-92).
 
@@ -224,7 +226,6 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 - Governance refuses the Asset Safe's modules as targets. A vote adding a module must apply policy compiled with it in the manifest (OD-38, [ADR 006](/adr/006-governance-through-easy-track-factories.md)) [s1]. The orders account has no governance role, and Asset Safe governance refuses it and its modifier (decision 21; [ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 38).
 - Four new Safes are required: Asset, emergency, orders and first-loss. Voting owns three; signers own the emergency Safe. Owner, module and singleton alerts cover all four plus the committee's Safe (decision 31).
 - The orders account uses fallback and contract-signature paths avoided by the Asset Safe. Its exposure is what enters it: operator transfers spend budgets; emergency transfers do not ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
-- First-loss shares have only two scoped paths: an enacted burn motion or redemption to the Agent. Neither role can send them elsewhere, so protection does not depend on a written rule ([ADR 008](/adr/008-funding-through-existing-payments.md)).
 - Disabling the operator modifier leaves safety and recovery working [s4]. The orders account's single modifier cannot provide the same switch without stopping recovery. Emergency revokes its operator targets or functions individually (decision 25); the DAO can still disable it.
 - Replacing the pinned operator modifier requires a DAO vote that rewrites safety policy in the same action. EM accepted this procedure on 2026-09-22 [s1].
 - The switch freezes queued operator-modifier writes; restart cancels them first. To freeze all Easy Track motions, including top-ups and exit writes, the Lido incident process pages Emergency Brakes for its global pause.
@@ -241,8 +242,8 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 - Kit tests of 2026-10-13: the emergency role holds the switch, pinned to the operator modifier, and cannot enable a module again (`test_D4_the_switch_is_the_emergency_role_s_and_pinned`); the switch freezes a queued motion until the owner path enables the modifier again (`test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts`); the compiler refuses a grant or a budget for the emergency role, and every approval of the emergency role is zero (`policy/constellation/compiler/compile.test.ts`).
 
 - INV-001, INV-002, INV-003, INV-004, INV-009, INV-019, INV-021, INV-022, INV-023, INV-026 and INV-027 in the [invariants](/specs/invariants.md).
-- Kit tests: before 2026-10-13, the technical role was the only one that could disable a module, and only the operator modifier [s4]; the emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6]; the Asset Safe has the Agent as its only owner, the pinned singleton, and no fallback handler or guard [s11].
-- Fork test owed for decision 28: Aragon Voting, as the only owner, runs an owner action on each of the three Safes through its own call script, by `approveHash` or by sending the transaction itself.
+- Kit tests: before 2026-10-13, the technical role was the only one that could disable a module, and only the operator modifier [s4]; the emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6]; the Asset Safe has the pinned singleton and no fallback handler or guard [s11]. The kit's owner check still names the Agent; it must name Aragon Voting (decision 28).
+- The enabling-vote rehearsal checked decision 28: Aragon Voting approved a batch hash on each of the three Safes, and the batches ran (decision 32; [research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
 
 ## Reversal conditions
 
@@ -259,4 +260,4 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 
 <!-- end of generated block -->
 
-The orders account's fallback handler on Safe v1.5.0 needs a fork test before it is relied on ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). On OD-65, EM said on 2026-10-13 that a member of the Tech team may hold the fifth seat, tentatively; a Snapshot appoints the signer before the emergency Safe is deployed.
+On OD-65, EM said on 2026-10-13 that a member of the Tech team may hold the fifth seat, tentatively; a Snapshot appoints the signer before the emergency Safe is deployed.

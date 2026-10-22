@@ -174,8 +174,9 @@
   closed: 2026-10-05
   log:
     - "2026-10-05 — OD-25 to OD-30: acceptance round 1 and the emergency exit"
-  adr: [ADR-007]
+  adr: [ADR-007, ADR-007#d27]
   see: [/research/recovery-and-withdrawal-queue-2026-10-05.md]
+  note: "The withdrawal queue left the design on 2026-10-08 (ADR 007, decision 27)."
 - id: OD-28
   question: "Does the no-redeem rule for the first-loss Earn shares bind the emergency role?"
   closed: 2026-10-05
@@ -273,6 +274,7 @@
   adr: [ADR-008, ADR-005]
   replaces:
     - {od: OD-21, part: true}
+    - {od: OD-28, part: true}
 - id: OD-43
   question: "How does the vault swap, given the committee's need for DCA, standing limit orders, stop-loss orders, and 1inch and Uniswap?"
   closed: 2026-10-06
@@ -394,6 +396,7 @@
   adr: [ADR-008#d21, ADR-008#d22, ADR-005#d27]
   replaces:
     - {od: OD-21, part: true}
+    - {od: OD-28, part: true}
     - {od: OD-42, part: true}
 - id: OD-61
   question: "How long may an operator order live?"
