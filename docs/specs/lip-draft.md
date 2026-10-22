@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T18:22:59Z
+  at: 2026-10-22T19:15:07Z
 verified: []
 sources:
   - id: s1
@@ -723,7 +723,7 @@ The [open-decisions register](/registers/open-decisions.md) tracks every open it
 4. **The orders account.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 come before the design is relied on.
 5. **The emergency Safe's fifth signer.** A Snapshot appoints a signer who is a member of neither the committee nor the Emergency Brakes multisig, before the emergency Safe is deployed (OD-58).
 6. **Insurance funds for other products (OD-66, OD-78).** Not at launch. A later vote adds the fund roles and factories, and a third funding registry that pays only the first-loss Safe. Then one Snapshot sets a standing framework with a checklist, each fund joins by one motion, and burns and payouts are motions.
-7. **One vote, then Easy Track (OD-68 to OD-79, decided).** EM decided these on 2026-10-14. Aragon Voting owns the vault's Safes, so no Clutch action passes Dual Governance (OD-73). The enabling vote holds spare budget keys (OD-69), a routine removal is a motion (OD-70), a new mandate size is a vote by design (OD-71, OD-89), and the template catalogue is checked before the vote (OD-72). The launch has no stop-loss orders, and the catalogue check keeps only the templates that a named protocol needs (OD-79). The launch leaves out insurance funds, the token template and the restore template, so a new token for the orders account and every restart stay votes (OD-78). [The enabling vote](/specs/enabling-vote.md) lists what the one vote holds and what still needs a vote after it.
+7. **One vote, then Easy Track (OD-68 to OD-79, decided).** EM decided these on 2026-10-14. Aragon Voting owns the vault's Safes, so no Clutch action passes Dual Governance (OD-73). The enabling vote holds spare budget keys (OD-69), a routine removal is a motion (OD-70), a new mandate size is a vote by design (OD-71, OD-89), and the template catalogue is checked before the vote (OD-72). The launch has no stop-loss orders, and the catalogue check keeps only the templates that a named protocol needs (OD-79). The launch leaves out insurance funds, the token template and the restore template, so a new token for the orders account and every restart stay votes (OD-78). Aragon Voting approves a hash for each Safe batch, and anyone executes the batches after the vote; the registries come from the registry factories with Voting as admin (OD-92). The vote keeps the USDS items (OD-93). Monitoring warns when few of Easy Track's shared motion slots are free, and a budget motion can set several keys (OD-94). [The enabling vote](/specs/enabling-vote.md) lists what the one vote holds and what still needs a vote after it.
 
 ## Links
 

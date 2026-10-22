@@ -88,9 +88,9 @@ sections:
         sources: ["ADR-005#context", "ADR-005#proposed-direction", "doc:docs/specs/lip-draft.md#test-cases"]
       - asked: "The complete initial configuration is in place before ownership passes to the DAO, so no separate setup-only vote is needed."
         verdict: changed
-        clutch: "Ownership never passes: the Asset Safe is created with Aragon Voting as its only owner. The enabling vote applies the committed policy artifact, grants every role, sets up the orders account and the first-loss Safe, and registers the factories, so no setup-only vote is needed."
-        why: "Aragon Voting is the only owner of the Asset Safe at all times, so only the DAO can configure the vault, and its enabling vote does it in one step (OD-73)."
-        sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", INV-001, "doc:script/DeployDryRun.s.sol",
+        clutch: "Ownership never passes: the Asset Safe is created with Aragon Voting as its only owner. The enabling vote approves the hash of each Safe batch, and the batches apply the committed policy artifact, grant every role and set up the orders account and the first-loss Safe; the vote also registers the factories. No setup-only vote is needed (OD-92)."
+        why: "Aragon Voting is the only owner of the Asset Safe at all times, so only the DAO can configure the vault. Its enabling vote approves the Safe batches, and anyone sends them after the vote (OD-73, OD-92)."
+        sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", INV-001, "ADR-005#d32", OD-92, "doc:script/DeployDryRun.s.sol",
           "doc:docs/specs/enabling-vote.md#the-vote", OD-73]
     added:
       - text: "An exit-governance role on the safety modifier: the motion that onboards a protocol also writes the emergency role's exit from it."

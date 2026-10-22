@@ -318,7 +318,7 @@ flows:
     title: Launch funding and the first-loss shares
     label: specified
     summary: "How the vault gets its first assets. After the enabling vote, the Growth Committee moves the DAO's first-loss Earn shares to the first-loss Safe. Then one seed motion funds the rest."
-    trigger: "The enabling vote has executed and the Safes exist."
+    trigger: "The enabling vote has executed, its Safe batches have run, and the Safes exist (OD-92)."
     steps:
       - who: "Growth Committee Safe"
         text: "The Growth Committee Safe transfers the first-loss earnETH and earnUSD shares to the [[first-loss Safe]]. That Safe needs no permission to receive them."
@@ -337,7 +337,7 @@ flows:
         edges: [first-loss-shares]
         check: "INV-021: the first-loss Safe has Aragon Voting as its only owner, and one modifier with two narrow roles. Specified, not built."
     sources: ["ADR-008#d4", "ADR-008#d13", "ADR-008#d19", "ADR-008#d20", "ADR-008#d21", "ADR-008#d23",
-      "ADR-008#proposed-direction", OD-21, OD-42, OD-54, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", OD-89]
+      "ADR-008#proposed-direction", OD-21, OD-42, OD-54, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", OD-89, OD-92]
 
   - id: first-loss-burn
     group: funding
@@ -719,7 +719,7 @@ flows:
   - id: enabling-vote
     group: deployment
     title: The enabling vote
-    label: open
+    label: specified
     summary: "One DAO vote turns the system on. The enabling-vote page lists what it holds, what comes before it and what follows without a vote."
     trigger: "The mandate is approved and phase 3 is done."
     steps:
@@ -735,11 +735,15 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, committee, emergency-safe]
       - who: "LDO holders"
-        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list. Aragon Voting runs every item itself when the vote executes, without Dual Governance (OD-73)."
+        text: "The vote registers the factories and adds USDS to the payment permission and to the shared stablecoin token list (OD-93). Aragon Voting runs these items itself, without Dual Governance (OD-73). For the vault's Safes, it approves the hash of each Safe batch: the batches apply the policy compiled for mainnet from the reviewed constellation, grant the roles, the exit-governance role and the two first-loss roles included, and set up the orders account with its order lists and relayer approvals (OD-92)."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
         edges: [own, own-op, own-sf]
+      - who: "Anyone"
+        text: "After the vote executes, anyone sends each Safe batch with Voting's approval of its hash. The batches of one Safe run in nonce order (OD-92)."
+        nodes: [asset-safe, orders, first-loss]
+        check: "One command computes each batch's hash again from the published batch, so a reviewer can match it to the vote. The command is owed."
       - who: "Growth Committee, then the committee's Safe"
-        text: "After the vote, the Growth Committee moves the first-loss shares to the first-loss Safe, and the seed motion funds the vault."
+        text: "After the batches run, the Growth Committee moves the first-loss shares to the first-loss Safe, and the seed motion funds the vault."
         nodes: [funding, first-loss, asset-safe, committee, easytrack]
         edges: [topup, motions]
     sources: ["ADR-004#d14", "ADR-007#proposed-direction", "ADR-007#confirmation", "ADR-008#d9", "ADR-008#d13",
@@ -747,7 +751,8 @@ flows:
       "ADR-010#d22", "ADR-008#d10", INV-022, INV-023, OD-54, "doc:ROADMAP.md#roadmap",
       "doc:docs/specs/enabling-vote.md#the-vote",
       "doc:docs/research/single-vote-review-2026-10-14.md#how-one-vote-carries-two-kinds-of-item", OD-73, "ADR-005#d28",
-      OD-78, OD-79, OD-55]
+      OD-78, OD-79, OD-55, OD-92, OD-93, "ADR-005#d32", "ADR-008#d35", "ADR-008#d36",
+      "doc:docs/research/enabling-vote-rehearsal-2026-10-15.md#the-vote-that-fits"]
 
   - id: signer-rotation
     group: deployment

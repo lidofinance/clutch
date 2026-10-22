@@ -92,9 +92,9 @@
   sources: [OD-48, "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
 
 - term: Enabling vote
-  plain: "The DAO vote that turns the system on. It applies the policy compiled for mainnet from the reviewed constellation, grants the roles, sets up the orders account and the first-loss Safe, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list."
+  plain: "The DAO vote that turns the system on. It registers the factories and adds USDS to the payment permission and to the shared stablecoin token list. For the vault's Safes, it approves the hash of each Safe batch, and anyone sends the batches after the vote: they apply the policy compiled for mainnet, grant the roles, and set up the orders account and the first-loss Safe."
   sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-008#d9", "ADR-008#d10", "ADR-008#d19",
-    "doc:docs/specs/enabling-vote.md#the-vote"]
+    "doc:docs/specs/enabling-vote.md#the-vote", "ADR-005#d32", "ADR-008#d36", OD-92, OD-93]
 
 - term: Fail closed
   plain: "When a check cannot run, the action stops. The screening guard fails closed: with no approval, the operator's transaction reverts."

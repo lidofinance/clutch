@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T18:22:59Z
+  at: 2026-10-22T19:14:25Z
 verified: []
 sources:
   - id: s1
@@ -61,6 +61,9 @@ sources:
   - id: s17
     resource: "urn:clutch:interview:2026-10-22"
     title: EM's answer on OD-91 and the go-ahead to push, 2026-10-22; the transcript is not in the repository
+  - id: s18
+    resource: "urn:clutch:interview:2026-10-22-enabling-vote"
+    title: EM's answers on OD-92 to OD-94, 2026-10-22; the transcript is not in the repository
 ---
 
 # Decision log
@@ -70,6 +73,23 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit
+
+The agent asked four questions after the second run of the rehearsal ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)): OD-92 Q1 and Q2, OD-93 and OD-94, in that order. EM answered:
+
+> Q1: A
+> Q2: A
+> Q3: A
+> Q4: A
+
+Recorded as, by question. The agent reads Q1 to Q4 in the order that it asked them.
+
+- (Q1, OD-92) A: the enabling vote applies the Safe batches by approved hash. Aragon Voting approves the hash of each batch, and anyone executes the batches after the vote ([ADR 005](/adr/005-account-graph-and-roles.md), decision 32).
+- (Q2, OD-92) A: the registry factories deploy the two funding registries with Aragon Voting as their admin. The deployer adds the Asset Safe and sets each limit, then gives up its roles. A check before the vote proves every role ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 35).
+- (Q3, OD-93) A, against the agent's recommendation B: the enabling vote keeps the four USDS items. Aragon Voting takes the token list's add-token role, adds USDS and gives the role up, and it rewrites the executor's shared payment permission ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 36). The agent's condition for A is in the proposed direction: the before-and-after check of that permission runs again before the vote starts and before it executes.
+- (Q4, OD-94) A: monitoring warns when few of Easy Track's open-motion slots are free, and the budget factory can set several keys in one motion ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 45).
+- The [enabling-vote spec](/specs/enabling-vote.md) now describes the vote of approved hashes, the registries' deployment and the token list's role steps. [s18]
 
 ## 2026-10-22 — OD-91 decided: LDO leaves the launch list
 

@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:29:31Z
+  at: 2026-10-22T19:14:25Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM's design answers of 2026-09-22, and later decisions to OD-80 on 2026-10-14
+    title: Decision log — EM's design answers of 2026-09-22, later decisions to OD-80 on 2026-10-14, and OD-92 on 2026-10-22
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Agent authority, committee Safes, Roles mastercopy
@@ -159,6 +159,12 @@ EM decided on 2026-10-14, closing OD-80 [s1]:
 
 Decision 31 replaces the dedicated operator Safe of decisions 7 and 8, and its Safe version in decisions 10 and 12. Decision 9's threshold, 4 of 7, is already the threshold of the committee's Safe. The committee's Safe takes the operator Safe's place in decision 27 and in every later text.
 
+EM decided on 2026-10-22, closing OD-92 Q1 [s1]:
+
+32. The enabling vote applies the Safe batches by approved hash. Aragon Voting approves the hash of each batch, and anyone executes the batches after the vote.
+
+Decision 32 applies the `approveHash` of decision 28 to the enabling vote. The vote cannot carry the batches as its own items: Aragon Voting stores its script when a vote starts, and that transaction would need more gas than EIP-7825 lets one transaction use ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
@@ -186,6 +192,8 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 The Emergency Brakes multisig holds no role in this table. It keeps the global Easy Track pause (decisions 4 and 23).
 
+- **The enabling vote's batches (decision 32).** Publish each batch with the vote, with one command that computes its hash again from the batch, the Safe and the Safe's nonce. The batches of one Safe run in nonce order. The builder starts a new batch below 12,000,000 gas and below 128 KiB. Rehearse the vote and the batches at a recent block before the vote starts and again before it executes.
+
 ## Options considered
 
 - **Emergency Brakes as emergency role:** EM rejected this because financial response needs daily portfolio knowledge.
@@ -201,8 +209,11 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 - **Two orders modifiers (OD-57 C):** EM replaced this on 2026-10-09. No motion writes there, so the split added no protection.
 - **Agent ownership of modifiers:** rejected because emergency revocation would need Agent authority.
 
+- One vote for each Safe batch: EM chose approved hashes in one vote instead (OD-92).
+
 ## Consequences
 
+- Voters see the batches as hashes. The batches and the command that computes each hash must be published with the vote (decision 32). A batch that can never run blocks its Safe until another vote approves a replacement.
 - The committee's Safe holds `operator` (decision 31) and `first-loss` (decision 27). A compromised quorum can redeem first-loss shares only to the Agent, or propose a burn with 72 hours for objection. Rotations affecting either body's emergency seat must update the emergency Safe (decision 24).
 - Each emergency quorum includes someone outside the committee and someone outside Emergency Brakes. The committee cannot act alone; two compromised committee keys reach no emergency power.
 - The two Emergency Brakes members and fifth signer can return assets within hours without the committee, satisfying the mandate's independent three-of-five exit [s12]. This quorum has no spare signer; the fifth signer is pivotal. The LIP and mandate need no disclaimer that the fast exit lacks independence.

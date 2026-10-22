@@ -9,7 +9,7 @@ valid_as_of: 2026-10-22
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T18:44:46Z
+  at: 2026-10-22T19:15:07Z
 verified: []
 sources:
   - id: s1
@@ -115,7 +115,7 @@ On 2026-10-15 EM asked for three things: build the enabling vote and run it end 
 - Easy Track's limit of 20 open motions is shared by every committee. On 2026-09-09, 18 motions were open, 16 of them for validator consolidations [s15][s16][s27].
 - The rest works with the live contracts: the factory registrations, the top-ups, a budget motion through the governance role, the switch, the orders account's CoW setup, Earn deposits from the new Safe, a first-loss burn through the executor's role and a first-loss redemption request [s1].
 - The seed can arrive 8 days after the vote starts, at the earliest [s28][s15]. Then the cap of OD-55 holds the vault until the lift. Each registry pays at most one mandate size a month, as a backstop, and after the seed a top-up needs the mandate's published eligibility conditions (OD-89) [s20][s25]. "What makes ramping up hard" lists every obstacle found.
-- OD-92 to OD-94 ask EM to decide the vote's method, the USDS items and the answer to the motion limit.
+- EM decided OD-92 to OD-94 on 2026-10-22: the vote of approved hashes, the registries from the registry factories with Voting as admin, the four USDS items kept, and a warning on free motion slots with several keys per budget motion.
 
 ## What ran
 
@@ -297,9 +297,9 @@ The cap is 16,777,216 gas per transaction [s3]. The txpools of geth and reth ref
 
 ## Decisions this note opens
 
-- **OD-92.** Q1: how the vote applies the Safe batches under the gas cap. Q2: how the registries get Voting as admin.
-- **OD-93.** Whether the vote keeps the four USDS items.
-- **OD-94.** How Clutch handles Easy Track's shared limit of 20 open motions.
+- **OD-92**, decided 2026-10-22: Voting approves the hash of each Safe batch, and anyone executes the batches after the vote (Q1 A). The registry factories deploy the registries with Voting as admin; the deployer sets them up and gives up its roles, and a check before the vote proves every role (Q2 A).
+- **OD-93**, decided 2026-10-22: the vote keeps the four USDS items (A).
+- **OD-94**, decided 2026-10-22: monitoring warns when few motion slots are free, and the budget factory can set several keys in one motion (A).
 
 The open-decision register has the options and the agent's recommendations.
 

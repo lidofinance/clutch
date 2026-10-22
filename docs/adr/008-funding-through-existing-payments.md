@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-21T20:39:52Z
+  at: 2026-10-22T19:14:25Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the payment ceilings and DAI, 2026-09-22, on OD-06, 2026-10-02, on the funding assets, the legacy investments and the first-loss shares in an emergency, 2026-10-05, on the first-loss role and its burn, 2026-10-13, and on the mandate size, 2026-10-21
+    title: Decision log — EM on the payment ceilings and DAI, 2026-09-22, on OD-06, 2026-10-02, on the funding assets, the legacy investments and the first-loss shares in an emergency, 2026-10-05, on the first-loss role and its burn, 2026-10-13, on the mandate size, 2026-10-21, and on the registries and the USDS items, 2026-10-22
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Finance, the payment ACL chain, budgets and an existing top-up factory
@@ -139,13 +139,20 @@ EM decided on 2026-10-21, closing OD-89 [s1]:
 
 Decisions 32 to 34 replace the floor of the context and of decisions 4 and 5, and the monthly refill behind decision 6: the mandate size is a ceiling, and no top-up refills the vault to it by right. Where an earlier decision of this ADR, ADR 007, ADR 009 or ADR 011 names one TM Floor Value, it now means one mandate size. Decision 24 stands for a new mandate size. Decisions 3, 4 and 7 stand as the registries' backstop. The proposed direction adapts the alerts of decision 6 to the headroom under the size; its alert on a top-up after an objected one stands.
 
+EM decided on 2026-10-22, closing OD-92 Q2 and OD-93 [s1]:
+
+35. The registry factories deploy the two funding registries with Aragon Voting as their admin. The deployer adds the Asset Safe and sets each limit, then gives up its roles. A check before the vote proves every role.
+36. The enabling vote keeps the four USDS items. Aragon Voting takes the token list's add-token role, adds USDS and gives the role up, and it rewrites the executor's shared payment permission.
+
+Decision 35 replaces the standard builder of the proposed direction: a builder fixes its admin at construction, and both live builders make the Aragon Agent the admin, so every limit change would pass Dual Governance ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)). Decision 36 keeps decisions 9, 10 and 12, and adds the token list's role steps.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
-- **USDS permission.** One vote rewrites the array, retaining seven entries and adding USDS at 2,000,000 per payment (decision 12). Fork-test the array before the vote.
+- **USDS permission.** One vote rewrites the array, retaining seven entries and adding USDS at 2,000,000 per payment (decision 12). Fork-test the array before the vote. Build the new params from the live ones at a recent block, and run the before-and-after check again before the vote starts and before it executes: another vote that rewrites the same params would drop one of the two changes without an error (decision 36).
 - **Multiple payments.** A motion can repeat the Asset Safe as recipient, respecting each call's ceiling. Ceilings apply per call, not per motion [s4].
-- **Registries.** Two standard-builder registries pay only the Asset Safe, with Voting as admin ([ADR 005](/adr/005-account-graph-and-roles.md), decision 28). As in the committee's registries, the executor cannot add recipients [s4].
+- **Registries.** Two registries from the registry factories pay only the Asset Safe, with Voting as admin ([ADR 005](/adr/005-account-graph-and-roles.md), decision 28; decision 35). As in the committee's registries, the executor cannot add recipients [s4]. The deployer holds the add-recipient and set-limit roles for one transaction, and the check before the vote reads every role of both registries.
 - **Factories.** One uses the shared stablecoin list after USDS is added; one is stETH-only. Both fix the committee's Safe as trusted caller, as [ADR 006](/adr/006-governance-through-easy-track-factories.md) requires. The DAO registers them.
 - **Limits.** Stablecoins use the mandate size at par; stETH uses the size divided by the pinned price. Attested computation produces both; they enter this repository when the mandate is approved. Each limit is a backstop: it allows more than the headroom under the size, so the size holds by procedure, objection and monitoring, as the launch cap does (decision 20).
 - **Seed.** Use the same registries, up to the mandate size less the transferred first-loss shares at the attested Earn oracle valuation (decision 32). Count Twyne only when evidenced (decision 17). Transfer shares before the seed motion. Before lift, the seed also stays within the cap (decision 20).
@@ -180,9 +187,12 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - Emergency first-loss redemption: EM rejected because exit before a flagged loss would front-run protected depositors.
 - Deduct Twyne now, as the mandate states: EM rejected because its holder and form remain unproved.
 - Keep the floor of mandate draft v0.1: EM replaced it on 2026-10-21 (OD-89), because the mandate's draft text sets a ceiling.
+- Leave the USDS items out of the launch: the agent's recommendation under OD-93; EM kept the items on 2026-10-22, because the vault should be able to receive USDS.
 
 ## Consequences
 
+- The deployer holds each registry's add-recipient and set-limit roles for one transaction. The check before the vote must find no role left with it (decision 35).
+- Keeping the USDS items keeps the rewrite of a permission that every committee's top-ups use. The before-and-after check guards it (decision 36).
 - Without objection, the committee can draw one mandate size per registry per month, or two within about 72 hours across a boundary. The mandate size and the treasury share hold by procedure; the LIP must disclose this.
 - After an ETH fall, the stETH limit is worth less than the mandate size; after a rise, it is worth more. The size counts each funding at its value when funded, so the limit stays a backstop.
 - The one-month period was chosen for a monthly refill, which the mandate no longer has. It stays as the backstop's period until the mandate publishes the eligibility conditions of a replenishment.
@@ -229,7 +239,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 <!-- generated by scripts/validate_docs.py --write-status; edit the sources, not this block -->
 
-- [OD-93](/registers/open-decisions.md): Does the enabling vote keep the four USDS items? The Aragon Agent holds no USDS, read again at block 26249900, and the vault gets USDS without the items: from DAI through Sky's converter, or from sUSDS. (A) Keep them: Voting takes the token list's add-token role, adds USDS and gives the role up, and rewrites the executor's shared payment permission. (B) Leave them out of the launch; a later vote adds USDS when the treasury holds it. B replaces part of OD-11 and OD-24.
+No open decision closes in this record.
 
 <!-- end of generated block -->
 

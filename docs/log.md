@@ -2,6 +2,7 @@
 
 ## 2026-10-22
 
+* **Decision**: Recorded EM's choices for OD-92 to OD-94. The enabling vote approves the hash of each Safe batch, and anyone executes the batches after it; the registry factories deploy the registries with Voting as admin, and a check before the vote proves every role; the vote keeps the four USDS items, against the agent's recommendation; monitoring warns when few Easy Track motion slots are free, and the budget factory can set several keys in one motion.
 * **Evidence**: Ran the enabling-vote rehearsal again on a fork of block 26249900, after OD-89 to OD-91. All eight tests pass. LDO left the Asset Safe policy and the orders account's relayer approvals, so the largest batch fell to 6,304,514 gas and 60,292 bytes; a vote with the batches inside still needs 37,606,772 gas. The Agent still holds no USDS, the shared payment permission still has 22 params, and one Easy Track motion was open. The rehearsal's open decisions are now OD-92 to OD-94.
 * **Decision**: Recorded EM's choice for OD-91: LDO leaves the launch list, the operator's order lists and the recovery sell list. The emergency role no longer transfers LDO to the Aragon Agent, and the dry run no longer buys LDO.
 

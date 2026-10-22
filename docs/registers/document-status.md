@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-22T18:45:16Z
+  at: 2026-10-22T19:15:07Z
 verified: []
 ---
 
@@ -24,11 +24,11 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/002-decision-and-review-process.md](/adr/002-decision-and-review-process.md) | Decision | human-reviewed | accepted | 2026-10-19 | human:em (recorded) |
 | [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | human-reviewed | accepted | 2026-10-19 | human:em (recorded) |
 | [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-10-19 | human:em (recorded) |
-| [adr/005-account-graph-and-roles.md](/adr/005-account-graph-and-roles.md) | Decision | slop | proposed | 2026-10-19 | none |
+| [adr/005-account-graph-and-roles.md](/adr/005-account-graph-and-roles.md) | Decision | slop | proposed | 2026-10-22 | none |
 | [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | slop | proposed | 2026-10-19 | none |
 | [adr/007-swapping-through-an-orders-account.md](/adr/007-swapping-through-an-orders-account.md) | Decision | slop | proposed | 2026-10-22 | none |
-| [adr/008-funding-through-existing-payments.md](/adr/008-funding-through-existing-payments.md) | Decision | slop | proposed | 2026-10-21 | none |
-| [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-10-21 | none |
+| [adr/008-funding-through-existing-payments.md](/adr/008-funding-through-existing-payments.md) | Decision | slop | proposed | 2026-10-22 | none |
+| [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-10-22 | none |
 | [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-10-20 | none |
 | [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-10-22 | none |
 | [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-10-19 | none |
@@ -58,7 +58,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/stonks-instances-2026-10-02.md](/research/stonks-instances-2026-10-02.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/stonks-pricing-2026-10-05.md](/research/stonks-pricing-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-10-19 | none |
-| [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-10-21 | none |
+| [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-10-22 | none |
 | [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-10-22 | none |
 | [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-10-21 | none |
 | [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-10-22 | none |

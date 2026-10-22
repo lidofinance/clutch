@@ -629,3 +629,25 @@
   log:
     - "2026-10-22 — OD-91 decided: LDO leaves the launch list"
   adr: [ADR-011#d15]
+- id: OD-92
+  question: "How does the enabling vote apply the Safe batches and make Voting the funding registries' admin?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit"
+  adr: [ADR-005#d32, ADR-008#d35]
+  see: [/research/enabling-vote-rehearsal-2026-10-15.md]
+  refines: [OD-06, OD-73]
+- id: OD-93
+  question: "Does the enabling vote keep the four USDS items?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit"
+  adr: [ADR-008#d36]
+  refines: [OD-11, OD-24]
+- id: OD-94
+  question: "How does Clutch keep its motions moving when Easy Track's shared limit of open motions is near?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit"
+  adr: [ADR-009#d45]
+  refines: [OD-69]
