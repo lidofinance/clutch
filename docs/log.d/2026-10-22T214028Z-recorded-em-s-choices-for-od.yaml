@@ -1,0 +1,3 @@
+date: '2026-10-22'
+kind: Decision
+text: Recorded EM's choices for OD-95 to OD-99. The repository is public (ADR 001 decision 10). CoW's order signer counts as new code with the Easy Track factories, and the external audit covers it (ADR 007 decision 40). A motion may bring back a single permission that the emergency role revoked, and a restart after the switch stays a vote (ADR 006 decision 19). The seed counts the first-loss shares at the report's price rule (ADR 008 decision 37). Every security report goes to the Lido bug bounty programme (SECURITY.md). Fixed the stale text of the accepted ADR 001, ADR 003 and ADR 004 for EM to verify again, and updated AGENTS.md, the README, CONTRIBUTING, the roadmap, the LIP, the parameters, the enabling-vote spec and the guide.

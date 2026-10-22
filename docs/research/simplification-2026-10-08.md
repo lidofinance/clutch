@@ -3,16 +3,16 @@ type: Research Note
 title: Simplification options, 2026-10-08
 description: OD-54–OD-57 evidence on eleven simplification options, launch controls, budgets and the modifier probe.
 tags: [simplification, scope, governance, screening, budgets, modifiers, evidence]
-status: stable
+status: deprecated
 review_status: slop
 valid_as_of: 2026-10-08
 stale_after: 2026-12-31T00:00:00Z
 superseded_by:
   ref: /registers/decision-log.md
-  note: "EM's answers of 2026-10-08 and 2026-10-09 (OD-54 to OD-57, and the withdrawal-queue cut), recorded in ADR 005 decisions 21 and 22, ADR 007 decisions 27 and 28, ADR 008 decision 20, ADR 009 decisions 31 to 33 and ADR 010 decisions 20 to 22."
+  note: "EM's answers of 2026-10-08 and 2026-10-09 (OD-54 to OD-57, and the withdrawal-queue cut), recorded in ADR 005 decisions 21 and 22, ADR 007 decisions 27 and 28, ADR 008 decision 20, ADR 009 decisions 31 to 33 and ADR 010 decisions 20 to 22. Later, OD-58 removed the technical role (ADR 005 decision 25), and OD-80 and OD-83 replaced the dedicated operator Safe and moved its guard (ADR 005 decision 31, ADR 010 decision 24)."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-10-22T20:29:49Z
 verified: []
 sources:
   - id: s1

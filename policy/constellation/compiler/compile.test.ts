@@ -89,7 +89,7 @@ test("the compiler refuses a grant that leaves a module unguarded", () => {
   const scope = grant(modifiers, GRANTS[0]);
   const child = scope.conditions.find((n) => n.compValue.toLowerCase() === pad(manifest.safetyModifier))!;
   child.compValue = pad("0x000000000000000000000000000000000000dEaD");
-  expect(() => checkProtected(modifiers, manifest)).toThrow(/scopeTarget\(bytes32,address\) must refuse 0x2C469A13E2B1746E3fa6EC644b166B924E44FFf7/);
+  expect(() => checkProtected(modifiers, manifest)).toThrow(`scopeTarget(bytes32,address) must refuse ${manifest.safetyModifier}`);
 });
 
 test("the compiler refuses a manifest that misses a module", () => {

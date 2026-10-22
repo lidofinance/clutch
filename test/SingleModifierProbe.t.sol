@@ -153,7 +153,7 @@ contract SingleModifierProbe is ClutchFixture {
     // ------------------------------------------------------------------
 
     function _owner(address to, bytes memory data) internal {
-        SafeExec.execAsOwner(agent, safe, to, data);
+        SafeExec.execAsOwner(voting, safe, to, data);
     }
 
     function _as(address member, bytes32 roleKey, address to, bytes memory data) internal returns (bool ok) {

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-20T18:34:06Z
+  at: 2026-10-22T20:15:25Z
 verified: []
 sources:
   - id: s1
@@ -157,17 +157,13 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - The existing committee Safe remains unguarded until lift. The enabling vote grants `operator` and registers it as trusted caller. Owners add the guard later in one transaction; factories stay unchanged.
 - Until then, permissions, four-of-seven signing, monitoring, emergency revocation and the switch protect funds within the cap.
-- Count Asset Safe and orders value using [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 20. Exclude first-loss, which those roles cannot reach.
+- Count Asset Safe and orders value at the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 35 and 36). Exclude first-loss, which those roles cannot reach.
 - The cap limits treasury funding. Price-driven excess requires reporting, not action.
 - Alert during objection if a top-up would exceed the cap; report excess at each fortnightly reading.
 - Before lift, set decision 10's guard, disable bypass, put decision 9's agreement in place and activate monitoring (decision 12). Check address, bypass and absent standing approvals. The committee's forum post links the check and lifts the cap.
 - Vendor redaction ends only under decision 13.
 
-**Requested screening rules (OD-39, OD-40, OD-43, OD-47):**
-
-- Refuse operator transactions that breach the buffer floor or post-transaction cap.
-- Refuse orders or router swaps whose limit/minimum output is too far below market.
-- Mark each rule requested until the vendor confirms pre-execution support. Ask whether it records changes and can delay relaxations.
+**Requested screening rules.** The [control matrix](/specs/control-matrix.md) lists them with their state (decision 19). Ask the vendor whether it records changes and can delay relaxations.
 
 ## Options considered
 
@@ -193,10 +189,9 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - Guard setup and standing-approval terms gate cap lift, not launch.
 - Lido does not write the guard, which can stop operator activity and motion creation. This deliberately narrows provider independence. Recovery independence, ten-day removal and the emergency switch, which disables the operator modifier, constrain this dependency (OD-58).
 - Lido must review the post-audit 10-day timelock change; ask the vendor to merge and document it [s11]. It remains off `main`, with 1-day documentation. Earlier text wrongly counted the non-Safe-caller early return as another post-audit change; the fix-review commit already includes it [s11].
-- v1.5.0 support rests on EM's 2026-10-05 report; the confirmation is outside this repository.
 - If the vendor accepts the request, batching uses only MultiSendCallOnly; other delegatecalls fail screening.
 - Naming requires mandate publication and written vendor consent. Restricted fork tests then enter the harness.
-- Asset and emergency Safes use v1.5.0, the first among the six checked Lido Safes. The committee keeps v1.3.0: the guard passed Lido's fork tests on it [s10], and the detector supports it [s11].
+- The committee keeps v1.3.0: the guard passed Lido's fork tests on it [s10], and the detector supports it [s11].
 - The mock module guard and route-A tests were removed on 2026-10-05. The harness has no screening test now. It needs transaction-guard coverage on a committee stand-in, preferably using deployed vendor bytecode.
 
 ## Confirmation

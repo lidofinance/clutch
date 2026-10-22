@@ -27,7 +27,7 @@ blocks:
 
   - id: assets
     title: Assets and venues
-    says: "A launch list of assets and venues: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access and Lido Lend access. It names four main stablecoins: USDC, USDT, USDS and DAI."
+    says: "A launch list of assets and venues. It names four main stablecoins: USDC, USDT, USDS and DAI."
     kept:
       - "On chain: default deny. A new target needs a template motion with a 72-hour objection window, or a DAO vote."
       - "Before execution: the screening vendor checks every operator transaction and every new motion, once the launch cap lifts (OD-54)."
@@ -132,7 +132,7 @@ blocks:
     says: "The emergency path may swap any asset into any of the four main stablecoins."
     kept:
       - "On chain: every swap is a CoW order from the orders account, and each role's permissions pin the receiver: the Asset Safe for the operator, the Aragon Agent for recovery."
-      - "Before execution: the screening vendor checks every operator order. Recovery orders are never screened."
+      - "Before execution: once the launch cap lifts, the screening vendor checks every operator order. Recovery orders are never screened."
       - "Detection: each fill against a market price, open orders, and a page on every emergency swap."
     tech: "Orders live at most 90 days, recovery orders 1 day (INV-024). Nothing on chain bounds an order's price; CoW's competition and EBBO rule hold a fill to the on-chain market."
     changes:
@@ -151,7 +151,7 @@ blocks:
     title: Emergency exit
     says: "A dual-access emergency exit: the DAO, and an emergency committee independent of the Treasury Management Committee, can each return every asset to the treasury within six hours."
     kept:
-      - "On chain: the emergency Safe revokes, exits and sends assets to the Agent through the safety modifier, which nothing screens. Its five signers are two committee members, two Emergency Brakes members and one member of neither body, at 3 of 5, so the committee cannot use it alone."
+      - "On chain: the emergency Safe revokes, exits and sends assets to the Agent through the safety modifier, which nothing screens. The committee cannot use it alone."
       - "On chain: the emergency Safe can switch the operator off; the Emergency Brakes multisig can pause Easy Track; only a DAO vote restarts."
       - "Drills: fork drills must show every emergency action initiated within six hours."
     tech: "INV-002 and INV-009 fix the emergency powers, and INV-027 refuses any emergency call that restores authority. A motion that onboards a protocol also adds its emergency exit through the exit-governance role (INV-025)."

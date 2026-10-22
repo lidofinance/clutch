@@ -7,8 +7,7 @@
 note: docs/research/request-for-solution-2026-10-07.md
 intro: >-
   The RFP asked any other design to keep four properties, and Clutch keeps all four. Below, each card takes one
-  part of the RFP. Every ask shows how Clutch answers it, and a highlighted note marks each difference and each
-  addition, with the reason. Like everything in this repository, the comparison is a draft.
+  part of the RFP.
 properties_sources: ["doc:docs/research/request-for-solution-2026-10-07.md#what-to-send-back"]
 properties:
   - name: DAO ownership
@@ -74,12 +73,12 @@ sections:
           "ADR-006#proposed-direction", OD-09, OD-46, OD-70, INV-004, "ADR-007#d38", OD-78, OD-79, "ADR-006#d18"]
       - asked: "Lido contributors design, build, audit, deploy and maintain the Easy Track helper contracts. The provider confirms that its access control exposes the administration functions and works safely with this path."
         verdict: kept
-        clutch: "The Easy Track factories are the only new contracts. Lido builds them in phase 2, and an external audit covers them in phase 3. The governance role calls six administration functions of the Roles modifier, each one guarded."
-        sources: ["ADR-006#d1", "ADR-006#proposed-direction", INV-004, "doc:ROADMAP.md#roadmap"]
+        clutch: "The Easy Track factories are the only new contracts. Lido builds them in phase 2, and an external audit covers them in phase 3, with CoW's order signer, which has no known audit (OD-96). The governance role calls six administration functions of the Roles modifier, each one guarded."
+        sources: ["ADR-006#d1", "ADR-006#proposed-direction", INV-004, "doc:ROADMAP.md#roadmap", "ADR-007#d40", OD-96]
       - asked: "The Aragon Agent stays the only owner of the Asset Safe. Easy Track gets no ownership and no unrestricted execution, and it executes only the permission changes that the Operator Safe proposes in motions."
         verdict: changed
         clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe (OD-73). Easy Track never receives authority over the vault's owner or the Agent. On the Asset Safe, its executor holds only the governance and exit-governance roles. Outside it, the executor holds only the burn role on the first-loss Safe, so every first-loss burn is a motion (OD-67). The committee's Safe, as the trusted caller of every factory, creates every motion."
-        why: "A vote on the vault then runs without Dual Governance, and Aragon Voting gains no power over the treasury that it lacks today (OD-73)."
+        why: "The reason is the one under Accounts: a vault vote passes no Dual Governance, and Aragon Voting gains no new power (OD-73)."
         sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-008#d23",
           "ADR-010#proposed-direction", OD-67, OD-73, INV-004]
       - asked: "A direct DAO path can make every change that Easy Track can make."
@@ -127,8 +126,8 @@ sections:
     items:
       - asked: "A launch set of stETH, wstETH, LDO, USDC, USDT, DAI, sDAI, USDS, sUSDS, earnUSD and earnETH, with a note of the assets or actions that need custom policy work."
         verdict: changed
-        clutch: "Clutch takes the mandate draft's launch list: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access and Lido Lend access. DAI earns through Sky's DAI–USDS converter, and sDAI and LDO are out."
-        why: "The mandate is the committee's rulebook. DAI earns through USDS without a swap or a third-party market, so sDAI is not needed. ETH and WETH need staking and wrapping. Lido's withdrawal queue left the design on 2026-10-08: stETH is sold in CoW orders instead."
+        clutch: "Clutch takes EM's launch list (ADR 011): ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access and Lido Lend access. DAI earns through Sky's DAI–USDS converter, and sDAI and LDO are out."
+        why: "EM set the list and later took LDO off it (OD-91). DAI earns through USDS without a swap or a third-party market, so sDAI is not needed. ETH and WETH need staking and wrapping. Lido's withdrawal queue left the design on 2026-10-08: stETH is sold in CoW orders instead."
         sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d7", "ADR-011#d14", "ADR-011#d15", "ADR-007#d13", "ADR-007#d27", OD-20, OD-22, OD-91, INV-015]
       - asked: "Unapproved actions are denied by default. On-chain rules restrict the target contracts, the functions, the transferred value and the relevant parameters."
         verdict: kept
@@ -203,7 +202,7 @@ sections:
         sources: ["ADR-009#d8", "ADR-009#d17", "ADR-009#proposed-direction", OD-13]
       - asked: "Each operator transaction is simulated and checked before execution, and the answer names the service that checks it."
         verdict: changed
-        clutch: "From the lift of the launch cap, the screening vendor checks each operator transaction before it runs. Its transaction guard on the committee's Safe refuses any transaction that the vendor did not approve on chain, once (OD-83). Every motion is screened too, because that Safe creates it. Until the cap lifts, the vault runs without the guard under a cap of one million dollars, which the committee keeps by procedure. The repository does not record whether the vendor simulates each transaction. From the launch, the Zodiac UI's signing flow refuses an operator transaction that would breach a cap or the buffer's floor, in its own interface only (OD-86), and from the lift it requests the vendor's approval for each transaction it builds (OD-88)."
+        clutch: "From the lift of the launch cap, the screening vendor checks each operator transaction before it runs. Its transaction guard on the committee's Safe refuses any transaction that the vendor did not approve on chain, once (OD-83). Every motion is screened too, because that Safe creates it. Until the cap lifts, the vault runs without the guard. The repository does not record whether the vendor simulates each transaction. From the launch, the Zodiac UI's signing flow refuses an operator transaction that would breach a cap or the buffer's floor, in its own interface only (OD-86), and from the lift it requests the vendor's approval for each transaction it builds (OD-88)."
         why: "EM allowed a launch without the guard under this cap, so the vendor is not on the launch's critical path. Above the cap, blocking before execution stays a hard requirement."
         sources: ["ADR-010#d1", "ADR-010#d4", "ADR-010#d9", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22",
           "ADR-010#proposed-direction", "ADR-010#d25", "ADR-009#d43", OD-01, OD-54, OD-55, INV-010, "lip:part-9", OD-83, OD-86, OD-88]

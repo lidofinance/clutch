@@ -28,4 +28,4 @@ The [product brief](product/brief.md) explains the goals and users.
 ## Understand a decision
 
 - [Decision records](adr/): the choices, alternatives and consequences.
-- [Research](research/): dated evidence and reproduction commands.
+- [Research](research/): dated evidence and reproduction commands, with an archive of superseded notes.

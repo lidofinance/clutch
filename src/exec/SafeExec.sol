@@ -3,7 +3,7 @@ pragma solidity >=0.8.24 <0.9.0;
 
 import {ISafe} from "../interfaces/ISafe.sol";
 import {IRoles} from "../interfaces/IRoles.sol";
-import {MockAragonAgent} from "../mocks/MockAragonAgent.sol";
+import {MockAragonVoting} from "../mocks/MockAragonVoting.sol";
 
 /// @dev One admin call: the target and its calldata. The policy artifact
 ///      (policy/constellation/artifacts) lists the policy as such calls.
@@ -12,24 +12,23 @@ struct Call {
     bytes data;
 }
 
-/// @dev Executes transactions through the Asset Safe *as its owner* (the
-///      MockAragonAgent in the dry-run; in production the owner is the Aragon
-///      Agent and authority reaches it through the Dual Governance admin
-///      executor — the only RUN_SCRIPT/EXECUTE holder at the fork block).
-///      Uses the Agent's `execute(address,uint256,bytes)` plus the Safe
-///      approveHash + v=1 signature flow, the only authorization path that
-///      ADR 005 allows the Agent (OD-17).
+/// @dev Executes transactions through a Safe *as its owner*: the
+///      MockAragonVoting in the dry run; in production Aragon Voting, through
+///      a passed vote's call script, with no Dual Governance (OD-73). Voting
+///      approves the transaction's hash, and anyone sends the transaction with
+///      that approval as the owner's signature (v=1): the only authorization
+///      path that ADR 005 allows the owner (OD-17, INV-001).
 library SafeExec {
     address internal constant SENTINEL_MODULES = address(0x0000000000000000000000000000000000000001);
 
-    function execAsOwner(MockAragonAgent agent, ISafe safe, address to, bytes memory data)
+    function execAsOwner(MockAragonVoting voting, ISafe safe, address to, bytes memory data)
         internal
     {
         bytes32 txHash =
             safe.getTransactionHash(to, 0, data, 0, 0, 0, 0, address(0), address(0), safe.nonce());
-        agent.execute(address(safe), 0, abi.encodeCall(ISafe.approveHash, (txHash)));
+        voting.execute(address(safe), 0, abi.encodeCall(ISafe.approveHash, (txHash)));
         bytes memory sig =
-            abi.encodePacked(bytes32(uint256(uint160(address(agent)))), bytes32(0), uint8(1));
+            abi.encodePacked(bytes32(uint256(uint160(address(voting)))), bytes32(0), uint8(1));
         bool ok =
             safe.execTransaction(to, 0, data, 0, 0, 0, 0, address(0), payable(address(0)), sig);
         require(ok, "SafeExec: execTransaction failed");

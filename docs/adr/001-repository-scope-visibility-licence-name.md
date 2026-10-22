@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:29:31Z
+  at: 2026-10-22T21:39:51Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -24,10 +24,15 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-20--adr-001-to-adr-004-verified-again-and-yt-registered
     sha256: 01803ac13d0dd11559df48adc5d0509bd03120cc310c588f6d83373243e852fd
+  - by: human:em
+    at: 2026-10-22T21:59:49Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-10-22--adr-001-adr-003-and-adr-004-verified-again
+    sha256: b4c7ee4d2ae6e9021c14ca736f9c3864059c407a6cf4401579e546ecec6c12af
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM's setup answers of 2026-09-30, the vendor's announcement, 2026-10-02, and the constellation's licence, 2026-10-06
+    title: Decision log — EM's setup answers of 2026-09-30, the vendor's announcement, 2026-10-02, the constellation's licence, 2026-10-06, and the repository's publication, 2026-10-22
   - id: s2
     resource: "https://www.gnu.org/licenses/gpl-3.0.html"
     title: GNU General Public License, version 3, section 13
@@ -83,6 +88,10 @@ EM decided on 2026-10-06, closing OD-34 [s1]:
 
 9. **The constellation's licence.** Files derived from the policy provider's Zodiac constellation keep LGPL-3.0-only. A derived file gets `SPDX-License-Identifier: LGPL-3.0-only` when it changes. New files use AGPL-3.0-or-later, the policy compiler among them. LGPL-3.0 is GPL-3.0 with added permissions [s9], so the reasoning of decision 5 applies.
 
+EM decided on 2026-10-22, closing OD-95 [s1]:
+
+10. **Publication.** The repository is public. Nothing enters it that could not be published now. This replaces the visibility rule of decision 4; its rule on the screening vendor's identity and unannounced counterparty terms stands.
+
 ## Options considered
 
 - Separate documentation and code repositories: rejected because specifications and tests must change in the same commit.
@@ -97,7 +106,7 @@ EM decided on 2026-10-06, closing OD-34 [s1]:
 - Source files use `SPDX-License-Identifier: AGPL-3.0-or-later`. Easy Track-derived files keep `GPL-3.0`; constellation-derived files keep `LGPL-3.0-only` (decision 9).
 - The LGPL text in `policy/constellation/LICENSE` must accompany derived files. The licence reading in decision 9 is not a legal review.
 - The kit's history names the policy provider. Its proposal repository is public, so the history passes the publication test.
-- AGPL-3.0 section 13 requires source access for users of a modified version over a network [s4]. Public source and explorer verification at deployment are the planned response.
+- AGPL-3.0 section 13 requires source access for users of a modified version over a network [s4]. The public repository and explorer verification at deployment are the response.
 - The decision log redacts the screening vendor's name and mandate size. The name enters when the mandate is posted, under decision 8.
 
 ## Confirmation
@@ -107,7 +116,7 @@ EM decided on 2026-10-06, closing OD-34 [s1]:
 
 ## Reversal conditions
 
-- A legal review requires a different licence or an earlier publication.
+- A legal review requires a different licence.
 - A naming conflict appears.
 
 ## Open questions

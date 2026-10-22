@@ -22,7 +22,7 @@ contract SlotWriter {
 abstract contract ReviewBase is ClutchFixture {
     function _own(address to, bytes memory data) internal {
         vm.startPrank(principal);
-        SafeExec.execAsOwner(agent, safe, to, data);
+        SafeExec.execAsOwner(voting, safe, to, data);
         vm.stopPrank();
     }
 

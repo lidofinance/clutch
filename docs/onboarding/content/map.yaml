@@ -75,7 +75,7 @@ nodes:
 - id: screening
   label: Screening guard
   sub: '[the screening vendor]'
-  summary: A transaction guard on the committee's Safe (OD-83). It refuses any transaction that the vendor has not approved once. It is set after the launch; the launch cap of one million dollars lifts once it is live (OD-54).
+  summary: A transaction guard on the committee's Safe (OD-83). It refuses any transaction that the vendor has not approved once. It is set after the launch; the launch cap lifts once it is live (OD-54).
   domain: ext
   kind: service
   status: instance
@@ -266,8 +266,7 @@ edges:
   to: emergency-safe
   kind: signers
   short: two seats
-  label: Two of the committee's signers sit on the emergency Safe, at 3 of 5 with two Emergency Brakes members and one
-    member of neither body. The committee cannot act alone there.
+  label: Two of the committee's signers sit on the emergency Safe. The committee cannot act alone there.
   via:
   - - 450
     - 170
@@ -306,8 +305,8 @@ edges:
   to: orders
   kind: owns
   short: swaps
-  label: To swap, the vault sends a token to the orders account under a budget, and a role places a CoW order there. The
-    operator's orders pay the Asset Safe; recovery orders pay the Aragon Agent.
+  label: To swap, a role sends a token to the orders account and places a CoW order there. The operator's transfers
+    spend its orders budgets. The operator's orders pay the Asset Safe; recovery orders pay the Aragon Agent.
   both: true
 - id: first-loss-shares
   from: first-loss

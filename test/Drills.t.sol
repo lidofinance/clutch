@@ -391,7 +391,7 @@ contract Drills is ClutchFixture {
         // scopes, exactly like the Easy Track factories.
         vm.startPrank(principal);
         SafeExec.execAsOwner(
-            agent,
+            voting,
             safe,
             address(roles),
             abi.encodeCall(
@@ -632,7 +632,7 @@ contract Drills is ClutchFixture {
         // and the owner path restores it
         vm.startPrank(principal);
         SafeExec.execAsOwner(
-            agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))
+            voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))
         );
         vm.stopPrank();
         assertTrue(safe.isModuleEnabled(address(roles)));
@@ -666,7 +666,7 @@ contract Drills is ClutchFixture {
 
         // the owner path enables the modifier again, and the same motion enacts
         vm.startPrank(principal);
-        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
+        SafeExec.execAsOwner(voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
         vm.stopPrank();
         easyTrack.enactMotion(id, script);
     }
@@ -787,14 +787,15 @@ contract Drills is ClutchFixture {
         _opRevert(SDAI, abi.encodeWithSignature("deposit(uint256,address)", 1e18, address(safe)));
     }
 
-    /// @dev INV-001 and INV-019 at deployment: the Agent is the only owner,
+    /// @dev INV-001 and INV-019 at deployment: Aragon Voting is the only owner,
     ///      with threshold one; the Safe runs the pinned v1.5.0 singleton; it
     ///      has no fallback handler, no transaction guard and no module guard
     ///      (OD-17); it owns both modifiers, and they are its only modules.
     function test_asset_safe_shape() public view {
         address[] memory owners = safe.getOwners();
         assertEq(owners.length, 1, "one owner");
-        assertEq(owners[0], address(agent), "the Agent is the owner");
+        assertEq(owners[0], address(voting), "Aragon Voting is the owner");
+        assertTrue(owners[0] != address(agent), "the Agent is not the owner");
         assertEq(safe.getThreshold(), 1, "threshold one");
         assertEq(
             address(uint160(uint256(vm.load(address(safe), bytes32(0))))), SAFE_SINGLETON, "pinned singleton"

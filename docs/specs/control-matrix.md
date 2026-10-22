@@ -7,12 +7,12 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T19:14:25Z
+  at: 2026-10-22T20:25:16Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on OD-39 to OD-45, 2026-10-06, and on OD-84 to OD-88, 2026-10-20
+    title: Decision log — EM on OD-39 to OD-45, 2026-10-06, on OD-64, 2026-10-13, and on OD-84 to OD-88, 2026-10-20
   - id: s2
     resource: /adr/009-budgets-caps-reporting-and-monitoring.md
     title: ADR 009 — layered controls, the buffer, the cap tier of new products, the detectors, and the two readings
@@ -41,7 +41,7 @@ sources:
 Every mandate rule gets a control on each layer that can carry it (OD-39) [s1][s2]:
 
 - **On chain:** the permission policy refuses the transaction.
-- **Before execution:** the screening vendor refuses an operator transaction. The Zodiac UI's signing flow also refuses one that breaches a cap or the buffer's floor, in its own interface only (OD-86). The emergency path and the DAO path are never screened or refused [s2][s4].
+- **Before execution:** from the lift of the launch cap (OD-54, OD-83), the screening vendor refuses an operator transaction. The Zodiac UI's signing flow also refuses one that breaches a cap or the buffer's floor, in its own interface only (OD-86). The emergency path and the DAO path are never screened or refused [s2][s4].
 - **Detection:** monitoring finds a breach and alerts the person who must act.
 - **Display:** the Zodiac UI shows the policy provider's own reading of the vault, and Lido's report generator publishes Lido's. The two readings are independent, and both count (OD-84) [s2].
 
@@ -52,8 +52,8 @@ Figures stay out of this page. They come from the attested computation once the 
 | Rule | On chain | Before execution | Detection | Display | Owner | Status |
 |---|---|---|---|---|---|---|
 | The DAO keeps custody | Aragon Voting is the only owner of the Asset Safe, the orders account and the first-loss Safe, and recovered assets go to the Aragon Agent (OD-73; INV-001, INV-021, INV-023) [s5][s8] | — | Owner, module and singleton alerts on every new Safe | Account graph | The DAO; `@lidofinance/defi-tech` specifies the alerts | Built for the Asset Safe; the other accounts specified |
-| Only approved protocols and actions | Default deny; a new target only through a template motion with a 72-hour objection window, or a DAO vote (INV-004, INV-005) [s6] | Every operator transaction and every new motion | Drift against the committed policy artifact | The policy and its difference from the chain | The committee proposes; LDO holders can object; the emergency Safe revokes | Built; templates and drift detector specified |
-| Every receiver is the vault | Receivers, owners and beneficiaries pinned (INV-003, INV-022) | Every operator transaction | Drift | — | `@lidofinance/defi-tech` | Built for positions; orders specified |
+| Only approved protocols and actions | Default deny; a new target only through a template motion with a 72-hour objection window, or a DAO vote (INV-004, INV-005) [s6] | Every operator transaction and every new motion, once the launch cap lifts | Drift against the committed policy artifact | The policy and its difference from the chain | The committee proposes; LDO holders can object; the emergency Safe revokes | Built; templates and drift detector specified |
+| Every receiver is the vault | Receivers, owners and beneficiaries pinned (INV-003, INV-022) | Every operator transaction, once the launch cap lifts | Drift | — | `@lidofinance/defi-tech` | Built for positions; orders specified |
 | No borrowing and no leverage | No borrow function in any role's permissions; INV-015 keeps the operator inside the launch scope | — | Drift | — | `@lidofinance/defi-tech` | Built; no test names borrowing |
 | Spending per protocol spender is bounded | Budget keys per spender, and fixed ceilings (INV-008, INV-011, INV-012) [s2] | — | Budget burn; every budget motion, whose forum post names its event (OD-56) | Budget left per key | The committee files a budget motion after an event; no routine retune | Built with dry-run figures |
 | Exposure caps | None: the policy cannot see value | The Zodiac UI refuses an operator transaction that breaches a cap at its post-transaction state, in its interface only (OD-86). Requested from the screening vendor: the same refusal | Fortnightly cap readings on IPFS, Lido's and the provider's; a breach in either counts (OD-84); the emergency Safe's switch stops the operator when a breach gets worse (OD-29, OD-32, OD-58) | Each cap against its limit, with headroom | The committee rebalances; the emergency Safe switches off on the trigger | Specified; screening requested |
@@ -66,10 +66,10 @@ Figures stay out of this page. They come from the attested computation once the 
 | The vault stays within the mandate size and the treasury share (OD-89) [s7] | None: the registries allow more | The creation of every top-up motion, once the launch cap lifts. Requested from the screening vendor: a dollar limit per top-up motion | A top-up motion whose enactment would take the funded value above the mandate size, or the vault above the treasury share, while its objection window is open; the treasury share at each fortnightly reading | The funded value against the mandate size, and the vault's treasury share | The committee; LDO holders can object; a DAO vote sets a new size | Decided by EM on 2026-10-21; monitoring owed; the mandate owes the share's base, the time of its test and the remedy |
 | Until the guard is live, the vault stays under a cap of one million dollars (OD-54, OD-55) | None: the registries allow more | None until the lift | A top-up motion whose enactment would take the vault above the cap, while its objection window is open; the vault's value above the cap at each fortnightly reading | The vault's value against the cap | The committee; LDO holders can object; the committee's forum post lifts the cap once the guard is set with its bypass mode off | Decided by EM on 2026-10-09; monitoring owed |
 | No top-up while the monthly report is late | None | — | A missing report flagged on day 8 | Report status | The committee | Specified |
-| Structural increases of exposure wait for a timelock (OD-45) | Motions with a 72-hour objection window, or DAO votes, which run as direct Voting items (OD-73) [s6] | The creation of every motion | Motion lifecycle; free Easy Track motion slots (OD-94) | Pending motions and their deadlines | LDO holders; the Emergency Brakes multisig can pause Easy Track; the emergency Safe's switch freezes the vault's queued motions | Built on a mock Easy Track; specified |
+| Structural increases of exposure wait for a timelock (OD-45) | Motions with a 72-hour objection window, or DAO votes, which run as direct Voting items (OD-73) [s6] | The creation of every motion, once the launch cap lifts | Motion lifecycle; free Easy Track motion slots (OD-94) | Pending motions and their deadlines | LDO holders; the Emergency Brakes multisig can pause Easy Track; the emergency Safe's switch freezes the vault's queued motions | Built on a mock Easy Track; specified |
 | The enabling vote installs exactly the reviewed Safe batches (OD-92) | Aragon Voting approves each batch's hash, and a batch with another content does not run [s5] | One command computes each hash again from the published batch, the Safe and its nonce | A batch that fails, or that waits after the vote executes | The published batches and their hashes | `@lidofinance/defi-tech` | Decided by EM on 2026-10-22; the command and the publication are owed |
 | A relaxation of a screening rule is controlled (OD-45) | — | The written list below; the vendor's own delay, if it has one | A rule change, where the vendor reports one | — | The committee and `@lidofinance/defi-tech`; the forum gets notice (OD-64) | Specified |
-| A motion adds only exits to the emergency role (OD-49) | The exit-governance role writes only under the `emergency` key, with no delegatecall, no allowance and no administrative target (INV-025) | The creation of every motion | Drift on the safety policy | — | `@lidofinance/defi-tech` writes the templates; LDO holders can object | Specified |
+| A motion adds only exits to the emergency role (OD-49) | The exit-governance role writes only under the `emergency` key, with no delegatecall, no allowance and no administrative target (INV-025) | The creation of every motion, once the launch cap lifts | Drift on the safety policy | — | `@lidofinance/defi-tech` writes the templates; LDO holders can object | Specified |
 | No delegatecall by motion, and no vault account as a motion's target | The governance role's guards (OD-36, OD-38) | — | Drift | — | `@lidofinance/defi-tech` | Built for the Asset Safe, and the compiler refuses a policy without the guard; the orders account has no governance role (OD-78) |
 | An emergency action starts within six hours | The emergency role, with its switch (INV-002, INV-009) | Never screened | Paging through the general Lido incident process | — | The emergency Safe; the Emergency Brakes multisig for the Easy Track pause | Built for the listed positions; a position that a motion onboards gets its emergency exit from that motion (OD-49), specified; runbooks and drills owed |
 | The emergency Safe keeps its seat rule (OD-58) | — | — | Owner-change alerts, critical on the emergency Safe (INV-026) | Signer sets | The committee and the Emergency Brakes multisig, for their seats | Specified; runbook owed |
@@ -97,4 +97,4 @@ These are the vault's rules in the vendor's service. A requested rule becomes de
 | Refuse an order whose limit price, or a router swap whose minimum output, lies too far below a market price | Orders and router swaps | Requested |
 | Depegs, protocol compromise and counterparty anomalies | Monitoring | Decided that the vendor runs detectors ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 7); this list is proposed |
 
-A relaxation of a rule changes this list in a reviewed pull request. The forum gets a notice, and the vendor's own delay applies if it has one (OD-45, OD-64) [s1].
+A relaxation of a rule changes this list in a reviewed pull request (OD-45, OD-64) [s1].

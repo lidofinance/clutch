@@ -80,7 +80,7 @@
 
 - title: Little new code, and where it stands
   text: "Clutch reuses deployed code that already runs: Safe, Zodiac Roles, Easy Track, CoW's order contracts and Lido's monitoring. It adds Easy Track factories, the permission policy with its compiler, the vault's detectors and a report generator.\n\nToday the design is in phase 0. Nothing is deployed, no audit is done and no runbook is written. The **Built or reused** and **Status** tabs show each part."
-  tech: "New code: the Easy Track factories, Clutch's TypeScript policy compiler, the detectors and the report generator. Reused as deployed: Safe v1.5.0, the locked Roles mastercopy, Easy Track and CoW's contracts."
+  tech: "New code: the Easy Track factories, Clutch's TypeScript policy compiler, the detectors and the report generator. CoW's order signer counts as new code too, because it has no known audit (OD-96). Reused as deployed: Safe v1.5.0, the locked Roles mastercopy, Easy Track and CoW's other contracts."
   nodes: [policy, easytrack, reporting, monitoring]
   flows: [policy-change, roadmap, enabling-vote]
-  sources: ["ADR-006#d1", "ADR-004#d12", "ADR-004#d13", "doc:ROADMAP.md#roadmap"]
+  sources: ["ADR-007#d40", OD-96, "ADR-006#d1", "ADR-004#d12", "ADR-004#d13", "doc:ROADMAP.md#roadmap"]

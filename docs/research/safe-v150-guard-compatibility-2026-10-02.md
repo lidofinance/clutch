@@ -7,9 +7,12 @@ status: stable
 review_status: slop
 valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
+superseded_by:
+  ref: /adr/010-pre-execution-screening.md
+  note: "In part: since OD-80 and OD-83, the guard goes on the committee's v1.3.0 Safe, so the v1.5.0 condition lapsed (decision 24). The fork test's v1.3.0 run still backs OD-83."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  at: 2026-10-22T20:29:49Z
 verified: []
 sources:
   - id: s1
