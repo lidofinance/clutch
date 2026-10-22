@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T20:24:15Z
+  at: 2026-10-22T21:39:40Z
 verified: []
 sources:
   - id: s1
@@ -91,7 +91,7 @@ Easy Track motions onboard protocols and assets and adjust budgets within ceilin
 Factories build complete permission trees from templates fixed at audit time; motions supply parameters only.
 Routine removal uses a removal-template motion. Emergency removal uses immediate revocation.
 
-Easy Track EVM script factories are the only new contracts.
+Easy Track EVM script factories are the only new contracts. CoW's order signer has no known audit, so it counts as new code with them (OD-96).
 No bespoke access-control, vault or accounting contract is introduced.
 Funding reuses the existing Finance application and allowed-recipients machinery already in production.
 
@@ -218,7 +218,7 @@ Each approval to a protocol spender spends that spender's budget key, which boun
 | **Screening guard** | vendor-supplied | the screening vendor's existing transaction guard, one instance, set with `setGuard` on the committee's Safe when the launch cap lifts (OD-83). Not written by Lido |
 | **Orders account** | to be deployed | new Safe instance owned by Aragon Voting, one of one, with CoW's `ExtensibleFallbackHandler` at `0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5` and ComposableCoW as the verifier of CoW's settlement domain. Holds only tokens in transit between a transfer and a fill. It has one modifier with the operator and emergency roles, and no governance role: a DAO vote adds a token (OD-43, OD-57, OD-58, OD-78) [s11] |
 | **First-loss Safe** | to be deployed | new Safe instance owned by Aragon Voting, one of one, with no guard or fallback handler. Holds only the DAO's first-loss Earn shares. One modifier carries two roles: **first-loss**, held by the committee's Safe, redeems the shares with the proceeds pinned to the Agent (OD-42, OD-60); **first-loss-burn**, held by the EVMScriptExecutor, burns them only as an enacted motion (OD-67) |
-| CoW order signer | `0x23dA9AdE38E4477b23770DeD512fD37b12381FAB` | reused, verified `CowswapOrderSigner`; called by delegatecall from the orders account [s11] |
+| CoW order signer | `0x23dA9AdE38E4477b23770DeD512fD37b12381FAB` | reused, verified `CowswapOrderSigner`; called by delegatecall from the orders account [s11]. It has no known audit, so it counts as new code with the factories (OD-96) |
 | ComposableCoW and its TWAP handler | `0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74`, `0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5` | reused; Ackee audited ComposableCoW and CoW's fallback handler, and Gnosis reviewed ComposableCoW; whether the TWAP handler is in those reports' scope is not checked [s11] |
 
 The Emergency Safe, the orders account and the first-loss Safe are new instances of the audited Safe singleton, not new contract code. Aragon Voting owns the orders account and the first-loss Safe (OD-73). The committee's Safe is the TMC multisig itself, so no owner set needs to follow it (OD-80). The Emergency Safe's two TMC seats and two Emergency Brakes seats follow their bodies: a signer who leaves a body leaves the seat. That reconciliation is an operational duty with no on-chain enforcement, and an owner change on the Emergency Safe is a critical alert.
@@ -398,7 +398,7 @@ The mandate puts seeding and top-ups on Easy Track, and it makes the objection t
 
 **The mandate size (OD-89).** The vault holds up to the mandate size in assets. Each funding counts in US dollars at its value when it is funded, and the legacy positions count too. More funding needs a separate DAO approval, and a replenishment needs the mandate's published eligibility conditions and its disclosure. The vault never holds more than the mandate's share of the DAO's non-LDO treasury. The size is a ceiling: no top-up refills the vault to it by right.
 
-**The legacy Earn shares (OD-21).** The DAO's first-loss shares in earnETH and earnUSD, approved by Snapshot in March 2026, sit in a Growth Committee Safe [s10]. After the enabling vote, the Growth Committee transfers them to the first-loss Safe. The seed is at most the mandate size less their value, and at most the launch cap until the lift (OD-42, OD-54, OD-89). This proposal takes over the first-loss terms of that allocation, with the committee as executor in place of the Growth Committee (OD-60); Parts 1 and 2 and section 4.4 give the roles. Reports show the first-loss Safe as a sub-allocation of the vault. A Twyne position counts against the seed only when its holder and form are shown.
+**The legacy Earn shares (OD-21).** The DAO's first-loss shares in earnETH and earnUSD, approved by Snapshot in March 2026, sit in a Growth Committee Safe [s10]. After the enabling vote, the Growth Committee transfers them to the first-loss Safe. The seed is at most the mandate size less their value at the report's price rule, and at most the launch cap until the lift (OD-42, OD-54, OD-89, OD-98). This proposal takes over the first-loss terms of that allocation, with the committee as executor in place of the Growth Committee (OD-60); Parts 1 and 2 and section 4.4 give the roles. Reports show the first-loss Safe as a sub-allocation of the vault. A Twyne position counts against the seed only when its holder and form are shown.
 
 - **Period: one calendar month.** EM chose it on 2026-10-02 for a monthly refill to a floor, which the mandate no longer has (OD-89). It stays as the backstop's period until the mandate publishes the eligibility conditions of a replenishment. No live Lido registry uses one month; they use three, six or twelve [s7].
 - **Limit: one mandate size per registry per month.** Stablecoins count at par. The stETH limit is the mandate size at the Coingecko price pinned when the enabling vote is prepared, set by attested computation. Either asset can carry the seed.
@@ -455,7 +455,7 @@ What it costs, and what must be planned:
 - **Conditional orders need a watch-tower.** CoW's watch-tower posts them to the order book. If it stops, the orders wait and no funds move.
 - **Assets sit in the orders account between transfer and fill.** This is a short custody excursion out of the Asset Safe and should be stated plainly rather than glossed.
 - **A recovery order names its own limit,** so it can fill in a depeg at a price that the emergency signers accept. The emergency service level remains time to initiate. Nothing on chain stops a bad limit either: three emergency signers, unscreened, choose the limit, and they need not include a committee member. CoW's rules hold the fill to the on-chain market, every emergency swap pages at high severity, and monitoring alerts on a limit far below a market price (OD-48).
-- **The order signer has no known audit.** It is 40 lines long. It and the TWAP handler, which the audits of ComposableCoW may not cover, join Lido's phase-3 review (Part 1) [s11].
+- **The order signer has no known audit.** It is 40 lines long, so it counts as new code and the external audit covers it with the factories (OD-96). The TWAP handler, which the audits of ComposableCoW may not cover, joins Lido's phase-3 review (Part 1) [s11].
 - **Tokens.** The operator's lists start with stETH, wstETH, WETH, USDC, USDT and USDS; DAI and sUSDS stay off (OD-22, OD-46), and LDO left the launch list (OD-91). Recovery sells every token of the launch list except ETH, which is staked first, and the Earn shares, which leave through their redeem queues. A DAO vote adds a token to the orders account, with its relayer approval, emergency transfer and recovery orders; no motion writes there (OD-36, OD-46, OD-78). Staking stays; the withdrawal queue left the design on 2026-10-08, so unstaking goes through CoW orders (ADR 007, decision 27).
 
 ##### 6.2 Module disabling — the emergency role's switch **[Implemented]**
@@ -616,6 +616,7 @@ Reproduce with `forge test` against an archive RPC, fork block 25946643.
 | Remove a strategy in an emergency | Emergency Safe, three of five | Direct through the safety modifier: `revokeTarget` or `revokeFunction` on the `operator` key | Minutes |
 | Adjust a budget within ceilings | Operator proposes | Easy Track motion, governance role | 72 hours |
 | Onboard a new protocol or asset | Operator proposes | Easy Track motion, template factory | 72 hours |
+| Bring back one revoked permission | Operator proposes | Easy Track motion, the template that covers it (OD-97) | 72 hours |
 | Top up the vault | Committee's Safe proposes, with the vendor's approval from the lift; anyone enacts | Easy Track motion, top-up factory, paying the Asset Safe only | 72 hours |
 | Revoke the operator | Emergency Safe, three of five | Direct, on the operator modifier and on the orders modifier | Minutes |
 | Disable the operator modifier | Emergency Safe, three of five | Direct through the safety modifier, the emergency role's switch | Minutes |

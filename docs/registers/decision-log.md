@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T19:14:25Z
+  at: 2026-10-22T21:39:40Z
 verified: []
 sources:
   - id: s1
@@ -64,6 +64,9 @@ sources:
   - id: s18
     resource: "urn:clutch:interview:2026-10-22-enabling-vote"
     title: EM's answers on OD-92 to OD-94, 2026-10-22; the transcript is not in the repository
+  - id: s19
+    resource: "urn:clutch:interview:2026-10-22-sweep"
+    title: EM's answers on the documentation sweep's open items, 2026-10-22; the transcript is not in the repository
 ---
 
 # Decision log
@@ -73,6 +76,30 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-22 — OD-95 to OD-99 decided: the public repository, the order signer as new code, re-grants by motion, the seed's price rule and security reports
+
+The agent swept every document for inconsistencies. It then asked EM about the items that it could not fix alone, in this order: (1) a record of the repository's publication; (2) the stale text of the accepted ADR 003 and ADR 004; (3) the Stonks wording in `AGENTS.md`, and its rule that everything else reuses audited contracts, while CoW's order signer has no known audit; (4) whether a motion may bring back a permission that the emergency role revoked; (5) the price at which the seed counts the first-loss shares; (6) the kit's test harness, which still makes the Agent the Asset Safe's owner; (7) the repeats across the guide's cards. EM answered, and added item 8:
+
+> 1. Record repo as public
+> 2. Fix stale APR so that I can verify them
+> 3. Stonks is no longer needed. Good catch on the non-audited contract. We must count it together with ET factories as the new code then.
+> 4. It can. A motion may bring back a single revoked permission, with the 72-hour window; a restart after the switch stays a vote.
+> 5. Repo price rule.
+> 6. Fix harness.
+> 7. Keep.
+> 8. Make security.md saying that every report must be sent to the Lido bug bounty program where it's classified under rules (e.g. it might be indeed out of scope which is okay)
+
+Recorded as:
+
+- (1, OD-95) The repository is public, and nothing enters it that could not be published now ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md), decision 10). This replaces the visibility rule of ADR 001 decision 4. On 2026-10-22, GitHub's API showed the repository as public.
+- (2) The agent reads "APR" as "ADR". It fixed the stale text of the accepted ADR 001, ADR 003 and ADR 004 for EM to verify again: the public repository (OD-95), the parameters that replace the swap instance settings (OD-96), OD-23, which ADR 012 decision 5 closed, the screening guard from the lift of the launch cap (OD-83, OD-88), and the policy port, which exists since 2026-10-06. The validator fails on each of the three pages until EM verifies it again with `just verify`.
+- (3, OD-96) The Stonks instances are gone, so `AGENTS.md` and ADR 003 decision 6 no longer name their settings. The agent names the orders account's token lists and the maximum order life in their place. CoW's order signer has no known audit, so it counts as new code, together with the Easy Track factories, and the external audit covers it with them ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 40). It stays deployed code that Clutch reuses.
+- (4, OD-97) A motion may bring back a single permission that the emergency role revoked, with the 72-hour objection window. A restart after the switch stays a vote ([ADR 006](/adr/006-governance-through-easy-track-factories.md), decision 19). No motion writes on the orders account (OD-78), so a permission there still comes back by vote.
+- (5, OD-98) The seed counts the first-loss shares at the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 35 and 36), as the funded value does ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 37). The agent reads "Repo price rule" as the report's price rule, the option that it proposed.
+- (6) The kit's test harness makes a stand-in for Aragon Voting the only owner of the Asset Safe, as OD-73 decided. The mock Agent stays the recovery destination.
+- (7) The guide's cards keep their repeats, because a click on a map box shows that box's card alone.
+- (8, OD-99) Every security report goes to the Lido bug bounty programme, which classifies it under its rules. A report can be out of scope, and that is acceptable. `SECURITY.md` says so. [s19]
 
 ## 2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit
 

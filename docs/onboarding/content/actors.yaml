@@ -266,12 +266,13 @@
   can:
     - "Onboard a protocol without a DAO vote: wrap and unwrap, a tokenized vault, a queue vault, a spender approval or a Morpho Blue market."
     - "Onboard Lido Lend in one motion through the Morpho Blue template, once Lido Lend's own contract exists. The same motion adds its emergency exit (OD-49)."
+    - "Bring back a single permission that the emergency role revoked, through the template that covers it, after the 72-hour window. A restart after the switch stays a vote (OD-97)."
   cannot:
     - "Accept a condition tree from a motion."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke (OD-09)."
     - "Add a token for market, limit or recovery orders. The order signer's permission is a delegatecall, which no motion can write (OD-36, OD-46)."
   numbers: ["up to 5 onboarding templates (OD-79)", "1 removal template", "a claim template only if needed (OD-72)", "external audit in phase 3"]
-  sources: ["ADR-006#d1", "ADR-006#d2", "ADR-006#d3", "ADR-006#d5", "ADR-006#d7", "ADR-006#d12", "ADR-006#d13",
+  sources: ["ADR-006#d19", OD-97, "ADR-006#d1", "ADR-006#d2", "ADR-006#d3", "ADR-006#d5", "ADR-006#d7", "ADR-006#d12", "ADR-006#d13",
     "ADR-006#d14", "ADR-006#d15", "ADR-006#proposed-direction", "ADR-011#d3", "ADR-011#d13", OD-09, OD-36, OD-43, OD-46,
     OD-49, OD-70, OD-72, "lip:part-4", OD-78, OD-79, "ADR-006#d18"]
 
@@ -629,8 +630,8 @@
     - "Run CI on every pull request: the docs bundle, the policy artifact and this guide."
   cannot:
     - "Hold a key, a seed or an RPC credential."
-    - "Go public before deployment. Nothing enters it that could not be published at that point."
-  sources: ["ADR-001#d1", "ADR-001#d2", "ADR-001#d4", "ADR-002#d3", "ADR-003#d8", "ADR-003#d9", "ADR-003#d10",
+    - "Take in anything that could not be published. The repository is public (OD-95)."
+  sources: ["ADR-001#d1", "ADR-001#d2", "ADR-001#d4", "ADR-001#d10", OD-95, "ADR-002#d3", "ADR-003#d8", "ADR-003#d9", "ADR-003#d10",
     "ADR-003#d11", "doc:SECURITY.md#repository-rules"]
 
 - id: em
@@ -658,9 +659,9 @@
   cannot:
     - "Merge, deploy, or touch `deployed/`."
     - "Mark a page reviewed, or record a body's verification."
-    - "Set a parameter: budgets, ceilings, swap settings, funding limits, allowlists or role membership."
+    - "Set a parameter: budgets, ceilings, the orders account's token lists and order life, funding limits, allowlists or role membership (OD-96)."
     - "Use the Zodiac key."
-  sources: ["ADR-003#d5", "ADR-003#d6", "ADR-003#d7", "ADR-003#d14", OD-31, "doc:AGENTS.md#out-of-scope-for-agents"]
+  sources: ["ADR-003#d5", "ADR-003#d6", "ADR-003#d7", "ADR-003#d14", OD-31, OD-96, "doc:AGENTS.md#out-of-scope-for-agents"]
 
 # --- Asset Safe ---------------------------------------------------------------------------------
 - id: asset-safe
@@ -912,9 +913,9 @@
     - "Withdraw a pre-signature with `unsignOrder`."
   cannot:
     - "Pin a receiver or amounts. The permission must pin them."
-    - "Show an audit. None was found; it is 40 lines long, and Lido reviews it in phase 3."
+    - "Show an audit. None was found, so it counts as new code: the external audit covers it with the Easy Track factories (OD-96)."
   address: "0x23dA9AdE38E4477b23770DeD512fD37b12381FAB"
-  sources: ["ADR-007#d18", "ADR-007#d23", "ADR-007#proposed-direction",
+  sources: ["ADR-007#d40", OD-96, "ADR-007#d18", "ADR-007#d23", "ADR-007#proposed-direction",
     "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer"]
 
 - id: composable-cow

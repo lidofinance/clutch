@@ -7,12 +7,12 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T20:25:16Z
+  at: 2026-10-22T21:39:40Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM's decisions to OD-94, 2026-10-22
+    title: Decision log — EM's decisions to OD-99, 2026-10-22
   - id: s2
     resource: /adr/005-account-graph-and-roles.md
     title: ADR 005 — the accounts, the roles and their holders
@@ -94,7 +94,7 @@ The vote's items run when it executes, about five days after it starts. Then any
 | By design | An onboarding template that the launch did not register, with its first protocol, and a claim template that did not ship | OD-72, OD-79 [s3] |
 | By design | Role membership; replacing a Safe, a modifier or a factory; delegatecall for the operator; another module or a Safe version change; the shared payment permission or token list; ending the first-loss terms | [s2][s3][s5] |
 | Later, by vote | Insurance funds for other products: the fund roles and templates, and a third funding registry and top-up factory | OD-78 [s5] |
-| After an emergency | Every restart: the operator modifier, with the operator's permissions on the orders account and any relayer approval set to zero; a funding limit that a vote set to zero; an Easy Track unpause; a repair of the safety modifier | OD-59, OD-78 [s2][s3] |
+| After an emergency | A restart after a stop: the operator modifier, with the operator's permissions on the orders account and any relayer approval set to zero; a funding limit that a vote set to zero; an Easy Track unpause; a repair of the safety modifier | OD-59, OD-78 [s2][s3] |
 | How | Each vote above is a direct Voting item of about five days, without Dual Governance, because Aragon Voting owns the vault's Safes | OD-73 [s1] |
 
-Motions cover the rest, since EM's decisions of 2026-10-14 (OD-69, OD-70, OD-72): a budget for a new spender from a spare key, a routine removal, and a reward claim through the claim template, if it shipped [s1]. The review behind this table is in the research note [s8].
+Motions cover the rest, since EM's decisions of 2026-10-14 (OD-69, OD-70, OD-72) and 2026-10-22 (OD-97): a budget for a new spender from a spare key, a routine removal, a reward claim through the claim template, if it shipped, and a single permission that the emergency role revoked, through the template that covers it [s1]. The review behind this table is in the research note [s8].

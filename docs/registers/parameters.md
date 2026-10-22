@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T20:29:40Z
+  at: 2026-10-22T21:39:40Z
 verified: []
 sources:
   - id: s1
@@ -42,6 +42,7 @@ sources:
 | Switch holder | the emergency Safe, through the emergency role; the module argument is pinned to the operator modifier; the technical role is gone | EM decision of 2026-10-13 (OD-58) [s1] | ADR 005 |
 | Emergency Brakes multisig in the vault | no role; it keeps only the global Easy Track pause | EM decision of 2026-10-13 (OD-58) [s1] | ADR 005 |
 | Restart after a stop | the DAO only: Voting items unpause Easy Track, or enable the operator modifier again and grant again the operator's permissions on the orders account and any relayer approval set to zero, after the same vote cancels the queued motions | EM decisions of 2026-10-13 (OD-59) and 2026-10-14 (OD-73, OD-78) [s1]; the cancel step is the agent's proposal | ADR 005 |
+| One revoked permission | a motion of the template that covers it brings it back on the operator modifier, with the 72-hour window; a restart after the switch stays a vote | EM decision of 2026-10-22 (OD-97) [s1] | [ADR 006](/adr/006-governance-through-easy-track-factories.md) |
 | Easy Track objection period | 72 hours, 259,200 seconds, global | Read [s2] | — |
 | Easy Track objection threshold | 0.5 percent of LDO, 50 basis points | Read [s2] | — |
 | Trusted caller of every factory | the committee's Safe | EM decisions of 2026-10-02 (OD-01) and 2026-10-14 (OD-80) [s1] | [ADR 006](/adr/006-governance-through-easy-track-factories.md) |
@@ -67,7 +68,7 @@ sources:
 | Funding limit per period | one mandate size in each registry, as a backstop; stablecoins at par; stETH at the Coingecko price pinned when the enabling vote is prepared; the figures are not in this repository; a new mandate size is a DAO vote by design, and a re-pin of the stETH limit is optional (OD-71) | EM decisions of 2026-10-02 and 2026-10-21 (OD-89) [s1]; figures by attested computation, entering when the mandate is approved | ADR 008 |
 | Mandate size | a ceiling: the vault holds up to it in assets; each funding counts in US dollars at its value when funded, and the legacy positions count too; more funding needs a separate DAO approval; a replenishment needs the mandate's published eligibility conditions and its disclosure; the figure is not in this repository | EM decision of 2026-10-21 (OD-89) [s1], replacing the floor of mandate draft v0.1 | ADR 008 |
 | Treasury share | the vault never holds more than the mandate's share of the DAO's non-LDO treasury; the figure is not in this repository | EM decision of 2026-10-21 (OD-89) [s1]; open: the mandate owes the share's base, the time of its test and the remedy for a breach that no vault transaction causes | ADR 008 |
-| Funded value | the first-loss shares at their value on the day of the transfer, plus each top-up at its value on the day of its enactment, by the report's price rule; each top-up's forum post states it, with the headroom under the mandate size | Proposed, following OD-89 | ADR 008, [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
+| Funded value | the first-loss shares at their value on the day of the transfer, plus each top-up at its value on the day of its enactment, by the report's price rule; each top-up's forum post states it, with the headroom under the mandate size | Proposed, following OD-89; the seed counts the first-loss shares the same way (OD-98) | ADR 008, [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
 | Registry admin | Aragon Voting, for each of the vault's two funding registries; it sets a limit and a period; the registry factories deploy both registries with Voting as admin, the deployer adds the Asset Safe and sets each limit, then gives up its roles, and a check before the vote proves every role | EM decisions of 2026-10-14 (OD-73) and 2026-10-22 (OD-92) [s1] | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 008](/adr/008-funding-through-existing-payments.md) |
 | Stablecoin token list of the funding registry | the shared stablecoin token list, with USDS added: DAI, USDT, USDC, sUSDS, USDS; the enabling vote adds USDS: Voting takes the list's add-token role, adds USDS and gives the role up | EM decisions of 2026-10-05 and 2026-10-22 (OD-93) [s1] | ADR 008 |
 | Easy Track motion slots | Easy Track's limit of 20 open motions stays as it is; every committee shares it; monitoring warns when few slots are free; the budget factory can set several keys in one motion; the warning threshold is not set | EM decision of 2026-10-22 (OD-94) [s1]; the detector specification sets the threshold | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |

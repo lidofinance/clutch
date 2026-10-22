@@ -2,11 +2,11 @@
 
 ## Reporting a vulnerability
 
-Clutch has no deployed contracts and no bug-bounty scope yet. Report a vulnerability in a deployed Lido contract through the Lido bug bounty programme at https://immunefi.com/bug-bounty/lido/. Report a problem in this repository privately to EM.
+Send every security report to the Lido bug bounty programme at https://immunefi.com/bug-bounty/lido/, a report about this repository or Clutch's design included. The programme classifies each report under its rules. A report can be out of scope, and that is acceptable (OD-99). Clutch has no deployed contracts yet.
 
 ## Repository rules
 
-- The repository is private until deployment at the latest. Nothing enters it that could not be published at that point.
+- The repository is public. Nothing enters it that could not be published now (ADR 001, OD-95).
 - The screening vendor's identity and any unannounced counterparty terms stay out of the repository until they are announced.
 - Never commit keys, seeds, tokens or RPC credentials. Keep them in a local `.env`, which git ignores. The fork suite needs an archive RPC; its URL never enters a file, a log or a commit.
 - Agent instruction files are attack surface. `AGENTS.md`, `CLAUDE.md`, `skills/`, `.github/`, `config/actors.yaml` and the permission policy change only through human-reviewed pull requests. CODEOWNERS and the branch rule on `main` enforce this: `@lidofinance/defi-tech` owns the repository, `@lidofinance/review-gh-workflows` owns `.github/`, and every merge needs an approval from someone other than the pull request's creator.

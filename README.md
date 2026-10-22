@@ -11,7 +11,7 @@ This repository is the single system of record for the product documents, decisi
 ## Status
 
 - Design and specification stage. Nothing is deployed.
-- Private; becomes public by deployment. Content must be suitable for publication then.
+- Public. Every file and commit message must be suitable for publication (ADR 001, OD-95).
 - Agents drafted each document's first version. Pages stay `slop` until human review; see [document status](docs/registers/document-status.md).
 - EM accepts decisions in the interim. The Treasury Management Committee is the permanent acceptor.
 

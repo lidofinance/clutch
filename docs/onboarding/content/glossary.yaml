@@ -216,8 +216,8 @@
   sources: ["ADR-005#d9"]
 
 - term: Seed
-  plain: "The vault's first funding, one motion after the enabling vote. It is at most the mandate size, less the value of the first-loss shares, and at most the launch cap until the cap lifts."
-  sources: ["ADR-008#d20", "ADR-008#d32", "ADR-008#proposed-direction", OD-54, OD-89]
+  plain: "The vault's first funding, one motion after the enabling vote. It is at most the mandate size, less the value of the first-loss shares at the report's price rule, and at most the launch cap until the cap lifts."
+  sources: ["ADR-008#d20", "ADR-008#d32", "ADR-008#d37", "ADR-008#proposed-direction", OD-54, OD-89, OD-98]
 
 - term: Snapshot vote
   plain: "Lido's off-chain LDO vote. The mandate passes a Snapshot vote before the on-chain enabling vote. It is not the same as a holdings snapshot."

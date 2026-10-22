@@ -63,8 +63,8 @@
     - "The Zodiac Roles mastercopy"
     - "The CoW order signer"
   answer: 1
-  why: "Easy Track factories are the only new contracts allowed. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses."
-  sources: ["ADR-006#d1", "ADR-007#proposed-direction"]
+  why: "Easy Track factories are the only new contracts allowed, and Lido writes them. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so Clutch counts it as new code and the external audit covers it with the factories (OD-96)."
+  sources: ["ADR-006#d1", "ADR-007#proposed-direction", "ADR-007#d40", OD-96]
 
 - id: limit-order-loss
   question: "The operator places a limit order far below the market price. What limits the loss?"

@@ -73,8 +73,8 @@ sections:
           "ADR-006#proposed-direction", OD-09, OD-46, OD-70, INV-004, "ADR-007#d38", OD-78, OD-79, "ADR-006#d18"]
       - asked: "Lido contributors design, build, audit, deploy and maintain the Easy Track helper contracts. The provider confirms that its access control exposes the administration functions and works safely with this path."
         verdict: kept
-        clutch: "The Easy Track factories are the only new contracts. Lido builds them in phase 2, and an external audit covers them in phase 3. The governance role calls six administration functions of the Roles modifier, each one guarded."
-        sources: ["ADR-006#d1", "ADR-006#proposed-direction", INV-004, "doc:ROADMAP.md#roadmap"]
+        clutch: "The Easy Track factories are the only new contracts. Lido builds them in phase 2, and an external audit covers them in phase 3, with CoW's order signer, which has no known audit (OD-96). The governance role calls six administration functions of the Roles modifier, each one guarded."
+        sources: ["ADR-006#d1", "ADR-006#proposed-direction", INV-004, "doc:ROADMAP.md#roadmap", "ADR-007#d40", OD-96]
       - asked: "The Aragon Agent stays the only owner of the Asset Safe. Easy Track gets no ownership and no unrestricted execution, and it executes only the permission changes that the Operator Safe proposes in motions."
         verdict: changed
         clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe (OD-73). Easy Track never receives authority over the vault's owner or the Agent. On the Asset Safe, its executor holds only the governance and exit-governance roles. Outside it, the executor holds only the burn role on the first-loss Safe, so every first-loss burn is a motion (OD-67). The committee's Safe, as the trusted caller of every factory, creates every motion."

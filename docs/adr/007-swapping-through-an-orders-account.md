@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T20:15:25Z
+  at: 2026-10-22T21:39:40Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the swap engine, recovery pairs and instances, 2026-09-22, on OD-05, 2026-10-02, on OD-20, OD-26 and OD-27, 2026-10-05, and on OD-43, 2026-10-06
+    title: Decision log — EM on the swap engine, recovery pairs and instances, 2026-09-22, on OD-05, 2026-10-02, on OD-20, OD-26 and OD-27, 2026-10-05, on OD-43, 2026-10-06, and on the order signer as new code, 2026-10-22
   - id: s2
     resource: /research/stonks-instances-2026-10-02.md
     title: Stonks 2.0 instances — roles, order life, factory, funding precedent and price coverage
@@ -175,6 +175,12 @@ Decision 39 replaces the stop-loss parts of decisions 18, 24 and 29, and decisio
 
 Since OD-91, LDO is out of the launch list, so it leaves the rebalancing set of decision 4 and the operator's lists of decision 22 ([ADR 011](/adr/011-launch-scope.md), decision 15).
 
+EM decided on 2026-10-22, closing OD-96 [s1]:
+
+40. CoW's order signer has no known audit, so it counts as new code, together with the Easy Track factories. The external audit covers it with them.
+
+The order signer stays deployed code that Clutch reuses: Lido does not write or deploy it.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as text.
@@ -221,7 +227,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - New tokens require DAO votes. The launch lists cover mandate assets, so additions should be rare.
 - Resting orders remain authorized for up to 90 days despite changes in price or context. The 30-day alert and monthly report prompt confirmation. Their backing tokens remain idle in orders.
 - The new Safe and modifier reuse existing code (decision 28). The enabling vote grants the signer's delegatecall; a motion cannot (OD-36).
-- This repository found no audit of the 40-line order signer. Lido reviews it in phase 3.
+- This repository found no audit of the 40-line order signer, so the external audit covers it with the factories (decision 40).
 - Without the withdrawal queue, neither operator error nor a captured quorum can create uncancellable stETH requests [s9].
 - Mandate draft v0.1 lets the emergency path swap into any of the four main stablecoins [s10]. Since OD-90, the Snapshot text names CoW orders through the orders account as the only venue and states that nothing on chain bounds their price. The forum post names USDC, then USDT, as the recovery destinations and carries the control matrix.
 

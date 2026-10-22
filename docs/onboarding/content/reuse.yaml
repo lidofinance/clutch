@@ -62,9 +62,9 @@
 - name: CoW Protocol, its order signer and ComposableCoW
   column: reused
   what: "The exchange that settles every vault order; the deployed order signer for market and limit orders; ComposableCoW, its TWAP handler and CoW's fallback handler for TWAP orders."
-  why: "Ackee audited ComposableCoW and the fallback handler, and Gnosis reviewed ComposableCoW. Whether the TWAP handler is in scope is not checked, and the 40-line order signer has no audit that the repository found, so Lido reviews them in phase 3."
+  why: "Ackee audited ComposableCoW and the fallback handler, and Gnosis reviewed ComposableCoW. Whether the TWAP handler is in scope is not checked, so Lido reviews it in phase 3. The 40-line order signer has no audit that the repository found, so it counts as new code and the external audit covers it with the Easy Track factories (OD-96)."
   owner: "CoW Protocol"
-  sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#proposed-direction", OD-43,
+  sources: ["ADR-007#d40", OD-96, "ADR-007#d17", "ADR-007#d18", "ADR-007#proposed-direction", OD-43,
     "doc:docs/research/cow-orders-account-2026-10-06.md#the-chain-read-on-2026-10-06-at-block-26134502"]
 
 - name: The protocols of the launch scope

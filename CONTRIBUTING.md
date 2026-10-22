@@ -86,7 +86,7 @@ The decision log quotes the interview exactly. Do not reconstruct a quote from m
 
 ## Restricted material and secrets
 
-Content must be suitable for publication at deployment (ADR 001).
+The repository is public, so every file and commit message must be suitable for publication now (ADR 001, OD-95).
 EM supplies restricted material outside the repository. Paraphrase it and cite a `urn:clutch:restricted:` source.
 Call the unannounced screening vendor "the screening vendor". Do not include figures from the unapproved mandate.
 

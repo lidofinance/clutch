@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T20:15:25Z
+  at: 2026-10-22T21:39:40Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the payment ceilings and DAI, 2026-09-22, on OD-06, 2026-10-02, on the funding assets, the legacy investments and the first-loss shares in an emergency, 2026-10-05, on the first-loss role and its burn, 2026-10-13, on the mandate size, 2026-10-21, and on the registries and the USDS items, 2026-10-22
+    title: Decision log — EM on the payment ceilings and DAI, 2026-09-22, on OD-06, 2026-10-02, on the funding assets, the legacy investments and the first-loss shares in an emergency, 2026-10-05, on the first-loss role and its burn, 2026-10-13, on the mandate size, 2026-10-21, on the registries and the USDS items, 2026-10-22, and on the seed's price rule, 2026-10-22
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Finance, the payment ACL chain, budgets and an existing top-up factory
@@ -146,6 +146,10 @@ EM decided on 2026-10-22, closing OD-92 Q2 and OD-93 [s1]:
 
 Decision 35 replaces the standard builder of the proposed direction: a builder fixes its admin at construction, and both live builders make the Aragon Agent the admin, so every limit change would pass Dual Governance ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)). Decision 36 keeps decisions 9, 10 and 12, and adds the token list's role steps.
 
+EM decided on 2026-10-22, closing OD-98 [s1]:
+
+37. The seed counts the first-loss shares at the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 35 and 36), as the funded value does.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
@@ -155,7 +159,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - **Registries.** Two registries from the registry factories pay only the Asset Safe, with Voting as admin ([ADR 005](/adr/005-account-graph-and-roles.md), decision 28; decision 35). As in the committee's registries, the executor cannot add recipients [s4]. The deployer holds the add-recipient and set-limit roles for one transaction, and the check before the vote reads every role of both registries.
 - **Factories.** One uses the shared stablecoin list after USDS is added; one is stETH-only. Both fix the committee's Safe as trusted caller, as [ADR 006](/adr/006-governance-through-easy-track-factories.md) requires. The DAO registers them.
 - **Limits.** Stablecoins use the mandate size at par; stETH uses the size divided by the pinned price. Attested computation produces both; they enter this repository when the mandate is approved. Each limit is a backstop: it allows more than the headroom under the size, so the size holds by procedure, objection and monitoring, as the launch cap does (decision 20).
-- **Seed.** Use the same registries, up to the mandate size less the transferred first-loss shares at the attested Earn oracle valuation (decision 32). Count Twyne only when evidenced (decision 17). Transfer shares before the seed motion. Before lift, the seed also stays within the cap (decision 20).
+- **Seed.** Use the same registries, up to the mandate size less the transferred first-loss shares at the report's price rule (decision 37). Count Twyne only when evidenced (decision 17). Transfer shares before the seed motion. Before lift, the seed also stays within the cap (decision 20).
 - **Capped top-ups.** The forum post states snapshot value and cap headroom at the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 35 and 36). During objection, monitoring flags motions that would exceed the cap. First-loss is outside it.
 - **Funded value.** Monitoring keeps the vault's funded value: the first-loss shares at their value on the day of the transfer, and each top-up at its value on the day of its enactment, by the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 35). Each top-up's forum post states the funded value, the headroom under the mandate size, and the vault's share of the DAO's non-LDO treasury.
 - **Funding alerts.** Monitoring flags a top-up above the headroom that its forum post states; a top-up motion that would take the vault above the mandate size or the treasury share, while its objection window is open; a fortnightly reading above the treasury share; and any top-up motion after an objected one. The days 1 to 10 window of decision 6 ends with the monthly refill.

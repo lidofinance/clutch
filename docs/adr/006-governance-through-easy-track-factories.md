@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T20:15:25Z
+  at: 2026-10-22T21:39:40Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on factories, trusted caller, disclosure and templates, 2026-09-22, on the operator Safe, 2026-10-02, on removals, 2026-10-05, on the scope of decision 7, 2026-10-13, and on the committee's Safe as trusted caller, 2026-10-14
+    title: Decision log — EM on factories, trusted caller, disclosure and templates, 2026-09-22, on the operator Safe, 2026-10-02, on removals, 2026-10-05, on the scope of decision 7, 2026-10-13, on the committee's Safe as trusted caller, 2026-10-14, and on re-grants by motion, 2026-10-22
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Easy Track settings, global duration, hash check, script format
@@ -106,6 +106,12 @@ EM decided on 2026-10-14, in the 80/20 pass after OD-78, closing OD-79 [s1]:
 18. The catalogue check of decision 15 also drops each onboarding template whose shape no protocol in the committee's named pipeline needs. A later vote registers such a template with its first protocol.
 
 Since OD-80, the committee's own Safe is the trusted caller of decision 3 ([ADR 005](/adr/005-account-graph-and-roles.md) decision 31). Until the launch cap lifts, the guard does not screen motion creation ([ADR 010](/adr/010-pre-execution-screening.md) decisions 20 to 22 and 24).
+
+EM decided on 2026-10-22, closing OD-97 [s1]:
+
+19. A motion may bring back a single permission that the emergency role revoked, with the 72-hour objection window. A restart after the switch stays a vote.
+
+Decision 19 confirms the motion path of decision 17 for a single permission, and narrows the vote of [ADR 005](/adr/005-account-graph-and-roles.md) decision 30 to a restart after the switch.
 
 ## Proposed direction
 

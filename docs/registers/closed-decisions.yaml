@@ -654,3 +654,41 @@
     - "2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit"
   adr: [ADR-009#d45]
   refines: [OD-69]
+
+- id: OD-95
+  question: "Is the repository public now, and what replaces the rule that it stays private until deployment?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-95 to OD-99 decided: the public repository, the order signer as new code, re-grants by motion, the seed's price rule and security reports"
+  adr: [ADR-001#d10]
+
+- id: OD-96
+  question: "CoW's order signer has no known audit: does it count as new code? And what replaces the Stonks settings in the agents' rules?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-95 to OD-99 decided: the public repository, the order signer as new code, re-grants by motion, the seed's price rule and security reports"
+  adr: [ADR-007#d40]
+  refines: [OD-43]
+
+- id: OD-97
+  question: "May a motion bring back a permission that the emergency role revoked, or is every restart a vote?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-95 to OD-99 decided: the public repository, the order signer as new code, re-grants by motion, the seed's price rule and security reports"
+  adr: [ADR-006#d19]
+  refines: [OD-78]
+
+- id: OD-98
+  question: "At which price does the seed count the first-loss shares: the Earn oracle's, or the report's price rule?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-95 to OD-99 decided: the public repository, the order signer as new code, re-grants by motion, the seed's price rule and security reports"
+  adr: [ADR-008#d37]
+  refines: [OD-89]
+
+- id: OD-99
+  question: "Where does a security report about Clutch go?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-95 to OD-99 decided: the public repository, the order signer as new code, re-grants by motion, the seed's price rule and security reports"
+  note: "SECURITY.md holds the rule."

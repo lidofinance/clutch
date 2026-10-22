@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T20:15:25Z
+  at: 2026-10-22T21:39:40Z
 verified: []
 sources:
   - id: s1
@@ -154,6 +154,8 @@ EM decided on 2026-10-14, after a count of the launch, closing OD-78 [s1]:
 30. No restore template ships with the launch, and the orders modifier has no approvals role. The DAO restarts by vote after each stop (decision 26): the same vote grants again what the emergency role revoked, on the Asset Safe and on the orders account, and sets again any relayer approval that the emergency role set to zero.
 
 Decision 30 replaces decision 29.
+
+Since OD-97, the vote of decision 30 is for a restart after the switch. A motion may bring back a single permission that the emergency role revoked on the operator modifier, through the template that covers it ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 19). No motion writes on the orders account (OD-78), so a permission there still comes back by vote.
 
 EM decided on 2026-10-14, closing OD-80 [s1]:
 

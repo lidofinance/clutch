@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:29:31Z
+  at: 2026-10-22T21:39:51Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -72,6 +72,8 @@ EM decided on 2026-10-06, closing OD-31 [s1]:
 
 14. Decision 6 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The decision log quotes the instruction, the entry names the agent in `recorded_by` and links the quote in `ref`, and the commit message says that the agent made the edit. An agent never records a body's verification ([ADR 002](/adr/002-decision-and-review-process.md) point 10).
 
+Since OD-96, the swap instance settings of decision 6 are the orders account's token lists and the maximum order life, because the Stonks instances left the design (OD-43).
+
 ## Options considered
 
 - A long `AGENTS.md` with an architecture tour, as in lido-lend-markets: rejected because overviews did not help agents [s2].
@@ -84,7 +86,7 @@ EM decided on 2026-10-06, closing OD-31 [s1]:
 - The human-written instruction-file goal remains unmet until EM prunes the initial agent draft.
 - A freshness check is owed; it must fail on broken paths and obsolete commands. Until it exists, that goal remains unmet.
 - Of the four planned skills, only `skills/adr-draft/` exists. The three Clutch-specific skills arrive with their tools in phase 2.
-- Until an agent has its own GitHub identity, it uses the creator's git identity. Another owning-team member must approve; the creator's approval does not count.
+- An agent owns no GitHub account: its work lands through the account of the human who runs it (OD-23, [ADR 012](/adr/012-contributing-with-many-agents.md) decision 5). Another owning-team member must approve; the creator's approval does not count.
 - The rules bind only while both owner teams have write access and the branch rule is active. The agent's environment cannot check either.
 - A `human:` entry alone no longer proves human authorship. `recorded_by` and the quoted instruction identify agent-recorded entries (decision 14); the register marks them `(recorded)`.
 
@@ -101,4 +103,4 @@ EM decided on 2026-10-06, closing OD-31 [s1]:
 
 ## Open questions
 
-- OD-23: when the agent gets its own GitHub identity.
+None open. OD-23 closed on 2026-10-07: agents own no GitHub accounts ([ADR 012](/adr/012-contributing-with-many-agents.md) decision 5, which replaces decision 12 when EM accepts ADR 012).

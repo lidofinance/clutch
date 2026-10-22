@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-22T20:29:49Z
+  at: 2026-10-22T21:40:14Z
 verified: []
 ---
 
@@ -20,10 +20,10 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 
 | Page | Type | Review status | Decision | Last change | Verified by |
 |---|---|---|---|---|---|
-| [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | human-reviewed | accepted | 2026-10-19 | human:em (recorded) |
+| [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | human-reviewed | accepted | 2026-10-22 | human:em (recorded) |
 | [adr/002-decision-and-review-process.md](/adr/002-decision-and-review-process.md) | Decision | human-reviewed | accepted | 2026-10-19 | human:em (recorded) |
-| [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | human-reviewed | accepted | 2026-10-19 | human:em (recorded) |
-| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-10-19 | human:em (recorded) |
+| [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | human-reviewed | accepted | 2026-10-22 | human:em (recorded) |
+| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-10-22 | human:em (recorded) |
 | [adr/005-account-graph-and-roles.md](/adr/005-account-graph-and-roles.md) | Decision | slop | proposed | 2026-10-22 | none |
 | [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | slop | proposed | 2026-10-22 | none |
 | [adr/007-swapping-through-an-orders-account.md](/adr/007-swapping-through-an-orders-account.md) | Decision | slop | proposed | 2026-10-22 | none |
@@ -31,7 +31,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-10-22 | none |
 | [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-10-22 | none |
 | [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-10-22 | none |
-| [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-10-19 | none |
+| [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-10-22 | none |
 | [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-10-22 | none |
 | [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-10-22 | none |
 | [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-10-22 | none |

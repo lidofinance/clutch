@@ -324,7 +324,7 @@ flows:
         text: "The Growth Committee Safe transfers the first-loss earnETH and earnUSD shares to the [[first-loss Safe]]. That Safe needs no permission to receive them."
         nodes: [funding, first-loss]
       - who: "Committee Safe"
-        text: "The committee's Safe creates the seed motion. It is at most the mandate size, less the value of the first-loss shares (OD-89). Until the launch cap lifts, it is also at most the cap (OD-54)."
+        text: "The committee's Safe creates the seed motion. It is at most the mandate size, less the value of the first-loss shares at the report's price rule (OD-89, OD-98). Until the launch cap lifts, it is also at most the cap (OD-54)."
         nodes: [committee, easytrack, funding]
         edges: [motions, topup-motion]
       - who: "Easy Track and Aragon Finance"
@@ -336,7 +336,7 @@ flows:
         nodes: [committee, first-loss, monitoring]
         edges: [first-loss-shares]
         check: "INV-021: the first-loss Safe has Aragon Voting as its only owner, and one modifier with two narrow roles. Specified, not built."
-    sources: ["ADR-008#d4", "ADR-008#d13", "ADR-008#d19", "ADR-008#d20", "ADR-008#d21", "ADR-008#d23",
+    sources: ["ADR-008#d37", OD-98, "ADR-008#d4", "ADR-008#d13", "ADR-008#d19", "ADR-008#d20", "ADR-008#d21", "ADR-008#d23",
       "ADR-008#proposed-direction", OD-21, OD-42, OD-54, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", OD-89, OD-92]
 
   - id: first-loss-burn
@@ -706,7 +706,7 @@ flows:
         text: "The round-trip check, the orders account and its permissions, the first-loss Safe with its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the mandate's rule data, the comparison of the two readings, and the invariant-to-test check."
         nodes: [policy, orders, first-loss, easytrack, funding, reporting, monitoring]
       - who: "Phase 3: assurance"
-        text: "An external audit, Lido's review of the guard change and of CoW's order signer, and fork drills that initiate within 6 hours."
+        text: "An external audit of the factories and of CoW's order signer, which counts as new code (OD-96), Lido's review of the guard change, and fork drills that initiate within 6 hours."
         nodes: [policy, screening, orders]
       - who: "Phase 4: governance and deployment"
         text: "The mandate's Snapshot vote, a Snapshot that appoints the emergency Safe's fifth signer, the LIP, the enabling vote and deployment without the guard under the [[launch cap]], the share transfer to the first-loss Safe and the seed motion."
@@ -714,7 +714,7 @@ flows:
       - who: "Phase 5: operation"
         text: "Monthly reports, the fortnightly cap reading, budget motions after events and recurring drills. Once the guard is set with its bypass mode off, the committee's forum post lifts the launch cap."
         nodes: [committee, reporting, monitoring]
-    sources: ["doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates", OD-54]
+    sources: ["ADR-007#d40", OD-96, "doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates", OD-54]
 
   - id: enabling-vote
     group: deployment
