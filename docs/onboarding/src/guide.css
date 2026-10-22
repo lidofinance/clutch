@@ -314,9 +314,11 @@ main:focus:not(:focus-visible), #player-title:focus:not(:focus-visible) { outlin
 .mchange { margin: 8px 0; padding: 8px 12px; border-left: 4px solid var(--axis); border-radius: 0 8px 8px 0; background: var(--page); }
 .mchange .why { margin: 4px 0 0; }
 .mchange.ms-owed { border-left-color: var(--ops); background: color-mix(in srgb, var(--ops) 9%, var(--surface)); }
+.mchange.ms-forum { border-left-color: var(--vault); background: color-mix(in srgb, var(--vault) 8%, var(--surface)); }
 .mchange.ms-design { border-left-color: var(--gov); background: color-mix(in srgb, var(--gov) 8%, var(--surface)); }
 .mchange.ms-proposed { border-left-style: dashed; }
 .badge.ms-owed { border-color: var(--ops); background: color-mix(in srgb, var(--ops) 14%, var(--surface)); }
+.badge.ms-forum { border-color: var(--vault); background: color-mix(in srgb, var(--vault) 12%, var(--surface)); }
 .badge.ms-design { border-color: var(--gov); background: color-mix(in srgb, var(--gov) 12%, var(--surface)); }
 .badge.ms-proposed { border-color: var(--axis); border-style: dashed; background: var(--page); }
 .munchanged { color: var(--ink-2); font-size: 0.9rem; }

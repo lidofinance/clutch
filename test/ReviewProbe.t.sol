@@ -298,8 +298,8 @@ contract ReviewProbe is ReviewBase {
         // a keyed spender: an unlimited approval exceeds any budget
         _opRefused(a.usdc, _approve(a.earnUsdDepositQueue, type(uint256).max), "unlimited approval must be rejected");
         // a capped spender: the ceiling binds, below it passes
-        _opRefused(a.steth, _approve(a.wsteth, FLOOR_STANDIN_STETH), "the ceiling must bind");
-        assertTrue(_op(a.steth, _approve(a.wsteth, FLOOR_STANDIN_STETH - 1)), "below the ceiling passes");
+        _opRefused(a.steth, _approve(a.wsteth, SIZE_STANDIN_STETH), "the ceiling must bind");
+        assertTrue(_op(a.steth, _approve(a.wsteth, SIZE_STANDIN_STETH - 1)), "below the ceiling passes");
         _opRefused(a.steth, _approve(a.withdrawalQueue, 1), "the withdrawal queue is out of scope (ADR 007, decision 27)");
         // zero is always allowed, even with the key exhausted
         assertTrue(_op(a.usdc, _approve(a.earnUsdDepositQueue, 500e6)), "a bounded approval is allowed");

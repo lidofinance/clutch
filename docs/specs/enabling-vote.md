@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:36:19Z
+  at: 2026-10-21T20:39:52Z
 verified: []
 sources:
   - id: s1
@@ -81,7 +81,7 @@ Every item runs when the vote executes, about five days after it starts. The com
 | Kind | What | Where |
 |---|---|---|
 | Still a vote | A token for the orders account, for any order type, with its relayer approval | OD-78 [s4] |
-| By design | A new TM Floor Value, and a re-pin of the stETH limit if wanted | [s5] |
+| By design | A new mandate size, and a re-pin of the stETH limit if wanted | [s5] |
 | By design | Role membership; replacing a Safe, a modifier or a factory; delegatecall for the operator; another module or a Safe version change; the shared payment permission or token list; ending the first-loss terms | [s2][s3][s5] |
 | Later, by vote | Insurance funds for other products: the fund roles and templates, and a third funding registry and top-up factory | OD-78 [s5] |
 | After an emergency | Every restart: the operator modifier, with the operator's permissions on the orders account and any relayer approval set to zero; a funding limit that a vote set to zero; an Easy Track unpause; a repair of the safety modifier | OD-59, OD-78 [s2][s3] |

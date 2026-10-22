@@ -460,9 +460,9 @@ contract Drills is ClutchFixture {
         _opRevert(a.daiUsds, abi.encodeCall(IDaiUsds.usdsToDai, (attacker, 1e18)));
 
         // an approval at or above the ceiling is refused; below it, and zero, pass
-        _opRevert(a.dai, _approve(a.daiUsds, FLOOR_STANDIN_USD));
-        _opRevert(a.usds, _approve(a.daiUsds, FLOOR_STANDIN_USD));
-        _op(a.dai, _approve(a.daiUsds, FLOOR_STANDIN_USD - 1));
+        _opRevert(a.dai, _approve(a.daiUsds, SIZE_STANDIN_USD));
+        _opRevert(a.usds, _approve(a.daiUsds, SIZE_STANDIN_USD));
+        _op(a.dai, _approve(a.daiUsds, SIZE_STANDIN_USD - 1));
         _op(a.dai, _approve(a.daiUsds, 0));
     }
 

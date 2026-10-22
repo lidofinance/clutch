@@ -5,12 +5,12 @@
 // (ADR 007, decision 27).
 // Changed for Clutch on 2026-10-13: the emergency role holds the switch that
 // the technical role held (ADR 005, decision 25).
+// Changed for Clutch on 2026-10-22: LDO left the launch scope (OD-91).
 import { anyOf, c, call, callWithValue, key, unique } from "../../lib";
 import {
   DAI,
   EARN_ETH,
   EARN_USD,
-  LDO,
   manifest,
   STETH,
   SUSDS,
@@ -29,7 +29,7 @@ const SPENDERS = unique(APPROVALS.map((approval) => approval.spender));
 const APPROVED_TOKENS = unique(APPROVALS.map((approval) => approval.token));
 
 /** Assets the Asset Safe can hold, which the emergency role may return to the Agent. */
-const RETURNABLE = [STETH, WSTETH, WETH, LDO, USDC, USDT, DAI, USDS, SUSDS, EARN_USD.share, EARN_ETH.share];
+const RETURNABLE = [STETH, WSTETH, WETH, USDC, USDT, DAI, USDS, SUSDS, EARN_USD.share, EARN_ETH.share];
 
 /**
  * What the emergency Safe may do, without a governance motion (ADR 005): zero

@@ -43,8 +43,8 @@ abstract contract ClutchFixture is Test {
     // The dry-run stand-ins that the tests expect, stated here and not read
     // from the artifact, so that the tests check the policy. They are test
     // values. The production figures come from the attested computation.
-    uint256 internal constant FLOOR_STANDIN_STETH = 10e18;
-    uint256 internal constant FLOOR_STANDIN_USD = 10_000e18;
+    uint256 internal constant SIZE_STANDIN_STETH = 10e18;
+    uint256 internal constant SIZE_STANDIN_USD = 10_000e18;
 
     struct Addresses {
         address safe; // the Asset Safe; owner of both modifiers

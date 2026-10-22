@@ -78,6 +78,7 @@ LABELS = {
 # How a change to the mandate stands, and how the constellation differs from the provider's.
 CHANGE_STATES = {
     "owed": ("Mandate text owed", "✎"),
+    "forum": ("Forum post", "¶"),
     "design": ("Design choice", "◆"),
     "proposed": ("Proposed", "◌"),
 }

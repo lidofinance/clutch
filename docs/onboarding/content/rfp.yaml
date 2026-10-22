@@ -127,9 +127,9 @@ sections:
     items:
       - asked: "A launch set of stETH, wstETH, LDO, USDC, USDT, DAI, sDAI, USDS, sUSDS, earnUSD and earnETH, with a note of the assets or actions that need custom policy work."
         verdict: changed
-        clutch: "Clutch takes the mandate draft's launch list: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access, Lido Lend access and LDO. DAI earns through Sky's DAI–USDS converter, and sDAI is out."
+        clutch: "Clutch takes the mandate draft's launch list: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access and Lido Lend access. DAI earns through Sky's DAI–USDS converter, and sDAI and LDO are out."
         why: "The mandate is the committee's rulebook. DAI earns through USDS without a swap or a third-party market, so sDAI is not needed. ETH and WETH need staking and wrapping. Lido's withdrawal queue left the design on 2026-10-08: stETH is sold in CoW orders instead."
-        sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d7", "ADR-011#d14", "ADR-007#d13", "ADR-007#d27", OD-20, OD-22, INV-015]
+        sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d7", "ADR-011#d14", "ADR-011#d15", "ADR-007#d13", "ADR-007#d27", OD-20, OD-22, OD-91, INV-015]
       - asked: "Unapproved actions are denied by default. On-chain rules restrict the target contracts, the functions, the transferred value and the relevant parameters."
         verdict: kept
         clutch: "Each role reaches only named targets and functions, and no target is open as a whole. Every receiver, owner and beneficiary is pinned to the vault, and only the staking and wrapping calls can carry ETH."

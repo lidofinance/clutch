@@ -5,6 +5,8 @@
 // (ADR 007, decision 27).
 // Changed for Clutch on 2026-10-14: the committee's own Safe holds the
 // operator role (ADR 005, decision 31).
+// Changed for Clutch on 2026-10-21: the approval ceilings' stand-ins are named
+// after the mandate size (OD-89).
 import { c, call, callWithValue } from "../../lib";
 import {
   DAI,
@@ -19,7 +21,7 @@ import {
   WSTETH,
 } from "../../addresses";
 import { earn_eth_deposit_wsteth, earn_usd_deposit, sky_savings_usds } from "../../allowances";
-import { FLOOR_STANDIN_STETH, FLOOR_STANDIN_USD } from "../../parameters";
+import { SIZE_STANDIN_STETH, SIZE_STANDIN_USD } from "../../parameters";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -35,10 +37,10 @@ const ZERO = "0x0000000000000000000000000000000000000000";
  * built from this one.
  */
 export const APPROVALS: readonly { token: string; spender: string; budget?: string; ceiling?: bigint }[] = [
-  { token: STETH, spender: WSTETH, ceiling: FLOOR_STANDIN_STETH },
+  { token: STETH, spender: WSTETH, ceiling: SIZE_STANDIN_STETH },
   { token: USDS, spender: SUSDS, budget: sky_savings_usds.key },
-  { token: USDS, spender: DAI_USDS, ceiling: FLOOR_STANDIN_USD }, // OD-22
-  { token: DAI, spender: DAI_USDS, ceiling: FLOOR_STANDIN_USD }, // OD-22
+  { token: USDS, spender: DAI_USDS, ceiling: SIZE_STANDIN_USD }, // OD-22
+  { token: DAI, spender: DAI_USDS, ceiling: SIZE_STANDIN_USD }, // OD-22
   { token: USDC, spender: EARN_USD.depositQueue, budget: earn_usd_deposit.key },
   { token: WSTETH, spender: EARN_ETH.depositQueue, budget: earn_eth_deposit_wsteth.key },
 ];

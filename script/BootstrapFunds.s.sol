@@ -12,11 +12,12 @@ import {IERC20, IStETH, IWstETH, IERC4626, IDaiUsds, IUniswapV3Router} from "../
 ///        ETH    -> stETH   via Lido submit (amount tracked by balance delta;
 ///                           submit returns SHARES, not stETH)
 ///        stETH  -> wstETH  via wrap (half)
-///        ETH    -> USDC/USDT/DAI/LDO via Uniswap V3 single hop
+///        ETH    -> USDC/USDT/DAI via Uniswap V3 single hop
 ///        DAI    -> USDS    via Sky's DAI–USDS converter, one to one
 ///                          (0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A)
 ///        USDS   -> sUSDS   via a vault deposit (receiver = Safe)
-///      sDAI is outside the launch scope (ADR 011), so DAI stays DAI.
+///      sDAI and LDO are outside the launch scope (ADR 011), so DAI stays DAI
+///      and no LDO is bought.
 ///      Every swap carries a minimum-out bound derived from the pool's own
 ///      slot0 price with 5% headroom (95% of quote). Legs are independent and
 ///      resumable: a token already held by the funder is not re-acquired, so
@@ -33,7 +34,6 @@ contract BootstrapFunds is Broadcast {
     address internal constant SKY_CONVERTER = 0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A;
     address internal constant UNISWAP_V3_FACTORY = 0x1F98431c8aD98523631AE4a59f267346ea31F984;
     address internal constant UNISWAP_V3_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
-    address internal constant LDO = 0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32;
     address internal constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     address internal constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
 
@@ -87,10 +87,10 @@ contract BootstrapFunds is Broadcast {
         }
 
         // DEX legs with slot0-derived minimums; each leg independent
-        address[4] memory dexTokens = [USDC, USDT, DAI, LDO];
-        string[4] memory dexLabels = ["USDC", "USDT", "DAI", "LDO"];
-        uint256[4] memory sharesBp = [uint256(2200), 1600, 2200, 1200];
-        for (uint256 i = 0; i < 4; i++) {
+        address[3] memory dexTokens = [USDC, USDT, DAI];
+        string[3] memory dexLabels = ["USDC", "USDT", "DAI"];
+        uint256[3] memory sharesBp = [uint256(2200), 1600, 2200];
+        for (uint256 i = 0; i < dexTokens.length; i++) {
             if (IERC20(dexTokens[i]).balanceOf(funder) > 0) {
                 legs[n++] = Leg(dexLabels[i], dexTokens[i], IERC20(dexTokens[i]).balanceOf(funder));
                 continue;
@@ -119,7 +119,7 @@ contract BootstrapFunds is Broadcast {
         // deliver everything the funder still holds to the Safe
         _transfer(safe, funder, STETH);
         _transfer(safe, funder, WSTETH);
-        for (uint256 i = 0; i < 4; i++) _transfer(safe, funder, dexTokens[i]);
+        for (uint256 i = 0; i < dexTokens.length; i++) _transfer(safe, funder, dexTokens[i]);
         _transfer(safe, funder, USDS);
     }
 

@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:33:22Z
+  at: 2026-10-22T18:22:59Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the launch assets, DAI and Lido Lend, 2026-09-22, and on WETH and DAI, 2026-10-05
+    title: Decision log — EM on the launch assets, DAI and Lido Lend, 2026-09-22, on WETH and DAI, 2026-10-05, and on LDO, 2026-10-22
   - id: s2
     resource: /specs/lip-draft.md
     title: LIP draft — launch asset and action matrix
@@ -89,6 +89,14 @@ EM decided on 2026-10-08 [s1]:
 
 Decision 14 replaces the withdrawal-queue route of decision 6.
 
+EM decided on 2026-10-22, closing OD-91 [s1]:
+
+15. LDO leaves the launch list. It is on neither the operator's order lists nor the recovery sell list.
+
+Decision 15 replaces LDO in decisions 1 and 14, and in the operator's lists of [ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 4 and 22.
+
+Since OD-89, the TM Floor Value of decision 8 means one mandate size ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 32 to 34).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
@@ -102,11 +110,10 @@ The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 | USDS | held; receives converted DAI | can fund the vault once a DAO vote adds it to the payment permission |
 | sUSDS | savings position | tokenized-vault template; can also fund the vault; the operator redeems it, and recovery can sell it in a CoW order |
 | earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares go from the Growth Committee to the first-loss Safe, where a burn runs only by Easy Track motion and the narrow role of the committee's Safe redeems them to the Aragon Agent (OD-21, OD-28, OD-42, OD-60, OD-67) |
-| LDO | held | on the operator's order lists |
 | Orders account | CoW market, limit and TWAP orders for the operator, and no stop-loss orders ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 39); recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
 | Lido Lend | lending, after launch | one motion through the Morpho Blue template once Lido Lend's own contract exists, which also adds its emergency exit (OD-49); the protocol cap applies until it matures and a budget motion unlocks it (OD-41) |
 
-Out of the launch scope: sDAI, Aave and every other third-party lending market, Lido's withdrawal queue (decision 14), and router swaps on Uniswap and 1inch until the screening vendor can bound their output (OD-43).
+Out of the launch scope: sDAI, Aave and every other third-party lending market, Lido's withdrawal queue (decision 14), LDO (decision 15), and router swaps on Uniswap and 1inch until the screening vendor can bound their output (OD-43).
 
 ## Options considered
 
@@ -127,7 +134,7 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market, 
 
 - INV-015 in the [invariants](/specs/invariants.md); tests refuse every out-of-scope venue [s8].
 - The Morpho Blue template's end-to-end test remains unbuilt.
-- Converter tests pay the Asset Safe in both directions, refuse other receivers and refuse approvals at or above the ceiling [s7]. The kit ceiling stands in for one TM Floor Value.
+- Converter tests pay the Asset Safe in both directions, refuse other receivers and refuse approvals at or above the ceiling [s7]. The kit ceiling stands in for one mandate size.
 
 ## Reversal conditions
 

@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-21T15:57:51Z
+  at: 2026-10-22T18:22:59Z
 verified: []
 sources:
   - id: s1
@@ -55,6 +55,12 @@ sources:
   - id: s15
     resource: "urn:clutch:interview:2026-10-21"
     title: EM's request to update pull request #42, 2026-10-21; the transcript is not in the repository
+  - id: s16
+    resource: "urn:clutch:interview:2026-10-21-mandate-size"
+    title: EM's answers on the mandate size, LDO and the mandate's owed text, 2026-10-21; the transcript is not in the repository
+  - id: s17
+    resource: "urn:clutch:interview:2026-10-22"
+    title: EM's answer on OD-91 and the go-ahead to push, 2026-10-22; the transcript is not in the repository
 ---
 
 # Decision log
@@ -64,6 +70,57 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-22 — OD-91 decided: LDO leaves the launch list
+
+EM answered OD-91:
+
+> 1. remove LDO from the launch list
+> 2. commit and push
+
+Recorded as:
+
+- (1, OD-91) A: LDO leaves the launch list, and with it the operator's order lists and the recovery sell list ([ADR 011](/adr/011-launch-scope.md), decision 15). So that the policy and the kit follow the launch list, the agent also removed LDO from the emergency role's transfers to the Aragon Agent and from the dry run's bootstrap. The dry run's teardown still sweeps any LDO that the Asset Safe holds.
+- (2) EM's go-ahead to commit and push the decisions branch of OD-89 to OD-91. [s17]
+
+## 2026-10-21 — OD-89 and OD-90 decided, OD-91 opened: the mandate size, the mandate's owed text, and LDO
+
+The agent compared the latest draft of the mandate's text with Clutch. The draft is not public, so this entry quotes only the lines of EM's answer that decide something for Clutch. EM wrote:
+
+> 1. Good point about LDO, I asked folks; if it's not needed then we will drop it, make a note so that we should have it confirmed explicitly
+> 2. - [the mandate size] meaning must me as written in the snapshot text, so update clutch architecture, docs and everything;
+
+EM wrote, on the launch scope, the first-loss burns, the emergency section and Dual Governance:
+
+> I believe we shall have DAI-USDS converters, ETH, WETH ones; OD-43 is good; OD-78 and OD-79 is a kinda launching trade-off
+
+> I don't believe we will silently burn tokens, let it be under Easy Track.
+
+> Emergency. It's good that it's decided, we can have it for the research forum post details.
+
+> You are right that Dual Governance is out.
+
+EM wrote, on the items that the mandate text owes:
+
+> we wanted to have unbounded Lido products exposure, maturity was added by me to make it more risk-adjusted
+
+> - sUSDS still should be a funding asset
+> - price waterfall is okay to have in LIP text only
+> - emergency Safe composition — I answered in 5.
+> - Cow-only swap section is a tradeoff, we need to be honest
+> - control matrix is a good material for the researh forum post
+
+Recorded as:
+
+- (2, OD-89) The mandate size is a ceiling, as the mandate's draft text writes it. The vault holds up to the mandate size in assets. Each funding counts in US dollars at its value when it is funded, and the legacy positions that move into the vault count too. More funding than the mandate size needs a separate DAO approval. A replenishment uses an approved governance path only when the mandate's published eligibility conditions are met, after the required disclosure. The agent reads "meaning" to include the draft's next rule: the vault never holds more than the mandate's share of the DAO's non-LDO treasury. This replaces the floor of mandate draft v0.1, so no top-up refills the vault to the size by right ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 32 to 34).
+- (2, OD-89) At EM's request, the agent updated the repository: the TM Floor Value is now the mandate size in the proposed directions, the specifications, the registers, the runbooks, the guide and the policy's stand-in names. The registries keep their period and their limit of one mandate size per period as a backstop, and the funding alerts follow the headroom under the size, not a monthly cycle. These readings are the agent's ([ADR 008](/adr/008-funding-through-existing-payments.md), proposed direction).
+- (1, OD-91) EM asked the team whether the operator needs LDO. If nobody needs it, LDO leaves the launch list and the operator's order lists. OD-91 holds the question until the answer is confirmed explicitly ([open decisions](/registers/open-decisions.md)).
+- (OD-90) The items that the mandate text owes go to three places ([LIP draft](/specs/lip-draft.md), open item 2):
+  - The Snapshot text: unbounded exposure to mature Lido products, with a new product in the protocol cap until it matures (OD-41); sUSDS as a funding asset (OD-11); the late-report rule (OD-14); the first-loss terms, with every burn as an Easy Track motion (OD-67); an honest swap section, with CoW orders only at launch, no price bound on chain, and router swaps only after a screening check of the output (OD-43); ETH, WETH and Sky's DAI–USDS converter in the asset list ([ADR 011](/adr/011-launch-scope.md)); Aragon Voting as the owner, so that no vault action passes Dual Governance (OD-73); the mandate size and the treasury share (OD-89); and the launch cap (OD-54).
+  - The forum post: the emergency Safe's composition and powers, with the emergency swap's destinations (OD-58, OD-26); and the control matrix, with the liquidity buffer's controls (OD-39, OD-40).
+  - The LIP alone: the price waterfall (OD-62).
+  The agent reads answer 5 as the whole emergency section, the emergency swap included. The agent also reads the control matrix as the home of the buffer's controls; the buffer's rule stays in the Snapshot text.
+- (3) EM keeps the launch scope's trade-offs: router swaps wait for a screening check of the output (OD-43), and the launch carries no token or restore template and no stop-loss orders (OD-78, OD-79). [s16]
 
 ## 2026-10-21 — AGENTS.md names YT
 
