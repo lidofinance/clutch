@@ -1,0 +1,3 @@
+date: '2026-10-22'
+kind: Decision
+text: 'Propose OD-100 in ADR 013: migrate four Sepolia role keys and use the same scheme in the mainnet design; define migration checks and support three-digit OD references.'

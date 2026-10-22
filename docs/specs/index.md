@@ -6,4 +6,5 @@
 | [Invariants](invariants.md) | Draft invariants, their ADRs and named tests where they exist |
 | [Control matrix](control-matrix.md) | Controls in the policy, screening, monitoring and UI |
 | [Enabling vote](enabling-vote.md) | Direct vote contents without Dual Governance, prerequisites and later governance actions |
+| [Sepolia stand deployment plan](sepolia-stand-plan.md) | Implementation tasks, deployment steps and acceptance checks for Asset, Orders, CoW and First-loss |
 | [LIP draft](lip-draft.md) | The external proposal, aligned with the ADRs |

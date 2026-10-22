@@ -1,0 +1,3 @@
+date: '2026-10-22'
+kind: Evidence
+text: The deployed Sepolia Constellation did not populate Vaults or Policies in the new workspace. Both lists remain empty; the supported synchronization or import route is still unconfirmed.

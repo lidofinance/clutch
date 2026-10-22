@@ -123,10 +123,10 @@ interface IRoles {
             uint64 timestamp
         );
 
-    function getModulesPaginated(uint256 start, uint256 pageSize)
+    function getModulesPaginated(address start, uint256 pageSize)
         external
         view
-        returns (address[] memory array, uint256 next);
+        returns (address[] memory array, address next);
 
     function isModuleEnabled(address module) external view returns (bool);
 }

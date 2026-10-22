@@ -6,8 +6,8 @@ tags: [specs, invariants, testing]
 status: draft
 review_status: slop
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-21T20:39:52Z
+  by: codex/gpt-6
+  at: 2026-10-22T19:53:33Z
 verified: []
 sources:
   - id: s1
@@ -19,6 +19,9 @@ sources:
   - id: s3
     resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/README.md"
     title: Kit harness README at 7a8c661 — what the policy follows, and what the kit still lacks
+  - id: s4
+    resource: /adr/013-tests-on-sepolia.md#mainnet-design-dependencies
+    title: OD-100 proposal — account-specific role keys, migration checks and mainnet dependencies
 ---
 
 # Invariants
@@ -26,6 +29,8 @@ sources:
 The invariants below come from ADR 004 to ADR 011 [s1]. On 2026-10-05 the kit's policy and tests were brought in line with the decisions. The mapping pairs each invariant with the kit test that checks it, by name and by a read of the test body [s2]. It is not yet a CI check.
 
 State "Draft" means the ADR is proposed. State "Retired" means a decision removed what the invariant protected. State "Pending" means the invariant depends on an open decision or on work that is not built. "Violated" would mean that the kit's policy breaks the invariant; no invariant is in that state. The harness README lists what the kit still lacks [s3].
+
+OD-100 proposes four account-specific role keys for the Sepolia migration and the mainnet design [s4]. The current rows stay in force pending that decision and its implementation. Before migration, revise INV-018, INV-025 and INV-027 with named tests for the new key references. Preserve INV-004's governance restrictions and INV-009's emergency stop [s4].
 
 | ID | Invariant | Set by | State | Kit test |
 |---|---|---|---|---|
