@@ -2,19 +2,19 @@
 /**
  * Fixed values of the policy.
  *
- * The ceilings are dry-run stand-ins for one TM Floor Value, the fixed ceiling
- * of an approval that has no budget key (ADR 009, ADR 011). They are test
+ * The ceilings are dry-run stand-ins for one mandate size, the fixed ceiling
+ * of an approval that has no budget key (ADR 009, ADR 011; OD-89). They are test
  * values. The production figures come from the attested computation and are
  * not in this repository.
  */
 
 const DAY = 24n * 60n * 60n;
 
-/** One TM Floor Value in stETH: the ceiling of the stETH approval to the wstETH contract (OD-08). */
-export const FLOOR_STANDIN_STETH = 10n * 10n ** 18n;
+/** One mandate size in stETH: the ceiling of the stETH approval to the wstETH contract (OD-08). */
+export const SIZE_STANDIN_STETH = 10n * 10n ** 18n;
 
-/** One TM Floor Value in DAI or USDS: the ceiling of the approvals to Sky's converter (OD-22). */
-export const FLOOR_STANDIN_USD = 10_000n * 10n ** 18n;
+/** One mandate size in DAI or USDS: the ceiling of the approvals to Sky's converter (OD-22). */
+export const SIZE_STANDIN_USD = 10_000n * 10n ** 18n;
 
 /** The refill period of every budget. */
 export const MONTH = 30n * DAY;

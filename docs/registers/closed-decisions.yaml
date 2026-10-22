@@ -607,3 +607,47 @@
     - "2026-10-20 — OD-84 to OD-88: two readings, the provider's reports and its checks"
   adr: [ADR-010#d25, ADR-010#d26]
   refines: [OD-83]
+- id: OD-89
+  question: "What does the mandate size mean: a floor that top-ups refill, or a ceiling?"
+  closed: 2026-10-21
+  log:
+    - "2026-10-21 — OD-89 and OD-90 decided, OD-91 opened: the mandate size, the mandate's owed text, and LDO"
+  adr: [ADR-008#d32, ADR-008#d33, ADR-008#d34]
+  replaces:
+    - {od: OD-06, part: true}
+  refines: [OD-42, OD-71]
+- id: OD-90
+  question: "Where does each item that the mandate text owes go: the Snapshot text, the forum post, or the LIP alone?"
+  closed: 2026-10-21
+  log:
+    - "2026-10-21 — OD-89 and OD-90 decided, OD-91 opened: the mandate size, the mandate's owed text, and LDO"
+  see: [/specs/lip-draft.md]
+  refines: [OD-14, OD-26, OD-39, OD-40, OD-58, OD-62]
+- id: OD-91
+  question: "Does the operator need LDO?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-91 decided: LDO leaves the launch list"
+  adr: [ADR-011#d15]
+- id: OD-92
+  question: "How does the enabling vote apply the Safe batches and make Voting the funding registries' admin?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit"
+  adr: [ADR-005#d32, ADR-008#d35]
+  see: [/research/enabling-vote-rehearsal-2026-10-15.md]
+  refines: [OD-06, OD-73]
+- id: OD-93
+  question: "Does the enabling vote keep the four USDS items?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit"
+  adr: [ADR-008#d36]
+  refines: [OD-11, OD-24]
+- id: OD-94
+  question: "How does Clutch keep its motions moving when Easy Track's shared limit of open motions is near?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit"
+  adr: [ADR-009#d45]
+  refines: [OD-69]

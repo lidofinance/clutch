@@ -52,12 +52,12 @@
     "ADR-007#proposed-direction", OD-43, INV-013, INV-014, INV-022, INV-024]
 
 - title: "Money in: top-ups"
-  text: "Funding comes from the DAO treasury through the existing payment path. Once a month, the committee's Safe creates a [[top-up]] motion. LDO holders can object for 72 hours.\n\nTwo funding registries pay only the Asset Safe, each within a monthly limit. The objection is the control; the limit is the backstop."
-  tech: "Two allowed-recipients registries from Easy Track's standard builder, each with the Asset Safe as its only recipient and a one-month period. Two top-up factories create the motions, with the committee's Safe as their trusted caller (INV-017)."
+  text: "Funding comes from the DAO treasury through the existing payment path. The vault holds up to the [[mandate size]]. After the seed, the committee's Safe creates a [[top-up]] motion only when the mandate's published conditions allow one. LDO holders can object for 72 hours.\n\nTwo funding registries pay only the Asset Safe, each within a monthly limit. The objection is the control; the limit is the backstop."
+  tech: "Two allowed-recipients registries from Easy Track's registry factories, with Aragon Voting as their admin (OD-92), each with the Asset Safe as its only recipient and a one-month period. Two top-up factories create the motions, with the committee's Safe as their trusted caller (INV-017)."
   nodes: [committee, easytrack, funding, dao, asset-safe]
   edges: [motions, topup-motion, treasury, topup]
   flows: [topup, seed]
-  sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#proposed-direction", INV-017]
+  sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d32", "ADR-008#d34", "ADR-008#proposed-direction", INV-017, OD-89, "ADR-008#d35", OD-92]
 
 - title: "Emergencies: two fast stops, one slow restart"
   text: "The **emergency Safe** has five signers: two committee members, two members of the Emergency Brakes multisig and one member of neither body. Three must sign, so the committee cannot use it alone. Through the safety modifier it revokes the operator, switches the operator modifier off, exits positions and sends assets to the Aragon Agent.\n\nThe **Emergency Brakes multisig** keeps only the Easy Track pause, and touches no funds. No emergency body restarts what it stopped: only a DAO vote does, in days."

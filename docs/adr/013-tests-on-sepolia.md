@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: codex/gpt-6
-  at: 2026-10-22T15:44:18Z
+  at: 2026-10-22T19:50:00Z
 verified: []
 sources:
   - id: s1
@@ -99,7 +99,7 @@ sources:
 
 ## Decision
 
-No decision is recorded yet. YT proposes this record; an agent drafted it on 2026-10-22. OD-89 to OD-93 carry the questions, and EM decides them [s16][s17].
+No decision is recorded yet. YT proposes this record; an agent drafted it on 2026-10-22. OD-95 to OD-99 carry the questions, and EM decides them [s16][s17].
 
 ## Proposed direction
 
@@ -109,14 +109,14 @@ Tests on Sepolia are permitted under the rows below. Each row is a permission th
 
 | Permission | Who acts | Conditions | Decision |
 |---|---|---|---|
-| Work from `testnet/sepolia` instead of the merged `main`: hosted calls to the Sepolia workspace and public Sepolia transactions | The stand owner | The commit is on GitHub. The working tree has no local changes. | OD-89 |
-| Hold an API key for the Sepolia workspace in a git-ignored `.env` | The stand owner | Nobody commits the key. No agent and no CI job uses it. If the provider can limit a key to one workspace, the key reaches only the Sepolia workspace. | OD-89 |
-| Run hosted calls through a Sepolia guard, separate from the owner guard | The stand owner | The guard requires `CLUTCH_SEPOLIA_PUSH=1` and the branch `testnet/sepolia`. It refuses CI, local changes, and a workspace that differs from the prepared context. The owner guard stays as it is. | OD-89 |
-| Publish the existing-state declaration to the Sepolia workspace as a draft | The stand owner | A committed script checks the payload hash and a fresh RPC comparison. It calls resolve and compares the resolved specification with the payload: accounts, owners, members and `Nor` conditions. It calls apply once for each API URL, workspace and payload hash, records the attempt exclusively and saves each status and body. Success requires a complete HTTP exchange and a JSON result with nonempty `id` and `url` strings. It uses the same API address as the SDK. | OD-90 |
-| Execute a transaction that the Zodiac app builds for the stand (Deploy or Apply) | Nobody, until EM decides otherwise | If EM permits it: Clutch's compiler produces the same calls from the same commit, and the test Voting contract executes them. | OD-91 |
-| Send public Sepolia transactions on the existing stand: funding, the CoW and First-loss drills, recovery and the stop of the run | The stand owner, with the keystore | Only through the `sepolia.just` recipes and their guards. A second stand needs a new decision. | OD-92 |
-| Import the three existing Safes as vaults and enter the address-book entries in the Sepolia workspace | The stand owner | No role or permission is edited in the Zodiac app. The entries come from the checked address list. | OD-93 |
-| Remove the earlier workspace's draft aliases and cancelled proposals | The stand owner | Only where the app permits it. Nothing is executed. | OD-93 |
+| Work from `testnet/sepolia` instead of the merged `main`: hosted calls to the Sepolia workspace and public Sepolia transactions | The stand owner | The commit is on GitHub. The working tree has no local changes. | OD-95 |
+| Hold an API key for the Sepolia workspace in a git-ignored `.env` | The stand owner | Nobody commits the key. No agent and no CI job uses it. If the provider can limit a key to one workspace, the key reaches only the Sepolia workspace. | OD-95 |
+| Run hosted calls through a Sepolia guard, separate from the owner guard | The stand owner | The guard requires `CLUTCH_SEPOLIA_PUSH=1` and the branch `testnet/sepolia`. It refuses CI, local changes, and a workspace that differs from the prepared context. The owner guard stays as it is. | OD-95 |
+| Publish the existing-state declaration to the Sepolia workspace as a draft | The stand owner | A committed script checks the payload hash and a fresh RPC comparison. It calls resolve and compares the resolved specification with the payload: accounts, owners, members and `Nor` conditions. It calls apply once for each API URL, workspace and payload hash, records the attempt exclusively and saves each status and body. Success requires a complete HTTP exchange and a JSON result with nonempty `id` and `url` strings. It uses the same API address as the SDK. | OD-96 |
+| Execute a transaction that the Zodiac app builds for the stand (Deploy or Apply) | Nobody, until EM decides otherwise | If EM permits it: Clutch's compiler produces the same calls from the same commit, and the test Voting contract executes them. | OD-97 |
+| Send public Sepolia transactions on the existing stand: funding, the CoW and First-loss drills, recovery and the stop of the run | The stand owner, with the keystore | Only through the `sepolia.just` recipes and their guards. A second stand needs a new decision. | OD-98 |
+| Import the three existing Safes as vaults and enter the address-book entries in the Sepolia workspace | The stand owner | No role or permission is edited in the Zodiac app. The entries come from the checked address list. | OD-99 |
+| Remove the earlier workspace's draft aliases and cancelled proposals | The stand owner | Only where the app permits it. Nothing is executed. | OD-99 |
 | Prepare payloads, run read-only RPC comparisons, and write code, tests and documents | Agents | No change: agents never use the key, call the hosted app, sign or send [s3]. | None |
 
 ## Options considered
@@ -133,7 +133,7 @@ Tests on Sepolia are permitted under the rows below. Each row is a permission th
 - The production rule of ADR 004 does not change. A second guard exists for Sepolia, and both guards need tests.
 - Hosted acceptance in the Sepolia workspace is evidence for Sepolia only. It does not show that the production workspace accepts the production policy.
 - Code runs from a branch that is not merged. Reviewers see it in pull request #44, but nobody has approved it [s18].
-- A key that reaches every workspace of the account also reaches the production workspace. The key condition of OD-89 decides this risk.
+- A key that reaches every workspace of the account also reaches the production workspace. The key condition of OD-95 decides this risk.
 - The stand keeps one controller. It does not test signer independence [s4].
 - The provider permits tests above the displayed quotas. Record an actual save or publication error for the provider to investigate [s21].
 
@@ -156,10 +156,10 @@ Tests on Sepolia are permitted under the rows below. Each row is a permission th
 
 <!-- generated by scripts/validate_docs.py --write-status; edit the sources, not this block -->
 
-- [OD-89](/registers/open-decisions.md): May the stand owner make hosted calls to the Sepolia workspace and send public Sepolia transactions from `testnet/sepolia`? A: no; ADR 004 decision 16 stays, so pull request #44 merges first and the owner team pushes from `main`. B: yes, from a commit that is on GitHub with no local changes, through a Sepolia guard separate from the owner guard, with an API key for the Sepolia workspace in a git-ignored `.env`. C: a one-time exception for each publication, recorded in the decision log.
-- [OD-90](/registers/open-decisions.md): How does the existing-state payload reach the Sepolia workspace? A: the SDK's `push`. B: a committed script behind the Sepolia guard: it checks the payload hash and a fresh RPC comparison, calls resolve, compares the resolved specification with the payload, calls apply once and saves each status and body. C: a manual API call.
-- [OD-91](/registers/open-decisions.md): May the stand owner execute a transaction that the Zodiac app builds for the Sepolia stand, through Deploy or Apply? A: no, drafts only. B: yes, when Clutch's compiler produces the same calls from the same commit and the test Voting contract executes them. C: yes, without that check.
-- [OD-92](/registers/open-decisions.md): May the stand owner send public Sepolia transactions on the existing stand from `testnet/sepolia`: funding, the CoW and First-loss drills, recovery and the stop of the run? A: yes, only through the `sepolia.just` recipes and their guards, with the keystore; a second stand needs a new decision. B: only after pull request #44 merges. C: no more public transactions.
-- [OD-93](/registers/open-decisions.md): Which records may the stand owner make by hand in the Zodiac app? A: none. B: vault imports of the three existing Safes, the checked address-book entries, and removal of the earlier workspace's draft aliases and cancelled proposals; no role or permission edits in the app. C: any record, policy drafts included.
+- [OD-95](/registers/open-decisions.md): May the stand owner make hosted calls to the Sepolia workspace and send public Sepolia transactions from `testnet/sepolia`? A: no; ADR 004 decision 16 stays, so pull request #44 merges first and the owner team pushes from `main`. B: yes, from a commit that is on GitHub with no local changes, through a Sepolia guard separate from the owner guard, with an API key for the Sepolia workspace in a git-ignored `.env`. C: a one-time exception for each publication, recorded in the decision log.
+- [OD-96](/registers/open-decisions.md): How does the existing-state payload reach the Sepolia workspace? A: the SDK's `push`. B: a committed script behind the Sepolia guard: it checks the payload hash and a fresh RPC comparison, calls resolve, compares the resolved specification with the payload, calls apply once and saves each status and body. C: a manual API call.
+- [OD-97](/registers/open-decisions.md): May the stand owner execute a transaction that the Zodiac app builds for the Sepolia stand, through Deploy or Apply? A: no, drafts only. B: yes, when Clutch's compiler produces the same calls from the same commit and the test Voting contract executes them. C: yes, without that check.
+- [OD-98](/registers/open-decisions.md): May the stand owner send public Sepolia transactions on the existing stand from `testnet/sepolia`: funding, the CoW and First-loss drills, recovery and the stop of the run? A: yes, only through the `sepolia.just` recipes and their guards, with the keystore; a second stand needs a new decision. B: only after pull request #44 merges. C: no more public transactions.
+- [OD-99](/registers/open-decisions.md): Which records may the stand owner make by hand in the Zodiac app? A: none. B: vault imports of the three existing Safes, the checked address-book entries, and removal of the earlier workspace's draft aliases and cancelled proposals; no role or permission edits in the app. C: any record, policy drafts included.
 
 <!-- end of generated block -->

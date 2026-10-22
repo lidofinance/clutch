@@ -181,10 +181,10 @@
   assumption: "The 72-hour objection on each top-up keeps funding inside the mandate. The registry limit is only the backstop."
   kind: design
   why: "The mandate makes the objection the control of a top-up."
-  breaks: "Without an objection, the committee's Safe can pull one TM Floor Value per registry per month, and two within about 72 hours around a month boundary."
+  breaks: "Without an objection, the committee's Safe can pull one mandate size per registry per month, and two within about 72 hours around a month boundary. The mandate size and the treasury share then hold only by procedure."
   watched_by: []
   watch_note: "INV-017 is pending: no registry, factory or test exists. The funding flags are not built."
-  sources: ["ADR-008#d4", "ADR-008#d5", "ADR-008#d6", INV-017]
+  sources: ["ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d32", "ADR-008#d33", INV-017, OD-89]
 
 - id: budgets-flow
   assumption: "Budgets in token units bound the monthly flow to each spender; the caps are measured, not enforced by budgets."

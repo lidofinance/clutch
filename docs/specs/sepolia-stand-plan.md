@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-22T15:44:18Z
+  at: 2026-10-22T19:50:00Z
 verified: []
 sources:
   - id: s1
@@ -87,7 +87,7 @@ sources:
     title: CLI regression tests — failed RPC preparation preserves saved payload, context and diff
   - id: s32
     resource: /adr/013-tests-on-sepolia.md
-    title: ADR 013 — proposed permissions for tests on Sepolia, OD-89 to OD-93
+    title: ADR 013 — proposed permissions for tests on Sepolia, OD-95 to OD-99
   - id: s33
     resource: urn:clutch:evidence:2026-10-22:sepolia-resolution-check
     title: Local check — the resolution saved on 2026-10-20 against the current payload; the same 63 calls with the roles in another order; Safe owners and modules match
@@ -288,11 +288,11 @@ The exported payload uses legacy `targets` and empty `annotations` for governanc
 Local readback reconstructs permissions and checks the same 63 configuration calls [s30].
 The pinned SDK's generic `push` does not emit this legacy format [s30].
 Production hosted commands keep the repository-owner workflow from clean merged `main` [s11].
-ADR 013 proposes a separate route for the Sepolia workspace. EM decides it in OD-89 and OD-90 [s32].
+ADR 013 proposes a separate route for the Sepolia workspace. EM decides it in OD-95 and OD-96 [s32].
 
 ### Publish the declaration to the Sepolia workspace
 
-Run these commands only after EM's decisions on OD-89 and OD-90 [s32].
+Run these commands only after EM's decisions on OD-95 and OD-96 [s32].
 Commit and push `testnet/sepolia` first.
 In the local `.env`, set `SEPOLIA_ZODIAC_API_KEY` and `SEPOLIA_ZODIAC_WORKSPACE`, the workspace of the prepared context.
 Set `SEPOLIA_ZODIAC_API_URL` only for another API origin; it must use https.
@@ -318,7 +318,7 @@ The resolution saved on 2026-10-20 in the earlier workspace passes this comparis
 
 After the publication, check the saved draft.
 The governance role keeps `Nor`, no node is marked as modified and the hosted diff is empty.
-Do not press Deploy or Apply in the Zodiac app (OD-91) [s32].
+Do not press Deploy or Apply in the Zodiac app (OD-97) [s32].
 
 - [ ] Publish the existing-state declaration as a draft and check it in the workspace.
 

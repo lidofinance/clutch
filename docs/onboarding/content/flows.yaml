@@ -187,13 +187,13 @@ flows:
     title: A budget motion
     label: specified
     summary: "How a budget key changes. There is no routine retune: the committee files a budget motion only after an event (OD-56)."
-    trigger: "An event: a new TM Floor Value, a new spender, a product's unlock, or the lift of the launch cap. A price move is not an event."
+    trigger: "An event: a new mandate size, a new spender, a product's unlock, or the lift of the launch cap. A price move is not an event."
     time: "72 hours."
     steps:
       - who: "Committee"
         text: "The attested computation derives the key's new budget, under that key's ceiling. The forum post names the event."
         nodes: [committee, asset-safe]
-        check: "A motion sets only a key that the policy already holds, so a new spender takes a spare key (OD-69). A new TM Floor Value also needs a DAO vote for the funding limits and the fixed approval ceilings, by design (OD-71)."
+        check: "A motion sets only a key that the policy already holds, so a new spender takes a spare key (OD-69). A new mandate size also needs a DAO vote for the funding limits and the fixed approval ceilings, by design (OD-71, OD-89)."
       - who: "Committee Safe"
         text: "The committee's Safe creates a motion on the budget factory. The guard screens it, once the guard is set (OD-54)."
         nodes: [committee, screening, easytrack]
@@ -207,7 +207,7 @@ flows:
         text: "Monitoring flags every budget motion, and checks that its forum post names an event."
         nodes: [monitoring]
     sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d31", "ADR-009#proposed-direction", "ADR-009#consequences", INV-011,
-      INV-012, OD-56, OD-69, OD-71, "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period", OD-54]
+      INV-012, OD-56, OD-69, OD-71, "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period", OD-54, OD-89]
 
   - id: dao-change
     group: governance
@@ -280,14 +280,14 @@ flows:
   # --- Funding ------------------------------------------------------------------------------------
   - id: topup
     group: funding
-    title: The monthly top-up
+    title: A top-up
     label: specified
-    summary: "How money moves from the DAO treasury to the vault. After the monthly report, the committee's Safe creates an Easy Track top-up motion."
-    trigger: "Month-end, when the vault is below its floor."
-    time: "72 hours, on days 1–10 of the month."
+    summary: "How money moves from the DAO treasury to the vault after the seed. The committee's Safe creates an Easy Track top-up motion, within the mandate size and the treasury share."
+    trigger: "The mandate's published eligibility conditions for a replenishment are met, and the vault has headroom under the mandate size (OD-89)."
+    time: "72 hours."
     steps:
       - who: "Committee"
-        text: "The committee publishes the monthly report, then posts the shortfall on the forum before the top-up. The post links both readings' reports (OD-85)."
+        text: "The committee posts the top-up on the forum: the funded value, the headroom under the mandate size, and the vault's share of the DAO's non-LDO treasury. The post links both readings' latest reports (OD-85)."
         nodes: [committee, reporting]
         check: "No top-up starts while the report is late, while the committee's estimate prices more than the set share of the vault (OD-62), or while Lido's reading and the policy provider's differ by more than the band (OD-84). Until the launch cap lifts, the committee asks for a top-up only while the vault stays at or below the cap, and the post states the room left under it (OD-54)."
       - who: "Committee Safe"
@@ -299,18 +299,18 @@ flows:
         nodes: [dao, easytrack]
         edges: [object]
       - who: "Easy Track and Aragon Finance"
-        text: "At enactment, the registry checks the monthly limit again, and Aragon Finance pays the Asset Safe from the treasury."
+        text: "At enactment, the registry checks its limit for the month again, and Aragon Finance pays the Asset Safe from the treasury."
         nodes: [easytrack, funding, dao, asset-safe]
         edges: [topup-motion, treasury, topup]
         check: "INV-017: only the Asset Safe, only allowed tokens, within the limit. Pending: nothing is built yet."
       - who: "Monitoring"
-        text: "Monitoring flags a top-up outside days 1–10, a month's top-ups above the posted shortfall, and any top-up after an objected one. Until the launch cap lifts, it also alerts on a top-up motion that would take the vault above the cap."
+        text: "Monitoring flags a top-up above the posted headroom, a top-up that would take the vault above the mandate size or the treasury share, and any top-up after an objected one. Until the launch cap lifts, it also alerts on a top-up motion that would take the vault above the cap."
         nodes: [monitoring]
     escapes:
       - "An objection stops the top-up. The mandate then asks for a Snapshot vote."
       - "The registry refuses a payment above its remaining limit."
-    sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d20", "ADR-008#proposed-direction",
-      "ADR-009#d19", "ADR-009#d21", "ADR-009#d36", "ADR-009#d41", "ADR-009#d42", OD-54, OD-62, OD-84, OD-85, INV-017, "runbook:Top up the vault",
+    sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d20", "ADR-008#d32", "ADR-008#d33", "ADR-008#d34", "ADR-008#proposed-direction",
+      "ADR-009#d19", "ADR-009#d21", "ADR-009#d36", "ADR-009#d41", "ADR-009#d42", OD-54, OD-62, OD-84, OD-85, OD-89, INV-017, "runbook:Top up the vault",
       "runbook:Re-set a funding limit", "lip:part-5"]
 
   - id: seed
@@ -318,13 +318,13 @@ flows:
     title: Launch funding and the first-loss shares
     label: specified
     summary: "How the vault gets its first assets. After the enabling vote, the Growth Committee moves the DAO's first-loss Earn shares to the first-loss Safe. Then one seed motion funds the rest."
-    trigger: "The enabling vote has executed and the Safes exist."
+    trigger: "The enabling vote has executed, its Safe batches have run, and the Safes exist (OD-92)."
     steps:
       - who: "Growth Committee Safe"
         text: "The Growth Committee Safe transfers the first-loss earnETH and earnUSD shares to the [[first-loss Safe]]. That Safe needs no permission to receive them."
         nodes: [funding, first-loss]
       - who: "Committee Safe"
-        text: "The committee's Safe creates the seed motion. It is at most one TM Floor Value, less the value of the first-loss shares. Until the launch cap lifts, it is also at most the cap (OD-54)."
+        text: "The committee's Safe creates the seed motion. It is at most the mandate size, less the value of the first-loss shares (OD-89). Until the launch cap lifts, it is also at most the cap (OD-54)."
         nodes: [committee, easytrack, funding]
         edges: [motions, topup-motion]
       - who: "Easy Track and Aragon Finance"
@@ -337,7 +337,7 @@ flows:
         edges: [first-loss-shares]
         check: "INV-021: the first-loss Safe has Aragon Voting as its only owner, and one modifier with two narrow roles. Specified, not built."
     sources: ["ADR-008#d4", "ADR-008#d13", "ADR-008#d19", "ADR-008#d20", "ADR-008#d21", "ADR-008#d23",
-      "ADR-008#proposed-direction", OD-21, OD-42, OD-54, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares"]
+      "ADR-008#proposed-direction", OD-21, OD-42, OD-54, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", OD-89, OD-92]
 
   - id: first-loss-burn
     group: funding
@@ -719,7 +719,7 @@ flows:
   - id: enabling-vote
     group: deployment
     title: The enabling vote
-    label: open
+    label: specified
     summary: "One DAO vote turns the system on. The enabling-vote page lists what it holds, what comes before it and what follows without a vote."
     trigger: "The mandate is approved and phase 3 is done."
     steps:
@@ -735,11 +735,15 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, committee, emergency-safe]
       - who: "LDO holders"
-        text: "The vote applies the policy compiled for mainnet from the reviewed constellation, grants the roles, the exit-governance role and the two first-loss roles included, sets up the orders account with its order lists and relayer approvals, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list. Aragon Voting runs every item itself when the vote executes, without Dual Governance (OD-73)."
+        text: "The vote registers the factories and adds USDS to the payment permission and to the shared stablecoin token list (OD-93). Aragon Voting runs these items itself, without Dual Governance (OD-73). For the vault's Safes, it approves the hash of each Safe batch: the batches apply the policy compiled for mainnet from the reviewed constellation, grant the roles, the exit-governance role and the two first-loss roles included, and set up the orders account with its order lists and relayer approvals (OD-92)."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
         edges: [own, own-op, own-sf]
+      - who: "Anyone"
+        text: "After the vote executes, anyone sends each Safe batch with Voting's approval of its hash. The batches of one Safe run in nonce order (OD-92)."
+        nodes: [asset-safe, orders, first-loss]
+        check: "One command computes each batch's hash again from the published batch, so a reviewer can match it to the vote. The command is owed."
       - who: "Growth Committee, then the committee's Safe"
-        text: "After the vote, the Growth Committee moves the first-loss shares to the first-loss Safe, and the seed motion funds the vault."
+        text: "After the batches run, the Growth Committee moves the first-loss shares to the first-loss Safe, and the seed motion funds the vault."
         nodes: [funding, first-loss, asset-safe, committee, easytrack]
         edges: [topup, motions]
     sources: ["ADR-004#d14", "ADR-007#proposed-direction", "ADR-007#confirmation", "ADR-008#d9", "ADR-008#d13",
@@ -747,7 +751,8 @@ flows:
       "ADR-010#d22", "ADR-008#d10", INV-022, INV-023, OD-54, "doc:ROADMAP.md#roadmap",
       "doc:docs/specs/enabling-vote.md#the-vote",
       "doc:docs/research/single-vote-review-2026-10-14.md#how-one-vote-carries-two-kinds-of-item", OD-73, "ADR-005#d28",
-      OD-78, OD-79, OD-55]
+      OD-78, OD-79, OD-55, OD-92, OD-93, "ADR-005#d32", "ADR-008#d35", "ADR-008#d36",
+      "doc:docs/research/enabling-vote-rehearsal-2026-10-15.md#the-vote-that-fits"]
 
   - id: signer-rotation
     group: deployment

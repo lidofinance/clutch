@@ -71,7 +71,7 @@ def _coverage(group, name, reason=None, drop=False):
 CONTENT_CASES = [
     ("the committed content passes", lambda c: None, None),
     ("an unknown ADR", _source("ADR-999"), "unknown ADR ADR-999"),
-    ("an unknown open decision", _source("OD-99"), "unknown open decision OD-99"),
+    ("an unknown open decision", _source("OD-00"), "unknown open decision OD-00"),
     ("an open decision that a later one replaced", _source("OD-68"), "OD-68 was replaced by OD-78"),
     ("an OD in the text that the sources do not cite", lambda c: c["actors"][0].update(what=c["actors"][0]["what"] + " See OD-65."),
      "actor committee: the text names OD-65, which its sources do not cite"),
@@ -108,7 +108,7 @@ CONTENT_CASES = [
     ("a percentage from the mandate draft", lambda c: c["mandate"]["blocks"][0].update(says="Up to 99 % each."), "must not appear"),
     ("a dollar figure from the mandate draft", lambda c: _first_change(c).update(why="It frees $1."), "must not appear"),
     ("a constellation change of an unknown kind", lambda c: c["constellation"]["changes"][0].update(kind="moved"), "bad kind moved"),
-    ("an unknown source in the constellation", lambda c: c["constellation"]["changes"][0]["sources"].append("OD-99"), "unknown open decision OD-99"),
+    ("an unknown source in the constellation", lambda c: c["constellation"]["changes"][0]["sources"].append("OD-00"), "unknown open decision OD-00"),
     ("a planned part without sources", lambda c: c["constellation"]["planned"][0].update(sources=[]), "no sources"),
     ("an ask that the research note does not hold", lambda c: _first_ask(c).update(asked="An ask that the request never made."),
      "the ask is not in docs/research/request-for-solution-2026-10-07.md"),

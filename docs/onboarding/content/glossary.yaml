@@ -92,9 +92,9 @@
   sources: [OD-48, "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
 
 - term: Enabling vote
-  plain: "The DAO vote that turns the system on. It applies the policy compiled for mainnet from the reviewed constellation, grants the roles, sets up the orders account and the first-loss Safe, registers the factories, and adds USDS to the payment permission and to the shared stablecoin token list."
+  plain: "The DAO vote that turns the system on. It registers the factories and adds USDS to the payment permission and to the shared stablecoin token list. For the vault's Safes, it approves the hash of each Safe batch, and anyone sends the batches after the vote: they apply the policy compiled for mainnet, grant the roles, and set up the orders account and the first-loss Safe."
   sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-008#d9", "ADR-008#d10", "ADR-008#d19",
-    "doc:docs/specs/enabling-vote.md#the-vote"]
+    "doc:docs/specs/enabling-vote.md#the-vote", "ADR-005#d32", "ADR-008#d36", OD-92, OD-93]
 
 - term: Fail closed
   plain: "When a check cannot run, the action stops. The screening guard fails closed: with no approval, the operator's transaction reverts."
@@ -144,6 +144,10 @@
 - term: Mandate
   plain: "The Treasury Management mandate: the rules that the committee runs the vault by. It is not yet approved. Its figures enter the repository only after its Snapshot vote."
   sources: ["ADR-009#d3", "ADR-009#proposed-direction", "doc:ROADMAP.md#roadmap"]
+
+- term: Mandate size
+  plain: "The ceiling of the vault's funding. The vault holds up to it in assets: each funding counts in US dollars at its value when it is funded, and the legacy positions count too. No top-up refills the vault to it by right, and a larger size needs a separate DAO approval. It also sets each funding registry's limit per month and the fixed approval ceilings. Its figure is not in the repository."
+  sources: ["ADR-008#d32", "ADR-008#d34", "ADR-008#d4", "ADR-008#proposed-direction", "ADR-009#d14", OD-89]
 
 - term: Manifest
   plain: "The file of deployment addresses that the compiler compiles against. The committed one describes the fork-test deployment, not mainnet."
@@ -212,8 +216,8 @@
   sources: ["ADR-005#d9"]
 
 - term: Seed
-  plain: "The vault's first funding, one motion after the enabling vote. It is at most one TM Floor Value, less the value of the first-loss shares, and at most the launch cap until the cap lifts."
-  sources: ["ADR-008#d20", "ADR-008#proposed-direction", OD-54]
+  plain: "The vault's first funding, one motion after the enabling vote. It is at most the mandate size, less the value of the first-loss shares, and at most the launch cap until the cap lifts."
+  sources: ["ADR-008#d20", "ADR-008#d32", "ADR-008#proposed-direction", OD-54, OD-89]
 
 - term: Snapshot vote
   plain: "Lido's off-chain LDO vote. The mandate passes a Snapshot vote before the on-chain enabling vote. It is not the same as a holdings snapshot."
@@ -236,13 +240,13 @@
   plain: "The fixed shape of permission that one Easy Track factory builds. A motion supplies only typed values, such as a target, an asset and a budget key."
   sources: ["ADR-006#d5", "ADR-006#proposed-direction"]
 
-- term: TM Floor Value
-  plain: "The mandate's floor size for the vault. The seed and each monthly top-up refill to it, and it sets each funding registry's monthly limit and the fixed approval ceilings. Its figure is not in the repository."
-  sources: ["ADR-008#d4", "ADR-008#proposed-direction", "ADR-009#d14"]
-
 - term: Top-up
-  plain: "An Easy Track motion that pays the Asset Safe from the DAO treasury, normally once a month, within the funding registry's monthly limit."
-  sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d6"]
+  plain: "An Easy Track motion that pays the Asset Safe from the DAO treasury, within the funding registry's limit per month. After the seed, a top-up needs the mandate's published eligibility conditions, and it keeps the vault within the mandate size and the treasury share."
+  sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d34", "ADR-008#proposed-direction", OD-89]
+
+- term: Treasury share
+  plain: "The largest part of the DAO's non-LDO treasury that the vault may hold. The mandate sets it. The mandate still owes the share's base, the time of its test, and the remedy for a breach that no vault transaction causes."
+  sources: ["ADR-008#d33", "ADR-008#proposed-direction", OD-89]
 
 - term: Trusted caller
   plain: "The only address that may create motions on an Easy Track factory, fixed when the factory is deployed. For every Clutch factory it is the committee's Safe (OD-80)."

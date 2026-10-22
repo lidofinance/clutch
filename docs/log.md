@@ -2,15 +2,20 @@
 
 ## 2026-10-22
 
+* **Update**: Synchronize testnet/sepolia with main and renumber its open Sepolia questions as OD-95 to OD-99.
+* **Decision**: Recorded EM's choices for OD-92 to OD-94. The enabling vote approves the hash of each Safe batch, and anyone executes the batches after it; the registry factories deploy the registries with Voting as admin, and a check before the vote proves every role; the vote keeps the four USDS items, against the agent's recommendation; monitoring warns when few Easy Track motion slots are free, and the budget factory can set several keys in one motion.
+* **Evidence**: Ran the enabling-vote rehearsal again on a fork of block 26249900, after OD-89 to OD-91. All eight tests pass. LDO left the Asset Safe policy and the orders account's relayer approvals, so the largest batch fell to 6,304,514 gas and 60,292 bytes; a vote with the batches inside still needs 37,606,772 gas. The Agent still holds no USDS, the shared payment permission still has 22 params, and one Easy Track motion was open. The rehearsal's open decisions are now OD-92 to OD-94.
+* **Decision**: Recorded EM's choice for OD-91: LDO leaves the launch list, the operator's order lists and the recovery sell list. The emergency role no longer transfers LDO to the Aragon Agent, and the dry run no longer buys LDO.
 * **Update**: Fix Sepolia publication success checks and retry isolation; record the provider reply on workspace quotas.
 * **Update**: Add the Sepolia guard and the publication commands for the existing-state Constellation; compare each resolution with the payload before apply.
-* **Decision**: Draft ADR 013 and open OD-89 to OD-93: the permissions that tests on Sepolia need.
+* **Decision**: Draft ADR 013 and open OD-95 to OD-99: the permissions that tests on Sepolia need.
 * **Update**: Preserve saved Sepolia Constellation files when RPC preparation fails; record publication review findings.
 * **Evidence**: Record Sepolia deployment findings, recovery checks, exact explorer verification, Zodiac import and publication limits, and proposals remaining after deployment cancellation.
 * **Update**: Add the Sepolia stand, CoW and First-loss fixtures, guarded deployment and recovery, explorer verification and existing-account Constellation export; retain the shared policy unchanged.
 
 ## 2026-10-21
 
+* **Decision**: Recorded EM's choices for OD-89 and OD-90, and opened OD-91. The mandate size is a ceiling, as the mandate's draft text writes it: each funding counts at its value when funded, the legacy positions count, the vault never holds more than the mandate's share of the DAO's non-LDO treasury, and more funding needs a DAO approval. The TM Floor Value becomes the mandate size across the repository, and the funding alerts follow the headroom under the size. The mandate's owed items now go to its Snapshot text, its forum post or the LIP alone. OD-91 asks whether the operator needs LDO.
 * **Update**: Fixed three inconsistencies after pull request #41: AGENTS.md now names EM and YT, at EM's request; the guide's banner no longer says that the public repository is not public; and the guide's phase-2 line names the mandate's rule data and the comparison of the two readings.
 
 ## 2026-10-20
@@ -29,6 +34,7 @@
 
 ## 2026-10-15
 
+* **Evidence**: Rehearsed the enabling vote end to end on a mainnet fork of block 26196400, with the live Aragon Voting, ACL, Finance, Easy Track and its executor. The vote as the spec describes it cannot start under EIP-7825; a vote in which Voting approves the hash of each Safe batch fits. The rehearsal also found that the standard builders make the Agent the registries' admin, that Voting must take the token list's add-token role to add USDS, that the USDS items fund nothing at launch, and that Easy Track's shared limit of open motions was nearly full in September 2026. Added the research note with a ramp-up plan, opened OD-92 to OD-94, pointed the enabling-vote spec at the findings, and made the policy checks cover the rehearsal's artifact.
 * **Decision**: Kept OD-80 and OD-83 after a review of the operator Safe. EM chose the recorded design over an operator Safe owned by the committee's Safe, and the agent advised against a return to a new Safe with the same signers. ADR 010 lists the owned Safe as not chosen, and ADR 010 and the LIP draft now name the duties of the committee's Safe that the guard also screens: Stonks orders and top-up motions, the Stonks 2.0 price router, and the LDO buyback roles. A new research note keeps the evidence.
 
 ## 2026-10-14
