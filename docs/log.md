@@ -1,5 +1,14 @@
 # Log
 
+## 2026-10-22
+
+* **Update**: Fix Sepolia publication success checks and retry isolation; record the provider reply on workspace quotas.
+* **Update**: Add the Sepolia guard and the publication commands for the existing-state Constellation; compare each resolution with the payload before apply.
+* **Decision**: Draft ADR 013 and open OD-89 to OD-93: the permissions that tests on Sepolia need.
+* **Update**: Preserve saved Sepolia Constellation files when RPC preparation fails; record publication review findings.
+* **Evidence**: Record Sepolia deployment findings, recovery checks, exact explorer verification, Zodiac import and publication limits, and proposals remaining after deployment cancellation.
+* **Update**: Add the Sepolia stand, CoW and First-loss fixtures, guarded deployment and recovery, explorer verification and existing-account Constellation export; retain the shared policy unchanged.
+
 ## 2026-10-21
 
 * **Update**: Fixed three inconsistencies after pull request #41: AGENTS.md now names EM and YT, at EM's request; the guide's banner no longer says that the public repository is not public; and the guide's phase-2 line names the mandate's rule data and the comparison of the two readings.

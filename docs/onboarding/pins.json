@@ -267,7 +267,7 @@
         "ADR-002#d1": "fbef8c1e24375017",
         "ADR-002#d7": "04f2137680376c15",
         "OD-63": "182b61c7ee7d26f8",
-        "doc:docs/registers/open-decisions.md#open-decisions": "6796bf40144ca8f4"
+        "doc:docs/registers/open-decisions.md#open-decisions": "79b876793c6b8f5d"
       }
     },
     "actor:emergency-safe": {
@@ -3293,7 +3293,7 @@
     "term:open-decision": {
       "content": "c96ba21de127cccb",
       "sources": {
-        "doc:docs/registers/open-decisions.md#open-decisions": "6796bf40144ca8f4"
+        "doc:docs/registers/open-decisions.md#open-decisions": "79b876793c6b8f5d"
       }
     },
     "term:orders-account": {

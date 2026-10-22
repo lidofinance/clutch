@@ -13,6 +13,7 @@ Each ADR records its decision and review status. Pending questions are in the [o
 | [003](003-agent-operating-model.md) | Agent instructions, procedures and limits |
 | [004](004-specifications-and-policy-as-data.md) | Specifications, policy artifacts and verification |
 | [012](012-contributing-with-many-agents.md) | Contribution workflow, CI and source pins |
+| [013](013-tests-on-sepolia.md) | Sepolia tests, their branch, the Zodiac test workspace and its key |
 
 ## System design
 

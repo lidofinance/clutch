@@ -1,0 +1,3 @@
+date: '2026-10-22'
+kind: Update
+text: Add the Sepolia stand, CoW and First-loss fixtures, guarded deployment and recovery, explorer verification and existing-account Constellation export; retain the shared policy unchanged.
