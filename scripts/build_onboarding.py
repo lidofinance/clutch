@@ -248,9 +248,9 @@ def facts() -> dict[str, Any]:
     od_text = (docs / "registers" / "open-decisions.md").read_text(encoding="utf-8")
     open_part, _, closed_part = od_text.partition("## Closed")
     ods = {}
-    for cells in _rows(open_part, r"OD-\d{2}"):
+    for cells in _rows(open_part, r"OD-\d{2,}"):
         ods[cells[0]] = {"question": _plain(cells[1]), "state": "open"}
-    for cells in _rows(closed_part, r"OD-\d{2}"):
+    for cells in _rows(closed_part, r"OD-\d{2,}"):
         ods[cells[0]] = {"question": _plain(cells[1]), "state": "closed", "closed": cells[2]}
     for od, state in V.od_states(V.load_closed(ROOT)).items():
         if od in ods:
@@ -341,7 +341,7 @@ def policy() -> list[dict[str, Any]]:
 def named_ods(item: Any, top: bool = True) -> set[str]:
     """The ODs that an item's own text names. A part with sources of its own answers for itself."""
     if isinstance(item, str):
-        return set(re.findall(r"\bOD-\d{2}\b", item))
+        return set(re.findall(r"\bOD-\d{2,}\b", item))
     if isinstance(item, dict):
         if not top and "sources" in item:
             return set()
@@ -377,7 +377,7 @@ def resolve(ref: str, f: dict[str, Any]) -> dict[str, str]:
                 raise BuildError(f"{adr} has no heading #{anchor}")
             out.update(label=f"{out['label']}: {section['title']}", href=out["href"] + "#" + anchor)
         return out
-    if re.fullmatch(r"OD-\d{2}", ref):
+    if re.fullmatch(r"OD-\d{2,}", ref):
         if ref not in f["ods"]:
             raise BuildError(f"unknown open decision {ref}")
         if f["ods"][ref].get("replaced_by"):
@@ -429,7 +429,7 @@ def locate(ref: str, f: dict[str, Any]) -> dict[str, str]:
         if anchor and re.fullmatch(r"d\d+", anchor):
             return {"path": path, "kind": "decision", "key": anchor[1:], "adr": adr}
         return {"path": path, "kind": "section", "key": anchor or "decision"}
-    if re.fullmatch(r"OD-\d{2}", ref):
+    if re.fullmatch(r"OD-\d{2,}", ref):
         return {"path": "docs/registers/open-decisions.md", "kind": "row", "key": ref}
     if re.fullmatch(r"INV-\d{3}", ref):
         return {"path": "docs/specs/invariants.md", "kind": "row", "key": ref}
