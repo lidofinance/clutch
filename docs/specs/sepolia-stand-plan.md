@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-22T19:50:00Z
+  at: 2026-10-22T19:53:33Z
 verified: []
 sources:
   - id: s1
@@ -87,7 +87,7 @@ sources:
     title: CLI regression tests — failed RPC preparation preserves saved payload, context and diff
   - id: s32
     resource: /adr/013-tests-on-sepolia.md
-    title: ADR 013 — proposed permissions for tests on Sepolia, OD-95 to OD-99
+    title: ADR 013 — proposed Sepolia permissions, role-key migration and mainnet design dependencies, OD-95 to OD-100
   - id: s33
     resource: urn:clutch:evidence:2026-10-22:sepolia-resolution-check
     title: Local check — the resolution saved on 2026-10-20 against the current payload; the same 63 calls with the roles in another order; Safe owners and modules match
@@ -97,6 +97,12 @@ sources:
   - id: s35
     resource: urn:clutch:evidence:2026-10-22:zodiac-quota-reply
     title: Reply relayed by the stand owner — quotas are not enforced immediately and tests may exceed the displayed limits
+  - id: s36
+    resource: urn:clutch:evidence:2026-10-22:sepolia-constellation-deployed
+    title: Owner publication from dacf262, Deployed and Nothing to deploy in Zodiac, original Nor conditions and zero RPC differences at block 11970750
+  - id: s37
+    resource: /research/sepolia-constellation-ui-2026-10-22.md
+    title: UI registration review — SDK 2.10.0, all workspace metadata and the duplicate-key permission conflicts
 ---
 
 # Sepolia stand deployment
@@ -320,7 +326,17 @@ After the publication, check the saved draft.
 The governance role keeps `Nor`, no node is marked as modified and the hosted diff is empty.
 Do not press Deploy or Apply in the Zodiac app (OD-97) [s32].
 
-- [ ] Publish the existing-state declaration as a draft and check it in the workspace.
+- [x] Publish the existing-state declaration and check it in the workspace. On 2026-10-22, Zodiac marks it `Deployed`; the deployment page says `Nothing to deploy`. The three Safe addresses, four modifiers and seven role keys match the prepared declaration. The original governance `Nor` conditions remain. The RPC comparison found zero differences across 82 events at block `11970750` [s36].
+
+- [x] Update to SDK 2.10.0 and API types 1.13.0. Prepare all three `vault: true` flags and seven policy labels locally. The payload differs only in those ten metadata fields; the RPC comparison found zero policy differences at block `11971576` [s37].
+- [x] Draft OD-100 and the ADR 013 migration proposal for `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency`. Include the same key scheme in the mainnet design dependencies [s32].
+- [ ] Obtain EM's decision on OD-100 and the execution route. The current policy model requires equal grants for each key. Preparation still records both conflicts and returns status `1`; the publication CLI stops before a hosted call [s32][s37].
+- [ ] Prepare the migration package and pass ADR 013's fork checks. Keep all seven on-chain roles unchanged until the owner authorises the reviewed package [s32].
+- [ ] After authorised migration, save the receipts and confirm zero RPC differences against the new declaration. Publish the workspace metadata under a separate instruction and confirm three Vaults and seven Policies with the new key mapping [s32][s37].
+
+The governance view shows `Unsupported Condition` for `Nor`, but displays its original opcode `3` tree in both columns.
+The saved resolve response matches the prepared payload.
+Evidence: `cache/sepolia/constellation/deployed-check-2026-10-22/` [s36].
 
 The captured workspace usage page on 2026-10-20 showed six policies against a limit of three.
 The screenshot does not establish the cause of the earlier `governance` error [s25].

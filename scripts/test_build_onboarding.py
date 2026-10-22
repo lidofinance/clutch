@@ -72,9 +72,13 @@ CONTENT_CASES = [
     ("the committed content passes", lambda c: None, None),
     ("an unknown ADR", _source("ADR-999"), "unknown ADR ADR-999"),
     ("an unknown open decision", _source("OD-00"), "unknown open decision OD-00"),
+    ("a three-digit open decision", _source("OD-100"), None),
+    ("an unknown three-digit open decision", _source("OD-999"), "unknown open decision OD-999"),
     ("an open decision that a later one replaced", _source("OD-68"), "OD-68 was replaced by OD-78"),
     ("an OD in the text that the sources do not cite", lambda c: c["actors"][0].update(what=c["actors"][0]["what"] + " See OD-65."),
      "actor committee: the text names OD-65, which its sources do not cite"),
+    ("a three-digit OD in the text needs its source", lambda c: c["actors"][0].update(what=c["actors"][0]["what"] + " See OD-100."),
+     "actor committee: the text names OD-100, which its sources do not cite"),
     ("an OD that a mandate change names and cites itself", lambda c: (_first_change(c).update(why=_first_change(c)["why"] + " See OD-65."),
      _first_change(c)["sources"].append("OD-65")), None),
     ("an unknown invariant", _source("INV-999"), "unknown invariant INV-999"),
@@ -206,6 +210,7 @@ def main() -> int:
         "decision": b.locate("ADR-007#d27", facts),
         "section": b.locate("ADR-007#proposed-direction", facts),
         "row": b.locate("OD-57", facts),
+        "three_digit_row": b.locate("OD-100", facts),
         "test": b.locate("test:test_D3_withdrawal_queue_is_out_of_scope", facts),
         "lip": b.locate("lip:part-8", facts),
     }
@@ -228,6 +233,7 @@ def main() -> int:
     adr9 = (ROOT / facts["adrs"]["ADR-009"]["path"]).read_text(encoding="utf-8")
     report("Decision 31 replaces decision 5" in b.decision_text(adr9, "ADR-009", "5"), "ADR 009's decision 5 pins the note that replaces it")
     report(texts["row"].startswith("| OD-57 |"), "an OD reference pins its row", texts["row"][:80])
+    report(texts["three_digit_row"].startswith("| OD-100 |"), "a three-digit OD reference pins its row", texts["three_digit_row"][:80])
     report(texts["test"].startswith("function test_D3_withdrawal_queue_is_out_of_scope(") and texts["test"].endswith("}"),
            "a test reference pins the test function", texts["test"][-80:])
     report(texts["lip"].startswith("#### Part 8"), "a LIP reference pins its part", texts["lip"][:80])
@@ -259,7 +265,7 @@ def main() -> int:
         r: b.resolve(r, facts) for r in ("ADR-007#d27", "ADR-007#d18", "OD-57", "ADR-007#consequences")}))
     report(chips == ["ADR 007, decisions 18 and 27", "OD-57", "ADR 007: Consequences"], "the decisions of one ADR share a chip", str(chips))
 
-    total = len(CONTENT_CASES) + len(PIN_CASES) + 10 + 6 + 2
+    total = len(CONTENT_CASES) + len(PIN_CASES) + 11 + 6 + 2
     print(f"{total - failures} passed, {failures} failed")
     return 1 if failures else 0
 

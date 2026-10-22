@@ -18,7 +18,7 @@
     "easyTrackExecutor": "0xCd9a550161dabeA93c0f61aE15683B475C7025FE"
   },
   "sdk": {
-    "@zodiaceco/sdk": "2.1.2",
+    "@zodiaceco/sdk": "2.10.0",
     "zodiac-roles-sdk": "4.1.3"
   },
   "modifiers": [

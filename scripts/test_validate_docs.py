@@ -234,6 +234,19 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _copy(root)
+        register = root / "docs/registers/open-decisions.md"
+        register.write_text("\n".join(line for line in register.read_text().splitlines()
+                                      if not line.startswith("| OD-100 |")) + "\n")
+        closed = root / CLOSED
+        text = closed.read_text()
+        if "- id: OD-100\n" in text:
+            text = _without_entry(text, "OD-100")
+        closed.write_text(text + '- id: OD-100\n  question: "A three-digit decision"\n'
+                          '  closed: 2026-10-22\n  note: "Test fixture."\n')
+        checks.append(("a three-digit OD can close", not validator._check_closed(root)))
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _copy(root)
         clean = not validator.generated_issues(root)
         register = root / "docs" / "registers" / "open-decisions.md"
         register.write_text(register.read_text(encoding="utf-8").replace("| OD-01 | Where", "| OD-01 | Whither", 1), encoding="utf-8")

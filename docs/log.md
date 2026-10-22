@@ -2,10 +2,14 @@
 
 ## 2026-10-22
 
+* **Decision**: Propose OD-100 in ADR 013: migrate four Sepolia role keys and use the same scheme in the mainnet design; define migration checks and support three-digit OD references.
 * **Update**: Synchronize testnet/sepolia with main and renumber its open Sepolia questions as OD-95 to OD-99.
+* **Update**: Update Zodiac SDK and API types, declare all Sepolia workspace metadata, and block publication of incompatible shared policy keys.
 * **Decision**: Recorded EM's choices for OD-92 to OD-94. The enabling vote approves the hash of each Safe batch, and anyone executes the batches after it; the registry factories deploy the registries with Voting as admin, and a check before the vote proves every role; the vote keeps the four USDS items, against the agent's recommendation; monitoring warns when few Easy Track motion slots are free, and the budget factory can set several keys in one motion.
 * **Evidence**: Ran the enabling-vote rehearsal again on a fork of block 26249900, after OD-89 to OD-91. All eight tests pass. LDO left the Asset Safe policy and the orders account's relayer approvals, so the largest batch fell to 6,304,514 gas and 60,292 bytes; a vote with the batches inside still needs 37,606,772 gas. The Agent still holds no USDS, the shared payment permission still has 22 params, and one Easy Track motion was open. The rehearsal's open decisions are now OD-92 to OD-94.
 * **Decision**: Recorded EM's choice for OD-91: LDO leaves the launch list, the operator's order lists and the recovery sell list. The emergency role no longer transfers LDO to the Aragon Agent, and the dry run no longer buys LDO.
+* **Evidence**: The deployed Sepolia Constellation did not populate Vaults or Policies in the new workspace. Both lists remain empty; the supported synchronization or import route is still unconfirmed.
+* **Evidence**: Checked the owner-published Sepolia Constellation: Zodiac shows Deployed and Nothing to deploy, the original Nor conditions remain, and the RPC comparison found zero policy differences at block 11970750.
 * **Update**: Fix Sepolia publication success checks and retry isolation; record the provider reply on workspace quotas.
 * **Update**: Add the Sepolia guard and the publication commands for the existing-state Constellation; compare each resolution with the payload before apply.
 * **Decision**: Draft ADR 013 and open OD-95 to OD-99: the permissions that tests on Sepolia need.

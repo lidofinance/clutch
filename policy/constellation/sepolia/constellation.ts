@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { constellation, push } from "@zodiaceco/sdk";
-import { coercePermission, processPermissions, reconstructPermissions } from "zodiac-roles-sdk";
+import { processPermissions, reconstructPermissions } from "zodiac-roles-sdk";
 import { build, buildNodes } from "./compile";
 import { compile } from "../compiler/compile";
 import { key } from "../constellation/lib";
@@ -25,11 +25,9 @@ export function createNodes(manifest: Record<string, any>, workspace: string, ru
   const sep = constellation({ workspace, label: "Clutch Sepolia", chain: 11155111 }, {
     codegen: { users: {}, accounts: { [workspace]: { workspaceId: workspace as `${string}-${string}-${string}-${string}-${string}`, workspaceName: workspace, safes: {}, rolesMods: {}, delays: {} } } },
   });
-  // SDK 2.1.2 types require new-Safe fields even when binding an existing Safe.
-  // The API existing-Safe schema permits address alone. Do not send empty overrides.
-  const asset_safe: any = sep.safe["Clutch Sepolia — Asset"]({ address: manifest.assetSafe } as any);
-  const orders_safe: any = sep.safe["Clutch Sepolia — Orders"]({ address: manifest.ordersSafe } as any);
-  const first_loss_safe: any = sep.safe["Clutch Sepolia — First-loss"]({ address: manifest.firstLossSafe } as any);
+  const asset_safe = sep.safe["Clutch Sepolia — Asset"]({ address: manifest.assetSafe, vault: true });
+  const orders_safe = sep.safe["Clutch Sepolia — Orders"]({ address: manifest.ordersSafe, vault: true });
+  const first_loss_safe = sep.safe["Clutch Sepolia — First-loss"]({ address: manifest.firstLossSafe, vault: true });
   const safes = [asset_safe, orders_safe, first_loss_safe];
   const roles = Object.fromEntries(Object.entries(policyNodes(manifest, runtime)).map(([ref, node]) => {
     const safe = safes.find((item) => item.address!.toLowerCase() === node.avatar.toLowerCase())!;
@@ -39,8 +37,8 @@ export function createNodes(manifest: Record<string, any>, workspace: string, ru
       allowances: Object.fromEntries(Object.entries(node.allowances).map(([name, allowance]: [string, any]) => [name, { ...allowance, key: name }])),
       roles: Object.fromEntries(Object.entries(node.roles).map(([name, role]: [string, any]) => [name, {
         members: role.members as `0x${string}`[],
-        // Materialize callbacks before SDK serialization; JSON drops functions.
-        permissions: role.permissions.map((entry: any) => coercePermission(entry)),
+        policy: `Clutch Sepolia — ${name}`,
+        permissions: role.permissions,
       }])),
     })];
   }));
@@ -84,7 +82,12 @@ export function checkPayload(payload: any, manifest: Record<string, any>, runtim
   }
   if (payload.chain !== 11155111 || payload.specification.some((node: any) => node.chain !== 11155111 || !node.address || "nonce" in node)) throw new Error("Only existing Sepolia accounts may be bound");
   for (const node of payload.specification.filter((item: any) => item.type === "SAFE")) {
-    if (Object.keys(node).some((field) => !["ref", "type", "label", "chain", "address"].includes(field))) throw new Error("Safe configuration overrides refused");
+    if (Object.keys(node).some((field) => !["ref", "type", "label", "chain", "address", "vault"].includes(field))) throw new Error("Safe configuration overrides refused");
+    if (node.vault !== true) throw new Error("Each Safe must be a workspace vault");
+  }
+  for (const node of payload.specification.filter((item: any) => item.type === "ROLES")) for (const [name, role] of Object.entries(node.roles) as [string, any][]) {
+    if (role.key !== name) throw new Error(`${node.ref}.${name}: role key differs`);
+    if (role.policy !== `Clutch Sepolia — ${name}`) throw new Error(`${node.ref}.${name}: policy label differs`);
   }
   const nodes = Object.fromEntries(payload.specification.filter((node: any) => node.type === "ROLES").map((node: any) => [node.ref, resolve(node)]));
   if (Object.values(nodes).some((node: any) => JSON.stringify(node.multisend) !== "[]")) throw new Error("Unexpected transaction unwrappers");
@@ -98,4 +101,25 @@ export function checkPayload(payload: any, manifest: Record<string, any>, runtim
   const wiring = (artifact: typeof candidate) => artifact.modifiers.map(({ ref, address, owner, avatar, target }) => ({ ref, address, owner, avatar, target }));
   if (JSON.stringify(candidate.calls) !== JSON.stringify(expected.calls) || JSON.stringify(wiring(candidate)) !== JSON.stringify(wiring(expected))) throw new Error("Serialized constellation differs from the Sepolia policy");
   return expected;
+}
+
+/** Zodiac requires one policy definition per key and at most one modifier per Safe. */
+export function workspacePolicyIssues(payload: any): string[] {
+  const refs = new Map(payload.specification.map((n: any) => [`$${n.ref}`, n.address]));
+  const seen = new Map<string, { ref: string; avatars: Set<string>; definition: string }>();
+  const issues: string[] = [];
+  for (const node of payload.specification.filter((n: any) => n.type === "ROLES")) for (const [key, role] of Object.entries(node.roles) as [string, any][]) {
+    if (!role?.policy) continue;
+    const avatar = String(refs.get(node.avatar) ?? node.avatar).toLowerCase();
+    const definition = JSON.stringify({ policy: role.policy, description: role.description,
+      members: role.members.map((m: string) => m.toLowerCase()).sort(),
+      targets: role.targets ?? processPermissions(role.permissions).targets,
+    });
+    const previous = seen.get(key);
+    if (previous?.definition !== undefined && previous.definition !== definition) issues.push(`${key}: policy grants differ between ${previous.ref} and ${node.ref}`);
+    if (previous?.avatars.has(avatar)) issues.push(`${key}: two policy modifiers act for the same Safe`);
+    if (previous) previous.avatars.add(avatar);
+    else seen.set(key, { ref: node.ref, avatars: new Set([avatar]), definition });
+  }
+  return issues;
 }

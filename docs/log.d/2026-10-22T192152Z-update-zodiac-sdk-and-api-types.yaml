@@ -1,0 +1,3 @@
+date: '2026-10-22'
+kind: Update
+text: Update Zodiac SDK and API types, declare all Sepolia workspace metadata, and block publication of incompatible shared policy keys.

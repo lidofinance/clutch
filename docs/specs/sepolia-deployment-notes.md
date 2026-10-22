@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-22T15:44:18Z
+  at: 2026-10-22T19:20:48Z
 verified: []
 sources:
   - id: s1
@@ -82,6 +82,12 @@ sources:
   - id: s24
     resource: urn:clutch:evidence:2026-10-22:zodiac-quota-reply
     title: Reply relayed by the stand owner — quotas are not enforced immediately and tests may exceed the displayed limits
+  - id: s25
+    resource: urn:clutch:evidence:2026-10-22:sepolia-constellation-deployed
+    title: Owner publication from dacf262, Deployed and Nothing to deploy in Zodiac, original Nor conditions and zero RPC differences at block 11970750
+  - id: s26
+    resource: /research/sepolia-constellation-ui-2026-10-22.md
+    title: UI registration review — SDK 2.10.0, all workspace metadata and two incompatible policy groups
 ---
 
 # Sepolia deployment findings
@@ -89,6 +95,34 @@ sources:
 The public deployment completed with 39 successful transactions at blocks `11955109–11955147`.
 The readback at block `11955151` passed 415 checks [s2].
 Use [the deployment plan](sepolia-stand-plan.md) for the next actions.
+
+## Constellation check on 2026-10-22
+
+The stand owner published the existing-state declaration from commit `dacf262` to workspace `25091c1a-4f37-48b1-8d35-f287550481a8`.
+The saved resolve and apply responses have HTTP status `200`; the resolution matches the payload.
+[Clutch Sepolia](https://app.zodiac.eco/workspace/25091c1a-4f37-48b1-8d35-f287550481a8/constellations/c0cc7061-5e89-4024-bf1b-2a3531f2f311) shows `Deployed`.
+Its deployment page says `Nothing to deploy` and `All updates have been applied onchain` [s25].
+
+The read-only command `just --justfile sepolia.just constellation-diff` checked 82 events at block `11970750` and found zero policy differences.
+The prepared payload matches the current state.
+This check did not inspect a new transaction receipt; the empty deployment does not establish new on-chain execution.
+Evidence: `cache/sepolia/constellation/deployed-check-2026-10-22/` [s25].
+
+The governance view still shows `Unsupported Condition` for `Nor`.
+Both columns display the original opcode `3` tree with the nine protected addresses.
+Use the resolved specification and RPC comparison to check those conditions [s25].
+
+The same workspace shows `No vaults yet` under Vaults and `No policies defined` under Policies.
+The Constellation graph contains the accounts and roles, but those two lists remain empty.
+The earlier completion check covered the Constellation and RPC state; it missed these lists.
+The declaration omitted `vault: true` on the Safes and `policy` on the roles.
+SDK 2.1.2 also dropped policy labels.
+The local dependencies now use SDK 2.10.0 and API types 1.13.0.
+The correction adds all three vault flags and seven policy labels without changing the original keys.
+Preparation records both policy conflicts and returns status `1`; the publication CLI refuses them before a hosted request.
+Promoting all seven roles still conflicts with Zodiac's rule that one policy key has the same grants on each modifier: `operator` and `emergency` differ between Asset and Orders.
+The research note records the source reads, the offline reproduction and the remaining provider requirement [s26].
+Evidence: `vaults-empty.*` and `policies-empty.*` in the same evidence directory [s25].
 
 ## Issues found during preparation
 
@@ -125,7 +159,7 @@ Use [the deployment plan](sepolia-stand-plan.md) for the next actions.
 | Importing all three Asset roles into the Zodiac workspace returned `Unexpected Server Error`. A separate `operator` import succeeded; `governance` still failed. | Import supported roles separately and check the saved list after each failure. Keep the governance import open. | A failed import does not prove that no records were saved. Screenshots: `cache/sepolia/zodiac-policy-import-error.png` and `cache/sepolia/zodiac-governance-import-error.png` [s8]. |
 | Asset and Orders both use the keys `operator` and `emergency`. Zodiac permits one policy per key per chain in a workspace. | Import Orders `operator` as `orders-operator` and Asset `emergency` as `asset-emergency`, as drafts only under the stand owner's instruction. Add a migration warning to both descriptions. Do not apply them. | The next deployment would move the original role to the new key. Screenshots: `cache/sepolia/zodiac-orders-operator-draft.png` and `cache/sepolia/zodiac-asset-emergency-draft.png` [s8][s9]. |
 | Manual workspace imports did not test the Constellation publication path. | Prepare a local Constellation with the existing addresses and original role keys. The stand owner later published a draft under an explicit exception for the review branch. | The saved draft contains three Safes, four modifiers and seven roles. Its governance condition encoding differs from the chain; publication does not apply that change [s12][s17]. |
-| The pinned SDK drops callback-valued conditions when serializing raw Clutch permission entries to JSON. | Materialize each permission with `coercePermission`, capture the real SDK payload locally and recompile the serialized entries. | Recipient and budget conditions must survive serialization. The prepared payload preserves the policy's 63 configuration calls with observed allowance values [s12]. |
+| SDK 2.1.2 dropped callback-valued conditions when serializing raw Clutch permission entries to JSON. | Materialize each permission with `coercePermission`, capture the real SDK payload locally and recompile the serialized entries. | Recipient and budget conditions must survive serialization. SDK 2.10.0 settles these conditions itself; the regression checks their serialized recipient and allowance. The prepared payload preserves the policy's 63 configuration calls with observed allowance values [s12][s26]. |
 | The hosted API refused the Constellation push with `400 The constellation is not valid`. It refused five governance scopes containing `Nor` opcode `3` in the `permissions` format. | Keep the original policy. The local Sepolia export describes governance through legacy `targets` and empty `annotations`; readback reconstructs its permissions before checking all configuration calls [s18][s21]. | Replacing `Nor` with `And` of `Or(LessThan, GreaterThan)` pairs passed the SDK check but introduced five on-chain differences [s15][s16]. That shared-policy draft is outside this change. |
 | The permissions parser's refusal of `Nor` does not cover all API formats. | Test the documented legacy role representation with `targets` and `annotations: []`. The resolver returned `200` with the original `Nor` trees. | This result proves resolver acceptance of that representation. It does not prove publication or a zero transaction diff. Responses: `cache/sepolia/constellation/hosted-resolve.json` and `cache/sepolia/constellation/hosted-resolve-targets.json` [s18]. |
 | The pinned SDK's generic `push` emits roles through `permissions` only. | Use the adapted local payload for provider review; confirm the publication workflow before publishing it. | Named SDK nodes still use the SDK's format. The local adapter does not change the hosted CLI or its owner guard [s18][s21]. |
@@ -157,7 +191,7 @@ All 12 contracts now have exact source matches. Results: `cache/sepolia/ethersca
 - [ ] Reconcile workspace keys with the deployment configuration. The two draft aliases remain unapplied. Check the final diff for unintended role removal or migration [s8][s9].
 - [x] Prepare and check the local existing-account Constellation. The RPC comparison found zero differences across four modifiers and seven roles at block `11956623` [s12].
 - [x] Confirm that the stand owner's published Constellation is visible in the workspace. The draft contains all seven roles on the existing accounts [s17].
-- [ ] Review publication of the existing-state payload with original `Nor` conditions. The previous five-call condition-replacement deployment is cancelled; confirm the new hosted diff before any execution [s18][s20][s21].
+- [x] Review publication of the existing-state payload with original `Nor` conditions. The new workspace shows `Deployed` and `Nothing to deploy`; the saved resolution matches the payload, and the RPC comparison found zero differences at block `11970750` [s25].
 - [ ] Show allowance amounts and remaining budgets in the operational UI. Compare them with RPC values at the same block. The imported condition view currently shows the allowance key [s7][s8].
 - [ ] Rehearse configuration and interrupted-run recovery on the target network. Include a transaction mined before its receipt reaches the saved run. Confirm canonical receipts and final state before funding [s5][s6].
 - [ ] Repeat dependency-code and execution-rule checks for the target network. Preserve the exact compiler inputs and verify every deployed instance [s1][s3][s5].

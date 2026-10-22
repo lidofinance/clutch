@@ -273,7 +273,7 @@
         "ADR-002#d1": "fbef8c1e24375017",
         "ADR-002#d7": "04f2137680376c15",
         "OD-63": "182b61c7ee7d26f8",
-        "doc:docs/registers/open-decisions.md#open-decisions": "0566fdf4bcff6eb5"
+        "doc:docs/registers/open-decisions.md#open-decisions": "7e8c5aab5e381695"
       }
     },
     "actor:emergency-safe": {
@@ -2634,7 +2634,7 @@
         "doc:docs/research/request-for-solution-2026-10-07.md#assets-and-permissions": "9d02516e530d3092",
         "doc:docs/specs/control-matrix.md#the-matrix": "4c61bdfc159ab64d",
         "doc:docs/specs/lip-draft.md#test-cases": "1ad86225d7d12e31",
-        "doc:policy/constellation/artifacts/fork-25946643.json": "eace4de55a6b94ea"
+        "doc:policy/constellation/artifacts/fork-25946643.json": "f5c908b3c6cbae4e"
       }
     },
     "rfp:beyond": {
@@ -2693,7 +2693,7 @@
         "OD-49": "5fe04b5f6cf1c1b1",
         "doc:ROADMAP.md#standing-gates": "580bf3c6dc99c434",
         "doc:docs/research/request-for-solution-2026-10-07.md#emergency-response": "4f35b36221cb4c79",
-        "doc:policy/constellation/artifacts/fork-25946643.json": "eace4de55a6b94ea",
+        "doc:policy/constellation/artifacts/fork-25946643.json": "f5c908b3c6cbae4e",
         "lip:part-6": "6da06f125682b20e",
         "runbook:Return assets to the Agent": "f1ee72e7005deadf",
         "runbook:Switch the operator off": "6f80a90fd3af042e"
@@ -3367,7 +3367,7 @@
     "term:open-decision": {
       "content": "c96ba21de127cccb",
       "sources": {
-        "doc:docs/registers/open-decisions.md#open-decisions": "0566fdf4bcff6eb5"
+        "doc:docs/registers/open-decisions.md#open-decisions": "7e8c5aab5e381695"
       }
     },
     "term:orders-account": {

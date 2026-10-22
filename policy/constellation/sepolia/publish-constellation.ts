@@ -5,7 +5,7 @@ import path from "node:path";
 import { reconstructPermissions } from "zodiac-roles-sdk";
 import { compile } from "../compiler/compile";
 import { build } from "./compile";
-import { checkPayload, type RuntimeAllowance } from "./constellation";
+import { checkPayload, workspacePolicyIssues, type RuntimeAllowance } from "./constellation";
 import { diffPolicy } from "./diff";
 import { readOnlyRpc } from "./prepare-constellation";
 
@@ -177,6 +177,11 @@ async function snapshot(manifest: Record<string, any>): Promise<Snapshot> {
 
 if (import.meta.main) {
   try {
+    if (process.argv[2] === "apply") {
+      const payload = JSON.parse(readFileSync(path.join(ROOT, "cache/sepolia/constellation/payload.json"), "utf8"));
+      const issues = workspacePolicyIssues(payload);
+      if (issues.length) throw new Error(`Workspace policies cannot be published: ${issues.join("; ")}`);
+    }
     process.exitCode = await run(process.argv[2] ?? "", {
       env: process.env, git: gitState, snapshot, fetch,
       input: path.join(ROOT, "cache/sepolia/constellation"),

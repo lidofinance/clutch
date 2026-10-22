@@ -2,7 +2,7 @@
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { build } from "./compile";
-import { capturePayload, checkPayload, createNodes } from "./constellation";
+import { capturePayload, checkPayload, createNodes, workspacePolicyIssues } from "./constellation";
 import { diffPolicy } from "./diff";
 
 const ROOT = path.resolve(import.meta.dir, "../../..");
@@ -45,9 +45,11 @@ if (import.meta.main) {
     const artifact = build(manifest);
     const report = await diffPolicy(readOnlyRpc(endpoint), manifest, artifact);
     let preparedPayloadMatchesCurrent = true;
+    let policyIssues: string[] = [];
     if (command !== "--diff") {
       const captured = await capturePayload(createNodes(manifest, command, report.allowances));
       checkPayload(captured.payload, manifest, report.allowances);
+      policyIssues = workspacePolicyIssues(captured.payload);
       save("payload.json", captured.payload);
       save("context.json", { workspace: command, manifest, allowances: report.allowances, block: report.block, blockHash: report.blockHash });
       console.log("Prepared 3 existing Safes and 4 existing Roles modifiers with 7 original roles. No deployment nonces or Safe overrides.");
@@ -56,16 +58,18 @@ if (import.meta.main) {
       try {
         const payload = JSON.parse(readFileSync(path.join(OUTPUT, "payload.json"), "utf8"));
         checkPayload(payload, manifest, report.allowances);
+        policyIssues = workspacePolicyIssues(payload);
       } catch {
         preparedPayloadMatchesCurrent = false;
         console.error("Prepared payload is missing or differs from the current policy or allowance values. Run constellation <workspace UUID> again.");
       }
     }
-    save("diff.json", { ...report, preparedPayloadMatchesCurrent });
+    save("diff.json", { ...report, preparedPayloadMatchesCurrent, workspacePolicyIssues: policyIssues });
     console.log(`Sepolia block ${report.block} (${report.blockHash}): ${report.differences.length} policy differences; ${report.history.events} events checked.`);
     for (const difference of report.differences) console.log(`Difference: ${difference.path}`);
+    for (const issue of policyIssues) console.error(`Workspace policy issue: ${issue}`);
     console.log("Report: cache/sepolia/constellation/diff.json. No hosted Zodiac calls or transactions.");
-    process.exitCode = report.matches && preparedPayloadMatchesCurrent ? 0 : 1;
+    process.exitCode = report.matches && preparedPayloadMatchesCurrent && !policyIssues.length ? 0 : 1;
   } catch (error) {
     console.error(error instanceof Error ? error.message : "Constellation preparation failed");
     process.exitCode = 1;

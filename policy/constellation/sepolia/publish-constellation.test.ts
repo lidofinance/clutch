@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { afterEach, beforeEach, expect, test } from "bun:test";
 import { createHash } from "node:crypto";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { getAddress } from "ethers";
@@ -33,7 +33,7 @@ function resolvedFrom(source: any) {
   const safeModules: Record<string, string[]> = {
     asset_safe: [manifest.safetyModifier, manifest.operatorModifier], orders_safe: [manifest.ordersModifier], first_loss_safe: [manifest.firstLossModifier],
   };
-  return structuredClone(source.specification).map((n: any) => n.type === "SAFE"
+  return structuredClone(source.specification).map(({ vault: _vault, ...n }: any) => n.type === "SAFE"
     ? { ...n, prefixedAddress: `sep:${n.address}`, threshold: 1, owners: [lower(manifest.voting)], modules: safeModules[n.ref].map(lower) }
     : {
       ...n, prefixedAddress: `sep:${n.address}`, owner: ref(n.owner), avatar: ref(n.avatar), target: ref(n.target), modules: [], version: 2,
@@ -68,6 +68,13 @@ test("the Sepolia guard refuses each missing condition of ADR 013", () => {
 
 test("a resolution that equals the payload and the stand has no differences", () => {
   expect(resolvedDifferences(resolvedFrom(payload), payload, manifest, allowances)).toEqual([]);
+});
+
+test("on-chain resolution need not echo the off-chain workspace vault flag", () => {
+  const nodes = resolvedFrom(payload);
+  expect(payload.specification.filter((n: any) => n.type === "SAFE").every((n: any) => n.vault === true)).toBe(true);
+  expect(nodes.filter((n: any) => n.type === "SAFE").every((n: any) => !("vault" in n))).toBe(true);
+  expect(resolvedDifferences(nodes, payload, manifest, allowances)).toEqual([]);
 });
 
 test("a resolution that lists roles in another order, as on 2026-10-20, has no differences", () => {
@@ -118,10 +125,31 @@ function deps(replies: Record<string, Reply>, change: Partial<Deps> = {}): Deps 
   };
 }
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
-// ApplyConstellationResult in @zodiaceco/api-types 1.9.0 requires id and url.
+// ApplyConstellationResult requires id and url.
 const published = { id: "33333333-3333-4333-8333-333333333333", url: "https://app.zodiac.eco/workspace/x" };
 const records = () => readdirSync(path.join(dir, "hosted")).sort();
 const saved = (prefix: string) => JSON.parse(readFileSync(path.join(dir, "hosted", records().find((f) => f.startsWith(prefix))!), "utf8"));
+
+test("the publication CLI stops conflicting policies before credentials, RPC or a hosted call", () => {
+  const entry = path.join(dir, "policy/constellation/sepolia/publish-constellation.ts");
+  mkdirSync(path.dirname(entry), { recursive: true });
+  symlinkSync(path.resolve(import.meta.dir, "../node_modules"), path.join(dir, "policy/constellation/node_modules"), "dir");
+  const source = readFileSync(path.join(import.meta.dir, "publish-constellation.ts"), "utf8")
+    .replace(/from "(\.[^\"]+)"/g, (_, module: string) => `from ${JSON.stringify(path.resolve(import.meta.dir, module))}`);
+  writeFileSync(entry, source);
+  const output = path.join(dir, "cache/sepolia/constellation");
+  mkdirSync(output, { recursive: true });
+  writeFileSync(path.join(output, "payload.json"), JSON.stringify(payload));
+  const preload = path.join(dir, "offline.ts");
+  writeFileSync(preload, 'globalThis.fetch = async () => { throw new Error("Network forbidden"); };');
+  const result = Bun.spawnSync([process.execPath, "--no-env-file", "--preload", preload, entry, "apply"], { env: {}, stdout: "pipe", stderr: "pipe" });
+  expect(result.exitCode).toBe(1);
+  expect(result.stderr.toString()).toContain("Workspace policies cannot be published");
+  expect(result.stderr.toString()).toContain("operator: policy grants differ");
+  expect(result.stderr.toString()).toContain("emergency: policy grants differ");
+  expect(result.stderr.toString()).not.toContain("Network forbidden");
+  expect(existsSync(path.join(output, "hosted"))).toBe(false);
+});
 
 test("resolve sends the exact payload to the SDK endpoint and saves the response without the key", async () => {
   expect(await run("resolve", deps({ resolve: json({ result: resolvedFrom(payload) }) }))).toBe(0);

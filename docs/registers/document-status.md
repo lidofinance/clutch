@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-22T19:50:00Z
+  at: 2026-10-22T19:53:33Z
 verified: []
 ---
 
@@ -54,6 +54,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/request-for-solution-2026-10-07.md](/research/request-for-solution-2026-10-07.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-10-19 | none |
+| [research/sepolia-constellation-ui-2026-10-22.md](/research/sepolia-constellation-ui-2026-10-22.md) | Research Note | slop |  | 2026-10-22 | none |
 | [research/simplification-2026-10-08.md](/research/simplification-2026-10-08.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/single-vote-review-2026-10-14.md](/research/single-vote-review-2026-10-14.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/stonks-instances-2026-10-02.md](/research/stonks-instances-2026-10-02.md) | Research Note | slop |  | 2026-10-19 | none |
@@ -61,7 +62,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-10-19 | none |
 | [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-10-22 | none |
 | [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-10-22 | none |
-| [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-10-21 | none |
+| [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-10-22 | none |
 | [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-10-22 | none |
 | [specs/sepolia-deployment-notes.md](/specs/sepolia-deployment-notes.md) | Research Note | slop |  | 2026-10-22 | none |
 | [specs/sepolia-stand-plan.md](/specs/sepolia-stand-plan.md) | Guide | slop |  | 2026-10-22 | none |
