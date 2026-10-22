@@ -7,18 +7,13 @@ status: stable
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-22T19:53:33Z
+  at: 2026-10-22T22:34:04Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
     title: Decision log — EM's inputs
-  - id: s2
-    resource: /research/sepolia-constellation-ui-2026-10-22.md
-    title: Zodiac policy identity and the two conflicting pairs of grants
-  - id: s3
-    resource: /adr/013-tests-on-sepolia.md
-    title: Proposed Sepolia migration and mainnet role-key dependencies
+
 ---
 
 # Open decisions
@@ -30,10 +25,7 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | OD-65 | Who holds the emergency Safe's fifth seat? The fifth signer is a member of neither the committee nor the Emergency Brakes multisig (OD-58), and a DAO Snapshot appoints them. | [ADR 005](/adr/005-account-graph-and-roles.md) | EM said on 2026-10-13 "yup, tentatively tho" to a member of the Tech team. Accept that as a criterion, not a name: a Tech-team member on neither body, whose key and seed are generated apart from the Emergency Brakes members' setup, who signs a written statement of independence, keeps on-call duty and takes part in the timed drill. Review the seat at the first rotation, because the only quorum without the committee is then all from the engineering organisation | EM; a DAO Snapshot appoints the signer |
 | OD-95 | May the stand owner make hosted calls to the Sepolia workspace and send public Sepolia transactions from `testnet/sepolia`? A: no; ADR 004 decision 16 stays, so pull request #44 merges first and the owner team pushes from `main`. B: yes, from a commit that is on GitHub with no local changes, through a Sepolia guard separate from the owner guard, with an API key for the Sepolia workspace in a git-ignored `.env`. C: a one-time exception for each publication, recorded in the decision log. | [ADR 013](/adr/013-tests-on-sepolia.md) | B. Reviewers can see the code that runs, the guard keeps CI and local changes out, and the production rule does not change. Before the first call, confirm whether the provider can limit a key to one workspace. | EM |
 | OD-96 | How does the existing-state payload reach the Sepolia workspace? A: the SDK's `push`. B: a committed script behind the Sepolia guard: it checks the payload hash and a fresh RPC comparison, calls resolve, compares the resolved specification with the payload, calls apply once and saves each status and body. C: a manual API call. | [ADR 013](/adr/013-tests-on-sepolia.md) | B. The API refused the governance `Nor` conditions in the format that `push` sends (A). A manual call leaves no reviewable record (C). | EM |
-| OD-97 | May the stand owner execute a transaction that the Zodiac app builds for the Sepolia stand, through Deploy or Apply? A: no, drafts only. B: yes, when Clutch's compiler produces the same calls from the same commit and the test Voting contract executes them. C: use a locally compiled package through test Voting under the same review conditions. | [ADR 013](/adr/013-tests-on-sepolia.md) | A until the migration proposed in OD-100 has a reviewed package and fork evidence. Choose B if Zodiac builds that package, or C for local execution. Both routes need the owner's authorisation of the exact calls [s3]. | EM |
-| OD-98 | May the stand owner send public Sepolia transactions on the existing stand from `testnet/sepolia`: funding, the CoW and First-loss drills, recovery and the stop of the run? A: yes, only through the `sepolia.just` recipes and their guards, with the keystore; a second stand needs a new decision. B: only after pull request #44 merges. C: no more public transactions. | [ADR 013](/adr/013-tests-on-sepolia.md) | A. The stand uses test governance and test assets, and the guards keep CI and raw private keys out. | EM |
 | OD-99 | Which records may the stand owner make by hand in the Zodiac app? A: none. B: vault imports of the three existing Safes, the checked address-book entries, and removal of the earlier workspace's draft aliases and cancelled proposals; no role or permission edits in the app. C: any record, policy drafts included. | [ADR 013](/adr/013-tests-on-sepolia.md) | B. The SDK has no address-book endpoint, and a policy edit in the app is drift (ADR 004 decision 11). | EM |
-| OD-100 | Should Clutch replace Asset `operator` and `emergency` with `asset-operator` and `asset-emergency`, and Orders `operator` and `emergency` with `orders-operator` and `orders-emergency`? A: retain the shared keys and defer separate Zodiac policies. B: adopt the four keys for both networks, migrate only the existing Sepolia stand after package review and fork tests, and complete the mainnet design updates before its initial deployment. C: migrate Sepolia alone and decide mainnet keys later. | [ADR 013](/adr/013-tests-on-sepolia.md#role-keys-for-sepolia-and-mainnet) | B. Separate keys fit Zodiac's policy identity and keep test and production naming aligned [s2]. Preserve holders, action permissions and allowance state; update governance, emergency revokes, invariants, compiler checks and execution clients together. Execution needs a reviewed package and explicit human authorisation. This proposal authorises no mainnet transaction [s3]. | EM |
 
 ## Closed
 
@@ -136,5 +128,8 @@ Generated from [closed-decisions.yaml](closed-decisions.yaml). EM's words are in
 | OD-92 | How does the enabling vote apply the Safe batches and make Voting the funding registries' admin? | 2026-10-22 | [OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit](decision-log.md#2026-10-22--od-92-to-od-94-decided-the-votes-batches-the-registries-the-usds-items-and-the-motion-limit); [ADR 005](/adr/005-account-graph-and-roles.md#decision), decision 32; [ADR 008](/adr/008-funding-through-existing-payments.md#decision), decision 35; [research note](/research/enabling-vote-rehearsal-2026-10-15.md) | In force. It refines OD-06 and OD-73. |
 | OD-93 | Does the enabling vote keep the four USDS items? | 2026-10-22 | [OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit](decision-log.md#2026-10-22--od-92-to-od-94-decided-the-votes-batches-the-registries-the-usds-items-and-the-motion-limit); [ADR 008](/adr/008-funding-through-existing-payments.md#decision), decision 36 | In force. It refines OD-11 and OD-24. |
 | OD-94 | How does Clutch keep its motions moving when Easy Track's shared limit of open motions is near? | 2026-10-22 | [OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit](decision-log.md#2026-10-22--od-92-to-od-94-decided-the-votes-batches-the-registries-the-usds-items-and-the-motion-limit); [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md#decision), decision 45 | In force. It refines OD-69. |
+| OD-97 | May the stand owner execute a transaction that the Zodiac app builds for the Sepolia stand, through Deploy or Apply? | 2026-10-22 | [OD-97, OD-98 and OD-100: the Sepolia role-key migration](decision-log.md#2026-10-22--od-97-od-98-and-od-100-the-sepolia-role-key-migration); [ADR 013](/adr/013-tests-on-sepolia.md#decision) | In force. |
+| OD-98 | May the stand owner send public Sepolia transactions on the existing stand from testnet/sepolia? | 2026-10-22 | [OD-97, OD-98 and OD-100: the Sepolia role-key migration](decision-log.md#2026-10-22--od-97-od-98-and-od-100-the-sepolia-role-key-migration); [ADR 013](/adr/013-tests-on-sepolia.md#decision) | In force. |
+| OD-100 | Should Clutch use four account-specific operator and emergency role keys for Sepolia and mainnet? | 2026-10-22 | [OD-97, OD-98 and OD-100: the Sepolia role-key migration](decision-log.md#2026-10-22--od-97-od-98-and-od-100-the-sepolia-role-key-migration); [ADR 013](/adr/013-tests-on-sepolia.md#decision) | In force. |
 
 <!-- end of generated block -->

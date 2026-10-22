@@ -45,6 +45,34 @@ constellation-resolve:
 constellation-publish:
     bun policy/constellation/sepolia/publish-constellation.ts apply
 
+# OD-100: preparation and verification are read-only; publication and execution are human-only.
+migration-prepare workspace:
+    bun policy/constellation/sepolia/prepare-migration.ts prepare {{quote(workspace)}}
+
+migration-check:
+    bun policy/constellation/sepolia/prepare-migration.ts check
+
+migration-rehearse: migration-check
+    SEPOLIA_MIGRATION_ARTIFACT=cache/sepolia/role-key-migration/package.json forge test --match-contract SepoliaRoleMigrationTest --hardfork amsterdam --threads 1 -vv
+    python3 scripts/sepolia_migration_rehearse.py
+
+migration-resolve:
+    bun policy/constellation/sepolia/publish-constellation.ts resolve --migration
+
+migration-publish:
+    bun policy/constellation/sepolia/publish-constellation.ts apply --migration
+
+migration-apply: _guard migration-check
+    python3 scripts/sepolia_receipts.py fresh broadcast/MigrateRolesSepolia.s.sol/11155111/run-latest.json
+    forge script script/sepolia/MigrateRolesSepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --broadcast --slow --gas-estimate-multiplier 200
+
+migration-resume: _guard
+    python3 scripts/sepolia_receipts.py resume broadcast/MigrateRolesSepolia.s.sol/11155111/run-latest.json
+    forge script script/sepolia/MigrateRolesSepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --resume --broadcast --slow
+
+migration-verify transaction:
+    bun policy/constellation/sepolia/prepare-migration.ts verify {{quote(transaction)}}
+
 apply: _guard
     python3 scripts/sepolia_receipts.py fresh broadcast/ApplySepolia.s.sol/11155111/run-latest.json
     just --justfile sepolia.just compile

@@ -1,0 +1,3 @@
+date: '2026-10-22'
+kind: Decision
+text: 'Record OD-100 B, OD-97 C and OD-98 A: four account-specific keys for both networks, local Sepolia execution through test Voting and guarded public stand transactions.'

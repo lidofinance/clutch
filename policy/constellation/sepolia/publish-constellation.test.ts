@@ -10,6 +10,7 @@ import { capturePayload, createNodes } from "./constellation";
 import { resolvedDifferences, run, sepoliaRefusals, type Deps, type Git } from "./publish-constellation";
 import { key } from "../constellation/lib";
 import network from "./network.json";
+import { captureMigration, migrationCalls, migrationManifest, migrationTransactions, MIGRATION_BATCH_EXECUTOR, normalizedMigrationPayload, payloadHash } from "./role-migration";
 
 const workspace = "11111111-1111-4111-8111-111111111111";
 const names = ["assetSafe", "ordersSafe", "firstLossSafe", "operatorSafe", "emergencySafe", "operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier", "easyTrackExecutor", "agent", "usdQueue", "ethQueue", "usdShare", "ethShare", "voting"];
@@ -174,6 +175,45 @@ test("apply runs only after a matching resolution, once per payload", async () =
   expect(calls.filter((c) => c.url.endsWith("/apply"))).toHaveLength(1);
 });
 
+test("migration publication checks the legacy source and resolves the declared new roles and deletions", async () => {
+  const migrationPayload = (await captureMigration(manifest, workspace, allowances)).payload;
+  const pkg = {
+    format: "clutch.sepolia-role-migration/1", workspace, block: 11969893, blockHash: "0x" + "ab".repeat(32),
+    batchExecutor: MIGRATION_BATCH_EXECUTOR, sourceManifest: manifest, manifest: migrationManifest(manifest), allowances,
+    calls: migrationCalls(manifest), transactions: migrationTransactions(manifest),
+    payload: migrationPayload, payloadSha256: payloadHash(migrationPayload),
+  };
+  writeFileSync(path.join(dir, "payload.json"), JSON.stringify(migrationPayload, null, 2) + "\n");
+  writeFileSync(path.join(dir, "context.json"), JSON.stringify({ workspace, manifest, migration: true, payloadSha256: pkg.payloadSha256 }));
+  writeFileSync(path.join(dir, "package.json"), JSON.stringify(pkg));
+  const resolved = resolvedFrom(normalizedMigrationPayload(migrationPayload, manifest, allowances));
+  let checkedSource = false;
+  const dependencies = deps({ resolve: json({ result: resolved }), apply: json(published) }, {
+    snapshot: async (source, migration) => {
+      expect(source).toEqual(manifest);
+      expect(migration.payloadSha256).toBe(pkg.payloadSha256);
+      checkedSource = true;
+      return { block: 11969893, blockHash: pkg.blockHash, allowances };
+    },
+  });
+  expect(await run("apply", dependencies)).toBe(0);
+  expect(checkedSource).toBe(true);
+  expect(JSON.parse(calls[1].init.body)).toEqual(migrationPayload);
+  expect(calls.map((c) => c.url.split("/").pop())).toEqual(["resolve", "apply"]);
+  const corrupted = structuredClone(resolved);
+  const role = corrupted.find((n: any) => n.ref === "operator_modifier").roles.find((r: any) => r.key === key("asset-operator"));
+  role.key = key("operator");
+  calls = [];
+  expect(await run("resolve", deps({ resolve: json({ result: corrupted }) }))).toBe(1);
+  expect(calls).toHaveLength(1);
+  const context = JSON.parse(readFileSync(path.join(dir, "context.json"), "utf8"));
+  context.payloadSha256 = "00".repeat(32);
+  writeFileSync(path.join(dir, "context.json"), JSON.stringify(context));
+  calls = [];
+  await expect(run("apply", dependencies)).rejects.toThrow("context or payload differs");
+  expect(calls).toHaveLength(0);
+});
+
 test("two concurrent applies send one apply", async () => {
   const replies = { resolve: json({ result: resolvedFrom(payload) }), apply: json(published) };
   const results = await Promise.allSettled([run("apply", deps(replies)), run("apply", deps(replies))]);
@@ -222,7 +262,7 @@ test.each([
 
 test("a timeout while reading an HTTP 200 apply body fails and keeps its attempt", async () => {
   const response = json(published);
-  response.text = async () => { throw new DOMException("The body timed out.", "TimeoutError"); };
+  Object.defineProperty(response, "text", { value: async () => { throw new DOMException("The body timed out.", "TimeoutError"); } });
   const replies = { resolve: json({ result: resolvedFrom(payload) }), apply: async () => response };
   expect(await run("apply", deps(replies))).toBe(1);
   expect(saved("apply-2")).toMatchObject({ status: 200, error: "TimeoutError" });

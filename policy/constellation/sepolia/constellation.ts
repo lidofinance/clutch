@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { constellation, push } from "@zodiaceco/sdk";
 import { processPermissions, reconstructPermissions } from "zodiac-roles-sdk";
-import { build, buildNodes } from "./compile";
+import { build, buildNodes, ROLE_MIGRATION } from "./compile";
 import { compile } from "../compiler/compile";
 import { key } from "../constellation/lib";
 
@@ -19,9 +19,10 @@ function policyNodes(manifest: Record<string, any>, runtime?: RuntimeAllowance[]
 }
 
 /** Bind existing accounts. Safe configuration stays outside this declaration. */
-export function createNodes(manifest: Record<string, any>, workspace: string, runtime?: RuntimeAllowance[]): Record<string, any> {
+export function createNodes(manifest: Record<string, any>, workspace: string, runtime?: RuntimeAllowance[], migration = false): Record<string, any> {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspace)) throw new Error("A Zodiac workspace UUID is required");
   build(manifest);
+  if (migration && manifest.roleKeyScheme !== "account") throw new Error("Migration requires account-specific keys");
   const sep = constellation({ workspace, label: "Clutch Sepolia", chain: 11155111 }, {
     codegen: { users: {}, accounts: { [workspace]: { workspaceId: workspace as `${string}-${string}-${string}-${string}-${string}`, workspaceName: workspace, safes: {}, rolesMods: {}, delays: {} } } },
   });
@@ -31,15 +32,16 @@ export function createNodes(manifest: Record<string, any>, workspace: string, ru
   const safes = [asset_safe, orders_safe, first_loss_safe];
   const roles = Object.fromEntries(Object.entries(policyNodes(manifest, runtime)).map(([ref, node]) => {
     const safe = safes.find((item) => item.address!.toLowerCase() === node.avatar.toLowerCase())!;
+    const { allowances, ...binding } = node;
     return [ref, sep.roles[`Clutch Sepolia — ${ref}`]({
-      ...node, address: node.address as `0x${string}`, owner: safe, avatar: safe, target: safe, multisend: [],
+      ...binding, address: node.address as `0x${string}`, owner: safe, avatar: safe, target: safe, multisend: [],
       // The API requires each allowance to repeat its record key; the SDK does not add it.
-      allowances: Object.fromEntries(Object.entries(node.allowances).map(([name, allowance]: [string, any]) => [name, { ...allowance, key: name }])),
-      roles: Object.fromEntries(Object.entries(node.roles).map(([name, role]: [string, any]) => [name, {
+      ...(!migration && { allowances: Object.fromEntries(Object.entries(allowances).map(([name, allowance]: [string, any]) => [name, { ...allowance, key: name }])) }),
+      roles: { ...Object.fromEntries(Object.entries(node.roles).map(([name, role]: [string, any]) => [name, {
         members: role.members as `0x${string}`[],
         policy: `Clutch Sepolia — ${name}`,
         permissions: role.permissions,
-      }])),
+      }])), ...(migration && Object.fromEntries(ROLE_MIGRATION.filter(([modifier]) => modifier === ref).map(([, old]) => [old, null]))) },
     })];
   }));
   return { asset_safe, orders_safe, first_loss_safe, ...roles };

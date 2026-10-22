@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Decision**: Record OD-100 B, OD-97 C and OD-98 A: four account-specific keys for both networks, local Sepolia execution through test Voting and guarded public stand transactions.
+* **Update**: Prepare the four-key Sepolia migration, two verified Safe batches and an explicit-deletion Constellation draft; retain public execution and mainnet changes for human decisions.
 * **Decision**: Propose OD-100 in ADR 013: migrate four Sepolia role keys and use the same scheme in the mainnet design; define migration checks and support three-digit OD references.
 * **Update**: Synchronize testnet/sepolia with main and renumber its open Sepolia questions as OD-95 to OD-99.
 * **Update**: Update Zodiac SDK and API types, declare all Sepolia workspace metadata, and block publication of incompatible shared policy keys.

@@ -10,10 +10,23 @@ const UNSIGN = `unsignOrder(${ORDER})`;
 const TWAP_TYPES = ["address", "address", "address", "uint256", "uint256", "uint256", "uint256", "uint256", "uint256", "bytes32"];
 const PERIOD = 30n * 86400n;
 
+export const ROLE_MIGRATION = [
+  ["operator_modifier", "operator", "asset-operator"],
+  ["safety_modifier", "emergency", "asset-emergency"],
+  ["orders_modifier", "operator", "orders-operator"],
+  ["orders_modifier", "emergency", "orders-emergency"],
+] as const;
+
 /** Test-only profile: two swap assets and two synthetic first-loss positions. */
 export function buildNodes(manifest: Record<string, any>) {
   if (manifest.chainId !== 11155111 || manifest.network !== "sepolia" || manifest.dependencies?.chainId !== 11155111) throw new Error("Sepolia manifest required");
   const m = manifest;
+  if (m.roleKeyScheme !== undefined && m.roleKeyScheme !== "account") throw new Error("Unknown Sepolia role-key scheme");
+  const accountKeys = m.roleKeyScheme === "account";
+  const assetOperator = accountKeys ? "asset-operator" : "operator";
+  const ordersOperator = accountKeys ? "orders-operator" : "operator";
+  const assetEmergency = accountKeys ? "asset-emergency" : "emergency";
+  const ordersEmergency = accountKeys ? "orders-emergency" : "emergency";
   const d = (name: string) => m.dependencies.contracts[name].address as string;
   const tokens = [m.dependencies.tokens.weth.address, m.dependencies.tokens.usdc.address] as string[];
   const allSafes = [m.assetSafe, m.ordersSafe, m.firstLossSafe, m.operatorSafe, m.emergencySafe];
@@ -37,38 +50,38 @@ export function buildNodes(manifest: Record<string, any>) {
     c.and(c.gt(1n), c.lte(parts)), c.and(c.gt(0n), c.lte(spacing)), 0n, ZeroHash,
   ] as any, TWAP_TYPES);
   const governance = [
-    call(m.operatorModifier, "scopeTarget(bytes32,address)", key("operator"), notAdmin),
-    call(m.operatorModifier, "revokeTarget(bytes32,address)", key("operator"), notAdmin),
-    call(m.operatorModifier, "allowFunction(bytes32,address,bytes4,uint8)", key("operator"), notAdmin, undefined, c.lt(2)),
-    call(m.operatorModifier, "revokeFunction(bytes32,address,bytes4)", key("operator"), notAdmin),
-    call(m.operatorModifier, "scopeFunction(bytes32,address,bytes4,(uint8,uint8,uint8,bytes)[],uint8)", key("operator"), notAdmin, undefined, undefined, c.lt(2)),
+    call(m.operatorModifier, "scopeTarget(bytes32,address)", key(assetOperator), notAdmin),
+    call(m.operatorModifier, "revokeTarget(bytes32,address)", key(assetOperator), notAdmin),
+    call(m.operatorModifier, "allowFunction(bytes32,address,bytes4,uint8)", key(assetOperator), notAdmin, undefined, c.lt(2)),
+    call(m.operatorModifier, "revokeFunction(bytes32,address,bytes4)", key(assetOperator), notAdmin),
+    call(m.operatorModifier, "scopeFunction(bytes32,address,bytes4,(uint8,uint8,uint8,bytes)[],uint8)", key(assetOperator), notAdmin, undefined, undefined, c.lt(2)),
     call(m.operatorModifier, "setAllowance(bytes32,uint128,uint128,uint128,uint64,uint64)", anyOf([key("orders_weth"), key("orders_usdc")]), undefined, undefined, undefined, c.gte(PERIOD)),
   ];
-  const revoke = (modifier: string) => [
-    call(modifier, "revokeTarget(bytes32,address)", key("operator")),
-    call(modifier, "revokeFunction(bytes32,address,bytes4)", key("operator")),
+  const revoke = (modifier: string, roleKey: string) => [
+    call(modifier, "revokeTarget(bytes32,address)", key(roleKey)),
+    call(modifier, "revokeFunction(bytes32,address,bytes4)", key(roleKey)),
   ];
   const nodes = {
     operator_modifier: node(m.operatorModifier, m.assetSafe, {
-      operator: role(m.operatorSafe, tokens.map((token, i) => call(token, "transfer(address,uint256)", m.ordersSafe, c.withinAllowance(i ? "orders_usdc" : "orders_weth")))),
+      [assetOperator]: role(m.operatorSafe, tokens.map((token, i) => call(token, "transfer(address,uint256)", m.ordersSafe, c.withinAllowance(i ? "orders_usdc" : "orders_weth")))),
       governance: role(m.easyTrackExecutor, governance),
     }, { orders_weth: allowance(1n * 10n ** 18n), orders_usdc: allowance(1000n * 10n ** 6n) }),
     safety_modifier: node(m.safetyModifier, m.assetSafe, {
-      emergency: role(m.emergencySafe, [
+      [assetEmergency]: role(m.emergencySafe, [
         ...tokens.map((token) => call(token, "transfer(address,uint256)", anyOf([m.ordersSafe, m.agent]))),
-        ...revoke(m.operatorModifier),
+        ...revoke(m.operatorModifier, assetOperator),
         call(m.assetSafe, "disableModule(address,address)", undefined, m.operatorModifier),
       ]),
     }),
     orders_modifier: node(m.ordersModifier, m.ordersSafe, {
-      operator: role(m.operatorSafe, [
+      [ordersOperator]: role(m.operatorSafe, [
         signer(m.assetSafe, 90n * 86400n),
         { ...call(d("orderSigner"), UNSIGN, order(m.assetSafe)), delegatecall: true },
         call(d("composableCow"), "createWithContext((address,bytes32,bytes),address,bytes,bool)", c.matches([d("twap"), undefined, c.or(twap(90n, 86400n), twap(12n, 7n * 86400n))] as any), d("timestampFactory"), "0x", true),
         call(d("composableCow"), "remove(bytes32)"),
         ...tokens.map((token) => call(token, "transfer(address,uint256)", m.assetSafe)),
       ]),
-      emergency: role(m.emergencySafe, [
+      [ordersEmergency]: role(m.emergencySafe, [
         signer(m.agent, 86400n, [tokens[1]]),
         { ...call(d("orderSigner"), UNSIGN), delegatecall: true },
         call(d("composableCow"), "remove(bytes32)"),
@@ -76,7 +89,7 @@ export function buildNodes(manifest: Record<string, any>) {
           call(token, "approve(address,uint256)", d("vaultRelayer"), 0n),
           call(token, "transfer(address,uint256)", anyOf([m.assetSafe, m.agent])),
         ]),
-        ...revoke(m.ordersModifier),
+        ...revoke(m.ordersModifier, ordersOperator),
       ]),
     }),
     first_loss_modifier: node(m.firstLossModifier, m.firstLossSafe, {

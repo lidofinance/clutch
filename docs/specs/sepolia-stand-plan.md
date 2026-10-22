@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-22T19:53:33Z
+  at: 2026-10-22T22:34:04Z
 verified: []
 sources:
   - id: s1
@@ -330,8 +330,10 @@ Do not press Deploy or Apply in the Zodiac app (OD-97) [s32].
 
 - [x] Update to SDK 2.10.0 and API types 1.13.0. Prepare all three `vault: true` flags and seven policy labels locally. The payload differs only in those ten metadata fields; the RPC comparison found zero policy differences at block `11971576` [s37].
 - [x] Draft OD-100 and the ADR 013 migration proposal for `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency`. Include the same key scheme in the mainnet design dependencies [s32].
-- [ ] Obtain EM's decision on OD-100 and the execution route. The current policy model requires equal grants for each key. Preparation still records both conflicts and returns status `1`; the publication CLI stops before a hosted call [s32][s37].
-- [ ] Prepare the migration package and pass ADR 013's fork checks. Keep all seven on-chain roles unchanged until the owner authorises the reviewed package [s32].
+- [x] Record EM's choices on 2026-10-22: OD-100 B, OD-97 C and OD-98 A. The migration uses a locally compiled package through test Voting. The new keys separate the conflicting policies [s32].
+- [x] Prepare the migration package and pass ADR 013's fork checks. Nine pinned-fork tests pass; two local Anvil transactions leave zero policy differences and preserve allowance storage and Safe configuration. The 87 calls fit in two atomic Safe batches. Commands and remaining public steps are in [the migration guide](sepolia-role-key-migration.md) [s32].
+- [ ] Publish the checked migration as a Constellation draft in the Sepolia workspace under an explicit hosted-call authorisation [s32].
+- [ ] Execute the reviewed Asset and Orders batches after EM's decision and the owner's authorisation [s32].
 - [ ] After authorised migration, save the receipts and confirm zero RPC differences against the new declaration. Publish the workspace metadata under a separate instruction and confirm three Vaults and seven Policies with the new key mapping [s32][s37].
 
 The governance view shows `Unsupported Condition` for `Nor`, but displays its original opcode `3` tree in both columns.

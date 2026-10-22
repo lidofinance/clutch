@@ -7,7 +7,7 @@ import { diffPolicy } from "./diff";
 
 const ROOT = path.resolve(import.meta.dir, "../../..");
 const OUTPUT = path.join(ROOT, "cache/sepolia/constellation");
-const READS = new Set(["eth_chainId", "eth_blockNumber", "eth_getBlockByNumber", "eth_getCode", "eth_getLogs", "eth_call"]);
+const READS = new Set(["eth_chainId", "eth_blockNumber", "eth_getBlockByNumber", "eth_getCode", "eth_getLogs", "eth_getStorageAt", "eth_getTransactionReceipt", "eth_getTransactionByHash", "eth_call"]);
 
 function save(name: string, value: unknown) {
   const temporary = path.join(OUTPUT, `.${name}.${process.pid}.tmp`);

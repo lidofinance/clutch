@@ -8,6 +8,8 @@ import { build } from "./compile";
 import { checkPayload, workspacePolicyIssues, type RuntimeAllowance } from "./constellation";
 import { diffPolicy } from "./diff";
 import { readOnlyRpc } from "./prepare-constellation";
+import { checkBefore } from "./prepare-migration";
+import { checkMigrationPackage, checkMigrationPayload, migrationManifest, normalizedMigrationPayload } from "./role-migration";
 
 const ROOT = path.resolve(import.meta.dir, "../../..");
 const BRANCH = "testnet/sepolia";
@@ -18,7 +20,7 @@ export type Snapshot = { block: number; blockHash: string; allowances: RuntimeAl
 export type Deps = {
   env: Record<string, string | undefined>;
   git: () => Git;
-  snapshot: (manifest: Record<string, any>) => Promise<Snapshot>;
+  snapshot: (manifest: Record<string, any>, migration?: any) => Promise<Snapshot>;
   fetch: typeof fetch;
   input: string;
   output: string;
@@ -102,8 +104,14 @@ export async function run(command: string, deps: Deps): Promise<number> {
   const payload = JSON.parse(raw.toString());
   const sha = createHash("sha256").update(raw).digest("hex");
   // A fresh comparison: the chain still matches the policy, and the payload still carries the current allowances.
-  const state = await deps.snapshot(manifest);
-  checkPayload(payload, manifest, state.allowances);
+  const migration = context.migration === true ? JSON.parse(readFileSync(path.join(deps.input, "package.json"), "utf8")) : undefined;
+  if (migration) {
+    checkMigrationPackage(migration);
+    if (migration.workspace !== context.workspace || sha !== migration.payloadSha256 || sha !== context.payloadSha256 || JSON.stringify(migration.sourceManifest) !== JSON.stringify(manifest)) throw new Error("The migration context or payload differs from its package");
+  }
+  const state = await deps.snapshot(manifest, migration);
+  if (migration) checkMigrationPayload(payload, manifest, state.allowances);
+  else checkPayload(payload, manifest, state.allowances);
   const api = (deps.env.SEPOLIA_ZODIAC_API_URL ?? DEFAULT_API).replace(/\/$/, "");
   const base = { workspace: context.workspace, origin: new URL(api).origin, commit: git.commit, payloadSha256: sha, block: state.block, blockHash: state.blockHash };
   mkdirSync(deps.output, { recursive: true });
@@ -136,10 +144,12 @@ export async function run(command: string, deps: Deps): Promise<number> {
 
   const resolved = await call("resolve");
   if (!resolved.ok) return 1;
-  const differences = resolvedDifferences(resolved.json?.result, payload, manifest, state.allowances);
+  const differences = resolvedDifferences(resolved.json?.result,
+    migration ? normalizedMigrationPayload(payload, manifest, state.allowances) : payload,
+    migration ? migrationManifest(manifest) : manifest, state.allowances);
   for (const difference of differences) console.error(`Resolution difference: ${difference}`);
   if (differences.length) return 1;
-  console.log(`The resolution matches the payload, the Sepolia policy and the chain at block ${state.block}.`);
+  console.log(`The resolution matches the ${migration ? "proposed migration; its source state was checked" : "payload, Sepolia policy and chain"} at block ${state.block}.`);
   if (command === "resolve") return 0;
   const attemptKey = createHash("sha256").update(JSON.stringify([api, context.workspace, sha])).digest("hex");
   try {
@@ -167,25 +177,27 @@ function gitState(): Git {
   };
 }
 
-async function snapshot(manifest: Record<string, any>): Promise<Snapshot> {
+async function snapshot(manifest: Record<string, any>, migration?: any): Promise<Snapshot> {
   const endpoint = process.env.SEPOLIA_RPC;
   if (!endpoint) throw new Error("Set SEPOLIA_RPC in the local environment");
-  const report = await diffPolicy(readOnlyRpc(endpoint), manifest, build(manifest));
+  const report = migration ? await checkBefore(readOnlyRpc(endpoint), migration, manifest) : await diffPolicy(readOnlyRpc(endpoint), manifest, build(manifest));
   if (!report.matches) throw new Error(`${report.differences.length} policy differences at block ${report.block}; run constellation-diff`);
   return { block: report.block, blockHash: report.blockHash, allowances: report.allowances };
 }
 
 if (import.meta.main) {
   try {
+    if (process.argv[3] !== undefined && process.argv[3] !== "--migration") throw new Error("Only --migration is supported after the command");
+    const input = path.join(ROOT, process.argv[3] === "--migration" ? "cache/sepolia/role-key-migration" : "cache/sepolia/constellation");
     if (process.argv[2] === "apply") {
-      const payload = JSON.parse(readFileSync(path.join(ROOT, "cache/sepolia/constellation/payload.json"), "utf8"));
+      const payload = JSON.parse(readFileSync(path.join(input, "payload.json"), "utf8"));
       const issues = workspacePolicyIssues(payload);
       if (issues.length) throw new Error(`Workspace policies cannot be published: ${issues.join("; ")}`);
     }
     process.exitCode = await run(process.argv[2] ?? "", {
       env: process.env, git: gitState, snapshot, fetch,
-      input: path.join(ROOT, "cache/sepolia/constellation"),
-      output: path.join(ROOT, "cache/sepolia/constellation/hosted"),
+      input,
+      output: path.join(input, "hosted"),
       manifestFile: process.env.SEPOLIA_MANIFEST ?? path.join(ROOT, "cache/sepolia/manifest.json"),
       now: () => new Date(),
     });

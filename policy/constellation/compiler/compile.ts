@@ -167,7 +167,7 @@ const ON_MODULE = new Map([
  * they hold only `narrow` calls, so they cannot give back what they removed:
  * the DAO restarts (ADR 005, decision 26).
  */
-const STOP_ONLY = new Set(["emergency"]);
+const STOP_ONLY = new Set(["emergency", "asset-emergency", "orders-emergency"]);
 
 /**
  * Refuses a policy in which a role reaches the Asset Safe or one of its

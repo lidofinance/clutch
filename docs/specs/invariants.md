@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-22T19:53:33Z
+  at: 2026-10-22T22:34:04Z
 verified: []
 sources:
   - id: s1
@@ -30,7 +30,9 @@ The invariants below come from ADR 004 to ADR 011 [s1]. On 2026-10-05 the kit's 
 
 State "Draft" means the ADR is proposed. State "Retired" means a decision removed what the invariant protected. State "Pending" means the invariant depends on an open decision or on work that is not built. "Violated" would mean that the kit's policy breaks the invariant; no invariant is in that state. The harness README lists what the kit still lacks [s3].
 
-OD-100 proposes four account-specific role keys for the Sepolia migration and the mainnet design [s4]. The current rows stay in force pending that decision and its implementation. Before migration, revise INV-018, INV-025 and INV-027 with named tests for the new key references. Preserve INV-004's governance restrictions and INV-009's emergency stop [s4].
+OD-100 B sets four account-specific role keys for the Sepolia migration and the mainnet design [s4]. The mainnet rows stay in force pending the required implementation. The Sepolia profile below maps the new key references to named tests. Revise the mainnet policy and INV-018, INV-025 and INV-027 together before mainnet deployment. Preserve INV-004's governance restrictions and INV-009's emergency stop [s4].
+
+For the Sepolia `roleKeyScheme: account` profile, INV-018 uses `asset-operator` on Asset and `orders-operator` on Orders. `test_new_roles_execute_and_old_keys_and_wrong_accounts_fail` and `test_governance_writes_only_the_new_asset_operator_key` check that mapping and INV-004's restrictions. `test_emergency_revokes_new_operators_and_keeps_its_recovery_path` and `test_asset_switch_stops_operator_and_cannot_be_reversed_by_emergency` check INV-009 and INV-027 under `asset-emergency` and `orders-emergency`. INV-025's exit-governance role remains a mainnet design dependency; Sepolia has no such role [s4].
 
 | ID | Invariant | Set by | State | Kit test |
 |---|---|---|---|---|

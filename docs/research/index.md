@@ -1,5 +1,7 @@
 # Research
 
+* [Sepolia role-key migration, 2026-10-22](sepolia-role-key-migration-2026-10-22.md) - Four explicit role deletions, two Safe batches and pinned-fork checks.
+
 * [Sepolia Constellation UI registration, 2026-10-22](sepolia-constellation-ui-2026-10-22.md) - Vault flags, policy serialization and two conflicting role keys.
 * [The enabling vote rehearsed on a mainnet fork, 2026-10-15](enabling-vote-rehearsal-2026-10-15.md) - OD-92 to OD-94: the vote built and run end to end with the live Aragon Voting, ACL, Finance and Easy Track, run again on 2026-10-22; why the Safe batches cannot travel inside the vote under EIP-7825, and the vote of approved hashes that fits; the registries' admin, the token list's role and the USDS items; the shared payment permission and Easy Track's shared motion limit; what works; and the ramp-up after the vote with every obstacle found.
 * [The committee's Safe as the operator, reviewed again, 2026-10-15](operator-safe-review-2026-10-15.md) - OD-80 and OD-83: operator account alternatives, other duties and the fork probe.

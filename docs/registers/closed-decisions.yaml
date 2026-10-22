@@ -651,3 +651,24 @@
     - "2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit"
   adr: [ADR-009#d45]
   refines: [OD-69]
+
+- id: OD-97
+  question: "May the stand owner execute a transaction that the Zodiac app builds for the Sepolia stand, through Deploy or Apply?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-97, OD-98 and OD-100: the Sepolia role-key migration"
+  adr: [ADR-013]
+
+- id: OD-98
+  question: "May the stand owner send public Sepolia transactions on the existing stand from testnet/sepolia?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-97, OD-98 and OD-100: the Sepolia role-key migration"
+  adr: [ADR-013]
+
+- id: OD-100
+  question: "Should Clutch use four account-specific operator and emergency role keys for Sepolia and mainnet?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-97, OD-98 and OD-100: the Sepolia role-key migration"
+  adr: [ADR-013]

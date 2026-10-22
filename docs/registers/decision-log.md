@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T19:14:25Z
+  at: 2026-10-22T22:34:04Z
 verified: []
 sources:
   - id: s1
@@ -64,6 +64,9 @@ sources:
   - id: s18
     resource: "urn:clutch:interview:2026-10-22-enabling-vote"
     title: EM's answers on OD-92 to OD-94, 2026-10-22; the transcript is not in the repository
+  - id: s19
+    resource: "urn:clutch:interview:2026-10-22-sepolia-migration"
+    title: EM's choices for OD-97, OD-98 and OD-100, 2026-10-22; the transcript is not in the repository
 ---
 
 # Decision log
@@ -73,6 +76,20 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-10-22 — OD-97, OD-98 and OD-100: the Sepolia role-key migration
+
+EM answered [s19]:
+
+> OD-100 B, OD-97 C, OD-98 A. Сделай GPG-коммит и пуш, потом дай команды для публикации и запуска миграции.
+
+Recorded as:
+
+- OD-100 B: use `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency` on both networks. Migrate only the existing Sepolia stand after package review and fork tests. Complete the mainnet design updates before its initial deployment. [ADR 013](/adr/013-tests-on-sepolia.md#decision) records the decision.
+- OD-97 C: the stand owner executes a locally compiled package through test Voting under the package review conditions in [ADR 013](/adr/013-tests-on-sepolia.md#decision).
+- OD-98 A: the stand owner may send public transactions on the existing Sepolia stand through `sepolia.just` and its guards, with the keystore. A second stand needs a new decision. [ADR 013](/adr/013-tests-on-sepolia.md#decision) records the decision.
+
+The choices do not close OD-95, OD-96 or OD-99 and do not record verification of the whole ADR. The owner reviews and authorises the exact calls before signing [s19].
 
 ## 2026-10-22 — OD-92 to OD-94 decided: the vote's batches, the registries, the USDS items and the motion limit
 
