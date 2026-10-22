@@ -6,6 +6,7 @@ import {ISafe, ISafeProxyFactory, IModuleProxyFactory} from "../../src/interface
 import {IRoles} from "../../src/interfaces/IRoles.sol";
 import {IERC20} from "../../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../../src/mocks/MockAragonAgent.sol";
+import {MockAragonVoting} from "../../src/mocks/MockAragonVoting.sol";
 import {MockEVMScriptExecutor} from "../../src/mocks/MockEVMScriptExecutor.sol";
 import {MockEasyTrack, PassThroughEVMScriptFactory} from "../../src/mocks/MockEasyTrack.sol";
 import {SafeExec} from "../../src/exec/SafeExec.sol";
@@ -48,7 +49,8 @@ abstract contract ClutchFixture is Test {
 
     struct Addresses {
         address safe; // the Asset Safe; owner of both modifiers
-        address agent; // dry-run: MockAragonAgent; production: the Aragon Agent
+        address voting; // the only owner of the Asset Safe (OD-73); dry-run: MockAragonVoting; production: Aragon Voting
+        address agent; // the recovery destination; dry-run: MockAragonAgent; production: the Aragon Agent
         address operator; // stand-in for the operator Safe
         address emergency; // stand-in for the emergency Safe
         address governance; // the governance role's member: the mock script executor
@@ -73,6 +75,7 @@ abstract contract ClutchFixture is Test {
         address earnEthShare;
     }
 
+    MockAragonVoting internal voting;
     MockAragonAgent internal agent;
     MockEVMScriptExecutor internal executor;
     MockEasyTrack internal easyTrack;
@@ -106,9 +109,10 @@ abstract contract ClutchFixture is Test {
         vm.mockCall(LDO, abi.encodeWithSelector(IERC20.balanceOf.selector, whale), abi.encode(6_000_000e18));
     }
 
-    /// @dev The mocked governance heads, the Asset Safe without a fallback
-    ///      handler (OD-17), and the two modifiers from the canonical module
-    ///      proxy factory. Every address is deterministic.
+    /// @dev The mocked governance heads, the Asset Safe with Aragon Voting's
+    ///      stand-in as its only owner (OD-73) and without a fallback handler
+    ///      (OD-17), and the two modifiers from the canonical module proxy
+    ///      factory. Every address is deterministic.
     function _deploy() internal {
         agent = new MockAragonAgent();
         executor = new MockEVMScriptExecutor(agent);
@@ -119,9 +123,12 @@ abstract contract ClutchFixture is Test {
         easyTrack = new MockEasyTrack(executor, IERC20(LDO), 3 days, 5_000_000e18);
         factory = new PassThroughEVMScriptFactory();
         easyTrack.addEVMScriptFactory(address(factory));
+        // Aragon Voting owns the Asset Safe; the Agent only receives what
+        // recovery returns (OD-73).
+        voting = new MockAragonVoting();
 
         address[] memory owners = new address[](1);
-        owners[0] = address(agent);
+        owners[0] = address(voting);
         bytes memory safeInit = abi.encodeCall(
             ISafe.setup, (owners, 1, address(0), "", address(0), address(0), 0, payable(address(0)))
         );
@@ -134,12 +141,13 @@ abstract contract ClutchFixture is Test {
         roles = IRoles(mpf.deployModule(ROLES_MASTERCOPY, rolesInit, uint256(0x11d0)));
         safety = IRoles(mpf.deployModule(ROLES_MASTERCOPY, rolesInit, uint256(0x11d1)));
 
-        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
-        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety))));
+        SafeExec.execAsOwner(voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
+        SafeExec.execAsOwner(voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety))));
     }
 
     function _fill() internal {
         a.safe = address(safe);
+        a.voting = address(voting);
         a.agent = address(agent);
         a.operator = operatorSafe;
         a.emergency = emergencySafe;
@@ -168,6 +176,7 @@ abstract contract ClutchFixture is Test {
     /// @dev The artifact names these addresses, so the deployment must match them.
     function _checkManifest() internal view {
         string memory m = vm.readFile(MANIFEST);
+        assertEq(vm.parseJsonAddress(m, ".voting"), a.voting, "manifest: Voting");
         assertEq(vm.parseJsonAddress(m, ".agent"), a.agent, "manifest: agent");
         assertEq(vm.parseJsonAddress(m, ".assetSafe"), a.safe, "manifest: Asset Safe");
         assertEq(vm.parseJsonAddress(m, ".operatorModifier"), a.rolesOperator, "manifest: operator modifier");
@@ -188,14 +197,14 @@ abstract contract ClutchFixture is Test {
     }
 
     /// @dev Applies the committed artifact's calls in order, each through the
-    ///      Asset Safe as its owner, the Agent.
+    ///      Asset Safe as its owner, Aragon Voting.
     function _applyArtifact() internal {
         string memory j = vm.readFile(ARTIFACT);
         address[] memory to = vm.parseJsonAddressArray(j, ".calls.to");
         bytes[] memory data = vm.parseJsonBytesArray(j, ".calls.data");
         require(to.length > 0 && to.length == data.length, "artifact: calls");
         for (uint256 i = 0; i < to.length; i++) {
-            SafeExec.execAsOwner(agent, safe, to[i], data[i]);
+            SafeExec.execAsOwner(voting, safe, to[i], data[i]);
         }
         policyCalls = to.length;
     }

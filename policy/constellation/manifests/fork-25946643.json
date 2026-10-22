@@ -2,14 +2,15 @@
   "network": "fork-25946643",
   "chainId": 1,
   "forkBlock": 25946643,
-  "note": "The fork fixture's deployment (test/utils/Fixture.sol): mocked governance heads, stand-in addresses for the committee's Safe and the emergency Safe, and a Safe and two Roles proxies from the deployed singletons. Not mainnet addresses.",
+  "note": "The fork fixture's deployment (test/utils/Fixture.sol): mocked governance heads, with Aragon Voting's stand-in as the Asset Safe's only owner (OD-73), stand-in addresses for the committee's Safe and the emergency Safe, and a Safe and two Roles proxies from the deployed singletons. Not mainnet addresses.",
+  "voting": "0xd55a42CEdD5F3c9D8bdAeFE216Fa6Aa9c95aA61E",
   "agent": "0x66eda24622120758687AAb57575F29534D74270f",
-  "assetSafe": "0xB546CB43ECfEf2d9C1078a17f7a0bE1e7e2EbD50",
-  "operatorModifier": "0x699Da4F4ED5e0e86265b4BeAfe011d28F4a52b8b",
-  "safetyModifier": "0x2C469A13E2B1746E3fa6EC644b166B924E44FFf7",
+  "assetSafe": "0x46D9384A3261778198490644ebc64C9bF2749B49",
+  "operatorModifier": "0x6362e4b97Beab827C04072FF5A4E1b884718C4e7",
+  "safetyModifier": "0x84377993cEdd4c42f085e02e1e553ac5936e50e1",
   "modules": [
-    "0x699Da4F4ED5e0e86265b4BeAfe011d28F4a52b8b",
-    "0x2C469A13E2B1746E3fa6EC644b166B924E44FFf7"
+    "0x6362e4b97Beab827C04072FF5A4E1b884718C4e7",
+    "0x84377993cEdd4c42f085e02e1e553ac5936e50e1"
   ],
   "operatorSafe": "0x27bd382539c23f850C09193B50b2Fad9cE5e7d6f",
   "emergencySafe": "0xCdf451F047dC337310E049C1D5AB46e8bFa8c163",

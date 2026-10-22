@@ -6,6 +6,7 @@ import {Broadcast} from "./Broadcast.sol";
 import {ISafe, ISafeProxyFactory, IModuleProxyFactory} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
+import {MockAragonVoting} from "../src/mocks/MockAragonVoting.sol";
 import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 import {MockEasyTrack, PassThroughEVMScriptFactory} from "../src/mocks/MockEasyTrack.sol";
 
@@ -72,12 +73,15 @@ contract DeployDryRun is Broadcast {
             new MockEasyTrack(executor_, IERC20(LDO), MOTION_DURATION, OBJECTION_THRESHOLD);
         PassThroughEVMScriptFactory factory = new PassThroughEVMScriptFactory();
         easyTrack.addEVMScriptFactory(address(factory));
+        // Aragon Voting owns the Asset Safe; the Agent only receives what
+        // recovery returns (OD-73).
+        MockAragonVoting voting = new MockAragonVoting();
 
         // --- production-grade accounts ------------------------------------
         ISafeProxyFactory proxyFactory = ISafeProxyFactory(SAFE_PROXY_FACTORY);
 
         address[] memory owners = new address[](1);
-        owners[0] = address(agent);
+        owners[0] = address(voting);
         bytes memory safeInit = abi.encodeCall(
             ISafe.setup,
             (owners, 1, address(0), "", address(0), address(0), 0, payable(address(0)))
@@ -102,17 +106,19 @@ contract DeployDryRun is Broadcast {
 
         // enable the modifier as a Safe module, as the owner (production path)
         SafeExec.execAsOwner(
-            agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))
+            voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))
         );
         SafeExec.execAsOwner(
-            agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety)))
+            voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(safety)))
         );
 
         vm.stopBroadcast();
 
         // --- manifest, in the format the policy compiler reads -------------
         string memory m = string.concat(
-            '{"network":"dryrun-mainnet","chainId":1,"agent":"',
+            '{"network":"dryrun-mainnet","chainId":1,"voting":"',
+            vm.toString(address(voting)),
+            '","agent":"',
             vm.toString(address(agent)),
             '","assetSafe":"',
             vm.toString(address(safe)),

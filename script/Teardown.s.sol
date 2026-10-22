@@ -5,13 +5,14 @@ import {console2} from "forge-std/Script.sol";
 import {Broadcast} from "./Broadcast.sol";
 import {ISafe} from "../src/interfaces/ISafe.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
-import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
+import {MockAragonVoting} from "../src/mocks/MockAragonVoting.sol";
 import {SafeExec} from "../src/exec/SafeExec.sol";
 
 /// @title Teardown — reverses a dry-run.
 /// @dev Sweeps every tracked token from the Asset Safe back to the funder
-///      through the owner path (the same power a DAO recovery action has),
-///      then disables both Roles modifiers. Writes a final manifest.
+///      through the owner path, Aragon Voting's stand-in (OD-73), with the
+///      same power that a DAO recovery action has, then disables both Roles
+///      modifiers. Writes a final manifest. VOTING is the manifest's `voting`.
 contract Teardown is Broadcast {
     address internal constant SENTINEL = address(0x0000000000000000000000000000000000000001);
 
@@ -30,7 +31,7 @@ contract Teardown is Broadcast {
     }
 
     function run() external {
-        address payable agentAddr = payable(vm.envAddress("AGENT"));
+        address payable votingAddr = payable(vm.envAddress("VOTING"));
         address safeAddr = vm.envAddress("SAFE");
         address rolesAddr = vm.envAddress("ROLES");
         address safetyAddr = vm.envOr("SAFETY", address(0));
@@ -38,7 +39,7 @@ contract Teardown is Broadcast {
         // Foundry's default sender, whose key is public.
         address beneficiary = _startBroadcast();
 
-        MockAragonAgent agent = MockAragonAgent(agentAddr);
+        MockAragonVoting voting = MockAragonVoting(votingAddr);
         ISafe safe = ISafe(payable(safeAddr));
 
         // sweep as the owner — the DAO-recovery-equivalent power
@@ -48,7 +49,7 @@ contract Teardown is Broadcast {
             uint256 bal = IERC20(tokens[i]).balanceOf(safeAddr);
             if (bal > 0) {
                 SafeExec.execAsOwner(
-                    agent,
+                    voting,
                     safe,
                     tokens[i],
                     abi.encodeCall(IERC20.transfer, (beneficiary, bal))
@@ -60,8 +61,8 @@ contract Teardown is Broadcast {
         // helper is value-less and the amounts are negligible. Documented.
 
         // disable both modifiers (leave the Safe inert under owner control)
-        bool disabled = _disable(agent, safe, rolesAddr);
-        if (safetyAddr != address(0)) disabled = _disable(agent, safe, safetyAddr) && disabled;
+        bool disabled = _disable(voting, safe, rolesAddr);
+        if (safetyAddr != address(0)) disabled = _disable(voting, safe, safetyAddr) && disabled;
 
         vm.stopBroadcast();
         string memory json = string.concat(
@@ -81,13 +82,13 @@ contract Teardown is Broadcast {
         console2.log(json);
     }
 
-    function _disable(MockAragonAgent agent, ISafe safe, address module) internal returns (bool) {
+    function _disable(MockAragonVoting voting, ISafe safe, address module) internal returns (bool) {
         (address[] memory mods,) = safe.getModulesPaginated(SENTINEL, 10);
         for (uint256 i = 0; i < mods.length; i++) {
             if (mods[i] == module) {
                 address prev = i == 0 ? SENTINEL : mods[i - 1];
                 SafeExec.execAsOwner(
-                    agent, safe, address(safe), abi.encodeCall(ISafe.disableModule, (prev, module))
+                    voting, safe, address(safe), abi.encodeCall(ISafe.disableModule, (prev, module))
                 );
                 return true;
             }

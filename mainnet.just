@@ -17,7 +17,7 @@ _guard:
 	@test -n "${SENDER:-}" || { echo "Set SENDER, the address of that keystore." >&2; exit 1; }
 	@test -n "${RPC:-}" || { echo "Set RPC, an archive mainnet RPC." >&2; exit 1; }
 
-# 1. Deploy the dry run (mocked Agent and Easy Track), compile its policy and apply it through the Agent
+# 1. Deploy the dry run (mocked Voting, Agent and Easy Track), compile its policy and apply it through Voting
 [confirm("This broadcasts a deployment on MAINNET and spends real ETH. Continue?")]
 dry-run: _guard
 	forge script script/DeployDryRun.s.sol --rpc-url ${RPC} --account ${ACCOUNT} --sender ${SENDER} --broadcast --slow
@@ -29,7 +29,7 @@ dry-run: _guard
 fund: _guard
 	forge script script/BootstrapFunds.s.sol --rpc-url ${RPC} --account ${ACCOUNT} --sender ${SENDER} --broadcast
 
-# 3. Tear it down: sweep the funds, disable both modifiers, write the teardown manifest
+# 3. Tear it down: sweep the funds, disable both modifiers, write the teardown manifest (VOTING, SAFE and ROLES from dryrun-manifest.json)
 [confirm("This broadcasts the teardown on MAINNET. Continue?")]
 teardown: _guard
 	forge script script/Teardown.s.sol --rpc-url ${RPC} --account ${ACCOUNT} --sender ${SENDER} --broadcast

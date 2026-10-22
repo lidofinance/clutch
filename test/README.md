@@ -1,6 +1,6 @@
 # Dry-run harness
 
-This harness runs the Clutch permission policy against production contracts on a pinned mainnet fork. Only the governance heads are mocked: the Aragon Agent, the Easy Track script executor and Easy Track. The Safe, the Roles modifier, the tokens and the protocols are the deployed mainnet contracts. The policy comes only from the committed artifact that the constellation compiler writes ([ADR 004](../docs/adr/004-specifications-and-policy-as-data.md)).
+This harness runs the Clutch permission policy against production contracts on a pinned mainnet fork. Only the governance heads are mocked: Aragon Voting, which owns the Asset Safe (OD-73), the Aragon Agent, the Easy Track script executor and Easy Track. The Safe, the Roles modifier, the tokens and the protocols are the deployed mainnet contracts. The policy comes only from the committed artifact that the constellation compiler writes ([ADR 004](../docs/adr/004-specifications-and-policy-as-data.md)).
 
 **Nothing has been deployed to mainnet.** Every result comes from `forge test` against a fork.
 
@@ -12,11 +12,12 @@ This harness runs the Clutch permission policy against production contracts on a
 | Safe v1.5.0 proxy factory | deployed, `0x14F2982D601c9458F93bd70B218933A6f8165e7b` |
 | Roles modifier mastercopy | deployed, `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5`, behind minimal proxies from the canonical module proxy factory |
 | Tokens and protocols | deployed mainnet contracts |
-| `MockAragonAgent` | the Aragon Agent: single-argument `forward(bytes)`, `execute`, `canForward` |
+| `MockAragonVoting` | Aragon Voting, the Asset Safe's only owner (OD-73): `execute` stands in for one call of a passed vote's script, which approves a Safe transaction's hash |
+| `MockAragonAgent` | the Aragon Agent, where recovery returns assets: single-argument `forward(bytes)`, `execute`, `canForward` |
 | `MockEVMScriptExecutor` | the Easy Track script executor: parses the production CallsScript format |
 | `MockEasyTrack` | Easy Track: re-invokes the factory at enactment and requires a matching script hash |
 | Committee's Safe, emergency Safe | plain addresses that stand in for them |
-| The policy | `policy/constellation/artifacts/fork-25946643.json`, compiled from the constellation against `manifests/fork-25946643.json`; `utils/Fixture.sol` deploys at the manifest's addresses, checks each, checks that the manifest's `modules` are exactly the Asset Safe's modules (OD-38), and applies the artifact's calls through the Agent and the Asset Safe |
+| The policy | `policy/constellation/artifacts/fork-25946643.json`, compiled from the constellation against `manifests/fork-25946643.json`; `utils/Fixture.sol` deploys at the manifest's addresses, checks each, checks that the manifest's `modules` are exactly the Asset Safe's modules (OD-38), and applies the artifact's calls through Voting and the Asset Safe |
 
 ## What the policy follows
 
@@ -64,12 +65,12 @@ The mainnet recipes are in `mainnet.just`, which the Justfile never loads. They 
 ```sh
 CLUTCH_MAINNET=1 just --justfile mainnet.just dry-run    # deploy on mainnet, compile against its manifest, apply; not run
 CLUTCH_MAINNET=1 just --justfile mainnet.just fund       # fund from a throwaway EOA with 0.05 ETH; not run
-CLUTCH_MAINNET=1 just --justfile mainnet.just teardown   # sweep, disable both modifiers, write a manifest; not run
+CLUTCH_MAINNET=1 just --justfile mainnet.just teardown   # sweep, disable both modifiers, write a manifest; VOTING, SAFE and ROLES from dryrun-manifest.json; not run
 ```
 
 A local rehearsal on an anvil fork may set `PRIVATE_KEY` to one of anvil's public test keys in the environment of a single command; `mainnet.just` refuses to run while `PRIVATE_KEY` is set.
 
-The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy, compile against the written manifest, apply 105 calls, then a permitted and a refused operator call. It was rehearsed again after OD-38, at block 26133512: the written manifest lists both modules, and the governance role is refused the safety modifier, the operator modifier and the Asset Safe as targets.
+The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy, compile against the written manifest, apply 105 calls, then a permitted and a refused operator call. It was rehearsed again after OD-38, at block 26133512: the written manifest lists both modules, and the governance role is refused the safety modifier, the operator modifier and the Asset Safe as targets. It was rehearsed again on 2026-10-22 at block 26249900, with Aragon Voting's stand-in as the Asset Safe's only owner: deploy, compile against the written manifest, apply 97 calls as Voting, a permitted and a refused operator call, and the teardown, which disabled both modifiers.
 
 `RPC` must be an archive node, because the suite forks block 25946643. Never commit a key or an RPC URL that contains one; keep them in a local `.env`.
 
