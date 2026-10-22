@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T21:39:40Z
+  at: 2026-10-22T21:53:27Z
 verified: []
 sources:
   - id: s1
@@ -42,8 +42,8 @@ sources:
     resource: "https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/script/DeployDryRun.s.sol#L73-L77"
     title: Kit deployment script at 370e20a — the Asset Safe is set up with no fallback handler
   - id: s11
-    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L898"
-    title: Kit test at 7a8c661 — the Asset Safe's owner, threshold, singleton, and missing fallback handler and guards
+    resource: "https://github.com/lidofinance/clutch/blob/03efa77c724f7fdde791a902a138090c099add0d/test/Drills.t.sol#L794"
+    title: Kit test at 03efa77 — the Asset Safe's owner, Aragon Voting's stand-in, its threshold, singleton, and missing fallback handler and guards
   - id: s12
     resource: "urn:clutch:restricted:mandate-draft-v0.1"
     title: Mandate draft v0.1 — the dual-access emergency exit and an emergency committee independent of the Treasury Management Committee; outside the repository until the mandate is published
@@ -244,7 +244,7 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 - Kit tests of 2026-10-13: the emergency role holds the switch, pinned to the operator modifier, and cannot enable a module again (`test_D4_the_switch_is_the_emergency_role_s_and_pinned`); the switch freezes a queued motion until the owner path enables the modifier again (`test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts`); the compiler refuses a grant or a budget for the emergency role, and every approval of the emergency role is zero (`policy/constellation/compiler/compile.test.ts`).
 
 - INV-001, INV-002, INV-003, INV-004, INV-009, INV-019, INV-021, INV-022, INV-023, INV-026 and INV-027 in the [invariants](/specs/invariants.md).
-- Kit tests: before 2026-10-13, the technical role was the only one that could disable a module, and only the operator modifier [s4]; the emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6]; the Asset Safe has the pinned singleton and no fallback handler or guard [s11]. The kit's owner check still names the Agent; it must name Aragon Voting (decision 28).
+- Kit tests: before 2026-10-13, the technical role was the only one that could disable a module, and only the operator modifier [s4]; the emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6]; the Asset Safe has a stand-in for Aragon Voting as its only owner, the pinned singleton, and no fallback handler or guard [s11].
 - The enabling-vote rehearsal checked decision 28: Aragon Voting approved a batch hash on each of the three Safes, and the batches ran (decision 32; [research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
 
 ## Reversal conditions

@@ -257,8 +257,8 @@
   kind: design
   why: "The LIP's Implemented parts rest on fork tests. Nothing is deployed, and no audit is done."
   breaks: "Green tests can miss real behaviour: the real Aragon Voting path, the real Easy Track and the screening guard."
-  watched_by: []
-  watch_note: "The harness mocks the Aragon Agent, Easy Track and its executor, and uses plain stand-in addresses for the committee's Safe and the emergency Safe."
+  watched_by: ["test:test_02_enabling_vote_end_to_end"]
+  watch_note: "The kit's harness mocks Aragon Voting, which owns the Asset Safe, the Aragon Agent, Easy Track and its executor, and uses plain stand-in addresses for the committee's Safe and the emergency Safe. The enabling-vote rehearsal runs the real Aragon Voting, ACL, Finance and Easy Track."
   sources: ["doc:test/README.md#what-is-real-and-what-is-mocked", "lip:part-1"]
 
 - id: branch-rule

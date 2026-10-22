@@ -7,18 +7,18 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T20:25:16Z
+  at: 2026-10-22T21:53:27Z
 verified: []
 sources:
   - id: s1
     resource: /adr/index.md
     title: Decision records that set each invariant
   - id: s2
-    resource: "https://github.com/lidofinance/clutch/tree/32e43fe53fd9e6dca7cccf11d8e7bbc059b0b038/test"
-    title: Kit test suites at 32e43fe
+    resource: "https://github.com/lidofinance/clutch/tree/03efa77c724f7fdde791a902a138090c099add0d/test"
+    title: Kit test suites at 03efa77
   - id: s3
-    resource: "https://github.com/lidofinance/clutch/blob/32e43fe53fd9e6dca7cccf11d8e7bbc059b0b038/test/README.md"
-    title: Kit harness README at 32e43fe — what the policy follows, and what the kit still lacks
+    resource: "https://github.com/lidofinance/clutch/blob/03efa77c724f7fdde791a902a138090c099add0d/test/README.md"
+    title: Kit harness README at 03efa77 — what the policy follows, and what the kit still lacks
 ---
 
 # Invariants
@@ -29,7 +29,7 @@ State "Draft" means the ADR is proposed. State "Retired" means a decision remove
 
 | ID | Invariant | Set by | State | Kit test |
 |---|---|---|---|---|
-| INV-001 | Aragon Voting is the only owner of the Asset Safe, with threshold one (OD-73). It authorizes Asset Safe transactions only by `approveHash` or by sending them itself, never by a contract signature. The Asset Safe has no fallback handler. | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | `test_asset_safe_shape` checks the owner, the threshold and the missing fallback handler. The harness executes through `approveHash`, but no test asserts that the Agent never signs with a contract signature |
+| INV-001 | Aragon Voting is the only owner of the Asset Safe, with threshold one (OD-73). It authorizes Asset Safe transactions only by `approveHash` or by sending them itself, never by a contract signature. The Asset Safe has no fallback handler. | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | `test_asset_safe_shape` checks that a stand-in for Aragon Voting is the only owner, the threshold and the missing fallback handler. The harness runs every owner action through Voting's `approveHash`, and `test_02_enabling_vote_end_to_end` runs each Safe batch with the live Voting's approved hash. No test asserts that Voting never signs with a contract signature |
 | INV-002 | No role except the DAO path can move an asset out of the Asset Safe, with three exceptions: the emergency role to the Aragon Agent or to the orders account, and the operator to the orders account. A token in the orders account leaves it only as an order's proceeds, to the Asset Safe or the Aragon Agent, or by a transfer to one of those two. A deposit, conversion, stake or withdrawal request whose receiver, owner or beneficiary is the Asset Safe is not a move out (INV-003). | [ADR 005](/adr/005-account-graph-and-roles.md), [ADR 007](/adr/007-swapping-through-an-orders-account.md) | Pending: the orders account | `test_D4_emergency_flow` and `test_D4_emergency_weth_route_to_agent` cover the Agent-only part |
 | INV-003 | Every receiver, owner and beneficiary argument in an operator permission is pinned to the avatar. | [ADR 005](/adr/005-account-graph-and-roles.md) | Draft | `test_D3_operator_cannot_route_around_avatar`, `test_D3_dai_usds_conversion_pays_the_asset_safe` |
 | INV-004 | The governance role cannot change role membership, cannot touch the emergency role, cannot give the operator delegatecall or an administrative target, and cannot set an allowance outside the operator's budget keys. The administrative targets are the Asset Safe and every module that it enables, the safety modifier included (OD-38), and, once it exists, the orders account and every module that it enables. It holds no `assignRoles` permission. | [ADR 006](/adr/006-governance-through-easy-track-factories.md) | Draft | `test_policyadmin_cannot_change_role_membership`, `test_policyadmin_cannot_touch_the_emergency_role`, `test_policyadmin_cannot_grant_operator_admin_targets`, `test_policyadmin_cannot_grant_operator_the_safety_modifier`, `test_policyadmin_refuses_every_module_of_the_asset_safe`, `test_policyadmin_cannot_grant_operator_delegatecall`, `test_policyadmin_cannot_raise_a_foreign_allowance_key` |

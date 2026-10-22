@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T21:39:40Z
+  at: 2026-10-22T21:53:27Z
 verified: []
 sources:
   - id: s1
@@ -20,8 +20,8 @@ sources:
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads at block 26092572
   - id: s4
-    resource: "https://github.com/lidofinance/clutch/tree/7a8c6613602a0078807298b1cebb513af2d74bd5/test"
-    title: Kit test suites at 7a8c661
+    resource: "https://github.com/lidofinance/clutch/tree/03efa77c724f7fdde791a902a138090c099add0d/test"
+    title: Kit test suites at 03efa77
   - id: s5
     resource: "https://github.com/safe-global/safe-smart-account/blob/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/contracts/base/ModuleManager.sol#L94-L108"
     title: Safe v1.5.0 ModuleManager — the module guard is called for every enabled module
@@ -566,27 +566,29 @@ Costs: two policy applications, two sets of role keys, two modules enabled on th
 
 ### Test Cases
 
-40 tests pass against deployed mainnet bytecode on a fork pinned at block 25946643, at commit 7a8c661 of this repository [s4]. Nothing has been deployed to mainnet. The [invariants](/specs/invariants.md) map these tests to the invariants they check.
+59 tests pass against deployed mainnet bytecode at commit 03efa77 of this repository [s4]: 51 on a fork pinned at block 25946643, and the 8 of the enabling-vote rehearsal at block 26249900 [s14]. Nothing has been deployed to mainnet. The [invariants](/specs/invariants.md) map these tests to the invariants they check.
 
 | Group | n | Covers |
 | --- | --- | --- |
 | Governance script encoding | 6 | Production CallsScript format accepted; 32-byte length rejected; truncated length rejected; multi-call script; script substituted at enactment rejected; objection rejection |
-| Governance change types | 4 | Spender, target, selector, budget |
-| Direct DAO path | 1 | The owner path applies the same change without Easy Track |
-| Escalation guards | 4 | Governance cannot change membership, cannot touch the emergency role, cannot grant the operator an administrative target, cannot raise a foreign allowance key |
-| Budget motions | 3 | A motion and the governance role cannot set a refill period below 30 days; per-key ceilings are expressible with native conditions |
-| Operator lifecycle | 5 | sUSDS, staking, wstETH and WETH round trips on real contracts; the DAI–USDS converter pays the Safe both ways, with a fixed ceiling on its approvals; the withdrawal queue is refused to both roles; receiver pinning enforced; asynchronous vault deposit authorised at the policy layer |
-| Emergency and module | 3 | Revoke, zero approval, exit, and return-to-Agent flow; WETH unwrapped, staked and sent to the Agent, through WETH's 2,300-gas transfer; module disabling with owner recovery |
-| Approvals | 3 | An approval spends its spender's key or stays below a fixed ceiling, and zero is free; the operator cannot restore an approval after revocation; one approve scope per token keeps every spender |
+| Governance change types | 4 | Asset, target, selector, parameter constraint |
+| Direct DAO path | 1 | The owner, Aragon Voting, applies the same change without Easy Track |
+| Escalation guards | 8 | Governance cannot change membership, touch the emergency role, grant the operator an administrative target or the safety modifier, reach a module of the Asset Safe, raise a foreign allowance key, grant delegatecall, or set a refill period below 30 days |
+| Budget motions | 2 | A motion cannot shorten the refill period; per-key ceilings are expressible with native conditions |
+| Operator lifecycle | 5 | sUSDS, staking, wstETH and WETH round trips on real contracts; the DAI–USDS converter pays the Safe both ways; the withdrawal queue is refused; receiver pinning enforced; asynchronous vault deposit authorised at the policy layer |
+| Emergency and the switch | 4 | Revoke, zero approval, exit and return to the Agent; WETH unwrapped, staked and sent to the Agent, through WETH's 2,300-gas transfer; the switch is the emergency role's and pinned, and the owner restores the module; the switch freezes queued motions until the DAO restarts |
+| Approvals | 4 | An approval spends its spender's key or stays below a fixed ceiling, and zero is free; the emergency role gives no non-zero approval and durably stops the operator's re-approval; one approve scope per token keeps every spender |
 | Budgets | 2 | Consumption, exhaustion, refill; keys of different assets and decimals are independent |
-| Adversarial and launch scope | 3 | The operator cannot widen, reach administration or act as another role; it holds only the `operator` key; no order pre-signing, CoW relayer approval, Aave or sDAI |
+| Adversarial and launch scope | 3 | The operator cannot widen, reach administration or act as another role; it holds only the `operator` key; out-of-scope venues are refused |
 | Policy shape | 3 | The policy builds; the `operator` key is the only operator key; no out-of-scope target, spender or receiver |
-| Asset Safe shape | 1 | Aragon Voting is the only owner, threshold one; pinned singleton; no fallback handler, guard or module guard; the Safe owns both modifiers |
+| Asset Safe shape | 1 | A stand-in for Aragon Voting is the only owner, threshold one; pinned singleton; no fallback handler, guard or module guard; the Safe owns both modifiers |
 | Known limits recorded as tests | 1 | A single-child match leaves trailing parameters unconstrained |
+| One orders modifier, on a stand-in | 6 | One modifier is enabled; unassigning the operator's role stops it, and recovery survives; the switch is pinned; the operator cannot restore itself; the emergency role revokes on its own modifier; the DAO restores the operator |
 | Funding bootstrap | 1 | The dry-run funding script |
-| **Total** | **40** | |
+| Enabling-vote rehearsal | 8 | The vote with the live Aragon Voting, ACL, Finance and Easy Track: a vote that carries the policy cannot start; the vote of approved hashes end to end; the ramp-up; Earn deposits from the Asset Safe; a first-loss burn and a redemption request; the payment rewrite changes only USDS |
+| **Total** | **59** | |
 
-Reproduce with `forge test` against an archive RPC, fork block 25946643.
+Reproduce with `forge test` against an archive RPC. The kit forks block 25946643, and the rehearsal block 26249900.
 
 ## Configuration
 
