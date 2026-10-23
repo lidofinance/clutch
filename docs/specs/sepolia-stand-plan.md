@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-22T22:34:04Z
+  at: 2026-10-23T13:21:35Z
 verified: []
 sources:
   - id: s1
@@ -103,6 +103,15 @@ sources:
   - id: s37
     resource: /research/sepolia-constellation-ui-2026-10-22.md
     title: UI registration review — SDK 2.10.0, all workspace metadata and the duplicate-key permission conflicts
+  - id: s38
+    resource: urn:clutch:evidence:2026-10-23:sepolia-role-key-migration
+    title: Owner publication HTTP 200; two canonical successful migration receipts; zero policy differences, unchanged allowances and Safe configuration at block 11976825
+  - id: s39
+    resource: urn:clutch:evidence:2026-10-23:sepolia-workspace-after-migration
+    title: Zodiac UI check — Deploy refuses a Safe already registered in Sepolia Basic Test; Remove vault affects only workspace records
+  - id: s40
+    resource: urn:clutch:evidence:2026-10-23:sepolia-workspace-registration
+    title: Three old vault records removed after four saved policy bindings were detached; new Constellation Deployed with Nothing to deploy, three Vaults and seven Policies
 ---
 
 # Sepolia stand deployment
@@ -332,9 +341,14 @@ Do not press Deploy or Apply in the Zodiac app (OD-97) [s32].
 - [x] Draft OD-100 and the ADR 013 migration proposal for `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency`. Include the same key scheme in the mainnet design dependencies [s32].
 - [x] Record EM's choices on 2026-10-22: OD-100 B, OD-97 C and OD-98 A. The migration uses a locally compiled package through test Voting. The new keys separate the conflicting policies [s32].
 - [x] Prepare the migration package and pass ADR 013's fork checks. Nine pinned-fork tests pass; two local Anvil transactions leave zero policy differences and preserve allowance storage and Safe configuration. The 87 calls fit in two atomic Safe batches. Commands and remaining public steps are in [the migration guide](sepolia-role-key-migration.md) [s32].
-- [ ] Publish the checked migration as a Constellation draft in the Sepolia workspace under an explicit hosted-call authorisation [s32].
-- [ ] Execute the reviewed Asset and Orders batches after EM's decision and the owner's authorisation [s32].
-- [ ] After authorised migration, save the receipts and confirm zero RPC differences against the new declaration. Publish the workspace metadata under a separate instruction and confirm three Vaults and seven Policies with the new key mapping [s32][s37].
+- [x] Publish the checked migration as a Constellation draft. The saved owner publication response on 2026-10-23 has HTTP status `200` and identifies Constellation `c0cc7061-5e89-4024-bf1b-2a3531f2f311` in the Sepolia workspace [s38].
+- [x] Execute the reviewed Asset and Orders batches. Both owner transactions succeeded on 2026-10-23, at blocks `11976805` and `11976806` [s38].
+- [x] Save and verify both canonical receipts against the exact package. The comparison at block `11976825` found zero policy differences, unchanged allowance storage and unchanged Safe configuration apart from the expected nonce increments. Activate the local `account` key profile; a fresh declaration at block `11976830` also has zero differences. Evidence: `cache/sepolia/role-key-migration/verification.json` and `cache/sepolia/constellation/diff.json` [s38].
+- [x] Confirm three Vaults and seven Policies with the new key mapping in the Zodiac workspace. Registration completed on 2026-10-23 through Constellation deployment `b3a13747-db82-40d3-a1bd-07c9873503a3`, whose page shows `Nothing to deploy`. No wallet was connected and no on-chain transaction was sent for this registration [s40]. On 2026-10-23, Deploy stops because Asset Safe is already a vault in `Sepolia Basic Test`, where policies still use it. That workspace contains all three stand vaults. Zodiac permits a Safe to be a vault in only one workspace. This was the initial registration blocker [s39].
+
+On the owner's explicit instruction, detach the saved vault bindings from the old `operator`, `first-loss`, `first-loss-burn` and `orders-operator` policies before removing the three old vault records. The first removal attempt failed with `Vault is still in use`; saving the detached bindings released that dependency. No old policy's `Apply changes` was used. The new Constellation then completed registration with no on-chain calls, and all three Vaults and seven Policies show `Deployed` [s40].
+
+The new workspace's Outstanding list also shows an older Asset proposal, `a7001419-4a97-46ef-b151-69fb4d3843cc`, with five calls and an age of two days. It was not signed, sent or cancelled during registration [s40].
 
 The governance view shows `Unsupported Condition` for `Nor`, but displays its original opcode `3` tree in both columns.
 The saved resolve response matches the prepared payload.

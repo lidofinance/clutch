@@ -1,0 +1,3 @@
+date: '2026-10-23'
+kind: Update
+text: Complete Sepolia workspace registration through Constellation with no on-chain transactions; remove three old vault records after detaching saved policy bindings and confirm three Vaults and seven Policies.

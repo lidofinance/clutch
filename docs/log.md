@@ -1,5 +1,10 @@
 # Log
 
+## 2026-10-23
+
+* **Update**: Complete Sepolia workspace registration through Constellation with no on-chain transactions; remove three old vault records after detaching saved policy bindings and confirm three Vaults and seven Policies.
+* **Update**: Verify the two public Sepolia role-key migration transactions and activate the local account-key profile; Zodiac registration is blocked by vault bindings in the old workspace.
+
 ## 2026-10-22
 
 * **Decision**: Record OD-100 B, OD-97 C and OD-98 A: four account-specific keys for both networks, local Sepolia execution through test Voting and guarded public stand transactions.
