@@ -2,6 +2,8 @@
 
 ## 2026-10-23
 
+* **Update**: Formalize the Sepolia setup coverage inventory and first-transfer assertions; separate fork evidence, public acceptance and missing integrations.
+* **Update**: Add account-key drills on the existing Sepolia stand fork and save the test plan, including CoW settlement, First-loss, governance, emergency recovery and Voting restart.
 * **Update**: Complete Sepolia workspace registration through Constellation with no on-chain transactions; remove three old vault records after detaching saved policy bindings and confirm three Vaults and seven Policies.
 * **Update**: Verify the two public Sepolia role-key migration transactions and activate the local account-key profile; Zodiac registration is blocked by vault bindings in the old workspace.
 

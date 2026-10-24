@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-23T13:21:35Z
+  at: 2026-10-23T14:00:04Z
 verified: []
 sources:
   - id: s1
@@ -112,6 +112,9 @@ sources:
   - id: s40
     resource: urn:clutch:evidence:2026-10-23:sepolia-workspace-registration
     title: Three old vault records removed after four saved policy bindings were detached; new Constellation Deployed with Nothing to deploy, three Vaults and seven Policies
+  - id: s41
+    resource: /specs/sepolia-test-plan.md
+    title: Current-stand fork test matrix, preparation, results and remaining public drills
 ---
 
 # Sepolia stand deployment
@@ -411,6 +414,9 @@ CLUTCH_SEPOLIA=1 just --justfile sepolia.just resume-fund
 Do not rerun `fund` to recover a partial run: it can wrap and transfer the amounts again.
 
 ## 6. CoW drills
+
+Use the [Sepolia test plan](sepolia-test-plan.md) for the current-stand fork command,
+case matrix and evidence requirements. Fork results do not close the public drills below [s41].
 
 - [ ] Committee funds Orders from Asset within the budget [s2].
 - [ ] Request a fresh quote from the Orders address; presign the exact typed order through its Roles modifier.
