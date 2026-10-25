@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass eight real sUSDS fork cases for exact deposit/redeem/withdraw rounding, custody and events, full approval-budget accounting, atomic failures, one-second pending yield and Emergency stop/exit/restart; retain production-role and rate/upgrade limits.

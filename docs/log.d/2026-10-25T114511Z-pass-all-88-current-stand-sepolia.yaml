@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass all 88 current-stand Sepolia fork cases at block 11990591 with payload and source hashes verified; one post-run RPC storage timeout is recorded separately.

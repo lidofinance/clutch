@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass six real Lido v4 fork cases for exact internal-share accounting, submission boundaries, ACL pause/resume, stake-limit exhaustion and stop/restart; retain production graph and oracle report limits.

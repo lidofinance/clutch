@@ -21,6 +21,23 @@ import {
     ISettlement
 } from "./rehearsal/RehearsalBase.sol";
 
+interface IPausableToken {
+    function pauser() external view returns (address);
+    function paused() external view returns (bool);
+    function pause() external;
+    function unpause() external;
+}
+
+interface IEasyTrackActions {
+    function cancelMotion(uint256 motionId) external;
+    function objectToMotion(uint256 motionId) external;
+}
+
+interface ILdoSnapshots {
+    function balanceOfAt(address account, uint256 blockNumber) external view returns (uint256);
+    function totalSupplyAt(uint256 blockNumber) external view returns (uint256);
+}
+
 /// @title EnablingVoteRehearsal — the enabling vote and the first weeks of
 ///        operation, rehearsed end to end on a mainnet fork.
 /// @dev The live Aragon Voting, token manager, Easy Track, script executor,
@@ -172,6 +189,182 @@ contract EnablingVoteRehearsal is RehearsalBase {
         vm.prank(Mainnet.COMMITTEE_SAFE);
         vm.expectRevert(bytes("GS104"));
         opMod.execTransactionWithRole(Mainnet.USDC, 0, abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, 0)), 0, OPERATOR, true);
+    }
+
+    function test_MAIN09_paused_usdc_topup_rolls_back_and_retries() public {
+        _enable();
+        address[] memory recipients = new address[](1); recipients[0] = address(asset);
+        uint256[] memory amounts = new uint256[](1); amounts[0] = 1e6;
+        bytes memory data = abi.encode(Mainnet.USDC, recipients, amounts);
+        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        uint256 openBefore = et.getMotions().length;
+        uint256 safeBefore = IERC20(Mainnet.USDC).balanceOf(address(asset));
+        uint256 registryBefore = IRecipientsRegistry(stableRegistry).spendableBalance();
+        vm.prank(Mainnet.COMMITTEE_SAFE); uint256 id = et.createMotion(stableTopUp, data);
+        assertEq(et.getMotions().length, openBefore + 1);
+        vm.warp(block.timestamp + et.motionDuration() + 1);
+
+        IPausableToken token = IPausableToken(Mainnet.USDC);
+        address pauser = token.pauser(); assertTrue(pauser != address(0)); assertFalse(token.paused());
+        vm.prank(pauser); token.pause(); assertTrue(token.paused());
+        IEasyTrack.Motion[] memory motionsBefore = et.getMotions();
+        (bool ok, bytes memory reason) = Mainnet.EASY_TRACK.call(abi.encodeCall(IEasyTrack.enactMotion, (id, data)));
+        assertFalse(ok); assertEq(bytes4(reason), bytes4(keccak256("Error(string)")));
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)), safeBefore);
+        assertEq(IRecipientsRegistry(stableRegistry).spendableBalance(), registryBefore);
+        IEasyTrack.Motion[] memory motionsAfter = et.getMotions();
+        assertEq(motionsAfter.length, motionsBefore.length); assertEq(motionsAfter[motionsAfter.length - 1].id, id);
+
+        vm.prank(pauser); token.unpause(); assertFalse(token.paused());
+        vm.prank(anyone); et.enactMotion(id, data);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)), safeBefore + 1e6);
+        assertEq(IRecipientsRegistry(stableRegistry).spendableBalance(), registryBefore - 1e18);
+        assertEq(et.getMotions().length, openBefore);
+    }
+
+    function test_MAIN09_topup_factory_rejects_untrusted_creator_and_recipient() public {
+        _enable();
+        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        uint256 openBefore = et.getMotions().length;
+        bytes memory validData = _stableTopUpData(1e6, address(asset));
+        vm.expectRevert(bytes("CALLER_IS_FORBIDDEN"));
+        vm.prank(anyone);
+        et.createMotion(stableTopUp, validData);
+
+        bytes memory unlistedRecipient = _stableTopUpData(1e6, anyone);
+        vm.expectRevert(bytes("RECIPIENT_NOT_ALLOWED"));
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        et.createMotion(stableTopUp, unlistedRecipient);
+        assertEq(et.getMotions().length, openBefore);
+    }
+
+    function test_MAIN09_registry_limit_changes_require_voting_role() public {
+        _enable();
+        IRecipientsRegistry registry = IRecipientsRegistry(stableRegistry);
+        (uint256 limit, uint256 months) = registry.getLimitParameters();
+        assertTrue(registry.hasRole(SET_PARAMETERS_ROLE, Mainnet.VOTING));
+        assertFalse(registry.hasRole(SET_PARAMETERS_ROLE, anyone));
+        (bool ok, bytes memory reason) = address(registry).call(
+            abi.encodeCall(IRecipientsRegistry.setLimitParameters, (limit + 1, months))
+        );
+        assertFalse(ok);
+        assertEq(bytes4(reason), bytes4(keccak256("Error(string)")));
+        (uint256 unchangedLimit, uint256 unchangedMonths) = registry.getLimitParameters();
+        assertEq(unchangedLimit, limit);
+        assertEq(unchangedMonths, months);
+        vm.prank(Mainnet.VOTING);
+        registry.setLimitParameters(limit, months);
+    }
+
+    function test_MAIN09_topup_creator_can_cancel_before_enactment() public {
+        _enable();
+        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        IEasyTrackActions actions = IEasyTrackActions(Mainnet.EASY_TRACK);
+        uint256 openBefore = et.getMotions().length;
+        bytes memory data = _stableTopUpData(1e6, address(asset));
+        uint256 safeBefore = IERC20(Mainnet.USDC).balanceOf(address(asset));
+        uint256 registryBefore = IRecipientsRegistry(stableRegistry).spendableBalance();
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        uint256 id = et.createMotion(stableTopUp, data);
+
+        vm.expectRevert(bytes("NOT_CREATOR"));
+        vm.prank(anyone);
+        actions.cancelMotion(id);
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        actions.cancelMotion(id);
+        assertEq(et.getMotions().length, openBefore);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)), safeBefore);
+        assertEq(IRecipientsRegistry(stableRegistry).spendableBalance(), registryBefore);
+        vm.expectRevert(bytes("MOTION_NOT_FOUND"));
+        vm.prank(anyone);
+        et.enactMotion(id, data);
+    }
+
+    function test_MAIN09_late_lido_objection_rejects_topup_without_payment() public {
+        _enable();
+        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        IEasyTrackActions actions = IEasyTrackActions(Mainnet.EASY_TRACK);
+        uint256 openBefore = et.getMotions().length;
+        vm.prank(Mainnet.AGENT);
+        IERC20(Mainnet.LDO).transfer(anyone, 10_000_000e18);
+        bytes memory data = _stableTopUpData(1e6, address(asset));
+        uint256 safeBefore = IERC20(Mainnet.USDC).balanceOf(address(asset));
+        uint256 registryBefore = IRecipientsRegistry(stableRegistry).spendableBalance();
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        uint256 id = et.createMotion(stableTopUp, data);
+        IEasyTrack.Motion[] memory motions = et.getMotions();
+        IEasyTrack.Motion memory motion = motions[motions.length - 1];
+        vm.roll(block.number + 1);
+        uint256 weight = ILdoSnapshots(Mainnet.LDO).balanceOfAt(anyone, motion.snapshotBlock);
+        uint256 supply = ILdoSnapshots(Mainnet.LDO).totalSupplyAt(motion.snapshotBlock);
+        assertGe(weight * 10_000 / supply, motion.objectionsThreshold);
+        vm.prank(anyone);
+        IERC20(Mainnet.LDO).transfer(Mainnet.AGENT, 10_000_000e18);
+        vm.prank(anyone);
+        actions.objectToMotion(id);
+
+        assertEq(et.getMotions().length, openBefore);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)), safeBefore);
+        assertEq(IRecipientsRegistry(stableRegistry).spendableBalance(), registryBefore);
+        vm.expectRevert(bytes("MOTION_NOT_FOUND"));
+        vm.prank(anyone);
+        et.enactMotion(id, data);
+    }
+
+    function test_MAIN09_monthly_topup_limit_exact_boundary_race_and_rollover() public {
+        _enable();
+        IRecipientsRegistry registry = IRecipientsRegistry(stableRegistry);
+        vm.prank(Mainnet.VOTING);
+        registry.setLimitParameters(2_000_000e18, 1);
+        deal(Mainnet.USDC, Mainnet.AGENT, 2_000_000e6);
+        uint256 safeBefore = IERC20(Mainnet.USDC).balanceOf(address(asset));
+        bytes memory overBoundary = _stableTopUpData(1_500_000e6, address(asset));
+        bytes memory competing = _stableTopUpData(1_000_000e6, address(asset));
+        bytes memory exactRemainder = _stableTopUpData(500_000e6, address(asset));
+        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        uint256 openBefore = et.getMotions().length;
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        uint256 first = et.createMotion(stableTopUp, overBoundary);
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        uint256 second = et.createMotion(stableTopUp, competing);
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        uint256 third = et.createMotion(stableTopUp, exactRemainder);
+        vm.warp(block.timestamp + et.motionDuration() + 1);
+
+        vm.prank(anyone);
+        et.enactMotion(first, overBoundary);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)), safeBefore + 1_500_000e6);
+        assertEq(registry.spendableBalance(), 500_000e18);
+        vm.expectRevert(bytes("SUM_EXCEEDS_SPENDABLE_BALANCE"));
+        vm.prank(anyone);
+        et.enactMotion(second, competing);
+        assertEq(et.getMotions().length, openBefore + 2);
+        assertEq(registry.spendableBalance(), 500_000e18);
+
+        vm.prank(anyone);
+        et.enactMotion(third, exactRemainder);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)), safeBefore + 2_000_000e6);
+        assertEq(registry.spendableBalance(), 0);
+        assertEq(et.getMotions().length, openBefore + 1);
+        (uint256 spentBefore, uint256 spendableBefore,, uint256 periodEnd) = registry.getPeriodState();
+        assertEq(spentBefore, 2_000_000e18);
+        assertEq(spendableBefore, 0);
+        assertGe(block.timestamp + et.motionDuration(), periodEnd);
+        deal(Mainnet.USDC, Mainnet.AGENT, 1_000_000e6);
+        bytes memory nextPeriod = _stableTopUpData(1_000_000e6, address(asset));
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        uint256 rollover = et.createMotion(stableTopUp, nextPeriod);
+        IEasyTrack.Motion[] memory pending = et.getMotions();
+        IEasyTrack.Motion memory rolloverMotion = pending[pending.length - 1];
+        assertGe(rolloverMotion.startDate + rolloverMotion.duration, periodEnd);
+        vm.warp(rolloverMotion.startDate + rolloverMotion.duration + 1);
+        vm.prank(anyone);
+        et.enactMotion(rollover, nextPeriod);
+        (uint256 spentAfter, uint256 spendableAfter,, uint256 nextPeriodEnd) = registry.getPeriodState();
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)), safeBefore + 3_000_000e6);
+        assertEq(spentAfter, 1_000_000e18);
+        assertEq(spendableAfter, 1_000_000e18);
+        assertGt(nextPeriodEnd, periodEnd);
     }
 
     // ---------------------------------------------------------------------
@@ -704,6 +897,14 @@ contract EnablingVoteRehearsal is RehearsalBase {
         vm.warp(block.timestamp + et.motionDuration() + 1);
         vm.prank(anyone);
         et.enactMotion(id, cd);
+    }
+
+    function _stableTopUpData(uint256 amount, address recipient) internal pure returns (bytes memory) {
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipient;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
+        return abi.encode(Mainnet.USDC, recipients, amounts);
     }
 
     function _operator(address to, bytes memory data, bool expectOk) internal {

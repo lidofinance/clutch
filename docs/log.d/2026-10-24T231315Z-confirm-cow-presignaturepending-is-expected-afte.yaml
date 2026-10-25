@@ -1,0 +1,3 @@
+date: '2026-10-24'
+kind: Evidence
+text: Confirm CoW presignaturePending is expected after unsign; invalidation is a separate state

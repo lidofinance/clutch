@@ -1,0 +1,3 @@
+date: '2026-10-24'
+kind: Evidence
+text: Trace all 102 Orders Safe transactions; confirm no silent conditional-order creates, registered TWAPs or Merkle root after cleanup.

@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Reproduce four Safe configuration false matches on the Sepolia fork; check five Safe owner sets, thresholds and both guard slots, pass 44 diff regressions and close OPS-05.

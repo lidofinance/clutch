@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Extend real First-loss redemption probes to nonzero fee and maximum-fee recipient exemption for both shares; the final full fork run passes 118 cases with 16 separate skips.

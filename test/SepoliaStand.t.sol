@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.8.24 <0.9.0;
 
-import {Test} from "forge-std/Test.sol";
+import {SepoliaStandFixture} from "./utils/SepoliaStandFixture.sol";
 import {ISafe} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
@@ -15,81 +15,17 @@ import {
     IComposableCoW
 } from "../script/sepolia/CoWInterfaces.sol";
 
-/// @dev ADR 005/007/008 acceptance probes against the stand created on a local fork.
-contract SepoliaStandTest is Test {
-    string internal manifest;
-    address internal controller;
-    address internal committee;
-    address internal emergency;
-    address internal asset;
-    address internal orders;
-    address internal firstLoss;
-    IRoles internal operator;
-    IRoles internal safety;
-    IRoles internal ordersRoles;
-    IRoles internal firstLossRoles;
-    bytes32 internal constant OP = bytes32("operator");
-    bytes32 internal constant EM = bytes32("emergency");
-    bytes4 internal constant CONDITION_VIOLATION = 0xd0a9bf58;
-
-    function a(string memory name) internal view returns (address) {
-        return vm.parseJsonAddress(manifest, string.concat(".", name));
-    }
-
-    function d(string memory name) internal view returns (address) {
-        return vm.parseJsonAddress(manifest, string.concat(".dependencies.contracts.", name, ".address"));
-    }
-
-    function token(string memory name) internal view returns (address) {
-        return vm.parseJsonAddress(manifest, string.concat(".dependencies.tokens.", name, ".address"));
-    }
-
-    function setUp() public {
-        string memory rpc = vm.envOr("SEPOLIA_REHEARSAL_RPC", string(""));
-        if (bytes(rpc).length == 0) {
-            vm.skip(true);
-            return;
-        }
-        require(keccak256(bytes(rpc)) == keccak256("http://127.0.0.1:8547"), "Local rehearsal only");
-        vm.createSelectFork(rpc);
-        manifest = vm.readFile(vm.envString("SEPOLIA_MANIFEST"));
-        controller = a("controller");
-        committee = a("operatorSafe");
-        emergency = a("emergencySafe");
-        asset = a("assetSafe");
-        orders = a("ordersSafe");
-        firstLoss = a("firstLossSafe");
-        operator = IRoles(a("operatorModifier"));
-        safety = IRoles(a("safetyModifier"));
-        ordersRoles = IRoles(a("ordersModifier"));
-        firstLossRoles = IRoles(a("firstLossModifier"));
-    }
-
-    function exec(address member, IRoles roles, bytes32 role, address to, bytes memory data, uint8 operation) internal {
-        vm.prank(member);
-        assertTrue(roles.execTransactionWithRole(to, 0, data, operation, role, true));
-    }
-
-    function denied(address member, IRoles roles, bytes32 role, address to, bytes memory data, uint8 operation)
-        internal
-    {
-        vm.prank(member);
-        (bool ok, bytes memory ret) =
-            address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole, (to, 0, data, operation, role, true)));
-        assertFalse(ok, "permission must reject");
-        assertEq(bytes4(ret), CONDITION_VIOLATION, "must reject in Roles");
-    }
-
-    function committeeCall(address to, bytes memory data) internal {
-        bytes memory signature = abi.encodePacked(bytes32(uint256(uint160(controller))), bytes32(0), uint8(1));
-        vm.prank(controller);
-        assertTrue(
-            ISafe(payable(committee))
-                .execTransaction(to, 0, data, 0, 0, 0, 0, address(0), payable(address(0)), signature)
-        );
-    }
-
+/// @dev ADR 005/007/008 acceptance probes on a pinned existing stand or a local rehearsal.
+contract SepoliaStandTest is SepoliaStandFixture {
     function test_account_graph_and_domain_verifier() public view {
+        string[4] memory modifiers = ["operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier"];
+        address[4] memory avatars = [asset, asset, orders, firstLoss];
+        for (uint256 i; i < modifiers.length; ++i) {
+            IRoles roles = IRoles(a(modifiers[i]));
+            assertEq(roles.owner(), avatars[i]);
+            assertEq(roles.avatar(), avatars[i]);
+            assertEq(roles.target(), avatars[i]);
+        }
         assertEq(ISafe(payable(committee)).getOwners()[0], controller);
         assertEq(ISafe(payable(emergency)).getOwners()[0], controller);
         assertEq(ISafe(payable(committee)).getThreshold(), 1);
@@ -105,52 +41,39 @@ contract SepoliaStandTest is Test {
         assertEq(ICoWFallback(d("fallbackHandler")).domainVerifiers(orders, domain), d("composableCow"));
         assertEq(MockAragonAgent(payable(a("voting"))).owner(), controller);
         assertTrue(a("agent") != a("voting"));
-        assertEq(SepoliaShares(a("usdShare")).balanceOf(firstLoss), 10 ether);
-        assertEq(SepoliaShares(a("ethShare")).balanceOf(firstLoss), 10 ether);
-        assertEq(IERC20(token("weth")).balanceOf(asset), 0.02 ether);
+        assertGe(SepoliaShares(a("usdShare")).balanceOf(firstLoss), 10 ether);
+        assertGe(SepoliaShares(a("ethShare")).balanceOf(firstLoss), 10 ether);
     }
 
     function test_funding_budget_and_safe_owner_path() public {
         address weth = token("weth");
-        deal(weth, asset, 2 ether);
+        uint256 ordersBefore = IERC20(weth).balanceOf(orders);
+        (uint128 refill,,uint64 period,uint128 available,) = operator.allowances(bytes32("orders_weth"));
+        assertGt(available, 0);
+        deal(weth, asset, uint256(available) + refill);
         committeeCall(
             address(operator),
             abi.encodeCall(
                 IRoles.execTransactionWithRole,
-                (weth, 0, abi.encodeCall(IERC20.transfer, (orders, 1 ether)), 0, OP, true)
+                (weth, 0, abi.encodeCall(IERC20.transfer, (orders, available)), 0, assetOperator, true)
             )
         );
-        assertEq(IERC20(weth).balanceOf(orders), 1 ether);
-        denied(committee, operator, OP, weth, abi.encodeCall(IERC20.transfer, (orders, 1)), 0);
-        denied(committee, operator, OP, weth, abi.encodeCall(IERC20.transfer, (controller, 1)), 0);
-        vm.warp(vm.getBlockTimestamp() + 30 days);
-        exec(committee, operator, OP, weth, abi.encodeCall(IERC20.transfer, (orders, 1 ether)), 0);
-        assertEq(IERC20(weth).balanceOf(orders), 2 ether);
+        assertEq(IERC20(weth).balanceOf(orders), ordersBefore + available);
+        denied(committee, operator, assetOperator, weth, abi.encodeCall(IERC20.transfer, (orders, 1)), 0);
+        denied(committee, operator, assetOperator, weth, abi.encodeCall(IERC20.transfer, (controller, 1)), 0);
+        vm.warp(vm.getBlockTimestamp() + period);
+        exec(committee, operator, assetOperator, weth, abi.encodeCall(IERC20.transfer, (orders, refill)), 0);
+        assertEq(IERC20(weth).balanceOf(orders), ordersBefore + available + refill);
     }
 
-    function order() internal view returns (CoWOrder.Data memory) {
-        return CoWOrder.Data(
-            token("weth"),
-            token("usdc"),
-            asset,
-            0.01 ether,
-            1,
-            uint32(block.timestamp + 1 hours - 1),
-            bytes32(0),
-            0,
-            keccak256("sell"),
-            false,
-            keccak256("erc20"),
-            keccak256("erc20")
-        );
-    }
+
 
     function test_typed_order_presign_unsign_and_receivers() public {
         CoWOrder.Data memory o = order();
         exec(
             committee,
             ordersRoles,
-            OP,
+            ordersOperator,
             d("orderSigner"),
             abi.encodeCall(IOrderSigner.signOrder, (o, uint32(1 hours), 0)),
             1
@@ -158,13 +81,13 @@ contract SepoliaStandTest is Test {
         bytes memory uid =
             abi.encodePacked(CoWOrder.digest(o, ICoWSettlement(d("settlement")).domainSeparator()), orders, o.validTo);
         assertGt(ICoWSettlement(d("settlement")).preSignature(uid), 0);
-        exec(committee, ordersRoles, OP, d("orderSigner"), abi.encodeCall(IOrderSigner.unsignOrder, (o)), 1);
+        exec(committee, ordersRoles, ordersOperator, d("orderSigner"), abi.encodeCall(IOrderSigner.unsignOrder, (o)), 1);
         assertEq(ICoWSettlement(d("settlement")).preSignature(uid), 0);
         o.receiver = controller;
         denied(
             committee,
             ordersRoles,
-            OP,
+            ordersOperator,
             d("orderSigner"),
             abi.encodeCall(IOrderSigner.signOrder, (o, uint32(1 hours), 0)),
             1
@@ -173,32 +96,15 @@ contract SepoliaStandTest is Test {
         denied(
             committee,
             ordersRoles,
-            OP,
+            ordersOperator,
             d("orderSigner"),
             abi.encodeCall(IOrderSigner.signOrder, (o, uint32(90 days + 1), 0)),
             1
         );
-        denied(committee, ordersRoles, OP, token("weth"), abi.encodeCall(IERC20.approve, (d("vaultRelayer"), 1)), 0);
+        denied(committee, ordersRoles, ordersOperator, token("weth"), abi.encodeCall(IERC20.approve, (d("vaultRelayer"), 1)), 0);
     }
 
-    function twap(address receiver, uint256 count) internal view returns (IComposableCoW.Params memory) {
-        return IComposableCoW.Params(
-            d("twap"),
-            bytes32(uint256(1)),
-            abi.encode(
-                token("weth"),
-                token("usdc"),
-                receiver,
-                uint256(0.005 ether),
-                uint256(1),
-                uint256(0),
-                count,
-                uint256(60),
-                uint256(0),
-                bytes32(0)
-            )
-        );
-    }
+
 
     function test_twap_two_parts_signature_and_cancellation() public {
         IComposableCoW cow = IComposableCoW(d("composableCow"));
@@ -206,7 +112,7 @@ contract SepoliaStandTest is Test {
         exec(
             committee,
             ordersRoles,
-            OP,
+            ordersOperator,
             address(cow),
             abi.encodeCall(IComposableCoW.createWithContext, (p, d("timestampFactory"), bytes(""), true)),
             0
@@ -223,7 +129,7 @@ contract SepoliaStandTest is Test {
         exec(
             emergency,
             ordersRoles,
-            EM,
+            ordersEmergency,
             address(cow),
             abi.encodeCall(IComposableCoW.remove, (keccak256(abi.encode(p)))),
             0
@@ -233,7 +139,7 @@ contract SepoliaStandTest is Test {
         denied(
             committee,
             ordersRoles,
-            OP,
+            ordersOperator,
             address(cow),
             abi.encodeCall(
                 IComposableCoW.createWithContext, (twap(controller, 2), d("timestampFactory"), bytes(""), true)
@@ -243,7 +149,7 @@ contract SepoliaStandTest is Test {
         denied(
             committee,
             ordersRoles,
-            OP,
+            ordersOperator,
             address(cow),
             abi.encodeCall(IComposableCoW.createWithContext, (twap(asset, 91), d("timestampFactory"), bytes(""), true)),
             0
@@ -254,6 +160,9 @@ contract SepoliaStandTest is Test {
         for (uint256 i; i < 2; ++i) {
             SepoliaShares share = SepoliaShares(a(i == 0 ? "usdShare" : "ethShare"));
             SepoliaRedeemQueue queue = SepoliaRedeemQueue(a(i == 0 ? "usdQueue" : "ethQueue"));
+            uint256 sharesBefore = share.balanceOf(firstLoss);
+            uint256 queuedBefore = share.balanceOf(address(queue));
+            uint256 agentBefore = queue.asset().balanceOf(a("agent"));
             uint32 timestamp = uint32(block.timestamp);
             exec(
                 committee,
@@ -263,8 +172,8 @@ contract SepoliaStandTest is Test {
                 abi.encodeCall(SepoliaRedeemQueue.redeem, (3 ether)),
                 0
             );
-            assertEq(share.balanceOf(firstLoss), 7 ether);
-            assertEq(share.balanceOf(address(queue)), 3 ether);
+            assertEq(share.balanceOf(firstLoss), sharesBefore - 3 ether);
+            assertEq(share.balanceOf(address(queue)), queuedBefore + 3 ether);
             vm.prank(controller);
             queue.settle(firstLoss, timestamp);
             uint32[] memory stamps = new uint32[](1);
@@ -285,7 +194,7 @@ contract SepoliaStandTest is Test {
                 abi.encodeCall(SepoliaRedeemQueue.claim, (a("agent"), stamps)),
                 0
             );
-            assertEq(queue.asset().balanceOf(a("agent")), 3 ether);
+            assertEq(queue.asset().balanceOf(a("agent")), agentBefore + 3 ether);
             denied(
                 committee,
                 firstLossRoles,
@@ -314,31 +223,35 @@ contract SepoliaStandTest is Test {
     }
 
     function test_burn_motion_wait_objection_and_voting_cancellation() public {
-        SepoliaShares share = SepoliaShares(a("usdShare"));
-        SepoliaEasyTrack et = SepoliaEasyTrack(a("easyTrack"));
-        bytes memory input = abi.encode(address(share), 2 ether);
-        committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), input)));
-        vm.expectRevert("ET: objection period not passed");
-        et.enactMotion(0, input);
-        vm.warp(vm.getBlockTimestamp() + et.motionDuration());
-        et.enactMotion(0, input);
-        assertEq(share.balanceOf(firstLoss), 8 ether);
-        committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), input)));
-        vm.prank(controller);
-        et.object(1);
-        vm.warp(vm.getBlockTimestamp() + et.motionDuration());
-        vm.expectRevert("ET: motion not pending");
-        et.enactMotion(1, input);
-        committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), input)));
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = 2;
-        vm.prank(controller);
-        MockAragonAgent(payable(a("voting")))
-            .execute(address(et), 0, abi.encodeCall(SepoliaEasyTrack.cancelMotions, (ids)));
-        vm.warp(vm.getBlockTimestamp() + et.motionDuration());
-        vm.expectRevert("ET: motion not pending");
-        et.enactMotion(2, input);
-        assertEq(share.balanceOf(firstLoss), 8 ether);
+        for (uint256 i; i < 2; ++i) {
+            SepoliaShares share = SepoliaShares(a(i == 0 ? "usdShare" : "ethShare"));
+            SepoliaEasyTrack et = SepoliaEasyTrack(a("easyTrack"));
+            uint256 sharesBefore = share.balanceOf(firstLoss);
+            uint256 motionId = et.motionsCount();
+            bytes memory input = abi.encode(address(share), 2 ether);
+            committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), input)));
+            vm.expectRevert("ET: objection period not passed");
+            et.enactMotion(motionId, input);
+            vm.warp(vm.getBlockTimestamp() + et.motionDuration());
+            et.enactMotion(motionId, input);
+            assertEq(share.balanceOf(firstLoss), sharesBefore - 2 ether);
+            committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), input)));
+            vm.prank(controller);
+            et.object(motionId + 1);
+            vm.warp(vm.getBlockTimestamp() + et.motionDuration());
+            vm.expectRevert("ET: motion not pending");
+            et.enactMotion(motionId + 1, input);
+            committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), input)));
+            uint256[] memory ids = new uint256[](1);
+            ids[0] = motionId + 2;
+            vm.prank(controller);
+            MockAragonAgent(payable(a("voting")))
+                .execute(address(et), 0, abi.encodeCall(SepoliaEasyTrack.cancelMotions, (ids)));
+            vm.warp(vm.getBlockTimestamp() + et.motionDuration());
+            vm.expectRevert("ET: motion not pending");
+            et.enactMotion(motionId + 2, input);
+            assertEq(share.balanceOf(firstLoss), sharesBefore - 2 ether);
+        }
     }
 
     function test_emergency_stops_asset_operator_but_cannot_restart() public {
@@ -347,10 +260,10 @@ contract SepoliaStandTest is Test {
         for (uint256 i; i < modules.length && modules[i] != address(operator); ++i) {
             previous = modules[i];
         }
-        exec(emergency, safety, EM, asset, abi.encodeCall(ISafe.disableModule, (previous, address(operator))), 0);
+        exec(emergency, safety, assetEmergency, asset, abi.encodeCall(ISafe.disableModule, (previous, address(operator))), 0);
         assertFalse(ISafe(payable(asset)).isModuleEnabled(address(operator)));
         assertTrue(ISafe(payable(asset)).isModuleEnabled(address(safety)));
-        denied(emergency, safety, EM, asset, abi.encodeCall(ISafe.enableModule, (address(operator))), 0);
+        denied(emergency, safety, assetEmergency, asset, abi.encodeCall(ISafe.enableModule, (address(operator))), 0);
         // The Asset switch leaves Orders and First-loss independent (ADR 005).
         assertTrue(ISafe(payable(orders)).isModuleEnabled(address(ordersRoles)));
         assertTrue(ISafe(payable(firstLoss)).isModuleEnabled(address(firstLossRoles)));

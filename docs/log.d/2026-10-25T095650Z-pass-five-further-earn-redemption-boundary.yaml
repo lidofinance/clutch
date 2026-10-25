@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass five further Earn redemption boundary/fault cases; reconcile nonzero fee burn/mint against deployed traces, correct both request helpers and retain the source-version mismatch and injected-fault limits.

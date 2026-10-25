@@ -5,7 +5,7 @@ import { rolesAbi } from "zodiac-roles-sdk";
 import type { build } from "./compile";
 import { diffPolicy } from "./diff";
 
-const ABI = new Interface([...rolesAbi, "event Initialized(uint64 version)"]);
+const ABI = new Interface([...rolesAbi, "event Initialized(uint64 version)", "function getOwners() view returns(address[])", "function getThreshold() view returns(uint256)"]);
 const A = (number: number) => getAddress("0x" + number.toString(16).padStart(40, "0"));
 const K = (number: number) => zeroPadValue(toQuantity(number).replace(/^0x([0-9a-f])$/, "0x0$1"), 32);
 const H = (number: number) => "0x" + number.toString(16).padStart(64, "0");
@@ -18,7 +18,7 @@ const CODE = "0x6000";
 function fixture() {
   const manifest = {
     chainId: 11155111, simulationBlock: 100, assetSafe: A(10), ordersSafe: A(11), firstLossSafe: A(12),
-    operatorSafe: A(13), emergencySafe: A(14),
+    operatorSafe: A(13), emergencySafe: A(14), controller: A(15), voting: A(16),
     dependencies: { contracts: { roles: { address: A(900), codeHash: keccak256(CODE) } } },
   };
   const conditions = [{ parent: 0, paramType: 5, operator: 5, compValue: "0x" }, { parent: 0, paramType: 1, operator: 16, compValue: H(123) }];
@@ -67,6 +67,9 @@ function fixture() {
   for (const safe of [manifest.assetSafe, manifest.ordersSafe, manifest.firstLossSafe, manifest.operatorSafe, manifest.emergencySafe]) {
     lists.set(safe.toLowerCase(), modifiers.filter((mod) => mod.avatar === safe).map((mod) => mod.address));
   }
+  const safeOwners = new Map([manifest.assetSafe, manifest.ordersSafe, manifest.firstLossSafe, manifest.operatorSafe, manifest.emergencySafe].map((safe) => [safe.toLowerCase(), [safe === manifest.operatorSafe || safe === manifest.emergencySafe ? manifest.controller : manifest.voting]]));
+  const thresholds = new Map([...safeOwners.keys()].map((safe) => [safe, 1n]));
+  const storage = new Map<string, string>();
   const calls: [string, unknown[]][] = [];
   const control = { wrongChain: false, reorg: false, oldCode: false, unsupportedLogs: false, wrongLogHash: false };
   let snapshotReads = 0;
@@ -90,6 +93,10 @@ function fixture() {
         const filter = params[0];
         return logs.filter((log) => log.address.toLowerCase() === filter.address.toLowerCase() && BigInt(log.blockNumber) >= BigInt(filter.fromBlock) && BigInt(log.blockNumber) <= BigInt(filter.toBlock)).map((log) => control.wrongLogHash ? { ...log, blockHash: H(999) } : log);
       }
+      case "eth_getStorageAt": {
+        expect(params[2]).toBe(toQuantity(PIN));
+        return storage.get(`${params[0].toLowerCase()}:${params[1].toLowerCase()}`) ?? ZeroHash;
+      }
       case "eth_call": {
         expect(params[1]).toBe(toQuantity(PIN));
         const { to, data } = params[0];
@@ -97,6 +104,9 @@ function fixture() {
         const mod = modifiers.find((item) => item.address.toLowerCase() === to.toLowerCase());
         let result: unknown[];
         switch (query.name) {
+          // Shape captured from all five deployed Safe getters on the pinned Sepolia fork.
+          case "getOwners": result = [safeOwners.get(to.toLowerCase())]; break;
+          case "getThreshold": result = [thresholds.get(to.toLowerCase())]; break;
           case "owner": result = [owners.get(to.toLowerCase())]; break;
           case "avatar": case "target": result = [mod![query.name]]; break;
           case "getModulesPaginated": {
@@ -116,7 +126,7 @@ function fixture() {
       default: throw new Error(`Unexpected RPC ${method}`);
     }
   };
-  return { manifest, artifact, modifiers, rpc, calls, logs, emit, lists, owners, defaults, adapters, control, setAllowance: (value: bigint[]) => allowance = value };
+  return { manifest, artifact, modifiers, rpc, calls, logs, emit, lists, owners, safeOwners, thresholds, storage, defaults, adapters, control, setAllowance: (value: bigint[]) => allowance = value };
 }
 
 test("seven roles and four modifiers match; timestamp zero is initialization, not drift", async () => {
@@ -127,7 +137,7 @@ test("seven roles and four modifiers match; timestamp zero is initialization, no
   const ranges = f.calls.filter(([method]) => method === "eth_getLogs").map(([, params]) => params[0] as any);
   expect(ranges).toHaveLength(12);
   expect(ranges.every((range) => BigInt(range.toBlock) - BigInt(range.fromBlock) < 1000n)).toBe(true);
-  expect(f.calls.every(([method]) => ["eth_chainId", "eth_blockNumber", "eth_getBlockByNumber", "eth_getCode", "eth_getLogs", "eth_call"].includes(method))).toBe(true);
+  expect(f.calls.every(([method]) => ["eth_chainId", "eth_blockNumber", "eth_getBlockByNumber", "eth_getCode", "eth_getLogs", "eth_call", "eth_getStorageAt"].includes(method))).toBe(true);
 });
 
 test("consumed balance and accrued timestamp remain observations, while refill configuration drifts", async () => {
@@ -230,4 +240,27 @@ test.each(["wrong chain", "reorg", "old code", "omitted setup", "noncanonical lo
 test("a missing permission event becomes missing configuration rather than an assumed match", async () => {
   const f = fixture(); f.logs.splice(f.logs.findIndex((log) => log.topics[0] === ABI.getEvent("ScopeFunction")!.topicHash), 1);
   expect((await diffPolicy(f.rpc, f.manifest, f.artifact)).matches).toBe(false);
+});
+
+// Safe getter shapes were captured at block 11988226. Local self-calls to the
+// deployed Safes reproduce owner/threshold/guard mutations independently of this mock.
+for (const safeName of ["assetSafe", "ordersSafe", "firstLossSafe", "operatorSafe", "emergencySafe"] as const) {
+  test.each(["owners", "threshold", "guard", "moduleGuard"])(`Safe ${safeName} configuration drift is reported: %s`, async (field) => {
+    const f = fixture(), safe = f.manifest[safeName];
+    if (field === "owners") f.safeOwners.set(safe.toLowerCase(), [A(99)]);
+    if (field === "threshold") f.thresholds.set(safe.toLowerCase(), 2n);
+    if (field === "guard" || field === "moduleGuard") {
+      const slot = field === "guard" ? "0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8" : "0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947";
+      f.storage.set(`${safe.toLowerCase()}:${slot}`, zeroPadValue(A(99), 32));
+    }
+    const report = await diffPolicy(f.rpc, f.manifest, f.artifact);
+    expect(report.matches).toBe(false);
+    expect(report.differences.map((item) => item.path)).toEqual([`safes.${safe}.${field}`]);
+  });
+}
+
+test.each([null, "0x0", "0x" + "gg".repeat(32)])("invalid Safe storage response stops verification: %s", async (value) => {
+  const f = fixture();
+  const rpc = (method: string, params: any[]) => method === "eth_getStorageAt" ? Promise.resolve(value) : f.rpc(method, params);
+  await expect(diffPolicy(rpc, f.manifest, f.artifact)).rejects.toThrow("Invalid Safe storage response");
 });

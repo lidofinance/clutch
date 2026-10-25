@@ -1,5 +1,107 @@
 # Log
 
+## 2026-10-25
+
+* **Evidence**: Pass the full 136-test fork suite before commit; fix Solc payout-model inlining, pin token-specific relayer allowance behavior and keep review findings in results.
+* **Evidence**: Prepare the Sepolia UI funding/return batch at Committee nonce 51; exact read-only simulation and two fork tests pass, including budget accounting and complete rollback for a forbidden return receiver.
+* **Evidence**: Close ET-05 with real Easy Track and LDO: raw-unit threshold boundaries, two-objector accumulation, duplicate refusal and post-snapshot transfers pass for both Earn shares; full fork suite passes 136 tests.
+* **Evidence**: Recheck Zodiac UI prerequisites: record the rejected old proposal, disconnected IAB signer, empty Transfer selector and Brave sign-in requirement without changing proposals or sending transactions.
+* **Evidence**: Pass the three MAIN-11 CoW token-matrix tests and the full 134-test fork suite; record forty settlement directions, independent stETH share arithmetic and explicit production-policy gaps in results.
+* **Evidence**: Replay frozen Sepolia constructors: all twelve stand runtimes match at creation and block 11992803; verify both queue child-token addresses and record the corrected ABI-head assertion in results.
+* **Evidence**: Rerun all 88 current-stand Sepolia fork tests at block 11992758; record the initial sandbox RPC failure and successful read-only retry in the results file.
+* **Evidence**: Record the sandbox DNS failure before fork setup and the subsequent successful read-only fork rerun.
+* **Evidence**: Pass all 88 current-stand Sepolia fork cases at block 11990591 with payload and source hashes verified; one post-run RPC storage timeout is recorded separately.
+* **Evidence**: Pass the Sepolia local guard, order, fee, workflow and policy suites with the strict TypeScript check; send no public transactions.
+* **Evidence**: Rerun all mainnet protocol fork suites on the current working tree; 131 passed, none failed and 16 Sepolia or migration cases skipped.
+* **Evidence**: Record blockers and post-launch status for MAIN-13 through MAIN-16 in Sepolia test results.
+* **Evidence**: Record MAIN-12 as open because the production screening guard and guarded Committee Safe are unavailable to the harness.
+* **Evidence**: Record MAIN-10 as not yet testable because its template factories and exit-governance role are not implemented.
+* **Evidence**: Record the missing CoW launch-token matrix coverage for MAIN-11.
+* **Evidence**: Pass all six MAIN-09 Easy Track registry, limit, objection, cancellation and paused-payment fork cases; full suite passes 131.
+* **Evidence**: Pass the MAIN-09 paused-USDC top-up rollback and retry case on the pinned mainnet fork; full suite passes 126 tests.
+* **Evidence**: Map the live treasury registry rehearsal to MAIN-09; production values and limit-boundary paths stay open.
+* **Evidence**: Pass the six MAIN-08 real-share burn motion cases on the pinned fork; factory registration stays local.
+* **Evidence**: Pass the MAIN-07 USDC queue-blacklist rollback and retry case on the pinned mainnet fork.
+* **Evidence**: Extend real First-loss redemption probes to nonzero fee and maximum-fee recipient exemption for both shares; the final full fork run passes 118 cases with 16 separate skips.
+* **Evidence**: Pass three more real Earn redemption cases for fee-recipient exemption, raw-share rounding and maximum-fee zero-net cleanup; record zero-payout and persistent-request boundaries separately from production coverage.
+* **Evidence**: Pass five further Earn redemption boundary/fault cases; reconcile nonzero fee burn/mint against deployed traces, correct both request helpers and retain the source-version mismatch and injected-fault limits.
+* **Evidence**: Pass three real First-loss EarnUSD/EarnETH fork probes for Agent-only claims, role isolation, replay and membership recovery; retain the compiled production-policy and signing limits.
+* **Evidence**: Pass seven real Earn Asset redemption fork cases and all fifteen Earn cases; record exact request/report/batch/claim ledgers and keep separate First-loss coverage open.
+* **Update**: Separate the concise stand test plan and public transaction sequences from recorded runs, findings and failures in a dedicated results page.
+* **Evidence**: Pass eight real EarnUSD/EarnETH deposit cases through existing oracle, vault, queues and hooks; verify exact claims/cancels, proof/account separation, cap boundary and emergency restart; retain timing and RPC failures and explicit fork-only grant limits.
+* **Evidence**: Pass eight real sUSDS fork cases for exact deposit/redeem/withdraw rounding, custody and events, full approval-budget accounting, atomic failures, one-second pending yield and Emergency stop/exit/restart; retain production-role and rate/upgrade limits.
+* **Evidence**: Pass seven real DaiUsds fork cases for exact token supply and Vat accounting, approval boundaries, rollback, Emergency return/restart and USDS deny/rely recovery; retain the failed cage assumption and five actual caller refusals.
+* **Evidence**: Pass five real wstETH fork cases for exact share rounding and custody, approval boundaries and zeroing, failed-call rollback, both unwrap roles and stop/recovery/restart; retain production-role and oracle-cycle limits.
+* **Evidence**: Pass six real Lido v4 fork cases for exact internal-share accounting, submission boundaries, ACL pause/resume, stake-limit exhaustion and stop/restart; retain production graph and oracle report limits.
+* **Evidence**: Pass five WETH boundary/recovery cases and all 65 mainnet fork tests; map MAIN-01 through MAIN-05 as partial under the committed legacy-key profile and retain production graph gaps.
+* **Evidence**: Bind current-stand fork success to a validated saved declaration and exact input hashes; reject the stale payload before Forge, refresh locally and pass all 88 named cases at 11988436.
+* **Evidence**: Run 21 operational guard scenarios through actual CLI/recipe entrypoints with real temporary Git state and blocked transport; verify funding refuses chain 1 in a dry-run.
+* **Evidence**: Reconcile all seven public CoW fills: fourteen protocol fees, network-fee equations and settlement buffer ledgers; add six captured-fixture regressions and retain unobserved fee paths as open.
+* **Evidence**: Reproduce four Safe configuration false matches on the Sepolia fork; check five Safe owner sets, thresholds and both guard slots, pass 44 diff regressions and close OPS-05.
+* **Evidence**: Verify stale owner restore and selective restart on the Sepolia fork; pass all 88 named cases and retain GOV-09 as partial pending stale-payload detection.
+* **Evidence**: Verify lost submission, post-mining HTTP timeout and legacy/EIP1559 replacements on Sepolia; preserve canonical nonce/receipt reconciliation and all funding receipt subsets.
+* **Evidence**: Verify a fully funded resting limit across canonical blocks, cancel and return all input; correct the legacy class expectation using the API-reported commit.
+* **Evidence**: Pass all 87 fork cases on the same block and unchanged sources after RPC failures; verify nonzero-remainder partial SELL/BUY price and fee rounding.
+* **Evidence**: Verify public fixed-target BUY, exact unused-USDC return, no funding-budget refund, replay refusal and independent cap/volume fee equations.
+* **Evidence**: Pass 86 current-stand fork cases, including conditional entrypoint and StopLoss-payload refusals; preserve the compiler regression and fixture isolation.
+* **Evidence**: Settle a public CoW half-fill with exact deltas, cancel its remainder and verify live settlement refusal plus 110 canonical receipts.
+* **Evidence**: Complete public FundSepolia interruption after wrap and Foundry resume of three transfers; verify four canonical nonces, exact raw-unit deltas and duplicate-run refusal.
+* **Evidence**: Pin all Sepolia manifest runtimes before Forge, reject inconsistent network/address/code inputs, and pass 84 fork cases plus 30 offline workflow checks.
+* **Evidence**: Verify 84 current-stand fork cases and one public after-mining failed-response drill; record alternate stop orderings and pending-burn cancellation.
+* **Evidence**: Correct CoW sell quote totals; verify ordinary, stopped recovery and reverse public settlements, exact Voting restoration, token-specific USDC accounting, 82 fork cases and 101 canonical receipts.
+* **Evidence**: Pass 82 Sepolia fork tests, including emergency administration and combined recovery; audit 67 canonical public receipts and 47 Safe hashes.
+
+## 2026-10-24
+
+* **Evidence**: Pass 79 Sepolia fork tests; cover governance cross-products, delegatecall downgrade and emergency recipients; reproduce allowance timestamp overflow and Voting recovery.
+* **Evidence**: Trace all 102 Orders Safe transactions; confirm no silent conditional-order creates, registered TWAPs or Merkle root after cleanup.
+* **Evidence**: Inventory Sepolia orders, motions and First-loss queues; remove the finished TWAP through Committee with verified Safe execution.
+* **Evidence**: Record 75 current-stand fork tests, boundary failure corrections and read-only Zodiac UI evidence.
+* **Evidence**: Confirm CoW presignaturePending is expected after unsign; invalidation is a separate state
+* **Evidence**: Complete public burn and emergency restart drills; verify 47 canonical receipts, exact policy restoration and 65 fork tests
+* **Evidence**: Complete public synthetic USD and ETH burn motions, objection, Voting cancellation and enactment refusal checks
+* **Evidence**: Pass all 65 current-stand fork tests at block 11986769 after public order admission and unsign
+* **Evidence**: Unsign the unfilled public CoW order; onchain presign cleared while Orderbook invalidation stays pending
+* **Evidence**: Submit a zero-fee CoW order on Sepolia; orderbook admission succeeded and settlement remains pending
+* **Evidence**: Pass all 65 current-stand fork tests at block 11986716 after public TWAP settlement and cancellation
+* **Evidence**: Settle both public TWAP parts and remove a separate TWAP before the next part; CoW invalidation remains open
+* **Evidence**: Pass all 65 current-stand fork tests at block 11986664 after public TWAP and First-loss transactions
+* **Evidence**: Public First-loss USD and ETH redemption, settlement and claim receipts and recovery errors
+* **Evidence**: Public CoW TWAP part one settlement; short-window expiration and duplicate-order evidence
+* **Evidence**: Pass all 65 current-stand Sepolia fork tests at block 11986574 after the CoW cancellation
+* **Evidence**: Correct Committee Safe role-key encoding, unsign the expired CoW order, and record stale indexer status
+* **Evidence**: Pass all current-stand Sepolia fork tests at block 11986397
+* **Evidence**: Recheck expired Sepolia CoW orders and record the quote API DNS failure
+* **Evidence**: Record unresolved NotAuthorized result from the prepared CoW unsign Safe simulation
+* **Evidence**: Refresh expired CoW orders and record fork test attempts blocked by RPC DNS
+* **Evidence**: Disambiguate the repeated direct-call NotAuthorized result from the pending Orders unsign test
+* **Evidence**: Verify live role membership behind the controller NotAuthorized result
+* **Evidence**: Read live Orders Roles wiring and current Asset operator WETH and USDC budgets
+* **Evidence**: Recheck expired CoW order 1724014; zero trades and no inclusion in latest auction
+* **Update**: Read live Orders WETH and USDC Vault Relayer allowances as uint256 max; retained remaining approval inventory as open.
+* **Update**: Recorded a public five-Safe configuration snapshot and current Sepolia token balances.
+* **Update**: Prepared cancellation for expired CoW quote 1724014; recorded presign marker, Safe nonce and RPC DNS simulation failure.
+* **Update**: Verified the expired CoW order remains pre-signed; recorded live zero-fill endpoints and GPv2 marker match.
+* **Evidence**: Record Sepolia CoW order expiry and zero-fill status
+* **Evidence**: Verify direct EOA role call is denied on Sepolia
+* **Evidence**: Clarify CoW Sepolia current-auction visibility and order status
+* **Evidence**: Recheck CoW 1724014 order and stale solver competition at block 11986120
+* **Evidence**: Recheck CoW 1724014 open order against stale Sepolia solver competition at block 11986056
+* **Evidence**: Record stale Sepolia solver competition for admitted CoW order 1724014
+* **Evidence**: Record CoW 1724014 presign and orderbook admission; settlement pending
+* **Evidence**: Record unfilled expired Sepolia CoW order and prepare longer-validity retry
+* **Evidence**: Record Sepolia CoW presign and orderbook admission for quote 1723886
+* **Evidence**: Prepare fresh zero-fee CoW quote 1723886 and simulate current Safe call
+* **Evidence**: Pass all 65 current-stand Sepolia fork tests with allowance-aware funding cases
+* **Evidence**: Verify zero-fee CoW order on Sepolia fork and record current-suite budget failures
+* **Evidence**: Correct CoW order fee handling and prescribe a zero-fee order digest
+* **Evidence**: Record CoW zero-hash fee rejection and onchainOrder quote results
+* **Evidence**: Record the public CoW presign and blocked orderbook admission
+* **Evidence**: Verify the first Committee transfer post-state: nonce, WETH balances and orders_weth allowance.
+* **Evidence**: Execute the first Committee WETH transfer on Sepolia and verify its receipt and allowance logs.
+* **Update**: Refresh the 0.01 WETH first-transfer payload and pass both exact-payload fork tests.
+* **Update**: Run 64 current-stand fork tests; record exact coverage and remaining public flows.
+
 ## 2026-10-23
 
 * **Update**: Formalize the Sepolia setup coverage inventory and first-transfer assertions; separate fork evidence, public acceptance and missing integrations.

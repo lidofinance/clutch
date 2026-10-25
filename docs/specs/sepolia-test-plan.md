@@ -1,229 +1,130 @@
 ---
 type: Guide
 title: Sepolia stand test plan
-description: Test the existing Sepolia stand after its role-key migration, then complete the public execution drills.
+description: Test cases, execution commands and public transaction sequences for the stand and its protocol integrations.
 tags: [sepolia, testing, roles, cow, first-loss]
 status: draft
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-23T15:44:44Z
+  at: 2026-10-25T19:35:38Z
 verified: []
 sources:
   - id: s1
-    resource: /adr/005-account-graph-and-roles.md
-    title: ADR 005 — account isolation, emergency stop and DAO restart
+    resource: /specs/sepolia-setup-checklist.md
+    title: Complete coverage obligations and their status
   - id: s2
-    resource: /adr/007-swapping-through-an-orders-account.md
-    title: ADR 007 — CoW orders, TWAP, recipients, approvals and cancellation
-  - id: s3
-    resource: /adr/008-funding-through-existing-payments.md
-    title: ADR 008 — First-loss redemption, burn motions and objection
-  - id: s4
-    resource: /adr/006-governance-through-easy-track-factories.md
-    title: ADR 006 — governance permissions and motion restrictions
-  - id: s5
     resource: /adr/013-tests-on-sepolia.md
-    title: ADR 013 — four account-specific keys and Sepolia execution boundaries
+    title: Sepolia account-specific roles and execution boundaries
+  - id: s3
+    resource: urn:clutch:source:sepolia-current-stand-tests
+    title: Current-stand runner and Sepolia stand, coverage and operational tests
+  - id: s4
+    resource: urn:clutch:source:mainnet-protocol-tests
+    title: Mainnet protocol tests in test/Mainnet*Coverage.t.sol, test/EnablingVoteRehearsal.t.sol and test/Drills.t.sol
+  - id: s5
+    resource: /research/sepolia-test-results.md
+    title: Recorded runs, transaction receipts, findings and limitations
   - id: s6
     resource: /specs/sepolia-stand-plan.md
-    title: Existing stand, funding procedure and recorded deployment evidence
-  - id: s7
-    resource: urn:clutch:source:sepolia-current-stand-tests
-    title: test/SepoliaStand.t.sol, test/SepoliaCurrentStand.t.sol, test/utils/SepoliaStandFixture.sol and scripts/sepolia_test_current.py
-  - id: s8
-    resource: https://github.com/cowprotocol/contracts/blob/main/src/contracts/GPv2Settlement.sol
-    title: CoW primary source checked on 2026-10-23 — settlement, limit-price checks and filled amounts
-  - id: s9
-    resource: https://github.com/cowprotocol/contracts/blob/main/src/contracts/libraries/GPv2Trade.sol
-    title: CoW primary source checked on 2026-10-23 — trade ABI and signature flags
-  - id: s10
-    resource: https://github.com/cowprotocol/contracts/blob/main/src/contracts/mixins/GPv2Signing.sol
-    title: CoW primary source checked on 2026-10-23 — presign and EIP-1271 signatures
-  - id: s11
-    resource: urn:clutch:evidence:2026-10-23:sepolia-current-stand-fork
-    title: Pinned existing-stand fork logs and result under cache/sepolia/current-stand/
-  - id: s12
-    resource: /specs/sepolia-setup-checklist.md
-    title: Complete setup coverage inventory, assertion-level status and review findings
-  - id: s13
-    resource: urn:clutch:evidence:2026-10-23:sepolia-first-transfer
-    title: Prepared first-transfer payload, eth_call and two fork tests at block 11977379
+    title: Stand addresses, funding and guarded public execution procedures
 ---
 
 # Sepolia stand test plan
 
-The [setup coverage checklist](sepolia-setup-checklist.md) holds the integration inventory and 120 coverage obligations.
-It separates exact fork assertions from open variants and dependencies absent from this stand.
-The 14 named tests below are selected executions, not complete integration coverage [s12].
+[Coverage and status](sepolia-setup-checklist.md) · [Results and findings](../research/sepolia-test-results.md) · [Stand and addresses](sepolia-stand-plan.md) [s1][s5][s6]
 
-## Scope and acceptance
+## Run
 
-Test the existing stand on chain `11155111` after the role-key migration.
-Use `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency` on their respective modifiers.
-Keep `governance`, `first-loss`, `first-loss-burn` and both allowance keys unchanged [s5].
-
-Each case must check its resulting state.
-A forbidden call must fail at the expected permission check.
-A protocol failure from missing funds must not count as a policy refusal.
-A settlement case must check the filled amount and the recipient's balance.
-A green suite with a missing or skipped case must fail the runner [s7][s8].
-
-## 1. Prepare the fork
-
-1. Keep `SEPOLIA_RPC` in the ignored `.env`. Use an RPC that can read the pinned block. No signer or Zodiac API key is needed [s5][s7].
-2. Keep the existing manifest at `cache/sepolia/manifest.json`. It must identify Sepolia and `roleKeyScheme: account`. The runner must not deploy, migrate or reapply the policy [s5][s7].
-3. Pin the block number and hash. Discover an existing solver from recent canonical CoW settlement logs. Check its authorization through the deployed authenticator [s7][s8].
-4. Check the account owners, thresholds, enabled modules and CoW domain verifier. Check successful calls under the four new keys and refusals under the old or wrong-account keys [s1][s5][s7].
-5. Supply test balances only inside the fork. Transfer test shares from the controller to First-loss. Use Forge balance fixtures for WETH, USDC and settlement liquidity. Keep deployed permissions, allowance settings and solver authorization intact [s7].
-
-The budget boundary cases expect the stand's existing full test budgets.
-They must fail if prior public consumption changes that precondition.
-Do not reset a public allowance to make a test pass [s6][s7].
-
-## 2. Run the cases
+Use the existing Sepolia manifest and account-specific keys: asset-operator, orders-operator, asset-emergency and orders-emergency. Keep RPC settings in the ignored .env [s2][s3].
 
 ```sh
-# Pin the latest block and run the existing stand's three test suites.
+just --justfile sepolia.just constellation <workspace-uuid>
 just --justfile sepolia.just test-current
-
-# Repeat at the recorded block.
-SEPOLIA_STAND_BLOCK=11977056 just --justfile sepolia.just test-current
+just test-fork
+just --justfile sepolia.just check
 ```
 
-All mutations run in Forge's isolated forks.
-Tests use impersonation and time changes.
-The runner sends only RPC reads to Sepolia.
-It checks the canonical block hash again after the run.
-It saves the block, solver evidence, test names and source hashes with the result.
-Each attempt removes the previous success report before preparation [s7].
+For a historical replay, use the recorded block with its matching manifest, declaration and source revision [s3]:
 
-| Flow | Observable acceptance | Named test | Basis |
-|---|---|---|---|
-| Account graph | Expected owners, thresholds, modules and CoW verifier remain present | `test_account_graph_and_domain_verifier` | [s1][s7] |
-| Keys and holders | All four new roles execute; old and wrong-account keys fail with `NoMembership`; a non-member fails with `NotAuthorized` | `test_role_keys_reject_old_wrong_account_and_non_member` | [s5][s7] |
-| WETH funding | Committee Safe funds Orders at the budget boundary; excess and a wrong recipient fail; refill permits another transfer | `test_funding_budget_and_safe_owner_path` | [s2][s7] |
-| USDC funding | Transfer consumes the budget; one extra raw unit fails; refill permits another transfer | `test_usdc_budget_boundary_and_refill` | [s2][s7] |
-| Presign and cancellation | Exact order gets a presignature; unsign clears it; wrong receiver, excessive duration and operator approval fail | `test_typed_order_presign_unsign_and_receivers` | [s2][s7] |
-| Order bounds and Asset isolation | Operator duration at 90 days succeeds; unlisted tokens and excess fee fail; Asset cannot presign or approve the relayer | `test_order_boundaries_and_asset_signing_are_restricted` | [s2][s7] |
-| Market and limit execution | Synthetic clearing settles to Asset; a price below the limit fails without a fill or debit; cancellation prevents settlement | `test_market_and_limit_settlement_and_cancelled_order_refusal` | [s2][s7][s8] |
-| TWAP signatures | Two parts have distinct digests; emergency removal blocks further generation; wrong receiver and excessive parts fail | `test_twap_two_parts_signature_and_cancellation` | [s2][s7] |
-| TWAP execution | Two parts settle to Asset through EIP-1271; removal makes the cached next signature unusable | `test_twap_settles_two_parts_and_cancelled_next_part_fails` | [s2][s7][s8][s9][s10] |
-| First-loss redemption | Both shares complete redeem, synthetic queue settlement and claim to Agent; direct burn, transfer, approve and another receiver fail | `test_first_loss_redeem_claim_both_assets_and_denied_bypass` | [s3][s7] |
-| First-loss burn | Both shares burn after the window; early enactment, an objected motion and a Voting-cancelled motion fail | `test_burn_motion_wait_objection_and_voting_cancellation` | [s3][s7] |
-| Governance restrictions | Executor revokes the new Asset key; old/wrong keys, administrative targets, delegatecall expansion and membership changes fail; Orders has no governance role | `test_governance_executor_restricts_keys_membership_and_administrative_targets` | [s4][s5][s7] |
-| Asset switch | Emergency disables the operator modifier; safety remains enabled; Emergency cannot re-enable the operator | `test_emergency_stops_asset_operator_but_cannot_restart` | [s1][s7] |
-| Recovery and restart | Stop both operator paths, cancel an existing order and TWAP, settle a bounded recovery order to Agent, sweep funds and zero approvals; Voting restores operations; cancelled orders stay invalid | `test_emergency_recovery_zero_approvals_and_voting_restart` | [s1][s2][s5][s7] |
+```sh
+SEPOLIA_STAND_BLOCK=<recorded-block> just --justfile sepolia.just test-current
+```
 
-Passing a named test closes only its explicit assertions.
-For example, the WETH funding test checks a wrong receiver after budget exhaustion.
-Its generic `ConditionViolation` does not isolate the receiver check.
-FUND-03 therefore stays open.
-The account graph case checks expected owner/module presence, not exact sets; CFG-03/04 stay partial [s7][s12].
+Check the expected error origin, rollback and nonce behavior. For public calls, check the receipt, Safe outcome and exact token/budget deltas. For settlement, reconcile the UID, Trade event and receiver balance. Record outcomes and limitations in the results file [s1][s3][s5].
 
-The suites are `SepoliaStandTest`, `SepoliaCurrentStandTest` and `SepoliaCoWSettlementTest`.
-The original `rehearse` recipe still creates a separate disposable local stand.
-Its seven shared cases select role keys from that rehearsal's manifest [s7].
+## Sepolia cases
 
-## 3. Record results
+The test families below cover the current-stand suite. The [runner](../../scripts/sepolia_test_current.py) defines its exact required function set [s3].
 
-Keep `drills.log` and `result.json` under `cache/sepolia/current-stand/`.
-The result must identify the canonical block hash, the solver's source transaction and the SHA-256 hashes of the test sources and manifest.
-Keep these local evidence files outside Git.
-Record the outcome and its limitations in this plan [s7].
+| Case | What to test | Tests |
+|---|---|---|
+| Configuration | Exact owners, thresholds, modules, guards, handlers, runtime code and initial approvals; Safe nonce/hash/signature replay | [Stand](../../test/SepoliaStand.t.sol): `test_account_graph_and_domain_verifier`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_CFG_*` [s3] |
+| Roles | Four account keys, holders and avatars; old/wrong-account keys, non-members and every actor/modifier combination | [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_role_keys_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_CFG_actor_matrix_*` [s3] |
+| Funding | WETH/USDC Asset→Orders; zero/partial/exact/excess, decimals, recipient, refill boundaries, rollback and no refund after return | [Stand](../../test/SepoliaStand.t.sol): `test_funding_budget_*`; [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_usdc_budget_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_FUND_*` [s3] |
+| Orders | Sign/unsign; both token directions, BUY/SELL and partial/full; EIP-712 fields, domain, UID, expiry, duration, fee and receiver bounds | [Stand](../../test/SepoliaStand.t.sol): `test_typed_order_*`; [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_order_boundaries_*`, `test_quote_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_ORD_*` [s3] |
+| Settlement | Marketable and resting orders; exact deltas, indexed prices, rounding/fees, overfill, cancellation, partial remainder, missing funds/approval and retry | [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_market_and_limit_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_SETTLE_*` [s3] |
+| TWAP | Two settled parts; daily/weekly schedules, interval edges, typed fields/proofs, replay, remove/recreate, cached signatures and forbidden handlers | [Stand](../../test/SepoliaStand.t.sol): `test_twap_two_parts_*`; [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_twap_settles_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_TWAP_*` [s3] |
+| First-loss redemption | Both stand shares: request, synthetic settlement, claim to Agent, partial/multiple timestamps, duplicate/empty/double claim and forbidden routes | [Stand](../../test/SepoliaStand.t.sol): `test_first_loss_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_FL_*` [s3] |
+| Burn motions | Trusted caller/factory, both stand shares, exact window, objection threshold, cancellation, removed factory, failed execution and supply accounting | [Stand](../../test/SepoliaStand.t.sol): `test_burn_motion_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_ET_*` [s3] |
+| Governance | Target/function changes, key/target restrictions, CALL/delegatecall, allowance bounds/timestamps, atomic batches and stale owner restoration | [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_governance_executor_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_GOV_*` [s3] |
+| Emergency | Asset switch; Orders revocations; cancel orders/TWAP; recovery to Agent; sweeps and zero approvals; repeated stops and Voting restart | [Stand](../../test/SepoliaStand.t.sol): `test_emergency_stops_*`; [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_emergency_recovery_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_EM_*` [s3] |
+| Configuration drift | Owner/threshold/module/guard changes must produce a diff | [diff tests](../../policy/constellation/sepolia/diff.test.ts) [s3] |
+| Submission/retry | Lost submission, mined response timeout, nonce replacement, funding interruption/resume and duplicate-send refusal | [workflow tests](../../scripts/test_sepolia_workflow.py) [s3] |
+| Operational guards | Wrong chain, branch, dirty/unpushed state, missing opt-in/account, CI and forbidden credentials | [guard tests](../../scripts/test_sepolia_operational_guards.py) [s3] |
+| Result integrity | Exact required cases, canonical block, source/payload hashes, current allowances and failed preparation clearing old success | [workflow tests](../../scripts/test_sepolia_workflow.py); [payload tests](../../policy/constellation/sepolia/verify-test-payload.test.ts) [s3] |
+| CoW API/fees | Quote→zero-legacy-fee order conversion; actual fee policies, executed amounts and settlement-buffer ledgers | [order tests](../../scripts/test_sepolia_cow_order.py); [fee tests](../../scripts/test_sepolia_protocol_fees.py) [s3] |
 
-The initial run at block `11977056`, hash `0xd348dd8716e26bfbc5f611e883d1209e7a9591448f4dc1774a87f62021eb6291`, failed all seven original cases.
-The failures exposed obsolete role keys and missing First-loss funding assumptions.
-The updated seven shared cases passed at the same block before the additional cases were added.
-The initial output is retained as `before-role-update.log` [s11].
+## Mainnet integration cases
 
-The final current-stand run on 2026-10-23 passed all 14 named cases across three suites, with no failures or skips.
-It used block `11977122`, hash `0xf8f1f619be3392ac883deea5b83d569c0f2e8ff239d7cb77e49a62ebf5bb12ef`.
-The solver `0xe40cbca4d703642778b40e1e866ebfec1e619872` came from settlement transaction `0x0a631f36cf1f5c6dd352b30d0aa941494665f969a53be57ecd83d1f4f32b18df`.
-The deployed authenticator confirmed its authorization at the pinned block.
-The runner checked the source hashes and canonical block hash after the tests [s7][s11].
+Run these against deployed protocol contracts on a pinned fork. A dash means the required case has no dedicated implementation in this table. Completion and remaining variants are recorded in the checklist and results [s1][s4][s5].
 
-## TC-SEP-001: First Committee funding transfer
+| ID | Required test | Test file |
+|---|---|---|
+| MAIN-01 | ETH↔WETH amounts, balances/events, failures, role differences and stop/restart | [MainnetWethCoverage](../../test/MainnetWethCoverage.t.sol): `test_MAIN01_*` [s4] |
+| MAIN-02 | Lido submit, referral, exact shares, zero/missing ETH, pause/resume, stake limit and recovery | [MainnetLidoCoverage](../../test/MainnetLidoCoverage.t.sol): `test_MAIN02_*` [s4] |
+| MAIN-03 | stETH↔wstETH rounding/dust, approvals/zeroing, custody, rollback and Emergency unwrap | [MainnetWstethCoverage](../../test/MainnetWstethCoverage.t.sol): `test_MAIN03_*` [s4] |
+| MAIN-04 | DAI↔USDS both ways, zero/excess/max, exact supply/Vat, approvals, dependency failure and recovery | [MainnetConverterCoverage](../../test/MainnetConverterCoverage.t.sol): `test_MAIN04_*` [s4] |
+| MAIN-05 | sUSDS deposit/redeem/withdraw, exact shares/yield, maxima, approval budget, rollback and Emergency exit | [MainnetSavingsCoverage](../../test/MainnetSavingsCoverage.t.sol): `test_MAIN05_*` [s4] |
+| MAIN-06 | Earn deposits for each allowed asset, request/cancel, report/claim, proof/account gates, caps, pause and liquidity failures | [MainnetEarnCoverage](../../test/MainnetEarnCoverage.t.sol): `test_MAIN06_*` [s4] |
+| MAIN-07 | Earn Asset and separate First-loss redemptions: report delay, batches, liquidity and token-transfer failure/retry, claim variants, fee/rounding boundaries and no double claim | Asset: [MainnetEarnCoverage](../../test/MainnetEarnCoverage.t.sol): `test_MAIN07_*`; First-loss: [MainnetFirstLossCoverage](../../test/MainnetFirstLossCoverage.t.sol): `test_MAIN07_first_loss_*` [s1][s4] |
+| MAIN-08 | Real First-loss burn: trusted factory, full motion lifecycle, snapshot objections/threshold boundaries and exact shares/supply | [MainnetFirstLossCoverage](../../test/MainnetFirstLossCoverage.t.sol): `test_MAIN08_*` [s1][s4] |
+| MAIN-09 | Treasury registries/funding: assets, recipient, permissions, creator, monthly limit, objection/cancel and paused-payment retry | [EnablingVoteRehearsal](../../test/EnablingVoteRehearsal.t.sol): `test_02_enabling_vote_end_to_end`, `test_03_ramp_up`, `test_06_the_payment_rewrite_changes_only_usds`, `test_MAIN09_*` [s1][s4] |
+| MAIN-10 | Governance templates, creation/enactment, narrow permissions, complete removal, stale recovery and Emergency exit | — [s1] |
+| MAIN-11 | Full launch swap/recovery token matrix, decimals, rounding, approvals/transfers and refusal of non-launch tokens | [MainnetCowCoverage](../../test/MainnetCowCoverage.t.sol): `test_MAIN11_*` for the Settlement/token matrix [s1][s4] |
+| MAIN-12 | Committee guard: exact build, full transaction/nonce binding, replay/bypass, outage/removal and independent Emergency/Voting | — [s1] |
+| MAIN-13 | Signing UI: approval state/latency, rejection, timeout, changed payload and other Committee duties | — [s1] |
+| MAIN-14 | Production signers/thresholds, Voting/Dual Governance/Agent ACL, enabling-vote atomicity and configuration alerts | — [s1] |
+| MAIN-15 | Attested valuation, caps/headroom/buffer, stale/missing data, Asset+Orders totals, First-loss exclusion and alerts | — [s1] |
+| MAIN-16 | Lido Lend/Morpho onboarding, full lifecycle and Emergency exit after the target exists | — [s1] |
 
-**Purpose:** verify one actual Committee-to-Asset-role WETH transfer and its accounting.
-This case closes only the checks selected in the table below.
-It does not close the allowance boundary, receiver-denial, refill, USDC, CoW or emergency cases [s1][s2][s12][s13].
+## Public Sepolia transaction sequences
 
-**Scope:** owner EOA → Committee Safe → Asset Roles `execTransactionWithRole` → Asset Safe → WETH `transfer` → Orders.
-The role is `asset-operator`; the budget key is `orders_weth`.
-Both execution operations are CALL, and the ETH value is zero [s5][s13].
+Links identify recorded executions of each sequence. Fork calls and read-only refusals have no public transaction. Detailed receipts, UIDs, balances and findings are in the results file [s5].
 
-**Preconditions:** Sepolia `11155111`; correct Committee owner and threshold; active Asset operator module; correct Roles wiring; sufficient WETH and allowance.
-Record the block/hash, both token balances, allowance and Committee nonce before execution.
-The prepared snapshot uses block `11977379`, hash `0x9b4d72bf304a1f027ed97376ab5670148fbf048a1c173d3d96d6d53a748c32b4` [s13].
-
-| Item | Prepared value |
-|---|---|
-| Committee | `0x1d7fC39145bb81dE7b36729760F873396555420a` |
-| Asset | `0x464f188165BCbE8f7FB3776C10E7B185963922ae` |
-| Asset Roles | `0x6b3dB3a3B4D9cB4bd697256E9fb1f1D19992DAC3` |
-| WETH | `0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14` |
-| Orders receiver | `0x84d6FFF030e0899a7fbFE505e2dEa199d7842cF0` |
-| Transfer amount | `10000000000000000` raw WETH units |
-| Initial Asset / Orders WETH | `20000000000000000` / `0` raw units |
-| Initial stored budget / Committee nonce | `1000000000000000000` raw units / `0` |
-
-Prepared values and outcomes below come from the saved payload and fork assertions [s13].
-
-| Check ID | Selected component and acceptance | Fork result | Public result |
-|---|---|---|---|
-| TC-SEP-001-01 | Committee executes the exact prepared payload; low-level call succeeds and Safe returns true | PASS | OPEN |
-| TC-SEP-001-02 | Asset WETH decreases by exactly `10000000000000000` | PASS | OPEN |
-| TC-SEP-001-03 | Orders WETH increases by exactly the same amount | PASS | OPEN |
-| TC-SEP-001-04 | Stored `orders_weth` balance decreases by exactly that amount, to `990000000000000000` | PASS | OPEN |
-| TC-SEP-001-05 | Committee nonce increases from 0 to 1 | PASS | OPEN |
-| TC-SEP-001-06 | Direct owner-EOA call to the same Roles payload fails with `NotAuthorized(controller)` | PASS | OPEN: read-only simulation is sufficient |
-| TC-SEP-001-07 | WETH Transfer log, Safe execution outcome and canonical receipt agree with the payload and state deltas | OPEN: logs were not asserted in the prepared fork test | OPEN |
-| TC-SEP-001-08 | Complete owners/modules/permissions/approvals diff contains no unintended change | OPEN: not asserted by this test | OPEN |
-| TC-SEP-001-09 | Browser-imported envelope and displayed chain, role, target, amount and receiver match the reviewed payload | NOT APPLICABLE to the direct fork call | OPEN |
-
-**Recorded execution:** two tests passed, none failed or skipped.
-`test_exact_committee_transaction_moves_weth_and_consumes_budget` supplies checks 01–05.
-`test_controller_cannot_call_the_committee_role_directly` supplies check 06.
-These tests use the real fork balances and existing permissions, without balance top-ups or policy application.
-The owner is impersonated with a prevalidated Safe signature; browser signing and an actual wallet signature remain open [s13].
-The assertions compare relative deltas.
-They do not assert the literal initial balances listed above or verify the canonical block hash.
-The saved payload and post-state describe that historical snapshot; a repeat run needs its own precondition and canonicality record [s13].
-
-**Evidence:** `cache/sepolia/first-transfer/transaction.json`, `safe-transaction-builder.json`, `FirstTransfer.t.sol`, `fork-tests.log` and `fork-result.json`.
-The payload file SHA-256 is `2f86eea467bdc5ea2dfd431cc9e9de5b69844e58a8b81017b57eb7a99fcf1c49`.
-The test-source SHA-256 is `9cc2f0cfaf3fe446e5338bbb016bfc8e5bac9f2600036f54fab345cf312e29e4`.
-The log SHA-256 is `97400b50b871cf8ddddf599de287b1b672389fd9037c2bdd7e487fa6bd98e7b3` [s13].
-
-**Public procedure:** refresh the preconditions; decode and compare the imported Committee transaction; run a fresh simulation; the owner reviews and signs; save the canonical receipt and read the post-state.
-Mark checks 01–05 and 07–09 PASS only from their own public evidence.
-Do not copy a fork PASS into the public column.
-Record negative cases through simulation or on a fork unless a public failed transaction is needed.
-Until these checks close, the public case is OPEN [s5][s12][s13].
-
-## 4. Complete the public Sepolia drills
-
-The owner must first check current balances, budgets, approvals, open orders and pending motions.
-The owner must review the exact calls and choose the test funding amounts.
-Use the existing guarded recipes and the owner's signing path [s5][s6].
-
-- [ ] Repeat a fresh policy and account-state comparison before signing.
-- [ ] Fund the stand once. Verify canonical receipts and balances before retrying an interrupted funding run.
-- [ ] Execute an allowed call through the Committee wallet and inspect its displayed role, target and recipient.
-- [ ] Submit market and limit orders to the Sepolia orderbook. Save UIDs and canonical settlement receipts.
-- [ ] Submit and settle two TWAP parts. Cancel a separate order and TWAP before their next execution.
-- [ ] Run both First-loss redemption and burn paths. Record objection and Voting cancellation separately.
-- [ ] Run emergency stop, cancellation, recovery and approval cleanup after the ordinary flows.
-- [ ] Review a separate Voting restart package. Confirm cancelled orders and motions remain unusable.
-
-Public completion needs receipts, UIDs and before/after state.
-A quote, API acceptance or a fork settlement cannot close a public settlement case [s6][s8].
-
-## Coverage limits
-
-- Fork settlement uses an impersonated, already-authorized solver and synthetic prices and liquidity. It tests the deployed settlement, signature, transfer and receiver paths. It does not test orderbook admission, solver discovery, competition, market pricing or public settlement availability [s7][s8][s9][s10].
-- Most role calls impersonate the Committee or Emergency Safe. The funding and burn-motion cases also execute through the Committee Safe. Browser-wallet signing, independent signers and the screening guard need separate coverage [s1][s6][s7].
-- First-loss uses the stand's deployed synthetic shares and queues. Its settlement is 1:1. These cases do not test real Earn shares, prices, liquidity or oracle reports [s3][s6][s7].
-- The governance case enters the deployed test executor as Easy Track. It tests the executor-to-role path. It does not build a missing governance factory or prove its full motion lifecycle. The burn factory's motion lifecycle is tested separately [s4][s7].
-- Mainnet Treasury funding, production governance, staking, wrapper/converter and vault integrations need their mainnet-fork coverage. Stop-loss and the token template are outside the launch scope [s2][s4][s6].
+| Case | Transaction sequence | Recorded transactions |
+|---|---|---|
+| WETH funding | Committee → Asset Roles → WETH.transfer(Orders, amount) | [transfer](https://sepolia.etherscan.io/tx/0x30868fa4e30e9cc57b6fc49b1e4f8c43b97b209f0d677984bc4474c338a200ec) [s5] |
+| UI funding/return batch | Committee → MultiSendCallOnly → asset-operator transfers one raw WETH unit to Orders → orders-operator returns it to Asset; review the UI envelope and then verify balances, budget, nonce and events | — [s5] |
+| Presign/cancel | Committee → Orders Roles → delegatecall signer.signOrder / unsignOrder | [sign](https://sepolia.etherscan.io/tx/0xf9d1a107930865237839da6809e49ee6d91d8af0550497939543de9b6095a8d1) → [unsign](https://sepolia.etherscan.io/tx/0x84abc74edc3e375cc28e061da3668bf4e5a3c268db5e7ffa1d70d248e0fc8db2) [s5] |
+| Full SELL | Fund Orders → presign → public solver settles to Asset | [WETH→USDC fill](https://sepolia.etherscan.io/tx/0xf980f0f35a1b1a0198d6f1cc2514048ce92f220a37c400526e943d99dca045b9) → [USDC→WETH fill](https://sepolia.etherscan.io/tx/0x75df586f42d7a43dc91b9ef7452aa716a1b89bdd6d1a7d64b67447f60b9751c2) [s5] |
+| Partial SELL | USDC funding → presign → half-fill → unsign remainder | [fund](https://sepolia.etherscan.io/tx/0xa11a4c13fbb78cf5edb65d0264bd803ebd52e36c60c3f85b12bdbd5fc30a77bf) → [sign](https://sepolia.etherscan.io/tx/0x0aeab6092dda720a0d7c440fc58b71dfe0ce971324a69a0aed4ac2f4a8abb418) → [fill](https://sepolia.etherscan.io/tx/0x227e8c6fd9eda88f0dac28222d59cbf03ff20054d9b4e6ace9b7ff3ea4304753) → [unsign](https://sepolia.etherscan.io/tx/0xd83ede41504d1967fd43e3d4b650b84362b6e0c445f42da576d11a3570b6303d) [s5] |
+| Fixed-target BUY | Fund maximum input → presign BUY → fill → return unused input | [fund](https://sepolia.etherscan.io/tx/0x19768633e82cee24133f4fe94e66230ded0db0cbb72c70694cd330f0c70e6e55) → [sign](https://sepolia.etherscan.io/tx/0xaed7d46caf6d2c96e1f72116edb2c3e0d16cb8dd9418e469feaeca5efc2d3c33) → [fill](https://sepolia.etherscan.io/tx/0x68865292541bb369ae0a1f0aef566f5fb5d3ed64e0ca3e1b84117ef82b2c0edc) → [return](https://sepolia.etherscan.io/tx/0xcd07f14b9619ebfda1e0a52550a3974773c9263b6f2b2af2efb34f4787e4b1ef) [s5] |
+| Resting limit | Fund → presign unmarketable order → unsign → return input | [fund](https://sepolia.etherscan.io/tx/0xb50d5c705f739b3803c230c0cb0e2a857d9032f3a24db9cf1f490e24759a0962) → [sign](https://sepolia.etherscan.io/tx/0xcbac486b4a95e589bcd2446e50a6fae78b88b9bc4f245084401ab7e9e73800ee) → [unsign](https://sepolia.etherscan.io/tx/0x351c7473ec3d973e326b41675e820f36c4720d90e694bfaba2a17cdb2e90de85) → [return](https://sepolia.etherscan.io/tx/0x3ce5965fdfe145c4979c621538b28c836114cfe18be559902f3ed749a7c4e2a8) [s5] |
+| TWAP | Create conditional order → generate each part → solver settles each part | [part 1 fill](https://sepolia.etherscan.io/tx/0xbb54da9c6ecb83deafbc3f829ca130f26defb0858c8571d308b8cfa1beb62788) → [part 2 fill](https://sepolia.etherscan.io/tx/0x58aa3328d61db7c0b28fb4754e518415e8891319a42686453dbc9a051b82e013) [s5] |
+| TWAP cancellation | Create a separate conditional order → remove before execution → reject cached signature | [create](https://sepolia.etherscan.io/tx/0x344af8237e7f4c94934ddfba022d4c50bc4bdd473346aa8a0c2fbd3df24b1522) → [remove](https://sepolia.etherscan.io/tx/0x55f42b367c4ac31a726d0ed1e349f711c1a2d5f6f0fb9ed1210adfd9e465034c) [s5] |
+| Stand First-loss USD | first-loss role: redeem → test queue settlement → claim(Agent) | [request](https://sepolia.etherscan.io/tx/0x5fdd027bf11b73c23e871ec740b1dd36d62e6928aabf95ea2cd2d3e7e3e1911b) → [settle](https://sepolia.etherscan.io/tx/0x5e01052b037a8a8562055dda98133d1055369bf119af1651b23ef68b1eacdcc2) → [claim](https://sepolia.etherscan.io/tx/0xf205056dab54fbbd21c4ee01834c0a460f8c0a2db1ebf6d01a195eae0652b46e) [s5] |
+| Stand First-loss ETH | first-loss role: redeem → test queue settlement → claim(Agent) | [request](https://sepolia.etherscan.io/tx/0x3cc6cbcb01114626aa5c3099a76a84dcc5568057730b437b65b6c49393333573) → [settle](https://sepolia.etherscan.io/tx/0x9b64cec0c1a00b417294173436083acd186e46bbff43590f55ab5c472c09b5dc) → [claim](https://sepolia.etherscan.io/tx/0x6ea6e38d5eb1fb1d140e736dfacdcc1f1f5833b94481faa089b8113b04959c18) [s5] |
+| Stand USD burn | createMotion → wait → enactMotion | [create](https://sepolia.etherscan.io/tx/0x53ffc68c9082a952cb86aa71003db34fd590bbe0a5a89b7ea29ebc07609c34cf) → [enact](https://sepolia.etherscan.io/tx/0x5e88f532647de580ce0e7dd4af0c1c73480de2ad3882e80aefbaf6d3f6a97e7e) [s5] |
+| Stand USD burn objection | createMotion → objectToMotion | [create](https://sepolia.etherscan.io/tx/0xcdd88f444fd0bb26b0fdd8a4b637b2337543adc90aa01f80859f5cd717b4b166) → [object](https://sepolia.etherscan.io/tx/0x6517b4becbbeb1e75ef42e95386a1468bee2dfb1089bbc59e08e492404d7da9b) [s5] |
+| Stand USD burn cancellation | createMotion → test Voting cancels motion | [create](https://sepolia.etherscan.io/tx/0x059759bc9abc43316d0c993f7236c1314fe09467999807b2cc7bbecf587499b5) → [cancel](https://sepolia.etherscan.io/tx/0x8a78d07bffc0844e2081c7334114275eee9bbe22d0ea170630fe8486e63f8176) [s5] |
+| Stand ETH burn | createMotion → wait → enactMotion | [create](https://sepolia.etherscan.io/tx/0xbf595ac2631c9d256e1da1a43b2a8768c9b42fa9e703ab1da5841a4fa4448334) → [enact](https://sepolia.etherscan.io/tx/0x3de8da61bcdd1000e055e5d52038cb86562cd9cc55f5a3aeef73a510c27ca7c5) [s5] |
+| Stand ETH burn objection | createMotion → objectToMotion | [create](https://sepolia.etherscan.io/tx/0xefd849d99b831651d3d2f304f07d91c5519419f1e12fa88cd8b31791cbcd5d49) → [object](https://sepolia.etherscan.io/tx/0xe2acf6b927496530298bf185beca84958814ba7e129adf1a9b507b53133990d2) [s5] |
+| Stand ETH burn cancellation | createMotion → test Voting cancels motion | [create](https://sepolia.etherscan.io/tx/0x50c9fd72e0d23f6c5470fdc1e7f4e1b76edb4d5e3c43c0844fb24b9878c011d5) → [cancel](https://sepolia.etherscan.io/tx/0x2d2e072fda13dd558ae18aeb587ffe3e8bf5440359dad12d743b5c0e18e86a6e) [s5] |
+| Asset stop | Emergency → safety modifier → Safe.disableModule(operator) | [disable](https://sepolia.etherscan.io/tx/0xb926d29b1ef443543491a2cf43c2abfb0d447d051252332e03890016a00ab4fb) [s5] |
+| Orders stop | Emergency revokes the four operator targets | [revoke 1](https://sepolia.etherscan.io/tx/0x87987768fa9d2b825cbfaf34e8082a961eb3c503bcd7c92be2cf452e7a77e5de) → [revoke 2](https://sepolia.etherscan.io/tx/0x38774559212359c8674c7562dc89272e73ac0ecf7bf35b512fca3d91d17c5a06) → [revoke 3](https://sepolia.etherscan.io/tx/0x16cfec3d8c95101cd43a3ed9f57f2e773627b807e7c688d85df4cd2713ba0130) → [revoke 4](https://sepolia.etherscan.io/tx/0x990d9109ceff8d1cde0ddc723cbd9b131b6121d4e99132b1d5c2618b59858df0) [s5] |
+| Recovery settlement | Fund → stop operator paths → recovery sign → solver pays Agent | [fund](https://sepolia.etherscan.io/tx/0xe3645922565ac1b644ef13933a405380ce6afab00f4ef2071fabc365c7e9e792) → [sign](https://sepolia.etherscan.io/tx/0x5c7df438849a8c3f2ab6a592b868305d4f1f3bc50fcd816e83143354166014f3) → [fill](https://sepolia.etherscan.io/tx/0x1fb3284c9e2a31a8620264a1e74684ae3fb46063da86b43f1c3c69f43bca548e) [s5] |
+| Approval removal | Emergency zeros Orders relayer approvals | [WETH zero](https://sepolia.etherscan.io/tx/0x4299065d00a4667796780ca15a62b44fc0062794b8afe190d2e48c1482b631c7) → [USDC zero](https://sepolia.etherscan.io/tx/0x37d056b295c7566f5cccc2943beac347c2528a4e6cefef06f861305fa4c5f000) [s5] |
+| Voting restart | Test Voting approves and executes the reviewed four-account restoration | [approve 1](https://sepolia.etherscan.io/tx/0xa789fe774cb7be7938086b6cd130a6c717c3b29bc3538b71c52b5aacc07b1367) → [restore 1](https://sepolia.etherscan.io/tx/0xb14421a250355c4d46cb71787e889a48f6a0f34f75c49c32553824e01f79aa7b) → [approve 2](https://sepolia.etherscan.io/tx/0x76a6fe0a6052372d974d4c31c9e7cb6218b857709302c5e325845fdd94b6da65) → [restore 2](https://sepolia.etherscan.io/tx/0x475ca91a79a5a941337f6c724e9c010e81e78e605e3125a9086257e3a214c665) → [approve 3](https://sepolia.etherscan.io/tx/0x46e57e5ba30a8faf9b8c89fd81814b036e121cab16da2a4655a99113f5d3da06) → [restore 3](https://sepolia.etherscan.io/tx/0xc26930957206cc42d27c790d6dbeac50bf31b73b1019bfafbcc5ec30472d6574) → [approve 4](https://sepolia.etherscan.io/tx/0x02a0eac5faef40fac871cc2c61f3d8181097bc28c05f2d9c96b0d213e11247bc) → [restore 4](https://sepolia.etherscan.io/tx/0xb7dafaec7d27260d57eb5d802d18ecc55efda7dc5dc724cfd3f314b549279db1) [s5] |
+| Funding interruption/resume | Wrap → interruption → resume only missing WETH/share transfers | [wrap](https://sepolia.etherscan.io/tx/0xb4f47a30c5b6acbd4ad377a1aa14ba5fb51af5ea63a47d3ad842971ae7ca712e) → [Asset WETH](https://sepolia.etherscan.io/tx/0xe45e1d44e1275d33feb5423d7465899d5ddbb4ff32e3f080b1525606ba7926ea) → [First-loss USD](https://sepolia.etherscan.io/tx/0xf800d0a4d626098061c858437b2a271d4c4b4089b2117af9be08520459507992) → [First-loss ETH](https://sepolia.etherscan.io/tx/0x021e631171ed441266575f0ca6c1dd7850538fd5511887cc865485083f6eac06) [s5] |
+| Submission failures | Lost submission → identical raw resume; mined response timeout; legacy/EIP-1559 pending replacement | [resume](https://sepolia.etherscan.io/tx/0x20752a5159e0f499c7864188c20e9f9682d5022552a16be7ec309b81e8f7b2e2) → [timeout](https://sepolia.etherscan.io/tx/0x1e621f229691b74d259d25f4f90e50974bb3ad2aadc7f30b1f774dfe6a4ac30d) → [legacy](https://sepolia.etherscan.io/tx/0x23a62e73fc112e4ab09253e4fe97169eeef85bd78e3ed7d4beca586ed860e2c7) → [EIP-1559](https://sepolia.etherscan.io/tx/0x05b08210d07de4459c29d586e8cdf9d6893b2747403efd06891d10776c92a5d7) [s5] |

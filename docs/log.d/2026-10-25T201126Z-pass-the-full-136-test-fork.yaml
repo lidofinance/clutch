@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass the full 136-test fork suite before commit; fix Solc payout-model inlining, pin token-specific relayer allowance behavior and keep review findings in results.

@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pin all Sepolia manifest runtimes before Forge, reject inconsistent network/address/code inputs, and pass 84 fork cases plus 30 offline workflow checks.

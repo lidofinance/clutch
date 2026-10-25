@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass 86 current-stand fork cases, including conditional entrypoint and StopLoss-payload refusals; preserve the compiler regression and fixture isolation.

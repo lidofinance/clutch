@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: 'Replay frozen Sepolia constructors: all twelve stand runtimes match at creation and block 11992803; verify both queue child-token addresses and record the corrected ABI-head assertion in results.'

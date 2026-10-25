@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass all 87 fork cases on the same block and unchanged sources after RPC failures; verify nonzero-remainder partial SELL/BUY price and fee rounding.

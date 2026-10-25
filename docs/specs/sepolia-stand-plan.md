@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: codex/gpt-6
-  at: 2026-10-23T14:00:04Z
+  at: 2026-10-25T09:15:26Z
 verified: []
 sources:
   - id: s1
@@ -114,7 +114,10 @@ sources:
     title: Three old vault records removed after four saved policy bindings were detached; new Constellation Deployed with Nothing to deploy, three Vaults and seven Policies
   - id: s41
     resource: /specs/sepolia-test-plan.md
-    title: Current-stand fork test matrix, preparation, results and remaining public drills
+    title: Current-stand fork cases and public transaction sequences
+  - id: s42
+    resource: urn:clutch:evidence:2026-10-25:sepolia-safe-config-drift
+    title: Safe configuration drift reproduced on a pinned fork, verifier corrected and 44 regression cases passed
 ---
 
 # Sepolia stand deployment
@@ -283,7 +286,7 @@ They do not use the Zodiac API, publish a workspace draft or send transactions.
 An RPC failure leaves the previous payload, context and diff intact.
 Each successful write replaces its file through a temporary file and rename.
 Check the command's exit status and the report's block before using a saved result [s31].
-The comparison does not test Safe owners or guards, target behavior or execution success [s24].
+The comparison now checks the five Safe owner sets and thresholds and requires both guard slots to be zero at the report block. The local fork reproduces the earlier owner/guard false matches and verifies their detection after correction. These expectations follow the reduced Sepolia profile. Safe versions, singleton and fallback slots, target behavior and execution success remain outside this comparison [s42].
 
 The stand owner published `Clutch Sepolia` under an explicit exception for `review/tamtamchik`.
 The workspace shows three existing Safes, four Roles modifiers and seven roles.
@@ -416,7 +419,8 @@ Do not rerun `fund` to recover a partial run: it can wrap and transfer the amoun
 ## 6. CoW drills
 
 Use the [Sepolia test plan](sepolia-test-plan.md) for the current-stand fork command,
-case matrix and evidence requirements. Fork results do not close the public drills below [s41].
+case matrix and transaction sequences. Recorded outcomes and findings are in the
+[test results](../research/sepolia-test-results.md). Fork results do not close the public drills below [s41].
 
 - [ ] Committee funds Orders from Asset within the budget [s2].
 - [ ] Request a fresh quote from the Orders address; presign the exact typed order through its Roles modifier.

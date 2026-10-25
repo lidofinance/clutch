@@ -1,0 +1,3 @@
+date: '2026-10-24'
+kind: Evidence
+text: Pass 79 Sepolia fork tests; cover governance cross-products, delegatecall downgrade and emergency recipients; reproduce allowance timestamp overflow and Voting recovery.

@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass five real wstETH fork cases for exact share rounding and custody, approval boundaries and zeroing, failed-call rollback, both unwrap roles and stop/recovery/restart; retain production-role and oracle-cycle limits.

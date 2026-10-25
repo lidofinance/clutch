@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass five WETH boundary/recovery cases and all 65 mainnet fork tests; map MAIN-01 through MAIN-05 as partial under the committed legacy-key profile and retain production graph gaps.

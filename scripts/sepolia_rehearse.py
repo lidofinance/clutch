@@ -25,14 +25,15 @@ EXPECTED_DRILLS = {
 }
 
 
-def validate_drills(output):
+def validate_drills(output, expected=EXPECTED_DRILLS, suites=1):
     passed = re.findall(r"^\[PASS\] (test_\w+)\(\)", output, re.MULTILINE)
     summaries = re.findall(r"^Suite result: (.+)$", output, re.MULTILINE)
-    if (len(passed) != len(EXPECTED_DRILLS) or set(passed) != EXPECTED_DRILLS
+    if (len(passed) != len(expected) or set(passed) != expected
             or re.search(r"^\[(?:FAIL|SKIP)", output, re.MULTILINE)
-            or len(summaries) != 1
-            or not re.match(r"ok\. 7 passed; 0 failed; 0 skipped(?:;|$)", summaries[0])):
-        raise ValueError("Expected all seven named Sepolia drills, with no failures or skips")
+            or len(summaries) != suites
+            or any(not re.match(r"ok\. [1-9][0-9]* passed; 0 failed; 0 skipped(?:;|$)", s) for s in summaries)
+            or sum(int(re.search(r"(\d+) passed", s)[1]) for s in summaries) != len(expected)):
+        raise ValueError("Expected all named Sepolia drills, with no failures or skips")
 
 
 def rpc(method, params):

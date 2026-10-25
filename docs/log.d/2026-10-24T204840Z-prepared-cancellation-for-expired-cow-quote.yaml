@@ -1,0 +1,3 @@
+date: '2026-10-24'
+kind: Update
+text: Prepared cancellation for expired CoW quote 1724014; recorded presign marker, Safe nonce and RPC DNS simulation failure.

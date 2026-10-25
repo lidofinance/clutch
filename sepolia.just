@@ -5,6 +5,9 @@ preflight:
     bun policy/constellation/sepolia/preflight.ts
 
 check:
+    PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_operational_guards.py
+    PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_protocol_fees.py
+    PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_cow_order.py
     PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_workflow.py
     cd policy/constellation && bun test sepolia
     cd policy/constellation && ./node_modules/.bin/tsc --noEmit --module esnext --moduleResolution bundler --target esnext --resolveJsonModule --esModuleInterop --skipLibCheck --strict sepolia/*.ts
@@ -12,6 +15,10 @@ check:
 # No public transactions. Anvil is stopped after the run.
 rehearse:
     python3 scripts/sepolia_rehearse.py
+
+# Read-only upstream RPC; all test mutations stay inside Forge's fork.
+test-current:
+    python3 scripts/sepolia_test_current.py
 
 # Human-only public writes. Foundry prompts for the keystore password.
 _guard:

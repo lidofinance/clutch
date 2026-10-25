@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Verify a fully funded resting limit across canonical blocks, cancel and return all input; correct the legacy class expectation using the API-reported commit.

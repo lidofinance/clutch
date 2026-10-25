@@ -86,6 +86,7 @@ interface IRecipientsRegistry {
     function hasRole(bytes32 role, address account) external view returns (bool);
     function getLimitParameters() external view returns (uint256, uint256);
     function spendableBalance() external view returns (uint256);
+    function getPeriodState() external view returns (uint256, uint256, uint256, uint256);
     function updateSpentAmount(uint256 amount) external;
 }
 

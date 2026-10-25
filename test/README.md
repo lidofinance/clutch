@@ -34,7 +34,7 @@ Budgets and fixed ceilings are dry-run stand-ins. The production figures come fr
 
 ## Known divergence from the design
 
-- **Swaps.** The harness deploys no orders account, so neither role has a swap path yet ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The fork tests of the CoW order signer and ComposableCoW are phase 1 work; the orders account enters the policy in phase 2.
+- **Swaps.** The shared mainnet policy fixture deploys no Orders account, so neither role has a swap path ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). `MainnetCowCoverage.t.sol` adds a local Orders Safe for the live Settlement/token matrix through owner presigning. It installs no Clutch Orders policy or order signer. The separate Sepolia stand tests those components for WETH/USDC.
 - **First-loss Safe.** The harness deploys no first-loss Safe ([ADR 008](../docs/adr/008-funding-through-existing-payments.md)). It enters the deployment in phase 2.
 - **Exit-governance role.** The safety modifier has no exit-governance role yet, so no motion can add an emergency exit ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md) decision 13). It comes with the template factories in phase 2.
 - **Pre-execution screening.** The operator is a plain address, not the committee's Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
@@ -51,6 +51,49 @@ Budgets and fixed ceilings are dry-run stand-ins. The production figures come fr
 A change to the policy changes the TypeScript and the artifact in the same commit. Reviewers approve the artifact (ADR 004, decision 14).
 
 ## Commands
+
+For the existing Sepolia stand after its role-key migration:
+
+```sh
+just --justfile sepolia.just constellation <workspace-uuid>
+just --justfile sepolia.just test-current
+SEPOLIA_STAND_BLOCK=<recorded-block> just --justfile sepolia.just test-current
+```
+
+The command reads `SEPOLIA_RPC` from the ignored `.env` and uses the existing
+`cache/sepolia/manifest.json` with account-specific role keys. It runs the shared
+stand, current-role and CoW settlement suites on a pinned fork. It sends no public
+transaction and does not reapply the policy. Test balances, solver impersonation
+and time changes stay in Forge. The runner requires the complete named test set
+with no failures or skips. Logs and the block/hash report stay under
+`cache/sepolia/current-stand/`. See the [test plan](../docs/specs/sepolia-test-plan.md)
+for the cases and transaction sequences. See the [test results](../docs/research/sepolia-test-results.md)
+for recorded outcomes, findings and coverage limits.
+
+For a captured CoW sell quote, prepare the feeAmount=0 order fields with:
+
+```sh
+python3 scripts/sepolia_cow_order.py < quote.json > order.json
+just --justfile sepolia.just check
+```
+
+The sell helper adds the quote fee to sellAmount and preserves the minimum buy and receiver. The signed zero fee field does not remove protocol fees. Buy quotes require their own conversion.
+
+The runner requires a saved local `cache/sepolia/constellation/payload.json`. It recompiles that declaration with both funding allowance balances/timestamps read at the fork block. It records the exact payload hash and refuses stale or changed inputs before reporting success. Refresh the local declaration after funding changes. A historical replay requires the matching archived payload, manifest and source revision. This does not check hosted workspace state.
+
+Before Forge starts, the current-stand runner validates the manifest network, named addresses, aliases, deployment block and code presence. It pins each runtime hash and checks the 13 declared dependency hashes. Observed code without a declared expectation remains separate from approved runtime verification.
+
+The current-stand runner derives Circle USDC's consumed relayer allowance from max Approval and subsequent direct settle Trade logs. It supplies SEPOLIA_EXPECTED_USDC_ALLOWANCE to the fixture and refuses unsupported event history. WETH retains its max approval. The USDC funding test uses the current remainder and the declared refill policy.
+
+Operational guard tests execute the actual resolve CLI in a disposable repository with a real local Git origin. A preload blocks hosted transport. The tests cover branch, dirty/unpushed state, opt-in, CI, workspace/manifest mismatch and wrong chain, plus the actual public recipe env guard. They use only synthetic credentials and do not exercise live publication or wallet signing.
+
+Workflow receipt-guard tests use a captured public four-call funding run to cover all 16 receipt subsets. Incomplete local records still require chain reconciliation before resume. The fixture excludes RPC URLs and signing material.
+
+Protocol-fee tests reconcile all seven public fills against captured policy rates, custom/uniform prices, Transfer logs and full-block buffer balances. They cover improvement-bound SELL and cap-bound BUY priceImprovement fees. Weekly fee payout and unobserved policy/rounding boundaries remain separate.
+
+The policy diff tests also check owners, threshold and both guard slots across all five Safes. Local fork mutations reproduce the old false matches and verify exact drift paths after correction. These checks use the reduced Sepolia signer profile and do not test production screening or alert delivery.
+
+The mainnet fork commands remain:
 
 ```sh
 RPC=<archive mainnet RPC> forge test     # the whole suite on the pinned fork
@@ -77,6 +120,15 @@ The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy
 
 | File | Covers |
 | --- | --- |
+| `MainnetCowCoverage.t.sol` | three cases cover 30 distinct six-token pairs to Asset, 10 stablecoin-destination pairs to Agent and decimals through live Settlement/relayer, with exact balances, independently calculated stETH shares and token-specific unlimited allowance deltas; local Safe, owner presigning, controlled funding/prices and solver impersonation do not establish production Orders policy or role allowlists |
+| `MainnetEarnCoverage.t.sol` | twenty-four real EarnUSD/EarnETH cases: eight deposit and sixteen Asset redemption cases through Oracle/Vault/Queue/Hook, with exact custody/supply/bounded batches, delayed reports, timestamp claims, restrictions, fee conservation/exemption/extremes, dust/zero-net cleanup, USDC blacklist rollback/retry, injected hook faults and Emergency completion; production First-loss policy, controlled fork grants and legacy governance/signing limits remain explicit |
+| `MainnetFirstLossCoverage.t.sol` | twelve real EarnUSD/EarnETH First-loss cases: four redemption and eight burn-motion cases with a separate Safe, Growth share transfers, Oracle/Hook settlement, exact Agent-only claims, deployed Easy Track, exact objection thresholds and historical weights after token transfers, motion lifecycle, exact burn accounting, role/receiver refusals and recovery; local factory registration and handwritten permissions do not verify production policy or signing |
+| `MainnetSavingsCoverage.t.sol` | eight real sUSDS cases for independent share rounding, exact custody/events, approvals and budgets, failures/maxima, one-second pending yield and Emergency stop/exit/restart; legacy roles and mock governance remain limits |
+| `MainnetConverterCoverage.t.sol` | seven real DaiUsds cases for exact token supply/balances and Vat RAD, approval boundaries, rollback, Emergency return/restart, actual USDS deny/rely recovery and five cage refusals; legacy keys and mock governance remain limits |
+| `MainnetWstethCoverage.t.sol` | five real wstETH cases for independently computed share rounding/dust, approval boundaries/zeroing, rollback, both unwrap roles and stop/recovery/restart; legacy roles and mock governance remain explicit limits |
+| `MainnetLidoCoverage.t.sol` | six real Lido v4 submission cases: independent internal-share accounting, boundaries, pause/resume with fork-only ACL prerequisites, stake limit and stop/restart; legacy roles and mocked governance remain explicit limits |
+| `EnablingVoteRehearsal.t.sol` | fourteen fork cases use live Aragon Voting, ACL, Finance and Easy Track for the enabling vote, USDC/stETH/USDS top-ups, payment permissions, creator/recipient and limit-role refusals, objection/cancellation, monthly-limit race/rollover and paused-USDC rollback/retry; registry deployments and funding limits are local stand-ins, and budget factory is not production |
+| `MainnetWethCoverage.t.sol` | five WETH boundary, balance/event, malformed-route and stop/recovery/restart cases on the committed legacy-key mainnet fork profile; production role migration and signer configuration remain separate |
 | `Drills.t.sol` | governance encoding and enactment, the four kinds of permission change and the budget-motion floor, the direct DAO path, operator lifecycle on in-scope venues, the emergency role and its switch, budgets, adversarial cases, the launch scope, and the Asset Safe's shape |
 | `ReviewProbe.t.sol` | escalation guards, approval bounds, budget keys, budget-motion bounds, and regression tests and probes for defects found in review |
 | `PolicyShape.t.sol` | static checks of the committed artifact: role keys and members, and no out-of-scope target, spender or receiver |
@@ -84,5 +136,6 @@ The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy
 | `utils/Fixture.sol` | the shared deployment at the manifest's addresses, with the artifact applied |
 | `utils/MotionCalls.sol` | the admin calls that the governance drills put in a motion; test inputs, not the policy |
 | `Bootstrap.t.sol` | the funding script |
+| `SepoliaCoverage.t.sol` | current-stand role and failure matrices, governance and emergency key/target cross-products, combined queue/order/governance restart, alternate stop orderings and pending-burn cancellation in the separate `SepoliaStopOrderingCoverageTest` suite, delegatecall downgrade, allowance timestamp overflow/recovery, typed-order domains, all 104 minimum/daily/weekly TWAP part identities, cancellation isolation, conditional entrypoint and StopLoss-payload refusals in `SepoliaConditionalEntryCoverageTest`, nonzero-remainder partial fee/price rounding in `SepoliaSettlementRoundingCoverageTest`, overfill rollback, approvals and synthetic First-loss failures |
 
 Negative drills require the modifier's own error, so a revert inside a protocol cannot pass for a refused permission.

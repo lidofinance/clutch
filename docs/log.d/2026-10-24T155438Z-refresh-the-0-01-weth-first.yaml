@@ -1,0 +1,3 @@
+date: '2026-10-24'
+kind: Update
+text: Refresh the 0.01 WETH first-transfer payload and pass both exact-payload fork tests.

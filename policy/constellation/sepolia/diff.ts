@@ -20,8 +20,11 @@ export type AllowanceObservation = {
 };
 
 // The deployed proxies emit OZ's uint64 Initialized event; the pinned SDK still declares uint8.
-const ABI = new Interface([...rolesAbi, "event Initialized(uint64 version)"]);
+const ABI = new Interface([...rolesAbi, "event Initialized(uint64 version)",
+  "function getOwners() view returns(address[])", "function getThreshold() view returns(uint256)"]);
 const SENTINEL = "0x0000000000000000000000000000000000000001";
+const GUARD_SLOT = "0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8";
+const MODULE_GUARD_SLOT = "0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947";
 const LOG_RANGE = 1000;
 const lower = (value: string) => value.toLowerCase();
 const sorted = (values: Iterable<string>) => [...values].map(lower).sort();
@@ -237,6 +240,14 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
   }
   for (const address of new Set([manifest.assetSafe, manifest.ordersSafe, manifest.firstLossSafe, manifest.operatorSafe, manifest.emergencySafe] as string[])) {
     compare(`safes.${address}.enabledModules`, sorted(modifiers.filter((item) => lower(item.avatar) === lower(address)).map((item) => item.address)), sorted(await modules(address)));
+    const owner = [manifest.operatorSafe, manifest.emergencySafe].some((safe) => lower(safe) === lower(address)) ? manifest.controller : manifest.voting;
+    compare(`safes.${address}.owners`, sorted([owner]), sorted(await call<string[]>(address, "getOwners")));
+    compare(`safes.${address}.threshold`, "1", (await call<bigint>(address, "getThreshold")).toString());
+    for (const [name, slot] of [["guard", GUARD_SLOT], ["moduleGuard", MODULE_GUARD_SLOT]]) {
+      const value = await read("eth_getStorageAt", [address, slot, tag]);
+      if (typeof value !== "string" || !/^0x[0-9a-fA-F]{64}$/.test(value)) throw new Error("Invalid Safe storage response");
+      compare(`safes.${address}.${name}`, ZeroHash, lower(value));
+    }
   }
   const final = await read("eth_getBlockByNumber", [tag, false]) as Header;
   if (!final || lower(final.hash) !== lower(snapshot.hash)) throw new Error("Policy snapshot changed during reads; retry after reorg");
@@ -247,7 +258,8 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
     limitations: [
       "Permission mappings are reconstructed from canonical RPC logs; completeness beyond creation/getter cross-checks relies on the RPC log service.",
       "Stored function entries are compared even under revoked targets; fully empty revoked roles are omitted.",
-      "No default roles or transaction unwrappers are expected. Safe owners/guards, target behavior and executable transaction success are outside this policy comparison.",
+      "Safe owners and threshold follow the reduced Sepolia profile; both guard slots must be zero. Safe versions, singleton/fallback slots, target behavior and executable transaction success are outside this comparison.",
+      "No default roles or transaction unwrappers are expected.",
       "Allowance balance and timestamp are observations, not configuration drift. Consumption totals come from events; no financial valuation is computed.",
     ],
   };

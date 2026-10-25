@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Pass eight real EarnUSD/EarnETH deposit cases through existing oracle, vault, queues and hooks; verify exact claims/cancels, proof/account separation, cap boundary and emergency restart; retain timing and RPC failures and explicit fork-only grant limits.

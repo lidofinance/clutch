@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Prepare the Sepolia UI funding/return batch at Committee nonce 51; exact read-only simulation and two fork tests pass, including budget accounting and complete rollback for a forbidden return receiver.

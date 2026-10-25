@@ -16,6 +16,7 @@ The [product brief](product/brief.md) explains the goals and users.
 - [Contribute a change](../CONTRIBUTING.md): setup, checks, review and decision procedures.
 - [Maintain the onboarding guide](onboarding/guide.md): build, source pins and browser tests.
 - [Run the fork harness](../test/README.md): policy checks against production contracts on a mainnet fork.
+- [Test the stand](specs/sepolia-test-plan.md): cases and transactions; [results and findings](research/sepolia-test-results.md).
 - [Find an operating procedure](runbooks/): the backlog for one runbook per emergency or technical action, each mapped to a permission and fork drill; none is written yet.
 
 ## Find a requirement or status

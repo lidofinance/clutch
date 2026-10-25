@@ -1,0 +1,3 @@
+date: '2026-10-25'
+kind: Evidence
+text: Verify stale owner restore and selective restart on the Sepolia fork; pass all 88 named cases and retain GOV-09 as partial pending stale-payload detection.
