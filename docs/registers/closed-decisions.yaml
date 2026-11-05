@@ -692,3 +692,144 @@
   log:
     - "2026-10-22 — OD-95 to OD-99 decided: the public repository, the order signer as new code, re-grants by motion, the seed's price rule and security reports"
   note: "SECURITY.md holds the rule."
+
+- id: OD-100
+  question: "Does Clutch manage permissions through Merkle roots, and how do concurrent Easy Track motions stay safe?"
+  closed: 2026-11-01
+  log:
+    - "2026-11-01 — OD-100: versions, not Merkle roots"
+  adr: [ADR-013#d1, ADR-013#d2]
+  see: [/research/easy-track-first-2026-11-05.md]
+
+- id: OD-101
+  question: "Which actions still need an Aragon vote after the enabling vote?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-101: no Aragon vote after launch"
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+  adr: [ADR-013#d3, ADR-013#d4]
+
+- id: OD-102
+  question: "How do Easy Track motions change the vault's permissions: a catalogue of template factories, or one universal factory?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-102 to OD-104 and OD-112: the ballot on one factory"
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+  adr: [ADR-013#d5, ADR-013#d6, ADR-013#d7, ADR-013#d8, ADR-013#d9, ADR-013#d10, ADR-013#d11]
+  replaces:
+    - {od: OD-69}
+    - {od: OD-70, part: true}
+    - {od: OD-72, part: true}
+    - {od: OD-79, part: true}
+  refines: [OD-49, OD-94]
+
+- id: OD-103
+  question: "Does the operator keep market and limit orders through the order signer, and how does a token join the orders account?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-102 to OD-104 and OD-112: the ballot on one factory"
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+  adr: [ADR-007#d41]
+  replaces:
+    - {od: OD-36, part: true}
+    - {od: OD-46, part: true}
+    - {od: OD-78, part: true}
+
+- id: OD-104
+  question: "Who restarts the operator after the emergency switch?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-102 to OD-104 and OD-112: the ballot on one factory"
+  adr: [ADR-013#d12]
+  replaces:
+    - {od: OD-59, part: true}
+    - {od: OD-78, part: true}
+    - {od: OD-97, part: true}
+
+- id: OD-105
+  question: "Can a motion change a ceiling, and within which limit?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+    - "2026-11-05 — OD-105 to OD-108, round three: the ceilings' period, insurance, the proceeds and the first tranche"
+  adr: [ADR-013#d13]
+  replaces:
+    - {od: OD-08, part: true}
+    - {od: OD-22, part: true}
+
+- id: OD-106
+  question: "How is the vault funded: by Easy Track top-ups through funding registries, or by tranche votes?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+    - "2026-11-05 — OD-105 to OD-108, round three: the ceilings' period, insurance, the proceeds and the first tranche"
+  adr: [ADR-014#d1, ADR-014#d2, ADR-014#d3]
+  see: [/research/easy-track-first-2026-11-05.md]
+  replaces:
+    - {od: OD-06}
+    - {od: OD-11}
+    - {od: OD-24}
+    - {od: OD-71}
+    - {od: OD-93}
+    - {od: OD-07, part: true}
+    - {od: OD-54, part: true}
+    - {od: OD-92, part: true}
+  refines: [OD-14, OD-62, OD-84, OD-89, OD-98]
+
+- id: OD-107
+  question: "Which insurance does the vault build in at launch, and where does its money come from?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+    - "2026-11-05 — OD-105 to OD-108, round three: the ceilings' period, insurance, the proceeds and the first tranche"
+  adr: [ADR-014#d4, ADR-014#d5, ADR-014#d6, ADR-014#d7]
+  replaces:
+    - {od: OD-78, part: true}
+  refines: [OD-66]
+
+- id: OD-108
+  question: "Which flows send funds back to the treasury, and how do funds return to the Aragon Agent?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+    - "2026-11-05 — OD-105 to OD-108, round three: the ceilings' period, insurance, the proceeds and the first tranche"
+  adr: [ADR-014#d8, ADR-014#d9, ADR-014#d10]
+  replaces:
+    - {od: OD-60, part: true}
+    - {od: OD-66, part: true}
+    - {od: OD-67, part: true}
+
+- id: OD-109
+  question: "Does a change of the committee's members need a Snapshot each time?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+  adr: [ADR-005#d33]
+
+- id: OD-110
+  question: "Does the vault keep a liquidity buffer of its own?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+  adr: [ADR-009#d46]
+  replaces:
+    - {od: OD-40}
+    - {od: OD-86, part: true}
+    - {od: OD-87, part: true}
+    - {od: OD-90, part: true}
+
+- id: OD-111
+  question: "Where does the report show the TMC-6 ratio of sUSDS and tokenized money market funds?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+  adr: [ADR-009#d47]
+
+- id: OD-112
+  question: "Does the policy chain a second Roles modifier whose bounds only a vote changes?"
+  closed: 2026-11-05
+  log:
+    - "2026-11-05 — OD-102 to OD-104 and OD-112: the ballot on one factory"
+    - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
+  adr: [ADR-013#d14]
+  see: [/research/easy-track-first-2026-11-05.md]

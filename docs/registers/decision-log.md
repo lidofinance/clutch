@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T21:59:44Z
+  at: 2026-11-05T19:22:54Z
 verified: []
 sources:
   - id: s1
@@ -70,15 +70,125 @@ sources:
   - id: s20
     resource: "urn:clutch:interview:2026-10-22-verify"
     title: EM's verification of ADR 001, ADR 003 and ADR 004, and the go-ahead to push, 2026-10-22; the transcript is not in the repository
+  - id: s21
+    resource: "urn:clutch:interview:2026-11-01"
+    title: EM's questions on Merkle-root policies, a two-modifier alternative and the cancel of a motion, and EM's answer on versions, 2026-11-01; the transcript is not in the repository
+  - id: s22
+    resource: "urn:clutch:restricted:cfo-comment-2026-11-01"
+    title: The CFO's comment on the design, which EM relayed, 2026-11-01; outside the repository
+  - id: s23
+    resource: "urn:clutch:interview:2026-11-05"
+    title: EM's aim of no Aragon vote after launch, EM's ballot on one factory, and EM's answers to the agent's questions of rounds two and three, 2026-11-05; the transcript is not in the repository
 ---
 
 # Decision log
 
 Entries quote EM exactly, including typos. An agent copied them from the interview transcripts. EM should confirm each entry by verifying this page. Newest first. Times are UTC.
 
-Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
+Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-05 — OD-105 to OD-108, round three: the ceilings' period, insurance, the proceeds and the first tranche
+
+The agent asked five questions after EM's answers of round two (the entry below): (1) whether a motion may lower a ceiling at any time, and raise it at most twofold, at most once in 30 days for that ceiling; (2) whether insurance for Lido Lend is (a) a first-loss position that the vault holds and burns on a loss, like the Earn shares, or (b) a reserve that pays a fixed Lend address after a confirmed loss, and which Earn vaults beyond earnETH and earnUSD it covers; (3) whether insurance money comes from the Asset Safe by motion, as the agent recommended, or from tranche votes paid straight to the insurance Safe; (4) whether redemption and fund-exit proceeds go to the Asset Safe instead of the Agent, as the agent recommended; (5) whether the first tranche goes inside the enabling vote, as the agent recommended. EM answered:
+
+> Answers:
+> 1. Ceiling limit is OK. Would consider doubling once per 15 days.
+> 2. It should be either (a) or (b), no other Earn vaults should be covered, only earnETH and earnUSD
+> 3. Insurance money should come from the Asset Safe by motion
+> 4. Redemption and fund-exit proceeds go to the Asset Safe instead of the Agent
+> 5. Tranche 1 goes inside the enabling vote exactly.
+
+Recorded as:
+
+- (1, OD-105) A motion lowers a ceiling at any time. It raises a ceiling to at most twice its value, at most once in 15 days for that ceiling ([ADR 013](/adr/013-one-easy-track-factory.md), decision 13). The agent reads "Would consider doubling once per 15 days" as the period.
+- (2, OD-107) For Lido Earn, only earnETH and earnUSD are covered. A fund for Lido Lend takes either form: burnable shares, or a fixed payout address, the two templates of OD-66 ([ADR 014](/adr/014-funding-by-tranche-votes.md), decisions 5 and 6). The agent reads "either" as both forms ready at launch, and one form for each fund.
+- (3, OD-107) Insurance money comes from the Asset Safe by motion ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 7).
+- (4, OD-108) Redemption and fund-exit proceeds go to the Asset Safe, not to the Aragon Agent ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 10).
+- (5, OD-106) The first tranche goes inside the enabling vote ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 2). [s23]
+
+## 2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items
+
+The agent asked ten questions with its plan for EM's ballot (the entry below). Questions 6 and 7 came from the CFO's comment of 2026-11-01 (the entry of that day). The questions were: (1) whether ceilings stay fixed at deployment, at the mandate size, so that a raise needs a new factory and a vote; (2) how much insurance to build in: the dormant registry and its factory only, or also the fund roles on the first-loss modifier; (3) whether a motion adds a token on the buy side of swaps, as the agent recommended, or a fixed list of plain tokens on the buy side changes only by vote, as the CFO preferred; (4) whether the replacement of a role holder, such as a new committee Safe in the operator role, stays a break-glass vote, as the agent recommended; (5) whether the funding tokens are fixed at launch, as the agent recommended, so that a new one needs a vote; (6) how funds return to the Aragon Agent: by an operator transfer pinned to the Agent without a motion, as the agent recommended, by a factory operation in a motion, or only by the emergency Safe or a vote; (7) whether EM confirms an alert and a runbook for changes of the committee's members, the end of the in-vault buffer (OD-40), and a report of the TMC-6 sUSDS ratio for the whole treasury; (8) whether EM chooses between options A and B of the factory at the end of the prototype, on the agent's criteria; (9) whether a motion's calls come from Clutch's own command, as the agent recommended, or from the Zodiac UI; (10) whether the repository attributes the two-modifier alternative. EM answered:
+
+> answers:
+> 1. Can we have ceiling adjustable by ET?
+> 2. We need to have pre-built insurance for Lido Earn and for Lido Lend
+> 3. The buy side of swaps by motion
+> 4. Agree that this is a vote only
+> 5. It doesn't need a vote. Also I would expect that funding won't be regular, can we switch to the following idea:
+> - first deployment is a vote to move $1m from treasury to vault
+> - next deployment is a vote to move [a figure] from treasury to vault
+> - one more deployment is a vote to move [a figure] from treasury to vault
+> it's just indicative, the exact token list should not matter
+> BUT please check that we rarely send back to treasury (only emergency and recovery must do it)
+> 6. Returning funds to the Agent must be: an operator transfer pinned to the Agent with no motion or emergency Safe with no motion; no vote must be required either way
+> 7. Agree that we need to have alert and runbook, but not a snapshot each time TMC member changes, drop the in-vault buffer, reporting the TMC-6 sUSDS ratio treasury-wide
+> 8. I didn't get the question really
+> 9. What is the planner?
+> 10. Describe without attribution
+
+Recorded as:
+
+- (1, OD-105) Ceilings change by motion. The agent proposed a limit on raises, which round three settled ([ADR 013](/adr/013-one-easy-track-factory.md), decision 13).
+- (2, OD-107) Insurance is built in at launch, for Lido Earn and for Lido Lend ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 4). This reverses OD-78 for insurance.
+- (3, OD-103) A motion adds a token on the buy side of swaps too ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 41). The CFO's preference, a fixed list of plain tokens on the buy side that changes only by vote, is not adopted.
+- (4, OD-101) The replacement of a role holder stays an Aragon vote ([ADR 013](/adr/013-one-easy-track-factory.md), decision 4).
+- (5, OD-106) The funding tokens need no vote. Funding is not regular: each funding is an Aragon vote that moves a tranche from the treasury to the vault, one million dollars first, then larger tranches. The figures are indicative, and the exact token list does not matter ([ADR 014](/adr/014-funding-by-tranche-votes.md), decisions 1 and 3). The funding registries, the top-up factories and the four USDS items go, and so do the effects of the ballot's answers 4 and 5 (the entry below). The agent checked the flows back to the treasury: emergency transfers and recovery orders pay the Agent, and so did the first-loss redemption and the exit from an insurance fund. It also checked that Aragon Voting pays through Finance, in any token and without Dual Governance ([research note](/research/easy-track-first-2026-11-05.md)). Round three moved the proceeds to the Asset Safe.
+- (6, OD-108) Funds return to the Aragon Agent by an operator transfer pinned to the Agent, or by the emergency Safe's transfer, with no motion and no vote ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 9).
+- (7, OD-109, OD-110 and OD-111) A change of the committee's members needs no Snapshot each time; an alert and a runbook cover it ([ADR 005](/adr/005-account-graph-and-roles.md), decision 33). The vault keeps no buffer, and each report shows the TMC-6 ratio for the whole treasury ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 46 and 47).
+- (8) EM had nothing to decide. The agent restated the rule: the prototype builds option A, and the agent reports its numbers before any switch to option B ([ADR 013](/adr/013-one-easy-track-factory.md), decision 11).
+- (9) The agent explained that the planner is the tool that writes a motion's calls from a change of the policy. Its recommendation, Clutch's own `motion` command, is in the proposed direction of [ADR 013](/adr/013-one-easy-track-factory.md).
+- (10, OD-112) The repository describes the two-modifier alternative without attribution. [s23]
+
+## 2026-11-05 — OD-102 to OD-104 and OD-112: the ballot on one factory
+
+The agent proposed one universal Easy Track factory and asked six questions, each with options: (1) the factory: A, one universal factory that widens permissions only through typed shapes, which pin receivers to the vault, draw budget keys and write emergency exits, narrows them with raw writes, checks versions at creation and at enactment, and has a counter that the emergency Safe can raise; B, raw writes only, with the 72-hour review as the only bound on where funds go; or C, the catalogue; (2) the orders: A, ComposableCoW's TWAP orders only, with no order signer and no delegatecall; or B, market and limit orders through the order signer, with delegatecall pinned to it; (3) the restart after the switch: A, by motion, through a restart role that may only enable the operator modifier; or B, by vote; (4) the registry limits: A, by motion, within a ceiling fixed at deployment; or B, by vote; (5) insurance funds: A, a later vote; or B, a dormant registry built in now; (6) a chain of two Roles modifiers, the outer one with bounds that only a vote changes: A, drop it; or B, keep it. The agent recommended A for each. An earlier, interrupted answer gave other choices; EM replaced it with this one:
+
+> 1. A, but can be B if something is too tough and complex
+> 2. B
+> 3. A
+> 4. A
+> 5. B
+> 6. A
+>
+> plan this changes carefully, prepare an execution plan and raise more questions if needed, don't write the code yet
+
+Recorded as:
+
+- (1, OD-102) Option A: one universal factory, with a fallback to option B if A proves too tough and complex ([ADR 013](/adr/013-one-easy-track-factory.md), decisions 5 to 11).
+- (2, OD-103) Option B, against the agent's recommendation: market and limit orders stay, through the order signer, with delegatecall pinned to it ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 41).
+- (3, OD-104) Option A: a motion restarts the operator after the switch ([ADR 013](/adr/013-one-easy-track-factory.md), decision 12).
+- (4) Option A: registry limits by motion. Round two removed the registries (OD-106), so this answer has no effect.
+- (5) Option B, against the agent's recommendation: a dormant insurance registry. Round two removed the registries, and EM chose insurance built in at launch, with its money from the Asset Safe (OD-107).
+- (6, OD-112) Option A: no chain of two Roles modifiers ([ADR 013](/adr/013-one-easy-track-factory.md), decision 14).
+- The agent wrote a plan without code and asked the questions of round two (the entry above). [s23]
+
+## 2026-11-05 — OD-101: no Aragon vote after launch
+
+EM wrote:
+
+> my current vision is that not a single action must require a DAO vote, can we figure out a design that compatible with this where almost every administrative action is easy track at most, we can probably even consider something like universal easy track factory, but still with guardrails to avoid having upgrades and delegatecalls allowed and scope limited to a particular set of contracts only (like address book)
+>
+> take this into account and suggest the next step how we can adjust design, we must make it as simple as possible, removing complexity is what we value: less moving parts is the best outcome
+
+Recorded as:
+
+- (OD-101) After the enabling vote, no administrative action needs an Aragon vote. An Easy Track motion is the most that one needs, and fewer moving parts is the best outcome ([ADR 013](/adr/013-one-easy-track-factory.md), decision 3). EM's guardrails for a universal factory, no upgrades, no delegatecall and an address book, became option A of the ballot (the entry above). Round two kept two kinds of vote: funding tranches and the replacement of a role holder ([ADR 013](/adr/013-one-easy-track-factory.md), decision 4). [s23]
+
+## 2026-11-01 — OD-100: versions, not Merkle roots
+
+The CFO commented on the design, and EM relayed the comment [s22]. The CFO asked what the approved list of protocols and assets is, and preferred to add protocols and assets by Easy Track, with a forum post, even when the launch list lacks them. The CFO noted that a vote for each new swap token is heavy, and preferred that the receiving tokens of swaps stay a short list of plain tokens that changes only by vote, while a sending token joins when its asset is approved. The CFO asked how token holders' approval of new committee members works in practice. The CFO preferred no runway floor or buffer inside the vault, and asked that the treasury's sUSDS count when the TMC-6 cap is computed. EM asked the agent to triage the comment.
+
+EM then asked what would change if Easy Track managed everything through a Merkle tree of allowed actions, as Veda's and Mellow's vaults do, and whether the Roles modifier is compatible with it. EM asked about an alternative with two chained Roles modifiers, and named the risk: a stateless write of the whole permission set could hit the gas limit, and a stateful write is unsafe while Easy Track motions run concurrently, in no guaranteed order. EM also asked whether the trusted caller can cancel a motion while it is pending, and in other phases. The agent's answers are in the [research note](/research/easy-track-first-2026-11-05.md). EM wrote:
+
+> okay, I guess we don't need merkle trees, but we do need versioning to prevent concurrent updates via ET; we must have almost everything managed by ET only not involving DAO votes
+
+Recorded as:
+
+- (OD-100) No Merkle-root policy. Easy Track motions carry versions, so that concurrent motions cannot overwrite each other ([ADR 013](/adr/013-one-easy-track-factory.md), decisions 1 and 2).
+- EM's aim that almost everything runs through Easy Track, without DAO votes, led to OD-101 (the entry of 2026-11-05 above). [s21]
 
 ## 2026-10-22 — ADR 001, ADR 003 and ADR 004 verified again
 

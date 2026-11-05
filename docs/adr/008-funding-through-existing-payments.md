@@ -1,19 +1,19 @@
 ---
 type: Decision
 title: "ADR 008: Funding through the existing payment path"
-description: Funding through Finance and registries, first-loss shares and the procedural launch cap.
+description: Funding through Finance and registries, first-loss shares and the procedural launch cap; since OD-106, tranche votes (ADR 014) replace the registries.
 tags: [funding, finance, easy-track, acl]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T21:39:40Z
+  at: 2026-11-05T19:22:54Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the payment ceilings and DAI, 2026-09-22, on OD-06, 2026-10-02, on the funding assets, the legacy investments and the first-loss shares in an emergency, 2026-10-05, on the first-loss role and its burn, 2026-10-13, on the mandate size, 2026-10-21, on the registries and the USDS items, 2026-10-22, and on the seed's price rule, 2026-10-22
+    title: Decision log — EM on the payment ceilings and DAI, 2026-09-22, on OD-06, 2026-10-02, on the funding assets, the legacy investments and the first-loss shares in an emergency, 2026-10-05, on the first-loss role and its burn, 2026-10-13, on the mandate size, 2026-10-21, on the registries and the USDS items, 2026-10-22, on the seed's price rule, 2026-10-22, and on tranche votes, insurance and the flows to the Agent, 2026-11-05
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Finance, the payment ACL chain, budgets and an existing top-up factory
@@ -150,9 +150,19 @@ EM decided on 2026-10-22, closing OD-98 [s1]:
 
 37. The seed counts the first-loss shares at the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 35 and 36), as the funded value does.
 
+Since EM's decisions of 2026-11-05 ([ADR 014](/adr/014-funding-by-tranche-votes.md)):
+
+- Aragon Voting funds the vault by tranche votes through Finance, and the first tranche goes inside the enabling vote (OD-106). Decisions 1, 3 to 12, 24, 35 and 36 and the registries of decision 20 lapse: the vault has no funding registry, no top-up factory and no change to Easy Track's payment permission or token list. Decisions 32 to 34 stand. Decision 37's price rule still counts the first-loss shares in the funded value.
+- Insurance ships with the launch for earnETH, earnUSD and Lido Lend, and its money comes from the Asset Safe by motion (OD-107). This replaces decision 31. Decisions 25, 26 and 29 stand.
+- The redemption and the claim of decisions 21 and 23, and the exit of decision 28, pay the Asset Safe, not the Aragon Agent (OD-108).
+- The universal factory carries the burn motion of decision 23 (OD-102, [ADR 013](/adr/013-one-easy-track-factory.md)).
+- The vault has no seed. Decision 17's Twyne rule and decision 37's price rule apply to the funded value: a Twyne position counts only when its holder and form are shown, and the first-loss shares count at the report's price rule.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
+
+Since OD-106, the proposed direction of [ADR 014](/adr/014-funding-by-tranche-votes.md) replaces the funding parts of this section: the USDS permission, the multiple payments, the registries, the factories, the limits, the seed, the capped top-ups, the funded value's top-ups, the funding alerts, the top-up reports and the funding assets. The first-loss parts stand, with the exit and the claim paid to the Asset Safe (OD-108).
 
 - **USDS permission.** One vote rewrites the array, retaining seven entries and adding USDS at 2,000,000 per payment (decision 12). Fork-test the array before the vote. Build the new params from the live ones at a recent block, and run the before-and-after check again before the vote starts and before it executes: another vote that rewrites the same params would drop one of the two changes without an error (decision 36).
 - **Multiple payments.** A motion can repeat the Asset Safe as recipient, respecting each call's ceiling. Ceilings apply per call, not per motion [s4].
@@ -175,6 +185,7 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - Raise shared ceilings: EM rejected this under OD-11; retain them and add USDS. Higher ceilings would widen other setups' grants.
 - Add a vault-only payment permission: EM rejected under OD-11 because shared configuration avoids another ACL entry.
 - Fund only by DAO vote: EM rejected under OD-06. The mandate uses Easy Track [s5]; votes add Dual Governance delay to each payment.
+- Since OD-106, tranche votes fund the vault. A payment through Finance by Aragon Voting does not pass Dual Governance, so the delay above does not apply to it ([research note](/research/easy-track-first-2026-11-05.md)).
 - Three-month periods: EM rejected because a permitted monthly refill could wait until the next quarter.
 - Price stETH limits for stress: rejected because it adds capacity above one floor for speed the mandate does not require.
 - Split one floor between registries: rejected because neither asset could provide a full permitted refill.
@@ -194,6 +205,8 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 ## Consequences
 
+Since OD-106, the vault has no funding registry, no top-up motion and no USDS item. [ADR 014](/adr/014-funding-by-tranche-votes.md) holds the funding consequences. The first-loss items below stand, with the redemption and the claim paid to the Asset Safe (OD-108).
+
 - The deployer holds each registry's add-recipient and set-limit roles for one transaction. The check before the vote must find no role left with it (decision 35).
 - Keeping the USDS items keeps the rewrite of a permission that every committee's top-ups use. The before-and-after check guards it (decision 36).
 - Without objection, the committee can draw one mandate size per registry per month, or two within about 72 hours across a boundary. The mandate size and the treasury share hold by procedure; the LIP must disclose this.
@@ -210,14 +223,16 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 - Separate first-loss custody distinguishes protected shares from ordinary Asset Safe positions. Only enacted burns or Agent-only redemptions can reach the first-loss Safe (decisions 21 and 23); the no-redeem rule needs no written check.
 - On Earn instructions, the committee proposes burns or exits without a DAO vote. Capital still absorbs losses first; curator freezes can delay redemption [s7].
 - Burns wait at least 72 hours, later than a Growth Committee burn would, and LDO holders can block them by objection. Public notice lets depositors time entry or exit. The vault should pause deposits and redemptions until burn, as after Kelp [s7]. March 2026 terms allowed urgent burns before notice; public motions remove that option [s7].
-- A compromised committee quorum cannot burn immediately. It can propose a publicly visible 72-hour motion or redeem only to the Agent. Burns transfer value to other depositors, so each motion pages monitoring. Emergency cannot reach the first-loss Safe; the DAO can remove both roles.
+- A compromised committee quorum cannot burn immediately. It can propose a publicly visible 72-hour motion or redeem only to the Asset Safe (OD-108). Burns transfer value to other depositors, so each motion pages monitoring. Emergency cannot reach the first-loss Safe; the DAO can remove both roles.
 - Burns reduce the vault's value. No top-up refills it by right: a replenishment needs the mandate's published eligibility conditions (decision 34).
 - The move depends on Earn administrators keeping share transfers open until it happens; they can restrict transfers [s6].
 - Without evidence of a Twyne holder, Twyne does not reduce the seed; the seed can exceed the mandate's figure.
 
 ## Confirmation
 
-- INV-017 and INV-021 in the [invariants](/specs/invariants.md).
+Since OD-106, INV-037 replaces the retired INV-017, and the registry checks below have no subject.
+
+- INV-021 and INV-037 in the [invariants](/specs/invariants.md).
 - The enabling-vote rehearsal moved both first-loss share balances from the Growth Committee's Safe by plain transfer ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
 - Fork tests still owed:
   - Burns only through enacted `first-loss-burn` motions, with all other callers refused.
@@ -230,12 +245,14 @@ The rest of this section is agent-drafted [s3]. EM has not accepted it as text.
 
 ## Reversal conditions
 
+Since OD-106, the conditions about registries, top-ups and USDS below have no subject; [ADR 014](/adr/014-funding-by-tranche-votes.md) holds the funding conditions.
+
 - The DAO declines to widen USDS payments for every stablecoin setup, so the vote that rewrites the permission fails.
 - The mandate's eligibility conditions call for a period other than one calendar month (decision 3).
 - Top-ups above the headroom under the mandate size happen. That would argue for one dollar limit on chain.
 - The Earn vaults block share transfers before the move.
 - The first-loss terms end. A DAO vote then moves the shares to the Asset Safe as ordinary positions.
-- The DAO changes or ends the first-loss authorisation. A DAO vote then changes or removes the two first-loss roles and the burn factory.
+- The DAO changes or ends the first-loss authorisation. A DAO vote then changes or removes the two first-loss roles and the factory's burn shape.
 - A top-up takes the vault above the cap before the lift (decision 20).
 
 ## Open questions
