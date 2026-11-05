@@ -1,5 +1,10 @@
 # Log
 
+## 2026-11-05
+
+* **Decision**: Recorded EM decisions of 2026-11-01 and 2026-11-05, OD-100 to OD-112: one universal Easy Track factory with versions, no Aragon vote after launch except funding tranches and break-glass actions, funding by tranche votes with the first inside the enabling vote, insurance for earnETH, earnUSD and Lido Lend at launch, and only emergency and recovery paying the Aragon Agent (ADR 013, ADR 014).
+* **Update**: Brought the enabling-vote spec, the invariants, the control matrix, the parameters, the runbooks, the roadmap, the LIP and the guide in line with OD-100 to OD-112, and added the research note on Easy Track, Roles and Finance payments.
+
 ## 2026-10-22
 
 * **Update**: Recorded EM's verification of ADR 001, ADR 003 and ADR 004 after the fixes of 2026-10-22, at EM's written instruction. ADR 002 did not change, so its verification of 2026-10-20 stands.

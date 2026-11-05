@@ -3,12 +3,12 @@
 - id: no-owner-path
   assumption: "No role can reach an owner-only function of the Asset Safe, the orders account or a modifier, beyond the narrow, pinned calls that the policy grants."
   kind: design
-  why: "The Asset Safe owns both modifiers, and every role call runs as the Asset Safe. The emergency revoke and the governance writes work only because a narrow role may administer a modifier. The LIP calls this composition the primary risk."
+  why: "The Asset Safe owns both modifiers, and every role call runs as the Asset Safe. The emergency revoke, the governance writes and the restart work only because a narrow role may administer a modifier or the Safe. The LIP calls this composition the primary risk."
   breaks: "An operator, a motion or a factory bug gets administration of the vault. Fork probes found two such paths, and both are closed: a motion could grant the operator delegatecall (OD-36), or give it the safety modifier as a target (OD-38)."
   watched_by: [INV-004, INV-009, INV-018, INV-027, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe", "test:test_policyadmin_cannot_grant_operator_delegatecall", "test:test_D6_adversarial"]
-  watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. Since OD-49 a motion can also write the emergency role's exits on the safety modifier, through the exit-governance role; INV-025 has no test yet. An external audit is due in phase 3."
-  sources: ["ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d10", "ADR-006#d13", "ADR-006#proposed-direction",
-    OD-36, OD-38, OD-49, INV-025, "lip:part-2"]
+  watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. Motions can also write the emergency role's exits on the safety modifier, through the exit-governance role (OD-49), and enable the operator modifier, through the restart role (OD-104). INV-025 and INV-035 have no test yet. An external audit is due in phase 3."
+  sources: ["ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d10", "ADR-006#d13", "ADR-013#d12",
+    OD-36, OD-38, OD-49, OD-104, INV-025, INV-035, "lip:part-2"]
 
 - id: agent-sole-owner
   assumption: "Aragon Voting is the only owner of the Asset Safe, which has no guard, no module guard and no fallback handler."
@@ -23,22 +23,24 @@
 - id: dao-sound
   assumption: "The DAO stays sound and able to act."
   kind: trust
-  why: "The DAO is the final authority. Only the DAO replaces the policy, enables a disabled modifier, unpauses Easy Track, moves the operator role to another Safe or sets registry limits. Every restart after an emergency stop is a DAO vote (OD-59)."
-  breaks: "Nothing restarts after a stop: the operator stays switched off, or Easy Track stays paused. Every DAO action takes about five days, and a defect in the safety modifier leaves only the DAO path."
-  watched_by: ["test:test_D2_direct_DAO_path", "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts"]
-  watch_note: "The tests run on a mock owner and a mock Easy Track. The DAO runbooks are listed but not written."
-  sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59, "lip:part-6", "runbook:Restart after a stop",
-    "doc:docs/runbooks/index.md#runbooks", OD-73, "ADR-005#d28", "ADR-005#d30"]
+  why: "The DAO is the final authority. After the enabling vote, it votes only to fund a tranche, to replace a role holder, and for break-glass actions: an owner action on a vault Safe, a new or changed factory, and an Easy Track unpause (OD-101)."
+  breaks: "The vault gets no new tranche, a captured committee keeps the operator role, a defect in the safety modifier or the factory stays, or Easy Track stays paused. Every DAO action takes about five days."
+  watched_by: ["test:test_D2_direct_DAO_path"]
+  watch_note: "The test runs on a mock owner. The DAO runbooks are listed but not written."
+  sources: ["ADR-005#proposed-direction", "ADR-013#d3", "ADR-013#d4", "ADR-013#proposed-direction", "ADR-014#d1", OD-101, "lip:part-6",
+    "doc:docs/runbooks/index.md#runbooks", OD-73, "ADR-005#d28", "runbook:Fund a tranche",
+    "runbook:Move the operator role to another Safe"]
 
 - id: signers-good-faith
   assumption: "The committee's signers act in good faith."
   kind: trust
-  why: "The committee's own Safe, at 4 of 7, holds the operator role and the first-loss role (OD-80). Two of its signers sit on the emergency Safe."
-  breaks: "The committee proposes its own expansions and executes the first-loss terms. A captured quorum of the committee's Safe can redeem the first-loss shares to the Aragon Agent, and can propose a burn, which LDO holders see for 72 hours before it moves the shares' value to the vault's other depositors. Two compromised committee keys do not reach the emergency role (OD-58)."
+  why: "The committee's own Safe, at 4 of 7, holds the operator role and the first-loss role, and it creates every motion (OD-80). Two of its signers sit on the emergency Safe."
+  breaks: "A captured quorum of the committee's Safe can propose any motion, and LDO holders see each one for 72 hours. Such a motion can onboard a bad protocol and lose up to its budgets in each period. It can raise a ceiling at most twofold in 15 days, or restart the operator after a stop. A burn motion moves the first-loss shares' value to the vault's other depositors. The quorum can also redeem the first-loss shares to the Asset Safe, and return vault tokens to the Aragon Agent, which stops the vault but loses nothing. Two compromised committee keys do not reach the emergency role (OD-58)."
   watched_by: ["test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval"]
-  watch_note: "INV-002, INV-014 and INV-021 are pending. Paging on every emergency action, every burn motion and every action of the first-loss role is not built."
+  watch_note: "INV-002, INV-014, INV-021 and INV-038 are pending. Paging on every emergency action, every burn motion and every action of the first-loss role is not built, and nor are the alerts on ceiling and restart motions and on transfers to the Agent."
   sources: ["ADR-005#d2", "ADR-005#d9", "ADR-005#d24", "ADR-005#d27", "ADR-008#d21", "ADR-008#d23",
-    "ADR-008#consequences", OD-67, "ADR-006#d3", OD-58, OD-60, INV-002, INV-014, INV-021, "ADR-005#d31", OD-80]
+    "ADR-008#consequences", "ADR-013#consequences", "ADR-014#consequences", OD-67, "ADR-006#d3", OD-58, OD-60, OD-108,
+    INV-002, INV-014, INV-021, INV-038, "ADR-005#d31", OD-80]
 
 - id: guard-single-use
   assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
@@ -52,23 +54,23 @@
     "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard", OD-83]
 
 - id: launch-cap
-  assumption: "Until the guard is live, the committee keeps the vault under a cap of one million dollars by procedure."
+  assumption: "Until the guard is live, the vault holds no more than its first tranche of one million dollars, the launch cap."
   kind: operational
-  why: "EM allowed a launch without the screening guard under that cap, on the Asset Safe and the orders account (OD-54, OD-55)."
-  breaks: "No contract refuses a top-up above the cap: only the procedure, an objection and monitoring stop it. Until the cap lifts, no operator transaction and no motion creation is screened."
+  why: "EM allowed a launch without the screening guard under that cap, on the Asset Safe and the orders account (OD-54, OD-55). The first tranche is the cap, so the cap holds by the tranche's size."
+  breaks: "Until the second tranche, no operator transaction and no motion creation is screened. A first-loss redemption can take the vault above the cap; the committee's Safe must then return the excess to the Aragon Agent."
   watched_by: []
-  watch_note: "The alerts on a top-up motion that would cross the cap, and on a vault value above it, are not built."
-  sources: ["ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-008#d20",
-    "ADR-008#proposed-direction", OD-54, OD-55]
+  watch_note: "The alerts on a redemption before the guard is set, on an excess that stays, and on a vault value above the cap, are not built."
+  sources: ["ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-014#d2", "ADR-014#proposed-direction",
+    OD-54, OD-55, OD-106]
 
 - id: artifact-is-policy
   assumption: "The committed artifact, compiled from the constellation, is the only statement of the policy."
   kind: design
-  why: "Reviewers approve the artifact. The enabling vote, the Easy Track templates and the drift detector consume it. Nothing is signed that the compiler did not produce from the same commit."
+  why: "Reviewers approve the artifact. The enabling vote, the motions of the universal factory and the drift detector consume it. Nothing is signed that the compiler did not produce from the same commit."
   breaks: "A transaction built in the hosted Zodiac app, or a change made in its UI, becomes unreviewed drift. The tests, the vote and the detector can then disagree."
   watched_by: ["doc:.github/workflows/policy.yml"]
-  watch_note: "CI fails when the artifact differs from a fresh compile. The round-trip check (INV-016) and the drift detector are not built."
-  sources: ["ADR-004#d7", "ADR-004#d11", "ADR-004#d12", "ADR-004#d14", OD-33, INV-016]
+  watch_note: "CI fails when the artifact differs from a fresh compile. The round-trip check (INV-016), the drift detector and the `motion` command are not built."
+  sources: ["ADR-004#d7", "ADR-004#d11", "ADR-004#d12", "ADR-004#d14", "ADR-013#proposed-direction", OD-33, INV-016]
 
 - id: roles-and-sdk
   assumption: "The locked Roles mastercopy and the pinned roles SDK encode and check conditions the way the compiler and the tests expect."
@@ -89,23 +91,24 @@
   sources: ["ADR-005#d8", "ADR-005#d12", "ADR-005#d13", "ADR-005#d20", "ADR-005#context", "ADR-010#d16", "ADR-010#d18",
     "ADR-010#proposed-direction", INV-019, "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
-- id: templates-safe
-  assumption: "Every template pins each receiver, owner and beneficiary, bounds each amount that moves value, never emits an administrative function, and gives the emergency role only exits."
+- id: factory-shapes-safe
+  assumption: "Every shape of the universal factory pins each receiver, owner and beneficiary, draws a budget key, writes the emergency exit and never emits an administrative function or a delegatecall other than the order signer's. Every raw write only narrows, and versions stop two motions from undoing each other."
   kind: design
-  why: "Motions onboard protocols without a DAO vote. The audit question becomes: can this template ever emit something unsafe?"
-  breaks: "Any motion that survives its objection window can use a template flaw. A sound template can still point the operator at an unaudited contract; then only the attached budget bounds the loss."
+  why: "Motions change the vault without a DAO vote. The factory is new code and the most critical contract: its shapes are the bound."
+  breaks: "Any motion that survives its objection window can use a flaw in a shape. A sound shape can still point the operator at an unaudited contract; then only the attached budget bounds the loss. If the shapes prove too complex, the fallback's raw writes leave the objection window as the only bound on where funds go."
   watched_by: []
-  watch_note: "No factory is built. Each needs tests for the four properties. The governance role's limits (INV-004) are a second layer."
-  sources: ["ADR-006#d2", "ADR-006#d5", "ADR-006#d13", "ADR-006#proposed-direction", INV-004, OD-49, "lip:part-4"]
+  watch_note: "The factory is not built. INV-032 to INV-036 have no test yet: the fork prototype must test each refusal against the live Easy Track. The governance role's limits (INV-004) are a second layer. An external audit is due in phase 3."
+  sources: ["ADR-013#d7", "ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#consequences", "ADR-013#confirmation",
+    INV-004, INV-032, INV-033, INV-034, INV-035, INV-036, OD-49, OD-102, "lip:part-4"]
 
 - id: easy-track-window
-  assumption: "Easy Track gives every motion an objection window of at least 48 hours, and rebuilds and hash-checks each script at enactment."
+  assumption: "Easy Track gives every motion an objection window of at least 48 hours, and rebuilds and hash-checks each script through its factory at enactment."
   kind: trust
-  why: "These properties bound motions, and they replace a bespoke controller contract."
-  breaks: "A motion could enact with changed content, or too fast to object to. The guard screens the creation of a motion, not its enactment."
+  why: "These properties bound motions, and they replace a bespoke controller contract. The rebuild also runs the factory's version checks again at enactment."
+  breaks: "A motion could enact with changed content, too fast to object to, or over a newer change of the same scope. The guard screens the creation of a motion, not its enactment."
   watched_by: [INV-005, INV-006, "test:test_D1_substituted_script_rejected_at_enactment"]
   watch_note: "The tests use a mock Easy Track. The motion-lifecycle detector is not built."
-  sources: ["ADR-006#d1", "ADR-006#d3", "ADR-006#d6", "ADR-006#context", INV-005, INV-006]
+  sources: ["ADR-006#d1", "ADR-006#d3", "ADR-006#d6", "ADR-006#context", "ADR-013#context", "ADR-013#d10", INV-005, INV-006]
 
 - id: six-hour-start
   assumption: "The emergency Safe's signers can start any emergency action within six hours, and the Emergency Brakes multisig can pause Easy Track in that time."
@@ -168,23 +171,32 @@
   sources: ["ADR-007#proposed-direction",
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
-- id: liquidity-buffer
-  assumption: "The liquidity buffer stays at or above one month of baseline spend."
+- id: tranche-votes
+  assumption: "Funding stays rare, so an Aragon vote for each tranche is an acceptable cost."
   kind: operational
-  why: "The committee requires it. Nothing on chain enforces it."
-  breaks: "The vault cannot meet a month of baseline spend from liquid stablecoins."
+  why: "EM expects funding not to be regular (OD-106). A tranche vote takes about five days, without Dual Governance, and it needs no funding contract."
+  breaks: "If funding becomes regular, the votes become a burden. A motion path for top-ups would then remove votes: a reversal condition of ADR 014."
   watched_by: []
-  watch_note: "The detector is specified, not built, and the runbook to restore the buffer is not written. The screening rule is requested from the vendor. The figure comes from the attested computation with the approved mandate."
-  sources: ["ADR-009#d27", "ADR-009#proposed-direction", OD-40]
+  watch_note: "INV-037 is a chain check before the enabling vote: no Easy Track registry lists a vault Safe, and the factory's address book holds no payment call."
+  sources: ["ADR-014#d1", "ADR-014#consequences", "ADR-014#reversal-conditions", INV-037, OD-106]
 
-- id: top-up-objection
-  assumption: "The 72-hour objection on each top-up keeps funding inside the mandate. The registry limit is only the backstop."
+- id: returns-rare
+  assumption: "Funds go back to the Aragon Agent only in an emergency or a recovery."
   kind: design
-  why: "The mandate makes the objection the control of a top-up."
-  breaks: "Without an objection, the committee's Safe can pull one mandate size per registry per month, and two within about 72 hours around a month boundary. The mandate size and the treasury share then hold only by procedure."
+  why: "EM wants the vault to send funds back rarely (OD-108). Redemption and fund-exit proceeds pay the Asset Safe, not the Agent."
+  breaks: "A captured or careless committee can return any vault token to the Agent at any time, with no motion and no vote. That stops the vault's work, but it loses nothing: the funds sit in the treasury."
   watched_by: []
-  watch_note: "INV-017 is pending: no registry, factory or test exists. The funding flags are not built."
-  sources: ["ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d32", "ADR-008#d33", INV-017, OD-89]
+  watch_note: "INV-038 is pending. The alert on every transfer to the Agent is not built."
+  sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#consequences", INV-038, OD-108]
+
+- id: insurance-one-safe
+  assumption: "One first-loss Safe, with one modifier, keeps the first-loss shares and the insurance funds of three products safe."
+  kind: design
+  why: "Insurance is built in at launch for earnETH, earnUSD and Lido Lend, and its money comes from the Asset Safe by motion (OD-107)."
+  breaks: "A defect in the first-loss modifier reaches every fund at once. A payout from a fund with a fixed payout address leaves the vault, so it is safe only if the creating motion pinned the right address and cap."
+  watched_by: []
+  watch_note: "INV-039 is pending. The insurance shapes and the first-loss modifier are not built, and the fork tests of each shape are owed."
+  sources: ["ADR-014#d4", "ADR-014#d6", "ADR-014#d7", "ADR-014#consequences", "ADR-014#confirmation", INV-039, OD-107]
 
 - id: budgets-flow
   assumption: "Budgets in token units bound the monthly flow to each spender; the caps are measured, not enforced by budgets."
@@ -196,10 +208,10 @@
   sources: ["ADR-009#d3", "ADR-009#d13", "ADR-009#d31", "ADR-009#d33", "ADR-009#proposed-direction", INV-011, INV-012, OD-56]
 
 - id: attested-computation
-  assumption: "The attested computation behind budgets, limits and ceilings ran correctly on inputs that match the approved mandate."
+  assumption: "The attested computation behind budgets and ceilings ran correctly on inputs that match the approved mandate."
   kind: operational
   why: "No financial figure may enter the repository except from an [[attested computation]]."
-  breaks: "Budgets, registry limits and approval ceilings would be too loose or too tight. A changed mandate needs a new run."
+  breaks: "Budgets and ceilings would be too loose or too tight. A changed mandate needs a new run."
   watched_by: []
   watch_note: "It ran with an independent attester and pinned inputs on 2026-09-22 and 2026-10-02. The results enter only after the mandate is approved."
   sources: ["ADR-009#d3", "ADR-009#d11", "ADR-009#proposed-direction", "doc:docs/registers/parameters.md#parameters"]
@@ -207,11 +219,11 @@
 - id: dai-usds-converter
   assumption: "Sky's DAI–USDS converter stays one to one, with no admin and no fee, and USDS stays sound."
   kind: trust
-  why: "DAI earns only by conversion to USDS. DAI, USDS and sUSDS are funding assets."
+  why: "DAI earns only by conversion to USDS. DAI, USDS and sUSDS are on the launch list."
   breaks: "Converted value is exposed to a Sky upgrade of USDS. USDS and DAI carry USDC risk, which is why recovery adds USDT."
   watched_by: ["test:test_D3_dai_usds_conversion_pays_the_asset_safe"]
   watch_note: "The depeg rules in [the screening vendor]'s service are not set up yet."
-  sources: ["ADR-011#d5", "ADR-011#d7", "ADR-007#d5", "ADR-007#d15",
+  sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d7", "ADR-007#d5", "ADR-007#d15",
     "doc:docs/research/dai-usds-conversion-2026-10-05.md#the-converter"]
 
 - id: earn-curators
@@ -227,11 +239,11 @@
 - id: monthly-report
   assumption: "The committee publishes each monthly report within seven days, from a generator that anyone can re-run."
   kind: operational
-  why: "Reports are the evidence for caps and top-ups. No top-up starts while a report is late."
-  breaks: "Top-ups stop. A report that cannot be reproduced is a reversal condition. Reports have no on-chain anchor."
+  why: "Reports are the evidence for caps and tranche votes. No tranche vote starts while a report is late."
+  breaks: "Tranche votes wait. A report that cannot be reproduced is a reversal condition. Reports have no on-chain anchor."
   watched_by: []
   watch_note: "The report generator and the day-8 flag are phase 2 work."
-  sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#reversal-conditions", OD-14]
+  sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#reversal-conditions", "ADR-014#proposed-direction", OD-14]
 
 - id: signer-rotation
   assumption: "Every rotation of a seat holder reaches the emergency Safe: a signer who leaves the committee or the Emergency Brakes multisig leaves the seat."
@@ -245,11 +257,11 @@
 - id: prices-sound
   assumption: "The price waterfall gives every asset a fair price, and the committee's valuation policy sets a sound band and level-5 share."
   kind: trust
-  why: "Caps, the liquidity buffer and top-ups rest on the reported value. A single price source can be wrong, not only missing."
-  breaks: "A wrong price opens a top-up that the vault does not need, or hides a breach. A committee estimate prices the committee's own positions."
+  why: "Caps and tranche votes rest on the reported value. A single price source can be wrong, not only missing."
+  breaks: "A wrong price supports a tranche that the vault does not need, or hides a breach. A committee estimate prices the committee's own positions."
   watched_by: []
   watch_note: "The report generator is phase 2 work. The band and the level-5 share are not set."
-  sources: ["ADR-009#d35", "ADR-009#d36", "ADR-009#d37", OD-62,
+  sources: ["ADR-009#d35", "ADR-009#d36", "ADR-009#d37", "ADR-014#proposed-direction", OD-62,
     "doc:docs/research/cfo-feedback-2026-10-13.md#prices-under-stress"]
 
 - id: harness-faithful

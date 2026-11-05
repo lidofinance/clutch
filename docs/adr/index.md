@@ -19,9 +19,11 @@ Each ADR records its decision and review status. Pending questions are in the [o
 | ADR | Subject |
 |---|---|
 | [005](005-account-graph-and-roles.md) | Accounts, ownership, roles and emergency powers |
-| [006](006-governance-through-easy-track-factories.md) | Easy Track factories and permission templates |
+| [006](006-governance-through-easy-track-factories.md) | Easy Track factories and permission templates; the catalogue gave way to ADR 013 |
 | [007](007-swapping-through-an-orders-account.md) | CoW orders and recovery through the orders account |
-| [008](008-funding-through-existing-payments.md) | Funding, first-loss shares and the launch cap |
+| [008](008-funding-through-existing-payments.md) | Funding, first-loss shares and the launch cap; the registries gave way to ADR 014 |
 | [009](009-budgets-caps-reporting-and-monitoring.md) | Budgets, exposure caps, pricing and monitoring |
 | [010](010-pre-execution-screening.md) | Screening on the committee's Safe |
 | [011](011-launch-scope.md) | Launch assets, venues and deferred integrations |
+| [013](013-one-easy-track-factory.md) | One Easy Track factory with versions; Aragon votes after launch only for tranches and break-glass actions |
+| [014](014-funding-by-tranche-votes.md) | Funding by tranche votes, insurance at launch, and the flows back to the treasury |

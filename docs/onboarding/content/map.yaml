@@ -4,19 +4,25 @@
 width: 1180
 height: 750
 description: The Lido DAO owns the Asset Safe; it also owns the orders account and the first-loss Safe, which the map
-  shows without an arrow. The Asset Safe owns two Roles modifiers. The committee's Safe holds the operator role and Easy Track holds the governance role on the operator modifier.
-  The emergency Safe holds the emergency role on the safety modifier, the switch included. Two of its five signers come
-  from the committee and two from the Emergency Brakes multisig, which can pause Easy Track. Easy Track
-  also holds the exit-governance role there, the operator and emergency roles act on the orders account through its own
-  modifier, the committee's Safe also holds the first-loss role, and Easy Track holds the first-loss burn role; the map draws no arrow for these. Once the launch cap lifts, the screening guard approves each transaction of the committee's Safe (OD-83). The Asset Safe uses approved protocols and swaps
-  through CoW orders from the orders account. The first-loss Safe holds the DAO's first-loss Earn shares. Monitoring
-  watches the vault and pages the emergency Safe. Reporting publishes from the vault's snapshots.
+  shows without an arrow. The Asset Safe owns two Roles modifiers. The committee's Safe holds the operator role and Easy
+  Track holds the governance role on the operator modifier. The emergency Safe holds the emergency role on the safety
+  modifier, the switch included. Two of its five signers come from the committee and two from the Emergency Brakes
+  multisig, which can pause Easy Track. One universal factory builds every Clutch motion. Easy Track also holds the
+  insurance-funding role on the operator modifier, the exit-governance and restart roles on the safety modifier, the
+  governance and approvals roles on the orders account's modifier, and the first-loss burn and insurance roles on the
+  first-loss modifier. The operator and emergency roles act on the orders account through its own modifier, and the
+  committee's Safe also holds the first-loss role. The map draws no arrow for these roles. Each funding is an Aragon
+  vote that pays a tranche through Finance to the Asset Safe. Once the launch cap lifts, the screening guard approves
+  each transaction of the committee's Safe (OD-83). The Asset Safe uses approved protocols, swaps through CoW orders
+  from the orders account, and pays insurance money to the first-loss Safe by motion. The first-loss Safe holds the
+  DAO's first-loss Earn shares and the insurance funds. Monitoring watches the vault and pages the emergency Safe.
+  Reporting publishes from the vault's snapshots.
 nodes:
 - id: committee
   label: Committee Safe
   sub: Treasury Management · 4 of 7
-  summary: The committee's existing Safe. It holds the operator role and is the trusted caller of every factory. Two of
-    its signers sit on the emergency Safe.
+  summary: The committee's existing Safe. It holds the operator role and is the universal factory's trusted caller. Two
+    of its signers sit on the emergency Safe.
   domain: ops
   kind: multisig
   status: existing
@@ -27,8 +33,8 @@ nodes:
 - id: dao
   label: Lido DAO
   sub: LDO vote · Voting owns the vault
-  summary: The final authority. Aragon Voting is the only owner of the Asset Safe; the Aragon Agent, the treasury, receives
-    every recovered asset.
+  summary: The final authority. Aragon Voting is the only owner of the Asset Safe, and it funds the vault by tranche
+    votes. The Aragon Agent, the treasury, gets funds back only in an emergency or a recovery.
   domain: gov
   kind: body
   status: existing
@@ -38,20 +44,21 @@ nodes:
   h: 84
 - id: funding
   label: Funding path
-  sub: Finance · registries · factories
-  summary: Moves money from the DAO treasury to the Asset Safe through Easy Track top-up motions, within monthly limits.
+  sub: Finance · tranche votes
+  summary: Moves money from the DAO treasury to the Asset Safe. Each funding is an Aragon vote that pays a tranche
+    through Aragon Finance. Funding is rare.
   domain: gov
   kind: contract
-  status: mixed
+  status: existing
   x: 860
   y: 44
   w: 280
   h: 84
 - id: easytrack
   label: Easy Track
-  sub: motions · 72 h objection
-  summary: Lido's optimistic governance. A motion enacts unless LDO holders object within 72 hours. It holds the governance
-    role.
+  sub: universal factory · 72 h
+  summary: Lido's optimistic governance. A motion enacts unless LDO holders object within 72 hours. One universal factory
+    builds every Clutch motion, and Easy Track's script executor holds the roles that motions use.
   domain: gov
   kind: contract
   status: mixed
@@ -75,7 +82,7 @@ nodes:
 - id: screening
   label: Screening guard
   sub: '[the screening vendor]'
-  summary: A transaction guard on the committee's Safe (OD-83). It refuses any transaction that the vendor has not approved once. It is set after the launch; the launch cap lifts once it is live (OD-54).
+  summary: A transaction guard on the committee's Safe (OD-83). It refuses any transaction that the vendor has not approved once. It is set after the launch, before the second tranche's vote lifts the launch cap (OD-54).
   domain: ext
   kind: service
   status: instance
@@ -86,7 +93,8 @@ nodes:
 - id: operator-modifier
   label: Operator modifier
   sub: 'operator, governance'
-  summary: A Zodiac Roles modifier. It lets the operator do only what the policy lists, within budgets.
+  summary: A Zodiac Roles modifier. It lets the operator do only what the policy lists, within budgets. It also carries
+    the governance and insurance-funding roles that motions use.
   domain: vault
   kind: contract
   status: instance
@@ -96,10 +104,10 @@ nodes:
   h: 84
 - id: safety-modifier
   label: Safety modifier
-  sub: 'emergency, the switch, exits'
+  sub: 'emergency, exits, restart'
   summary: A second Roles modifier for the emergency role, the switch included. Nothing screens it, so recovery never waits
     on a vendor. Its exit-governance role, which is specified, lets the motion that onboards a protocol add its emergency exit
-    here.
+    here. Its restart role, also specified, lets a motion enable the operator modifier again after the switch.
   domain: vault
   kind: contract
   status: instance
@@ -132,9 +140,10 @@ nodes:
   h: 88
 - id: first-loss
   label: First-loss Safe
-  sub: two narrow roles · Voting owns it
-  summary: A Safe that Aragon Voting owns. It holds only the DAO's first-loss Earn shares. On the Earn team's written
-    instruction, an Easy Track motion burns them, or a role of the committee's Safe redeems them to the Agent.
+  sub: insurance · Voting owns it
+  summary: A Safe that Aragon Voting owns. It holds the DAO's first-loss Earn shares and the vault's insurance funds.
+    Motions burn, fund and pay out. On the Earn team's written instruction, a role of the committee's Safe redeems the
+    shares to the Asset Safe.
   domain: vault
   kind: contract
   status: instance
@@ -157,7 +166,7 @@ nodes:
   label: Orders account
   sub: CoW orders · Voting owns it
   summary: 'A Safe that Aragon Voting owns, with one modifier of its own. The roles place CoW orders from it: the operator''s
-    orders pay the Asset Safe, and recovery orders pay the Aragon Agent.'
+    orders pay the Asset Safe, and recovery orders pay the Aragon Agent. A motion adds a token to its lists.'
   domain: vault
   kind: contract
   status: mixed
@@ -168,8 +177,8 @@ nodes:
 - id: monitoring
   label: Monitoring
   sub: two estates · alerts
-  summary: Watches the vault, the liquidity buffer, the orders, the motions and the Safes, and pages the right body when
-    something is wrong.
+  summary: Watches the vault, the orders, every motion, every transfer to the Aragon Agent and the Safes, and pages the
+    right body when something is wrong.
   domain: ext
   kind: service
   status: mixed
@@ -181,7 +190,7 @@ nodes:
   label: Reporting
   sub: IPFS · forum
   summary: Monthly reports and fortnightly cap readings, published on IPFS and cited on the forum. Each report shows the
-    caps and the liquidity buffer; no contract checks them.
+    caps, and each monthly report shows the TMC-6 ratio for the whole treasury; no contract checks them.
   domain: ext
   kind: service
   status: mixed
@@ -195,8 +204,8 @@ edges:
   to: asset-safe
   kind: owns
   short: owns · assets home
-  label: Aragon Voting is the Asset Safe's only owner, at 1 of 1. In an emergency, assets go back to the Aragon Agent, the
-    DAO's treasury, a fixed address.
+  label: Aragon Voting is the Asset Safe's only owner, at 1 of 1. Assets go back to the Aragon Agent, the DAO's treasury,
+    only in an emergency or a recovery, by a transfer pinned to that fixed address.
   label_at:
   - 590
   - 466
@@ -209,7 +218,7 @@ edges:
   label: The Asset Safe owns the operator modifier and enables it as a module. A permitted call runs as the Asset Safe.
   label_at:
   - 458
-  - 432
+  - 435
 - id: own-sf
   from: asset-safe
   to: safety-modifier
@@ -218,7 +227,7 @@ edges:
   label: The Asset Safe owns the safety modifier and enables it as a module. A permitted call runs as the Asset Safe.
   label_at:
   - 722
-  - 432
+  - 435
 - id: op-role
   from: committee
   to: operator-modifier
@@ -251,7 +260,7 @@ edges:
   to: easytrack
   kind: governs
   short: ''
-  label: 'The committee''s Safe is the trusted caller of every Clutch factory: it creates the motions.'
+  label: 'The committee''s Safe is the universal factory''s trusted caller: it creates every Clutch motion.'
 - id: object
   from: dao
   to: easytrack
@@ -312,37 +321,28 @@ edges:
   from: first-loss
   to: protocols
   kind: owns
-  short: Earn shares
-  label: The first-loss Safe holds the DAO's first-loss shares in earnETH and earnUSD. Only an enacted motion burns them,
-    and only the committee's narrow role redeems them to the Agent.
-- id: topup-motion
-  from: easytrack
-  to: funding
+  short: Earn shares · insurance
+  label: The first-loss Safe holds the DAO's first-loss shares in earnETH and earnUSD, and the positions of the insurance
+    funds. Only an enacted motion burns or pays out, and only the committee's narrow role redeems, to the Asset Safe.
+- id: insure
+  from: asset-safe
+  to: first-loss
   kind: governs
-  short: top-up motions
-  label: A top-up is an Easy Track motion created by the committee's Safe.
-  label_at:
-  - 800
-  - 15
-  via:
-  - - 20
-    - 232
-  - - 20
-    - 20
-  - - 1000
-    - 20
+  short: insurance
+  label: A motion moves insurance money from the Asset Safe to the first-loss Safe, pinned to it.
 - id: treasury
   from: dao
   to: funding
   kind: governs
-  short: pays
-  label: Aragon Finance pays from the DAO treasury held by the Aragon Agent.
-- id: topup
+  short: votes
+  label: Each tranche is an Aragon vote. Aragon Voting pays it through Aragon Finance, from the treasury that the Aragon
+    Agent holds, without Dual Governance.
+- id: tranche
   from: funding
   to: asset-safe
   kind: governs
-  short: top-ups
-  label: A top-up pays the Asset Safe only, within a monthly limit per funding registry.
+  short: tranches
+  label: A tranche pays the Asset Safe only. The first tranche, one million dollars, is part of the enabling vote.
   via:
   - - 1160
     - 84
@@ -356,8 +356,8 @@ edges:
   to: asset-safe
   kind: screens
   short: watches
-  label: 'Monitoring watches the vault: drift from the policy, approvals, budget burn, the liquidity buffer, orders and
-    fills, owners, modules and motions.'
+  label: 'Monitoring watches the vault: drift from the policy, approvals, budget burn, orders and fills, transfers to the
+    Aragon Agent, owners, modules and motions.'
 - id: page
   from: monitoring
   to: emergency-safe

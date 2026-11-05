@@ -18,8 +18,8 @@
     - "The operator modifier: the policy has no such transfer, and every receiver is pinned to the Asset Safe"
     - "The objection window"
   answer: 2
-  why: "The operator role holds no transfer to an outside address: its one planned transfer goes to the orders account, and every receiver, owner and beneficiary in its permissions is the Asset Safe. Once the launch cap lifts, the screening guard is a second, independent check."
-  sources: [INV-003, "test:test_D3_operator_cannot_route_around_avatar"]
+  why: "The operator role holds no transfer to an outside address: its planned transfers go only to the orders account or back to the Aragon Agent, and every receiver, owner and beneficiary in its permissions is the Asset Safe. Once the launch cap lifts, the screening guard is a second, independent check."
+  sources: [INV-002, INV-003, "ADR-014#d9", "test:test_D3_operator_cannot_route_around_avatar"]
 
 - id: depeg-first
   question: "A stablecoin depegs. Who acts first, and how fast must they start?"
@@ -36,13 +36,12 @@
   question: "The emergency Safe has switched the operator off. Who turns it on again?"
   options:
     - "The emergency Safe, once the incident is over"
-    - "Easy Track, by a motion"
-    - "The DAO, by vote"
-    - "The committee's Safe"
-  answer: 2
-  why: "No emergency body restores what it stopped. A DAO vote, a direct Aragon Voting item, enables the operator modifier again, and the same vote first cancels the queued motions, because a motion does not expire. It also grants again the operator's permissions on the orders account."
-  sources: ["ADR-005#d26", "ADR-005#proposed-direction", OD-59,
-    "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts", "ADR-005#d30"]
+    - "An Easy Track motion, after its 72-hour objection window"
+    - "Nobody: the switch is final"
+    - "The committee's Safe, at once"
+  answer: 1
+  why: "No emergency body restores what it stopped. The committee's Safe creates a restart motion. After 72 hours without an objection, the Easy Track executor's restart role enables the operator modifier again, and the role can do nothing else. Motions from before the stop fail, because the emergency Safe raised the factory's motion counter (OD-104)."
+  sources: ["ADR-005#d26", "ADR-013#d10", "ADR-013#d12", OD-104, INV-035]
 
 - id: vendor-offline
   question: "[the screening vendor] goes offline. What still works?"
@@ -59,12 +58,12 @@
   question: "Which of these is new code that Lido writes for Clutch?"
   options:
     - "The Safe v1.5.0 singleton"
-    - "The Easy Track template factories"
+    - "The universal Easy Track factory"
     - "The Zodiac Roles mastercopy"
     - "The CoW order signer"
   answer: 1
-  why: "Easy Track factories are the only new contracts allowed, and Lido writes them. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so Clutch counts it as new code and the external audit covers it with the factories (OD-96)."
-  sources: ["ADR-006#d1", "ADR-007#proposed-direction", "ADR-007#d40", OD-96]
+  why: "The universal Easy Track factory is the only new contract, and Lido writes it. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so Clutch counts it as new code and the external audit covers it with the factory (OD-96)."
+  sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-007#proposed-direction", "ADR-007#d40", OD-96]
 
 - id: limit-order-loss
   question: "The operator places a limit order far below the market price. What limits the loss?"
