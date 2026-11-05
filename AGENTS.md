@@ -39,7 +39,7 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 - A GitHub account of their own. An agent works through the account of the human who runs it, and the commit carries a `Co-Authored-By` trailer (ADR 012).
 - Any recipe in `mainnet.just`, and the package scripts that call the hosted Zodiac app (`push`, `pull`, `pull-org`, `pull-contracts`). Agents never use the Zodiac API key.
 - Anything under `deployed/`, and any governance action or deployment.
-- Parameters: budgets, approval ceilings, the orders account's token lists and the maximum order life, funding limits, factory allowlists and role membership. Agents draft options; the acceptor decides.
+- Parameters: budgets, approval ceilings, the orders account's token lists and the maximum order life, tranche amounts (OD-106), factory allowlists and role membership. Agents draft options; the acceptor decides.
 - Raising a runbook above `slop` without a fork drill record, or a policy change without the verification output.
 - Security assessments, audit opinions, release sign-off and legal opinions.
 - Edits to `LICENSE`, `SECURITY.md`, `AGENTS.md`, `config/actors.yaml` or `.github/` without an explicit human request.
