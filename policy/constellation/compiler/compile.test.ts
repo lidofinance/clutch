@@ -113,7 +113,8 @@ test("the compiler refuses access to every function of the Asset Safe", () => {
 });
 
 // ADR 005, decisions 25 and 26: the emergency role holds the switch, and no
-// emergency role restores what it stopped. The DAO restarts.
+// emergency role restores what it stopped. A motion restarts (ADR 013,
+// decision 12).
 const DISABLE_MODULE = id("disableModule(address,address)").slice(0, 10) as `0x${string}`;
 
 test("the emergency role holds the switch, pinned to the operator modifier", () => {
@@ -123,7 +124,7 @@ test("the emergency role holds the switch, pinned to the operator modifier", () 
   const pinned = onSafe[0].functions[0].conditions.filter((n) => n.operator === EQUAL_TO).map((n) => n.compValue.toLowerCase());
   expect(pinned).toEqual([pad(manifest.operatorModifier)]);
   for (const r of artifact.modifiers.flatMap((m) => m.roles)) {
-    if (r.name !== "emergency") expect(r.targets.some((t) => t.address === manifest.assetSafe)).toBe(false);
+    if (r.name !== "emergency" && r.name !== "restart") expect(r.targets.some((t) => t.address === manifest.assetSafe)).toBe(false);
   }
 });
 
@@ -148,5 +149,67 @@ test("the compiler refuses a grant or a budget for the emergency role", () => {
     emergency.targets.find((t) => t.address === manifest.operatorModifier)!.functions.push(structuredClone(lent));
     const name = signature.replace(/[()[\]]/g, "\\$&");
     expect(() => checkProtected(modifiers, manifest)).toThrow(new RegExp(`${name} would let a role that stops restore authority`));
+  }
+});
+
+// ADR 013, decision 12: the restart role, which the Easy Track executor holds,
+// may only enable the operator modifier on the Asset Safe.
+const ENABLE_MODULE = id("enableModule(address)").slice(0, 10) as `0x${string}`;
+const restartFunction = (modifiers: typeof artifact.modifiers) =>
+  modifiers.flatMap((m) => m.roles).find((r) => r.name === "restart")!.targets.find((t) => t.address === manifest.assetSafe)!.functions[0];
+
+test("the restart role holds only enableModule, pinned to the operator modifier", () => {
+  const restart = role("restart");
+  expect(restart.members.map((m: { address: string }) => m.address)).toEqual([manifest.easyTrackExecutor]);
+  expect(restart.targets.map((t) => t.address)).toEqual([manifest.assetSafe]);
+  expect(restart.targets[0].functions.map((f) => f.selector)).toEqual([ENABLE_MODULE]);
+  const pinned = restart.targets[0].functions[0].conditions.filter((n) => n.operator === EQUAL_TO).map((n) => n.compValue.toLowerCase());
+  expect(pinned).toEqual([pad(manifest.operatorModifier)]);
+});
+
+test("the compiler gives enableModule to the restart role alone", () => {
+  const modifiers = structuredClone(artifact.modifiers);
+  const emergency = modifiers.flatMap((m) => m.roles).find((r) => r.name === "emergency")!;
+  emergency.targets.find((t) => t.address === manifest.assetSafe)!.functions.push(structuredClone(restartFunction(modifiers)));
+  expect(() => checkProtected(modifiers, manifest)).toThrow(/enableModule\(address\) belongs to the restart role alone/);
+});
+
+test("the compiler refuses a restart that is not pinned to the operator modifier", () => {
+  for (const other of [manifest.safetyModifier, "0x000000000000000000000000000000000000dEaD"]) {
+    const modifiers = structuredClone(artifact.modifiers);
+    restartFunction(modifiers).conditions[1].compValue = pad(other);
+    expect(() => checkProtected(modifiers, manifest)).toThrow(/must pin its argument to the operator modifier/);
+  }
+  const modifiers = structuredClone(artifact.modifiers);
+  const fn = restartFunction(modifiers);
+  fn.conditions = [fn.conditions[0]];
+  fn.wildcarded = true;
+  expect(() => checkProtected(modifiers, manifest)).toThrow(/must pin its argument|needs a condition/);
+});
+
+// ADR 013, decision 9: a budget motion may set a launch key, or a key that
+// the factory derives for a new spender, which starts with "k:".
+test("a budget motion may set a launch key or a derived key, and no other", () => {
+  const BITMASK = 21;
+  const OR = 2;
+  const setAllowance = grant(artifact.modifiers, "setAllowance(bytes32,uint128,uint128,uint128,uint64,uint64)");
+  const keyParam = setAllowance.conditions.flatMap((n, i) => (i !== 0 && n.parent === 0 ? [i] : []))[0];
+  expect(setAllowance.conditions[keyParam].operator).toBe(OR);
+  const branches = setAllowance.conditions.filter((n) => n.parent === keyParam);
+  const derived = branches.filter((n) => n.operator === BITMASK);
+  expect(derived.map((n) => n.compValue as string)).toEqual(["0x0000ffff" + "00".repeat(13) + "6b3a" + "00".repeat(13)]);
+  expect(branches.filter((n) => n.operator === EQUAL_TO).length).toBe(3);
+});
+
+// ADR 014, decision 7: insurance money moves only to the first-loss Safe.
+test("the insurance-funding role transfers only to the first-loss Safe", () => {
+  const TRANSFER = id("transfer(address,uint256)").slice(0, 10) as `0x${string}`;
+  const funding = role("insurance-funding");
+  expect(funding.members.map((m: { address: string }) => m.address)).toEqual([manifest.easyTrackExecutor]);
+  expect(funding.targets.length).toBeGreaterThan(0);
+  for (const target of funding.targets) {
+    expect(target.functions.map((f) => f.selector)).toEqual([TRANSFER]);
+    const pinned = target.functions[0].conditions.filter((n) => n.operator === EQUAL_TO).map((n) => n.compValue.toLowerCase());
+    expect(pinned).toEqual([pad(manifest.firstLossSafe)]);
   }
 });

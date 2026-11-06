@@ -42,8 +42,10 @@ export type Manifest = {
    * members and one member of neither body.
    */
   emergencySafe: string;
-  /** The Easy Track script executor, which holds the governance role. */
+  /** The Easy Track script executor, which holds the governance, restart and insurance-funding roles. */
   easyTrackExecutor: string;
+  /** The first-loss Safe: the only receiver of insurance money (ADR 014, decision 7). */
+  firstLossSafe: string;
 };
 
 const manifestPath = process.env.CLUTCH_MANIFEST;
@@ -100,4 +102,5 @@ export const NAMES: Record<string, string> = {
   [manifest.operatorSafe]: "committee's Safe",
   [manifest.emergencySafe]: "emergency Safe",
   [manifest.easyTrackExecutor]: "Easy Track script executor",
+  [manifest.firstLossSafe]: "first-loss Safe",
 };

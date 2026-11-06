@@ -13,5 +13,6 @@
   ],
   "operatorSafe": "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647",
   "emergencySafe": "0x23BAb8FFEBD5E626B9e5CdE837Cce99B77365C46",
-  "easyTrackExecutor": "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977"
+  "easyTrackExecutor": "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977",
+  "firstLossSafe": "0xf28784d8aBC5B3b108e5e1C1e631C9121a675e68"
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { anyOf, c, call, key, noneOf } from "../../lib";
+import { anyOf, c, call, derivedKey, key, noneOf } from "../../lib";
 import { manifest } from "../../addresses";
 import * as budgets from "../../allowances";
 import { MIN_REFILL_PERIOD } from "../../parameters";
@@ -30,8 +30,12 @@ const NOT_ADMINISTRATION = noneOf(manifest.assetSafe, ...manifest.modules);
  */
 const NO_DELEGATECALL = c.lt(2);
 
-/** The operator's own budget keys: the only keys that a budget motion may set. */
-const BUDGET_KEYS = Object.values(budgets).map((budget) => key(budget.key));
+/**
+ * The keys that a budget motion may set: the operator's launch keys, and the
+ * keys that the universal factory derives for a new spender, which start with
+ * "k:" (ADR 013, decision 9).
+ */
+const BUDGET_KEYS = [...Object.values(budgets).map((budget) => key(budget.key)), derivedKey];
 
 /**
  * What an enacted Easy Track motion may do, as the governance role on the

@@ -37,6 +37,8 @@ abstract contract ClutchFixture is Test {
     bytes32 internal constant OPERATOR = bytes32("operator");
     bytes32 internal constant GOVERNANCE = bytes32("governance");
     bytes32 internal constant EMERGENCY = bytes32("emergency");
+    bytes32 internal constant RESTART = bytes32("restart");
+    bytes32 internal constant INSURANCE_FUNDING = bytes32("insurance-funding");
     bytes32 internal constant K_SUSDS = bytes32("sky_savings_usds");
     bytes32 internal constant K_EARN_USD = bytes32("earn_usd_deposit");
     bytes32 internal constant K_EARN_ETH = bytes32("earn_eth_deposit_wsteth");
@@ -86,6 +88,8 @@ abstract contract ClutchFixture is Test {
 
     address internal operatorSafe = makeAddr("operator-safe-standin");
     address internal emergencySafe = makeAddr("emergency-safe-standin");
+    // The only receiver of insurance money (ADR 014, decision 7); the kit deploys no first-loss Safe.
+    address internal firstLossSafe = makeAddr("first-loss-safe-standin");
     address internal whale = makeAddr("ldo-whale"); // objection whale
     address internal attacker = makeAddr("attacker");
     address internal principal;
@@ -184,6 +188,7 @@ abstract contract ClutchFixture is Test {
         assertEq(vm.parseJsonAddress(m, ".operatorSafe"), a.operator, "manifest: operator Safe");
         assertEq(vm.parseJsonAddress(m, ".emergencySafe"), a.emergency, "manifest: emergency Safe");
         assertEq(vm.parseJsonAddress(m, ".easyTrackExecutor"), a.governance, "manifest: script executor");
+        assertEq(vm.parseJsonAddress(m, ".firstLossSafe"), firstLossSafe, "manifest: first-loss Safe");
 
         // The governance role refuses every listed module as an administered
         // target (OD-38), so the list must be exactly the Asset Safe's modules.
