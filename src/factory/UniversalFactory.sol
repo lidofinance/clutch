@@ -14,8 +14,9 @@ import {IRoles} from "../interfaces/IRoles.sol";
 ///      which widens only through its typed shape and narrows by removal (decision 7); the
 ///      revoke of one function; budgets within ceilings; ceilings that a motion lowers at any
 ///      time and raises at most twofold, once in 15 days (decision 13); the introduction of a
-///      token, which sets its ceilings in the same operation (decision 15); the restart
-///      (decision 12); and insurance money from the Asset Safe to the first-loss Safe (ADR 014,
+///      token, which sets its ceilings in the same operation (decision 15); the restore of a
+///      target that the emergency role revoked (OD-104, decision 16); the restart (decision
+///      12); and insurance money from the Asset Safe to the first-loss Safe (ADR 014,
 ///      decision 7). The other shapes, and each shape's emergency exit, come with the
 ///      exit-governance role. Every check here sits behind the modifiers' own guards.
 contract UniversalFactory {
@@ -41,6 +42,10 @@ contract UniversalFactory {
     ///      (decision 15). A token is introduced once; the enabling vote introduces the launch
     ///      tokens by seeding their ceilings.
     uint8 public constant INTRODUCE = 7;
+    /// @dev Scope again, for the operator, a target that the emergency role revoked as a whole.
+    ///      It writes no new permission: the function permissions stored under the target, each
+    ///      written by the enabling vote or by a motion, come back as they were last written.
+    uint8 public constant RESTORE = 8;
 
     /// @dev The classes of ceiling, each per token: a budget key's figures, and the fixed cap
     ///      of an approval that spends no key.
@@ -255,6 +260,7 @@ contract UniversalFactory {
             else if (kind == RESTART) _restart(p);
             else if (kind == FUND) _fund(p, ops[i].data);
             else if (kind == INTRODUCE) _introduce(p, ops[i].data);
+            else if (kind == RESTORE) _restore(p, ops[i].data);
             else revert UnknownOperation(kind);
         }
         return _script(p, motionEpoch);
@@ -447,6 +453,16 @@ contract UniversalFactory {
         _setCeiling(p, ceilingKey(APPROVAL_CAP_CEILING, token), approvalCeiling);
         p.introduced[p.introductions] = token;
         p.introducedBudgetCeilings[p.introductions++] = budgetCeiling;
+    }
+
+    /// @dev The restore of a target (OD-104): `scopeTarget` under the operator key. Roles keeps a
+    ///      target's function permissions when the target is revoked, so they come back as they
+    ///      were; a target with none stored gives the operator nothing. The policy holds no
+    ///      whole-target clearance, so a restore never narrows one.
+    function _restore(Plan memory p, bytes memory data) internal view {
+        address target = abi.decode(data, (address));
+        _protected(target);
+        _govern(p, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, target)));
     }
 
     function _revoke(Plan memory p, bytes memory data) internal view {

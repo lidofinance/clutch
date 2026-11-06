@@ -441,6 +441,51 @@ contract UniversalFactoryRehearsal is EnabledVault {
     }
 
     // ---------------------------------------------------------------------
+    // OD-104 and OD-114: a revoked target comes back by motion
+    // ---------------------------------------------------------------------
+
+    /// @dev The emergency role revokes a whole target, and a restore motion scopes it again. The
+    ///      approval list stored under the target comes back as it was, with no list written
+    ///      again; a spender outside the stored list stays refused. A stop fails a restore motion
+    ///      that was open before it, and no motion restores one of the vault's own accounts.
+    function test_uf_restore_brings_back_a_revoked_target() public enabled {
+        bytes memory approve = abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, 1e6));
+        _operator(Mainnet.USDC, approve, true);
+        _emergencyRevokeTarget(Mainnet.USDC);
+        _operator(Mainnet.USDC, approve, false);
+
+        // a stop fails a restore motion that was open before it
+        bytes memory early = _calldata(_one(_op(uf.RESTORE(), abi.encode(Mainnet.USDC))));
+        uint256 id = _create(early);
+        vm.prank(address(emergency));
+        uf.raiseCounter();
+        _afterWindow();
+        vm.prank(anyone);
+        vm.expectRevert(abi.encodeWithSelector(UniversalFactory.StaleCounter.selector, 0, 1));
+        IEasyTrack(Mainnet.EASY_TRACK).enactMotion(id, early);
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        IEasyTrack(Mainnet.EASY_TRACK).cancelMotion(id);
+
+        // the restore brings the stored list back: its version does not change
+        bytes32 scope = uf.functionScope(Mainnet.USDC, IERC20.approve.selector);
+        bytes32 version = uf.versions(scope);
+        _motion(_one(_op(uf.RESTORE(), abi.encode(Mainnet.USDC))));
+        _operator(Mainnet.USDC, approve, true);
+        _operator(Mainnet.USDC, abi.encodeCall(IERC20.approve, (newVault, 1e6)), false);
+        assertEq(uf.versions(scope), version, "the list was not written again");
+
+        // never one of the vault's own accounts
+        _refuse(
+            _op(uf.RESTORE(), abi.encode(address(opMod))),
+            abi.encodeWithSelector(UniversalFactory.ProtectedAddress.selector, address(opMod))
+        );
+        _refuse(
+            _op(uf.RESTORE(), abi.encode(address(asset))),
+            abi.encodeWithSelector(UniversalFactory.ProtectedAddress.selector, address(asset))
+        );
+    }
+
+    // ---------------------------------------------------------------------
     // INV-035 and INV-039: the restart and insurance money
     // ---------------------------------------------------------------------
 
@@ -537,6 +582,9 @@ contract UniversalFactoryRehearsal is EnabledVault {
         UniversalFactory.Op[] memory many = new UniversalFactory.Op[](16);
         for (uint256 i = 0; i < 16; i++) many[i] = _budgetOp(Mainnet.USDC, address(uint160(0x1000 + i)), 1e6, bytes32(0));
         _measureMotion("16 budgets in one motion", many);
+
+        _emergencyRevokeTarget(Mainnet.USDS);
+        _measureMotion("restore of a revoked target", _one(_op(uf.RESTORE(), abi.encode(Mainnet.USDS))));
 
         _emergencySwitch();
         _measureMotion("restart", _one(_op(uf.RESTART(), "")));

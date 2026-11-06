@@ -429,6 +429,14 @@ abstract contract EnabledVault is RehearsalBase {
         assertEq(ok, expectOk, "operator call outcome");
     }
 
+    /// @dev The emergency role's revoke of a whole operator target, through the safety modifier.
+    function _emergencyRevokeTarget(address target) internal {
+        vm.prank(address(emergency));
+        safetyMod.execTransactionWithRole(
+            address(opMod), 0, abi.encodeCall(IRoles.revokeTarget, (OPERATOR, target)), 0, EMERGENCY, true
+        );
+    }
+
     /// @dev The switch runbook: the emergency Safe disables the operator modifier,
     ///      then raises the factory's counter, so that no queued motion enacts.
     function _emergencySwitch() internal {
