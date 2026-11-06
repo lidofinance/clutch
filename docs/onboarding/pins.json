@@ -792,7 +792,7 @@
         "ADR-013#d7": "e35b3b62cf84a24b",
         "ADR-013#proposed-direction": "30c2692dc473c980",
         "INV-004": "4cd3fb556492d80a",
-        "INV-034": "93715357083e0504",
+        "INV-034": "749c3144fdd63116",
         "OD-36": "d117a7aa5295347b",
         "OD-38": "3d2c403df79d214f",
         "OD-70": "5a57f4c12fdbce15",
@@ -895,7 +895,7 @@
       }
     },
     "actor:universal-factory": {
-      "content": "2b656fb90e352d7c",
+      "content": "606e0819c9ecf2af",
       "sources": {
         "ADR-006#d10": "b3bf5c89ec8fd08f",
         "ADR-006#d9": "b9adf426765770aa",
@@ -916,7 +916,7 @@
         "INV-029": "c4ffa117ebfad7de",
         "INV-032": "b371cc9d4e91d578",
         "INV-033": "5daaa147610c6198",
-        "INV-034": "93715357083e0504",
+        "INV-034": "749c3144fdd63116",
         "INV-036": "4a7b6cb399c1e5bf",
         "INV-037": "d02d3c465796aea1",
         "OD-09": "363bde07469e31fc",
@@ -934,7 +934,9 @@
         "doc:ROADMAP.md#roadmap": "009fca643024e2fb",
         "doc:docs/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06": "2dd144f4e1b9df67",
         "doc:docs/research/universal-factory-prototype-2026-11-05.md#measures-for-the-choice-between-options-a-and-b": "2d9358b1ca9ce316",
-        "lip:part-4": "0eb15040597d3259"
+        "doc:docs/research/universal-factory-prototype-2026-11-05.md#the-restore-of-a-revoked-target-built-on-2026-11-06": "7e3add17e0167721",
+        "lip:part-4": "0eb15040597d3259",
+        "test:test_uf_restore_brings_back_a_revoked_target": "119d65ed314dcc61"
       }
     },
     "actor:vault-tokens": {
@@ -1202,9 +1204,9 @@
       }
     },
     "assumption:factory-shapes-safe": {
-      "content": "2f92b4014f4578b3",
+      "content": "fe225300cfe94092",
       "sources": {
-        "ADR-013#confirmation": "2763e4f2faa93d81",
+        "ADR-013#confirmation": "ac50d820099e7d6f",
         "ADR-013#consequences": "7f05294ecab9bb4d",
         "ADR-013#d10": "fb6c98d59ea4f21a",
         "ADR-013#d11": "aea313a0154fde94",
@@ -1213,10 +1215,11 @@
         "INV-004": "4cd3fb556492d80a",
         "INV-032": "b371cc9d4e91d578",
         "INV-033": "5daaa147610c6198",
-        "INV-034": "93715357083e0504",
+        "INV-034": "749c3144fdd63116",
         "INV-035": "d394624d06902abe",
         "INV-036": "4a7b6cb399c1e5bf",
         "OD-102": "9b08fc5cc64ce2b4",
+        "OD-104": "e81480b2297805b8",
         "OD-113": "dab734a51e5b7dbb",
         "OD-49": "264da092820956ab",
         "lip:part-4": "0eb15040597d3259"
@@ -1523,7 +1526,7 @@
         "ADR-013#d7": "e35b3b62cf84a24b",
         "ADR-013#proposed-direction": "30c2692dc473c980",
         "INV-004": "4cd3fb556492d80a",
-        "INV-034": "93715357083e0504",
+        "INV-034": "749c3144fdd63116",
         "OD-36": "d117a7aa5295347b",
         "OD-38": "3d2c403df79d214f"
       }
@@ -1831,7 +1834,7 @@
         "INV-005": "5044f42cd3c66d90",
         "INV-025": "e990ac07ef663b00",
         "INV-033": "5daaa147610c6198",
-        "INV-034": "93715357083e0504",
+        "INV-034": "749c3144fdd63116",
         "OD-103": "9cff48d253bffc5d",
         "OD-36": "d117a7aa5295347b",
         "OD-38": "3d2c403df79d214f",
@@ -1923,7 +1926,7 @@
       }
     },
     "flow:restart": {
-      "content": "2880ca487e6f1e4a",
+      "content": "45e74850480218f3",
       "sources": {
         "ADR-005#d26": "f33d430f600dbbe0",
         "ADR-005#proposed-direction": "fe3ffe2803d8f304",
@@ -1938,7 +1941,8 @@
         "runbook:Raise the motion counter": "29cb3572eb89fa74",
         "runbook:Restart after a stop": "a73b45c03de115f4",
         "test:test_D4_the_restart_role_enables_only_the_operator_modifier": "60eef28bed6eb321",
-        "test:test_uf_restart_motion_after_the_switch": "29c6151f8cd4bd48"
+        "test:test_uf_restart_motion_after_the_switch": "29c6151f8cd4bd48",
+        "test:test_uf_restore_brings_back_a_revoked_target": "119d65ed314dcc61"
       }
     },
     "flow:return-to-agent": {
@@ -2939,7 +2943,7 @@
         "OD-91": "620f5baff185d11d",
         "doc:docs/research/request-for-solution-2026-10-07.md#assets-and-permissions": "9d02516e530d3092",
         "doc:docs/specs/control-matrix.md#the-matrix": "e9790562e978f899",
-        "doc:docs/specs/lip-draft.md#test-cases": "187ddc54309ba00b",
+        "doc:docs/specs/lip-draft.md#test-cases": "155d0f589a942b06",
         "doc:policy/constellation/artifacts/fork-25946643.json": "a370776c739b03ba"
       }
     },
@@ -3060,7 +3064,7 @@
         "INV-004": "4cd3fb556492d80a",
         "INV-025": "e990ac07ef663b00",
         "INV-033": "5daaa147610c6198",
-        "INV-034": "93715357083e0504",
+        "INV-034": "749c3144fdd63116",
         "INV-035": "d394624d06902abe",
         "OD-09": "363bde07469e31fc",
         "OD-100": "f801004088de88e7",
@@ -3077,7 +3081,7 @@
         "doc:ROADMAP.md#roadmap": "009fca643024e2fb",
         "doc:docs/research/request-for-solution-2026-10-07.md#governance-and-easy-track": "c7546b67ba29bb6e",
         "doc:docs/specs/enabling-vote.md#the-vote": "0dbabeea3ca35c53",
-        "doc:docs/specs/lip-draft.md#test-cases": "187ddc54309ba00b",
+        "doc:docs/specs/lip-draft.md#test-cases": "155d0f589a942b06",
         "doc:script/DeployDryRun.s.sol": "aaa33bd72e3b4ae0",
         "lip:part-4": "0eb15040597d3259"
       }
@@ -3173,7 +3177,7 @@
         "INV-009": "423da9cdd15c0594",
         "INV-029": "c4ffa117ebfad7de",
         "INV-033": "5daaa147610c6198",
-        "INV-034": "93715357083e0504",
+        "INV-034": "749c3144fdd63116",
         "OD-09": "363bde07469e31fc",
         "OD-102": "9b08fc5cc64ce2b4",
         "OD-104": "e81480b2297805b8",
@@ -3207,7 +3211,7 @@
         "INV-010": "188a3bf9015fca69",
         "INV-021": "fcad35f3dffebb38",
         "INV-023": "a0f2053c947f1d07",
-        "INV-034": "93715357083e0504",
+        "INV-034": "749c3144fdd63116",
         "OD-33": "a5227d94586cf05d",
         "OD-58": "34f2d86fd20c861b",
         "doc:ROADMAP.md#standing-gates": "e73c8d2f9bcb613e",
@@ -3257,7 +3261,7 @@
         "INV-012": "90462743ec0b5b63",
         "INV-032": "b371cc9d4e91d578",
         "INV-033": "5daaa147610c6198",
-        "INV-034": "93715357083e0504",
+        "INV-034": "749c3144fdd63116",
         "OD-36": "d117a7aa5295347b",
         "OD-38": "3d2c403df79d214f",
         "OD-45": "0f1bfbb3e7d90f53",
@@ -3860,7 +3864,7 @@
         "ADR-013#d7": "e35b3b62cf84a24b",
         "ADR-013#d9": "26c88ae6802c697c",
         "ADR-013#proposed-direction": "30c2692dc473c980",
-        "INV-034": "93715357083e0504"
+        "INV-034": "749c3144fdd63116"
       }
     },
     "term:snapshot-vote": {

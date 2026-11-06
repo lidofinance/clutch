@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-06T04:19:05Z
+  at: 2026-11-06T04:31:16Z
 verified: []
 sources:
   - id: s1
@@ -140,6 +140,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The factory's size against EIP-170 and the gas per motion, reported before decision 11 applies.
 - On 2026-11-05 a prototype of the factory's core passed 15 tests against the live Easy Track on a fork, and eight mutants of its checks each failed a test. It is 11,553 bytes, 47 percent of EIP-170's limit, and its largest measured motion enacts in about 3.8 million gas ([research note](/research/universal-factory-prototype-2026-11-05.md)).
 - On 2026-11-06 the prototype built decision 15: one operation writes a token's first approval list and sets both of its ceilings; a token is introduced once; an approval list for a token that was never introduced, and a ceiling operation on a ceiling that was never set, are refused. It counts the introduction as each ceiling's first raise ([research note](/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06)).
+- On 2026-11-06 the prototype added the restore of a target that the emergency role revoked as a whole: a motion scopes the target again, and the function permissions stored under it come back as they were, with nothing written again. A stop fails a restore motion that was open before it ([research note](/research/universal-factory-prototype-2026-11-05.md#the-restore-of-a-revoked-target-built-on-2026-11-06)).
 - INV-032 to INV-036 in the [invariants](/specs/invariants.md).
 
 ## Reversal conditions

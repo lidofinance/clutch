@@ -706,6 +706,7 @@ flows:
         text: "Other motions bring back what the emergency role revoked, on the Asset Safe and on the orders account, relayer approvals included."
         nodes: [easytrack, operator-modifier, orders]
         edges: [gov-role]
+        check: "A restore motion brings back a revoked target with the permissions stored under it, tested on a fork for the operator modifier. The orders account's restore is not built."
       - who: "Monitoring"
         text: "Monitoring alerts on every restart motion. The emergency Safe can stop the operator again at any time."
         nodes: [monitoring, emergency-safe]
@@ -716,7 +717,7 @@ flows:
     sources: ["ADR-013#d3", "ADR-013#d10", "ADR-013#d12", "ADR-013#proposed-direction", "ADR-013#consequences",
       "ADR-005#d26", "ADR-005#proposed-direction", OD-104, INV-027, INV-035, "runbook:Restart after a stop",
       "runbook:Raise the motion counter", "test:test_D4_the_restart_role_enables_only_the_operator_modifier",
-      "test:test_uf_restart_motion_after_the_switch"]
+      "test:test_uf_restart_motion_after_the_switch", "test:test_uf_restore_brings_back_a_revoked_target"]
 
   - id: cap-breach
     group: emergencies

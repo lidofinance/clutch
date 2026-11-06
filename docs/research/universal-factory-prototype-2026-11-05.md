@@ -9,7 +9,7 @@ valid_as_of: 2026-11-05
 stale_after: 2027-02-28T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-06T04:19:05Z
+  at: 2026-11-06T04:31:16Z
 verified: []
 sources:
   - id: s1
@@ -42,6 +42,12 @@ sources:
   - id: s10
     resource: "https://github.com/lidofinance/clutch/blob/a4394fb3c8c3fa90435424e16495e0418260fd41/test/UniversalFactory.t.sol"
     title: The prototype's tests at a4394fb, with the two tests of a token's introduction
+  - id: s11
+    resource: "https://github.com/lidofinance/clutch/blob/72743fc74aa1f7f0d59cbfdb9dd4812df8469cc3/src/factory/UniversalFactory.sol"
+    title: The universal factory's prototype at 72743fc, with the restore of a revoked target
+  - id: s12
+    resource: "https://github.com/lidofinance/clutch/blob/72743fc74aa1f7f0d59cbfdb9dd4812df8469cc3/test/UniversalFactory.t.sol"
+    title: The prototype's tests at 72743fc, with the test of the restore
 ---
 
 # The universal factory's prototype on a fork, 2026-11-05
@@ -105,8 +111,22 @@ Checks: the fork suite passes 76 tests, the factory's 17 among them. Seven new m
 
 Measures: the factory grows to 12,667 bytes, 52 percent of EIP-170's limit. A motion that introduces a token with one budget takes 322,302 gas at creation and 682,545 at enactment. The other motions of the table above changed by less than 2 percent, except a ceiling motion's enactment, which fell from 73,903 to 58,126 gas: the slot that keeps the time of the last raise now also holds the ceiling's flag, so the raise no longer writes an empty slot.
 
+## The restore of a revoked target, built on 2026-11-06
+
+The emergency role can revoke a whole operator target, and motions bring back what it revoked (OD-104, OD-114). Until this date no operation could scope a target again, so a revoked target stayed off. The prototype adds a restore [s11][s12]:
+
+- **What it writes.** The restore calls `scopeTarget` under the operator key, through the governance role, and writes nothing else. A target is never one of the vault's own accounts.
+- **What comes back.** Roles keeps a target's function permissions when the target is revoked. The fork test shows it with the deployed Roles mastercopy: after the emergency role revoked USDC as a target, a restore motion brought back the operator's approval to the Earn deposit queue as the enabling vote wrote it, with no list written again and the list's version unchanged; a spender outside the stored list stayed refused. So a restore brings back what was stored, each permission written earlier by the enabling vote or by a motion, and nothing new. A target with nothing stored gives the operator nothing.
+- **No narrowing by mistake.** The policy gives the operator no whole-target clearance, so `scopeTarget` never narrows such a clearance.
+- **A stop wins.** A restore motion that was open before a stop fails on the raised counter, as every motion does.
+- **Limits.** The restore acts on the operator modifier only; the orders account's restore comes with its roles. A function that the emergency role revoked alone is deleted from Roles: an approval list comes back by a motion that writes the list again, and any other function needs its protocol's shape, which the build phase adds.
+
+Checks: the fork suite passes 77 tests, the factory's 18 among them. Two new mutants, a restore of a vault account and a restore that scopes nothing, each fail the new test.
+
+Measures: the factory grows to 12,845 bytes, 52 percent of EIP-170's limit. A restore motion takes 230,280 gas at creation and 103,441 at enactment.
+
 ## Not built
 
 The other shapes, each shape's emergency exit with the exit-governance role, the orders account's roles, the first-loss modifier's insurance roles, the payouts, the `motion` command and the monitoring. They are work of the build phase, and the full vote is step 2 of the rebuild [s5][s7].
 
-No operation scopes a target again after the emergency role revokes the whole target: the prototype emits `scopeTarget` only when it introduces a token. A motion can bring back a revoked function by writing its list again, but a revoked target needs a shape that the build phase adds (OD-104, OD-114).
+The shapes that bring back a function that the emergency role revoked alone, other than an approval list, come with each protocol's shape (OD-104, OD-114).
