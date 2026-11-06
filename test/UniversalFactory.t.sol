@@ -319,7 +319,7 @@ contract UniversalFactoryRehearsal is EnabledVault {
         uint256 c = BUDGET_CEILING_USDC;
         _refuse(_ceilingOp(key, c, 2 * c + 1), abi.encodeWithSelector(UniversalFactory.RaiseTooLarge.selector, key, 2 * c + 1, 2 * c));
         _motion(_one(_ceilingOp(key, c, 2 * c)));
-        (, uint64 raisedAt) = uf.ceilings(key);
+        (, uint64 raisedAt,) = uf.ceilings(key);
         assertEq(raisedAt, block.timestamp, "the raise's time");
         _refuse(
             _ceilingOp(key, 2 * c, 2 * c + 1),
@@ -329,11 +329,115 @@ contract UniversalFactoryRehearsal is EnabledVault {
         _motion(_one(_ceilingOp(key, 2 * c, c)));
         vm.warp(uint256(raisedAt) + 15 days);
         _motion(_one(_ceilingOp(key, c, 2 * c)));
-        (uint256 value,) = uf.ceilings(key);
+        (uint256 value,,) = uf.ceilings(key);
         assertEq(value, 2 * c, "a raise 15 days after the last one");
-        // a zero ceiling cannot rise by motion
+        // a ceiling lowered to zero cannot rise by motion
+        _motion(_one(_ceilingOp(key, 2 * c, 0)));
+        _refuse(_ceilingOp(key, 0, 1), abi.encodeWithSelector(UniversalFactory.RaiseFromZero.selector, key));
+        // a ceiling that was never set changes only with its token's introduction (decision 15)
         bytes32 none = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDT);
-        _refuse(_ceilingOp(none, 0, 1), abi.encodeWithSelector(UniversalFactory.RaiseFromZero.selector, none));
+        _refuse(_ceilingOp(none, 0, 1), abi.encodeWithSelector(UniversalFactory.CeilingNotSet.selector, none));
+    }
+
+    // ---------------------------------------------------------------------
+    // INV-036 and decision 15: a token's introduction sets its ceilings
+    // ---------------------------------------------------------------------
+
+    uint256 internal constant INTRO_BUDGET_CEILING = 1_000_000e6;
+    uint256 internal constant INTRO_APPROVAL_CEILING = 1_000e6;
+
+    /// @dev A token outside the launch lists takes its first approval list and both of its
+    ///      ceilings in one operation, and the same motion's budget for it stays under the new
+    ///      budget ceiling. Without an introduction the token takes no list and no ceiling.
+    function test_uf_a_new_token_is_introduced_with_its_ceilings() public enabled {
+        address token = Mainnet.USDT;
+        UniversalFactory.Entry[] memory list = _introList();
+        bytes32 budgetKey = uf.ceilingKey(uf.BUDGET_CEILING(), token);
+
+        // without an introduction, no list and no ceiling
+        _refuse(
+            _approvalsOp(token, new UniversalFactory.Entry[](0), list),
+            abi.encodeWithSelector(UniversalFactory.TokenNotIntroduced.selector, token)
+        );
+        _refuse(_ceilingOp(budgetKey, 0, 1), abi.encodeWithSelector(UniversalFactory.CeilingNotSet.selector, budgetKey));
+        // the introduction's own figures bound its list and the motion's budgets
+        _refuse(
+            _introduceOp(token, list, INTRO_BUDGET_CEILING, INTRO_APPROVAL_CEILING - 1),
+            abi.encodeWithSelector(
+                UniversalFactory.CapAboveCeiling.selector, token, INTRO_APPROVAL_CEILING, INTRO_APPROVAL_CEILING - 1
+            )
+        );
+        _refuse(
+            _introduceOp(token, new UniversalFactory.Entry[](0), INTRO_BUDGET_CEILING, INTRO_APPROVAL_CEILING),
+            abi.encodeWithSelector(UniversalFactory.EmptyIntroduction.selector, token)
+        );
+        bytes32 newKey = uf.keyFor(token, newVault);
+        _refuseMotion(
+            _introduction(uint128(INTRO_BUDGET_CEILING + 1), false),
+            abi.encodeWithSelector(UniversalFactory.BudgetAboveCeiling.selector, newKey, INTRO_BUDGET_CEILING)
+        );
+        // a budget before the introduction still sees no ceiling
+        _refuseMotion(
+            _introduction(500_000e6, true), abi.encodeWithSelector(UniversalFactory.BudgetAboveCeiling.selector, newKey, 0)
+        );
+
+        // one motion introduces the token, sets its ceilings and the new spender's budget
+        _motion(_introduction(500_000e6, false));
+        (uint256 value, uint64 raisedAt, bool set) = uf.ceilings(budgetKey);
+        assertEq(value, INTRO_BUDGET_CEILING, "the budget ceiling");
+        assertTrue(set, "the budget ceiling is set");
+        assertEq(raisedAt, block.timestamp, "the introduction counts as the first raise");
+        (value,, set) = uf.ceilings(uf.ceilingKey(uf.APPROVAL_CAP_CEILING(), token));
+        assertEq(value, INTRO_APPROVAL_CEILING, "the approval ceiling");
+        assertTrue(set, "the approval ceiling is set");
+        assertEq(uf.versions(uf.functionScope(token, IERC20.approve.selector)), uf.listVersion(list), "the list's version");
+        _operator(token, abi.encodeCall(IERC20.approve, (newVault, 500_000e6)), true);
+        _operator(token, abi.encodeCall(IERC20.approve, (otherVault, INTRO_APPROVAL_CEILING)), false);
+        _operator(token, abi.encodeCall(IERC20.approve, (otherVault, INTRO_APPROVAL_CEILING - 1)), true);
+    }
+
+    /// @dev A token is introduced once, also after its list is emptied, and the enabling vote
+    ///      introduced the launch tokens. From then on decision 13 holds: the introduction is
+    ///      the first raise, so the next raise waits 15 days.
+    function test_uf_a_token_is_introduced_once() public enabled {
+        address token = Mainnet.USDT;
+        UniversalFactory.Entry[] memory list = _introList();
+        _motion(_introduction(500_000e6, false));
+        bytes memory again = abi.encodeWithSelector(UniversalFactory.AlreadyIntroduced.selector, token);
+        _refuse(_introduceOp(token, list, 2 * INTRO_BUDGET_CEILING, INTRO_APPROVAL_CEILING), again);
+        _motion(_one(_approvalsOp(token, list, new UniversalFactory.Entry[](0))));
+        _refuse(_introduceOp(token, list, 2 * INTRO_BUDGET_CEILING, INTRO_APPROVAL_CEILING), again);
+        _refuse(
+            _introduceOp(Mainnet.USDC, launchApprovals(Mainnet.USDC), INTRO_BUDGET_CEILING, INTRO_APPROVAL_CEILING),
+            abi.encodeWithSelector(UniversalFactory.AlreadyIntroduced.selector, Mainnet.USDC)
+        );
+
+        bytes32 budgetKey = uf.ceilingKey(uf.BUDGET_CEILING(), token);
+        (, uint64 raisedAt,) = uf.ceilings(budgetKey);
+        _refuse(
+            _ceilingOp(budgetKey, INTRO_BUDGET_CEILING, 2 * INTRO_BUDGET_CEILING),
+            abi.encodeWithSelector(UniversalFactory.RaiseTooSoon.selector, budgetKey, uint256(raisedAt) + 15 days)
+        );
+        vm.warp(uint256(raisedAt) + 15 days);
+        _motion(_one(_ceilingOp(budgetKey, INTRO_BUDGET_CEILING, 2 * INTRO_BUDGET_CEILING)));
+        (uint256 value,,) = uf.ceilings(budgetKey);
+        assertEq(value, 2 * INTRO_BUDGET_CEILING, "a twofold raise 15 days after the introduction");
+    }
+
+    /// @dev USDT's first list: a derived key for one new spender and a capped entry for another.
+    function _introList() internal view returns (UniversalFactory.Entry[] memory list) {
+        list = new UniversalFactory.Entry[](1);
+        list[0] = _derived(Mainnet.USDT, newVault);
+        list = _with(list, UniversalFactory.Entry(otherVault, bytes32(0), INTRO_APPROVAL_CEILING));
+    }
+
+    /// @dev USDT's introduction and a budget for its derived key, in this order or the other.
+    function _introduction(uint128 budget, bool budgetFirst) internal view returns (UniversalFactory.Op[] memory ops) {
+        ops = new UniversalFactory.Op[](2);
+        UniversalFactory.Op memory intro =
+            _introduceOp(Mainnet.USDT, _introList(), INTRO_BUDGET_CEILING, INTRO_APPROVAL_CEILING);
+        UniversalFactory.Op memory b = _budgetOp(Mainnet.USDT, newVault, budget, bytes32(0));
+        (ops[0], ops[1]) = budgetFirst ? (b, intro) : (intro, b);
     }
 
     // ---------------------------------------------------------------------
@@ -413,6 +517,12 @@ contract UniversalFactoryRehearsal is EnabledVault {
         bytes32 key = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDC);
         _measureMotion("ceiling", _one(_ceilingOp(key, BUDGET_CEILING_USDC, 2 * BUDGET_CEILING_USDC)));
         _measureMotion("insurance money", _one(_op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(1_000e6)))));
+        UniversalFactory.Entry[] memory usdt = new UniversalFactory.Entry[](1);
+        usdt[0] = _derived(Mainnet.USDT, newVault);
+        UniversalFactory.Op[] memory intro = new UniversalFactory.Op[](2);
+        intro[0] = _introduceOp(Mainnet.USDT, usdt, 1_000_000e6, 1_000e6);
+        intro[1] = _budgetOp(Mainnet.USDT, newVault, 1_000e6, bytes32(0));
+        _measureMotion("introduction of a token, with one budget", intro);
 
         // a full list: 32 spenders, the most that one list may hold
         UniversalFactory.Entry[] memory current = launchApprovals(Mainnet.USDC);
@@ -452,7 +562,11 @@ contract UniversalFactoryRehearsal is EnabledVault {
     // ---------------------------------------------------------------------
 
     function _refuse(UniversalFactory.Op memory op, bytes memory err) internal {
-        bytes memory cd = _calldata(_one(op));
+        _refuseMotion(_one(op), err);
+    }
+
+    function _refuseMotion(UniversalFactory.Op[] memory ops, bytes memory err) internal {
+        bytes memory cd = _calldata(ops);
         vm.prank(Mainnet.COMMITTEE_SAFE);
         vm.expectRevert(err);
         IEasyTrack(Mainnet.EASY_TRACK).createMotion(address(uf), cd);

@@ -400,6 +400,17 @@ abstract contract EnabledVault is RehearsalBase {
         return _op(uf.CEILING(), abi.encode(key, expected, value));
     }
 
+    /// @dev A token's introduction: its first approval list and both of its ceilings
+    ///      (ADR 013, decision 15).
+    function _introduceOp(
+        address token,
+        UniversalFactory.Entry[] memory list,
+        uint256 budgetCeiling,
+        uint256 approvalCeiling
+    ) internal view returns (UniversalFactory.Op memory) {
+        return _op(uf.INTRODUCE(), abi.encode(token, list, budgetCeiling, approvalCeiling));
+    }
+
     // ---------------------------------------------------------------------
     // The vault's roles
     // ---------------------------------------------------------------------

@@ -130,7 +130,7 @@ contract EnablingVoteRehearsal is EnabledVault {
         // 3f. A ceiling motion: twofold now, and no second raise within 15 days (OD-105).
         bytes32 key = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDC);
         _motion(_one(_ceilingOp(key, BUDGET_CEILING_USDC, 2 * BUDGET_CEILING_USDC)));
-        (uint256 ceiling,) = uf.ceilings(key);
+        (uint256 ceiling,,) = uf.ceilings(key);
         assertEq(ceiling, 2 * BUDGET_CEILING_USDC, "the ceiling rose twofold");
         bytes memory again = _calldata(_one(_ceilingOp(key, ceiling, ceiling + 1)));
         vm.prank(Mainnet.COMMITTEE_SAFE);

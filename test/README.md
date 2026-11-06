@@ -90,7 +90,7 @@ The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy
 | `utils/MotionCalls.sol` | the admin calls that the governance drills put in a motion; test inputs, not the policy |
 | `Bootstrap.t.sol` | the funding script |
 | `EnablingVoteRehearsal.t.sol` | the enabling vote on a fork of block 26249900, with the live Aragon Voting, Finance and Easy Track: a vote that carries the policy cannot start; the vote that registers the universal factory, pays the first tranche and approves the Safe batches; a later tranche vote, a budget motion, a ceiling motion, the switch and a restart motion; Earn deposits; the first-loss burn and redemption request; the manifest |
-| `UniversalFactory.t.sol` | the universal factory's prototype against the live Easy Track: its address book, its trees against the compiler's, versions and the counter, the shape of an approval list, budgets and ceilings, the restart, insurance money, its guards and its measures |
+| `UniversalFactory.t.sol` | the universal factory's prototype against the live Easy Track: its address book, its trees against the compiler's, versions and the counter, the shape of an approval list, budgets and ceilings, a token's introduction with its ceilings, the restart, insurance money, its guards and its measures |
 | `rehearsal/` | the rehearsal's deployment, the vote's builder, and the helpers that create and enact the factory's motions |
 
 Negative drills require the modifier's own error, so a revert inside a protocol cannot pass for a refused permission.

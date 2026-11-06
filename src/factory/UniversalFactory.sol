@@ -10,13 +10,14 @@ import {IRoles} from "../interfaces/IRoles.sol";
 ///         every operation when the motion is created and again when it is enacted, because
 ///         Easy Track builds the script again at enactment and compares its hash. The script's
 ///         last call, `commit`, stores the new versions (decision 10).
-/// @dev Prototype scope (phase 1 of the plan): versions and the counter; the operator's
-///      approval list of one token, which widens only through its typed shape and narrows by
-///      removal (decision 7); the revoke of one function; budgets within ceilings; ceilings that
-///      a motion lowers at any time and raises at most twofold, once in 15 days (decision 13);
-///      the restart (decision 12); and insurance money from the Asset Safe to the first-loss
-///      Safe (ADR 014, decision 7). The other shapes, and each shape's emergency exit, come with
-///      the exit-governance role. Every check here sits behind the modifiers' own guards.
+/// @dev Prototype scope: versions and the counter; the operator's approval list of one token,
+///      which widens only through its typed shape and narrows by removal (decision 7); the
+///      revoke of one function; budgets within ceilings; ceilings that a motion lowers at any
+///      time and raises at most twofold, once in 15 days (decision 13); the introduction of a
+///      token, which sets its ceilings in the same operation (decision 15); the restart
+///      (decision 12); and insurance money from the Asset Safe to the first-loss Safe (ADR 014,
+///      decision 7). The other shapes, and each shape's emergency exit, come with the
+///      exit-governance role. Every check here sits behind the modifiers' own guards.
 contract UniversalFactory {
     // ------------------------------------------------------------------
     // The kinds of operation that a motion may carry
@@ -36,6 +37,10 @@ contract UniversalFactory {
     uint8 public constant RESTART = 5;
     /// @dev Move a token from the Asset Safe to the first-loss Safe, for insurance.
     uint8 public constant FUND = 6;
+    /// @dev Introduce a token: its first approval list and both of its ceilings, together
+    ///      (decision 15). A token is introduced once; the enabling vote introduces the launch
+    ///      tokens by seeding their ceilings.
+    uint8 public constant INTRODUCE = 7;
 
     /// @dev The classes of ceiling, each per token: a budget key's figures, and the fixed cap
     ///      of an approval that spends no key.
@@ -87,9 +92,12 @@ contract UniversalFactory {
         uint256 cap;
     }
 
+    /// @dev `set` marks a ceiling that the enabling vote seeded or that a token's
+    ///      introduction set. A ceiling that was never set changes only by an introduction.
     struct Ceiling {
         uint256 value;
         uint64 lastRaise;
+        bool set;
     }
 
     /// @dev A launch budget key: the key that the enabling vote's policy gives a spender.
@@ -135,6 +143,9 @@ contract UniversalFactory {
         uint256 ceilings;
         bytes32[] claimed;
         uint256 claims;
+        address[] introduced;
+        uint256[] introducedBudgetCeilings;
+        uint256 introductions;
     }
 
     // ------------------------------------------------------------------
@@ -158,6 +169,10 @@ contract UniversalFactory {
     error BudgetAboveCeiling(bytes32 key, uint256 ceiling);
     error PeriodTooShort(uint64 period);
     error RaiseFromZero(bytes32 key);
+    error CeilingNotSet(bytes32 key);
+    error TokenNotIntroduced(address token);
+    error AlreadyIntroduced(address token);
+    error EmptyIntroduction(address token);
     error RaiseTooLarge(bytes32 key, uint256 value, uint256 limit);
     error RaiseTooSoon(bytes32 key, uint256 next);
     error ZeroAmount();
@@ -212,6 +227,7 @@ contract UniversalFactory {
         }
         for (uint256 i = 0; i < caps.length; i++) {
             ceilings[caps[i].key].value = caps[i].value;
+            ceilings[caps[i].key].set = true;
             emit CeilingSet(caps[i].key, caps[i].value, false);
         }
     }
@@ -238,6 +254,7 @@ contract UniversalFactory {
             else if (kind == CEILING) _ceiling(p, ops[i].data);
             else if (kind == RESTART) _restart(p);
             else if (kind == FUND) _fund(p, ops[i].data);
+            else if (kind == INTRODUCE) _introduce(p, ops[i].data);
             else revert UnknownOperation(kind);
         }
         return _script(p, motionEpoch);
@@ -290,6 +307,7 @@ contract UniversalFactory {
             bool raised = ceilingValues[i] > c.value;
             if (raised) c.lastRaise = uint64(block.timestamp);
             c.value = ceilingValues[i];
+            c.set = true;
             emit CeilingSet(ceilingKeys[i], ceilingValues[i], raised);
         }
     }
@@ -374,8 +392,10 @@ contract UniversalFactory {
         _protected(token);
         _canonical(current);
         _canonical(next);
+        if (!_introduced(token)) revert TokenNotIntroduced(token);
         bytes32 scope = functionScope(token, APPROVE);
         if (versions[scope] != listVersion(current)) revert StaleVersion(scope);
+        uint256 approvalCeiling = ceilings[ceilingKey(APPROVAL_CAP_CEILING, token)].value;
 
         // Every entry of the next list either stays as it is, lowers a cap, or widens.
         uint256 j;
@@ -385,7 +405,7 @@ contract UniversalFactory {
             bool found = j < current.length && current[j].spender == e.spender;
             if (found && current[j].key == e.key && current[j].cap == e.cap) continue;
             if (found && current[j].key == bytes32(0) && e.key == bytes32(0) && e.cap < current[j].cap) continue;
-            _widen(token, e);
+            _widen(token, e, approvalCeiling);
         }
 
         bytes memory write = next.length == 0
@@ -397,15 +417,36 @@ contract UniversalFactory {
 
     /// @dev A widening entry fills the shape: a spender that is no vault account, and either the
     ///      key that the factory derives for it, or a cap within the token's approval ceiling.
-    function _widen(address token, Entry memory e) internal view {
+    function _widen(address token, Entry memory e, uint256 approvalCeiling) internal view {
         _protected(e.spender);
         if (e.key != bytes32(0)) {
             bytes32 expected = keyFor(token, e.spender);
             if (e.key != expected) revert KeyNotDerived(e.spender, e.key);
-        } else {
-            uint256 ceiling = ceilings[ceilingKey(APPROVAL_CAP_CEILING, token)].value;
-            if (e.cap > ceiling) revert CapAboveCeiling(token, e.cap, ceiling);
+        } else if (e.cap > approvalCeiling) {
+            revert CapAboveCeiling(token, e.cap, approvalCeiling);
         }
+    }
+
+    /// @dev A token's introduction (decision 15): the token's first approval list, which fills
+    ///      the shape under the new approval ceiling, and both of its ceilings. The operations
+    ///      after it in the same motion check the token's budgets against the new budget
+    ///      ceiling. The introduction counts as each ceiling's first raise.
+    function _introduce(Plan memory p, bytes memory data) internal view {
+        (address token, Entry[] memory list, uint256 budgetCeiling, uint256 approvalCeiling) =
+            abi.decode(data, (address, Entry[], uint256, uint256));
+        _protected(token);
+        bytes32 scope = functionScope(token, APPROVE);
+        if (_introduced(token) || versions[scope] != bytes32(0)) revert AlreadyIntroduced(token);
+        _canonical(list);
+        if (list.length == 0) revert EmptyIntroduction(token);
+        for (uint256 i = 0; i < list.length; i++) _widen(token, list[i], approvalCeiling);
+        _govern(p, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, token)));
+        _govern(p, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, token, APPROVE, approvalTree(list), 0)));
+        _write(p, scope, listVersion(list));
+        _setCeiling(p, ceilingKey(BUDGET_CEILING, token), budgetCeiling);
+        _setCeiling(p, ceilingKey(APPROVAL_CAP_CEILING, token), approvalCeiling);
+        p.introduced[p.introductions] = token;
+        p.introducedBudgetCeilings[p.introductions++] = budgetCeiling;
     }
 
     function _revoke(Plan memory p, bytes memory data) internal view {
@@ -429,7 +470,7 @@ contract UniversalFactory {
         bytes32 key = keyFor(token, spender);
         bytes32 scope = allowanceScope(key);
         if (versions[scope] != expected) revert StaleVersion(scope);
-        uint256 ceiling = ceilings[ceilingKey(BUDGET_CEILING, token)].value;
+        uint256 ceiling = _budgetCeiling(p, token);
         if (balance > ceiling || maxRefill > ceiling || refill > ceiling) revert BudgetAboveCeiling(key, ceiling);
         if (period < MIN_PERIOD) revert PeriodTooShort(period);
         _govern(p, abi.encodeCall(IRoles.setAllowance, (key, balance, maxRefill, refill, period, 0)));
@@ -439,19 +480,17 @@ contract UniversalFactory {
     function _ceiling(Plan memory p, bytes memory data) internal view {
         (bytes32 key, uint256 expected, uint256 value) = abi.decode(data, (bytes32, uint256, uint256));
         Ceiling memory c = ceilings[key];
+        // A token's first ceilings come only with its introduction (decision 15).
+        if (!c.set) revert CeilingNotSet(key);
         // The ceiling's value is its version.
-        bytes32 scope = keccak256(abi.encode("ceiling", key));
-        if (c.value != expected) revert StaleVersion(scope);
+        if (c.value != expected) revert StaleVersion(_ceilingScope(key));
         if (value > c.value) {
             if (c.value == 0) revert RaiseFromZero(key);
             if (value > 2 * c.value) revert RaiseTooLarge(key, value, 2 * c.value);
             uint256 next = uint256(c.lastRaise) + RAISE_INTERVAL;
             if (c.lastRaise != 0 && block.timestamp < next) revert RaiseTooSoon(key, next);
         }
-        _claim(p, scope);
-        p.ceilingKeys[p.ceilings] = key;
-        p.ceilingValues[p.ceilings] = value;
-        p.ceilings++;
+        _setCeiling(p, key, value);
     }
 
     function _restart(Plan memory p) internal view {
@@ -479,14 +518,43 @@ contract UniversalFactory {
     // Helpers
     // ------------------------------------------------------------------
 
+    /// @dev An introduction makes two calls, sets two ceilings and claims three scopes, so the
+    ///      plan holds room for that many per operation, and one more call for `commit`.
     function _plan(uint256 n) internal pure returns (Plan memory p) {
-        p.to = new address[](n + 1);
-        p.data = new bytes[](n + 1);
+        p.to = new address[](2 * n + 1);
+        p.data = new bytes[](2 * n + 1);
         p.scopes = new bytes32[](n);
         p.versions = new bytes32[](n);
-        p.ceilingKeys = new bytes32[](n);
-        p.ceilingValues = new uint256[](n);
-        p.claimed = new bytes32[](n);
+        p.ceilingKeys = new bytes32[](2 * n);
+        p.ceilingValues = new uint256[](2 * n);
+        p.claimed = new bytes32[](3 * n);
+        p.introduced = new address[](n);
+        p.introducedBudgetCeilings = new uint256[](n);
+    }
+
+    /// @dev A token is introduced once one of its ceilings is set.
+    function _introduced(address token) internal view returns (bool) {
+        return ceilings[ceilingKey(BUDGET_CEILING, token)].set || ceilings[ceilingKey(APPROVAL_CAP_CEILING, token)].set;
+    }
+
+    /// @dev The budget ceiling of a token: the one that this motion's introduction of the token
+    ///      sets, or the stored one.
+    function _budgetCeiling(Plan memory p, address token) internal view returns (uint256) {
+        for (uint256 i = 0; i < p.introductions; i++) {
+            if (p.introduced[i] == token) return p.introducedBudgetCeilings[i];
+        }
+        return ceilings[ceilingKey(BUDGET_CEILING, token)].value;
+    }
+
+    function _ceilingScope(bytes32 key) internal pure returns (bytes32) {
+        return keccak256(abi.encode("ceiling", key));
+    }
+
+    function _setCeiling(Plan memory p, bytes32 key, uint256 value) internal pure {
+        _claim(p, _ceilingScope(key));
+        p.ceilingKeys[p.ceilings] = key;
+        p.ceilingValues[p.ceilings] = value;
+        p.ceilings++;
     }
 
     /// @dev One write of the governance role: a call of the operator modifier on itself, which
