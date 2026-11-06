@@ -16,13 +16,9 @@ planned:
     where: "On the safety modifier, held by the Easy Track script executor"
     what: "The motion that onboards a protocol also writes the emergency role's exit for it. The role writes only under the emergency key."
     sources: ["ADR-006#d13", "ADR-013#d7", OD-49, INV-025]
-  - name: Restart role
-    where: "On the safety modifier, held by the Easy Track script executor"
-    what: "After the switch, a motion enables the operator modifier on the Asset Safe again. The role may call only `enableModule`, with the operator modifier as its argument (OD-104)."
-    sources: ["ADR-013#d12", "ADR-005#proposed-direction", OD-104, INV-035]
   - name: Insurance roles
-    where: "On the operator modifier and the first-loss modifier, held by the Easy Track script executor"
-    what: "The insurance-funding role moves a listed token from the Asset Safe to the first-loss Safe, pinned to it. The insurance roles on the first-loss modifier deposit into the insured product with the first-loss Safe as the receiver, burn, and pay a fund's pinned payout address within its cap. All act only by motion (OD-107)."
+    where: "On the first-loss modifier, held by the Easy Track script executor"
+    what: "The insurance-funding role on the operator modifier, which moves a listed token from the Asset Safe to the first-loss Safe, is in the constellation. The insurance roles on the first-loss modifier deposit into the insured product with the first-loss Safe as the receiver, burn, and pay a fund's pinned payout address within its cap. All act only by motion (OD-107)."
     sources: ["ADR-014#d4", "ADR-014#d7", "ADR-014#proposed-direction", "ADR-005#proposed-direction", OD-107, INV-039]
   - name: First-loss Safe and its roles
     where: "A Voting-owned Safe with one modifier of its own"

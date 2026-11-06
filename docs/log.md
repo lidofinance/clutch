@@ -1,7 +1,12 @@
 # Log
 
+## 2026-11-06
+
+* **Decision**: Recorded EM decisions of 2026-11-06, OD-113 and OD-114: the motion that introduces a token sets the token's ceilings, and a motion created after an emergency revoke may still enact (ADR 013, decisions 15 and 16).
+
 ## 2026-11-05
 
+* **Evidence**: Built a prototype of the universal factory and tested it on a fork against the live Easy Track: versions, the motion counter, the shape of an approval list, budgets within their ceilings, the ceiling's twofold limit, the restart and insurance money. Added the restart and insurance-funding roles to the policy, rebuilt step 1 of the enabling-vote rehearsal, and recorded the factory's size and gas for the choice between options A and B.
 * **Decision**: Recorded EM decisions of 2026-11-01 and 2026-11-05, OD-100 to OD-112: one universal Easy Track factory with versions, no Aragon vote after launch except funding tranches and break-glass actions, funding by tranche votes with the first inside the enabling vote, insurance for earnETH, earnUSD and Lido Lend at launch, and only emergency and recovery paying the Aragon Agent (ADR 013, ADR 014).
 * **Update**: Brought the enabling-vote spec, the invariants, the control matrix, the parameters, the runbooks, the roadmap, the LIP and the guide in line with OD-100 to OD-112, and added the research note on Easy Track, Roles and Finance payments.
 

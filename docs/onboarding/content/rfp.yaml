@@ -268,7 +268,7 @@ sections:
       - text: "Returns: funds go back to the Aragon Agent only in an emergency or a recovery. The committee's Safe may send any vault token to the Agent too, pinned to it, with no motion and no vote, and monitoring alerts on every transfer to the Agent."
         why: "A return to the treasury loses nothing; at worst the vault stops working. Redemption and fund-exit proceeds stay in the vault."
         sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#consequences", OD-108, INV-038]
-      - text: "Budgets: each approval to a protocol spender spends that spender's budget key, which refills no more often than every 30 days. A motion raises a ceiling at most twofold, at most once in 15 days."
+      - text: "Budgets: each approval to a protocol spender spends that spender's budget key, which refills no more often than every 30 days. A motion raises a ceiling at most twofold, at most once in 15 days; the motion that introduces a token sets its first ceilings."
         why: "A spender can pull an approval without any deposit, so the approval is what must be bounded. A ceiling that one motion could set to any value would bound nothing."
         sources: ["ADR-009#d13", "ADR-009#d15", "ADR-013#d13", OD-08, OD-105, INV-008, INV-012, INV-036]
       - text: "Reports: a monthly report that anyone can re-run at a pinned block, and a cap reading every two weeks on IPFS. The policy provider publishes its own reading next to Lido's, with the same rules, and both count."
