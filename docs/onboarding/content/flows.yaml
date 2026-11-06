@@ -216,7 +216,7 @@ flows:
     group: governance
     title: A ceiling motion
     label: specified
-    summary: "How a ceiling changes. The enabling vote, or the motion that introduces a token, sets a token's first ceilings (OD-113). A motion lowers a ceiling at any time. It raises one to at most twice its value, at most once in 15 days for that ceiling (OD-105). Why the limit: a ceiling that one motion could set to any value would bound nothing."
+    summary: "How a ceiling changes. The enabling vote, or the motion that introduces a token, sets a token's first ceilings (OD-113), and an introduction counts as their first raise. A motion lowers a ceiling at any time. It raises one to at most twice its value, at most once in 15 days for that ceiling (OD-105). Why the limit: a ceiling that one motion could set to any value would bound nothing."
     trigger: "A budget or an approval needs more room under its ceiling, or the committee wants less."
     time: "72 hours."
     steps:
@@ -234,7 +234,7 @@ flows:
       - who: "Universal factory"
         text: "At creation and again at enactment, the factory refuses a raise above twice the ceiling, and a second raise of that ceiling within 15 days. It keeps the time of each raise."
         nodes: [easytrack]
-        check: "INV-036: a ceiling falls at any time, and rises only by motion, at most twofold and at most once in 15 days. Tested on a fork with the factory's prototype; a new token's first ceilings (OD-113) are not built."
+        check: "INV-036: a ceiling falls at any time, and rises only by motion, at most twofold and at most once in 15 days. Tested on a fork with the factory's prototype, a new token's first ceilings (OD-113) included."
       - who: "Monitoring"
         text: "Monitoring alerts on every ceiling motion."
         nodes: [monitoring, easytrack]
@@ -242,7 +242,8 @@ flows:
       - "An objection stops the motion, and the ceiling stays as it is."
       - "A raise of the factory's motion counter makes the open motion fail."
     sources: ["ADR-013#d13", "ADR-013#d10", "ADR-013#context", "ADR-013#proposed-direction", "ADR-009#d14", "ADR-011#d8",
-      INV-036, OD-105, OD-113, "ADR-013#d15", "runbook:Change a ceiling", "test:test_uf_ceiling_rises_at_most_twofold_once_in_15_days"]
+      INV-036, OD-105, OD-113, "ADR-013#d15", "runbook:Change a ceiling", "test:test_uf_ceiling_rises_at_most_twofold_once_in_15_days",
+      "test:test_uf_a_new_token_is_introduced_with_its_ceilings", "test:test_uf_a_token_is_introduced_once"]
 
   - id: orders-token
     group: governance

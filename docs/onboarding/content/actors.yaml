@@ -234,13 +234,14 @@
     - "Pay from the treasury. Its address book holds no payment call (INV-037)."
     - "Enact a motion if a version that it names, or the [[motion counter]], changed since its creation. The emergency Safe raises the counter at every stop, and every open motion then fails (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke (OD-09)."
-  numbers: ["one factory for every Clutch motion", "a ceiling's raise: at most twofold, once in 15 days", "the prototype's core: 11,553 of EIP-170's 24,576 bytes", "external audit in phase 3"]
+  numbers: ["one factory for every Clutch motion", "a ceiling's raise: at most twofold, once in 15 days", "the prototype: 12,667 of EIP-170's 24,576 bytes", "external audit in phase 3"]
   sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d9", "ADR-013#d10",
     "ADR-013#d11", "ADR-013#d13", "ADR-013#proposed-direction", "ADR-013#consequences", "ADR-007#d41", "ADR-006#d9",
     "ADR-006#d10", "ADR-011#d13", OD-09, OD-36, OD-38, OD-49, OD-70, OD-100, OD-102, OD-103, OD-104, OD-105, OD-107,
     OD-113, "ADR-013#d15",
     INV-029, INV-032, INV-033, INV-034, INV-036, INV-037, "lip:part-4", "doc:ROADMAP.md#roadmap",
-    "doc:docs/research/universal-factory-prototype-2026-11-05.md#measures-for-the-choice-between-options-a-and-b"]
+    "doc:docs/research/universal-factory-prototype-2026-11-05.md#measures-for-the-choice-between-options-a-and-b",
+    "doc:docs/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06"]
 
 # --- Emergency Safe -----------------------------------------------------------------------------
 - id: emergency-safe

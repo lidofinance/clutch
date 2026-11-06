@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T21:13:28Z
+  at: 2026-11-06T04:06:56Z
 verified: []
 sources:
   - id: s1
@@ -20,8 +20,8 @@ sources:
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads at block 26092572
   - id: s4
-    resource: "https://github.com/lidofinance/clutch/tree/eeede8bf934ac9d6d7e8e4a9555b808662f0345a/test"
-    title: Fork test suites at eeede8b
+    resource: "https://github.com/lidofinance/clutch/tree/a4394fb3c8c3fa90435424e16495e0418260fd41/test"
+    title: Fork test suites at a4394fb
   - id: s5
     resource: "https://github.com/safe-global/safe-smart-account/blob/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/contracts/base/ModuleManager.sol#L94-L108"
     title: Safe v1.5.0 ModuleManager — the module guard is called for every enabled module
@@ -673,7 +673,7 @@ Costs: two policy applications, two sets of role keys, two modules enabled on th
 
 ### Test Cases
 
-74 tests pass against deployed mainnet bytecode at commit eeede8b of this repository [s4]: 53 on a fork pinned at block 25946643, and 21 at block 26249900, the 6 of the enabling-vote rehearsal and the 15 of the universal factory's prototype [s14][s18]. Nothing has been deployed.
+76 tests pass against deployed mainnet bytecode at commit a4394fb of this repository [s4]: 53 on a fork pinned at block 25946643, and 23 at block 26249900, the 6 of the enabling-vote rehearsal and the 17 of the universal factory's prototype [s14][s18]. Nothing has been deployed.
 
 | Group | n | Covers |
 | --- | --- | --- |
@@ -694,8 +694,8 @@ Costs: two policy applications, two sets of role keys, two modules enabled on th
 | One orders modifier, on a stand-in | 6 | One modifier is enabled; unassigning the operator's role stops it, and recovery survives; the switch is pinned; the operator cannot restore itself; the emergency role revokes on its own modifier; the DAO restores the operator |
 | Funding bootstrap | 1 | The dry-run funding script |
 | Enabling-vote rehearsal | 6 | The vote with the live Aragon Voting, Finance and Easy Track: a vote that carries the policy cannot start; the vote that registers the factory, pays the first tranche and approves the batches, end to end; the ramp-up with a later tranche, a budget motion, a ceiling motion, the switch and a restart motion; Earn deposits from the Asset Safe; the first-loss burn and redemption request; the manifest |
-| The universal factory's prototype | 15 | The address book is the registration; the factory writes the compiler's trees; versions settle a conflict on one scope in both orders, disjoint scopes enact in any order, and the counter fails every open motion; widening only through the shape, raw writes only narrow; budgets within their ceilings; a ceiling rises at most twofold, once in 15 days; the restart motion; insurance money; the factory's own guards; the measures |
-| **Total** | **74** | |
+| The universal factory's prototype | 17 | The address book is the registration; the factory writes the compiler's trees; versions settle a conflict on one scope in both orders, disjoint scopes enact in any order, and the counter fails every open motion; widening only through the shape, raw writes only narrow; budgets within their ceilings; a ceiling rises at most twofold, once in 15 days; a token is introduced once, with both of its ceilings; the restart motion; insurance money; the factory's own guards; the measures |
+| **Total** | **76** | |
 
 Reproduce with `forge test` against an archive RPC. The kit forks block 25946643, and the rehearsal and the factory block 26249900.
 

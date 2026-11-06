@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-06T00:20:54Z
+  at: 2026-11-06T04:19:05Z
 verified: []
 ---
 
@@ -65,5 +65,5 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-05 | none |
 | [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-05 | none |
 | [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-06 | none |
-| [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-05 | none |
+| [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-06 | none |
 | [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-10-19 | none |

@@ -9,7 +9,7 @@ valid_as_of: 2026-11-05
 stale_after: 2027-02-28T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-06T00:20:54Z
+  at: 2026-11-06T04:19:05Z
 verified: []
 sources:
   - id: s1
@@ -35,7 +35,13 @@ sources:
     title: ADR 014 — the first tranche inside the enabling vote, and insurance money from the Asset Safe by motion
   - id: s8
     resource: /registers/decision-log.md
-    title: Decision log — EM's decisions of 2026-11-06 on the prototype's first two questions (OD-113, OD-114)
+    title: Decision log — EM's decisions of 2026-11-06 on the prototype's first two questions (OD-113, OD-114), and EM's confirmation that an introduction counts as the first raise
+  - id: s9
+    resource: "https://github.com/lidofinance/clutch/blob/a4394fb3c8c3fa90435424e16495e0418260fd41/src/factory/UniversalFactory.sol"
+    title: The universal factory's prototype at a4394fb, with the introduction of a token
+  - id: s10
+    resource: "https://github.com/lidofinance/clutch/blob/a4394fb3c8c3fa90435424e16495e0418260fd41/test/UniversalFactory.t.sol"
+    title: The prototype's tests at a4394fb, with the two tests of a token's introduction
 ---
 
 # The universal factory's prototype on a fork, 2026-11-05
@@ -80,11 +86,27 @@ Every motion is far under EIP-7825's cap of 16,777,216 gas. The contract has 417
 
 ## Questions that the prototype raised
 
-1. **A new token has no ceiling.** Ceilings are per token, a zero ceiling cannot rise by motion, and so a token outside the launch list takes no budget and no cap. The options are a ceiling for every token of the mandate's asset list at deployment, a first ceiling by vote, or a first raise from zero up to a fixed figure. The agent recommended the first: it needs no new rule and no vote. EM decided on 2026-11-06 that the motion that introduces a token sets its ceilings, in the same motion (OD-113) [s8]. The prototype does not build that yet: it refuses every raise from zero.
+1. **A new token has no ceiling.** Ceilings are per token, a zero ceiling cannot rise by motion, and so a token outside the launch list takes no budget and no cap. The options are a ceiling for every token of the mandate's asset list at deployment, a first ceiling by vote, or a first raise from zero up to a fixed figure. The agent recommended the first: it needs no new rule and no vote. EM decided on 2026-11-06 that the motion that introduces a token sets its ceilings, in the same motion (OD-113) [s8]. The prototype builds it since that day; see the next section.
 2. **Versions do not see the emergency Safe.** The emergency role revokes directly on the modifier, so the factory's version of that scope does not change. The counter, which the emergency Safe raises with each stop, fails every motion that was open before. A motion created after a revoke may bring the permission back after its objection window, as OD-97 allows. EM accepted this on 2026-11-06 (OD-114) [s8].
 3. **The seeds come from the policy.** The factory starts with the version of every list that the enabling vote writes. The prototype takes them from a copy of the launch lists and proves the copy against the compiled artifact. The build phase's tooling should compute them from the artifact itself.
 4. **A failed enactment holds a motion slot.** Easy Track deletes the motion only when enactment succeeds, so a stale motion stays open until its creator or Aragon Voting cancels it [s6]. The tests cancel it, and monitoring should alert on it.
 
+## Decision 15, built on 2026-11-06
+
+EM decided that the motion that introduces a token sets the token's ceilings (OD-113) [s8]. The prototype builds it [s9][s10]:
+
+- **The introduction.** One new operation writes a token's first approval list and sets both of its ceilings, the budget ceiling and the approval ceiling. The list fills the shape under the new approval ceiling. A budget for the token later in the same motion stays under the new budget ceiling; a budget before the introduction sees no ceiling and fails.
+- **Once.** A token is introduced once. The enabling vote introduces the launch tokens by seeding their ceilings. A token whose list a motion empties stays introduced, so no motion can lower its ceilings to zero and introduce it again with higher ones.
+- **No first ceiling by other means.** An approval list for a token that was never introduced is refused, and so is a ceiling operation on a ceiling that was never set. A ceiling that a motion lowers to zero cannot rise again.
+- **Decision 13 after that.** The prototype counts the introduction as each ceiling's first raise, so the next raise waits 15 days. EM confirmed this reading on 2026-11-06 [s8].
+- **The enabling vote's seeds.** A class of ceiling that the enabling vote does not seed for a launch token stays unset, because the token already counts as introduced. The vote therefore seeds both classes for every launch token, with zero where no entry uses the class.
+
+Checks: the fork suite passes 76 tests, the factory's 17 among them. Seven new mutants, one for each new check, each fail a test, and the eight earlier mutants still do.
+
+Measures: the factory grows to 12,667 bytes, 52 percent of EIP-170's limit. A motion that introduces a token with one budget takes 322,302 gas at creation and 682,545 at enactment. The other motions of the table above changed by less than 2 percent, except a ceiling motion's enactment, which fell from 73,903 to 58,126 gas: the slot that keeps the time of the last raise now also holds the ceiling's flag, so the raise no longer writes an empty slot.
+
 ## Not built
 
 The other shapes, each shape's emergency exit with the exit-governance role, the orders account's roles, the first-loss modifier's insurance roles, the payouts, the `motion` command and the monitoring. They are work of the build phase, and the full vote is step 2 of the rebuild [s5][s7].
+
+No operation scopes a target again after the emergency role revokes the whole target: the prototype emits `scopeTarget` only when it introduces a token. A motion can bring back a revoked function by writing its list again, but a revoked target needs a shape that the build phase adds (OD-104, OD-114).

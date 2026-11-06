@@ -2,6 +2,8 @@
 
 ## 2026-11-06
 
+* **Decision**: Recorded EM's confirmation of 2026-11-06 that a token's introduction counts as its ceilings' first raise, so the next raise waits 15 days (OD-113; ADR 013, decision 15).
+* **Evidence**: Built decision 15 of ADR 013 (OD-113) into the factory prototype: one operation introduces a token with its first approval list and both of its ceilings, a token is introduced once, and a ceiling that was never set changes only by an introduction. The fork suite passes 76 tests, and seven new mutants are caught.
 * **Decision**: Recorded EM decisions of 2026-11-06, OD-113 and OD-114: the motion that introduces a token sets the token's ceilings, and a motion created after an emergency revoke may still enact (ADR 013, decisions 15 and 16).
 
 ## 2026-11-05

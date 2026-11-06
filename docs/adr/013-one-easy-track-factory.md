@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-06T00:20:54Z
+  at: 2026-11-06T04:19:05Z
 verified: []
 sources:
   - id: s1
@@ -90,7 +90,7 @@ EM decided on 2026-11-06, closing OD-113 and OD-114 [s1]:
 15. The motion that introduces a token sets the token's ceilings, in the same motion. Decision 13 applies after that. The enabling vote sets the ceilings of the launch tokens.
 16. A motion created after an emergency revoke may enact, and so bring the revoked permission back after its objection window. The factory's versions record only the factory's own writes, not the emergency role's revokes; the counter fails the motions that were open when the emergency Safe raised it.
 
-EM wrote "ceiling should be set together with token intro"; the agent reads the introduction as the motion that first writes a permission for the token.
+EM wrote "ceiling should be set together with token intro"; the agent reads the introduction as the motion that first writes a permission for the token. EM confirmed on 2026-11-06 that a token's introduction counts as its ceilings' first raise, so the next raise waits 15 days [s1].
 
 Decisions 5 to 7 replace the template catalogue of [ADR 006](/adr/006-governance-through-easy-track-factories.md) decisions 5, 14, 15, 17 and 18: a routine removal is the factory's narrowing write, a revoked permission comes back through a shape, and a shape that the factory lacks needs a changed factory, which is a vote. Decision 12 replaces the vote for a restart in ADR 006 decision 19 and in [ADR 005](/adr/005-account-graph-and-roles.md) decisions 26 and 30. Decision 9 replaces the spare keys of [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 39. Decision 13 replaces the fixed ceilings of ADR 009 decision 14 and [ADR 011](/adr/011-launch-scope.md) decision 8: each is now a ceiling under decision 13.
 
@@ -129,6 +129,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - A captured committee could restart the operator after a stop. The motion is visible for 72 hours, the counter fails it after any new stop, and the emergency Safe can stop the operator again.
 - A stale motion fails at enactment and holds one of Easy Track's 20 shared motion slots until it is cancelled.
 - A token's first ceilings are as high as the motion that introduces the token sets them, so the objection window is their only bound (decision 15). Decision 13's limit applies from then on.
+- A launch token counts as introduced once the enabling vote seeds one of its ceilings, so a class of ceiling that the vote does not seed for it stays unset: no motion sets it. The enabling vote therefore seeds both classes for every launch token, with zero where no entry uses the class.
 - A motion created after an emergency revoke can bring the permission back after its 72 hours, unless LDO holders object or the emergency Safe raises the counter again (decision 16, OD-97).
 - Every Clutch motion uses one factory and one calldata format, so monitoring decodes one format.
 - After launch, Aragon votes are for funding tranches and break-glass actions only.
@@ -138,7 +139,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - A fork prototype of the factory, with tests against the live Easy Track: a conflict on one scope in both orders; disjoint scopes in any order; the counter failing a stale motion; a cancel; the restart; and every refusal, which covers delegatecall other than the order signer's, a protected target, an administrative selector, a raw widening, a ceiling above its limit, a second raise within 15 days and a call outside the address book.
 - The factory's size against EIP-170 and the gas per motion, reported before decision 11 applies.
 - On 2026-11-05 a prototype of the factory's core passed 15 tests against the live Easy Track on a fork, and eight mutants of its checks each failed a test. It is 11,553 bytes, 47 percent of EIP-170's limit, and its largest measured motion enacts in about 3.8 million gas ([research note](/research/universal-factory-prototype-2026-11-05.md)).
-- Decision 15 is not built: the prototype refuses every raise from zero. It needs fork tests of a motion that introduces a token with its ceilings, and of a raise from zero outside such a motion, which fails.
+- On 2026-11-06 the prototype built decision 15: one operation writes a token's first approval list and sets both of its ceilings; a token is introduced once; an approval list for a token that was never introduced, and a ceiling operation on a ceiling that was never set, are refused. It counts the introduction as each ceiling's first raise ([research note](/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06)).
 - INV-032 to INV-036 in the [invariants](/specs/invariants.md).
 
 ## Reversal conditions

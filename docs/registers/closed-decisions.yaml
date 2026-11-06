@@ -839,6 +839,7 @@
   closed: 2026-11-06
   log:
     - "2026-11-06 — OD-113 and OD-114: a new token's ceilings and motions after a revoke"
+    - "2026-11-06 — OD-113: an introduction counts as the first raise"
   adr: [ADR-013#d15]
   see: [/research/universal-factory-prototype-2026-11-05.md]
   refines: [OD-105]

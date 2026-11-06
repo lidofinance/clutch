@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-06T00:20:54Z
+  at: 2026-11-06T04:19:05Z
 verified: []
 sources:
   - id: s1
@@ -142,7 +142,7 @@ Generated from [closed-decisions.yaml](closed-decisions.yaml). EM's words are in
 | OD-110 | Does the vault keep a liquidity buffer of its own? | 2026-11-05 | [OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items](decision-log.md#2026-11-05--od-101-od-103-and-od-105-to-od-112-round-two-tranche-votes-insurance-at-launch-the-flows-back-to-the-treasury-and-the-committees-items); [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md#decision), decision 46 | In force. It replaces OD-40; it replaces in part OD-86, OD-87 and OD-90. |
 | OD-111 | Where does the report show the TMC-6 ratio of sUSDS and tokenized money market funds? | 2026-11-05 | [OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items](decision-log.md#2026-11-05--od-101-od-103-and-od-105-to-od-112-round-two-tranche-votes-insurance-at-launch-the-flows-back-to-the-treasury-and-the-committees-items); [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md#decision), decision 47 | In force. |
 | OD-112 | Does the policy chain a second Roles modifier whose bounds only a vote changes? | 2026-11-05 | [OD-102 to OD-104 and OD-112: the ballot on one factory](decision-log.md#2026-11-05--od-102-to-od-104-and-od-112-the-ballot-on-one-factory); [OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items](decision-log.md#2026-11-05--od-101-od-103-and-od-105-to-od-112-round-two-tranche-votes-insurance-at-launch-the-flows-back-to-the-treasury-and-the-committees-items); [ADR 013](/adr/013-one-easy-track-factory.md#decision), decision 14; [research note](/research/easy-track-first-2026-11-05.md) | In force. |
-| OD-113 | How does a token that is not on the launch list get its ceilings? | 2026-11-06 | [OD-113 and OD-114: a new token's ceilings and motions after a revoke](decision-log.md#2026-11-06--od-113-and-od-114-a-new-tokens-ceilings-and-motions-after-a-revoke); [ADR 013](/adr/013-one-easy-track-factory.md#decision), decision 15; [research note](/research/universal-factory-prototype-2026-11-05.md) | In force. It refines OD-105. |
+| OD-113 | How does a token that is not on the launch list get its ceilings? | 2026-11-06 | [OD-113 and OD-114: a new token's ceilings and motions after a revoke](decision-log.md#2026-11-06--od-113-and-od-114-a-new-tokens-ceilings-and-motions-after-a-revoke); [OD-113: an introduction counts as the first raise](decision-log.md#2026-11-06--od-113-an-introduction-counts-as-the-first-raise); [ADR 013](/adr/013-one-easy-track-factory.md#decision), decision 15; [research note](/research/universal-factory-prototype-2026-11-05.md) | In force. It refines OD-105. |
 | OD-114 | May a motion created after an emergency revoke still enact, although the factory's versions do not see the revoke? | 2026-11-06 | [OD-113 and OD-114: a new token's ceilings and motions after a revoke](decision-log.md#2026-11-06--od-113-and-od-114-a-new-tokens-ceilings-and-motions-after-a-revoke); [ADR 013](/adr/013-one-easy-track-factory.md#decision), decision 16; [research note](/research/universal-factory-prototype-2026-11-05.md) | In force. It refines OD-97. |
 
 <!-- end of generated block -->

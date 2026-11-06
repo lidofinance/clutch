@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-06T00:20:54Z
+  at: 2026-11-06T04:19:05Z
 verified: []
 sources:
   - id: s1
@@ -82,6 +82,9 @@ sources:
   - id: s24
     resource: "urn:clutch:interview:2026-11-06"
     title: EM's decisions on the two questions of the universal factory's prototype, 2026-11-06; the transcript is not in the repository
+  - id: s25
+    resource: "urn:clutch:interview:2026-11-06-confirm"
+    title: EM's confirmation that a token's introduction counts as its first ceiling raise, and the go-ahead to commit and push, 2026-11-06; the transcript is not in the repository
 ---
 
 # Decision log
@@ -91,6 +94,16 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-06 — OD-113: an introduction counts as the first raise
+
+The agent built decision 15 of ADR 013 into the prototype and asked EM to confirm one reading: that a token's introduction counts as its ceilings' first raise, so that the next raise waits 15 days.
+
+> 1. I confirm that a token's introduction counts as it's first ceiling raise
+
+Recorded as:
+
+- (1, OD-113) A token's introduction counts as its ceilings' first raise, so the next raise of either ceiling waits 15 days ([ADR 013](/adr/013-one-easy-track-factory.md), decision 15). [s25]
 
 ## 2026-11-06 — OD-113 and OD-114: a new token's ceilings and motions after a revoke
 
