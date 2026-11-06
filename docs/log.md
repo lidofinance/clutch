@@ -2,6 +2,7 @@
 
 ## 2026-11-06
 
+* **Update**: Fixed the onboarding guide's constellation tab, which named the Aragon Agent as the Asset Safe's owner. Aragon Voting is its only owner (OD-73).
 * **Evidence**: Added the restore of a revoked target to the factory prototype (OD-104): a motion scopes again a target that the emergency role revoked as a whole, and the permissions stored under it come back as they were, with nothing written again. The fork suite passes 77 tests.
 * **Decision**: Recorded EM's confirmation of 2026-11-06 that a token's introduction counts as its ceilings' first raise, so the next raise waits 15 days (OD-113; ADR 013, decision 15).
 * **Evidence**: Built decision 15 of ADR 013 (OD-113) into the factory prototype: one operation introduces a token with its first approval list and both of its ceilings, a token is introduced once, and a ceiling that was never set changes only by an introduction. The fork suite passes 76 tests, and seven new mutants are caught.

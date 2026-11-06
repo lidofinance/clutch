@@ -1,0 +1,3 @@
+date: '2026-11-06'
+kind: Update
+text: Fixed the onboarding guide's constellation tab, which named the Aragon Agent as the Asset Safe's owner. Aragon Voting is its only owner (OD-73).

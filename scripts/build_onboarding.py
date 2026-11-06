@@ -1147,7 +1147,7 @@ def section_constellation(c: dict[str, Any], f: dict[str, Any], refs: dict[str, 
     graph = (
         f'<div class="cgraph" role="group" aria-label="The constellation as built">'
         f'<div class="cnode cavatar"><span class="ckind">Avatar and owner</span><strong>Asset Safe</strong>'
-        f'<small>The Aragon Agent owns it; every permitted call runs as it</small></div>'
+        f'<small>Aragon Voting owns it; every permitted call runs as it</small></div>'
         f'<div class="cmods">{"".join(mods)}</div></div>'
     )
     planned = "".join(
