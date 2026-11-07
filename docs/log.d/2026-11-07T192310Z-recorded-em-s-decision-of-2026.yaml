@@ -1,0 +1,3 @@
+date: '2026-11-07'
+kind: Decision
+text: 'Recorded EM''s decision of 2026-11-07, OD-116: an order of the orders account signs no fee; the policy pins the order''s own fee field to zero, and the signer''s fee bound stays zero (ADR 007, decision 43).'

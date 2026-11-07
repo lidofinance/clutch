@@ -852,3 +852,20 @@
   adr: [ADR-013#d16]
   see: [/research/universal-factory-prototype-2026-11-05.md]
   refines: [OD-97]
+
+- id: OD-115
+  question: "Does an order of the orders account carry app data?"
+  closed: 2026-11-07
+  log:
+    - "2026-11-07 — OD-115 and OD-116: zero app data, and the signed fee"
+  adr: [ADR-007#d42]
+  see: [/research/orders-account-fork-tests-2026-11-07.md]
+
+- id: OD-116
+  question: "Does an order of the orders account sign a fee?"
+  closed: 2026-11-07
+  log:
+    - "2026-11-07 — OD-115 and OD-116: zero app data, and the signed fee"
+    - "2026-11-07 — OD-116: no signed fee, the order's fee field pinned to zero"
+  adr: [ADR-007#d43]
+  see: [/research/orders-account-fork-tests-2026-11-07.md]

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T19:22:54Z
+  at: 2026-11-07T19:23:10Z
 verified: []
 sources:
   - id: s1
@@ -186,6 +186,13 @@ EM decided on 2026-11-05, choosing option B, closing OD-103 [s1]:
 41. The operator keeps market and limit orders through CoW's order signer. The orders modifier gets a governance role and an approvals role, both held by the Easy Track executor. A motion adds a token to the lists, on the sell side and on the buy side, with its relayer approval, its emergency transfer and its recovery orders. The governance role grants delegatecall only to the order signer, for signing and unsigning orders.
 
 Decision 41 replaces decisions 21 and 38, and the vote for a token in [ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 12. It narrows ADR 006 decision 9 to one exception, the order signer. The universal factory writes these permissions ([ADR 013](/adr/013-one-easy-track-factory.md)), and decision 40's Easy Track factories are that factory. Decisions 22, 25, 29 and 39 stand.
+EM decided on 2026-11-07, closing OD-115 [s1]:
+
+42. Every order of the orders account carries zero app data, so it carries no hooks and no partner fee.
+
+EM decided on 2026-11-07, choosing the agent's recommendation, closing OD-116 [s1]:
+
+43. An order of the orders account signs no fee. The policy pins the order's own fee field to zero, and the order signer's fee bound stays zero. CoW's order book refuses a signed fee, and CoW charges its fees inside the execution, within the order's limit.
 
 ## Proposed direction
 
@@ -194,8 +201,8 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - **Orders account.** A new Safe owned one-of-one by Voting ([ADR 005](/adr/005-account-graph-and-roles.md), decision 28). It uses `ExtensibleFallbackHandler` and ComposableCoW for CoW's settlement domain. The enabling vote configures its single modifier, with the account as owner, avatar and target, the `operator` and `emergency` roles, and the Easy Track executor's governance and approvals roles (decision 41).
 - **Operator funding.** On the Asset Safe, each listed-token transfer is pinned to the orders account and spends that token's orders budget, from the attested computation.
 - **Operator orders.**
-  - Delegatecall the order signer with listed tokens, the Asset Safe as receiver, a fee bound and at most 90 days' life (decision 29). The signer refuses `validTo` beyond `validDuration`; `unsignOrder` cancels.
-  - Use only ComposableCoW's TWAP handler, with listed tokens and the Asset Safe as receiver; no stop-loss (decision 39). `createWithContext`, start zero and CoW's current-timestamp value factory make creation the start. Permit at most 90 parts at most a day apart, or at most 12 parts at most 7 days apart, ending within 90 days (decision 29). `remove` cancels.
+  - Delegatecall the order signer with listed tokens, the Asset Safe as receiver, plain ERC-20 balances, zero app data (decision 42), no signed fee (decision 43) and at most 90 days' life (decision 29). Zero app data carries no hooks and no partner fee. The signer refuses `validTo` beyond `validDuration`; `unsignOrder` cancels.
+  - Use only ComposableCoW's TWAP handler, with listed tokens, the Asset Safe as receiver and zero app data; no stop-loss (decision 39). `createWithContext`, start zero and CoW's current-timestamp value factory make creation the start. Permit at most 90 parts at most a day apart, or at most 12 parts at most 7 days apart, ending within 90 days (decision 29). `remove` cancels.
   - Transfer any token back to the Asset Safe, or to the Aragon Agent by a transfer pinned to it ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 9).
 - **Emergency actions.** From the Asset Safe, transfer any asset to orders or the Agent. On orders, cancel any order, revoke operator targets/functions, zero CoW relayer approvals, and transfer listed tokens to the Aragon Agent or the Asset Safe. Signer recovery orders buy USDC or USDT, pay the Agent and last at most 1 day (decision 25).
 - **Stop.** Revoke `operator` targets and functions on the orders modifier (decision 30). Every operator permission there uses the `operator` key, so revocation reaches all of them. Revocation does not cancel resting orders; cancel them too, because fills never consult the policy. A 2026-10-08 fork probe demonstrated emergency revocation on a stand-in modifier.
@@ -241,12 +248,13 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 
 - INV-002, INV-008, INV-013, INV-014, INV-022, INV-023 and INV-024 in the [invariants](/specs/invariants.md).
 - Existing kit coverage: no Asset Safe pre-signing or relayer approval [s5]; staking with the Safe as owner [s7]; both roles refused the withdrawal queue (`test_D3_withdrawal_queue_is_out_of_scope`); WETH unwrap pays the Safe [s8].
-- Fork tests still owed:
-  - Signer delegatecall from Safe v1.5.0 through Roles, with receiver pinning.
-  - TWAP from Safe v1.5.0 with CoW's handler; receiver conditions inside ComposableCoW's encoded data; refusal of other receivers.
-  - Life limits of decisions 25 and 29, including refusal of TWAP outside both allowed shapes.
-  - Emergency cancel, sweep and recovery settlement with the vote's relayer approval.
-  - Emergency revocation on the orders modifier, with recovery still available (decision 30).
+- Fork tests of 2026-11-07 on the enabling vote's vault, each order settled through CoW's settlement contract ([research note](/research/orders-account-fork-tests-2026-11-07.md)):
+  - Signer delegatecall from Safe v1.5.0 through Roles, with receiver pinning (`test_orders_signer_order_settles_to_the_asset_safe`, `test_orders_signer_refusals`).
+  - TWAP from Safe v1.5.0 with CoW's handler; receiver conditions inside ComposableCoW's encoded data; refusal of other receivers (`test_orders_twap_part_settles_through_the_fallback_handler`, `test_orders_twap_refusals`). CoW's fallback handler works on Safe v1.5.0.
+  - Life limits of decisions 25 and 29, including refusal of TWAP outside both allowed shapes (the refusal tests).
+  - Emergency cancel, sweep and recovery settlement with the vote's relayer approval (`test_orders_emergency_cancels_sweeps_and_recovers`).
+  - Emergency revocation on the orders modifier, with recovery still available (decision 30; `test_orders_emergency_revocation_keeps_recovery`).
+- Still owed: the order book's acceptance of zero app data, the watch-tower's posting of TWAP parts, and decision 41's governance and approvals roles with the factory's token-list shape.
 
 ## Reversal conditions
 
@@ -265,4 +273,4 @@ No open decision closes in this record.
 
 <!-- end of generated block -->
 
-Owed: the fork tests above, the screening vendor's answer on output checks, and the orders budgets from the attested computation.
+Owed: the screening vendor's answer on output checks, the orders budgets from the attested computation, and decision 41's governance and approvals roles.

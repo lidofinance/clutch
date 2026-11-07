@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-06T04:19:05Z
+  at: 2026-11-07T19:23:10Z
 verified: []
 sources:
   - id: s1
@@ -85,6 +85,12 @@ sources:
   - id: s25
     resource: "urn:clutch:interview:2026-11-06-confirm"
     title: EM's confirmation that a token's introduction counts as its first ceiling raise, and the go-ahead to commit and push, 2026-11-06; the transcript is not in the repository
+  - id: s26
+    resource: "urn:clutch:interview:2026-11-07"
+    title: EM's acceptance of zero app data for the orders, and EM's request for more research on the signed fee, 2026-11-07; the transcript is not in the repository
+  - id: s27
+    resource: "urn:clutch:interview:2026-11-07-fee"
+    title: EM's decision to pin the order's fee field to zero, 2026-11-07; the transcript is not in the repository
 ---
 
 # Decision log
@@ -94,6 +100,28 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-07 — OD-116: no signed fee, the order's fee field pinned to zero
+
+The agent researched the signed fee ([research note](/research/orders-account-fork-tests-2026-11-07.md#the-signed-fee-od-116)) and recommended that an order sign no fee, with the order's own fee field also pinned to zero: CoW's order book refuses a signed fee, and the limit price bounds every fee that CoW charges.
+
+> pin the fee field
+
+Recorded as:
+
+- (OD-116) An order of the orders account signs no fee: the policy pins the order's own fee field to zero, and the order signer's fee bound stays zero ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 43). EM chose the agent's recommendation. [s27]
+
+## 2026-11-07 — OD-115 and OD-116: zero app data, and the signed fee
+
+The agent built the orders account's policy and pinned two order fields that no decision named: zero app data, so an order carries no hooks and no partner fee, and a signed fee of zero ([research note](/research/orders-account-fork-tests-2026-11-07.md)). It asked EM to accept both.
+
+> - I accept app data fixed at zeeo
+> - research more is it beneficial to have signed fee to be zero or better come smarter?
+
+Recorded as:
+
+- (1, OD-115) Every order of the orders account carries zero app data: no hooks and no partner fee ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 42). The agent reads "zeeo" as "zero".
+- (2, OD-116) EM asked for more research on the signed fee. The research and the agent's recommendation are in the research note, and OD-116 stays open in the [register](/registers/open-decisions.md) until EM decides. [s26]
 
 ## 2026-11-06 — OD-113: an introduction counts as the first raise
 
