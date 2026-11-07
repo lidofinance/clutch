@@ -149,9 +149,14 @@ const selector = (signature: string) => id(signature).slice(0, 10);
  * What a role may call on the Asset Safe or on one of its modules (OD-38).
  * A `narrow` call only removes authority. A `grant` call gives the operator a
  * permission, so it must refuse every protected account as the target that
- * it administers. A `budget` call must carry a condition.
+ * it administers. A `budget` call must carry a condition. A `restart` call
+ * enables the operator modifier again: only the restart role may hold it, and
+ * only with its argument pinned to that modifier (ADR 013, decision 12).
  */
-const ON_ASSET_SAFE = new Map([[selector("disableModule(address,address)"), "narrow"]]);
+const ON_ASSET_SAFE = new Map([
+  [selector("disableModule(address,address)"), "narrow"],
+  [selector("enableModule(address)"), "restart"],
+]);
 const ON_MODULE = new Map([
   [selector("revokeTarget(bytes32,address)"), "narrow"],
   [selector("revokeFunction(bytes32,address,bytes4)"), "narrow"],
@@ -165,9 +170,12 @@ const ON_MODULE = new Map([
 /**
  * The roles that stop and never restore. On the Asset Safe and its modules
  * they hold only `narrow` calls, so they cannot give back what they removed:
- * the DAO restarts (ADR 005, decision 26).
+ * a motion restarts (ADR 005, decision 26; ADR 013, decision 12).
  */
 const STOP_ONLY = new Set(["emergency"]);
+
+/** The only role that may hold a `restart` call. */
+const RESTART_ROLE = "restart";
 
 /**
  * Refuses a policy in which a role reaches the Asset Safe or one of its
@@ -202,8 +210,14 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
           const kind = allowed.get(fn.selector);
           const name = fn.signature ?? fn.selector;
           if (!kind) throw new Error(`${where}: ${name} is not allowed on the Asset Safe or one of its modules (OD-38)`);
+          if (kind === "restart" && role.name !== RESTART_ROLE) {
+            throw new Error(`${where}: ${name} belongs to the restart role alone (ADR 013, decision 12)`);
+          }
+          if (kind === "restart" && !pinnedTo(fn.conditions, manifest.operatorModifier)) {
+            throw new Error(`${where}: ${name} must pin its argument to the operator modifier (ADR 013, decision 12)`);
+          }
           if (kind !== "narrow" && STOP_ONLY.has(role.name)) {
-            throw new Error(`${where}: ${name} would let a role that stops restore authority; the DAO restarts (ADR 005, decision 26)`);
+            throw new Error(`${where}: ${name} would let a role that stops restore authority; a motion restarts (ADR 005, decision 26)`);
           }
           if (kind !== "narrow" && fn.wildcarded) throw new Error(`${where}: ${name} needs a condition (OD-38)`);
           const missing = kind === "grant" ? unguarded(fn.conditions, protectedAccounts) : [];
@@ -230,6 +244,19 @@ export function unguarded(conditions: { parent: number; operator: number; compVa
       : [],
   );
   return accounts.filter((account) => !refused.has(zeroPadValue(account, 32).toLowerCase()));
+}
+
+/**
+ * Whether a one-parameter call's condition pins that parameter to `account`:
+ * a root Matches with one child, EqualTo the account.
+ */
+export function pinnedTo(conditions: { parent: number; operator: number; compValue: string }[], account: string) {
+  return (
+    conditions.length === 2 &&
+    conditions[1].parent === 0 &&
+    conditions[1].operator === EQUAL_TO &&
+    conditions[1].compValue.toLowerCase() === zeroPadValue(getAddress(account), 32).toLowerCase()
+  );
 }
 
 /** An entry that only the hosted app can compile has no target, or carries an action or an annotation. */

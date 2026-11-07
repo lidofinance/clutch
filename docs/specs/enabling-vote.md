@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T20:16:37Z
+  at: 2026-11-05T21:13:28Z
 verified: []
 sources:
   - id: s1
@@ -109,6 +109,8 @@ The rehearsal of 2026-10-15 and 2026-10-22 built the vote of ADR 008: two fundin
 
 ### Step 1: with the factory prototype
 
+Done on 2026-11-05: the fork suite passes 74 tests, and the [research note](/research/universal-factory-prototype-2026-11-05.md) records the measures.
+
 The fork prototype of the universal factory ([ADR 013](/adr/013-one-easy-track-factory.md), confirmation) rebuilds the Easy Track part of the vote [s10]:
 
 1. **Harness.** `RehearsalBase` drops the funding registries, the top-up factories and the token-list interfaces. It deploys the prototype with the committee's Safe as its trusted caller, and builds its address book: `execTransactionWithRole` on the four modifiers and the factory's `commit`. The prototype replaces `BudgetFactoryStandIn`.
@@ -119,7 +121,7 @@ The fork prototype of the universal factory ([ADR 013](/adr/013-one-easy-track-f
    - `test_03_ramp_up` replaces the seed and the top-ups with the first tranche and a later tranche vote in another token, such as USDS that the fork gives the Agent. Its budget motion runs through the prototype, with versions. A ceiling motion raises a ceiling twofold, and a second raise within 15 days fails.
    - `test_06_the_payment_rewrite_changes_only_usds` and `test_07_usds_reaches_the_vault_without_the_usds_items` retire, because they test items that no longer exist.
    - New tests run against the live Easy Track: a conflict on one scope, in both orders; disjoint scopes, in any order; the counter that fails a stale motion; a cancel; a restart motion after the switch; and each refusal of the factory.
-   - `test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts` becomes a test of the restart motion, under a new name, and the pages that cite it follow.
+   - `test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts` becomes `test_D4_the_switch_freezes_queued_motions_until_a_restart_motion`, and the pages that cite it follow.
 5. **Measures for EM.** The factory's size against the 24,576-byte limit of EIP-170, the gas per motion and the complexity of the checks, before decision 11 of ADR 013 can apply.
 
 ### Step 2: the full vote, before it starts

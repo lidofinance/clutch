@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T19:22:54Z
+  at: 2026-11-05T21:13:28Z
 verified: []
 sources:
   - id: s1
@@ -262,7 +262,8 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 ## Confirmation
 
 - The probe `test/SingleModifierProbe.t.sol`, on the Asset Safe of the harness as a stand-in for the orders modifier: on one modifier, the pinned membership removal stops the operator, recovery keeps working, the switch cannot be repointed or widened, and the operator cannot restore itself (6 tests, 2026-10-08). Decision 25 replaced the membership removal; the probe's emergency revoke on its own modifier is the stop that stays. The orders account's own test is owed with the orders account.
-- Kit tests of 2026-10-13: the emergency role holds the switch, pinned to the operator modifier, and cannot enable a module again (`test_D4_the_switch_is_the_emergency_role_s_and_pinned`); the switch freezes a queued motion until the owner path enables the modifier again (`test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts`); the compiler refuses a grant or a budget for the emergency role, and every approval of the emergency role is zero (`policy/constellation/compiler/compile.test.ts`).
+- Kit tests of 2026-10-13: the emergency role holds the switch, pinned to the operator modifier, and cannot enable a module again (`test_D4_the_switch_is_the_emergency_role_s_and_pinned`); the compiler refuses a grant or a budget for the emergency role, and every approval of the emergency role is zero (`policy/constellation/compiler/compile.test.ts`).
+- Kit tests of 2026-11-05: the switch freezes a queued motion, and a restart motion enables the operator modifier again (`test_D4_the_switch_freezes_queued_motions_until_a_restart_motion`, which until 2026-11-05 tested the owner path under another name); the restart role enables only the operator modifier, and only the Easy Track executor holds it (`test_D4_the_restart_role_enables_only_the_operator_modifier`).
 
 - INV-001, INV-002, INV-003, INV-004, INV-009, INV-019, INV-021, INV-022, INV-023, INV-026 and INV-027 in the [invariants](/specs/invariants.md).
 - Kit tests: before 2026-10-13, the technical role was the only one that could disable a module, and only the operator modifier [s4]; the emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6]; the Asset Safe has a stand-in for Aragon Voting as its only owner, the pinned singleton, and no fallback handler or guard [s11].

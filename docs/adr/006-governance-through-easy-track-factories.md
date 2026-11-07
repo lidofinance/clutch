@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T19:22:54Z
+  at: 2026-11-05T21:13:28Z
 verified: []
 sources:
   - id: s1
@@ -169,7 +169,7 @@ Since OD-102, a template below means the universal factory's shape that replaced
 
 - INV-004, INV-005, INV-006 and INV-018 in the [invariants](/specs/invariants.md).
 - Kit tests for the governance-role guards [s6]. The factory-path tests ran on the retired toggle factory, so the template factories need their own.
-- `test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts` (2026-10-13): with the operator modifier disabled, a queued motion's enactment fails while exits work, and the same motion enacts after the owner path enables the modifier again.
+- `test_D4_the_switch_freezes_queued_motions_until_a_restart_motion` (2026-10-13; on 2026-11-05 renamed, and changed to restart by motion instead of the owner path): with the operator modifier disabled, a queued motion's enactment fails while exits work, and a restart motion enables the modifier again.
 - For decision 10, a fork test replays the probe that found the gap and shows each step refused, and another refuses every module that the Asset Safe enables on chain. The compiler's own tests refuse a policy without the guard and a manifest that misses a module.
 - Each template factory, when built, needs its own tests for the four audit properties above.
 

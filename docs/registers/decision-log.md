@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T19:22:54Z
+  at: 2026-11-06T04:19:05Z
 verified: []
 sources:
   - id: s1
@@ -79,6 +79,12 @@ sources:
   - id: s23
     resource: "urn:clutch:interview:2026-11-05"
     title: EM's aim of no Aragon vote after launch, EM's ballot on one factory, and EM's answers to the agent's questions of rounds two and three, 2026-11-05; the transcript is not in the repository
+  - id: s24
+    resource: "urn:clutch:interview:2026-11-06"
+    title: EM's decisions on the two questions of the universal factory's prototype, 2026-11-06; the transcript is not in the repository
+  - id: s25
+    resource: "urn:clutch:interview:2026-11-06-confirm"
+    title: EM's confirmation that a token's introduction counts as its first ceiling raise, and the go-ahead to commit and push, 2026-11-06; the transcript is not in the repository
 ---
 
 # Decision log
@@ -88,6 +94,29 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-06 — OD-113: an introduction counts as the first raise
+
+The agent built decision 15 of ADR 013 into the prototype and asked EM to confirm one reading: that a token's introduction counts as its ceilings' first raise, so that the next raise waits 15 days.
+
+> 1. I confirm that a token's introduction counts as it's first ceiling raise
+
+Recorded as:
+
+- (1, OD-113) A token's introduction counts as its ceilings' first raise, so the next raise of either ceiling waits 15 days ([ADR 013](/adr/013-one-easy-track-factory.md), decision 15). [s25]
+
+## 2026-11-06 — OD-113 and OD-114: a new token's ceilings and motions after a revoke
+
+The agent asked two questions in the [research note on the universal factory's prototype](/research/universal-factory-prototype-2026-11-05.md): (1) how a token that is not on the launch list gets its ceilings, because a ceiling of zero cannot rise by motion: a ceiling for every token of the mandate's asset list at deployment, which the agent recommended, a first ceiling by vote, or a first raise from zero up to a fixed figure; (2) whether it is acceptable that the factory's versions do not see the emergency role's revokes, so that a motion created after a revoke may bring the permission back after its objection window, as OD-97 allows.
+
+> Decisions:
+> - ceiling should be set together with token intro
+> - motions after revoke is fine to work, acceptable
+
+Recorded as:
+
+- (1, OD-113) The motion that introduces a token sets the token's ceilings, in the same motion. Decision 13's limit applies after that ([ADR 013](/adr/013-one-easy-track-factory.md), decision 15). The agent reads "token intro" as the motion that first writes a permission for the token; the enabling vote sets the ceilings of the launch tokens.
+- (2, OD-114) A motion created after an emergency revoke may enact, and so bring the permission back after its objection window. The factory's versions do not see the emergency role's revokes ([ADR 013](/adr/013-one-easy-track-factory.md), decision 16). [s24]
 
 ## 2026-11-05 — OD-105 to OD-108, round three: the ceilings' period, insurance, the proceeds and the first tranche
 

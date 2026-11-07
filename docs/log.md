@@ -1,7 +1,16 @@
 # Log
 
+## 2026-11-06
+
+* **Update**: Fixed the onboarding guide's constellation tab, which named the Aragon Agent as the Asset Safe's owner. Aragon Voting is its only owner (OD-73).
+* **Evidence**: Added the restore of a revoked target to the factory prototype (OD-104): a motion scopes again a target that the emergency role revoked as a whole, and the permissions stored under it come back as they were, with nothing written again. The fork suite passes 77 tests.
+* **Decision**: Recorded EM's confirmation of 2026-11-06 that a token's introduction counts as its ceilings' first raise, so the next raise waits 15 days (OD-113; ADR 013, decision 15).
+* **Evidence**: Built decision 15 of ADR 013 (OD-113) into the factory prototype: one operation introduces a token with its first approval list and both of its ceilings, a token is introduced once, and a ceiling that was never set changes only by an introduction. The fork suite passes 76 tests, and seven new mutants are caught.
+* **Decision**: Recorded EM decisions of 2026-11-06, OD-113 and OD-114: the motion that introduces a token sets the token's ceilings, and a motion created after an emergency revoke may still enact (ADR 013, decisions 15 and 16).
+
 ## 2026-11-05
 
+* **Evidence**: Built a prototype of the universal factory and tested it on a fork against the live Easy Track: versions, the motion counter, the shape of an approval list, budgets within their ceilings, the ceiling's twofold limit, the restart and insurance money. Added the restart and insurance-funding roles to the policy, rebuilt step 1 of the enabling-vote rehearsal, and recorded the factory's size and gas for the choice between options A and B.
 * **Decision**: Recorded EM decisions of 2026-11-01 and 2026-11-05, OD-100 to OD-112: one universal Easy Track factory with versions, no Aragon vote after launch except funding tranches and break-glass actions, funding by tranche votes with the first inside the enabling vote, insurance for earnETH, earnUSD and Lido Lend at launch, and only emergency and recovery paying the Aragon Agent (ADR 013, ADR 014).
 * **Update**: Brought the enabling-vote spec, the invariants, the control matrix, the parameters, the runbooks, the roadmap, the LIP and the guide in line with OD-100 to OD-112, and added the research note on Easy Track, Roles and Finance payments.
 

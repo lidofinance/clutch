@@ -223,9 +223,10 @@
   can:
     - "Widen a permission only through a typed [[shape]]. Each shape pins receivers, owners and beneficiaries to the vault, draws a [[budget key]] and writes the emergency exit."
     - "Narrow a permission with a raw write: a revoke, or a complete list that removes entries. A routine removal is such a write (OD-70)."
+    - "Bring back a target that the emergency role revoked as a whole: a restore scopes it again, and the permissions stored under it come back as they were. It writes nothing new (OD-104)."
     - "Derive a new budget key for each new spender, so the policy holds no spare keys."
     - "Keep a [[version]] for each scope that a motion writes. It checks the versions at creation and again at enactment, and the script's last call commits the new versions. Two motions on one scope therefore cannot undo each other (OD-100)."
-    - "Change a [[ceiling]]: lower it at any time, or raise it to at most twice its value, at most once in 15 days (OD-105)."
+    - "Change a [[ceiling]]: lower it at any time, or raise it to at most twice its value, at most once in 15 days (OD-105). The motion that introduces a token sets the token's first ceilings (OD-113)."
     - "Onboard Lido Lend in one motion, once its own contract exists, through its shape for a market that is compatible with Morpho Blue. The same motion adds the emergency exit (OD-49)."
     - "Carry the other motions: budgets, a token for the orders account, the restart, the first-loss burn and the insurance funds (OD-103, OD-104, OD-107)."
   cannot:
@@ -234,11 +235,15 @@
     - "Pay from the treasury. Its address book holds no payment call (INV-037)."
     - "Enact a motion if a version that it names, or the [[motion counter]], changed since its creation. The emergency Safe raises the counter at every stop, and every open motion then fails (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke (OD-09)."
-  numbers: ["one factory for every Clutch motion", "a ceiling's raise: at most twofold, once in 15 days", "size limit: 24,576 bytes (EIP-170), reported by the prototype", "external audit in phase 3"]
+  numbers: ["one factory for every Clutch motion", "a ceiling's raise: at most twofold, once in 15 days", "the prototype: 12,845 of EIP-170's 24,576 bytes", "external audit in phase 3"]
   sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d9", "ADR-013#d10",
     "ADR-013#d11", "ADR-013#d13", "ADR-013#proposed-direction", "ADR-013#consequences", "ADR-007#d41", "ADR-006#d9",
     "ADR-006#d10", "ADR-011#d13", OD-09, OD-36, OD-38, OD-49, OD-70, OD-100, OD-102, OD-103, OD-104, OD-105, OD-107,
-    INV-029, INV-032, INV-033, INV-034, INV-036, INV-037, "lip:part-4", "doc:ROADMAP.md#roadmap"]
+    OD-113, "ADR-013#d15",
+    INV-029, INV-032, INV-033, INV-034, INV-036, INV-037, "lip:part-4", "doc:ROADMAP.md#roadmap",
+    "doc:docs/research/universal-factory-prototype-2026-11-05.md#measures-for-the-choice-between-options-a-and-b",
+    "doc:docs/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06",
+    "doc:docs/research/universal-factory-prototype-2026-11-05.md#the-restore-of-a-revoked-target-built-on-2026-11-06", "test:test_uf_restore_brings_back_a_revoked_target"]
 
 # --- Emergency Safe -----------------------------------------------------------------------------
 - id: emergency-safe
@@ -317,14 +322,15 @@
   what: "A Zodiac [[Roles modifier]], enabled as a module on the Asset Safe. It checks each call of the operator role and of the motion roles against the policy, and runs only what the policy allows, as the Asset Safe."
   controlled_by: "Its owner, the Asset Safe, so in the end the DAO."
   can:
-    - "Carry the operator role, the governance role, the operator's budget keys, and the insurance-funding role that moves insurance money by motion. The insurance-funding role is specified, not built."
+    - "Carry the operator role, the governance role, the operator's budget keys, and the insurance-funding role that moves insurance money by motion. The insurance-funding role may only transfer the vault's tokens to the first-loss Safe; it is tested on a fork."
     - "Refuse any call that the policy does not list. It is [[default-deny]]."
   cannot:
     - "Be replaced without a DAO vote. The safety policy names its address, so the vote also rewrites the safety policy."
   numbers: ["budget period: 30 days"]
   address: "To be deployed"
   sources: ["ADR-005#d6", "ADR-005#proposed-direction", "ADR-014#proposed-direction", "lip:part-1",
-    "test:test_D3_operator_lifecycle", "runbook:Replace the operator modifier"]
+    "test:test_D3_operator_lifecycle", "runbook:Replace the operator modifier",
+    "test:test_insurance_funding_pays_only_the_first_loss_safe", INV-039]
 
 - id: roles-mastercopy
   node: operator-modifier
@@ -378,18 +384,19 @@
   controlled_by: "Held by the Easy Track script executor, so only an enacted motion uses it."
   can:
     - "Write operator permissions for a target that a motion names, under the `operator` key only."
-    - "Set the operator's budgets, with a refill period of at least 30 days."
+    - "Set the operator's budgets, with a refill period of at least 30 days. A budget's key is a launch key, or a key that the universal factory derives for a new spender and that starts with `k:`."
     - "Revoke an operator target or function. The universal factory's narrowing write uses this when a routine removal takes a whole target or function (OD-70)."
   cannot:
     - "Grant or remove a role, or touch the emergency role."
     - "Make the Asset Safe or any of its modules an operator target, the safety modifier included (OD-38). The compiler refuses a policy without this guard."
     - "Grant the operator delegatecall (OD-36)."
-    - "Widen a permission except through a typed shape: a raw write only narrows. This is specified, and the modifier does not check it (INV-034)."
+    - "Widen a permission except through a typed shape: a raw write only narrows. The factory checks this, not the modifier; the factory's prototype passes it on a fork (INV-034)."
   numbers: ["refill period: 30 days or more"]
   sources: ["ADR-006#d5", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7",
     "ADR-013#proposed-direction", "ADR-005#proposed-direction", INV-004, INV-034, OD-36, OD-38,
     "test:test_policyadmin_cannot_grant_operator_the_safety_modifier",
-    "test:test_policyadmin_refuses_every_module_of_the_asset_safe", OD-70]
+    "test:test_policyadmin_refuses_every_module_of_the_asset_safe", OD-70, "test:test_uf_raw_writes_only_narrow",
+    "test:test_uf_widening_fills_the_shape"]
 
 - id: budget-keys
   node: operator-modifier
@@ -418,13 +425,14 @@
   what: "A second Roles modifier on the Asset Safe, for the emergency role and its switch. No guard screens it, so recovery never waits for the vendor. It also carries two roles that motions use: exit-governance and restart."
   controlled_by: "Its owner, the Asset Safe, so in the end the DAO."
   can:
-    - "Carry the emergency role. It has no budget keys. The exit-governance and restart roles are specified, not built (OD-49, OD-104)."
+    - "Carry the emergency role. It has no budget keys. Carry the restart role, which may only enable the operator modifier; it is tested on a fork. The exit-governance role is specified, not built (OD-49, OD-104)."
     - "Keep working after the emergency role's switch disables the operator modifier."
   cannot:
     - "Be disabled by the switch: its pin is exact. If it has a defect, the fix is a DAO vote."
   address: "To be deployed"
   sources: ["ADR-005#d6", "ADR-005#d25", "ADR-005#context", "ADR-005#proposed-direction", "ADR-013#d12", INV-009, OD-49,
-    OD-58, OD-104, "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned"]
+    OD-58, OD-104, "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned", INV-035,
+    "test:test_D4_the_restart_role_enables_only_the_operator_modifier"]
 
 - id: role-emergency
   node: safety-modifier
@@ -450,7 +458,7 @@
   sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d24", "ADR-005#d25", "ADR-005#d26", "ADR-005#proposed-direction",
     "ADR-008#d21", "ADR-008#d23", OD-42, OD-48, OD-49, OD-58, OD-59, OD-67, INV-002, INV-009, INV-027,
     "test:test_D4_emergency_flow", "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned",
-    "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts",
+    "test:test_D4_the_switch_freezes_queued_motions_until_a_restart_motion",
     "test:test_emergency_cannot_give_a_non_zero_approval", "test:test_emergency_can_durably_stop_operator_reapproval",
     OD-60]
 
@@ -472,7 +480,7 @@
   node: safety-modifier
   name: The restart role
   status: new
-  label: specified
+  label: built
   what: "The permission that a restart motion uses on the safety modifier. After the emergency Safe switches the operator off, it lets a motion enable the operator modifier again. No emergency body resumes what it stopped (OD-104)."
   controlled_by: "Held only by the Easy Track script executor, so only an enacted motion uses it. The committee's Safe creates the restart motion."
   can:
@@ -483,7 +491,8 @@
     - "Enact a restart motion from before a new stop. The emergency Safe raises the factory's motion counter at every stop, so the motion fails."
     - "Unpause Easy Track. Only Aragon Voting can."
   sources: ["ADR-013#d10", "ADR-013#d12", "ADR-013#consequences", "ADR-005#d26", "ADR-005#proposed-direction", OD-104,
-    INV-027, INV-035, "runbook:Restart after a stop"]
+    INV-027, INV-035, "runbook:Restart after a stop", "test:test_D4_the_restart_role_enables_only_the_operator_modifier",
+    "test:test_uf_restart_motion_after_the_switch"]
 
 # --- Policy pipeline and repository -------------------------------------------------------------
 - id: constellation
@@ -629,7 +638,7 @@
     - "Receive each tranche from Aragon Finance when its vote executes (OD-106)."
     - "Send a token to the orders account for an order, under the orders budgets. Specified, not built."
     - "Send tokens back to the Aragon Agent, through the emergency role or through the operator's transfer pinned to the Agent. The operator's transfer is specified, not built (OD-108)."
-    - "Send insurance money to the first-loss Safe, only by motion (OD-107). Specified, not built."
+    - "Send insurance money to the first-loss Safe, only by motion (OD-107). Tested on a fork with the factory's prototype."
   cannot:
     - "Take an ERC-721 or ERC-1155 safe transfer, or sign by EIP-1271. It has no [[fallback handler]], on purpose."
     - "Have a guard or a module guard. Recovery never passes through vendor code."
@@ -638,7 +647,8 @@
   address: "To be deployed"
   sources: ["ADR-005#d6", "ADR-005#d12", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20", "ADR-005#context",
     "ADR-005#proposed-direction", "ADR-014#d2", "ADR-014#d7", "ADR-014#d9", INV-001, INV-002, INV-039,
-    "test:test_asset_safe_shape", OD-73, OD-106, OD-107, OD-108, "ADR-005#d28"]
+    "test:test_asset_safe_shape", OD-73, OD-106, OD-107, OD-108, "ADR-005#d28",
+    "test:test_uf_insurance_money_goes_to_the_first_loss_safe"]
 
 - id: safe-contracts
   node: asset-safe

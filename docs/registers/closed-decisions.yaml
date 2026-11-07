@@ -833,3 +833,22 @@
     - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
   adr: [ADR-013#d14]
   see: [/research/easy-track-first-2026-11-05.md]
+
+- id: OD-113
+  question: "How does a token that is not on the launch list get its ceilings?"
+  closed: 2026-11-06
+  log:
+    - "2026-11-06 — OD-113 and OD-114: a new token's ceilings and motions after a revoke"
+    - "2026-11-06 — OD-113: an introduction counts as the first raise"
+  adr: [ADR-013#d15]
+  see: [/research/universal-factory-prototype-2026-11-05.md]
+  refines: [OD-105]
+
+- id: OD-114
+  question: "May a motion created after an emergency revoke still enact, although the factory's versions do not see the revoke?"
+  closed: 2026-11-06
+  log:
+    - "2026-11-06 — OD-113 and OD-114: a new token's ceilings and motions after a revoke"
+  adr: [ADR-013#d16]
+  see: [/research/universal-factory-prototype-2026-11-05.md]
+  refines: [OD-97]

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T19:44:54Z
+  at: 2026-11-06T04:31:16Z
 verified: []
 sources:
   - id: s1
@@ -20,8 +20,8 @@ sources:
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads at block 26092572
   - id: s4
-    resource: "https://github.com/lidofinance/clutch/tree/03efa77c724f7fdde791a902a138090c099add0d/test"
-    title: Kit test suites at 03efa77
+    resource: "https://github.com/lidofinance/clutch/tree/72743fc74aa1f7f0d59cbfdb9dd4812df8469cc3/test"
+    title: Fork test suites at 72743fc
   - id: s5
     resource: "https://github.com/safe-global/safe-smart-account/blob/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/contracts/base/ModuleManager.sol#L94-L108"
     title: Safe v1.5.0 ModuleManager — the module guard is called for every enabled module
@@ -55,6 +55,9 @@ sources:
   - id: s17
     resource: /research/easy-track-first-2026-11-05.md
     title: One Easy Track factory and funding by tranche votes, 2026-11-05 — Easy Track's script permissions, cancel and pause, Roles storage, the two-modifier alternative, Finance payments by Aragon Voting, and TMC-6
+  - id: s18
+    resource: /research/universal-factory-prototype-2026-11-05.md
+    title: The universal factory's prototype on a fork, 2026-11-05 — the tests, the mutants and the measures
 ---
 
 # LIP-XX: Active Treasury Management Vault
@@ -196,7 +199,7 @@ A raw write may only narrow (OD-102). As proposed, it names the scope's current 
 **Versions, not Merkle roots.** Easy Track motions have no order. Two motions that write one scope both pass their checks, and the later enactment wins [s17].
 The factory therefore keeps a version for each scope. It checks the versions at creation and again at enactment, and the script's last call commits the new ones (OD-100, OD-102) [s15].
 A Merkle-root policy would replace the Roles modifiers with new code, so Clutch uses none (OD-100) [s17].
-One write of the whole policy per motion does not scale: the 97 calls of the launch policy take about 6.3 million gas, and EIP-7825 caps a transaction at about 16.8 million [s15].
+One write of the whole policy per motion does not scale: the Asset Safe's launch batch of 99 calls already took about 6.3 million gas in the rehearsal, and EIP-7825 caps a transaction at about 16.8 million [s15].
 
 **One bound, not two modifiers.** An alternative chained a second Roles modifier in front of the first, with bounds that only a vote changes.
 It adds a modifier and a second policy to keep in sync, and each change of a bound becomes a vote.
@@ -554,7 +557,7 @@ The orders account has one modifier (OD-57), so disabling it would also stop rec
 
 If the defect is in the safety modifier itself, the switch cannot help: its pin is exact. Recovery then runs through a DAO vote acting as the Safe's owner: a direct Voting item, about five days (OD-73).
 
-Tested on 2026-10-13 (`test_D4_the_switch_is_the_emergency_role_s_and_pinned`, `test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts`): the operator is refused; the emergency role cannot point the call at another module address or at the safety modifier; it can disable the operator modifier; the operator then stops working while the safety modifier stays enabled and the emergency role still moves assets to the Agent; the emergency role cannot enable the module again; and the owner path restores the operator modifier. A queued motion fails while the modifier is off, and enacts after the owner path restores it.
+Tested on 2026-10-13 (`test_D4_the_switch_is_the_emergency_role_s_and_pinned`): the operator is refused; the emergency role cannot point the call at another module address or at the safety modifier; it can disable the operator modifier; the operator then stops working while the safety modifier stays enabled and the emergency role still moves assets to the Agent; the emergency role cannot enable the module again; and the owner path restores the operator modifier. Tested on 2026-11-05 (`test_D4_the_switch_freezes_queued_motions_until_a_restart_motion`, `test_uf_restart_motion_after_the_switch`): a queued motion fails while the modifier is off, exits still work, and a restart motion enables the modifier again. With the universal factory, the raised counter also fails a motion from before the stop.
 
 **Recovery semantics to state honestly.** Exiting a position and receiving the assets are different events. Where a protocol has no liquidity, the emergency role transfers the receipt token to the Agent, which moves custody without completing the exit. Where a vault settles asynchronously, the role can start the exit and claim later. The target is time-to-initiate, not time-to-receive.
 
@@ -670,7 +673,7 @@ Costs: two policy applications, two sets of role keys, two modules enabled on th
 
 ### Test Cases
 
-59 tests pass against deployed mainnet bytecode at commit 03efa77 of this repository [s4]: 51 on a fork pinned at block 25946643, and the 8 of the enabling-vote rehearsal at block 26249900 [s14]. Nothing has been deployed to mainnet. The [invariants](/specs/invariants.md) map these tests to the invariants they check.
+77 tests pass against deployed mainnet bytecode at commit 72743fc of this repository [s4]: 53 on a fork pinned at block 25946643, and 24 at block 26249900, the 6 of the enabling-vote rehearsal and the 18 of the universal factory's prototype [s14][s18]. Nothing has been deployed.
 
 | Group | n | Covers |
 | --- | --- | --- |
@@ -680,21 +683,23 @@ Costs: two policy applications, two sets of role keys, two modules enabled on th
 | Escalation guards | 8 | Governance cannot change membership, touch the emergency role, grant the operator an administrative target or the safety modifier, reach a module of the Asset Safe, raise a foreign allowance key, grant delegatecall, or set a refill period below 30 days |
 | Budget motions | 2 | A motion cannot shorten the refill period; per-key ceilings are expressible with native conditions |
 | Operator lifecycle | 5 | sUSDS, staking, wstETH and WETH round trips on real contracts; the DAI–USDS converter pays the Safe both ways; the withdrawal queue is refused; receiver pinning enforced; asynchronous vault deposit authorised at the policy layer |
-| Emergency and the switch | 4 | Revoke, zero approval, exit and return to the Agent; WETH unwrapped, staked and sent to the Agent, through WETH's 2,300-gas transfer; the switch is the emergency role's and pinned, and the owner restores the module; the switch freezes queued motions until the DAO restarts |
+| Emergency and the switch | 4 | Revoke, zero approval, exit and return to the Agent; WETH unwrapped, staked and sent to the Agent, through WETH's 2,300-gas transfer; the switch is the emergency role's and pinned, and the owner restores the module; the switch freezes queued motions until a restart motion |
+| The executor's roles | 2 | The restart role enables only the operator modifier, and only the executor holds it; insurance funding pays only the first-loss Safe |
 | Approvals | 4 | An approval spends its spender's key or stays below a fixed ceiling, and zero is free; the emergency role gives no non-zero approval and durably stops the operator's re-approval; one approve scope per token keeps every spender |
 | Budgets | 2 | Consumption, exhaustion, refill; keys of different assets and decimals are independent |
 | Adversarial and launch scope | 3 | The operator cannot widen, reach administration or act as another role; it holds only the `operator` key; out-of-scope venues are refused |
-| Policy shape | 3 | The policy builds; the `operator` key is the only operator key; no out-of-scope target, spender or receiver |
+| Policy shape | 3 | The policy builds; the `operator` key is the only operator key, and the executor's other keys are pinned; no out-of-scope target, spender or receiver |
 | Asset Safe shape | 1 | A stand-in for Aragon Voting is the only owner, threshold one; pinned singleton; no fallback handler, guard or module guard; the Safe owns both modifiers |
 | Known limits recorded as tests | 1 | A single-child match leaves trailing parameters unconstrained |
 | One orders modifier, on a stand-in | 6 | One modifier is enabled; unassigning the operator's role stops it, and recovery survives; the switch is pinned; the operator cannot restore itself; the emergency role revokes on its own modifier; the DAO restores the operator |
 | Funding bootstrap | 1 | The dry-run funding script |
-| Enabling-vote rehearsal | 8 | The vote with the live Aragon Voting, ACL, Finance and Easy Track: a vote that carries the policy cannot start; the vote of approved hashes end to end; the ramp-up; Earn deposits from the Asset Safe; a first-loss burn and a redemption request; the payment rewrite changes only USDS |
-| **Total** | **59** | |
+| Enabling-vote rehearsal | 6 | The vote with the live Aragon Voting, Finance and Easy Track: a vote that carries the policy cannot start; the vote that registers the factory, pays the first tranche and approves the batches, end to end; the ramp-up with a later tranche, a budget motion, a ceiling motion, the switch and a restart motion; Earn deposits from the Asset Safe; the first-loss burn and redemption request; the manifest |
+| The universal factory's prototype | 18 | The address book is the registration; the factory writes the compiler's trees; versions settle a conflict on one scope in both orders, disjoint scopes enact in any order, and the counter fails every open motion; widening only through the shape, raw writes only narrow; budgets within their ceilings; a ceiling rises at most twofold, once in 15 days; a token is introduced once, with both of its ceilings; a revoked target comes back by motion, with what was stored under it; the restart motion; insurance money; the factory's own guards; the measures |
+| **Total** | **77** | |
 
-Reproduce with `forge test` against an archive RPC. The kit forks block 25946643, and the rehearsal block 26249900.
+Reproduce with `forge test` against an archive RPC. The kit forks block 25946643, and the rehearsal and the factory block 26249900.
 
-The rehearsal funds the vault through two funding registries and top-up motions, and it rewrites Easy Track's payment permission. The current design uses neither: Aragon Voting pays each tranche (OD-106). No test covers the universal factory, the `restart` role, a tranche payment, the insurance shapes or the operator's return to the Agent yet. ADR 013 and ADR 014 list the fork tests that they owe [s15][s16].
+The rehearsal's vote follows the current design: it registers the universal factory and pays the first tranche through Finance (OD-102, OD-106). No test covers the factory's other shapes, each shape's emergency exit, the first-loss modifier's insurance roles, the orders account's roles or the operator's return to the Agent yet. ADR 013 and ADR 014 list the fork tests that they owe [s15][s16].
 
 ## Configuration
 

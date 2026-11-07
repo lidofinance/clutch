@@ -72,6 +72,19 @@ export const noneOf =
     })),
   });
 
+/**
+ * A budget key that the universal factory derives for a new spender: "k:",
+ * then the spender, then the token's first ten bytes (ADR 013, decision 9).
+ * Bitmask checks the first two bytes. The roles SDK has no helper for
+ * Bitmask, so this writes the raw condition: two bytes of shift, fifteen of
+ * mask and fifteen of expected value.
+ */
+export const derivedKey = () => ({
+  paramType: ParameterType.Static,
+  operator: Operator.Bitmask,
+  compValue: ("0x" + "0000" + "ffff" + "00".repeat(13) + "6b3a" + "00".repeat(13)) as `0x${string}`,
+});
+
 /** A role or allowance key, encoded as the Zodiac app encodes it: the label as bytes32. */
 export function key(label: string): `0x${string}` {
   if (new TextEncoder().encode(label).length > 32) throw new Error(`key label longer than 32 bytes: ${label}`);

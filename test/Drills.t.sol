@@ -606,8 +606,8 @@ contract Drills is ClutchFixture {
     /// @dev The switch: the emergency role disables the operator modifier,
     ///      with the module argument pinned (ADR 005, decision 25). Recovery
     ///      survives on the safety modifier, which the switch cannot reach.
-    ///      No role enables the modifier again; only the owner path, the DAO,
-    ///      does (decision 26).
+    ///      No emergency body enables the modifier again (decision 26); the
+    ///      owner path can, and so can a restart motion (ADR 013, decision 12).
     function test_D4_the_switch_is_the_emergency_role_s_and_pinned() public {
         bytes memory off = abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles)));
         // the operator does not hold it
@@ -640,11 +640,14 @@ contract Drills is ClutchFixture {
 
     /// @dev The switch also freezes a queued motion: its write goes through
     ///      the disabled operator modifier, so its enactment fails, while
-    ///      exits still work. The owner path enables the modifier again, and
-    ///      that re-arms the same motion, because a motion does not expire. So
-    ///      the DAO's restart cancels the queued motions first (ADR 005,
-    ///      decision 26).
-    function test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts() public {
+    ///      exits still work. A restart motion enables the modifier again,
+    ///      through the Easy Track executor's restart role on the safety
+    ///      modifier (ADR 013, decision 12). A motion does not expire, so the
+    ///      restart would re-arm the queued motion here, where the pass-through
+    ///      stand-in factory has no counter; with the universal factory, the
+    ///      counter that the emergency Safe raises at the stop fails it (INV-033,
+    ///      `test_uf_counter_fails_every_open_motion`).
+    function test_D4_the_switch_freezes_queued_motions_until_a_restart_motion() public {
         Call[] memory add = new Call[](1);
         add[0] = _rc(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(0xBEEF))));
         bytes memory script = EVMScriptLib.buildAsGovernance(roles, GOVERNANCE, add);
@@ -664,11 +667,73 @@ contract Drills is ClutchFixture {
         deal(a.usdc, address(safe), 10e6);
         _em(a.usdc, abi.encodeCall(IERC20.transfer, (address(agent), 1e6)));
 
-        // the owner path enables the modifier again, and the same motion enacts
-        vm.startPrank(principal);
-        SafeExec.execAsOwner(voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
-        vm.stopPrank();
-        easyTrack.enactMotion(id, script);
+        // a restart motion enables the modifier again, after its objection window
+        Call[] memory restart = new Call[](1);
+        restart[0] = Call({to: address(safe), data: abi.encodeCall(ISafe.enableModule, (address(roles)))});
+        bytes memory restartScript = EVMScriptLib.buildAsGovernance(safety, RESTART, restart);
+        vm.prank(operatorSafe);
+        uint256 rid = easyTrack.createMotion(address(factory), restartScript);
+        vm.warp(block.timestamp + 3 days + 1);
+        easyTrack.enactMotion(rid, restartScript);
+        assertTrue(safe.isModuleEnabled(address(roles)), "the restart motion enabled the operator modifier");
+        // the operator acts again: an approval of zero is always allowed
+        _op(a.usdc, _approve(a.earnUsdDepositQueue, 0));
+    }
+
+    /// @dev INV-035: the restart role, which only the Easy Track executor
+    ///      holds, may only enable the operator modifier on the Asset Safe.
+    ///      It cannot enable another module, and no other holder can use it.
+    function test_D4_the_restart_role_enables_only_the_operator_modifier() public {
+        _em(address(safe), abi.encodeCall(ISafe.disableModule, (_prevModule(address(roles)), address(roles))));
+        bytes memory other = abi.encodeCall(ISafe.enableModule, (attacker));
+        vm.prank(address(executor));
+        (bool ok, bytes memory ret) = address(safety).call(
+            abi.encodeCall(IRoles.execTransactionWithRole, (address(safe), 0, other, 0, RESTART, true))
+        );
+        assertFalse(ok, "another module stays off");
+        assertEq(bytes4(ret), CONDITION_VIOLATION, "the modifier refuses another module");
+        bytes memory on = abi.encodeCall(ISafe.enableModule, (address(roles)));
+        address[2] memory others = [operatorSafe, emergencySafe];
+        for (uint256 i = 0; i < others.length; i++) {
+            vm.prank(others[i]);
+            (ok,) = address(safety).call(
+                abi.encodeCall(IRoles.execTransactionWithRole, (address(safe), 0, on, 0, RESTART, true))
+            );
+            assertFalse(ok, "only the executor holds the restart role");
+        }
+        vm.prank(address(executor));
+        safety.execTransactionWithRole(address(safe), 0, on, 0, RESTART, true);
+        assertTrue(safe.isModuleEnabled(address(roles)), "the executor's restart");
+    }
+
+    /// @dev INV-039 and ADR 014, decision 7: the insurance-funding role, which
+    ///      only the Easy Track executor holds, moves a token from the Asset
+    ///      Safe to the first-loss Safe and to no other receiver.
+    function test_insurance_funding_pays_only_the_first_loss_safe() public {
+        deal(a.usdc, address(safe), 10e6);
+        vm.prank(address(executor));
+        roles.execTransactionWithRole(a.usdc, 0, abi.encodeCall(IERC20.transfer, (firstLossSafe, 4e6)), 0, INSURANCE_FUNDING, true);
+        assertEq(IERC20(a.usdc).balanceOf(firstLossSafe), 4e6, "insurance money reached the first-loss Safe");
+        address[2] memory receivers = [address(agent), attacker];
+        for (uint256 i = 0; i < receivers.length; i++) {
+            vm.prank(address(executor));
+            (bool ok, bytes memory ret) = address(roles).call(
+                abi.encodeCall(
+                    IRoles.execTransactionWithRole,
+                    (a.usdc, 0, abi.encodeCall(IERC20.transfer, (receivers[i], 1e6)), 0, INSURANCE_FUNDING, true)
+                )
+            );
+            assertFalse(ok, "no other receiver");
+            assertEq(bytes4(ret), CONDITION_VIOLATION, "the modifier refuses it");
+        }
+        vm.prank(operatorSafe);
+        (bool okOp,) = address(roles).call(
+            abi.encodeCall(
+                IRoles.execTransactionWithRole,
+                (a.usdc, 0, abi.encodeCall(IERC20.transfer, (firstLossSafe, 1e6)), 0, INSURANCE_FUNDING, true)
+            )
+        );
+        assertFalse(okOp, "the committee's Safe does not hold the role");
     }
 
     // ------------------------------------------------------------------
