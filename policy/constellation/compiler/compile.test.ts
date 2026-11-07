@@ -5,6 +5,7 @@ import path from "node:path";
 import { id } from "ethers";
 import { Clearance } from "zodiac-roles-sdk";
 import { checkProtected, compileManifest, refuseHosted, render, unguarded } from "./compile";
+import type { Artifact } from "./compile";
 
 const ROOT = path.resolve(import.meta.dir, "..");
 const MANIFEST = path.join(ROOT, "manifests/fork-25946643.json");
@@ -109,7 +110,7 @@ test("the compiler refuses access to every function of the Asset Safe", () => {
   const modifiers = structuredClone(artifact.modifiers);
   const emergency = modifiers.flatMap((m) => m.roles).find((r) => r.name === "emergency")!;
   emergency.targets.find((t) => t.address === manifest.assetSafe)!.clearance = Clearance.Target;
-  expect(() => checkProtected(modifiers, manifest)).toThrow(/may not call every function of the Asset Safe/);
+  expect(() => checkProtected(modifiers, manifest)).toThrow(/may not call every function of a vault Safe/);
 });
 
 // ADR 005, decisions 25 and 26: the emergency role holds the switch, and no
@@ -198,7 +199,10 @@ test("a budget motion may set a launch key or a derived key, and no other", () =
   const branches = setAllowance.conditions.filter((n) => n.parent === keyParam);
   const derived = branches.filter((n) => n.operator === BITMASK);
   expect(derived.map((n) => n.compValue as string)).toEqual(["0x0000ffff" + "00".repeat(13) + "6b3a" + "00".repeat(13)]);
-  expect(branches.filter((n) => n.operator === EQUAL_TO).length).toBe(3);
+  // Every launch key of the operator modifier: the three venue keys and the six orders budgets (ADR 007, decision 18).
+  const operatorModifier = artifact.modifiers.find((m) => m.ref === "operator_modifier")!;
+  expect(branches.filter((n) => n.operator === EQUAL_TO).length).toBe(operatorModifier.allowances.length);
+  expect(operatorModifier.allowances.length).toBe(9);
 });
 
 // ADR 014, decision 7: insurance money moves only to the first-loss Safe.
@@ -211,5 +215,124 @@ test("the insurance-funding role transfers only to the first-loss Safe", () => {
     expect(target.functions.map((f) => f.selector)).toEqual([TRANSFER]);
     const pinned = target.functions[0].conditions.filter((n) => n.operator === EQUAL_TO).map((n) => n.compValue.toLowerCase());
     expect(pinned).toEqual([pad(manifest.firstLossSafe)]);
+  }
+});
+
+// ADR 007: the orders account. The kit's manifest names no orders modifier, so these checks read the committed
+// rehearsal artifact, which CI compares with a fresh compile.
+const REHEARSAL = JSON.parse(
+  readFileSync(path.join(ROOT, "artifacts/rehearsal-26249900.json"), "utf8"),
+) as Artifact;
+const ORDER_SIGNER = "0x23dA9AdE38E4477b23770DeD512fD37b12381FAB";
+const ORDER = "(address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32)";
+const SIGN_ORDER = id(`signOrder(${ORDER},uint32,uint256)`).slice(0, 10);
+const UNSIGN_ORDER = id(`unsignOrder(${ORDER})`).slice(0, 10);
+const ordersRole = (name: string) =>
+  REHEARSAL.modifiers.find((m) => m.ref === "orders_modifier")!.roles.find((r) => r.name === name)!;
+const signOrderOf = (name: string) =>
+  ordersRole(name).targets.find((t) => t.address === ORDER_SIGNER)!.functions.find((f) => f.selector === SIGN_ORDER)!;
+
+test("the rehearsal artifact passes the checks, the orders account included", () => {
+  expect(() => checkProtected(REHEARSAL.modifiers, REHEARSAL.manifest)).not.toThrow();
+});
+
+test("every delegatecall is the orders account's call of the order signer", () => {
+  const delegatecalls = REHEARSAL.modifiers.flatMap((m) =>
+    m.roles.flatMap((r) =>
+      r.targets.flatMap((t) => t.functions.filter((f) => (f.executionOptions & 2) !== 0).map((f) => ({ m: m.ref, t: t.address, f }))),
+    ),
+  );
+  expect(delegatecalls.length).toBe(4);
+  for (const d of delegatecalls) {
+    expect(d.m).toBe("orders_modifier");
+    expect(d.t).toBe(ORDER_SIGNER);
+    expect([SIGN_ORDER, UNSIGN_ORDER]).toContain(d.f.selector);
+  }
+});
+
+test("operator orders pay the Asset Safe for 90 days at most; recovery orders pay the Agent for 1 day at most", () => {
+  const receiverAndLife = (name: string) => {
+    const f = signOrderOf(name);
+    const order = f.conditions.findIndex((n, i) => i !== 0 && n.parent === 0);
+    const fields = f.conditions.flatMap((n, i) => (i !== order && n.parent === order ? [i] : []));
+    const life = f.conditions.filter((n, i) => i !== 0 && n.parent === 0)[1];
+    return { receiver: f.conditions[fields[2]], life };
+  };
+  const operator = receiverAndLife("operator");
+  expect(operator.receiver.operator).toBe(EQUAL_TO);
+  expect(operator.receiver.compValue).toBe(pad(REHEARSAL.manifest.assetSafe));
+  expect(operator.life.operator).toBe(LESS_THAN);
+  expect(BigInt(operator.life.compValue)).toBe(90n * 86400n + 1n);
+  const recovery = receiverAndLife("emergency");
+  expect(recovery.receiver.compValue).toBe(pad(REHEARSAL.manifest.agent));
+  expect(BigInt(recovery.life.compValue)).toBe(86400n + 1n);
+});
+
+test("the compiler refuses a delegatecall to anything but the order signer", () => {
+  const modifiers = structuredClone(REHEARSAL.modifiers);
+  const operator = modifiers.find((m) => m.ref === "orders_modifier")!.roles.find((r) => r.name === "operator")!;
+  operator.targets.find((t) => t.functions.some((f) => f.signature?.startsWith("transfer")))!.functions[0].executionOptions = 2;
+  expect(() => checkProtected(modifiers, REHEARSAL.manifest)).toThrow(/only the orders account may delegatecall/);
+});
+
+test("the compiler refuses the order signer's delegatecall from the Asset Safe", () => {
+  const modifiers = structuredClone(REHEARSAL.modifiers);
+  const signer = structuredClone(ordersRole("operator").targets.find((t) => t.address === ORDER_SIGNER)!);
+  modifiers.find((m) => m.ref === "operator_modifier")!.roles.find((r) => r.name === "operator")!.targets.push(signer);
+  expect(() => checkProtected(modifiers, REHEARSAL.manifest)).toThrow(/only the orders account may delegatecall/);
+});
+
+test("the compiler refuses any call on the orders account itself", () => {
+  const modifiers = structuredClone(REHEARSAL.modifiers);
+  const operator = modifiers.find((m) => m.ref === "orders_modifier")!.roles.find((r) => r.name === "operator")!;
+  const target = structuredClone(operator.targets.find((t) => t.functions.some((f) => f.signature?.startsWith("transfer")))!);
+  target.address = REHEARSAL.manifest.ordersAccount;
+  operator.targets.push(target);
+  expect(() => checkProtected(modifiers, REHEARSAL.manifest)).toThrow(/is not allowed on a vault Safe or one of its modules/);
+});
+
+test("the orders account's emergency role only removes authority on the orders modifier", () => {
+  const modifiers = structuredClone(REHEARSAL.modifiers);
+  const emergency = modifiers.find((m) => m.ref === "orders_modifier")!.roles.find((r) => r.name === "emergency")!;
+  const onModifier = emergency.targets.find((t) => t.address === REHEARSAL.manifest.ordersModifier)!;
+  expect(onModifier.functions.map((f) => f.signature).sort()).toEqual(
+    ["revokeFunction(bytes32,address,bytes4)", "revokeTarget(bytes32,address)"],
+  );
+  onModifier.functions.push({ ...onModifier.functions[0], selector: id("scopeTarget(bytes32,address)").slice(0, 10) as `0x${string}`, signature: "scopeTarget(bytes32,address)" });
+  expect(() => checkProtected(modifiers, REHEARSAL.manifest)).toThrow(/would let a role that stops restore authority/);
+});
+
+test("every governance grant also refuses the orders account and its modifier", () => {
+  const scopeTarget = grant(REHEARSAL.modifiers, "scopeTarget(bytes32,address)");
+  const { ordersAccount, ordersModifier } = REHEARSAL.manifest as Record<string, string>;
+  expect(unguarded(scopeTarget.conditions, [ordersAccount, ordersModifier])).toEqual([]);
+});
+
+// A missing pinned address would leave a transfer open, so the constellation refuses the manifest.
+test("the constellation refuses a manifest that misses a pinned address", async () => {
+  const { checkManifest } = await import("../constellation/addresses");
+  const complete = JSON.parse(readFileSync(MANIFEST, "utf8"));
+  expect(() => checkManifest(complete)).not.toThrow();
+  for (const field of ["firstLossSafe", "ordersAccount", "agent"]) {
+    const { [field]: _missing, ...partial } = complete;
+    expect(() => checkManifest(partial)).toThrow(new RegExp(`must name ${field}`));
+  }
+  expect(() => checkManifest({ ...complete, ordersModifier: "orders" })).toThrow(/ordersModifier must be an address/);
+});
+
+// ADR 007, decision 43 (OD-116): no signed fee. The order's own fee field is pinned to zero for both roles, and so
+// is the signer's fee bound, which alone would let the fee reach 1 wei.
+test("every signer order signs no fee", () => {
+  for (const name of ["operator", "emergency"]) {
+    const f = signOrderOf(name);
+    const params = f.conditions.flatMap((n, i) => (i !== 0 && n.parent === 0 ? [i] : []));
+    const fields = f.conditions.flatMap((n, i) => (i !== params[0] && n.parent === params[0] ? [i] : []));
+    expect(fields.length).toBe(12);
+    const fee = f.conditions[fields[7]];
+    expect(fee.operator).toBe(EQUAL_TO);
+    expect(BigInt(fee.compValue)).toBe(0n);
+    const bound = f.conditions[params[2]];
+    expect(bound.operator).toBe(EQUAL_TO);
+    expect(BigInt(bound.compValue)).toBe(0n);
   }
 });

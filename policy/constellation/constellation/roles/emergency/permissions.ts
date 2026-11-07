@@ -6,6 +6,8 @@
 // Changed for Clutch on 2026-10-13: the emergency role holds the switch that
 // the technical role held (ADR 005, decision 25).
 // Changed for Clutch on 2026-10-22: LDO left the launch scope (OD-91).
+// Changed for Clutch on 2026-11-07: the emergency role may send assets to the
+// orders account for recovery orders (ADR 007, decision 19).
 import { anyOf, c, call, callWithValue, key, unique } from "../../lib";
 import {
   DAI,
@@ -21,6 +23,7 @@ import {
   WSTETH,
 } from "../../addresses";
 import { APPROVALS } from "../operator/permissions";
+import { RECOVERY_SELL } from "../../orders";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -74,6 +77,13 @@ export default [
   // whose value depends on that list at call time, so it stays open.
   call(manifest.assetSafe, "disableModule(address,address)", undefined, manifest.operatorModifier),
 
-  // Return to the treasury: every transfer is pinned to the Agent.
-  ...RETURNABLE.map((token) => call(token, "transfer(address,uint256)", manifest.agent)),
+  // Return to the treasury: every transfer is pinned to the Agent. An asset that a recovery order can sell
+  // may also go to the orders account, whose recovery orders pay the Agent (ADR 007, decision 19).
+  ...RETURNABLE.map((token) =>
+    call(
+      token,
+      "transfer(address,uint256)",
+      RECOVERY_SELL.includes(token) ? anyOf([manifest.agent, manifest.ordersAccount]) : manifest.agent,
+    ),
+  ),
 ] satisfies Permissions;

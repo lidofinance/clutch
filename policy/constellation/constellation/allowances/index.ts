@@ -24,6 +24,17 @@ export const earn_usd_deposit = budget("earn_usd_deposit", 500n * 10n ** 6n);
 /** wstETH approved to the earnETH deposit queue. */
 export const earn_eth_deposit_wsteth = budget("earn_eth_deposit_wsteth", 10n ** 18n);
 
+/**
+ * The orders budgets: what the operator sends to the orders account for its orders, one key per order token
+ * (ADR 007, decision 18). The transfer spends the key, because the orders account can sell all it holds.
+ */
+export const orders_steth = budget("orders_steth", 10n * 10n ** 18n);
+export const orders_wsteth = budget("orders_wsteth", 10n * 10n ** 18n);
+export const orders_weth = budget("orders_weth", 10n * 10n ** 18n);
+export const orders_usdc = budget("orders_usdc", 10_000n * 10n ** 6n);
+export const orders_usdt = budget("orders_usdt", 10_000n * 10n ** 6n);
+export const orders_usds = budget("orders_usds", 10_000n * 10n ** 18n);
+
 function budget(label: string, perMonth: bigint) {
   return {
     key: label,

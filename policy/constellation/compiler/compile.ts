@@ -12,8 +12,10 @@
  * cannot verify it (ADR 004, decision 11). It also refuses a policy that lets
  * a role reach the Asset Safe or one of its modules beyond a fixed set of
  * calls (OD-38), or lets the emergency role restore what it stopped (ADR 005,
- * decision 26). Its output is deterministic, so CI can compare the committed
- * artifact with a fresh compile.
+ * decision 26). The orders account and its modifier get the same protection,
+ * and the only delegatecall that a policy may grant is the orders account's
+ * call of CoW's order signer (ADR 007, decision 41). Its output is
+ * deterministic, so CI can compare the committed artifact with a fresh compile.
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -177,15 +179,34 @@ const STOP_ONLY = new Set(["emergency"]);
 /** The only role that may hold a `restart` call. */
 const RESTART_ROLE = "restart";
 
+/** No role may call the orders account itself: it is administered only by the DAO's own path. */
+const ON_ORDERS_ACCOUNT = new Map<string, string>();
+
+/**
+ * CoW's order signer, which runs only by delegatecall (ADR 007; OD-96), and the two functions that a role may
+ * delegatecall on it: sign and unsign an order. Every other delegatecall is refused, and so is this one from
+ * any account but the orders account, because a delegatecall runs foreign code in the Safe's own storage (OD-36).
+ */
+const ORDER_SIGNER = getAddress("0x23dA9AdE38E4477b23770DeD512fD37b12381FAB");
+const SIGNER_FUNCTIONS = new Set([
+  selector("signOrder((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32),uint32,uint256)"),
+  selector("unsignOrder((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32))"),
+]);
+const DELEGATECALL = 2;
+
 /**
  * Refuses a policy in which a role reaches the Asset Safe or one of its
  * modules beyond the calls above, grants a permission without refusing every
  * one of them as the administered target, or lets a role that stops make
  * anything but a `narrow` call there. The manifest's `modules` must list
- * every compiled modifier that acts for the Asset Safe (OD-38).
+ * every compiled modifier that acts for the Asset Safe (OD-38). The orders
+ * account and its modifier, where the manifest names them, are protected the
+ * same way, and no role may call the orders account itself.
  */
 export function checkProtected(modifiers: Artifact["modifiers"], manifest: Record<string, any>) {
   const safe = getAddress(manifest.assetSafe);
+  const ordersAccount = manifest.ordersModifier ? getAddress(manifest.ordersAccount) : null;
+  const ordersModifier = manifest.ordersModifier ? getAddress(manifest.ordersModifier) : null;
   if (!Array.isArray(manifest.modules) || manifest.modules.length === 0) {
     throw new Error("the manifest must list every module of the Asset Safe in `modules` (OD-38)");
   }
@@ -195,21 +216,34 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
     if (m.avatar === safe && !modules.includes(m.address)) {
       throw new Error(`the manifest's modules must list ${m.ref} ${m.address}, a module of the Asset Safe (OD-38)`);
     }
+    if (ordersAccount !== null && m.avatar === ordersAccount && m.address !== ordersModifier) {
+      throw new Error(`${m.ref} ${m.address} acts for the orders account, but the manifest's orders modifier is ${ordersModifier}`);
+    }
   }
-  const protectedAccounts = [safe, ...modules];
+  const protectedAccounts = [safe, ...modules, ...(ordersAccount !== null ? [ordersAccount, ordersModifier!] : [])];
   for (const m of modifiers) {
     for (const role of m.roles) {
       for (const target of role.targets) {
-        const allowed = target.address === safe ? ON_ASSET_SAFE : modules.includes(target.address) ? ON_MODULE : null;
+        refuseDelegatecall(m, role.name, target, ordersAccount);
+        const allowed =
+          target.address === safe
+            ? ON_ASSET_SAFE
+            : modules.includes(target.address)
+              ? ON_MODULE
+              : target.address === ordersAccount
+                ? ON_ORDERS_ACCOUNT
+                : target.address === ordersModifier
+                  ? ON_MODULE
+                  : null;
         if (!allowed) continue;
         const where = `${m.ref}.${role.name} on ${target.name ?? target.address}`;
         if (target.clearance !== Clearance.Function) {
-          throw new Error(`${where}: a role may not call every function of the Asset Safe or of one of its modules (OD-38)`);
+          throw new Error(`${where}: a role may not call every function of a vault Safe or of one of its modules (OD-38)`);
         }
         for (const fn of target.functions) {
           const kind = allowed.get(fn.selector);
           const name = fn.signature ?? fn.selector;
-          if (!kind) throw new Error(`${where}: ${name} is not allowed on the Asset Safe or one of its modules (OD-38)`);
+          if (!kind) throw new Error(`${where}: ${name} is not allowed on a vault Safe or one of its modules (OD-38)`);
           if (kind === "restart" && role.name !== RESTART_ROLE) {
             throw new Error(`${where}: ${name} belongs to the restart role alone (ADR 013, decision 12)`);
           }
@@ -226,6 +260,30 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
           }
         }
       }
+    }
+  }
+}
+
+/**
+ * Refuses a delegatecall anywhere but the orders account's call of the order signer's sign and unsign
+ * functions (OD-36; ADR 007, decision 41), and a whole-target clearance that allows delegatecall.
+ */
+export function refuseDelegatecall(
+  m: { ref: string; avatar: string },
+  role: string,
+  target: { address: string; name: string | null; clearance: number; executionOptions: number; functions: { selector: string; signature: string | null; executionOptions: number }[] },
+  ordersAccount: string | null,
+) {
+  const where = `${m.ref}.${role} on ${target.name ?? target.address}`;
+  if (target.clearance === Clearance.Target && (target.executionOptions & DELEGATECALL) !== 0) {
+    throw new Error(`${where}: a whole-target clearance may not allow delegatecall (OD-36)`);
+  }
+  for (const fn of target.functions) {
+    if ((fn.executionOptions & DELEGATECALL) === 0) continue;
+    const name = fn.signature ?? fn.selector;
+    const signer = target.address === ORDER_SIGNER && SIGNER_FUNCTIONS.has(fn.selector);
+    if (!signer || ordersAccount === null || m.avatar !== ordersAccount) {
+      throw new Error(`${where}: ${name} delegatecalls, and only the orders account may delegatecall, to sign or unsign a CoW order (OD-36; ADR 007, decision 41)`);
     }
   }
 }
@@ -284,7 +342,9 @@ export async function compileManifest(manifestFile: string) {
   const manifestPath = path.resolve(manifestFile);
   process.env.CLUTCH_MANIFEST = manifestPath;
   await import(path.join(ROOT, ".lib/globals.ts"));
-  const { default: _unused, ...nodes } = await import(path.join(ROOT, "constellation/index.ts"));
+  const { default: _unused, ...all } = await import(path.join(ROOT, "constellation/index.ts"));
+  // A node that the manifest does not deploy, such as the orders modifier in the kit, is exported as undefined.
+  const nodes = Object.fromEntries(Object.entries(all).filter(([, node]) => node !== undefined)) as Record<string, Node>;
   const { NAMES } = await import(path.join(ROOT, "constellation/addresses.ts"));
   const names = Object.fromEntries(Object.entries(NAMES as Record<string, string>).map(([k, v]) => [getAddress(k), v]));
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));

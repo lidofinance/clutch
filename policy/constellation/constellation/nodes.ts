@@ -16,3 +16,4 @@ const eth = constellation({
 
 export const operatorRolesNode = eth.roles["Clutch operator modifier"];
 export const safetyRolesNode = eth.roles["Clutch safety modifier"];
+export const ordersRolesNode = eth.roles["Clutch orders modifier"];

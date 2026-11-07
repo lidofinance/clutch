@@ -114,6 +114,12 @@ contract DeployDryRun is Broadcast {
 
         vm.stopBroadcast();
 
+        // Receivers that the dry run does not deploy: the first-loss Safe (ADR 014) and the orders account
+        // (ADR 007). No one holds a key for these addresses, so a transfer pinned to one pays nobody who can
+        // take it. The policy compiler refuses a manifest without them.
+        address firstLossStandin = address(uint160(uint256(keccak256("clutch dry run: first-loss Safe"))));
+        address ordersStandin = address(uint160(uint256(keccak256("clutch dry run: orders account"))));
+
         // --- manifest, in the format the policy compiler reads -------------
         string memory m = string.concat(
             '{"network":"dryrun-mainnet","chainId":1,"voting":"',
@@ -140,6 +146,10 @@ contract DeployDryRun is Broadcast {
             vm.toString(emergencyStandin),
             '","easyTrackExecutor":"',
             vm.toString(address(executor_)),
+            '","firstLossSafe":"',
+            vm.toString(firstLossStandin),
+            '","ordersAccount":"',
+            vm.toString(ordersStandin),
             '","easyTrack":"',
             vm.toString(address(easyTrack)),
             '","passThroughFactory":"',

@@ -261,7 +261,9 @@ abstract contract RehearsalBase is Test {
         vm.serializeAddress(o, "operatorSafe", Mainnet.COMMITTEE_SAFE);
         vm.serializeAddress(o, "emergencySafe", address(emergency));
         vm.serializeAddress(o, "easyTrackExecutor", Mainnet.ET_EXECUTOR);
-        return vm.serializeAddress(o, "firstLossSafe", address(firstLoss));
+        vm.serializeAddress(o, "firstLossSafe", address(firstLoss));
+        vm.serializeAddress(o, "ordersAccount", address(orders));
+        return vm.serializeAddress(o, "ordersModifier", address(ordersMod));
     }
 
     function _checkManifest() internal view {
@@ -274,6 +276,8 @@ abstract contract RehearsalBase is Test {
         assertEq(vm.parseJsonAddress(m, ".emergencySafe"), address(emergency), "manifest: emergency Safe");
         assertEq(vm.parseJsonAddress(m, ".easyTrackExecutor"), Mainnet.ET_EXECUTOR, "manifest: executor");
         assertEq(vm.parseJsonAddress(m, ".firstLossSafe"), address(firstLoss), "manifest: first-loss Safe");
+        assertEq(vm.parseJsonAddress(m, ".ordersAccount"), address(orders), "manifest: orders account");
+        assertEq(vm.parseJsonAddress(m, ".ordersModifier"), address(ordersMod), "manifest: orders modifier");
     }
 
     function _cold(address[] memory accounts) internal {

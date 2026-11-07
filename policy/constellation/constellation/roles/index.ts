@@ -9,3 +9,6 @@ export * as emergency from "./emergency";
 // insurance-funding roles (ADR 013, decision 12; ADR 014, decision 7).
 export * as restart from "./restart";
 export * as insuranceFunding from "./insurance-funding";
+// Added for Clutch on 2026-11-07: the roles of the orders account (ADR 007, decision 30).
+export * as ordersOperator from "./orders-operator";
+export * as ordersEmergency from "./orders-emergency";
