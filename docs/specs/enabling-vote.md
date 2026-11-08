@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T21:13:28Z
+  at: 2026-11-07T18:35:46Z
 verified: []
 sources:
   - id: s1
@@ -57,7 +57,7 @@ Aragon Voting stores the whole script when a vote starts. With the Safe batches 
 - **Figures.** An attested computation sets every budget, every ceiling, and the first tranche's tokens and amounts [s6][s10][s11].
 - **Decisions.** Every OD is decided except OD-65, which closes at the fifth signer's Snapshot [s1].
 - **Deployments.** They need no authority. Clutch's script creates the Asset Safe, the orders account and the first-loss Safe with Aragon Voting as only owner, and the emergency Safe with its signers, on Safe v1.5.0; the orders account runs it only if its fork test passes. It deploys the four Roles modifiers as minimal proxies through the Zodiac module proxy factory, and the universal factory with the committee's Safe as its trusted caller (OD-80, OD-102) [s2][s10].
-- **Checks.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 behind a Roles modifier [s4]. The external audit of the universal factory and the order signer (OD-96). The check of Safe's releases, advisories and bug-bounty records [s7]. The policy compiled for mainnet from the reviewed constellation. The factory's shapes against the mandate's protocols and the committee's named pipeline. The factory's versions, seeded from the compiled artifact. The Safe batches, published with one command that computes each hash again. A rehearsal of the vote and the batches at a recent block, with the first tranche [s9][s10].
+- **Checks.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 behind a Roles modifier [s4], which passed on 2026-11-07 at block 26249900 and run again at a recent block ([research note](/research/orders-account-fork-tests-2026-11-07.md)). The external audit of the universal factory and the order signer (OD-96). The check of Safe's releases, advisories and bug-bounty records [s7]. The policy compiled for mainnet from the reviewed constellation. The factory's shapes against the mandate's protocols and the committee's named pipeline. The factory's versions, seeded from the compiled artifact. The Safe batches, published with one command that computes each hash again. A rehearsal of the vote and the batches at a recent block, with the first tranche [s9][s10].
 
 ## The vote
 

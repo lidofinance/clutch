@@ -4,9 +4,19 @@
 // Changed for Clutch on 2026-10-13: the technical role merged into the
 // emergency role (ADR 005, decision 25).
 import { manifest } from "./addresses";
-import { operatorRolesNode, safetyRolesNode } from "./nodes";
-import { emergency, governance, insuranceFunding, operator, restart } from "./roles";
-import { earn_eth_deposit_wsteth, earn_usd_deposit, sky_savings_usds } from "./allowances";
+import { operatorRolesNode, ordersRolesNode, safetyRolesNode } from "./nodes";
+import { emergency, governance, insuranceFunding, operator, ordersEmergency, ordersOperator, restart } from "./roles";
+import {
+  earn_eth_deposit_wsteth,
+  earn_usd_deposit,
+  orders_steth,
+  orders_usdc,
+  orders_usds,
+  orders_usdt,
+  orders_weth,
+  orders_wsteth,
+  sky_savings_usds,
+} from "./allowances";
 
 /**
  * The operator modifier: the operator role, the governance role that
@@ -19,7 +29,17 @@ export const operator_modifier = operatorRolesNode({
   avatar: manifest.assetSafe as `0x${string}`,
   target: manifest.assetSafe as `0x${string}`,
   roles: { operator, governance, "insurance-funding": insuranceFunding },
-  allowances: { sky_savings_usds, earn_usd_deposit, earn_eth_deposit_wsteth },
+  allowances: {
+    sky_savings_usds,
+    earn_usd_deposit,
+    earn_eth_deposit_wsteth,
+    orders_steth,
+    orders_wsteth,
+    orders_weth,
+    orders_usdc,
+    orders_usdt,
+    orders_usds,
+  },
 });
 
 /**
@@ -35,3 +55,18 @@ export const safety_modifier = safetyRolesNode({
   target: manifest.assetSafe as `0x${string}`,
   roles: { emergency, restart },
 });
+
+/**
+ * The orders modifier: the operator and emergency roles on the orders account (ADR 007, decision 30). The
+ * orders account is its owner, avatar and target, so a permitted call executes as the orders account. Only a
+ * manifest that names the modifier compiles it: the kit deploys no orders account.
+ */
+export const orders_modifier = manifest.ordersModifier
+  ? ordersRolesNode({
+      address: manifest.ordersModifier as `0x${string}`,
+      owner: manifest.ordersAccount as `0x${string}`,
+      avatar: manifest.ordersAccount as `0x${string}`,
+      target: manifest.ordersAccount as `0x${string}`,
+      roles: { operator: ordersOperator, emergency: ordersEmergency },
+    })
+  : undefined;

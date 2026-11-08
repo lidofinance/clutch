@@ -1,5 +1,6 @@
 [profile.default]
-gas_limit = 100_000_000
+# Room for the rehearsal's measure of a vote that stores the whole policy, far above EIP-7825's cap.
+gas_limit = 400_000_000
 src = "src"
 out = "out"
 libs = ["lib"]

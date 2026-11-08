@@ -1,5 +1,12 @@
 # Log
 
+## 2026-11-07
+
+* **Decision**: Recorded EM's decision of 2026-11-07, OD-116: an order of the orders account signs no fee; the policy pins the order's own fee field to zero, and the signer's fee bound stays zero (ADR 007, decision 43).
+* **Decision**: Recorded EM's decision of 2026-11-07, OD-115: every order of the orders account carries zero app data, so no hooks and no partner fee (ADR 007, decision 42). Opened OD-116 on the signed fee, with the research and the agent's recommendation.
+* **Update**: The policy now refuses a manifest that misses an address that a permission pins, which would have left a transfer open. The mainnet dry run's manifest names stand-ins for the first-loss Safe and the orders account.
+* **Evidence**: Built the orders account's policy and ran the fork tests that ADR 007 owed: CoW's order signer by delegatecall and TWAP orders through ComposableCoW, from a Safe v1.5.0 behind the orders modifier, settled through CoW's settlement contract and paying their pinned receivers; recovery orders, cancels and the emergency revoke. CoW's fallback handler works on Safe v1.5.0. The fork suite passes 84 tests.
+
 ## 2026-11-06
 
 * **Update**: Fixed the onboarding guide's constellation tab, which named the Aragon Agent as the Asset Safe's owner. Aragon Voting is its only owner (OD-73).

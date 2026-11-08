@@ -90,6 +90,8 @@ abstract contract ClutchFixture is Test {
     address internal emergencySafe = makeAddr("emergency-safe-standin");
     // The only receiver of insurance money (ADR 014, decision 7); the kit deploys no first-loss Safe.
     address internal firstLossSafe = makeAddr("first-loss-safe-standin");
+    // Where the operator funds its CoW orders (ADR 007, decision 18); the kit deploys no orders account.
+    address internal ordersAccount = makeAddr("orders-account-standin");
     address internal whale = makeAddr("ldo-whale"); // objection whale
     address internal attacker = makeAddr("attacker");
     address internal principal;
@@ -189,6 +191,7 @@ abstract contract ClutchFixture is Test {
         assertEq(vm.parseJsonAddress(m, ".emergencySafe"), a.emergency, "manifest: emergency Safe");
         assertEq(vm.parseJsonAddress(m, ".easyTrackExecutor"), a.governance, "manifest: script executor");
         assertEq(vm.parseJsonAddress(m, ".firstLossSafe"), firstLossSafe, "manifest: first-loss Safe");
+        assertEq(vm.parseJsonAddress(m, ".ordersAccount"), ordersAccount, "manifest: orders account");
 
         // The governance role refuses every listed module as an administered
         // target (OD-38), so the list must be exactly the Asset Safe's modules.

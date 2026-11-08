@@ -37,7 +37,7 @@
   why: "The committee's own Safe, at 4 of 7, holds the operator role and the first-loss role, and it creates every motion (OD-80). Two of its signers sit on the emergency Safe."
   breaks: "A captured quorum of the committee's Safe can propose any motion, and LDO holders see each one for 72 hours. Such a motion can onboard a bad protocol and lose up to its budgets in each period. It can raise a ceiling at most twofold in 15 days, set any first ceilings for a token that it introduces (OD-113), or restart the operator after a stop. A burn motion moves the first-loss shares' value to the vault's other depositors. The quorum can also redeem the first-loss shares to the Asset Safe, and return vault tokens to the Aragon Agent, which stops the vault but loses nothing. Two compromised committee keys do not reach the emergency role (OD-58)."
   watched_by: ["test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval"]
-  watch_note: "INV-002, INV-014, INV-021 and INV-038 are pending. Paging on every emergency action, every burn motion and every action of the first-loss role is not built, and nor are the alerts on ceiling and restart motions and on transfers to the Agent."
+  watch_note: "INV-002, INV-021 and INV-038 are pending. Paging on every emergency action, every burn motion and every action of the first-loss role is not built, and nor are the alerts on ceiling and restart motions and on transfers to the Agent."
   sources: ["ADR-005#d2", "ADR-005#d9", "ADR-005#d24", "ADR-005#d27", "ADR-008#d21", "ADR-008#d23",
     "ADR-008#consequences", "ADR-013#consequences", "ADR-014#consequences", OD-67, "ADR-006#d3", OD-58, OD-60, OD-108,
     INV-002, INV-014, INV-021, INV-038, "ADR-005#d31", OD-80, OD-113, "ADR-013#d15"]
@@ -145,10 +145,10 @@
   kind: design
   why: "Every swap runs through the orders account. The pinned receiver keeps the operator's proceeds in the vault and recovery proceeds at the Agent."
   breaks: "If the fallback handler or the order signer fails on Safe v1.5.0, the vault has no limit or TWAP orders. If a receiver pin fails, an order could pay another account."
-  watched_by: []
-  watch_note: "INV-022 and INV-023 are pending. The fork tests are owed before the design is relied on."
+  watched_by: [INV-022, INV-023, "test:test_orders_signer_order_settles_to_the_asset_safe", "test:test_orders_twap_part_settles_through_the_fallback_handler"]
+  watch_note: "Tested on a fork on 2026-11-07: signer and TWAP orders from the Safe v1.5.0 settled through CoW's settlement contract and paid only their pinned receivers. The order book's acceptance of zero app data is not tested."
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#confirmation", "ADR-007#reversal-conditions", OD-43,
-    INV-022, INV-023, "doc:docs/research/cow-orders-account-2026-10-06.md#limits"]
+    INV-022, INV-023, "doc:docs/research/cow-orders-account-2026-10-06.md#limits", "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests"]
 
 - id: order-prices
   assumption: "CoW's solver competition and EBBO rule, screening, the orders budgets and monitoring of each fill keep order prices close to the market."
@@ -270,7 +270,7 @@
   why: "The LIP's Implemented parts rest on fork tests. Nothing is deployed, and no audit is done."
   breaks: "Green tests can miss real behaviour: the real Aragon Voting path, the real Easy Track and the screening guard."
   watched_by: ["test:test_02_enabling_vote_end_to_end"]
-  watch_note: "The kit's harness mocks Aragon Voting, which owns the Asset Safe, the Aragon Agent, Easy Track and its executor, and uses plain stand-in addresses for the committee's Safe, the emergency Safe and the first-loss Safe. The enabling-vote rehearsal and the universal factory's prototype run the real Aragon Voting, Finance and Easy Track."
+  watch_note: "The kit's harness mocks Aragon Voting, which owns the Asset Safe, the Aragon Agent, Easy Track and its executor, and uses plain stand-in addresses for the committee's Safe, the emergency Safe, the first-loss Safe and the orders account. The enabling-vote rehearsal, the universal factory's prototype and the orders account's tests run the real Aragon Voting, Finance and Easy Track, and the orders account's tests settle through CoW's settlement contract."
   sources: ["doc:test/README.md#what-is-real-and-what-is-mocked", "lip:part-1"]
 
 - id: branch-rule

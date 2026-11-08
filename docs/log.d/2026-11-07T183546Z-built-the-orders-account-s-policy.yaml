@@ -1,0 +1,3 @@
+date: '2026-11-07'
+kind: Evidence
+text: 'Built the orders account''s policy and ran the fork tests that ADR 007 owed: CoW''s order signer by delegatecall and TWAP orders through ComposableCoW, from a Safe v1.5.0 behind the orders modifier, settled through CoW''s settlement contract and paying their pinned receivers; recovery orders, cancels and the emergency revoke. CoW''s fallback handler works on Safe v1.5.0. The fork suite passes 84 tests.'

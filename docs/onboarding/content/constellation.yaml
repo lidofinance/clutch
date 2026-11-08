@@ -7,11 +7,10 @@ intro: >-
   vault and rewrote it to the decided design. Clutch's own compiler turns it into the committed artifact that reviewers
   approve, and this page reads the graph below from that artifact when it is built.
 planned:
-  - name: Orders account
-    where: "A second Voting-owned Safe, with one modifier of its own"
-    what: "One orders modifier for the operator and emergency roles, and for the Easy Track executor's governance and approvals roles: a motion adds a token, and grants delegatecall only to CoW's order signer (OD-57, OD-58, OD-103). The operator signs CoW orders that pay the Asset Safe; recovery orders pay the Aragon Agent."
-    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d28", "ADR-007#d30", "ADR-007#d41", OD-43, OD-57, OD-58,
-      OD-103, INV-023, INV-040]
+  - name: Orders account's motion roles
+    where: "On the orders modifier, held by the Easy Track script executor"
+    what: "The governance role adds a token to the order lists, on the sell side and the buy side, with its emergency transfer and recovery orders, and grants delegatecall only to CoW's order signer; the approvals role raises CoW's vault relayer's approval. A motion of the universal factory uses both (OD-103). The orders account and its operator and emergency roles are in the constellation."
+    sources: ["ADR-007#d28", "ADR-007#d30", "ADR-007#d41", OD-57, OD-58, OD-103, INV-023, INV-040]
   - name: Exit-governance role
     where: "On the safety modifier, held by the Easy Track script executor"
     what: "The motion that onboards a protocol also writes the emergency role's exit for it. The role writes only under the emergency key."
@@ -69,9 +68,9 @@ changes:
   - area: Swaps
     kind: changed
     provider: "A CoW swap action over six sell and five buy tokens, with a TODO for bounds, compiled by the hosted app."
-    clutch: "No swap on the Asset Safe. CoW orders from the orders account, with every receiver pinned; specified, not built."
+    clutch: "No swap on the Asset Safe. CoW orders from the orders account, with every receiver pinned and zero app data."
     why: "An action that only the hosted app compiles cannot be reviewed here, and its price bounds were still a TODO."
-    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", OD-33, OD-43]
+    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", OD-33, OD-43, "ADR-007#d42", OD-115]
   - area: DAI
     kind: added
     provider: "No converter; DAI goes to Aave or sDAI."

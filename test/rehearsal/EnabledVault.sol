@@ -165,30 +165,45 @@ abstract contract EnabledVault is RehearsalBase {
         vm.pauseGasMetering();
         VoteBuilder.Item[] memory calls = _assetCalls();
         vm.resumeGasMetering();
-        uint256[] memory gasOf = _measure(calls, address(asset));
+        _addSplit(asset, calls, _modulesOf(address(opMod), address(safetyMod)), "Asset Safe");
+        vm.pauseGasMetering();
+        VoteBuilder.Item[] memory o = _ordersCalls();
+        vm.resumeGasMetering();
+        _addSplit(orders, o, _modulesOf(address(ordersMod), address(0)), "Orders account");
+        vm.pauseGasMetering();
+        VoteBuilder.Item[] memory f = _firstLossCalls();
+        _addBatch(firstLoss, f, 0, f.length, "First-loss Safe: approve its setup batch");
+        vm.resumeGasMetering();
+        console2.log("REHEARSAL Safe batches", batches.length);
+    }
+
+    /// @dev Measures the calls of one Safe, each cold, and splits them into batches under the gas budget.
+    function _addSplit(ISafe safe, VoteBuilder.Item[] memory calls, address[] memory modules, string memory name) internal {
+        uint256[] memory gasOf = _measure(calls, address(safe), modules);
         vm.pauseGasMetering();
         uint256 total;
         for (uint256 i = 0; i < gasOf.length; i++) total += gasOf[i];
-        console2.log("REHEARSAL Asset Safe policy: calls", calls.length);
-        console2.log("REHEARSAL Asset Safe policy: gas of the calls, each cold", total);
-
+        console2.log(string.concat("REHEARSAL ", name, " policy: calls"), calls.length);
+        console2.log(string.concat("REHEARSAL ", name, " policy: gas of the calls, each cold"), total);
+        string memory label = string.concat(name, ": approve a policy batch");
         uint256 start;
         uint256 sum;
         for (uint256 i = 0; i < calls.length; i++) {
             if (sum + gasOf[i] > BATCH_CALL_GAS_BUDGET && i > start) {
-                _addBatch(asset, calls, start, i, "Asset Safe: approve a policy batch");
+                _addBatch(safe, calls, start, i, label);
                 start = i;
                 sum = 0;
             }
             sum += gasOf[i];
         }
-        _addBatch(asset, calls, start, calls.length, "Asset Safe: approve a policy batch");
-        VoteBuilder.Item[] memory o = _ordersCalls();
-        _addBatch(orders, o, 0, o.length, "Orders account: approve its setup batch");
-        VoteBuilder.Item[] memory f = _firstLossCalls();
-        _addBatch(firstLoss, f, 0, f.length, "First-loss Safe: approve its setup batch");
+        _addBatch(safe, calls, start, calls.length, label);
         vm.resumeGasMetering();
-        console2.log("REHEARSAL Safe batches", batches.length);
+    }
+
+    function _modulesOf(address first, address second) internal pure returns (address[] memory m) {
+        m = new address[](second == address(0) ? 1 : 2);
+        m[0] = first;
+        if (second != address(0)) m[1] = second;
     }
 
     function _addBatch(ISafe safe, VoteBuilder.Item[] memory calls, uint256 from, uint256 to, string memory label)
@@ -205,34 +220,54 @@ abstract contract EnabledVault is RehearsalBase {
         batches.push(Batch({safe: safe, data: data, hash: hash, calls: to - from, label: label}));
     }
 
+    /// @dev The Asset Safe's batch: both modifiers enabled, then the artifact's calls on them.
     function _assetCalls() internal view returns (VoteBuilder.Item[] memory calls) {
+        VoteBuilder.Item[] memory policy = _policyCalls(address(opMod), address(safetyMod));
+        calls = new VoteBuilder.Item[](policy.length + 2);
+        calls[0] = VoteBuilder.Item(address(asset), abi.encodeCall(ISafe.enableModule, (address(opMod))), "");
+        calls[1] = VoteBuilder.Item(address(asset), abi.encodeCall(ISafe.enableModule, (address(safetyMod))), "");
+        for (uint256 i = 0; i < policy.length; i++) calls[i + 2] = policy[i];
+    }
+
+    /// @dev The artifact's calls on one or two modifiers, in the artifact's order. A modifier's owner applies
+    ///      them, so each Safe's batch takes the calls on its own modifiers.
+    function _policyCalls(address first, address second) internal view returns (VoteBuilder.Item[] memory calls) {
         string memory j = vm.readFile(ARTIFACT);
         address[] memory to = vm.parseJsonAddressArray(j, ".calls.to");
         bytes[] memory data = vm.parseJsonBytesArray(j, ".calls.data");
-        calls = new VoteBuilder.Item[](to.length + 2);
-        calls[0] = VoteBuilder.Item(address(asset), abi.encodeCall(ISafe.enableModule, (address(opMod))), "");
-        calls[1] = VoteBuilder.Item(address(asset), abi.encodeCall(ISafe.enableModule, (address(safetyMod))), "");
-        for (uint256 i = 0; i < to.length; i++) calls[i + 2] = VoteBuilder.Item(to[i], data[i], "");
+        uint256 n;
+        for (uint256 i = 0; i < to.length; i++) if (to[i] == first || to[i] == second) n++;
+        calls = new VoteBuilder.Item[](n);
+        n = 0;
+        for (uint256 i = 0; i < to.length; i++) {
+            if (to[i] == first || to[i] == second) calls[n++] = VoteBuilder.Item(to[i], data[i], "");
+        }
     }
 
-    /// @dev ADR 007: CoW's fallback handler, ComposableCoW as the settlement
-    ///      domain's verifier, the orders modifier with its two roles, and the
-    ///      relayer approvals for the operator's order tokens; LDO left the
-    ///      launch list (OD-91). The orders policy itself is not built yet.
+    /// @dev The tokens that CoW's vault relayer may pull from the orders account: the operator's order tokens
+    ///      and every token that a recovery order sells (ADR 007, decisions 15 and 22; LDO left by OD-91).
+    function _relayerTokens() internal pure returns (address[8] memory) {
+        return [
+            Mainnet.STETH, Mainnet.WSTETH, Mainnet.WETH, Mainnet.USDC, Mainnet.USDT, Mainnet.DAI, Mainnet.USDS, Mainnet.SUSDS
+        ];
+    }
+
+    /// @dev ADR 007: CoW's fallback handler, ComposableCoW as the settlement domain's verifier, the orders
+    ///      modifier with the artifact's policy and its two roles, and the relayer approvals.
     function _ordersCalls() internal view returns (VoteBuilder.Item[] memory c) {
-        address[6] memory tokens =
-            [Mainnet.STETH, Mainnet.WSTETH, Mainnet.WETH, Mainnet.USDC, Mainnet.USDT, Mainnet.USDS];
+        address[8] memory tokens = _relayerTokens();
+        VoteBuilder.Item[] memory policy = _policyCalls(address(ordersMod), address(0));
         bytes32 domain = ISettlement(Mainnet.COW_SETTLEMENT).domainSeparator();
-        c = new VoteBuilder.Item[](5 + tokens.length);
+        c = new VoteBuilder.Item[](3 + policy.length + tokens.length);
         c[0] = VoteBuilder.Item(address(orders), abi.encodeCall(ISafeAdmin.setFallbackHandler, (Mainnet.COW_FALLBACK_HANDLER)), "");
         c[1] = VoteBuilder.Item(
             address(orders), abi.encodeCall(IExtensibleFallbackHandler.setDomainVerifier, (domain, Mainnet.COMPOSABLE_COW)), ""
         );
         c[2] = VoteBuilder.Item(address(orders), abi.encodeCall(ISafe.enableModule, (address(ordersMod))), "");
-        c[3] = VoteBuilder.Item(address(ordersMod), _assign(Mainnet.COMMITTEE_SAFE, OPERATOR), "");
-        c[4] = VoteBuilder.Item(address(ordersMod), _assign(address(emergency), EMERGENCY), "");
+        for (uint256 i = 0; i < policy.length; i++) c[3 + i] = policy[i];
         for (uint256 i = 0; i < tokens.length; i++) {
-            c[5 + i] = VoteBuilder.Item(tokens[i], abi.encodeCall(IERC20.approve, (Mainnet.COW_VAULT_RELAYER, type(uint256).max)), "");
+            c[3 + policy.length + i] =
+                VoteBuilder.Item(tokens[i], abi.encodeCall(IERC20.approve, (Mainnet.COW_VAULT_RELAYER, type(uint256).max)), "");
         }
     }
 
@@ -254,13 +289,15 @@ abstract contract EnabledVault is RehearsalBase {
 
     /// @dev The gas of each call on its own, with cold accounts, applied in
     ///      order and then rolled back.
-    function _measure(VoteBuilder.Item[] memory calls, address from) internal returns (uint256[] memory gasOf) {
+    function _measure(VoteBuilder.Item[] memory calls, address from, address[] memory modules)
+        internal
+        returns (uint256[] memory gasOf)
+    {
         uint256 snap = vm.snapshotState();
         gasOf = new uint256[](calls.length);
-        address[] memory touched = new address[](3);
-        touched[0] = address(asset);
-        touched[1] = address(opMod);
-        touched[2] = address(safetyMod);
+        address[] memory touched = new address[](1 + modules.length);
+        touched[0] = from;
+        for (uint256 i = 0; i < modules.length; i++) touched[1 + i] = modules[i];
         for (uint256 i = 0; i < calls.length; i++) {
             _cold(touched);
             vm.prank(from);

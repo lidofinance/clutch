@@ -56,7 +56,9 @@ contract EnablingVoteRehearsal is EnabledVault {
         (bool ok,, bytes memory txData) = _newVote(voteScript);
         console2.log("REHEARSAL direct vote: newVote calldata bytes", txData.length);
         assertFalse(ok, "a vote that stores the policy must not fit in one transaction");
-        assertLe(txData.length, TX_SIZE_LIMIT, "its size alone would pass the txpool");
+        // Until the orders policy, the size alone passed the txpool and only the gas cap stopped the vote. With
+        // it, the vote's calldata passes the txpool's limit too (ADR 007).
+        console2.log("REHEARSAL direct vote: above the txpool's size limit (1 = yes)", txData.length > TX_SIZE_LIMIT ? 1 : 0);
         // The gas that newVote needs without the cap
         vm.revertToState(snap);
         vm.pauseGasMetering();

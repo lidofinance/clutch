@@ -15,10 +15,10 @@
   options:
     - "Nothing, if 4 of 7 signers sign"
     - "Only [the screening vendor]"
-    - "The operator modifier: the policy has no such transfer, and every receiver is pinned to the Asset Safe"
+    - "The operator modifier: the policy has no such transfer, and every receiver is pinned to a vault account"
     - "The objection window"
   answer: 2
-  why: "The operator role holds no transfer to an outside address: its planned transfers go only to the orders account or back to the Aragon Agent, and every receiver, owner and beneficiary in its permissions is the Asset Safe. Once the launch cap lifts, the screening guard is a second, independent check."
+  why: "The operator role holds no transfer to an outside address: its transfers go only to the orders account, under the orders budgets, and its planned return goes only to the Aragon Agent; every other receiver, owner and beneficiary in its permissions is the Asset Safe. Once the launch cap lifts, the screening guard is a second, independent check."
   sources: [INV-002, INV-003, "ADR-014#d9", "test:test_D3_operator_cannot_route_around_avatar"]
 
 - id: depeg-first

@@ -15,5 +15,6 @@
   "operatorSafe": "0x27bd382539c23f850C09193B50b2Fad9cE5e7d6f",
   "emergencySafe": "0xCdf451F047dC337310E049C1D5AB46e8bFa8c163",
   "easyTrackExecutor": "0xCd9a550161dabeA93c0f61aE15683B475C7025FE",
-  "firstLossSafe": "0x89cFd078303EC78ff11957e26d3fC1dd9dda8Aef"
+  "firstLossSafe": "0x89cFd078303EC78ff11957e26d3fC1dd9dda8Aef",
+  "ordersAccount": "0xFb88b1f3f7Debed7F5A87d31581b38eD888d0931"
 }

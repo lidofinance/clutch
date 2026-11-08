@@ -364,10 +364,10 @@
     - "Approve a protocol spender. The [[approval]] spends that spender's budget key, or stays under a [[ceiling]]."
     - "Return any listed token to the Aragon Agent, by a transfer pinned to it, with no motion and no vote (OD-108)."
   cannot:
-    - "Transfer a token anywhere else. The transfers to the orders account and to the Aragon Agent are specified but not yet in the policy."
+    - "Transfer a token anywhere else. Its transfers to the orders account are in the policy, each under its token's orders budget; its transfer to the Aragon Agent is specified, not built (OD-108)."
     - "Borrow, or use a venue outside the launch scope."
     - "Administer a modifier or the Safe, or change its own permissions."
-    - "Use delegatecall on the Asset Safe. Its one planned delegatecall, to CoW's order signer, is on the orders account and is specified (OD-43)."
+    - "Use delegatecall on the Asset Safe. Its one delegatecall, to CoW's order signer, is on the orders account, and the compiler refuses any other (OD-43)."
     - "Reach the first-loss shares through the operator role. They sit in the first-loss Safe, where only motions and the separate first-loss role of the committee's Safe act (OD-42, OD-60, OD-67)."
   numbers: ["one role key: `operator`"]
   sources: ["ADR-005#proposed-direction", "ADR-009#d13", "ADR-009#d14", "ADR-013#d7", "ADR-013#d13", "ADR-014#d9",
@@ -440,10 +440,10 @@
   status: new
   label: built
   role: emergency
-  what: "The permissions of the emergency Safe on the safety modifier. They only reduce exposure. It moves assets only to the Aragon Agent or into the orders account, and a recovery order pays only the Agent. A recovery order, which is specified, has no on-chain price floor; CoW's rules hold its fill to the on-chain market (OD-48)."
+  what: "The permissions of the emergency Safe on the safety modifier. They only reduce exposure. It moves assets only to the Aragon Agent or into the orders account, and a recovery order pays only the Agent. A recovery order has no on-chain price floor; CoW's rules hold its fill to the on-chain market (OD-48)."
   controlled_by: "Held by the emergency Safe, at 3 of 5."
   can:
-    - "Revoke any operator target or function. One revoke reaches every operator permission on the modifier; the orders modifier needs its own, which is specified."
+    - "Revoke any operator target or function. One revoke reaches every operator permission on the modifier; on the orders modifier the emergency role holds a revoke of its own."
     - "Switch the operator off: `disableModule` on the Asset Safe, with the module pinned to the operator modifier. The operator, governance and insurance-funding roles stop at once, and so does every queued motion that writes through them (OD-58)."
     - "Set any operator spender's approval to zero."
     - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, and redeem sUSDS. A protocol that a motion onboards gets its emergency exit from the same motion, which is specified (OD-49)."
@@ -451,7 +451,7 @@
     - "Transfer the vault's tokens and Earn shares, but only to the Aragon Agent."
   cannot:
     - "Add a permission or give a non-zero approval."
-    - "Send an asset anywhere except the Aragon Agent. The transfer to the orders account is specified but not built."
+    - "Send an asset anywhere except the Aragon Agent, or the orders account for a recovery order."
     - "Disable the safety modifier or any later module. The switch's pin is exact."
     - "Restore what it stopped: enable a module, grant a permission or set a budget. The compiler refuses a policy that gives it one (OD-59)."
     - "Reach the first-loss shares or the insurance funds. They sit in the first-loss Safe, where only motions and the narrow first-loss role of the committee's Safe act (OD-60, OD-67)."
@@ -636,7 +636,7 @@
   can:
     - "Own both modifiers, and run their permitted calls as itself: it is their [[avatar]]."
     - "Receive each tranche from Aragon Finance when its vote executes (OD-106)."
-    - "Send a token to the orders account for an order, under the orders budgets. Specified, not built."
+    - "Send a token to the orders account for an order, under the orders budgets. Tested on a fork."
     - "Send tokens back to the Aragon Agent, through the emergency role or through the operator's transfer pinned to the Agent. The operator's transfer is specified, not built (OD-108)."
     - "Send insurance money to the first-loss Safe, only by motion (OD-107). Tested on a fork with the factory's prototype."
   cannot:
@@ -862,7 +862,7 @@
   node: orders
   name: Orders account
   status: instance
-  label: specified
+  label: built
   what: "A new Safe that Aragon Voting owns. Every vault swap is a [[CoW]] order placed from it. It holds only tokens in transit, between a transfer from the Asset Safe and a fill."
   controlled_by: "Aragon Voting, at 1 of 1 (OD-73). The roles act on it only through its own modifier (OD-57)."
   can:
@@ -879,27 +879,29 @@
   sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d20", "ADR-007#d23", "ADR-007#d25", "ADR-007#d26",
     "ADR-007#d28", "ADR-007#d29", "ADR-007#d30", "ADR-007#d41", "ADR-007#proposed-direction", "ADR-005#d15",
     "ADR-005#d20", "ADR-005#d21", OD-43, OD-47, OD-48, OD-61, OD-103, INV-013, INV-023, INV-040,
-    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design", OD-73, "ADR-005#d28", OD-57]
+    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design", OD-73, "ADR-005#d28", OD-57,
+    "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests", "test:test_orders_signer_order_settles_to_the_asset_safe", "test:test_orders_twap_part_settles_through_the_fallback_handler"]
 
 - id: orders-modifiers
   node: orders
   name: The orders account's modifier
   status: instance
-  label: specified
+  label: built
   what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, and two roles of the Easy Track script executor: governance and approvals (OD-57, OD-58, OD-103)."
   controlled_by: "Its owner, the orders account, so in the end the DAO."
   can:
     - "Let the operator sign orders through the order signer and create TWAP orders. The receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."
     - "Let the emergency role cancel any order, set a relayer approval to zero, send any listed token to the Aragon Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent."
     - "Let the emergency role stop the operator by revoking its targets and functions. The stop also cancels the operator's open orders, because a fill does not consult the policy (OD-58)."
-    - "Let a motion add a token to the lists, on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders (OD-103)."
-    - "Let a motion raise an approval of CoW's vault relayer again, after the emergency role set it to zero."
+    - "Let a motion add a token to the lists, on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders (OD-103). The governance role is specified, not built."
+    - "Let a motion raise an approval of CoW's vault relayer again, after the emergency role set it to zero. The approvals role is specified, not built."
   cannot:
     - "Take a delegatecall from a motion, except to the order signer, for signing and unsigning orders (INV-040)."
     - "Let the governance role write outside the `operator` and `emergency` keys, change membership or reach an administrative target (INV-040)."
   address: "To be deployed"
   sources: ["ADR-007#d19", "ADR-007#d25", "ADR-007#d28", "ADR-007#d30", "ADR-007#d41", "ADR-007#proposed-direction",
-    "ADR-005#d21", "ADR-005#d25", OD-43, OD-57, OD-58, OD-103, INV-014, INV-022, INV-040, "ADR-007#d39", OD-79]
+    "ADR-005#d21", "ADR-005#d25", OD-43, OD-57, OD-58, OD-103, INV-014, INV-022, INV-040, "ADR-007#d39", OD-79,
+    "test:test_orders_emergency_cancels_sweeps_and_recovers", "test:test_orders_emergency_revocation_keeps_recovery"]
 
 - id: cow-order-signer
   node: orders

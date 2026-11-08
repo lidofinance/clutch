@@ -8,6 +8,8 @@
 // role in the policy (ADR 005, decision 23).
 // Changed for Clutch on 2026-10-14: the committee's own Safe holds the
 // operator role (ADR 005, decision 31).
+// Changed for Clutch on 2026-11-07: the orders account, its modifier and CoW's
+// contracts (ADR 007).
 import { readFileSync } from "node:fs";
 
 /**
@@ -46,11 +48,49 @@ export type Manifest = {
   easyTrackExecutor: string;
   /** The first-loss Safe: the only receiver of insurance money (ADR 014, decision 7). */
   firstLossSafe: string;
+  /**
+   * The orders account: the Safe that owns the vault's CoW orders (ADR 007, decisions 17 and 28). The
+   * operator funds it by transfers pinned to it, and the emergency role may send it assets for recovery orders.
+   */
+  ordersAccount: string;
+  /**
+   * The orders account's one modifier, with the operator and emergency roles (ADR 007, decision 30). The kit
+   * deploys no orders account, so its manifest names none, and the orders policy compiles only where it does.
+   */
+  ordersModifier?: string;
 };
+
+/** The addresses that permissions pin: each must be in the manifest. */
+const PINNED = [
+  "agent",
+  "assetSafe",
+  "operatorModifier",
+  "safetyModifier",
+  "operatorSafe",
+  "emergencySafe",
+  "easyTrackExecutor",
+  "firstLossSafe",
+  "ordersAccount",
+] as const;
+
+/**
+ * Refuses a manifest that misses an address that a permission pins. A missing one would not fail later: the
+ * helpers leave an undefined parameter open, so a transfer pinned to it would pay any address.
+ */
+export function checkManifest(m: Record<string, unknown>) {
+  const isAddress = (v: unknown) => typeof v === "string" && /^0x[0-9a-fA-F]{40}$/.test(v);
+  for (const field of PINNED) {
+    if (!isAddress(m[field])) throw new Error(`the manifest must name ${field} as an address: a permission pins it`);
+  }
+  if (m.ordersModifier !== undefined && !isAddress(m.ordersModifier)) {
+    throw new Error("the manifest's ordersModifier must be an address");
+  }
+}
 
 const manifestPath = process.env.CLUTCH_MANIFEST;
 if (!manifestPath) throw new Error("Set CLUTCH_MANIFEST to a manifest, such as manifests/fork-25946643.json.");
 export const manifest: Manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+checkManifest(manifest);
 
 /** Mainnet contracts that the policy names. The fork tests read each at block 25946643. */
 export const STETH = "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84";
@@ -76,6 +116,17 @@ export const EARN_ETH = {
   redeemQueue: "0x095bFAca9f1c6F2B063Cd67C6d6bfcd0c3aaB7b4",
   share: "0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4",
 };
+
+/**
+ * CoW Protocol's deployed contracts that the orders policy names (ADR 007; research note of 2026-10-06). The
+ * order signer runs only by delegatecall, so the Safe that calls it owns the order (OD-96).
+ */
+export const COW_SETTLEMENT = "0x9008D19f58AAbD9eD0D60971565AA8510560ab41";
+export const COW_VAULT_RELAYER = "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110";
+export const ORDER_SIGNER = "0x23dA9AdE38E4477b23770DeD512fD37b12381FAB";
+export const COMPOSABLE_COW = "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74";
+export const TWAP_HANDLER = "0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5";
+export const TIMESTAMP_FACTORY = "0x52eD56Da04309Aca4c3FECC595298d80C2f16BAc";
 
 /** Names for the artifact, so that a reviewer reads `stETH` and not an address. */
 export const NAMES: Record<string, string> = {
@@ -103,4 +154,12 @@ export const NAMES: Record<string, string> = {
   [manifest.emergencySafe]: "emergency Safe",
   [manifest.easyTrackExecutor]: "Easy Track script executor",
   [manifest.firstLossSafe]: "first-loss Safe",
+  [manifest.ordersAccount]: "orders account",
+  ...(manifest.ordersModifier ? { [manifest.ordersModifier]: "orders modifier" } : {}),
+  [COW_SETTLEMENT]: "CoW settlement",
+  [COW_VAULT_RELAYER]: "CoW vault relayer",
+  [ORDER_SIGNER]: "CoW order signer",
+  [COMPOSABLE_COW]: "ComposableCoW",
+  [TWAP_HANDLER]: "CoW TWAP handler",
+  [TIMESTAMP_FACTORY]: "CoW current-timestamp factory",
 };

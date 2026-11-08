@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-06T04:31:16Z
+  at: 2026-11-07T19:23:10Z
 verified: []
 sources:
   - id: s1
@@ -20,8 +20,8 @@ sources:
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads at block 26092572
   - id: s4
-    resource: "https://github.com/lidofinance/clutch/tree/72743fc74aa1f7f0d59cbfdb9dd4812df8469cc3/test"
-    title: Fork test suites at 72743fc
+    resource: "https://github.com/lidofinance/clutch/tree/d590723c1c19162eb797a4f0569eb3ab36882a3a/test"
+    title: Fork test suites at d590723
   - id: s5
     resource: "https://github.com/safe-global/safe-smart-account/blob/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/contracts/base/ModuleManager.sol#L94-L108"
     title: Safe v1.5.0 ModuleManager — the module guard is called for every enabled module
@@ -58,6 +58,9 @@ sources:
   - id: s18
     resource: /research/universal-factory-prototype-2026-11-05.md
     title: The universal factory's prototype on a fork, 2026-11-05 — the tests, the mutants and the measures
+  - id: s19
+    resource: /research/orders-account-fork-tests-2026-11-07.md
+    title: The orders account's policy on a fork, 2026-11-07 — signer and TWAP orders settled through CoW's settlement contract
 ---
 
 # LIP-XX: Active Treasury Management Vault
@@ -271,7 +274,7 @@ The Emergency Safe, the orders account and the first-loss Safe are new instances
 2. The deployed mastercopy predates the current upstream source. Its initialiser is `setUp(bytes)` taking `abi.encode(owner, avatar, target)`, not the three-argument form. Audits and deployment tooling must pin the deployed bytecode, not repository HEAD.
 3. Each modifier's `owner`, `avatar` and `target` are its own Safe.
 4. The Asset Safe is set up with no fallback handler. Without one, it refuses ERC-721 and ERC-1155 safe transfers and cannot sign a message by EIP-1271. A protocol that needs either comes back to EM (OD-17).
-5. The orders account is set up with CoW's fallback handler, and its domain verifier for CoW's settlement domain is ComposableCoW. A fork rehearsal set both on a Safe v1.5.0 but placed no order [s14]. Fork tests of signed and TWAP orders must pass before the account is relied on [s11].
+5. The orders account is set up with CoW's fallback handler, and its domain verifier for CoW's settlement domain is ComposableCoW. On a fork, a signed order and a TWAP part from the Safe v1.5.0, through its modifier, settled through CoW's settlement contract, so CoW's fallback handler works on Safe v1.5.0 [s19].
 6. The universal factory fixes the committee's Safe as its trusted caller at deployment, and Easy Track cannot change it later [s15]. Before the enabling vote, a chain check confirms that the factory's registration lists only its address book (INV-032).
 
 #### Part 2: Roles and authority **[Implemented in part]**
@@ -494,9 +497,9 @@ The emergency role holds, and nothing else:
 - exits: savings-vault redeem and withdraw with receiver and owner pinned to the avatar; asynchronous vault cancel, claim, and redeem. The first-loss shares and the insurance funds sit in the first-loss Safe, which the emergency role does not reach (OD-42, OD-60, OD-107);
 - conversions: `unwrap` on wstETH and on WETH, and `submit` on stETH with the referral pinned to zero (OD-20);
 - `transfer(to, amount)` with `to` pinned by `EqualTo` to the Agent literal, on every asset and receipt token the Safe can hold;
-- `revokeTarget(operator, …)` and `revokeFunction(operator, …)` on the operator modifier, and on the orders modifier once it exists, role key pinned to the operator;
+- `revokeTarget(operator, …)` and `revokeFunction(operator, …)` on the operator modifier and on the orders modifier, role key pinned to the operator;
 - `disableModule(prevModule, operatorModifier)` on the Asset Safe, the switch, with the module argument pinned (see 6.2);
-- `transfer(to, amount)` with `to` pinned by `EqualTo` to the orders account, and on the orders account: cancel any order, revoke the operator's targets and functions, set a relayer approval to zero, send any listed token to the Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent (see 6.1). These are specified, not built: the orders account does not exist yet.
+- `transfer(to, amount)` with `to` pinned by `EqualTo` to the orders account, and on the orders account: cancel any order, revoke the operator's targets and functions, set a relayer approval to zero, send any listed token to the Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent (see 6.1). Tested on a fork [s19].
 - the exits that an onboarding motion adds through the exit-governance role: redeem, withdraw, claim and cancel pinned to the avatar, a transfer pinned to the Agent, and an approval set to zero (OD-49). Specified, not built.
 
 Nothing in this role restores authority: no `enableModule`, no grant, no budget and no non-zero approval. The compiler refuses a policy that gives it one (OD-59). Only the `restart` role holds `enableModule`, pinned to the operator modifier, and only the Easy Track executor holds that role (section 6.3).
@@ -505,14 +508,14 @@ At every stop, the emergency Safe also raises the universal factory's counter. E
 
 Separately and already deployed: the Emergency Brakes multisig holds the pause role on Easy Track and holds neither unpause nor cancel. Pausing Easy Track freezes every queued motion of the DAO, and only Aragon Voting unpauses it [s17]. The switch freezes the vault's own queued motions that write through the operator modifier, without that pause. A motion does not expire. The counter therefore makes each motion that was queued before a stop fail at enactment, and its creator or Aragon Voting cancels it [s15].
 
-##### 6.1 Swapping — CoW orders from the orders account **[Specified]**
+##### 6.1 Swapping — CoW orders from the orders account **[Implemented in part]**
 
 Neither role receives an exchange permission on the Asset Safe. Every swap, routine or emergency, is a CoW order placed from the orders account: a Safe owned by Aragon Voting, with CoW's fallback handler and one modifier of its own (OD-43, OD-57) [s1][s11].
 
 The path:
 
 1. The role transfers the asset from the Asset Safe to the orders account, with the recipient pinned by `EqualTo`. For the operator, the transfer spends that token's orders budget.
-2. On the orders account, the role places an order. A market or limit order goes through a delegatecall to the deployed CoW order signer, which computes the order identifier from the typed order and sets the pre-signature. The permission pins the sell and buy tokens, the receiver, the order's maximum life and the fee bound. A TWAP order goes through ComposableCoW, with the handler, the receiver and the tokens pinned. The launch has no stop-loss orders (OD-79).
+2. On the orders account, the role places an order. A market or limit order goes through a delegatecall to the deployed CoW order signer, which computes the order identifier from the typed order and sets the pre-signature. The permission pins the sell and buy tokens, the receiver, plain ERC-20 balances, zero app data, the order's maximum life and a signed fee of zero. Zero app data carries no hooks and no partner fee (OD-115); CoW's order book refuses a signed fee, and CoW charges its fees within the order's limit (OD-116). A TWAP order goes through ComposableCoW, with the handler, the receiver, the tokens, the start, the shape and zero app data pinned [s19]. The launch has no stop-loss orders (OD-79).
 3. CoW settles the order and pays the receiver directly.
 
 **The receiver is what separates the two roles.** It is pinned in each role's permissions:
@@ -673,7 +676,7 @@ Costs: two policy applications, two sets of role keys, two modules enabled on th
 
 ### Test Cases
 
-77 tests pass against deployed mainnet bytecode at commit 72743fc of this repository [s4]: 53 on a fork pinned at block 25946643, and 24 at block 26249900, the 6 of the enabling-vote rehearsal and the 18 of the universal factory's prototype [s14][s18]. Nothing has been deployed.
+84 tests pass against deployed mainnet bytecode at commit d590723 of this repository [s4]: 53 on a fork pinned at block 25946643, and 31 at block 26249900, the 6 of the enabling-vote rehearsal, the 18 of the universal factory's prototype and the 7 of the orders account [s14][s18][s19]. Nothing has been deployed.
 
 | Group | n | Covers |
 | --- | --- | --- |
@@ -695,7 +698,8 @@ Costs: two policy applications, two sets of role keys, two modules enabled on th
 | Funding bootstrap | 1 | The dry-run funding script |
 | Enabling-vote rehearsal | 6 | The vote with the live Aragon Voting, Finance and Easy Track: a vote that carries the policy cannot start; the vote that registers the factory, pays the first tranche and approves the batches, end to end; the ramp-up with a later tranche, a budget motion, a ceiling motion, the switch and a restart motion; Earn deposits from the Asset Safe; the first-loss burn and redemption request; the manifest |
 | The universal factory's prototype | 18 | The address book is the registration; the factory writes the compiler's trees; versions settle a conflict on one scope in both orders, disjoint scopes enact in any order, and the counter fails every open motion; widening only through the shape, raw writes only narrow; budgets within their ceilings; a ceiling rises at most twofold, once in 15 days; a token is introduced once, with both of its ceilings; a revoked target comes back by motion, with what was stored under it; the restart motion; insurance money; the factory's own guards; the measures |
-| **Total** | **77** | |
+| The orders account | 7 | Signer orders by delegatecall and TWAP orders through ComposableCoW, from the Safe v1.5.0, settled through CoW's settlement contract and paying the Asset Safe; their receivers, tokens, balances, app data, fee bound, life and TWAP shapes; the emergency role's cancels, sweeps, zeroed approvals and recovery orders paying the Agent; the revoke that stops the operator while recovery works; the funding from the Asset Safe under the orders budgets |
+| **Total** | **84** | |
 
 Reproduce with `forge test` against an archive RPC. The kit forks block 25946643, and the rehearsal and the factory block 26249900.
 
