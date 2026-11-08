@@ -7,7 +7,7 @@
  * receives the same entry. No entry made here needs the hosted app to compile
  * it, so local tooling can verify every one (ADR 004, decision 11).
  */
-import { c, encodeKey, Operator, ParameterType } from "zodiac-roles-sdk";
+import { c, encodeKey, flattenCondition, Operator, ParameterType, processPermissions } from "zodiac-roles-sdk";
 import { zeroPadValue } from "ethers";
 
 export { c };
@@ -94,4 +94,16 @@ export function key(label: string): `0x${string}` {
 /** The distinct values of a list, in first-seen order. */
 export function unique<T>(values: readonly T[]): T[] {
   return [...new Set(values)];
+}
+
+/**
+ * The condition tree of a permission entry for one function, flat, as `scopeFunction` takes it: the parent, the
+ * parameter type, the operator and the compared value of each node, in the SDK's form. A governance role can pin a
+ * grant's tree to it whole, so that a motion writes exactly that permission.
+ */
+export function flatTree(entry: { targetAddress: string; signature: string; condition?: unknown }) {
+  const [target] = processPermissions([entry] as any).targets;
+  const fn = target.functions[0];
+  if (target.functions.length !== 1 || fn.wildcarded) throw new Error(`${entry.signature}: no single condition to pin`);
+  return flattenCondition(fn.condition!).map((n) => [n.parent, n.paramType, n.operator, n.compValue ?? "0x"] as const);
 }

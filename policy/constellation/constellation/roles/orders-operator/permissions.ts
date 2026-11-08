@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { anyOf, call } from "../../lib";
 import { manifest } from "../../addresses";
 import { removeConditionalOrder, signOrder, twapOrder, unsignOrder } from "../../cow";
-import { ORDER_TOKENS } from "../../orders";
+import { ORDER_TOKENS, returnTransfer } from "../../orders";
 import { ORDER_LIFE_MAX } from "../../parameters";
 
 /**
@@ -16,5 +15,5 @@ export default [
   unsignOrder(),
   twapOrder({ sell: ORDER_TOKENS, buy: ORDER_TOKENS, receiver: manifest.assetSafe }),
   removeConditionalOrder(),
-  ...ORDER_TOKENS.map((token) => call(token, "transfer(address,uint256)", anyOf([manifest.assetSafe, manifest.agent]))),
+  ...ORDER_TOKENS.map(returnTransfer),
 ] satisfies Permissions;

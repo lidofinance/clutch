@@ -16,6 +16,7 @@ contract PolicyShape is Test {
     bytes32 internal constant GOVERNANCE = bytes32("governance");
     bytes32 internal constant EMERGENCY = bytes32("emergency");
     bytes32 internal constant RESTART = bytes32("restart");
+    bytes32 internal constant EXIT_GOVERNANCE = bytes32("exit-governance");
     bytes32 internal constant INSURANCE_FUNDING = bytes32("insurance-funding");
     bytes4 internal constant TRANSFER = 0xa9059cbb; // transfer(address,uint256)
     bytes4 internal constant ENABLE_MODULE = 0x610b5925; // enableModule(address)
@@ -92,9 +93,10 @@ contract PolicyShape is Test {
     ///      transfer to the first-loss Safe (ADR 014, decision 7). The safety
     ///      modifier never names the operator: the emergency Safe holds the
     ///      emergency key, so the Emergency Brakes multisig holds no role (ADR
-    ///      005, decision 23), and the Easy Track executor holds only the
-    ///      restart key, whose one permission enables the operator modifier on
-    ///      the Asset Safe (INV-035; ADR 013, decision 12).
+    ///      005, decision 23). The Easy Track executor holds the restart key,
+    ///      whose one permission enables the operator modifier on the Asset
+    ///      Safe (INV-035; ADR 013, decision 12), and the exit-governance key,
+    ///      whose permissions administer only the safety modifier (INV-025).
     function test_operator_holds_only_the_operator_key() public view {
         for (uint256 i = 0; i < to.length; i++) {
             (bytes4 sel, bytes memory args) = _args(data[i]);
@@ -121,8 +123,11 @@ contract PolicyShape is Test {
                 if (sel == IRoles.assignRoles.selector) {
                     (address member, bytes32[] memory keys,) = abi.decode(args, (address, bytes32[], bool[]));
                     assertTrue(member != operatorSafe, "the operator holds no safety key");
-                    if (member == governanceMember) assertEq(keys[0], RESTART, "the executor holds only the restart key");
-                    else assertEq(member, emergencySafe, "the emergency Safe and the executor are the only members");
+                    if (member == governanceMember) {
+                        assertTrue(keys[0] == RESTART || keys[0] == EXIT_GOVERNANCE, "the executor's safety-modifier keys");
+                    } else {
+                        assertEq(member, emergencySafe, "the emergency Safe and the executor are the only members");
+                    }
                 }
                 if (key == bytes32(0)) continue;
                 if (key == RESTART) {
@@ -131,6 +136,8 @@ contract PolicyShape is Test {
                         (,, bytes4 fn,,) = abi.decode(args, (bytes32, address, bytes4, IRoles.ConditionFlat[], uint8));
                         assertEq(fn, ENABLE_MODULE, "the restart role only enables a module");
                     }
+                } else if (key == EXIT_GOVERNANCE) {
+                    assertEq(target, safetyRoles, "exit-governance administers only the safety modifier");
                 } else {
                     assertEq(key, EMERGENCY, "the emergency key only");
                 }

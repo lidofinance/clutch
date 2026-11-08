@@ -14,7 +14,7 @@
  */
 import { id, zeroPadValue } from "ethers";
 import { anyOf, c, call } from "./lib";
-import { COMPOSABLE_COW, ORDER_SIGNER, TIMESTAMP_FACTORY, TWAP_HANDLER } from "./addresses";
+import { COMPOSABLE_COW, COW_VAULT_RELAYER, ORDER_SIGNER, TIMESTAMP_FACTORY, TWAP_HANDLER } from "./addresses";
 import { TWAP_SHAPES } from "./parameters";
 
 /** CoW's `GPv2Order.Data`, as the order signer takes it. */
@@ -91,4 +91,18 @@ export function twapOrder({ sell, buy, receiver }: Omit<Order, "life">) {
 /** Cancel a conditional order of the orders account. ComposableCoW keys it by its owner, the caller. */
 export function removeConditionalOrder() {
   return call(COMPOSABLE_COW, "remove(bytes32)");
+}
+
+/**
+ * CoW's vault relayer may pull `token` from the orders account, for any amount: the approvals role's one
+ * permission per token (ADR 007, decision 41). The spender is pinned; the amount stays open, so a motion can raise
+ * an approval that the emergency role set to zero.
+ */
+export function relayerApproval(token: string) {
+  return call(token, "approve(address,uint256)", COW_VAULT_RELAYER);
+}
+
+/** The emergency role's zeroing of CoW's vault relayer's approval of `token` (ADR 007, decision 19). */
+export function relayerZero(token: string) {
+  return call(token, "approve(address,uint256)", COW_VAULT_RELAYER, 0n);
 }

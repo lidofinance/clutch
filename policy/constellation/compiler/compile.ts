@@ -13,9 +13,13 @@
  * a role reach the Asset Safe or one of its modules beyond a fixed set of
  * calls (OD-38), or lets the emergency role restore what it stopped (ADR 005,
  * decision 26). The orders account and its modifier get the same protection,
- * and the only delegatecall that a policy may grant is the orders account's
- * call of CoW's order signer (ADR 007, decision 41). Its output is
- * deterministic, so CI can compare the committed artifact with a fresh compile.
+ * and the only delegatecall that a policy or a motion may grant is the orders
+ * account's call of CoW's order signer (ADR 007, decision 41). A grant pins
+ * the role key to the keys that its modifier lets a motion write: the
+ * operator's on the operator modifier, the emergency role's on the safety
+ * modifier, and those three of the orders account on its modifier. Its output
+ * is deterministic, so CI can compare the committed artifact with a fresh
+ * compile.
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -143,8 +147,11 @@ export function compile(nodes: Record<string, Node>, manifest: Record<string, an
 }
 
 /** The Roles operators that the checks below read, as the deployed mastercopy numbers them. */
+const OR = 2;
 const NOR = 3;
+const MATCHES = 5;
 const EQUAL_TO = 16;
+const LESS_THAN = 18;
 const selector = (signature: string) => id(signature).slice(0, 10);
 
 /**
@@ -188,11 +195,21 @@ const ON_ORDERS_ACCOUNT = new Map<string, string>();
  * any account but the orders account, because a delegatecall runs foreign code in the Safe's own storage (OD-36).
  */
 const ORDER_SIGNER = getAddress("0x23dA9AdE38E4477b23770DeD512fD37b12381FAB");
-const SIGNER_FUNCTIONS = new Set([
-  selector("signOrder((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32),uint32,uint256)"),
-  selector("unsignOrder((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32))"),
-]);
+const SIGN_ORDER = selector("signOrder((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32),uint32,uint256)");
+const UNSIGN_ORDER = selector("unsignOrder((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32))");
+const SIGNER_FUNCTIONS = new Set([SIGN_ORDER, UNSIGN_ORDER]);
 const DELEGATECALL = 2;
+
+/**
+ * Where a grant's execution options sit among its parameters, and which signer functions it may grant with
+ * delegatecall: `signOrder` only with a condition, so by `scopeFunction`, and `unsignOrder` either way. A
+ * whole-target clearance never delegatecalls.
+ */
+const GRANT_OPTIONS = new Map<string, { index: number; signer: Set<string> }>([
+  [selector("allowTarget(bytes32,address,uint8)"), { index: 2, signer: new Set() }],
+  [selector("allowFunction(bytes32,address,bytes4,uint8)"), { index: 3, signer: new Set([UNSIGN_ORDER]) }],
+  [selector("scopeFunction(bytes32,address,bytes4,(uint8,uint8,uint8,bytes)[],uint8)"), { index: 4, signer: SIGNER_FUNCTIONS }],
+]);
 
 /**
  * Refuses a policy in which a role reaches the Asset Safe or one of its
@@ -258,6 +275,10 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
           if (missing.length > 0) {
             throw new Error(`${where}: ${name} must refuse ${missing.join(", ")} as the administered target (OD-38)`);
           }
+          if (kind === "grant") {
+            checkGrantKeys(where, name, fn.conditions, role.key, writableKeys(manifest, target.address));
+            checkGrantDelegatecall(where, name, fn.selector, fn.conditions, target.address === ordersModifier);
+          }
         }
       }
     }
@@ -271,7 +292,13 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
 export function refuseDelegatecall(
   m: { ref: string; avatar: string },
   role: string,
-  target: { address: string; name: string | null; clearance: number; executionOptions: number; functions: { selector: string; signature: string | null; executionOptions: number }[] },
+  target: {
+    address: string;
+    name: string | null;
+    clearance: number;
+    executionOptions: number;
+    functions: { selector: string; signature: string | null; executionOptions: number; wildcarded?: boolean }[];
+  },
   ordersAccount: string | null,
 ) {
   const where = `${m.ref}.${role} on ${target.name ?? target.address}`;
@@ -285,30 +312,153 @@ export function refuseDelegatecall(
     if (!signer || ordersAccount === null || m.avatar !== ordersAccount) {
       throw new Error(`${where}: ${name} delegatecalls, and only the orders account may delegatecall, to sign or unsign a CoW order (OD-36; ADR 007, decision 41)`);
     }
+    if (fn.selector === SIGN_ORDER && fn.wildcarded) {
+      throw new Error(`${where}: ${name} needs a condition: a signer order without one pays anyone (ADR 007, decision 18)`);
+    }
   }
 }
 
 /**
- * The accounts that a grant's second parameter, the administered target,
- * does not refuse with Nor. The tree is flat: the root is 0, and its
- * children are the parameters in order.
+ * The keys that a motion may write under, by the modifier that its grant administers: the operator's on the
+ * operator modifier (INV-004), the emergency role's on the safety modifier (INV-025), and the operator's, the
+ * emergency role's and the approvals role's on the orders modifier (INV-040). Any other module takes no grant.
  */
-export function unguarded(conditions: { parent: number; operator: number; compValue: string }[], accounts: string[]) {
-  const params = conditions.flatMap((n, i) => (i !== 0 && n.parent === 0 ? [i] : []));
-  const target = params[1];
-  const refused = new Set(
-    target !== undefined && conditions[target].operator === NOR
-      ? conditions.filter((n, i) => i !== 0 && n.parent === target && n.operator === EQUAL_TO).map((n) => n.compValue.toLowerCase())
-      : [],
-  );
-  return accounts.filter((account) => !refused.has(zeroPadValue(account, 32).toLowerCase()));
+export function writableKeys(manifest: Record<string, any>, modifier: string): string[] {
+  const at = (field: string) => typeof manifest[field] === "string" && getAddress(manifest[field]) === getAddress(modifier);
+  if (at("operatorModifier")) return [keyOf("operator")];
+  if (at("safetyModifier")) return [keyOf("emergency")];
+  if (at("ordersModifier")) return ["operator", "emergency", "approvals"].map(keyOf);
+  return [];
+}
+
+/**
+ * Refuses a grant that leaves the role key open in a branch, that may write under its own role's key, or that may
+ * write under a key that its modifier keeps from motions: a governance role never widens itself or another motion
+ * role, and never touches a role that it does not administer (ADR 006).
+ */
+export function checkGrantKeys(where: string, name: string, conditions: Flat[], ownKey: string, writable: string[]) {
+  const allowed = writable.map((k) => k.toLowerCase());
+  for (const b of readable(where, name, conditions)) {
+    const keys = fixedValues(conditions, childrenOf(conditions, b)[0]);
+    if (keys === null) throw new Error(`${where}: ${name} must pin the role key that it writes under (ADR 006)`);
+    if (keys.includes(ownKey.toLowerCase())) throw new Error(`${where}: ${name} may not write under its own role's key (ADR 006)`);
+    const other = keys.filter((k) => !allowed.includes(k));
+    if (other.length > 0) {
+      throw new Error(`${where}: ${name} may write under ${other.map(decodeLabel).join(", ")}, which this modifier keeps from motions (INV-004, INV-025, INV-040)`);
+    }
+  }
+}
+
+/** A key's label, for an error message: the bytes32 key without its zero padding. */
+function decodeLabel(key: string) {
+  const hex = key.slice(2).replace(/(00)+$/, "");
+  return `\`${Buffer.from(hex, "hex").toString("utf8")}\``;
+}
+
+/**
+ * Refuses a grant that may give delegatecall, unless it is a grant on the orders modifier of the order signer's
+ * sign or unsign function, the target and the function pinned (OD-36; ADR 007, decision 41). Execution options
+ * whose condition this cannot read count as delegatecall.
+ */
+export function checkGrantDelegatecall(where: string, name: string, fnSelector: string, conditions: Flat[], onOrdersModifier: boolean) {
+  const options = GRANT_OPTIONS.get(fnSelector);
+  if (options === undefined) return;
+  for (const b of readable(where, name, conditions)) {
+    const params = childrenOf(conditions, b);
+    if (!mayDelegatecall(conditions, params[options.index])) continue;
+    const targets = fixedValues(conditions, params[1]);
+    const selectors = fixedValues(conditions, params[2]);
+    const signer = zeroPadValue(ORDER_SIGNER, 32).toLowerCase();
+    const allowed = [...options.signer].map((s) => s.toLowerCase().padEnd(66, "0"));
+    if (
+      !onOrdersModifier ||
+      targets === null ||
+      !targets.every((t) => t === signer) ||
+      selectors === null ||
+      !selectors.every((s) => allowed.includes(s))
+    ) {
+      throw new Error(`${where}: ${name} may grant delegatecall, and a motion may grant it only on the orders modifier, for the order signer's sign or unsign function (OD-36; ADR 007, decision 41)`);
+    }
+  }
+}
+
+/** The branches of a grant's condition, or an error if the checks cannot read its shape. */
+function readable(where: string, name: string, conditions: Flat[]) {
+  const bs = branches(conditions);
+  if (bs === null) throw new Error(`${where}: ${name} has a condition whose shape the checks cannot read`);
+  return bs;
+}
+
+/** Whether an execution-options parameter may carry the delegatecall bit. An open or unread condition may. */
+function mayDelegatecall(conditions: Flat[], i: number | undefined) {
+  if (i === undefined) return true;
+  const n = conditions[i];
+  if (n.operator === LESS_THAN) return BigInt(n.compValue) > BigInt(DELEGATECALL);
+  const values = fixedValues(conditions, i);
+  return values === null || values.some((v) => (BigInt(v) & BigInt(DELEGATECALL)) !== 0n);
+}
+
+type Flat = { parent: number; operator: number; compValue: string };
+
+/** The children of node `i` of a flat tree, in order. The root is its own parent, so it is not its own child. */
+function childrenOf(conditions: Flat[], i: number) {
+  return conditions.flatMap((n, j) => (j !== i && n.parent === i ? [j] : []));
+}
+
+/**
+ * The branches of a call's condition, each a Matches whose children are the parameters in order: the root, or
+ * the children of a root Or. Null for any other shape, which no check below can read.
+ */
+function branches(conditions: Flat[]): number[] | null {
+  const root = conditions[0];
+  if (root === undefined) return null;
+  if (root.operator === MATCHES) return [0];
+  if (root.operator !== OR) return null;
+  const kids = childrenOf(conditions, 0);
+  return kids.length > 0 && kids.every((k) => conditions[k].operator === MATCHES) ? kids : null;
+}
+
+/** The values that a parameter may take, lower-case, if it is EqualTo one value or an Or of EqualTo; else null. */
+function fixedValues(conditions: Flat[], i: number | undefined): string[] | null {
+  if (i === undefined) return null;
+  const n = conditions[i];
+  if (n.operator === EQUAL_TO) return [n.compValue.toLowerCase()];
+  if (n.operator !== OR) return null;
+  const kids = childrenOf(conditions, i);
+  if (kids.length === 0 || !kids.every((k) => conditions[k].operator === EQUAL_TO)) return null;
+  return kids.map((k) => conditions[k].compValue.toLowerCase());
+}
+
+/**
+ * The accounts that a grant leaves open as the administered target, its second parameter. In every branch the
+ * target must refuse each account with Nor, or be pinned to accounts outside the list, such as the order signer.
+ * A condition of any other shape leaves every account open.
+ */
+export function unguarded(conditions: Flat[], accounts: string[]) {
+  const bs = branches(conditions);
+  if (bs === null) return [...accounts];
+  const open = new Set<string>();
+  for (const b of bs) {
+    const target = childrenOf(conditions, b)[1];
+    const pinned = fixedValues(conditions, target);
+    const refused = new Set(
+      target !== undefined && conditions[target].operator === NOR
+        ? childrenOf(conditions, target).filter((k) => conditions[k].operator === EQUAL_TO).map((k) => conditions[k].compValue.toLowerCase())
+        : [],
+    );
+    for (const account of accounts) {
+      const word = zeroPadValue(account, 32).toLowerCase();
+      if (pinned !== null ? pinned.includes(word) : !refused.has(word)) open.add(account);
+    }
+  }
+  return accounts.filter((account) => open.has(account));
 }
 
 /**
  * Whether a one-parameter call's condition pins that parameter to `account`:
  * a root Matches with one child, EqualTo the account.
  */
-export function pinnedTo(conditions: { parent: number; operator: number; compValue: string }[], account: string) {
+export function pinnedTo(conditions: Flat[], account: string) {
   return (
     conditions.length === 2 &&
     conditions[1].parent === 0 &&
