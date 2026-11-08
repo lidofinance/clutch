@@ -200,7 +200,7 @@
   controlled_by: "Easy Track. Only an enacted motion makes it act."
   can:
     - "Act as the governance role: write the operator's permissions and budgets through the universal factory's shapes, inside the limits that the policy sets."
-    - "Act as the exit-governance role on the safety modifier: add the emergency exit for a protocol that a motion onboards (OD-49)."
+    - "Act as the exit-governance role on the safety modifier: add the emergency exit for a protocol that a motion onboards, or for a token that a motion adds to the order lists (OD-49)."
     - "Act as the restart role: enable the operator modifier on the Asset Safe after the switch, and nothing else (OD-104)."
     - "Act as the orders modifier's governance and approvals roles: add a token to the order lists, and raise an approval of CoW's vault relayer (OD-103)."
     - "Act as the first-loss burn role on the first-loss modifier: burn the DAO's [[first-loss shares]] in an enacted burn motion (OD-67)."
@@ -425,7 +425,7 @@
   what: "A second Roles modifier on the Asset Safe, for the emergency role and its switch. No guard screens it, so recovery never waits for the vendor. It also carries two roles that motions use: exit-governance and restart."
   controlled_by: "Its owner, the Asset Safe, so in the end the DAO."
   can:
-    - "Carry the emergency role. It has no budget keys. Carry the restart role, which may only enable the operator modifier; it is tested on a fork. The exit-governance role is specified, not built (OD-49, OD-104)."
+    - "Carry the emergency role. It has no budget keys. Carry the restart role, which may only enable the operator modifier, and the exit-governance role, which writes only the emergency role's exits; both are tested on a fork (OD-49, OD-104)."
     - "Keep working after the emergency role's switch disables the operator modifier."
   cannot:
     - "Be disabled by the switch: its pin is exact. If it has a defect, the fix is a DAO vote."
@@ -446,7 +446,7 @@
     - "Revoke any operator target or function. One revoke reaches every operator permission on the modifier; on the orders modifier the emergency role holds a revoke of its own."
     - "Switch the operator off: `disableModule` on the Asset Safe, with the module pinned to the operator modifier. The operator, governance and insurance-funding roles stop at once, and so does every queued motion that writes through them (OD-58)."
     - "Set any operator spender's approval to zero."
-    - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, and redeem sUSDS. A protocol that a motion onboards gets its emergency exit from the same motion, which is specified (OD-49)."
+    - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, and redeem sUSDS. A protocol that a motion onboards gets its emergency exit from the same motion, through the exit-governance role, which is tested on a fork; the factory's shapes that write the exits are not built (OD-49)."
     - "Unwrap wstETH and WETH, and stake ETH."
     - "Transfer the vault's tokens and Earn shares, but only to the Aragon Agent."
   cannot:
@@ -466,15 +466,16 @@
   node: safety-modifier
   name: The exit-governance role
   status: new
-  label: specified
-  what: "The permissions that an enacted Easy Track motion uses on the safety modifier. The motion that onboards a protocol also adds its emergency exit through this role."
+  label: built
+  what: "The permissions that an enacted Easy Track motion uses on the safety modifier. The motion that onboards a protocol, or adds a token to the orders account's lists, also adds its emergency exit through this role."
   controlled_by: "Held by the Easy Track script executor, so only an enacted motion uses it. The DAO creates it at the enabling vote."
   can:
-    - "Write an exit for the emergency role: redeem, withdraw, claim and cancel with the receiver and owner pinned to the Asset Safe, a transfer pinned to the Aragon Agent, or an approval set to zero."
+    - "Write an exit for the emergency role, each tree pinned whole: redeem, withdraw and claim with the receiver and owner pinned to the Asset Safe; cancel, a redeem queue's redeem and unwrap; a transfer pinned to the Aragon Agent, or to the Agent or the orders account for a token that a recovery order sells; or an approval set to zero."
   cannot:
-    - "Write an entry, a deposit or a non-zero approval. The universal factory's shapes emit only exits; the modifier cannot check that, so tests and the audit do."
-    - "Grant delegatecall, touch membership or the switch, set an allowance, or target the Asset Safe or any module of it."
-  sources: ["ADR-006#d13", "ADR-013#d7", "ADR-005#proposed-direction", OD-49, INV-025]
+    - "Write an entry, a deposit, a non-zero approval or another receiver: the modifier refuses any tree but the pinned exits. Which target gets which exit is the universal factory's shape, which tests and the audit check."
+    - "Write under any key but the emergency role's, grant Send or delegatecall, touch membership or the switch, set an allowance, or target the Asset Safe or any module of it."
+  sources: ["ADR-006#d13", "ADR-013#d7", "ADR-005#proposed-direction", "ADR-007#d45", OD-49, INV-025,
+    "test:test_exit_governance_writes_only_exits", "test:test_exit_governance_gives_a_new_token_its_exit"]
 
 - id: restart-role
   node: safety-modifier
@@ -503,7 +504,7 @@
   what: "The permission policy, written as a Zodiac [[constellation]] in TypeScript under `policy/constellation/`. It names the Safes, the modifiers, the roles, the permissions and the budget keys."
   controlled_by: "The repository. A change is a reviewed pull request. `@lidofinance/defi-tech` owns it."
   can:
-    - "State every permission of the three built roles in one place. The other roles join when they are built: exit-governance and restart, the orders modifier's roles, the first-loss roles and the insurance roles (OD-49, OD-60, OD-67, OD-103, OD-104, OD-107)."
+    - "State every permission of the built roles in one place: operator, governance, emergency, restart, insurance-funding and exit-governance, and the orders account's four roles. The first-loss roles and the insurance roles join when they are built (OD-49, OD-60, OD-67, OD-103, OD-104, OD-107)."
     - "Go to the Lido Zodiac workspace, so that the UI can show it."
   cannot:
     - "Change the chain by itself. Only a vote or a motion applies a policy."
@@ -893,15 +894,16 @@
     - "Let the operator sign orders through the order signer and create TWAP orders. The receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."
     - "Let the emergency role cancel any order, set a relayer approval to zero, send any listed token to the Aragon Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent."
     - "Let the emergency role stop the operator by revoking its targets and functions. The stop also cancels the operator's open orders, because a fill does not consult the policy (OD-58)."
-    - "Let a motion add a token to the lists, on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders (OD-103). The governance role is specified, not built."
-    - "Let a motion raise an approval of CoW's vault relayer again, after the emergency role set it to zero. The approvals role is specified, not built."
+    - "Let a motion add a token to the lists, on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders (OD-103). The governance role is built and tested on a fork; the factory's shape that writes the motion is not built."
+    - "Let a motion raise an approval of CoW's vault relayer again, after the emergency role set it to zero. The approvals role is built and tested on a fork."
   cannot:
     - "Take a delegatecall from a motion, except to the order signer, for signing and unsigning orders (INV-040)."
-    - "Let the governance role write outside the `operator` and `emergency` keys, change membership or reach an administrative target (INV-040)."
+    - "Let the governance role write outside the `operator` and `emergency` keys, write anything but the relayer approval under the `approvals` key, change membership or reach an administrative target (INV-040)."
   address: "To be deployed"
   sources: ["ADR-007#d19", "ADR-007#d25", "ADR-007#d28", "ADR-007#d30", "ADR-007#d41", "ADR-007#proposed-direction",
     "ADR-005#d21", "ADR-005#d25", OD-43, OD-57, OD-58, OD-103, INV-014, INV-022, INV-040, "ADR-007#d39", OD-79,
-    "test:test_orders_emergency_cancels_sweeps_and_recovers", "test:test_orders_emergency_revocation_keeps_recovery"]
+    "test:test_orders_emergency_cancels_sweeps_and_recovers", "test:test_orders_emergency_revocation_keeps_recovery",
+    "test:test_orders_governance_writes_only_its_keys_and_targets", "test:test_orders_approvals_role_approves_only_the_relayer"]
 
 - id: cow-order-signer
   node: orders

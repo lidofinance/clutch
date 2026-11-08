@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-07T19:23:10Z
+  at: 2026-11-08T10:58:07Z
 verified: []
 sources:
   - id: s1
@@ -91,6 +91,9 @@ sources:
   - id: s27
     resource: "urn:clutch:interview:2026-11-07-fee"
     title: EM's decision to pin the order's fee field to zero, 2026-11-07; the transcript is not in the repository
+  - id: s28
+    resource: "urn:clutch:interview:2026-11-08"
+    title: EM's acceptance of INV-040's amendment and the pinned trees, and EM's decision to build the exit-governance role, 2026-11-08; the transcript is not in the repository
 ---
 
 # Decision log
@@ -100,6 +103,20 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-08 — OD-103 and OD-49: the orders modifier's pinned grants, and the exit-governance role
+
+The agent built the orders modifier's governance and approvals roles ([research note](/research/orders-motion-roles-2026-11-08.md)). It amended INV-040, so that the governance role also writes the relayer approval under the approvals key, and it pinned whole each tree that does not depend on the token. It asked EM to accept both. It also asked whether to build the exit-governance role now: a token that a motion adds can arrive in the Asset Safe, the emergency role cannot move it out until that role writes its exit, and the exit also needs a transfer to the orders account, where a recovery order sells it.
+
+> 1. I accept INV-040 amendment and exact-copy locking
+> 2. We should build it
+> 3. Commit and push after 1 and 2 properly incorporated
+
+Recorded as:
+
+- (1, OD-103) The orders modifier's governance role writes, under the approvals key, only the relayer approval. It pins whole each tree that does not depend on the token: the return to the Asset Safe or the Agent, the emergency role's zeroing of the relayer's approval, and the relayer approval ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 44; INV-040). EM accepted the agent's amendment.
+- (2, OD-49) The exit-governance role is built now. The motion that adds a token to the order lists also writes the token's exit on the Asset Safe through it: a transfer to the Aragon Agent or to the orders account ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 45). The agent pinned the role's exit trees whole, as in point 1; EM's answer does not name that part.
+- (3) EM asked to commit and push once points 1 and 2 are in. [s28]
 
 ## 2026-11-07 — OD-116: no signed fee, the order's fee field pinned to zero
 

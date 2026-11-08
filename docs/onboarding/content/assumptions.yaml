@@ -6,7 +6,7 @@
   why: "The Asset Safe owns both modifiers, and every role call runs as the Asset Safe. The emergency revoke, the governance writes and the restart work only because a narrow role may administer a modifier or the Safe. The LIP calls this composition the primary risk."
   breaks: "An operator, a motion or a factory bug gets administration of the vault. Fork probes found two such paths, and both are closed: a motion could grant the operator delegatecall (OD-36), or give it the safety modifier as a target (OD-38)."
   watched_by: [INV-004, INV-009, INV-018, INV-027, "test:test_policyadmin_cannot_grant_operator_the_safety_modifier", "test:test_policyadmin_refuses_every_module_of_the_asset_safe", "test:test_policyadmin_cannot_grant_operator_delegatecall", "test:test_D6_adversarial"]
-  watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. Motions can also write the emergency role's exits on the safety modifier, through the exit-governance role (OD-49), and enable the operator modifier, through the restart role (OD-104). INV-025 has no test yet; INV-035 is tested on a fork. An external audit is due in phase 3."
+  watch_note: "The compiler also refuses a policy that leaves the Asset Safe or one of its modules unguarded. Motions can also write the emergency role's exits on the safety modifier, through the exit-governance role (OD-49), and enable the operator modifier, through the restart role (OD-104). INV-025 and INV-035 are tested on a fork, and the exit-governance role's exit trees are pinned whole. An external audit is due in phase 3."
   sources: ["ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d10", "ADR-006#d13", "ADR-013#d12",
     OD-36, OD-38, OD-49, OD-104, INV-025, INV-035, "lip:part-2"]
 
@@ -97,9 +97,9 @@
   why: "Motions change the vault without a DAO vote. The factory is new code and the most critical contract: its shapes are the bound."
   breaks: "Any motion that survives its objection window can use a flaw in a shape. A sound shape can still point the operator at an unaudited contract; then only the attached budget bounds the loss. If the shapes prove too complex, the fallback's raw writes leave the objection window as the only bound on where funds go."
   watched_by: []
-  watch_note: "The factory's prototype passes INV-032 to INV-036 on a fork against the live Easy Track, for its core, the shape of an approval list, a token's introduction with its ceilings (OD-113) and the restore of a revoked target (OD-104). The other shapes and their emergency exits are not built. The governance role's limits (INV-004) are a second layer. An external audit is due in phase 3."
+  watch_note: "The factory's prototype passes INV-032 to INV-036 on a fork against the live Easy Track, for its core, the shape of an approval list, a token's introduction with its ceilings (OD-113) and the restore of a revoked target (OD-104). The other shapes and their emergency exits are not built. The motion roles' limits are a second layer: the governance role's (INV-004), the exit-governance role's pinned exits (INV-025) and the orders modifier's roles (INV-040). An external audit is due in phase 3."
   sources: ["ADR-013#d7", "ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#consequences", "ADR-013#confirmation",
-    INV-004, INV-032, INV-033, INV-034, INV-035, INV-036, OD-49, OD-102, "lip:part-4", OD-113, OD-104]
+    INV-004, INV-032, INV-033, INV-034, INV-035, INV-036, OD-49, OD-102, "lip:part-4", OD-113, OD-104, INV-025, INV-040]
 
 - id: easy-track-window
   assumption: "Easy Track gives every motion an objection window of at least 48 hours, and rebuilds and hash-checks each script through its factory at enactment."

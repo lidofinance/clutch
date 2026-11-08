@@ -7,14 +7,11 @@ intro: >-
   vault and rewrote it to the decided design. Clutch's own compiler turns it into the committed artifact that reviewers
   approve, and this page reads the graph below from that artifact when it is built.
 planned:
-  - name: Orders account's motion roles
-    where: "On the orders modifier, held by the Easy Track script executor"
-    what: "The governance role adds a token to the order lists, on the sell side and the buy side, with its emergency transfer and recovery orders, and grants delegatecall only to CoW's order signer; the approvals role raises CoW's vault relayer's approval. A motion of the universal factory uses both (OD-103). The orders account and its operator and emergency roles are in the constellation."
-    sources: ["ADR-007#d28", "ADR-007#d30", "ADR-007#d41", OD-57, OD-58, OD-103, INV-023, INV-040]
-  - name: Exit-governance role
-    where: "On the safety modifier, held by the Easy Track script executor"
-    what: "The motion that onboards a protocol also writes the emergency role's exit for it. The role writes only under the emergency key."
-    sources: ["ADR-006#d13", "ADR-013#d7", OD-49, INV-025]
+  - name: Orders account's token motion
+    where: "The universal factory, through the orders modifier's governance and approvals roles"
+    what: "A motion adds a token to the order lists, on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders. The orders account and its four roles are in the constellation, compiled for the rehearsal, because the kit has no orders account: the governance role grants delegatecall only to CoW's order signer and pins whole the trees that do not depend on the token, and the approvals role approves only CoW's vault relayer. The factory's shape that writes the motion is not built (OD-103)."
+    sources: ["ADR-007#d28", "ADR-007#d30", "ADR-007#d41", OD-57, OD-58, OD-103, INV-023, INV-040,
+      "doc:docs/research/orders-motion-roles-2026-11-08.md#what-was-built"]
   - name: Insurance roles
     where: "On the first-loss modifier, held by the Easy Track script executor"
     what: "The insurance-funding role on the operator modifier, which moves a listed token from the Asset Safe to the first-loss Safe, is in the constellation. The insurance roles on the first-loss modifier deposit into the insured product with the first-loss Safe as the receiver, burn, and pay a fund's pinned payout address within its cap. All act only by motion (OD-107)."
@@ -48,10 +45,10 @@ changes:
   - area: Governance
     kind: added
     provider: "No role. It assumed that motions act as the Aragon Agent, which Easy Track cannot do."
-    clutch: "A governance role for Easy Track's script executor. It writes operator permissions only through the universal factory's typed shapes, never delegatecall and never on the Asset Safe or its modules."
+    clutch: "A governance role for Easy Track's script executor. It writes operator permissions only through the universal factory's typed shapes, never delegatecall and never on the Asset Safe or its modules. An exit-governance role on the safety modifier writes only the emergency role's exits, each tree pinned whole."
     why: "Motions need their own narrow role; two fork probes showed how a wider one reaches the vault (OD-36, OD-38)."
     sources: ["ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7", "ADR-013#proposed-direction", OD-36, OD-38, INV-004,
-      INV-034]
+      INV-034, "ADR-006#d13", OD-49, INV-025]
   - area: Asset Safe
     kind: changed
     provider: "Agent-owned, on the Safe v1.4.1 singleton. The constellation's Safe node cannot set a version, a guard or a fallback handler."
