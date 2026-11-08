@@ -58,4 +58,6 @@ library Mainnet {
     address internal constant EARN_ETH_SHARE = 0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4;
     address internal constant EARN_USD_SHARE = 0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981;
     address internal constant EARN_USD_DEPOSIT_QUEUE = 0xC75E7E73B25fEa8bB23EB55CC48BA55067b5be76;
+    // A stand-in for a token that a motion adds to the orders lists (ADR 007, decision 41). No decision lists it.
+    address internal constant WBTC = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
 }

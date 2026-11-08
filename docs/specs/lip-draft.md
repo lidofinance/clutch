@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-07T19:23:10Z
+  at: 2026-11-08T10:58:07Z
 verified: []
 sources:
   - id: s1
@@ -288,9 +288,9 @@ The principals and their roles follow. Role keys are `bytes32`; the encoding mus
 | `governance` | EVMScriptExecutor, driven by Easy Track. **Operator modifier** | Write operator permissions through a typed shape of the universal factory, for a target named in a motion; narrow them by a raw write; set operator budgets and ceilings within their limits (OD-102, OD-105) | Submit a tree that widens a permission; grant or remove any role; touch the emergency role; target the modifier's avatar or any of its modules; grant delegatecall |
 | `insurance-funding` | EVMScriptExecutor, driven by Easy Track. **Operator modifier** | Transfer a listed token from the Asset Safe to the first-loss Safe, only as an enacted motion (OD-107) | Pay anyone but the first-loss Safe |
 | `emergency` | Emergency Safe, three of five: two TMC members, two Emergency Brakes members and one member of neither body. **Safety modifier** and the orders modifier | Set approvals to zero; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS; transfer assets to the Agent or to the orders account; on the orders account, cancel orders, set a relayer approval to zero, send tokens to the Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent; revoke the operator's targets and functions, for an emergency removal (OD-70); disable the **operator** modifier, with the module argument pinned, for a defect in the permission layer or on the cap-breach trigger (OD-29, OD-58) | Add any permission; enter any protocol except by staking ETH; borrow; reach the first-loss Safe; change the recovery destination; disable the safety modifier or the orders modifier; restore what it stopped (OD-59) |
-| exit governance | EVMScriptExecutor, driven by Easy Track. **Safety modifier** | Write the emergency role's exit for a target that an onboarding motion names, from the same shape: redeem, withdraw, claim and cancel pinned to the avatar, a transfer pinned to the Agent, an approval set to zero (OD-49) | Write anything but an exit; grant delegatecall; touch membership or the switch; set an allowance; target the Asset Safe or any of its modules |
+| exit governance | EVMScriptExecutor, driven by Easy Track. **Safety modifier** | Write the emergency role's exit for a target that a motion names, each tree pinned whole: redeem, withdraw and claim paid to the avatar; cancel, a redeem queue's redeem and unwrap; a transfer pinned to the Agent, or to the Agent or the orders account for a token that recovery sells; an approval set to zero (OD-49) | Write anything but an exit; write under any key but `emergency`; grant Send or delegatecall; touch membership or the switch; set an allowance; target the Asset Safe or any of its modules |
 | `restart` | EVMScriptExecutor, driven by Easy Track. **Safety modifier** | Call `enableModule` on the Asset Safe, with the operator modifier as its argument, only as an enacted motion (OD-104) | Anything else |
-| orders `governance` and approvals | EVMScriptExecutor, driven by Easy Track. **Orders modifier** | Add a token to the orders account's lists, on the sell side and the buy side, with delegatecall only to the order signer; raise an approval of CoW's vault relayer; each only as an enacted motion (OD-103) | Any other delegatecall; touch membership or the switch |
+| orders `governance` and approvals | EVMScriptExecutor, driven by Easy Track. **Orders modifier** | Add a token to the orders account's lists, on the sell side and the buy side, with delegatecall only to the order signer; write the token's return to the Asset Safe or the Agent, the emergency role's zeroing and the relayer approval, each pinned whole; restore the operator's cancels; raise an approval of CoW's vault relayer; each only as an enacted motion (OD-103) | Any other delegatecall, receiver or spender; write under its own key; touch membership or the switch; target the vault's accounts |
 | `first-loss` | Committee's Safe, the TMC signers, four of seven, screened once the launch cap lifts. **First-loss modifier** | Request and claim the redemption of the DAO's earnETH and earnUSD shares, with the proceeds pinned to the Asset Safe; on the Earn team's written instruction under the March 2026 terms (OD-60, OD-108) | Burn, transfer or approve the shares; pay anyone but the Asset Safe; act on the Asset Safe or the orders account |
 | `first-loss-burn` | EVMScriptExecutor, driven by Easy Track. **First-loss modifier** | Burn the DAO's earnETH and earnUSD shares, only as an enacted motion of the universal factory that the committee's Safe created (OD-67, OD-102) | Anything else |
 | insurance roles | EVMScriptExecutor, driven by Easy Track. **First-loss modifier** | Create a fund's permissions through a typed shape; deposit into earnETH, earnUSD or a Lido Lend vault with the first-loss Safe as the receiver; burn a fund's shares; pay a fund's pinned payout address within its cap; each only as an enacted motion (OD-107) | Pay any other address; transfer or approve the first-loss shares |
@@ -339,9 +339,9 @@ The governance role is separately constrained so that a factory bug cannot reach
 - `setAllowance` takes only an operator budget key, and a period of at least 30 days (OD-08).
 - `allowFunction` and `scopeFunction` take only the execution options None or Send. A motion cannot grant delegatecall on the Asset Safe (OD-36).
 - `assignRoles` and `setDefaultRole` are **not** granted (OD-09). Membership changes are a DAO vote (OD-101).
-- The exit-governance role on the safety modifier carries the same guards, with the role key pinned to `emergency`, and no `setAllowance` at all (OD-49). It is specified, not built.
-- The `restart` role on the safety modifier may call only `enableModule` on the Asset Safe, with the operator modifier as its argument (OD-104). It is specified, not built.
-- The orders modifier's governance role grants delegatecall only to CoW's order signer, for signing and unsigning orders (OD-103). It is specified, not built.
+- The exit-governance role on the safety modifier carries the same guards, with the role key pinned to `emergency`, no `setAllowance` at all, and each exit tree pinned whole (OD-49). It is built and tested on a fork.
+- The `restart` role on the safety modifier may call only `enableModule` on the Asset Safe, with the operator modifier as its argument (OD-104). The universal factory's prototype has it.
+- The orders modifier's governance role grants delegatecall only to CoW's order signer, for signing and unsigning orders, and pins whole the trees that do not depend on the token (OD-103). It is built and tested on a fork; the factory's shape that writes through it is not built.
 
 Pinning the role key alone does not stop escalation: a grant targeting a modifier lets the operator reach owner-only administration through the avatar.
 A factory bug can still grant calls on ordinary targets; the shapes and the objection window control that risk.
@@ -388,11 +388,11 @@ A shape that adds a branch to a function with branches, such as a spender on `ap
 
 **Each onboarding shape also writes the emergency exit (OD-49).** The same script uses exit-governance on the safety modifier to grant the emergency role its target's exits:
 
-- Redeem, withdraw, claim and cancel, with receiver and owner pinned to the avatar.
-- Transfer of the new receipt token to the Agent.
-- Zero approval of the new spender.
+- Redeem, withdraw and claim, with receiver and owner pinned to the avatar; cancel, a redeem queue's redeem and unwrap, which act for the avatar alone.
+- Transfer of the new token to the Agent, or, for a token that a recovery order sells, to the Agent or the orders account.
+- Zero approval of any spender.
 
-It grants no entry, deposit or non-zero approval. The exit exists at enactment and survives the emergency role's switch.
+It grants no entry, deposit or non-zero approval. The role's guard pins each exit tree whole, so the modifier refuses any other. The exit exists at enactment and survives the emergency role's switch.
 
 **Building a motion.** As proposed, Clutch's own `motion` command builds each motion from a merged commit of the policy. It reads the versions and the counter on chain, runs the motion against the live Easy Track on a fork, prints the permission difference and drafts the forum post. The Zodiac UI does not know the factory's format or its versions, so it does not build motions [s15].
 
@@ -500,7 +500,7 @@ The emergency role holds, and nothing else:
 - `revokeTarget(operator, …)` and `revokeFunction(operator, …)` on the operator modifier and on the orders modifier, role key pinned to the operator;
 - `disableModule(prevModule, operatorModifier)` on the Asset Safe, the switch, with the module argument pinned (see 6.2);
 - `transfer(to, amount)` with `to` pinned by `EqualTo` to the orders account, and on the orders account: cancel any order, revoke the operator's targets and functions, set a relayer approval to zero, send any listed token to the Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent (see 6.1). Tested on a fork [s19].
-- the exits that an onboarding motion adds through the exit-governance role: redeem, withdraw, claim and cancel pinned to the avatar, a transfer pinned to the Agent, and an approval set to zero (OD-49). Specified, not built.
+- the exits that a motion adds through the exit-governance role, each tree pinned whole: redeem, withdraw and claim pinned to the avatar, cancel, a redeem queue's redeem and unwrap, a transfer pinned to the Agent or, for a token that recovery sells, to the Agent or the orders account, and an approval set to zero (OD-49). Built and tested on a fork.
 
 Nothing in this role restores authority: no `enableModule`, no grant, no budget and no non-zero approval. The compiler refuses a policy that gives it one (OD-59). Only the `restart` role holds `enableModule`, pinned to the operator modifier, and only the Easy Track executor holds that role (section 6.3).
 

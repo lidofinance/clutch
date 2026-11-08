@@ -169,9 +169,9 @@ flows:
         edges: [gov-role]
         check: "INV-004: the Asset Safe and every module of it are refused as targets (OD-38)."
       - who: "Exit-governance role"
-        text: "The same script gives the emergency role the new target's exits on the safety modifier: redeem, withdraw, claim and cancel pinned to the Asset Safe, a transfer pinned to the Agent, and an approval set to zero. The script's last call, the factory's `commit`, stores the new versions."
+        text: "The same script gives the emergency role the new target's exits on the safety modifier: redeem, withdraw and claim paid to the Asset Safe, cancel and unwrap, a transfer pinned to the Agent, and an approval set to zero. The script's last call, the factory's `commit`, stores the new versions."
         nodes: [easytrack, safety-modifier]
-        check: "INV-025: this role writes only under the emergency key, with no delegatecall, allowance or administrative target. Specified, not built (OD-49)."
+        check: "INV-025: this role writes only the emergency role's exits, under the emergency key, each tree pinned whole, with no delegatecall, allowance or administrative target. The role is built and tested on a fork; the factory's shapes that emit the exits are not built (OD-49)."
       - who: "Operator, and the emergency Safe if needed"
         text: "The operator can use the new permission. The emergency Safe can revoke it at once."
         nodes: [committee, operator-modifier, emergency-safe, safety-modifier]
@@ -270,9 +270,9 @@ flows:
         nodes: [dao, easytrack]
         edges: [object]
       - who: "Easy Track"
-        text: "The executor writes the token into the order lists through the orders modifier's governance role, and approves CoW's vault relayer for it through the approvals role. The same motion adds the emergency transfer, the recovery orders and the operator's return of the token to the Aragon Agent."
+        text: "The executor writes the token into the order lists through the orders modifier's governance role, and approves CoW's vault relayer for it through the approvals role. The same motion adds the emergency transfer, the recovery orders and the operator's return of the token to the Aragon Agent, and, through the exit-governance role, the token's exit from the Asset Safe to the Agent or the orders account (ADR 007, decision 45)."
         nodes: [easytrack, orders]
-        check: "INV-040: the governance role grants delegatecall only to the order signer, for signing and unsigning orders, and the approvals role approves only CoW's vault relayer. Pending: the orders modifier's governance and approvals roles are not built."
+        check: "INV-040: the governance role grants delegatecall only to the order signer, for signing and unsigning orders, pins whole the trees that do not depend on the token, and the approvals role approves only CoW's vault relayer. Both roles are built, and a fork test runs the motion's writes by hand; the factory's shape is not built."
       - who: "Operator"
         text: "The operator can now sell or buy the token in market, limit and TWAP orders that pay the Asset Safe."
         nodes: [committee, asset-safe, orders]
@@ -282,7 +282,8 @@ flows:
       - "The emergency Safe can set the token's relayer approval to zero at once. Only a motion raises it again."
     sources: ["ADR-007#d41", "ADR-007#d22", "ADR-007#proposed-direction", "ADR-013#d8", "ADR-013#proposed-direction",
       "ADR-014#proposed-direction", "ADR-006#d4", OD-103, INV-008, INV-040,
-      "runbook:Cancel orders and sweep the orders account"]
+      "runbook:Cancel orders and sweep the orders account", "test:test_orders_motion_adds_a_token",
+      "test:test_orders_approvals_role_approves_only_the_relayer"]
 
   - id: dao-change
     group: governance
@@ -505,7 +506,7 @@ flows:
         text: "The committee's Safe sends a vault token to the Aragon Agent through the operator role, from the Asset Safe or from the orders account. The permission pins the receiver to the Agent."
         nodes: [committee, operator-modifier, asset-safe, dao]
         edges: [op-role, own-op, own]
-        check: "Specified: the return is not in the policy yet. Once the launch cap lifts, the screening guard checks it."
+        check: "From the orders account, the return is in the policy. From the Asset Safe, it is specified and not in the policy yet. Once the launch cap lifts, the screening guard checks it."
       - who: "Emergency Safe"
         text: "In an emergency, the emergency Safe sends tokens to the Agent through the safety modifier, or places recovery orders that pay the Agent."
         nodes: [emergency-safe, safety-modifier, asset-safe, dao]
@@ -712,7 +713,7 @@ flows:
         text: "Other motions bring back what the emergency role revoked, on the Asset Safe and on the orders account, relayer approvals included."
         nodes: [easytrack, operator-modifier, orders]
         edges: [gov-role]
-        check: "A restore motion brings back a revoked target with the permissions stored under it, tested on a fork for the operator modifier. The orders account's restore is not built."
+        check: "A restore motion brings back a revoked target with the permissions stored under it, tested on a fork for the operator modifier. On the orders account, the governance role restores by hand, tested on a fork; the factory's restore for it is not built."
       - who: "Monitoring"
         text: "Monitoring alerts on every restart motion. The emergency Safe can stop the operator again at any time."
         nodes: [monitoring, emergency-safe]

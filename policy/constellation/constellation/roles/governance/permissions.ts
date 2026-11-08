@@ -1,32 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { anyOf, c, call, derivedKey, key, noneOf } from "../../lib";
+import { anyOf, c, call, derivedKey, key } from "../../lib";
 import { manifest } from "../../addresses";
+import { NOT_ADMINISTRATION } from "../../administration";
 import * as budgets from "../../allowances";
 import { MIN_REFILL_PERIOD } from "../../parameters";
 
 const MODIFIER = manifest.operatorModifier;
 const OPERATOR = key("operator");
-
-/**
- * Pinning only the role key leaves an indirect escalation: a motion grants
- * the operator a permission whose target is the Asset Safe or one of its
- * modules, and the operator then reaches owner-only administration through
- * the avatar. A fork probe did this with the safety modifier (OD-38). So
- * every scope below forbids, as the administered target, the Asset Safe and
- * every module that the manifest lists, with Nor, and the compiler checks
- * the guard. The orders account and its modifier are refused too (ADR 007).
- * This deny-list is necessary and not sufficient: the universal factory's
- * shapes carry the positive rules (ADR 013).
- */
-if (!Array.isArray(manifest.modules) || manifest.modules.length === 0) {
-  throw new Error("the manifest must list every module of the Asset Safe in `modules` (OD-38)");
-}
-const NOT_ADMINISTRATION = noneOf(
-  manifest.assetSafe,
-  ...manifest.modules,
-  manifest.ordersAccount,
-  ...(manifest.ordersModifier ? [manifest.ordersModifier] : []),
-);
 
 /**
  * The execution options that a motion may grant: None or Send. DelegateCall

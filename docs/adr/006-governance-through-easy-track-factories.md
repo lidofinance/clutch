@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T21:13:28Z
+  at: 2026-11-08T10:58:07Z
 verified: []
 sources:
   - id: s1
@@ -120,6 +120,8 @@ Since EM's decisions of 2026-11-05 ([ADR 013](/adr/013-one-easy-track-factory.md
 - A motion restarts the operator after the switch (OD-104). This replaces the vote of decision 19.
 - Decisions 1 to 4, 6, 8, 10 and 11 stand. The committee's Safe is the universal factory's trusted caller.
 
+Since EM's decisions of 2026-11-08, decision 13's exit-governance role is built and tested on a fork. It writes only the emergency role's exits, each tree pinned whole, and the motion that adds a token to the orders account's lists writes the token's exit through it ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 44 and 45; [research note](/research/orders-motion-roles-2026-11-08.md)).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted from the design [s3]. EM has not accepted it as text.
@@ -133,8 +135,8 @@ Since OD-102, the proposed direction of [ADR 013](/adr/013-one-easy-track-factor
 - The role-toggle factory left the design and kit on 2026-10-05 (decision 8) [s4]. Budget and template factories remain unbuilt.
 - Modifier conditions independently prevent governance from changing membership or emergency powers, granting administrative targets, using foreign budget keys or setting refill periods below 30 days [s6]. Refused targets include both accounts and their modules (decision 10). A factory bug can still grant calls on ordinary targets, such as token transfers. Templates and objections control that risk.
 - An objection, Easy Track pause or committee cancellation stops a queued onboarding motion. The emergency switch freezes its operator-modifier write, and the counter that the emergency Safe raises at the stop makes it fail at enactment ([ADR 013](/adr/013-one-easy-track-factory.md) decision 10). After enactment, emergency can revoke the new permission immediately.
-- **Exit-governance** writes only `emergency`, through `scopeTarget`, `scopeFunction` and `allowFunction`, with None or Send (decision 9). It refuses the Asset Safe and all its modules, including safety (decision 10). It has no `assignRoles`, switch access or allowances.
-- **Exit templates.** Each onboarding template also builds its target's emergency exit: redeem, withdraw, claim and cancel with receiver and owner pinned to the Asset Safe; receipt-token transfer pinned to the Agent; and zero spender approval. They add no entry, deposit or non-zero approval. The modifier cannot identify an exit tree, so code, tests and audit must enforce this.
+- **Exit-governance** writes only `emergency`, through `scopeTarget`, `scopeFunction` and `allowFunction`, as plain calls (decision 9). Each exit tree is pinned whole, so the modifier refuses any other. It refuses the Asset Safe and all its modules, including safety (decision 10). It has no `assignRoles`, switch access or allowances.
+- **Exit templates.** Each onboarding template also builds its target's emergency exit: redeem, withdraw, claim and cancel with receiver and owner pinned to the Asset Safe; receipt-token transfer pinned to the Agent; and zero spender approval. They add no entry, deposit or non-zero approval. The exit-governance role's guard pins each exit tree whole, so the modifier refuses any tree but an exit; which target gets which exit stays the shapes' choice, for code, tests and the audit.
 - **Routine removal** writes the complete function tree without the removed branch and adds nothing (decision 14). Emergency uses immediate `revokeTarget` or `revokeFunction`, pinned to `operator`. All operator permissions use that key; revokes on the operator and orders modifiers cover them.
 
 ## Options considered

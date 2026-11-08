@@ -8,7 +8,9 @@
 // Changed for Clutch on 2026-10-22: LDO left the launch scope (OD-91).
 // Changed for Clutch on 2026-11-07: the emergency role may send assets to the
 // orders account for recovery orders (ADR 007, decision 19).
-import { anyOf, c, call, callWithValue, key, unique } from "../../lib";
+// Changed for Clutch on 2026-11-08: the exits come from the shared builders
+// that the exit-governance role pins (OD-49).
+import { anyOf, call, callWithValue, key, unique } from "../../lib";
 import {
   DAI,
   EARN_ETH,
@@ -24,6 +26,7 @@ import {
 } from "../../addresses";
 import { APPROVALS } from "../operator/permissions";
 import { RECOVERY_SELL } from "../../orders";
+import { queueClaim, queueClaimRequests, toAgent, toAgentOrOrders, vaultRedeem, vaultWithdraw } from "../../exits";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -49,8 +52,8 @@ export default [
   ...APPROVED_TOKENS.map((token) => call(token, "approve(address,uint256)", anyOf(SPENDERS), 0n)),
 
   // Exits and conversions, paid to the Asset Safe.
-  call(SUSDS, "redeem(uint256,address,address)", undefined, c.avatar, c.avatar),
-  call(SUSDS, "withdraw(uint256,address,address)", undefined, c.avatar, c.avatar),
+  vaultRedeem(SUSDS),
+  vaultWithdraw(SUSDS),
   call(WSTETH, "unwrap(uint256)"),
   // WETH goes through stETH: unwrap, stake, then send or swap (OD-20).
   call(WETH, "withdraw(uint256)"),
@@ -60,9 +63,9 @@ export default [
   // so that its shares can be redeemed. Claims pay the Asset Safe.
   ...[EARN_USD, EARN_ETH].flatMap((vault) => [
     call(vault.depositQueue, "cancelDepositRequest()"),
-    call(vault.depositQueue, "claim(address)", c.avatar),
+    queueClaim(vault.depositQueue),
     call(vault.redeemQueue, "redeem(uint256)"),
-    call(vault.redeemQueue, "claim(address,uint32[])", c.avatar),
+    queueClaimRequests(vault.redeemQueue),
   ]),
 
   // Block the operator: the revoking half of the operator modifier's admin
@@ -79,11 +82,5 @@ export default [
 
   // Return to the treasury: every transfer is pinned to the Agent. An asset that a recovery order can sell
   // may also go to the orders account, whose recovery orders pay the Agent (ADR 007, decision 19).
-  ...RETURNABLE.map((token) =>
-    call(
-      token,
-      "transfer(address,uint256)",
-      RECOVERY_SELL.includes(token) ? anyOf([manifest.agent, manifest.ordersAccount]) : manifest.agent,
-    ),
-  ),
+  ...RETURNABLE.map((token) => (RECOVERY_SELL.includes(token) ? toAgentOrOrders(token) : toAgent(token))),
 ] satisfies Permissions;

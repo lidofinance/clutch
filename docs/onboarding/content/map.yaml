@@ -106,8 +106,8 @@ nodes:
   label: Safety modifier
   sub: 'emergency, exits, restart'
   summary: A second Roles modifier for the emergency role, the switch included. Nothing screens it, so recovery never waits
-    on a vendor. Its exit-governance role, which is specified, lets the motion that onboards a protocol add its emergency exit
-    here. Its restart role, also specified, lets a motion enable the operator modifier again after the switch.
+    on a vendor. Its exit-governance role lets the motion that onboards a protocol, or adds a token to the order lists, add
+    its emergency exit here. Its restart role lets a motion enable the operator modifier again after the switch.
   domain: vault
   kind: contract
   status: instance

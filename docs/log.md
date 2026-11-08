@@ -1,5 +1,11 @@
 # Log
 
+## 2026-11-08
+
+* **Evidence**: Built the exit-governance role on the safety modifier (ADR 006, decision 13; OD-49): it writes only the emergency role's exits, under the emergency key, each tree pinned whole. The compiler now keeps each modifier's keys from motions. Fork tests run a token motion's writes with its exit on the Asset Safe; the fork suite passes 93 tests.
+* **Decision**: Recorded EM's decisions of 2026-11-08: EM accepted INV-040's amendment and the pinned trees of the orders modifier's governance role (ADR 007, decision 44), and decided to build the exit-governance role now, so that the motion that adds a token to the order lists also writes the token's exit on the Asset Safe, a transfer to the Agent or the orders account (ADR 007, decision 45).
+* **Evidence**: Built the orders modifier's governance and approvals roles of ADR 007 decision 41, held by the Easy Track executor: governance writes a token's signer and TWAP orders and three trees pinned whole, grants delegatecall only to the order signer and restores the operator's cancels; the approvals role approves only CoW's vault relayer. The compiler gained grant rules for role keys and delegatecall. Fork tests run a token motion's writes by hand; the fork suite passes 90 tests. INV-040 is amended to add the approvals key.
+
 ## 2026-11-07
 
 * **Decision**: Recorded EM's decision of 2026-11-07, OD-116: an order of the orders account signs no fee; the policy pins the order's own fee field to zero, and the signer's fee bound stays zero (ADR 007, decision 43).

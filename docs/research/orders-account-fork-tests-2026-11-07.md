@@ -9,7 +9,7 @@ valid_as_of: 2026-11-07
 stale_after: 2027-02-28T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-07T19:23:10Z
+  at: 2026-11-08T10:32:34Z
 verified: []
 sources:
   - id: s1
@@ -114,6 +114,5 @@ EM asked whether a signed fee of zero is the right bound, or whether a smarter o
 ## Not tested, and not built
 
 - The order book's acceptance of an order with zero app data and of a TWAP part with zero app data, and the watch-tower's posting of TWAP parts. Neither runs on a fork.
-- The orders modifier's governance and approvals roles, and the universal factory's shape that adds a token to the lists with its relayer approval, emergency transfer and recovery orders (ADR 007 decision 41; INV-040).
-- The restore of a target that the emergency role revoked on the orders modifier.
+- The universal factory's shape that adds a token to the lists with its relayer approval, emergency transfer and recovery orders (ADR 007 decision 41; INV-040). The orders modifier's governance and approvals roles, and the restore of what the emergency role revoked there, were built on 2026-11-08 ([research note](/research/orders-motion-roles-2026-11-08.md)).
 - The orders budgets' figures, which come from the attested computation.

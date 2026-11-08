@@ -12,3 +12,8 @@ export * as insuranceFunding from "./insurance-funding";
 // Added for Clutch on 2026-11-07: the roles of the orders account (ADR 007, decision 30).
 export * as ordersOperator from "./orders-operator";
 export * as ordersEmergency from "./orders-emergency";
+// Added for Clutch on 2026-11-08: the Easy Track executor's roles on the orders account (ADR 007, decision 41).
+export * as ordersGovernance from "./orders-governance";
+export * as ordersApprovals from "./orders-approvals";
+// Added for Clutch on 2026-11-08: the Easy Track executor's exit-governance role (ADR 006, decision 13; OD-49).
+export * as exitGovernance from "./exit-governance";

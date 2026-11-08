@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { anyOf, call, key } from "../../lib";
-import { COW_VAULT_RELAYER, manifest } from "../../addresses";
-import { removeConditionalOrder, signOrder, unsignOrder } from "../../cow";
-import { RECOVERY_BUY, RECOVERY_SELL } from "../../orders";
+import { call, key } from "../../lib";
+import { manifest } from "../../addresses";
+import { relayerZero, removeConditionalOrder, signOrder, unsignOrder } from "../../cow";
+import { RECOVERY_BUY, RECOVERY_SELL, returnTransfer } from "../../orders";
 import { RECOVERY_LIFE_MAX } from "../../parameters";
 
 /** The kit deploys no orders modifier; a manifest without one never compiles this role. */
@@ -22,6 +22,6 @@ export default [
   removeConditionalOrder(),
   call(MODIFIER, "revokeTarget(bytes32,address)", OPERATOR),
   call(MODIFIER, "revokeFunction(bytes32,address,bytes4)", OPERATOR),
-  ...RECOVERY_SELL.map((token) => call(token, "approve(address,uint256)", COW_VAULT_RELAYER, 0n)),
-  ...RECOVERY_SELL.map((token) => call(token, "transfer(address,uint256)", anyOf([manifest.agent, manifest.assetSafe]))),
+  ...RECOVERY_SELL.map(relayerZero),
+  ...RECOVERY_SELL.map(returnTransfer),
 ] satisfies Permissions;

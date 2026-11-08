@@ -1,5 +1,8 @@
 # Research
 
+* [The orders account's motion roles and the exit-governance role on a fork, 2026-11-08](orders-motion-roles-2026-11-08.md) - OD-103 and OD-49: the orders modifier's governance and approvals roles, the exit-governance role, the compiler's grant rules, and a token motion's writes run by hand.
+* [The orders account's policy on a fork, 2026-11-07](orders-account-fork-tests-2026-11-07.md) - ADR 007's fork tests: the order signer and TWAP orders from Safe v1.5.0; OD-115 and OD-116.
+* [The universal factory's prototype, 2026-11-05](universal-factory-prototype-2026-11-05.md) - OD-102 to OD-104, OD-113 and OD-114: the factory's core, an approval list, introductions and restores, on a fork.
 * [One Easy Track factory and funding by tranche votes, 2026-11-05](easy-track-first-2026-11-05.md) - OD-100 to OD-112: Easy Track's script permissions, cancel and pause; Roles storage; Merkle-root engines; the two-modifier alternative; Finance payments by Aragon Voting; the flows to the Aragon Agent.
 * [The enabling vote rehearsed on a mainnet fork, 2026-10-15](enabling-vote-rehearsal-2026-10-15.md) - OD-92 to OD-94: the vote run on forks of 2026-10-15 and 2026-10-22, the vote of approved hashes under EIP-7825, and the ramp-up. Since OD-106 the vote has no registries and no USDS items; the approved-hash evidence stands.
 * [The committee's Safe as the operator, reviewed again, 2026-10-15](operator-safe-review-2026-10-15.md) - OD-80 and OD-83: operator account alternatives, other duties and the fork probe.

@@ -322,7 +322,8 @@
   closed: 2026-10-06
   log:
     - "2026-10-06 — OD-49: emergency exits for positions that a motion onboards"
-  adr: [ADR-006, ADR-005, ADR-011]
+    - "2026-11-08 — OD-103 and OD-49: the orders modifier's pinned grants, and the exit-governance role"
+  adr: [ADR-006, ADR-005, ADR-011, ADR-007#d45]
 - id: OD-50
   question: "Which human ids may verify a page, besides EM, the committee and the Emergency Brakes multisig?"
   closed: 2026-10-07
@@ -729,7 +730,8 @@
   log:
     - "2026-11-05 — OD-102 to OD-104 and OD-112: the ballot on one factory"
     - "2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items"
-  adr: [ADR-007#d41]
+    - "2026-11-08 — OD-103 and OD-49: the orders modifier's pinned grants, and the exit-governance role"
+  adr: [ADR-007#d41, ADR-007#d44]
   replaces:
     - {od: OD-36, part: true}
     - {od: OD-46, part: true}

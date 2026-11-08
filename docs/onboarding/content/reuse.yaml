@@ -117,7 +117,7 @@
 # --- New code or configuration -------------------------------------------------------------------
 - name: The permission policy
   column: new
-  what: "The roles and their permissions: what the operator, governance, emergency, exit-governance, restart, orders approvals, first-loss, first-loss burn and insurance roles may call, and with which arguments. Three are built: operator, governance and emergency. The others are specified (OD-49, OD-60, OD-67, OD-103, OD-104, OD-107)."
+  what: "The roles and their permissions: what the operator, governance, emergency, exit-governance, restart, orders approvals, first-loss, first-loss burn and insurance roles may call, and with which arguments. Built: the operator, governance and emergency roles, on the Asset Safe and on the orders account; the restart, insurance-funding and exit-governance roles; and the orders approvals role. Specified: first-loss, first-loss burn and the insurance roles (OD-49, OD-60, OD-67, OD-103, OD-104, OD-107)."
   why: "This is the heart of Clutch. Every permission traces back to a decision and forward to a test."
   owner: "`@lidofinance/defi-tech`; reviewers approve each change"
   sources: ["ADR-005#d6", "ADR-005#proposed-direction", "ADR-004#d3", "ADR-004#d7", "ADR-004#d12", "ADR-013#proposed-direction",
