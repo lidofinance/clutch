@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T19:22:54Z
+  at: 2026-11-08T14:24:34Z
 verified: []
 sources:
   - id: s1
@@ -109,7 +109,7 @@ EM decided on 2026-10-13, closing OD-67 [s1]:
 
 23. No first-loss burn runs without the objection window. A burn runs only as an Easy Track motion: the operator Safe creates it, and after the window the Easy Track executor burns the shares through a `first-loss-burn` role on the first-loss modifier. The operator Safe's `first-loss` role keeps the redemption and the claim, paid to the Aragon Agent.
 
-Decision 23 replaces the burn in decision 21. The redemption and the claim stay as decision 21 says.
+Decision 23 replaces the burn in decision 21. The redemption and the claim stay as decision 21 says. Since [ADR 013](/adr/013-one-easy-track-factory.md) decision 18 (2026-11-08), the universal factory holds `first-loss-burn`, in place of the Easy Track executor, and burns in the motion's one call.
 
 EM decided on 2026-10-14, closing OD-71 and OD-66 [s1]:
 
@@ -174,7 +174,7 @@ Since OD-106, the proposed direction of [ADR 014](/adr/014-funding-by-tranche-vo
 - **Funded value.** Monitoring keeps the vault's funded value: the first-loss shares at their value on the day of the transfer, and each top-up at its value on the day of its enactment, by the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 35). Each top-up's forum post states the funded value, the headroom under the mandate size, and the vault's share of the DAO's non-LDO treasury.
 - **Funding alerts.** Monitoring flags a top-up above the headroom that its forum post states; a top-up motion that would take the vault above the mandate size or the treasury share, while its objection window is open; a fortnightly reading above the treasury share; and any top-up motion after an objected one. The days 1 to 10 window of decision 6 ends with the monthly refill.
 - **First-loss custody.** Plain transfers fund the first-loss Safe without a permission. That Safe is its modifier's owner, avatar and target.
-- **First-loss burn.** The committee creates a motion naming an amount and pinned earnETH or earnUSD. After 72 hours without objection, the executor calls `burn` through `first-loss-burn` (decision 23). Burns always wait, including urgent ones.
+- **First-loss burn.** The committee creates a motion naming an amount and pinned earnETH or earnUSD. After 72 hours without objection, the universal factory calls `burn` through `first-loss-burn` (decision 23; ADR 013, decision 18). Burns always wait, including urgent ones.
 - **First-loss exit.** The committee's `first-loss` role calls `redeem` and `claim` on the vault's queue, paying only the Agent (decision 21).
 - **Instructions and reporting.** The Earn team's written instruction is required: curator-confirmed loss of at least 1% for burns, confirmed material risk for exits. Publish the instruction and curator confirmation with the motion; update the incident within seven days [s7]. Below the terms, obtain a Snapshot exception first, as for Kelp. First-loss equals received shares less burns; reports show it as a sub-allocation. Monitor balance, owner, module and singleton changes; page on every burn motion and first-loss-role action ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
 - **Top-up reports.** Put the report identifier in the required pre-top-up forum post; the fixed payment reference provides no on-chain anchor. No top-up motion starts while the monthly report is late, while level-5 prices cover more than a set share of the vault, or while the two readings differ by more than the band ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 21, 36 and 41).

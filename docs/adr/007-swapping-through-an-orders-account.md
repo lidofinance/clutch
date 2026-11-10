@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-08T10:58:07Z
+  at: 2026-11-08T14:24:34Z
 verified: []
 sources:
   - id: s1
@@ -204,11 +204,13 @@ EM decided on 2026-11-08 to build the exit-governance role of [ADR 006](/adr/006
 
 Decisions 44 and 45 refine decision 41.
 
+Since [ADR 013](/adr/013-one-easy-track-factory.md) decision 18 (OD-118), the universal factory holds the governance and approvals roles that decisions 31, 34 and 41 give the Easy Track executor. One motion adds a token: its permissions, its exit, its funding transfer and its place in both lists.
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as text.
 
-- **Orders account.** A new Safe owned one-of-one by Voting ([ADR 005](/adr/005-account-graph-and-roles.md), decision 28). It uses `ExtensibleFallbackHandler` and ComposableCoW for CoW's settlement domain. The enabling vote configures its single modifier, with the account as owner, avatar and target, the `operator` and `emergency` roles, and the Easy Track executor's governance and approvals roles (decision 41).
+- **Orders account.** A new Safe owned one-of-one by Voting ([ADR 005](/adr/005-account-graph-and-roles.md), decision 28). It uses `ExtensibleFallbackHandler` and ComposableCoW for CoW's settlement domain. The enabling vote configures its single modifier, with the account as owner, avatar and target, the `operator` and `emergency` roles, and the universal factory's governance and approvals roles (decision 41; ADR 013, decision 18).
 - **Operator funding.** On the Asset Safe, each listed-token transfer is pinned to the orders account and spends that token's orders budget, from the attested computation.
 - **Operator orders.**
   - Delegatecall the order signer with listed tokens, the Asset Safe as receiver, plain ERC-20 balances, zero app data (decision 42), no signed fee (decision 43) and at most 90 days' life (decision 29). Zero app data carries no hooks and no partner fee. The signer refuses `validTo` beyond `validDuration`; `unsignOrder` cancels.
@@ -218,7 +220,7 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
 - **Stop.** Revoke `operator` targets and functions on the orders modifier (decision 30). Every operator permission there uses the `operator` key, so revocation reaches all of them. Revocation does not cancel resting orders; cancel them too, because fills never consult the policy. A 2026-10-08 fork probe demonstrated emergency revocation on a stand-in modifier.
 - **Re-affirmation.** At 30 days, alert the committee to confirm or cancel each open order. Monthly reports list its limit, age, distance to market and idle balance (decision 29). Neither control acts on chain. Removing a token or tightening a bound also requires cancellation of affected orders.
 - **Relayer approvals.** The enabling vote has the orders account approve CoW's vault relayer for the maximum amount of all listed tokens, including recovery tokens. Only the approvals role raises an orders-account approval, by motion, and only for the relayer, so operator revocation leaves recovery settlement available. The governance role writes that approval for a new token, and no other, with its tree pinned whole. Zeroing an approval stops all orders in that token until a motion restores it; transfer to the Agent remains available (decision 41).
-- **Governance.** The orders modifier's governance role, held by the Easy Track executor, writes through the universal factory's token-list shape ([ADR 013](/adr/013-one-easy-track-factory.md)). A motion adds a token to the sell side and the buy side, with its relayer approval, emergency transfer and recovery orders; the only delegatecall it grants is to the order signer, for signing and unsigning (decision 41). The role writes signer orders, the operator's TWAP orders, and three trees pinned whole: the return to the Asset Safe or the Agent, the emergency role's zeroing and the relayer approval (decision 44). The same motion writes the token's exit on the Asset Safe through the exit-governance role (decision 45). It restores the operator's two cancels after an emergency revoke, and it refuses the vault's accounts as targets. Asset Safe governance refuses the orders account and its modifier (OD-38).
+- **Governance.** The orders modifier's governance role, held by the universal factory, writes the factory's orders operation ([ADR 013](/adr/013-one-easy-track-factory.md)). A motion adds a token to the sell side and the buy side, with its relayer approval, emergency transfer and recovery orders; the only delegatecall it grants is to the order signer, for signing and unsigning (decision 41). The role writes signer orders, the operator's TWAP orders, and three trees pinned whole: the return to the Asset Safe or the Agent, the emergency role's zeroing and the relayer approval (decision 44). The same motion writes the token's exit on the Asset Safe through the exit-governance role (decision 45). It restores the operator's two cancels after an emergency revoke, and it refuses the vault's accounts as targets. Asset Safe governance refuses the orders account and its modifier (OD-38).
 - **Tokens.** Operator lists start with stETH, wstETH, WETH, USDC, USDT and USDS (decision 22; OD-91). Recovery sells the launch list except ETH, which is staked first, and Earn shares, which use redeem queues. Recovery buys USDC, with USDT second. The enabling vote sets both lists, and motions extend them (decision 41).
 - **Routers.** None at launch. Uniswap and 1inch routes from the orders account, paying the Asset Safe, wait for the screening vendor's confirmation of a market-relative minimum-output check.
 - **Price controls.** Controls are order terms, CoW competition and EBBO, operator screening after the lift, funding budgets and fill monitoring (decision 26). Nothing on chain bounds the price; CoW competition and EBBO hold a fill to the on-chain market. Emergency orders have neither screening nor budgets; paging and limit alerts cover them.
@@ -269,7 +271,8 @@ The rest of this section is agent-drafted [s4][s11]. EM has not accepted it as t
   - The approvals role, which raises a zeroed approval for the relayer only (`test_orders_approvals_role_approves_only_the_relayer`).
   - The exit-governance role, which writes only the emergency role's exits, and a new token's exit on the Asset Safe (`test_exit_governance_writes_only_exits`, `test_exit_governance_gives_a_new_token_its_exit`).
   - A motion's writes that add a token, with its exit on the Asset Safe, run by hand; orders in the token then settle, a recovery order after the emergency role moved the token from the Asset Safe (`test_orders_motion_adds_a_token`).
-- Still owed: the order book's acceptance of zero app data, the watch-tower's posting of TWAP parts, and the factory's token-list shape that writes the motion of decisions 41, 44 and 45.
+- Fork tests of 2026-11-08 of the universal factory's orders operation ([research note](/research/orders-token-motions-2026-11-08.md)): the trees in the compiler's form; one motion that adds a token through the live Easy Track, in 7,796,336 gas under EIP-7825's cap with cold accounts, after which orders in the token settle; the checks; and versions that keep two token motions apart (`test_factory_orders_trees_match_the_compiler`, `test_factory_orders_token_motion`, `test_factory_orders_token_refusals`, `test_factory_orders_tokens_one_after_another`).
+- Still owed: the order book's acceptance of zero app data, and the watch-tower's posting of TWAP parts.
 
 ## Reversal conditions
 
@@ -288,4 +291,4 @@ No open decision closes in this record.
 
 <!-- end of generated block -->
 
-Owed: the screening vendor's answer on output checks, the orders budgets from the attested computation, and the factory's token-list shape for decisions 41, 44 and 45.
+Owed: the screening vendor's answer on output checks, and the orders budgets from the attested computation.

@@ -13,12 +13,12 @@ planned:
     sources: ["ADR-007#d28", "ADR-007#d30", "ADR-007#d41", OD-57, OD-58, OD-103, INV-023, INV-040,
       "doc:docs/research/orders-motion-roles-2026-11-08.md#what-was-built"]
   - name: Insurance roles
-    where: "On the first-loss modifier, held by the Easy Track script executor"
+    where: "On the first-loss modifier, held by the universal factory"
     what: "The insurance-funding role on the operator modifier, which moves a listed token from the Asset Safe to the first-loss Safe, is in the constellation. The insurance roles on the first-loss modifier deposit into the insured product with the first-loss Safe as the receiver, burn, and pay a fund's pinned payout address within its cap. All act only by motion (OD-107)."
     sources: ["ADR-014#d4", "ADR-014#d7", "ADR-014#proposed-direction", "ADR-005#proposed-direction", OD-107, INV-039]
   - name: First-loss Safe and its roles
     where: "A Voting-owned Safe with one modifier of its own"
-    what: "One first-loss modifier. The first-loss burn role, held by the Easy Track script executor, burns the DAO's first-loss shares only in an enacted motion. The first-loss role, held by the committee's Safe, redeems them to the Asset Safe. The insurance roles act on the insurance funds, by motion. No role can transfer or approve the first-loss shares."
+    what: "One first-loss modifier. The first-loss burn role, held by the universal factory, burns the DAO's first-loss shares only in an enacted motion. The first-loss role, held by the committee's Safe, redeems them to the Asset Safe. The insurance roles act on the insurance funds, by motion. No role can transfer or approve the first-loss shares."
     sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-014#d10", OD-42, OD-60, OD-67, OD-107, OD-108,
       INV-021]
 changes:
@@ -45,7 +45,7 @@ changes:
   - area: Governance
     kind: added
     provider: "No role. It assumed that motions act as the Aragon Agent, which Easy Track cannot do."
-    clutch: "A governance role for Easy Track's script executor. It writes operator permissions only through the universal factory's typed shapes, never delegatecall and never on the Asset Safe or its modules. An exit-governance role on the safety modifier writes only the emergency role's exits, each tree pinned whole."
+    clutch: "A governance role for the universal factory, which uses it in an enacted motion's one call. It writes operator permissions only through the universal factory's typed shapes, never delegatecall and never on the Asset Safe or its modules. An exit-governance role on the safety modifier writes only the emergency role's exits, each tree pinned whole."
     why: "Motions need their own narrow role; two fork probes showed how a wider one reaches the vault (OD-36, OD-38)."
     sources: ["ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7", "ADR-013#proposed-direction", OD-36, OD-38, INV-004,
       INV-034, "ADR-006#d13", OD-49, INV-025]

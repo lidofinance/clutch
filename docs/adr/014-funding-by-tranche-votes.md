@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T19:22:54Z
+  at: 2026-11-08T14:24:34Z
 verified: []
 sources:
   - id: s1
@@ -82,7 +82,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
   - Lido Earn: a deposit into earnETH or earnUSD with the first-loss Safe as the receiver; a burn by motion (ADR 008 decision 23); and a redemption request and claim by the `first-loss` role, paid to the Asset Safe.
   - Lido Lend, burnable shares: a deposit with the first-loss Safe as the receiver, and a burn by motion. ERC-4626 defines no burn by the holder, so this form fits only a Lend share token that has one.
   - Lido Lend, fixed payout address: the motion that creates the fund pins the payout address and the fund's cap. A payout motion pays at most the remaining cap, to that address only.
-  - Money for a fund: a motion moves tokens from the Asset Safe to the first-loss Safe, pinned to it, through the Easy Track executor's `insurance-funding` role on the operator modifier.
+  - Money for a fund: a motion moves tokens from the Asset Safe to the first-loss Safe, pinned to it, through the universal factory's `insurance-funding` role on the operator modifier ([ADR 013](/adr/013-one-easy-track-factory.md) decision 18).
   - The checklist of ADR 008 decision 29 becomes the shape's fields: the product, the share token or the payout address, the cap, the loss trigger with its independent confirming party, the incident-update deadline and the end of the terms.
 - **The operator's return.** A `transfer` to the Aragon Agent, of any amount, on the Asset Safe and on the orders account, for each listed token. The motion that adds a token adds its return too.
 - **Owed mandate text.** Funding by tranche votes replaces the draft's seed and top-ups through Easy Track [s4]. Redemption and fund-exit proceeds stay in the vault.

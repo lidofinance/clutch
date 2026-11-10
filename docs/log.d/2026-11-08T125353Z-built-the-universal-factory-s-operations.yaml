@@ -1,0 +1,3 @@
+date: '2026-11-08'
+kind: Evidence
+text: Built the universal factory's operations that add a token to the orders account (ADR 007, decisions 41, 44 and 45) and ran them through the live Easy Track on a fork. The factory with the orders shape exceeds EIP-170, so the shape is a companion contract (OD-117, opened); one motion does not fit EIP-7825's gas cap, because Easy Track's executor copies a script into memory three times per call, so a token joins in two motions (OD-118, opened). The fork suite passes 98 tests.

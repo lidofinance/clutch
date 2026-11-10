@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-08T10:58:07Z
+  at: 2026-11-08T14:24:34Z
 verified: []
 sources:
   - id: s1
@@ -94,6 +94,12 @@ sources:
   - id: s28
     resource: "urn:clutch:interview:2026-11-08"
     title: EM's acceptance of INV-040's amendment and the pinned trees, and EM's decision to build the exit-governance role, 2026-11-08; the transcript is not in the repository
+  - id: s29
+    resource: "urn:clutch:interview:2026-11-08-od117"
+    title: EM's acceptance of the factory's companion contract, and EM's answer on the two motions for a token, 2026-11-08; the transcript is not in the repository
+  - id: s30
+    resource: "urn:clutch:interview:2026-11-08-od118"
+    title: EM's choice of the factory that makes a motion's writes in one call, 2026-11-08; the transcript is not in the repository
 ---
 
 # Decision log
@@ -103,6 +109,28 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-08 — OD-118: the factory makes a motion's writes in one call
+
+The agent measured EM's idea of a helper that approves hashes, and a simpler form of it. Easy Track's executor copies a motion's script into memory three times for each call that the script makes, so a motion fits when its script makes one call. The agent put two options to EM: A, the universal factory holds the motion roles and makes a motion's writes in the motion's one call; B, a motion approves the hash of its writes, and a helper that holds the roles makes them in a second transaction. It recommended A.
+
+> do A
+
+Recorded as:
+
+- (OD-118) The universal factory holds the motion roles. A motion's script makes one call, the factory's `applyMotion`, which checks the motion again, stores its versions and makes its writes in the enactment's transaction ([ADR 013](/adr/013-one-easy-track-factory.md), decision 18). One motion adds a token to the orders account. EM chose the agent's recommendation. [s30]
+
+## 2026-11-08 — OD-117 and OD-118: the companion contract, and one motion for a token
+
+The agent built the universal factory's operations for a token of the orders account ([research note](/research/orders-token-motions-2026-11-08.md)). It found that the factory and the orders shape together exceed EIP-170, and moved the shape into a companion contract (OD-117). It found that one motion that adds a token fails under EIP-7825's gas cap, and split the token into two motions, its preparation and its listing (OD-118). It asked EM to decide both.
+
+> OD-117: I am okay to have a thin helper as you made
+> OD-118: this one I don't like tbh, feels hackish they way you did it; can we also consider a kind of helper and ET factory to approve particular hashes or smth?
+
+Recorded as:
+
+- (OD-117) The universal factory may carry a shape in a thin companion contract that it creates and only reads ([ADR 013](/adr/013-one-easy-track-factory.md), decision 17). EM accepted the agent's recommendation.
+- (OD-118) EM did not accept two motions for one token, and asked the agent to consider a helper with which the factory approves particular hashes. OD-118 stays open in the [register](/registers/open-decisions.md), with that option and the agent's measured alternative. [s29]
 
 ## 2026-11-08 — OD-103 and OD-49: the orders modifier's pinned grants, and the exit-governance role
 

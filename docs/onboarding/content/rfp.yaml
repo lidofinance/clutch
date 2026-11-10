@@ -74,14 +74,14 @@ sections:
           "ADR-013#proposed-direction", "ADR-007#d41", OD-09, OD-70, OD-102, OD-103, OD-105, INV-004, INV-034]
       - asked: "Lido contributors design, build, audit, deploy and maintain the Easy Track helper contracts. The provider confirms that its access control exposes the administration functions and works safely with this path."
         verdict: kept
-        clutch: "The universal Easy Track factory is the only new contract. Lido builds it in phase 2, and an external audit covers it in phase 3, with CoW's order signer, which has no known audit (OD-96). The governance role calls six administration functions of the Roles modifier, each one guarded."
-        sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", INV-004, "doc:ROADMAP.md#roadmap", "ADR-007#d40", OD-96]
+        clutch: "The universal Easy Track factory, with the thin companion contracts that it creates (OD-117), is the only new code. Lido builds it in phase 2, and an external audit covers it in phase 3, with CoW's order signer, which has no known audit (OD-96). The governance role calls six administration functions of the Roles modifier, each one guarded."
+        sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", INV-004, "doc:ROADMAP.md#roadmap", "ADR-007#d40", OD-96, "ADR-013#d17", OD-117]
       - asked: "The Aragon Agent stays the only owner of the Asset Safe. Easy Track gets no ownership and no unrestricted execution, and it executes only the permission changes that the Operator Safe proposes in motions."
         verdict: changed
-        clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe (OD-73). Easy Track never receives authority over the vault's owner or the Agent. On the Asset Safe, its executor holds only the governance, insurance-funding, exit-governance and restart roles; the restart role may only enable the operator modifier. Outside it, the executor holds the governance and approvals roles on the orders modifier, and the burn and insurance roles on the first-loss Safe, so every first-loss burn is a motion (OD-67). The committee's Safe, as the universal factory's trusted caller, creates every motion."
+        clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe (OD-73). Easy Track never receives authority over the vault's owner or the Agent. On the Asset Safe, the universal factory holds only the governance, insurance-funding, exit-governance and restart roles, and uses them only in an enacted motion's one call; the restart role may only enable the operator modifier. Outside it, the factory holds the governance and approvals roles on the orders modifier, and the burn and insurance roles on the first-loss Safe, so every first-loss burn is a motion (OD-67). Easy Track's executor holds no role (OD-118). The committee's Safe, as the universal factory's trusted caller, creates every motion."
         why: "The reason is the one under Accounts: a vault vote passes no Dual Governance, and Aragon Voting gains no new power (OD-73)."
         sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-008#d23", "ADR-013#d12",
-          "ADR-013#proposed-direction", "ADR-010#proposed-direction", OD-67, OD-73, INV-004, INV-035]
+          "ADR-013#proposed-direction", "ADR-010#proposed-direction", OD-67, OD-73, INV-004, INV-035, "ADR-013#d18", OD-118]
       - asked: "A direct DAO path can make every change that Easy Track can make."
         verdict: kept
         clutch: "A DAO vote, a direct Aragon Voting item, can do everything on the owner path: replace the policy, change membership and apply any change without Easy Track. A fork test runs that path."

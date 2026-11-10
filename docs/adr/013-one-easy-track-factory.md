@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-06T04:31:16Z
+  at: 2026-11-08T14:24:34Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on Merkle roots and versioning, 2026-11-01, on the vote-free design, the factory, the orders, the restart, the ceilings and the two-modifier alternative, 2026-11-05, and on a new token's ceilings and motions after a revoke, 2026-11-06
+    title: Decision log — EM on Merkle roots and versioning, 2026-11-01, on the vote-free design, the factory, the orders, the restart, the ceilings and the two-modifier alternative, 2026-11-05, on a new token's ceilings and motions after a revoke, 2026-11-06, and on the companion contract and a motion's one call, 2026-11-08
   - id: s2
     resource: /research/easy-track-first-2026-11-05.md
     title: Research note — Easy Track's script permissions, enactment, cancel and pause; Roles storage; Merkle-root engines; the two-modifier alternative
@@ -90,6 +90,20 @@ EM decided on 2026-11-06, closing OD-113 and OD-114 [s1]:
 15. The motion that introduces a token sets the token's ceilings, in the same motion. Decision 13 applies after that. The enabling vote sets the ceilings of the launch tokens.
 16. A motion created after an emergency revoke may enact, and so bring the revoked permission back after its objection window. The factory's versions record only the factory's own writes, not the emergency role's revokes; the counter fails the motions that were open when the emergency Safe raised it.
 
+EM decided on 2026-11-08, choosing the agent's recommendation, closing OD-117 [s1]:
+
+17. The universal factory may carry a shape in a thin companion contract. The factory creates the companion in its own constructor and only reads from it. The companion holds no state, makes no call and cannot be upgraded, and Easy Track registers the factory alone. The orders shape is the first such companion.
+
+Decision 17 keeps decisions 5 to 8, and answers the reversal condition on EIP-170 without decision 11's fallback.
+
+EM decided on 2026-11-08, choosing option A, the agent's recommendation, closing OD-118 [s1]:
+
+18. The universal factory holds the motion roles. A motion's script makes one call, the factory's `applyMotion`. That call checks the motion again, stores its versions and makes its writes, all in the enactment's one transaction.
+
+Easy Track's executor copies a script into memory three times for each call that the script makes, so the gas of a script grows with its size times its calls. One motion that adds a token to the orders account did not fit EIP-7825's cap as 17 calls. As one call it enacts in 7,796,336 gas ([research note](/research/orders-token-motions-2026-11-08.md)). EM did not accept the agent's first answer, two motions for one token.
+
+Decision 18 changes three earlier decisions. The registration of decision 6 is one call, the factory's `applyMotion`, and the factory makes the role calls of the four modifiers itself. The `applyMotion` call stores the versions of decision 10, in place of the script's last call, `commit`. The factory, not the Easy Track executor, holds the restart role of decision 12.
+
 EM wrote "ceiling should be set together with token intro"; the agent reads the introduction as the motion that first writes a permission for the token. EM confirmed on 2026-11-06 that a token's introduction counts as its ceilings' first raise, so the next raise waits 15 days [s1].
 
 Decisions 5 to 7 replace the template catalogue of [ADR 006](/adr/006-governance-through-easy-track-factories.md) decisions 5, 14, 15, 17 and 18: a routine removal is the factory's narrowing write, a revoked permission comes back through a shape, and a shape that the factory lacks needs a changed factory, which is a vote. Decision 12 replaces the vote for a restart in ADR 006 decision 19 and in [ADR 005](/adr/005-account-graph-and-roles.md) decisions 26 and 30. Decision 9 replaces the spare keys of [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 39. Decision 13 replaces the fixed ceilings of ADR 009 decision 14 and [ADR 011](/adr/011-launch-scope.md) decision 8: each is now a ceiling under decision 13.
@@ -100,13 +114,13 @@ The accepted [ADR 004](/adr/004-specifications-and-policy-as-data.md) decision 1
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
-- **Scopes and versions.** A scope is one modifier's role, target and selector, one allowance key, or one ceiling. Its version is the hash of its current content, as the factory last wrote it. The enabling vote seeds the versions of the launch policy from the committed artifact. A motion names the version that it expects for each scope it writes, and the counter it saw. The factory refuses the motion at creation, and Easy Track's rebuild refuses it at enactment, if a version or the counter changed. The script's last call, the factory's `commit`, stores the new versions. A failed enactment reverts as a whole, so it leaves no partial write; the motion stays open until the committee's Safe or Aragon Voting cancels it [s2].
+- **Scopes and versions.** A scope is one modifier's role, target and selector, one allowance key, or one ceiling. Its version is the hash of its current content, as the factory last wrote it. The enabling vote seeds the versions of the launch policy from the committed artifact. A motion names the version that it expects for each scope it writes, and the counter it saw. The factory refuses the motion at creation, and Easy Track's rebuild refuses it at enactment, if a version or the counter changed. The script's one call, the factory's `applyMotion`, checks the motion again, stores the new versions and then makes the writes (decision 18). A failed enactment reverts as a whole, so it leaves no partial write; the motion stays open until the committee's Safe or Aragon Voting cancels it [s2].
 - **Narrowing.** A raw write names the scope's current content, which must match its version, and writes a subset of it, or revokes the target or the function.
-- **Address book.** The registration lists `execTransactionWithRole` on the operator, safety, orders and first-loss modifiers, and the factory's `commit`. The Easy Track executor holds one role per kind of write: `governance` and `insurance-funding` on the operator modifier, `exit-governance` and `restart` on the safety modifier, the governance and approvals roles on the orders modifier, and `first-loss-burn` with the insurance roles on the first-loss modifier ([ADR 014](/adr/014-funding-by-tranche-votes.md)).
+- **Address book.** The registration lists one call: the factory's `applyMotion` (decision 18). The factory calls `execTransactionWithRole` on the operator, safety, orders and first-loss modifiers itself. Easy Track's executor holds no Clutch role. The factory holds one role per kind of write: `governance` and `insurance-funding` on the operator modifier, `exit-governance` and `restart` on the safety modifier, the governance and approvals roles on the orders modifier, and `first-loss-burn` with the insurance roles on the first-loss modifier ([ADR 014](/adr/014-funding-by-tranche-votes.md)).
 - **Shapes at launch.** An ERC-20 approval list; an ERC-4626 vault; an asynchronous queue vault; a market compatible with Morpho Blue, for Lido Lend; a wrapper; Sky's DAI–USDS converter; the orders account's token lists, with the order signer, ComposableCoW's TWAP, the relayer approval, the emergency transfer and the recovery orders; budgets, with a refill period of at least 30 days; ceilings (decision 13); the first-loss burn; the insurance funds of ADR 014; the restart; and a claim, if a launch protocol pays rewards. Each onboarding shape also writes its target's exit for the emergency role through `exit-governance`.
 - **The counter.** Aragon Voting can raise it too, as the owner. The emergency Safe raises it with every switch, so a motion queued before a stop fails at enactment.
 - **Ceilings.** The factory keeps each ceiling with the time of its last raise. Ceilings are per shape class and per token, so a new protocol uses an existing ceiling.
-- **The `motion` command.** It takes a change of the policy from a merged commit, reads the versions and the counter on chain, builds the motion's calldata, runs the motion against the live Easy Track on a fork, prints the permission difference from the modifiers' events and drafts the forum post. The Zodiac UI does not know the factory's format or its versions, so it is not the planner.
+- **The `motion` command.** It takes a change of the policy from a merged commit, reads the versions and the counter on chain, builds the motion's calldata, runs the motion against the live Easy Track on a fork, prints the writes that the factory's `writesOf` returns and the permission difference from the modifiers' events, and drafts the forum post. The Zodiac UI does not know the factory's format or its versions, so it is not the planner.
 - **Monitoring.** It decodes every motion of the factory from `MotionCreated`, and alerts on a failed enactment, a raise of the counter, a ceiling motion, a restart motion and few free motion slots ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 45).
 - **Trusted caller.** The committee's Safe is the factory's trusted caller ([ADR 005](/adr/005-account-graph-and-roles.md) decision 31). Easy Track sets it once [s6], so a new committee Safe needs a new factory, which is a vote (decision 4).
 
@@ -121,6 +135,8 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - Restart by vote: not chosen (decision 12).
 - Ceilings fixed at deployment: replaced by decision 13.
 - Orders through ComposableCoW's TWAP only, without the order signer: not chosen ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 41).
+- Two motions for a token, its preparation and then its listing: built, and not accepted by EM (decision 18).
+- A motion that approves the hash of its writes, with a helper that holds the roles and makes the writes in a second transaction: not chosen (decision 18). Each motion would need a second transaction, an expiry for an approval that nobody applies, and its checks again at execution.
 
 ## Consequences
 
@@ -132,6 +148,9 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - A launch token counts as introduced once the enabling vote seeds one of its ceilings, so a class of ceiling that the vote does not seed for it stays unset: no motion sets it. The enabling vote therefore seeds both classes for every launch token, with zero where no entry uses the class.
 - A motion created after an emergency revoke can bring the permission back after its 72 hours, unless LDO holders object or the emergency Safe raises the counter again (decision 16, OD-97).
 - Every Clutch motion uses one factory and one calldata format, so monitoring decodes one format.
+- Easy Track's executor, which every Easy Track factory of the DAO shares, holds no Clutch role (decision 18). Another factory reaches the vault only if Aragon Voting registers it for the factory's `applyMotion`, and that call runs the factory's checks again.
+- A vote that replaces the factory also moves the motion roles to the new factory, in the same vote that changes Easy Track's registration.
+- A motion's script shows one call. The factory's `writesOf` returns the writes that a motion makes if it is enacted now, for the forum post and for monitoring.
 - After launch, Aragon votes are for funding tranches and break-glass actions only.
 
 ## Confirmation
@@ -141,11 +160,14 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - On 2026-11-05 a prototype of the factory's core passed 15 tests against the live Easy Track on a fork, and eight mutants of its checks each failed a test. It is 11,553 bytes, 47 percent of EIP-170's limit, and its largest measured motion enacts in about 3.8 million gas ([research note](/research/universal-factory-prototype-2026-11-05.md)).
 - On 2026-11-06 the prototype built decision 15: one operation writes a token's first approval list and sets both of its ceilings; a token is introduced once; an approval list for a token that was never introduced, and a ceiling operation on a ceiling that was never set, are refused. It counts the introduction as each ceiling's first raise ([research note](/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06)).
 - On 2026-11-06 the prototype added the restore of a target that the emergency role revoked as a whole: a motion scopes the target again, and the function permissions stored under it come back as they were, with nothing written again. A stop fails a restore motion that was open before it ([research note](/research/universal-factory-prototype-2026-11-05.md#the-restore-of-a-revoked-target-built-on-2026-11-06)).
+- On 2026-11-08 the prototype added a token for the orders account (ADR 007, decisions 41, 44 and 45) and measured two limits. The factory with the orders shape is 26,026 bytes, over EIP-170, so the shape moved into a companion contract that the factory creates and only reads (decision 17). One motion that adds a token failed under EIP-7825's gas cap, because Easy Track's executor copies a script into memory three times for each call. The prototype first split the token into two motions, which EM did not accept. With decision 18, one motion adds a token in 7,796,336 gas with cold accounts, 46 percent of the cap ([research note](/research/orders-token-motions-2026-11-08.md)).
+- On 2026-11-08 the fork tests checked decision 18: the registration is the one call; Easy Track's executor holds no role, and its own call of `applyMotion` is refused like a motion that the checks refuse; and a write that the vault refuses fails the whole motion, which leaves its versions as they were (`test_uf_address_book_is_the_registration`, `test_uf_the_factory_holds_the_motion_roles`, `test_uf_a_refused_write_fails_the_whole_motion`). The other motions of the prototype cost less gas than before, except a ceiling's enactment, which costs about 2,000 more ([research note](/research/orders-token-motions-2026-11-08.md#one-motion-with-one-call)).
 - INV-032 to INV-036 in the [invariants](/specs/invariants.md).
 
 ## Reversal conditions
 
 - The factory does not fit EIP-170, or its checks prove too complex to review: decision 11.
+- A motion's writes do not fit one transaction under EIP-7825's cap, even as one call: decision 18.
 - A shape that can emit an unsafe permission.
 - A motion that enacts against the disclosure rule without an objection.
 

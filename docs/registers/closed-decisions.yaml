@@ -871,3 +871,20 @@
     - "2026-11-07 — OD-116: no signed fee, the order's fee field pinned to zero"
   adr: [ADR-007#d43]
   see: [/research/orders-account-fork-tests-2026-11-07.md]
+
+- id: OD-117
+  question: "The universal factory and its orders shape together exceed EIP-170: does the shape live in a companion contract?"
+  closed: 2026-11-08
+  log:
+    - "2026-11-08 — OD-117 and OD-118: the companion contract, and one motion for a token"
+  adr: [ADR-013#d17]
+  see: [/research/orders-token-motions-2026-11-08.md]
+
+- id: OD-118
+  question: "One motion that adds a token to the orders account fails under EIP-7825's gas cap: how does one motion fit?"
+  closed: 2026-11-08
+  log:
+    - "2026-11-08 — OD-117 and OD-118: the companion contract, and one motion for a token"
+    - "2026-11-08 — OD-118: the factory makes a motion's writes in one call"
+  adr: [ADR-013#d18]
+  see: [/research/orders-token-motions-2026-11-08.md]
