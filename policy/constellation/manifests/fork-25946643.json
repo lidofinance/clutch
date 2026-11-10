@@ -2,7 +2,7 @@
   "network": "fork-25946643",
   "chainId": 1,
   "forkBlock": 25946643,
-  "note": "The fork fixture's deployment (test/utils/Fixture.sol): mocked governance heads, with Aragon Voting's stand-in as the Asset Safe's only owner (OD-73), stand-in addresses for the committee's Safe, the emergency Safe and the first-loss Safe, and a Safe and two Roles proxies from the deployed singletons. Not mainnet addresses.",
+  "note": "The fork fixture's deployment (test/utils/Fixture.sol): mocked governance heads, with Aragon Voting's stand-in as the Asset Safe's only owner (OD-73), stand-in addresses for the committee's Safe, the emergency Safe and the first-loss Safe, the mock script executor in the universal factory's place as the holder of the motion roles, and a Safe and two Roles proxies from the deployed singletons. Not mainnet addresses.",
   "voting": "0xd55a42CEdD5F3c9D8bdAeFE216Fa6Aa9c95aA61E",
   "agent": "0x66eda24622120758687AAb57575F29534D74270f",
   "assetSafe": "0x46D9384A3261778198490644ebc64C9bF2749B49",
@@ -14,7 +14,7 @@
   ],
   "operatorSafe": "0x27bd382539c23f850C09193B50b2Fad9cE5e7d6f",
   "emergencySafe": "0xCdf451F047dC337310E049C1D5AB46e8bFa8c163",
-  "easyTrackExecutor": "0xCd9a550161dabeA93c0f61aE15683B475C7025FE",
+  "universalFactory": "0xCd9a550161dabeA93c0f61aE15683B475C7025FE",
   "firstLossSafe": "0x89cFd078303EC78ff11957e26d3fC1dd9dda8Aef",
   "ordersAccount": "0xFb88b1f3f7Debed7F5A87d31581b38eD888d0931"
 }

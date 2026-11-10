@@ -16,8 +16,8 @@ interface IERC4626Vault {
 /// @title ExitGovernanceRehearsal — the exit-governance role on the enabling vote's vault (ADR 006, decision 13;
 ///        OD-49; INV-025), and the exit that a token gets when a motion adds it to the order lists (ADR 007,
 ///        decision 45).
-/// @dev Easy Track's executor makes each write, as an enacted motion would. The universal factory's shapes that emit
-///      the writes are not built.
+/// @dev Each write is made as the universal factory, the role's member, makes it in an enacted motion's call. Of the
+///      factory's shapes, only the orders operation emits an exit: a new token's (ADR 007, decision 45).
 ///      Run: RPC=<archive RPC> forge test --match-contract ExitGovernanceRehearsal
 contract ExitGovernanceRehearsal is EnabledVault {
     bytes4 internal constant CONDITION_VIOLATION = 0xd0a9bf58;
@@ -195,9 +195,9 @@ contract ExitGovernanceRehearsal is EnabledVault {
     // Helpers
     // ---------------------------------------------------------------------
 
-    /// @dev A write of the exit-governance role on the safety modifier, as Easy Track's executor runs it.
+    /// @dev A write of the exit-governance role on the safety modifier, as the universal factory makes it.
     function _exit(bytes memory write) internal returns (bool ok, bytes memory ret) {
-        vm.prank(Mainnet.ET_EXECUTOR);
+        vm.prank(address(uf));
         (ok, ret) = address(safetyMod).call(
             abi.encodeCall(IRoles.execTransactionWithRole, (address(safetyMod), 0, write, CALL, EXIT_GOVERNANCE, true))
         );

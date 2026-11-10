@@ -209,12 +209,12 @@ contract EnablingVoteRehearsal is EnabledVault {
         vm.stopPrank();
 
         uint256 before = IERC20(Mainnet.EARN_ETH_SHARE).balanceOf(address(firstLoss));
-        vm.prank(Mainnet.ET_EXECUTOR);
+        vm.prank(address(uf));
         firstLossMod.execTransactionWithRole(
             Mainnet.EARN_ETH_SHARE, 0, abi.encodeWithSignature("burn(uint256)", 10e18), 0, FIRST_LOSS_BURN, true
         );
-        assertEq(IERC20(Mainnet.EARN_ETH_SHARE).balanceOf(address(firstLoss)), before - 10e18, "the burn by the executor");
-        console2.log("REHEARSAL first-loss burn of 10 earnETH shares by the executor's role: done");
+        assertEq(IERC20(Mainnet.EARN_ETH_SHARE).balanceOf(address(firstLoss)), before - 10e18, "the burn by the factory's role");
+        console2.log("REHEARSAL first-loss burn of 10 earnETH shares by the universal factory's role: done");
 
         // The committee's role asks for a redemption; the queue takes the shares.
         uint256 usdBefore = IERC20(Mainnet.EARN_USD_SHARE).balanceOf(address(firstLoss));

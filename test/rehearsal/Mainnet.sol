@@ -60,4 +60,9 @@ library Mainnet {
     address internal constant EARN_USD_DEPOSIT_QUEUE = 0xC75E7E73B25fEa8bB23EB55CC48BA55067b5be76;
     // A stand-in for a token that a motion adds to the orders lists (ADR 007, decision 41). No decision lists it.
     address internal constant WBTC = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
+    // A stand-in for a token outside the launch lists, with six decimals, for the factory's introductions.
+    // No decision lists it.
+    address internal constant PYUSD = 0x6c3ea9036406852006290770BEdFcAbA0e23A0e8;
+    // A second stand-in, for a second token motion. No decision lists it.
+    address internal constant LINK = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
 }

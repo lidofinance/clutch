@@ -43,7 +43,7 @@ contract PolicyShape is Test {
         safetyRoles = vm.parseJsonAddress(m, ".safetyModifier");
         operatorSafe = vm.parseJsonAddress(m, ".operatorSafe");
         emergencySafe = vm.parseJsonAddress(m, ".emergencySafe");
-        governanceMember = vm.parseJsonAddress(m, ".easyTrackExecutor");
+        governanceMember = vm.parseJsonAddress(m, ".universalFactory");
         assetSafe = vm.parseJsonAddress(m, ".assetSafe");
         firstLossSafe = vm.parseJsonAddress(m, ".firstLossSafe");
         string memory j = vm.readFile(ARTIFACT);
