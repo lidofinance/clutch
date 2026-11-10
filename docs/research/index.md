@@ -1,6 +1,6 @@
 # Research
 
-* [Sepolia stand coverage review, 2026-11-10](sepolia-coverage-review-2026-11-10.md) - Independent rerun of the stand tests, a checklist of 39 covered cases with their transactions, the open gaps and the cases that can be tested now.
+* [Sepolia stand coverage review, 2026-11-10](sepolia-coverage-review-2026-11-10.md) - Independent rerun of the stand tests, fork tests and real transactions in separate sections, the open gaps and the cases that can be tested now.
 * [Sepolia role-key migration, 2026-10-22](sepolia-role-key-migration-2026-10-22.md) - Four explicit role deletions, two Safe batches and pinned-fork checks.
 
 * [Sepolia Constellation UI registration, 2026-10-22](sepolia-constellation-ui-2026-10-22.md) - Vault flags, policy serialization and two conflicting role keys.
