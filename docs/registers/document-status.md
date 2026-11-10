@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-10-25T20:11:26Z
+  at: 2026-11-10T12:39:52Z
 verified: []
 ---
 
@@ -55,6 +55,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/sepolia-constellation-ui-2026-10-22.md](/research/sepolia-constellation-ui-2026-10-22.md) | Research Note | slop |  | 2026-10-22 | none |
+| [research/sepolia-coverage-review-2026-11-10.md](/research/sepolia-coverage-review-2026-11-10.md) | Research Note | slop |  | 2026-11-10 | none |
 | [research/sepolia-role-key-migration-2026-10-22.md](/research/sepolia-role-key-migration-2026-10-22.md) | Research Note | slop |  | 2026-10-22 | none |
 | [research/sepolia-test-results.md](/research/sepolia-test-results.md) | Research Note | slop |  | 2026-10-25 | none |
 | [research/simplification-2026-10-08.md](/research/simplification-2026-10-08.md) | Research Note | slop |  | 2026-10-19 | none |

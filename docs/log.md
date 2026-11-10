@@ -1,5 +1,9 @@
 # Log
 
+## 2026-11-10
+
+* **Evidence**: Review the Sepolia stand coverage: rerun 88 fork tests at blocks 11992758 and 12104452, check 239 public receipts and list covered, uncovered and still-testable cases.
+
 ## 2026-10-25
 
 * **Evidence**: Pass the full 136-test fork suite before commit; fix Solc payout-model inlining, pin token-specific relayer allowance behavior and keep review findings in results.
