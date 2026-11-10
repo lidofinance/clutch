@@ -40,7 +40,7 @@
     - "Nobody: the switch is final"
     - "The committee's Safe, at once"
   answer: 1
-  why: "No emergency body restores what it stopped. The committee's Safe creates a restart motion. After 72 hours without an objection, the Easy Track executor's restart role enables the operator modifier again, and the role can do nothing else. Motions from before the stop fail, because the emergency Safe raised the factory's motion counter (OD-104)."
+  why: "No emergency body restores what it stopped. The committee's Safe creates a restart motion. After 72 hours without an objection, the universal factory's restart role enables the operator modifier again, and the role can do nothing else. Motions from before the stop fail, because the emergency Safe raised the factory's motion counter (OD-104)."
   sources: ["ADR-005#d26", "ADR-013#d10", "ADR-013#d12", OD-104, INV-035]
 
 - id: vendor-offline
@@ -62,8 +62,8 @@
     - "The Zodiac Roles mastercopy"
     - "The CoW order signer"
   answer: 1
-  why: "The universal Easy Track factory is the only new contract, and Lido writes it. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so Clutch counts it as new code and the external audit covers it with the factory (OD-96)."
-  sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-007#proposed-direction", "ADR-007#d40", OD-96]
+  why: "The universal Easy Track factory, with the thin companion contracts that it creates (OD-117), is the only new code, and Lido writes it. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so Clutch counts it as new code and the external audit covers it with the factory (OD-96)."
+  sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-007#proposed-direction", "ADR-007#d40", OD-96, "ADR-013#d17", OD-117]
 
 - id: limit-order-loss
   question: "The operator places a limit order far below the market price. What limits the loss?"

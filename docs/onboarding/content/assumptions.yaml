@@ -97,9 +97,10 @@
   why: "Motions change the vault without a DAO vote. The factory is new code and the most critical contract: its shapes are the bound."
   breaks: "Any motion that survives its objection window can use a flaw in a shape. A sound shape can still point the operator at an unaudited contract; then only the attached budget bounds the loss. If the shapes prove too complex, the fallback's raw writes leave the objection window as the only bound on where funds go."
   watched_by: []
-  watch_note: "The factory's prototype passes INV-032 to INV-036 on a fork against the live Easy Track, for its core, the shape of an approval list, a token's introduction with its ceilings (OD-113) and the restore of a revoked target (OD-104). The other shapes and their emergency exits are not built. The motion roles' limits are a second layer: the governance role's (INV-004), the exit-governance role's pinned exits (INV-025) and the orders modifier's roles (INV-040). An external audit is due in phase 3."
+  watch_note: "The factory's prototype passes INV-032 to INV-036 on a fork against the live Easy Track, for its core, the shape of an approval list, a token's introduction with its ceilings (OD-113), the restore of a revoked target (OD-104), and a token for the orders account in one motion (OD-118). The other shapes and their emergency exits are not built. The motion roles' limits are a second layer: the governance role's (INV-004), the exit-governance role's pinned exits (INV-025) and the orders modifier's roles (INV-040). An external audit is due in phase 3."
   sources: ["ADR-013#d7", "ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#consequences", "ADR-013#confirmation",
-    INV-004, INV-032, INV-033, INV-034, INV-035, INV-036, OD-49, OD-102, "lip:part-4", OD-113, OD-104, INV-025, INV-040]
+    INV-004, INV-032, INV-033, INV-034, INV-035, INV-036, OD-49, OD-102, "lip:part-4", OD-113, OD-104, INV-025, INV-040,
+    OD-118]
 
 - id: easy-track-window
   assumption: "Easy Track gives every motion an objection window of at least 48 hours, and rebuilds and hash-checks each script through its factory at enactment."

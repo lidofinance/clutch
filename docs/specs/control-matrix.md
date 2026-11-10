@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-08T10:58:07Z
+  at: 2026-11-08T14:25:19Z
 verified: []
 sources:
   - id: s1
@@ -78,7 +78,7 @@ Figures stay out of this page. They come from the attested computation once the 
 | No delegatecall by motion except the order signer's, and no vault account as a motion's target | The governance role's guards (OD-36, OD-38); on the orders modifier, delegatecall only to the order signer, for signing and unsigning (OD-103; INV-040) [s3][s9] | — | Drift | — | `@lidofinance/defi-tech` | Built for the Asset Safe and the orders modifier, and the compiler refuses a policy without either guard; the factory's shape for an orders token is not built |
 | An emergency action starts within six hours | The emergency role, with its switch (INV-002, INV-009) | Never screened | Paging through the general Lido incident process | — | The emergency Safe; the Emergency Brakes multisig for the Easy Track pause | Built for the listed positions; a position that a motion onboards gets its emergency exit from that motion (OD-49), specified; runbooks and drills owed |
 | The emergency Safe keeps its seat rule (OD-58) | — | — | Owner-change alerts, critical on the emergency Safe (INV-026) | Signer sets | The committee and the Emergency Brakes multisig, for their seats | Specified; runbook owed |
-| No emergency body restores what it stopped (OD-59) | The emergency role holds only calls that remove authority, and the compiler refuses a grant or a budget for it (INV-027). Only the Easy Track executor's restart role enables the operator modifier again (OD-104; INV-035) [s9] | — | Drift; any change of Easy Track's roles; every restart motion | — | The committee restarts by motion, after the objection window | Built for the Asset Safe; the restart role specified; the Easy Track roles are a chain check before the enabling vote |
+| No emergency body restores what it stopped (OD-59) | The emergency role holds only calls that remove authority, and the compiler refuses a grant or a budget for it (INV-027). Only the universal factory's restart role enables the operator modifier again (OD-104; INV-035) [s9] | — | Drift; any change of Easy Track's roles; every restart motion | — | The committee restarts by motion, after the objection window | Built for the Asset Safe; the restart role specified; the Easy Track roles are a chain check before the enabling vote |
 | Every asset has a price, with its level and source (OD-62) | None | — | The report generator's five-level waterfall; a tranche vote's post names every price below level 2; a tranche vote waits while level 5 covers more than the set share | Lido's reading, with each price's level and source; the provider's reading, with its own sources (OD-84) | The committee's valuation policy sets the band and the level-5 share | Specified; the figures are not set |
 | Reports can be reproduced | — | — | The report generator at a pinned block | Lido's reading; the provider's report, on IPFS next to it (OD-85) | `@lidofinance/defi-tech` builds the generator; the committee publishes | Specified |
 | The two readings agree within a band (OD-84) | None | — | Both published readings compared at each snapshot; a tranche vote that starts while they differ by more than the band | Both readings and their difference | The committee explains a difference; `@lidofinance/defi-tech` specifies the comparison | Specified; the band is not set |

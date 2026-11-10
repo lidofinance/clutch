@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-07T19:23:10Z
+  at: 2026-11-08T14:24:34Z
 verified: []
 sources:
   - id: s1
@@ -146,5 +146,7 @@ Generated from [closed-decisions.yaml](closed-decisions.yaml). EM's words are in
 | OD-114 | May a motion created after an emergency revoke still enact, although the factory's versions do not see the revoke? | 2026-11-06 | [OD-113 and OD-114: a new token's ceilings and motions after a revoke](decision-log.md#2026-11-06--od-113-and-od-114-a-new-tokens-ceilings-and-motions-after-a-revoke); [ADR 013](/adr/013-one-easy-track-factory.md#decision), decision 16; [research note](/research/universal-factory-prototype-2026-11-05.md) | In force. It refines OD-97. |
 | OD-115 | Does an order of the orders account carry app data? | 2026-11-07 | [OD-115 and OD-116: zero app data, and the signed fee](decision-log.md#2026-11-07--od-115-and-od-116-zero-app-data-and-the-signed-fee); [ADR 007](/adr/007-swapping-through-an-orders-account.md#decision), decision 42; [research note](/research/orders-account-fork-tests-2026-11-07.md) | In force. |
 | OD-116 | Does an order of the orders account sign a fee? | 2026-11-07 | [OD-115 and OD-116: zero app data, and the signed fee](decision-log.md#2026-11-07--od-115-and-od-116-zero-app-data-and-the-signed-fee); [OD-116: no signed fee, the order's fee field pinned to zero](decision-log.md#2026-11-07--od-116-no-signed-fee-the-orders-fee-field-pinned-to-zero); [ADR 007](/adr/007-swapping-through-an-orders-account.md#decision), decision 43; [research note](/research/orders-account-fork-tests-2026-11-07.md) | In force. |
+| OD-117 | The universal factory and its orders shape together exceed EIP-170: does the shape live in a companion contract? | 2026-11-08 | [OD-117 and OD-118: the companion contract, and one motion for a token](decision-log.md#2026-11-08--od-117-and-od-118-the-companion-contract-and-one-motion-for-a-token); [ADR 013](/adr/013-one-easy-track-factory.md#decision), decision 17; [research note](/research/orders-token-motions-2026-11-08.md) | In force. |
+| OD-118 | One motion that adds a token to the orders account fails under EIP-7825's gas cap: how does one motion fit? | 2026-11-08 | [OD-117 and OD-118: the companion contract, and one motion for a token](decision-log.md#2026-11-08--od-117-and-od-118-the-companion-contract-and-one-motion-for-a-token); [OD-118: the factory makes a motion's writes in one call](decision-log.md#2026-11-08--od-118-the-factory-makes-a-motions-writes-in-one-call); [ADR 013](/adr/013-one-easy-track-factory.md#decision), decision 18; [research note](/research/orders-token-motions-2026-11-08.md) | In force. |
 
 <!-- end of generated block -->

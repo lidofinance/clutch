@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-07T18:35:46Z
+  at: 2026-11-08T14:25:19Z
 verified: []
 sources:
   - id: s1
@@ -65,7 +65,7 @@ Aragon Voting runs the Easy Track and payment items itself. It holds Easy Track'
 
 ### Easy Track
 
-- Register the universal factory in Easy Track. Its permissions are its address book: `execTransactionWithRole` on the operator, safety, orders and first-loss modifiers, and the factory's own `commit` (OD-102) [s10]. It is the only Clutch factory.
+- Register the universal factory in Easy Track. Its permissions are its address book: one call, the factory's own `applyMotion` (OD-102, OD-118) [s10]. It is the only Clutch factory.
 
 ### The first tranche
 
@@ -75,9 +75,9 @@ Aragon Voting runs the Easy Track and payment items itself. It holds Easy Track'
 
 Each Safe's changes form one or more batches. The vote approves the hash of each batch on its Safe, and anyone sends the batch after the vote with that approval as Voting's signature (OD-92). The batches of one Safe run in nonce order [s9].
 
-- **The Asset Safe.** Enable the operator modifier and the safety modifier, and apply the compiled policy on both: every permission, and every budget key with its ceiling, the Lido Lend key included. The operator's permissions include a transfer of each listed token to the Aragon Agent (OD-108). Grant `operator` to the committee's Safe; `governance` and `insurance-funding` on the operator modifier, and `exit-governance` and `restart` on the safety modifier, to the Easy Track executor; and `emergency`, with the switch, to the emergency Safe [s2][s6][s10][s11].
-- **The orders account.** Set CoW's fallback handler, and ComposableCoW as the verifier of CoW's settlement domain. Enable the orders modifier and apply its policy: the operator's orders on the launch lists and its transfers to the Aragon Agent, and the emergency role's recovery orders, transfers and cancels. Grant `operator` to the committee's Safe, `emergency` to the emergency Safe, and the governance and approvals roles to the Easy Track executor (OD-103). Approve CoW's vault relayer for every listed token, the recovery tokens included [s4].
-- **The first-loss Safe.** Enable the first-loss modifier and apply its policy. Grant `first-loss` to the committee's Safe, and `first-loss-burn` and the insurance roles to the Easy Track executor (OD-107) [s5][s11].
+- **The Asset Safe.** Enable the operator modifier and the safety modifier, and apply the compiled policy on both: every permission, and every budget key with its ceiling, the Lido Lend key included. The operator's permissions include a transfer of each listed token to the Aragon Agent (OD-108). Grant `operator` to the committee's Safe; `governance` and `insurance-funding` on the operator modifier, and `exit-governance` and `restart` on the safety modifier, to the universal factory; and `emergency`, with the switch, to the emergency Safe [s2][s6][s10][s11].
+- **The orders account.** Set CoW's fallback handler, and ComposableCoW as the verifier of CoW's settlement domain. Enable the orders modifier and apply its policy: the operator's orders on the launch lists and its transfers to the Aragon Agent, and the emergency role's recovery orders, transfers and cancels. Grant `operator` to the committee's Safe, `emergency` to the emergency Safe, and the governance and approvals roles to the universal factory (OD-103, OD-118). Approve CoW's vault relayer for every listed token, the recovery tokens included [s4].
+- **The first-loss Safe.** Enable the first-loss modifier and apply its policy. Grant `first-loss` to the committee's Safe, and `first-loss-burn` and the insurance roles to the universal factory (OD-107, OD-118) [s5][s11].
 
 ### Order
 
@@ -113,8 +113,8 @@ Done on 2026-11-05: the fork suite passes 74 tests, and the [research note](/res
 
 The fork prototype of the universal factory ([ADR 013](/adr/013-one-easy-track-factory.md), confirmation) rebuilds the Easy Track part of the vote [s10]:
 
-1. **Harness.** `RehearsalBase` drops the funding registries, the top-up factories and the token-list interfaces. It deploys the prototype with the committee's Safe as its trusted caller, and builds its address book: `execTransactionWithRole` on the four modifiers and the factory's `commit`. The prototype replaces `BudgetFactoryStandIn`.
-2. **Policy.** The constellation adds two roles of the Easy Track executor: `restart` on the safety modifier, pinned to `enableModule` with the operator modifier as its argument, and `insurance-funding` on the operator modifier, pinned to transfers to the first-loss Safe. The compiler's guard on protected targets allows exactly that one `enableModule` call. The rehearsal's manifest is compiled again, and reviewers approve the artifact's diff ([ADR 004](/adr/004-specifications-and-policy-as-data.md), decision 14).
+1. **Harness.** `RehearsalBase` drops the funding registries, the top-up factories and the token-list interfaces. It deploys the prototype with the committee's Safe as its trusted caller, and builds its address book: one call, the factory's `applyMotion` (OD-118). The prototype replaces `BudgetFactoryStandIn`.
+2. **Policy.** The constellation adds two roles that the universal factory holds: `restart` on the safety modifier, pinned to `enableModule` with the operator modifier as its argument, and `insurance-funding` on the operator modifier, pinned to transfers to the first-loss Safe. The compiler's guard on protected targets allows exactly that one `enableModule` call. The rehearsal's manifest is compiled again, and reviewers approve the artifact's diff ([ADR 004](/adr/004-specifications-and-policy-as-data.md), decision 14).
 3. **The vote.** One Easy Track item registers the factory with its address book, in place of the three factory items. The USDS items go. One `newImmediatePayment` from Finance for each token pays the first tranche, with stand-in amounts under the launch cap [s11].
 4. **Tests.**
    - `test_02_enabling_vote_end_to_end` checks the factory's registration, and that the first tranche reaches the Asset Safe when the vote executes, before the batches run.

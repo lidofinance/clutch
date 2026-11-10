@@ -153,7 +153,7 @@ test("the compiler refuses a grant or a budget for the emergency role", () => {
   }
 });
 
-// ADR 013, decision 12: the restart role, which the Easy Track executor holds,
+// ADR 013, decision 12: the restart role, which the universal factory holds,
 // may only enable the operator modifier on the Asset Safe.
 const ENABLE_MODULE = id("enableModule(address)").slice(0, 10) as `0x${string}`;
 const restartFunction = (modifiers: typeof artifact.modifiers) =>
@@ -161,7 +161,7 @@ const restartFunction = (modifiers: typeof artifact.modifiers) =>
 
 test("the restart role holds only enableModule, pinned to the operator modifier", () => {
   const restart = role("restart");
-  expect(restart.members.map((m: { address: string }) => m.address)).toEqual([manifest.easyTrackExecutor]);
+  expect(restart.members.map((m: { address: string }) => m.address)).toEqual([manifest.universalFactory]);
   expect(restart.targets.map((t) => t.address)).toEqual([manifest.assetSafe]);
   expect(restart.targets[0].functions.map((f) => f.selector)).toEqual([ENABLE_MODULE]);
   const pinned = restart.targets[0].functions[0].conditions.filter((n) => n.operator === EQUAL_TO).map((n) => n.compValue.toLowerCase());
@@ -209,7 +209,7 @@ test("a budget motion may set a launch key or a derived key, and no other", () =
 test("the insurance-funding role transfers only to the first-loss Safe", () => {
   const TRANSFER = id("transfer(address,uint256)").slice(0, 10) as `0x${string}`;
   const funding = role("insurance-funding");
-  expect(funding.members.map((m: { address: string }) => m.address)).toEqual([manifest.easyTrackExecutor]);
+  expect(funding.members.map((m: { address: string }) => m.address)).toEqual([manifest.universalFactory]);
   expect(funding.targets.length).toBeGreaterThan(0);
   for (const target of funding.targets) {
     expect(target.functions.map((f) => f.selector)).toEqual([TRANSFER]);
@@ -234,6 +234,31 @@ const signOrderOf = (name: string) =>
 
 test("the rehearsal artifact passes the checks, the orders account included", () => {
   expect(() => checkProtected(REHEARSAL.modifiers, REHEARSAL.manifest)).not.toThrow();
+});
+
+// ADR 013, decision 18: the universal factory holds every motion role, and no other role. The kit, which has no
+// universal factory, names its mock script executor in the factory's place.
+test("the universal factory holds every motion role, and no other", () => {
+  const MOTION_ROLES = ["governance", "restart", "insurance-funding", "exit-governance", "approvals"];
+  const artifacts: [typeof REHEARSAL, string][] = [
+    [artifact as typeof REHEARSAL, (artifact.manifest as Record<string, string>).universalFactory],
+    [REHEARSAL, (REHEARSAL.manifest as Record<string, string>).universalFactory],
+  ];
+  for (const [a, factory] of artifacts) {
+    let held = 0;
+    for (const m of a.modifiers) {
+      for (const r of m.roles) {
+        const members = r.members.map((x: { address: string }) => x.address);
+        if (MOTION_ROLES.includes(r.name)) {
+          expect(members).toEqual([factory]);
+          held++;
+        } else {
+          expect(members).not.toContain(factory);
+        }
+      }
+    }
+    expect(held).toBeGreaterThanOrEqual(4);
+  }
 });
 
 test("every delegatecall is the orders account's call of the order signer", () => {
@@ -337,8 +362,8 @@ test("every signer order signs no fee", () => {
   }
 });
 
-// ADR 007, decision 41 (INV-040): the orders modifier's governance and approvals roles, both held by the Easy Track
-// executor. Governance writes under the operator and emergency keys, and under the approvals key only the relayer
+// ADR 007, decision 41 (INV-040): the orders modifier's governance and approvals roles, both held by the universal
+// factory. Governance writes under the operator and emergency keys, and under the approvals key only the relayer
 // approval; the one delegatecall that it grants is the order signer's; it holds no membership setter and refuses
 // the vault's accounts as the administered target. The approvals role approves only CoW's vault relayer.
 const COW_VAULT_RELAYER = "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110";
@@ -360,11 +385,11 @@ const ordersGrant = (modifiers: typeof REHEARSAL.modifiers, signature: string) =
 const branchesOf = (c: Flat[]) => (c[0].operator === OR ? kids(c, 0) : [0]).map((b) => ({ b, params: kids(c, b) }));
 const SCOPE_FUNCTION = GRANTS[2];
 const ALLOW_FUNCTION = GRANTS[1];
-const executor = REHEARSAL.manifest.easyTrackExecutor as string;
+const factory = REHEARSAL.manifest.universalFactory as string;
 
-test("the executor holds the orders modifier's governance role, on the modifier alone, with three grants", () => {
+test("the universal factory holds the orders modifier's governance role, on the modifier alone, with three grants", () => {
   const governance = ordersRole("governance");
-  expect(governance.members.map((m: { address: string }) => m.address)).toEqual([executor]);
+  expect(governance.members.map((m: { address: string }) => m.address)).toEqual([factory]);
   expect(governance.targets.map((t) => t.address)).toEqual([REHEARSAL.manifest.ordersModifier]);
   expect(governance.targets[0].functions.map((f) => f.signature).sort()).toEqual([...GRANTS].sort());
   // no membership setter, no allowTarget, no revoke and no setAllowance
@@ -460,7 +485,7 @@ test("orders governance restores only the operator's two functions without condi
 
 test("the approvals role approves only CoW's vault relayer, for every token that an order sells", () => {
   const approvalsRole = ordersRole("approvals");
-  expect(approvalsRole.members.map((m: { address: string }) => m.address)).toEqual([executor]);
+  expect(approvalsRole.members.map((m: { address: string }) => m.address)).toEqual([factory]);
   for (const target of approvalsRole.targets) {
     expect(target.functions.map((f) => f.selector)).toEqual([APPROVE]);
     const c = target.functions[0].conditions as Flat[];
@@ -587,8 +612,8 @@ test("adding a token inserts one sorted leaf in each list, in the SDK's form", a
   }
 });
 
-// ADR 006, decision 13 (OD-49; INV-025): the exit-governance role on the safety modifier, held by the Easy Track
-// executor, writes only the emergency role's exits, each tree pinned to the emergency role's own, as plain calls,
+// ADR 006, decision 13 (OD-49; INV-025): the exit-governance role on the safety modifier, held by the universal
+// factory, writes only the emergency role's exits, each tree pinned to the emergency role's own, as plain calls,
 // and never on a vault account. The kit compiles the safety modifier, so these checks read the kit's artifact.
 const exitRole = () => artifact.modifiers.find((m) => m.ref === "safety_modifier")!.roles.find((r) => r.name === "exit-governance")!;
 const exitGrant = (modifiers: typeof artifact.modifiers, signature: string) =>
@@ -597,9 +622,9 @@ const emergencyOnSafety = () => artifact.modifiers.find((m) => m.ref === "safety
 const encodeTree = (conditions: Flat[]) =>
   AbiCoder.defaultAbiCoder().encode(["(uint8,uint8,uint8,bytes)[]"], [conditions.map((n) => [n.parent, n.paramType, n.operator, n.compValue])]);
 
-test("the executor holds the exit-governance role, on the safety modifier alone, writing only under the emergency key", () => {
+test("the universal factory holds the exit-governance role, on the safety modifier alone, writing only under the emergency key", () => {
   const exit = exitRole();
-  expect(exit.members.map((m: { address: string }) => m.address)).toEqual([manifest.easyTrackExecutor]);
+  expect(exit.members.map((m: { address: string }) => m.address)).toEqual([manifest.universalFactory]);
   expect(exit.targets.map((t) => t.address)).toEqual([manifest.safetyModifier]);
   expect(exit.targets[0].functions.map((f) => f.signature).sort()).toEqual([...GRANTS].sort());
   for (const signature of GRANTS) {

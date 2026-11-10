@@ -17,3 +17,4 @@ export * as ordersGovernance from "./orders-governance";
 export * as ordersApprovals from "./orders-approvals";
 // Added for Clutch on 2026-11-08: the Easy Track executor's exit-governance role (ADR 006, decision 13; OD-49).
 export * as exitGovernance from "./exit-governance";
+// Changed for Clutch on 2026-11-08: the universal factory holds every motion role (ADR 013, decision 18).

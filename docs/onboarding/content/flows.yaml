@@ -164,12 +164,12 @@ flows:
         nodes: [easytrack]
         check: "INV-005, tested on a mock Easy Track. INV-033 is tested on a fork, with the factory's prototype and the live Easy Track."
       - who: "Governance role"
-        text: "The script executor writes the new operator permission through the governance role. The modifier checks this write too: the operator key only, no role change, no delegatecall and no administrative target."
+        text: "The motion's one call reaches the universal factory, which checks the motion again and writes the new operator permission through the governance role. The modifier checks this write too: the operator key only, no role change, no delegatecall and no administrative target."
         nodes: [easytrack, operator-modifier]
         edges: [gov-role]
         check: "INV-004: the Asset Safe and every module of it are refused as targets (OD-38)."
       - who: "Exit-governance role"
-        text: "The same script gives the emergency role the new target's exits on the safety modifier: redeem, withdraw and claim paid to the Asset Safe, cancel and unwrap, a transfer pinned to the Agent, and an approval set to zero. The script's last call, the factory's `commit`, stores the new versions."
+        text: "The same motion gives the emergency role the new target's exits on the safety modifier: redeem, withdraw and claim paid to the Asset Safe, cancel and unwrap, a transfer pinned to the Agent, and an approval set to zero. In the same call the factory stores the new versions, before it writes."
         nodes: [easytrack, safety-modifier]
         check: "INV-025: this role writes only the emergency role's exits, under the emergency key, each tree pinned whole, with no delegatecall, allowance or administrative target. The role is built and tested on a fork; the factory's shapes that emit the exits are not built (OD-49)."
       - who: "Operator, and the emergency Safe if needed"
@@ -206,7 +206,7 @@ flows:
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
       - who: "Easy Track"
-        text: "After 72 hours without an objection, the executor sets the budget through the governance role. The refill period stays at 30 days or more."
+        text: "After 72 hours without an objection, the universal factory sets the budget through the governance role, in the motion's one call. The refill period stays at 30 days or more."
         nodes: [easytrack, operator-modifier, dao]
         edges: [gov-role, object]
         check: "INV-012: the 30-day floor is tested on the modifier. The factory's prototype also holds each budget within its token's ceiling, at stand-in figures; the real ceilings wait for the attested figures."
@@ -270,9 +270,9 @@ flows:
         nodes: [dao, easytrack]
         edges: [object]
       - who: "Easy Track"
-        text: "The executor writes the token into the order lists through the orders modifier's governance role, and approves CoW's vault relayer for it through the approvals role. The same motion adds the emergency transfer, the recovery orders and the operator's return of the token to the Aragon Agent, and, through the exit-governance role, the token's exit from the Asset Safe to the Agent or the orders account (ADR 007, decision 45)."
+        text: "In the motion's one call, the universal factory writes the token into the order lists through the orders modifier's governance role, and approves CoW's vault relayer for it through the approvals role. The same motion adds the emergency transfer, the recovery orders and the operator's return of the token to the Aragon Agent, and, through the exit-governance role, the token's exit from the Asset Safe to the Agent or the orders account (ADR 007, decision 45)."
         nodes: [easytrack, orders]
-        check: "INV-040: the governance role grants delegatecall only to the order signer, for signing and unsigning orders, pins whole the trees that do not depend on the token, and the approvals role approves only CoW's vault relayer. Both roles are built, and a fork test runs the motion's writes by hand; the factory's shape is not built."
+        check: "INV-040: the governance role grants delegatecall only to the order signer, for signing and unsigning orders, pins whole the trees that do not depend on the token, and the approvals role approves only CoW's vault relayer. Both roles are built. The universal factory adds the token in one motion through the live Easy Track, under EIP-7825's gas cap (OD-118)."
       - who: "Operator"
         text: "The operator can now sell or buy the token in market, limit and TWAP orders that pay the Asset Safe."
         nodes: [committee, asset-safe, orders]
@@ -283,7 +283,7 @@ flows:
     sources: ["ADR-007#d41", "ADR-007#d22", "ADR-007#proposed-direction", "ADR-013#d8", "ADR-013#proposed-direction",
       "ADR-014#proposed-direction", "ADR-006#d4", OD-103, INV-008, INV-040,
       "runbook:Cancel orders and sweep the orders account", "test:test_orders_motion_adds_a_token",
-      "test:test_orders_approvals_role_approves_only_the_relayer"]
+      "test:test_orders_approvals_role_approves_only_the_relayer", OD-118, "test:test_factory_orders_token_motion", "ADR-013#d18"]
 
   - id: dao-change
     group: governance
@@ -436,7 +436,7 @@ flows:
         edges: [screen, motions, first-loss-shares]
         check: "INV-021: only an enacted motion can burn the shares, and no role can transfer or approve them. Specified, not built. A redemption also runs before the guard is set; if its proceeds take the vault above the first tranche, the committee's Safe returns the excess to the Aragon Agent."
       - who: "Easy Track, after 72 hours"
-        text: "If LDO holders do not object, anyone enacts the motion. The Easy Track script executor calls `burn` on the share token through the first-loss burn role."
+        text: "If LDO holders do not object, anyone enacts the motion. In the motion's one call, the universal factory calls `burn` on the share token through the first-loss burn role."
         nodes: [easytrack, first-loss, protocols]
         edges: [first-loss-shares]
       - who: "Monitoring"
@@ -475,7 +475,7 @@ flows:
         nodes: [dao, easytrack]
         edges: [object]
       - who: "Easy Track"
-        text: "The executor moves the tokens from the Asset Safe to the first-loss Safe through the insurance-funding role, pinned to the first-loss Safe. For a fund of shares, an insurance role then deposits them into the insured product, with the first-loss Safe as the receiver."
+        text: "The universal factory moves the tokens from the Asset Safe to the first-loss Safe through the insurance-funding role, pinned to the first-loss Safe. For a fund of shares, an insurance role then deposits them into the insured product, with the first-loss Safe as the receiver."
         nodes: [easytrack, operator-modifier, asset-safe, first-loss, protocols]
         edges: [own-op, insure, first-loss-shares]
         check: "INV-039: insurance money reaches the first-loss Safe only by motion, from the Asset Safe. Tested on a fork with the factory's prototype."
@@ -705,10 +705,10 @@ flows:
         nodes: [dao, easytrack]
         edges: [object]
       - who: "Restart role"
-        text: "After the window, the executor's restart role on the safety modifier enables the operator modifier on the Asset Safe. The role can do nothing else."
+        text: "After the window, the universal factory's restart role on the safety modifier enables the operator modifier on the Asset Safe. The role can do nothing else."
         nodes: [easytrack, safety-modifier, asset-safe, operator-modifier]
         edges: [own-sf, own-op]
-        check: "INV-035: the restart role, held only by the Easy Track executor, may only call `enableModule` with the operator modifier as its argument. Tested on a fork, with the factory's prototype for the motion."
+        check: "INV-035: the restart role, held only by the universal factory, may only call `enableModule` with the operator modifier as its argument. Tested on a fork, with the factory's prototype for the motion."
       - who: "Easy Track"
         text: "Other motions bring back what the emergency role revoked, on the Asset Safe and on the orders account, relayer approvals included."
         nodes: [easytrack, operator-modifier, orders]

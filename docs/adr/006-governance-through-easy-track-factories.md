@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-08T10:58:07Z
+  at: 2026-11-08T14:24:34Z
 verified: []
 sources:
   - id: s1
@@ -81,6 +81,8 @@ EM decided on 2026-10-06, closing OD-46 [s1]:
 EM decided on 2026-10-06, closing OD-49 [s1]:
 
 13. A motion that onboards a protocol also adds its emergency exit. A new role on the safety modifier, the exit-governance role, held by the Easy Track script executor, writes exits for the emergency role through the same templates ([ADR 005](/adr/005-account-graph-and-roles.md)).
+
+Since [ADR 013](/adr/013-one-easy-track-factory.md) decision 18 (2026-11-08), the universal factory holds the exit-governance role in place of the Easy Track script executor.
 
 EM confirmed on 2026-10-13 [s1] that decision 7's "Easy Track only expands" is a rule for permissions. The first-loss burn motion writes no permission, so it does not break decision 7 ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23).
 

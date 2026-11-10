@@ -1,5 +1,6 @@
 # Research
 
+* [A token for the orders account by motion, 2026-11-08](orders-token-motions-2026-11-08.md) - OD-117 and OD-118: the factory's orders operation, a companion contract for EIP-170, and the factory that holds the motion roles and makes a motion's writes in one call, so that one motion adds a token under EIP-7825's gas cap.
 * [The orders account's motion roles and the exit-governance role on a fork, 2026-11-08](orders-motion-roles-2026-11-08.md) - OD-103 and OD-49: the orders modifier's governance and approvals roles, the exit-governance role, the compiler's grant rules, and a token motion's writes run by hand.
 * [The orders account's policy on a fork, 2026-11-07](orders-account-fork-tests-2026-11-07.md) - ADR 007's fork tests: the order signer and TWAP orders from Safe v1.5.0; OD-115 and OD-116.
 * [The universal factory's prototype, 2026-11-05](universal-factory-prototype-2026-11-05.md) - OD-102 to OD-104, OD-113 and OD-114: the factory's core, an approval list, introductions and restores, on a fork.

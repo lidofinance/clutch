@@ -268,8 +268,8 @@
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
 - term: Universal factory
-  plain: "The one Easy Track factory that builds every Clutch motion. Its registration is its address book: the role call of the vault's four modifiers, and its own `commit`. It widens a permission only through typed [[shape|shapes]], narrows one with raw writes, keeps a [[version]] for each scope, and cannot be upgraded."
-  sources: ["ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d10", INV-032, OD-102]
+  plain: "The one Easy Track factory that builds every Clutch motion and holds the roles that motions use. Its registration is its address book: one call, its own `applyMotion`, in which it checks a motion again and makes the motion's writes. It widens a permission only through typed [[shape|shapes]], narrows one with raw writes, keeps a [[version]] for each scope, and cannot be upgraded."
+  sources: ["ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d10", "ADR-013#d18", INV-032, OD-102, OD-118]
 
 - term: Version
   plain: "The universal factory's record of a scope's current content. A scope is one modifier's role, target and function, one budget key, or one ceiling. A motion names the versions that it expects. If another motion changed a scope first, the motion fails at enactment, so two motions cannot undo each other."

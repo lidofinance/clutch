@@ -46,21 +46,13 @@ contract UniversalFactoryRehearsal is EnabledVault {
     // ---------------------------------------------------------------------
 
     /// @dev The registration that the enabling vote writes is the address book:
-    ///      the role call of the four modifiers and the factory's commit. A script
-    ///      that reaches anything else does not pass Easy Track, and only Aragon
-    ///      Voting registers a factory.
+    ///      one call, the factory's own `applyMotion` (ADR 013, decision 18). A
+    ///      script that reaches anything else does not pass Easy Track, and only
+    ///      Aragon Voting registers a factory.
     function test_uf_address_book_is_the_registration() public enabled {
         IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
         bytes memory book = et.evmScriptFactoryPermissions(address(uf));
-        bytes4 exec = IRoles.execTransactionWithRole.selector;
-        assertEq(
-            book,
-            abi.encodePacked(
-                address(opMod), exec, address(safetyMod), exec, address(ordersMod), exec, address(firstLossMod), exec,
-                address(uf), uf.commit.selector
-            ),
-            "the address book"
-        );
+        assertEq(book, abi.encodePacked(address(uf), uf.applyMotion.selector), "the address book");
 
         RogueFactory rogue = new RogueFactory();
         vm.prank(Mainnet.COMMITTEE_SAFE);
@@ -71,6 +63,55 @@ contract UniversalFactoryRehearsal is EnabledVault {
         vm.prank(Mainnet.COMMITTEE_SAFE);
         vm.expectRevert(bytes("HAS_NO_PERMISSIONS"));
         et.createMotion(address(rogue), "");
+    }
+
+    /// @dev The universal factory holds the motion roles, and Easy Track's executor, which every
+    ///      Easy Track factory shares, holds none (decision 18). A motion's script is one call,
+    ///      `applyMotion`, which checks the motion again: the executor's own call of it is refused
+    ///      like a motion that the checks refuse. `writesOf` shows the writes that it would make.
+    function test_uf_the_factory_holds_the_motion_roles() public enabled {
+        bytes memory restore = abi.encodeCall(IRoles.scopeTarget, (OPERATOR, newVault));
+        bytes memory viaRole = abi.encodeCall(IRoles.execTransactionWithRole, (address(opMod), 0, restore, 0, GOVERNANCE, true));
+        vm.prank(Mainnet.ET_EXECUTOR);
+        (bool ok,) = address(opMod).call(viaRole);
+        assertFalse(ok, "the executor holds no role");
+
+        bytes memory cd = _calldata(_one(_op(uf.RESTORE(), abi.encode(newVault))));
+        bytes memory call = abi.encodeCall(uf.applyMotion, (cd));
+        assertEq(
+            uf.createEVMScript(Mainnet.COMMITTEE_SAFE, cd),
+            abi.encodePacked(bytes4(0x00000001), address(uf), uint32(call.length), call),
+            "a script of one call"
+        );
+        (address[] memory to, bytes[] memory data) = uf.writesOf(cd);
+        assertEq(to.length, 1, "one write");
+        assertEq(to[0], address(opMod), "on the operator modifier");
+        assertEq(data[0], viaRole, "through the governance role");
+
+        bytes memory protectedTarget = _calldata(_one(_op(uf.RESTORE(), abi.encode(address(asset)))));
+        vm.prank(Mainnet.ET_EXECUTOR);
+        vm.expectRevert(abi.encodeWithSelector(UniversalFactory.ProtectedAddress.selector, address(asset)));
+        uf.applyMotion(protectedTarget);
+
+        _motion(_one(_op(uf.RESTORE(), abi.encode(newVault))));
+        vm.prank(address(uf));
+        (ok,) = address(opMod).call(viaRole);
+        assertTrue(ok, "the factory holds the governance role");
+    }
+
+    /// @dev A write that the vault refuses fails the whole enactment, and the motion's versions
+    ///      stay as they were: with the operator modifier disabled, and the counter left as it
+    ///      is, a budget motion fails at enactment.
+    function test_uf_a_refused_write_fails_the_whole_motion() public enabled {
+        bytes memory cd = _calldata(_one(_budgetOp(Mainnet.USDC, newVault, 1_000e6, bytes32(0))));
+        bytes32 scope = uf.allowanceScope(uf.keyFor(Mainnet.USDC, newVault));
+        uint256 id = _create(cd);
+        _afterWindow();
+        _disableOperatorModifier();
+        vm.prank(anyone);
+        (bool ok,) = Mainnet.EASY_TRACK.call(abi.encodeCall(IEasyTrack.enactMotion, (id, cd)));
+        assertFalse(ok, "the enactment fails");
+        assertEq(uf.versions(scope), bytes32(0), "the version stays");
     }
 
     /// @dev The factory writes an approval list exactly as the policy compiler does, so the
@@ -306,8 +347,8 @@ contract UniversalFactoryRehearsal is EnabledVault {
         );
         // a token without a budget ceiling takes no budget
         _refuse(
-            _budgetOp(Mainnet.USDT, newVault, 1, bytes32(0)),
-            abi.encodeWithSelector(UniversalFactory.BudgetAboveCeiling.selector, uf.keyFor(Mainnet.USDT, newVault), 0)
+            _budgetOp(Mainnet.PYUSD, newVault, 1, bytes32(0)),
+            abi.encodeWithSelector(UniversalFactory.BudgetAboveCeiling.selector, uf.keyFor(Mainnet.PYUSD, newVault), 0)
         );
         _motion(_one(_budgetOp(Mainnet.USDC, Mainnet.EARN_USD_DEPOSIT_QUEUE, uint128(BUDGET_CEILING_USDC), seeded)));
         (,,, uint128 balance,) = opMod.allowances(key);
@@ -335,7 +376,7 @@ contract UniversalFactoryRehearsal is EnabledVault {
         _motion(_one(_ceilingOp(key, 2 * c, 0)));
         _refuse(_ceilingOp(key, 0, 1), abi.encodeWithSelector(UniversalFactory.RaiseFromZero.selector, key));
         // a ceiling that was never set changes only with its token's introduction (decision 15)
-        bytes32 none = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDT);
+        bytes32 none = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.PYUSD);
         _refuse(_ceilingOp(none, 0, 1), abi.encodeWithSelector(UniversalFactory.CeilingNotSet.selector, none));
     }
 
@@ -350,7 +391,7 @@ contract UniversalFactoryRehearsal is EnabledVault {
     ///      ceilings in one operation, and the same motion's budget for it stays under the new
     ///      budget ceiling. Without an introduction the token takes no list and no ceiling.
     function test_uf_a_new_token_is_introduced_with_its_ceilings() public enabled {
-        address token = Mainnet.USDT;
+        address token = Mainnet.PYUSD;
         UniversalFactory.Entry[] memory list = _introList();
         bytes32 budgetKey = uf.ceilingKey(uf.BUDGET_CEILING(), token);
 
@@ -400,7 +441,7 @@ contract UniversalFactoryRehearsal is EnabledVault {
     ///      introduced the launch tokens. From then on decision 13 holds: the introduction is
     ///      the first raise, so the next raise waits 15 days.
     function test_uf_a_token_is_introduced_once() public enabled {
-        address token = Mainnet.USDT;
+        address token = Mainnet.PYUSD;
         UniversalFactory.Entry[] memory list = _introList();
         _motion(_introduction(500_000e6, false));
         bytes memory again = abi.encodeWithSelector(UniversalFactory.AlreadyIntroduced.selector, token);
@@ -424,19 +465,19 @@ contract UniversalFactoryRehearsal is EnabledVault {
         assertEq(value, 2 * INTRO_BUDGET_CEILING, "a twofold raise 15 days after the introduction");
     }
 
-    /// @dev USDT's first list: a derived key for one new spender and a capped entry for another.
+    /// @dev The new token's first list: a derived key for one new spender and a capped entry for another.
     function _introList() internal view returns (UniversalFactory.Entry[] memory list) {
         list = new UniversalFactory.Entry[](1);
-        list[0] = _derived(Mainnet.USDT, newVault);
+        list[0] = _derived(Mainnet.PYUSD, newVault);
         list = _with(list, UniversalFactory.Entry(otherVault, bytes32(0), INTRO_APPROVAL_CEILING));
     }
 
-    /// @dev USDT's introduction and a budget for its derived key, in this order or the other.
+    /// @dev The new token's introduction and a budget for its derived key, in this order or the other.
     function _introduction(uint128 budget, bool budgetFirst) internal view returns (UniversalFactory.Op[] memory ops) {
         ops = new UniversalFactory.Op[](2);
         UniversalFactory.Op memory intro =
-            _introduceOp(Mainnet.USDT, _introList(), INTRO_BUDGET_CEILING, INTRO_APPROVAL_CEILING);
-        UniversalFactory.Op memory b = _budgetOp(Mainnet.USDT, newVault, budget, bytes32(0));
+            _introduceOp(Mainnet.PYUSD, _introList(), INTRO_BUDGET_CEILING, INTRO_APPROVAL_CEILING);
+        UniversalFactory.Op memory b = _budgetOp(Mainnet.PYUSD, newVault, budget, bytes32(0));
         (ops[0], ops[1]) = budgetFirst ? (b, intro) : (intro, b);
     }
 
@@ -533,9 +574,9 @@ contract UniversalFactoryRehearsal is EnabledVault {
         // only the committee's Safe creates a motion
         vm.expectRevert(abi.encodeWithSelector(UniversalFactory.NotTrustedCaller.selector, Mainnet.VOTING));
         uf.createEVMScript(Mainnet.VOTING, restart);
-        // only the executor commits
+        // only the executor applies a motion
         vm.expectRevert(abi.encodeWithSelector(UniversalFactory.NotExecutor.selector, address(this)));
-        uf.commit(0, new bytes32[](0), new bytes32[](0), new bytes32[](0), new uint256[](0));
+        uf.applyMotion(restart);
         // a motion writes each scope once, and carries known operations only
         vm.prank(Mainnet.COMMITTEE_SAFE);
         vm.expectRevert(abi.encodeWithSelector(UniversalFactory.DuplicateScope.selector, scope));
@@ -562,11 +603,11 @@ contract UniversalFactoryRehearsal is EnabledVault {
         bytes32 key = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDC);
         _measureMotion("ceiling", _one(_ceilingOp(key, BUDGET_CEILING_USDC, 2 * BUDGET_CEILING_USDC)));
         _measureMotion("insurance money", _one(_op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(1_000e6)))));
-        UniversalFactory.Entry[] memory usdt = new UniversalFactory.Entry[](1);
-        usdt[0] = _derived(Mainnet.USDT, newVault);
+        UniversalFactory.Entry[] memory fresh = new UniversalFactory.Entry[](1);
+        fresh[0] = _derived(Mainnet.PYUSD, newVault);
         UniversalFactory.Op[] memory intro = new UniversalFactory.Op[](2);
-        intro[0] = _introduceOp(Mainnet.USDT, usdt, 1_000_000e6, 1_000e6);
-        intro[1] = _budgetOp(Mainnet.USDT, newVault, 1_000e6, bytes32(0));
+        intro[0] = _introduceOp(Mainnet.PYUSD, fresh, 1_000_000e6, 1_000e6);
+        intro[1] = _budgetOp(Mainnet.PYUSD, newVault, 1_000e6, bytes32(0));
         _measureMotion("introduction of a token, with one budget", intro);
 
         // a full list: 32 spenders, the most that one list may hold

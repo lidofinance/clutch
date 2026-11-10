@@ -196,51 +196,52 @@
   name: Easy Track script executor
   status: existing
   label: existing
-  what: "The contract that runs an enacted motion's script. In Clutch it holds one role for each kind of write: governance and insurance-funding on the operator modifier; exit-governance and restart on the safety modifier; governance and approvals on the orders modifier; and first-loss burn and the insurance roles on the first-loss modifier."
+  what: "The contract that runs an enacted motion's script. A Clutch motion's script makes one call: the universal factory's `applyMotion`. The executor holds no Clutch role (OD-118). Why: every Easy Track factory of the DAO shares this executor, so the roles that Clutch's motions use sit with Clutch's own factory."
   controlled_by: "Easy Track. Only an enacted motion makes it act."
   can:
-    - "Act as the governance role: write the operator's permissions and budgets through the universal factory's shapes, inside the limits that the policy sets."
-    - "Act as the exit-governance role on the safety modifier: add the emergency exit for a protocol that a motion onboards, or for a token that a motion adds to the order lists (OD-49)."
-    - "Act as the restart role: enable the operator modifier on the Asset Safe after the switch, and nothing else (OD-104)."
-    - "Act as the orders modifier's governance and approvals roles: add a token to the order lists, and raise an approval of CoW's vault relayer (OD-103)."
-    - "Act as the first-loss burn role on the first-loss modifier: burn the DAO's [[first-loss shares]] in an enacted burn motion (OD-67)."
-    - "Act as the insurance roles: move insurance money from the Asset Safe to the first-loss Safe, and create, burn and pay out insurance funds (OD-107)."
+    - "Make an enacted Clutch motion's one call: the universal factory's `applyMotion`, which checks the motion again and then makes its writes (OD-118)."
   cannot:
+    - "Write a Clutch permission itself. The universal factory holds the motion roles, and the executor holds none (INV-032)."
     - "Run scripts as the Aragon Agent. It holds neither `RUN_SCRIPT_ROLE` nor `EXECUTE_ROLE`."
     - "Pay the vault from the treasury. The universal factory's address book holds no payment call, and no Easy Track registry lists a vault Safe (INV-037)."
   address: "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977"
-  sources: ["ADR-005#context", "ADR-005#proposed-direction", "ADR-006#d8", "ADR-006#d13", "ADR-007#d41", "ADR-008#d23",
-    "ADR-013#d6", "ADR-013#d12", "ADR-013#proposed-direction", "ADR-014#d7", "ADR-014#proposed-direction", OD-49, OD-67,
-    OD-103, OD-104, OD-107, INV-035, INV-037, INV-040, "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
+  sources: ["ADR-005#context", "ADR-005#proposed-direction", "ADR-006#d8", "ADR-013#d18", "ADR-013#proposed-direction",
+    "ADR-013#consequences", OD-118, INV-032, INV-037, "test:test_uf_the_factory_holds_the_motion_roles",
+    "doc:docs/research/chain-reads-2026-09-30.md#easy-track"]
 
 - id: universal-factory
   node: easytrack
   name: The universal factory
   status: new
   label: specified
-  what: "One new Easy Track factory that builds every Clutch motion. Its Easy Track registration is its address book: the role call of the operator, safety, orders and first-loss modifiers, and its own `commit`. Nothing else is callable (OD-102). Why one factory: fewer moving parts, and one calldata format for monitoring to decode. If its shapes prove too complex, it falls back to raw writes that may also widen, with the objection window as the only bound."
+  what: "One new Easy Track factory that builds every Clutch motion and holds the roles that motions use. Its Easy Track registration is its address book: one call, its own `applyMotion`. Nothing else is callable (OD-102, OD-118). Why one factory: fewer moving parts, and one calldata format for monitoring to decode. Why one call: Easy Track's executor copies a script into memory three times for each call that the script makes, so a motion that adds a token fits EIP-7825's gas cap only as one call. If its shapes prove too complex, it falls back to raw writes that may also widen, with the objection window as the only bound."
   controlled_by: "Nobody can upgrade it. The committee's Safe is its [[trusted caller]], fixed at deployment. Aragon Voting registers it in Easy Track, and can raise its [[motion counter]] as its owner. A changed factory is a new registration, by vote."
   can:
+    - "Make an enacted motion's writes in the motion's one call, `applyMotion`, after it checks the motion again: through governance and insurance funding on the operator modifier, exit governance and restart on the safety modifier, governance and approvals on the orders modifier, and the first-loss burn and insurance roles on the first-loss modifier (OD-118)."
+    - "Show, through `writesOf`, the writes that a motion makes if it is enacted now."
     - "Widen a permission only through a typed [[shape]]. Each shape pins receivers, owners and beneficiaries to the vault, draws a [[budget key]] and writes the emergency exit."
     - "Narrow a permission with a raw write: a revoke, or a complete list that removes entries. A routine removal is such a write (OD-70)."
     - "Bring back a target that the emergency role revoked as a whole: a restore scopes it again, and the permissions stored under it come back as they were. It writes nothing new (OD-104)."
     - "Derive a new budget key for each new spender, so the policy holds no spare keys."
-    - "Keep a [[version]] for each scope that a motion writes. It checks the versions at creation and again at enactment, and the script's last call commits the new versions. Two motions on one scope therefore cannot undo each other (OD-100)."
+    - "Keep a [[version]] for each scope that a motion writes. It checks the versions at creation and again at enactment, and the motion's one call stores the new versions before it writes. Two motions on one scope therefore cannot undo each other (OD-100)."
     - "Change a [[ceiling]]: lower it at any time, or raise it to at most twice its value, at most once in 15 days (OD-105). The motion that introduces a token sets the token's first ceilings (OD-113)."
     - "Onboard Lido Lend in one motion, once its own contract exists, through its shape for a market that is compatible with Morpho Blue. The same motion adds the emergency exit (OD-49)."
-    - "Carry the other motions: budgets, a token for the orders account, the restart, the first-loss burn and the insurance funds (OD-103, OD-104, OD-107)."
+    - "Carry the other motions: budgets, a token for the orders account in one motion, the restart, the first-loss burn and the insurance funds (OD-103, OD-104, OD-107)."
   cannot:
     - "Grant a delegatecall, except the order signer's on the orders account, or reach an administrative target or function. The governance role's guards stay (OD-36, OD-38)."
     - "Take a condition tree that widens a permission. A raw write only narrows (INV-034)."
     - "Pay from the treasury. Its address book holds no payment call (INV-037)."
+    - "Use its roles outside an enacted motion. Only Easy Track's executor calls `applyMotion` (INV-032)."
     - "Enact a motion if a version that it names, or the [[motion counter]], changed since its creation. The emergency Safe raises the counter at every stop, and every open motion then fails (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke (OD-09)."
-  numbers: ["one factory for every Clutch motion", "a ceiling's raise: at most twofold, once in 15 days", "the prototype: 12,845 of EIP-170's 24,576 bytes", "external audit in phase 3"]
+  numbers: ["one factory for every Clutch motion", "a ceiling's raise: at most twofold, once in 15 days", "the prototype: 16,410 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 10,489 (OD-117)", "a motion that adds a token: 7,796,336 of EIP-7825's 16,777,216 gas (OD-118)", "external audit in phase 3"]
   sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d9", "ADR-013#d10",
     "ADR-013#d11", "ADR-013#d13", "ADR-013#proposed-direction", "ADR-013#consequences", "ADR-007#d41", "ADR-006#d9",
     "ADR-006#d10", "ADR-011#d13", OD-09, OD-36, OD-38, OD-49, OD-70, OD-100, OD-102, OD-103, OD-104, OD-105, OD-107,
-    OD-113, "ADR-013#d15",
+    OD-113, "ADR-013#d15", OD-117, "ADR-013#d18", "ADR-013#d12", "ADR-006#d13", "ADR-008#d23", "ADR-014#d7", OD-67,
+    OD-118, INV-035, INV-040, "test:test_uf_the_factory_holds_the_motion_roles", "test:test_factory_orders_token_motion",
     INV-029, INV-032, INV-033, INV-034, INV-036, INV-037, "lip:part-4", "doc:ROADMAP.md#roadmap",
+    "doc:docs/research/orders-token-motions-2026-11-08.md#one-contract-does-not-hold-the-shape",
     "doc:docs/research/universal-factory-prototype-2026-11-05.md#measures-for-the-choice-between-options-a-and-b",
     "doc:docs/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06",
     "doc:docs/research/universal-factory-prototype-2026-11-05.md#the-restore-of-a-revoked-target-built-on-2026-11-06", "test:test_uf_restore_brings_back_a_revoked_target"]
@@ -381,7 +382,7 @@
   label: built
   role: governance
   what: "The permissions that an enacted Easy Track motion uses on the operator modifier. A motion can widen what the operator may do, but only through the universal factory's typed shapes."
-  controlled_by: "Held by the Easy Track script executor, so only an enacted motion uses it."
+  controlled_by: "Held by the universal factory, so only an enacted motion uses it."
   can:
     - "Write operator permissions for a target that a motion names, under the `operator` key only."
     - "Set the operator's budgets, with a refill period of at least 30 days. A budget's key is a launch key, or a key that the universal factory derives for a new spender and that starts with `k:`."
@@ -468,7 +469,7 @@
   status: new
   label: built
   what: "The permissions that an enacted Easy Track motion uses on the safety modifier. The motion that onboards a protocol, or adds a token to the orders account's lists, also adds its emergency exit through this role."
-  controlled_by: "Held by the Easy Track script executor, so only an enacted motion uses it. The DAO creates it at the enabling vote."
+  controlled_by: "Held by the universal factory, so only an enacted motion uses it. The DAO creates it at the enabling vote."
   can:
     - "Write an exit for the emergency role, each tree pinned whole: redeem, withdraw and claim with the receiver and owner pinned to the Asset Safe; cancel, a redeem queue's redeem and unwrap; a transfer pinned to the Aragon Agent, or to the Agent or the orders account for a token that a recovery order sells; or an approval set to zero."
   cannot:
@@ -483,7 +484,7 @@
   status: new
   label: built
   what: "The permission that a restart motion uses on the safety modifier. After the emergency Safe switches the operator off, it lets a motion enable the operator modifier again. No emergency body resumes what it stopped (OD-104)."
-  controlled_by: "Held only by the Easy Track script executor, so only an enacted motion uses it. The committee's Safe creates the restart motion."
+  controlled_by: "Held only by the universal factory, so only an enacted motion uses it. The committee's Safe creates the restart motion."
   can:
     - "Call `enableModule` on the Asset Safe, with the operator modifier as its pinned argument."
   cannot:
@@ -696,7 +697,7 @@
   name: First-loss Safe
   status: instance
   label: specified
-  what: "A new Safe that holds the DAO's [[first-loss shares]] in earnETH and earnUSD, and the vault's insurance funds. Aragon Voting owns it. One modifier carries the committee's first-loss role and the Easy Track executor's roles. The committee therefore executes the first-loss terms without a DAO vote. A burn, a fund, its money and a payout each wait for a motion's objection window, and an exit pays the Asset Safe."
+  what: "A new Safe that holds the DAO's [[first-loss shares]] in earnETH and earnUSD, and the vault's insurance funds. Aragon Voting owns it. One modifier carries the committee's first-loss role and the universal factory's roles. The committee therefore executes the first-loss terms without a DAO vote. A burn, a fund, its money and a payout each wait for a motion's objection window, and an exit pays the Asset Safe."
   controlled_by: "Aragon Voting, at 1 of 1 (OD-73). Safe v1.5.0, with no guard or fallback handler, and one modifier: the first-loss modifier."
   can:
     - "Receive the first-loss shares from the Growth Committee Safe, once, after the enabling vote."
@@ -740,7 +741,7 @@
   status: new
   label: specified
   what: "The role on the first-loss Safe that burns the DAO's [[first-loss shares]]. Only an enacted Easy Track motion uses it, so every burn waits for the objection window (OD-67)."
-  controlled_by: "Held by the Easy Track script executor. The committee's Safe creates each burn motion on the universal factory, on the Earn team's written instruction. The DAO can change or remove the role by vote."
+  controlled_by: "Held by the universal factory. The committee's Safe creates each burn motion on the factory, on the Earn team's written instruction. The DAO can change or remove the role by vote."
   can:
     - "Burn the DAO's earnETH or earnUSD shares after a loss of at least 1% that the curators confirm. Below that, a Snapshot exception comes first."
   cannot:
@@ -758,7 +759,7 @@
   status: new
   label: specified
   what: "Insurance that the vault builds in at launch, for Lido Earn's earnETH and earnUSD only, and for Lido Lend. The first-loss Safe holds every fund. A fund for Lido Lend takes one of two forms: burnable shares, or a fixed payout address (OD-107)."
-  controlled_by: "The insurance roles of the Easy Track script executor, so every action is a motion that the committee's Safe creates. One Snapshot sets the framework for all funds first."
+  controlled_by: "The insurance roles of the universal factory, so every action is a motion that the committee's Safe creates. One Snapshot sets the framework for all funds first."
   can:
     - "Create a fund by motion, with the framework's checklist: the product, the share token or the payout address, the cap, the loss trigger with an independent confirming party, the incident-update deadline and the end of the terms."
     - "Take money from the Asset Safe by motion, through the insurance-funding role on the operator modifier, pinned to the first-loss Safe."
@@ -888,7 +889,7 @@
   name: The orders account's modifier
   status: instance
   label: built
-  what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, and two roles of the Easy Track script executor: governance and approvals (OD-57, OD-58, OD-103)."
+  what: "One Roles modifier on the orders account, from the same mastercopy as the Asset Safe's. It carries the operator and emergency roles, and two roles of the universal factory: governance and approvals (OD-57, OD-58, OD-103)."
   controlled_by: "Its owner, the orders account, so in the end the DAO."
   can:
     - "Let the operator sign orders through the order signer and create TWAP orders. The receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."

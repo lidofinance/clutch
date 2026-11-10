@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-08T10:58:07Z
+  at: 2026-11-08T14:26:34Z
 verified: []
 sources:
   - id: s1
@@ -90,8 +90,8 @@ Aragon votes fund the vault in rare tranches (OD-106). After the enabling vote, 
 Aragon Voting is the sole owner of the Asset Safe (OD-73).
 On the Asset Safe, two Zodiac Roles modifiers enforce default-deny permissions:
 
-- The operator modifier carries `operator`, held by the committee's Safe, and two roles of the Easy Track executor: `governance` and `insurance-funding`.
-- The safety modifier carries `emergency`, held by a new three-of-five Safe: two committee members, two Emergency Brakes members and one member of neither body. It also carries two roles of the Easy Track executor: exit governance, which adds an emergency exit, and `restart`, which may only enable the operator modifier again (OD-49, OD-104).
+- The operator modifier carries `operator`, held by the committee's Safe, and two roles of the universal factory: `governance` and `insurance-funding`.
+- The safety modifier carries `emergency`, held by a new three-of-five Safe: two committee members, two Emergency Brakes members and one member of neither body. It also carries two roles of the universal factory: exit governance, which adds an emergency exit, and `restart`, which may only enable the operator modifier again (OD-49, OD-104).
 
 The committee cannot form the emergency quorum alone. The Emergency Brakes multisig retains only the global Easy Track pause and touches no funds.
 No emergency body can restart what it stopped. A motion restarts the operator, after the objection window.
@@ -101,12 +101,12 @@ Each role's permissions pin the receiver: the Asset Safe for operator orders, th
 Prices have no on-chain bound. CoW's competition rules, screening, budgets and fill monitoring provide the controls.
 
 One universal Easy Track factory carries every motion (OD-102).
-Its Easy Track registration is its address book: `execTransactionWithRole` on the vault's four modifiers, and its own `commit`.
+Its Easy Track registration is its address book: one call, its own `applyMotion`, in which it checks a motion again and makes the motion's writes through the roles that it holds (OD-118).
 It widens a permission only through typed shapes. Each shape pins receivers to the vault, draws a budget key and writes the emergency exit. A raw write only narrows.
 Versions stop two motions from overwriting each other. A counter lets the emergency Safe make every open motion fail.
 Routine removal is a narrowing motion. Emergency removal uses immediate revocation.
 
-The universal factory is the only new contract. CoW's order signer has no known audit, so it counts as new code with the factory (OD-96).
+The universal factory, with the thin companion contract that it creates for its orders shape (OD-117), is the only new code. CoW's order signer has no known audit, so it counts as new code with the factory (OD-96).
 No bespoke access-control, vault or accounting contract is introduced.
 
 Aragon Voting funds the vault in tranches. Each tranche is a vote that pays the Asset Safe through the existing Finance application, without Dual Governance (OD-106). The first tranche, one million dollars, is an item of the enabling vote and is the launch cap.
@@ -160,11 +160,12 @@ flowchart TD
     GUARD["Screening guard<br/>vendor-supplied"] -.->|screens from the lift, OD-83| TMC
 
     ET["Easy Track"] --> EXEC["EVMScriptExecutor"]
-    FACTORY["Universal ET factory<br/>NEW CONTRACT<br/>shapes, versions, counter"] -.->|builds script| ET
-    EXEC -->|governance, insurance-funding| ROLES
-    EXEC -->|exit-governance, restart| SAFETY
-    EXEC -->|governance, approvals| OMODS
-    EXEC -->|burn and insurance, by enacted motion| FL
+    FACTORY["Universal ET factory<br/>NEW CONTRACT<br/>shapes, versions, counter,<br/>the motion roles"] -.->|builds a script of one call| ET
+    EXEC -->|one call per motion| FACTORY
+    FACTORY -->|governance, insurance-funding| ROLES
+    FACTORY -->|exit-governance, restart| SAFETY
+    FACTORY -->|governance, approvals| OMODS
+    FACTORY -->|burn and insurance, by enacted motion| FL
 
     TMC["Committee's Safe<br/>TMC, 4 of 7, existing"]
     TMC -->|operator role| ROLES
@@ -200,7 +201,7 @@ The audit covers that finite set of shapes.
 A raw write may only narrow (OD-102). As proposed, it names the scope's current content, which must match the scope's version, and writes a subset of it [s15].
 
 **Versions, not Merkle roots.** Easy Track motions have no order. Two motions that write one scope both pass their checks, and the later enactment wins [s17].
-The factory therefore keeps a version for each scope. It checks the versions at creation and again at enactment, and the script's last call commits the new ones (OD-100, OD-102) [s15].
+The factory therefore keeps a version for each scope. It checks the versions at creation and again at enactment, and the motion's one call, `applyMotion`, stores the new ones before it writes (OD-100, OD-102, OD-118) [s15].
 A Merkle-root policy would replace the Roles modifiers with new code, so Clutch uses none (OD-100) [s17].
 One write of the whole policy per motion does not scale: the Asset Safe's launch batch of 99 calls already took about 6.3 million gas in the rehearsal, and EIP-7825 caps a transaction at about 16.8 million [s15].
 
@@ -248,7 +249,7 @@ Each shape derives a key for its new spender, so the policy holds no spare keys 
 | Dual Governance admin executor | `0x23E0B465633FF5178808F4A75186E2F2F9537021` | existing |
 | Finance application | `0xB9E5CBB9CA5b0d659238807E84D0176930753d86` | existing, `vault()` returns the Agent. Aragon Voting pays each tranche through it (OD-106) |
 | Easy Track | `0xF0211b7660680B49De1A7E9f25C65660F0a13Fea` | existing. At most 20 motions are open at once, and every Lido motion shares that limit (OD-94) [s17] |
-| EVMScriptExecutor | `0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977` | existing. Holds every role that a Clutch motion uses (Part 2) |
+| EVMScriptExecutor | `0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977` | existing. Makes each Clutch motion's one call, the universal factory's `applyMotion`; it holds no Clutch role (Part 2) |
 | **TMC multisig, the committee's Safe** | `0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647` | existing, Safe v1.3.0, threshold 4 of 7. Holds the operator role and the **first-loss** role (OD-60, OD-80), and is the trusted caller of the universal factory (OD-80, OD-102). Two of its signers sit on the Emergency Safe. It carries the screening guard before the second tranche's vote, which lifts the launch cap (OD-83, OD-106). A change of its members needs no Snapshot each time; monitoring alerts on every change of its owners or threshold (OD-109) |
 | Emergency Brakes multisig | `0x73b047fe6337183A454c5217241D780a932777bD` | existing, threshold 3 of 5; holds the global Easy Track pause and no role in the vault; two of its members sit on the Emergency Safe (OD-58) |
 | **Emergency Safe** | to be deployed | new Safe v1.5.0 instance, **threshold 3 of 5**: two TMC members, two Emergency Brakes members and a fifth signer who is a member of neither body. No guard. It raises the universal factory's counter at every stop (OD-102) |
@@ -257,12 +258,12 @@ Each shape derives a key for its new spender, so the policy holds no spare keys 
 | Zodiac Roles mastercopy | `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5` | reused, `owner()` is `0x…01`, i.e. locked |
 | Zodiac ModuleProxyFactory | `0x000000000000aDdB49795b0f9bA5BC298cDda236` | reused |
 | **Asset Safe** | to be deployed | new instance of the singleton. No guard and no fallback handler are set on it. Aragon Voting, its only owner, authorizes its transactions only by `approveHash` or by sending them itself, never by a contract signature (OD-17, OD-73) |
-| **Operator modifier** | to be deployed | minimal proxy of the mastercopy. Carries the operator role, held by the committee's Safe (OD-80), and two roles of the Easy Track executor: `governance` and `insurance-funding` (OD-102, OD-107) |
-| **Safety modifier** | to be deployed | minimal proxy of the mastercopy. Carries the emergency role, and two roles of the Easy Track executor: exit governance, through which a motion adds an emergency exit (OD-49), and `restart`, which only enables the operator modifier again (OD-104). Never screened |
+| **Operator modifier** | to be deployed | minimal proxy of the mastercopy. Carries the operator role, held by the committee's Safe (OD-80), and two roles of the universal factory: `governance` and `insurance-funding` (OD-102, OD-107) |
+| **Safety modifier** | to be deployed | minimal proxy of the mastercopy. Carries the emergency role, and two roles of the universal factory: exit governance, through which a motion adds an emergency exit (OD-49), and `restart`, which only enables the operator modifier again (OD-104). Never screened |
 | **Screening guard** | vendor-supplied | the screening vendor's existing transaction guard, one instance, set with `setGuard` on the committee's Safe before the second tranche's vote, which lifts the launch cap (OD-83, OD-106). Not written by Lido |
-| **Universal factory** | to be deployed | the only new contract: one Easy Track EVM script factory, which cannot be upgraded, with the committee's Safe as its trusted caller. Its Easy Track registration allows only `execTransactionWithRole` on the four modifiers and its own `commit`. It keeps a version for each scope and one counter (OD-100, OD-102) [s15] |
-| **Orders account** | to be deployed | new Safe instance owned by Aragon Voting, one of one, with CoW's `ExtensibleFallbackHandler` at `0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5` and ComposableCoW as the verifier of CoW's settlement domain. Holds only tokens in transit between a transfer and a fill. Its one modifier carries the operator and emergency roles, and the governance and approvals roles of the Easy Track executor: a motion adds a token (OD-43, OD-57, OD-58, OD-103) [s11] |
-| **First-loss Safe** | to be deployed | new Safe instance owned by Aragon Voting, one of one, with no guard or fallback handler. Holds the DAO's first-loss Earn shares and the insurance funds for earnETH, earnUSD and Lido Lend (OD-107). One modifier carries **first-loss**, held by the committee's Safe, which redeems the Earn shares with the proceeds pinned to the Asset Safe (OD-60, OD-108); and **first-loss-burn** and the insurance roles, held by the EVMScriptExecutor, which act only as enacted motions (OD-67, OD-107) |
+| **Universal factory** | to be deployed | the only new code, with the thin companion contract that it creates for its orders shape (OD-117): one Easy Track EVM script factory, which cannot be upgraded, with the committee's Safe as its trusted caller. Its Easy Track registration allows one call only, its own `applyMotion`, and it holds every role that a motion uses (OD-118). It keeps a version for each scope and one counter (OD-100, OD-102) [s15] |
+| **Orders account** | to be deployed | new Safe instance owned by Aragon Voting, one of one, with CoW's `ExtensibleFallbackHandler` at `0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5` and ComposableCoW as the verifier of CoW's settlement domain. Holds only tokens in transit between a transfer and a fill. Its one modifier carries the operator and emergency roles, and the governance and approvals roles of the universal factory: one motion adds a token (OD-43, OD-57, OD-58, OD-103, OD-118) [s11] |
+| **First-loss Safe** | to be deployed | new Safe instance owned by Aragon Voting, one of one, with no guard or fallback handler. Holds the DAO's first-loss Earn shares and the insurance funds for earnETH, earnUSD and Lido Lend (OD-107). One modifier carries **first-loss**, held by the committee's Safe, which redeems the Earn shares with the proceeds pinned to the Asset Safe (OD-60, OD-108); and **first-loss-burn** and the insurance roles, held by the universal factory, which act only as enacted motions (OD-67, OD-107) |
 | CoW order signer | `0x23dA9AdE38E4477b23770DeD512fD37b12381FAB` | reused, verified `CowswapOrderSigner`; called by delegatecall from the orders account [s11]. It is the only delegatecall target that a motion can grant (OD-103). It has no known audit, so it counts as new code with the universal factory (OD-96) |
 | ComposableCoW and its TWAP handler | `0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74`, `0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5` | reused; Ackee audited ComposableCoW and CoW's fallback handler, and Gnosis reviewed ComposableCoW; whether the TWAP handler is in those reports' scope is not checked [s11] |
 
@@ -275,7 +276,7 @@ The Emergency Safe, the orders account and the first-loss Safe are new instances
 3. Each modifier's `owner`, `avatar` and `target` are its own Safe.
 4. The Asset Safe is set up with no fallback handler. Without one, it refuses ERC-721 and ERC-1155 safe transfers and cannot sign a message by EIP-1271. A protocol that needs either comes back to EM (OD-17).
 5. The orders account is set up with CoW's fallback handler, and its domain verifier for CoW's settlement domain is ComposableCoW. On a fork, a signed order and a TWAP part from the Safe v1.5.0, through its modifier, settled through CoW's settlement contract, so CoW's fallback handler works on Safe v1.5.0 [s19].
-6. The universal factory fixes the committee's Safe as its trusted caller at deployment, and Easy Track cannot change it later [s15]. Before the enabling vote, a chain check confirms that the factory's registration lists only its address book (INV-032).
+6. The universal factory fixes the committee's Safe as its trusted caller at deployment, and Easy Track cannot change it later [s15]. Before the enabling vote, a chain check confirms that the factory's registration lists only its address book, and that the factory holds the motion roles (INV-032).
 
 #### Part 2: Roles and authority **[Implemented in part]**
 
@@ -285,15 +286,15 @@ The principals and their roles follow. Role keys are `bytes32`; the encoding mus
 | --- | --- | --- | --- |
 | DAO | Aragon Voting, by vote, as the only owner (OD-73) | Everything: owns the Safe, may replace the whole policy, may add or remove role members; pays each funding tranche through Finance (OD-106) | — |
 | `operator` | Committee's Safe, the TMC signers, screened from the lift of the launch cap. **Operator modifier** and the orders modifier | Open, adjust, and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below a ceiling (OD-08, OD-105); stake ETH; convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe; fund the orders account under budgets and place CoW orders there that pay the Asset Safe (OD-43); transfer any listed token to the Aragon Agent, pinned, without a motion (OD-108) | Transfer any asset out, except into the orders account or to the Aragon Agent; borrow; create debt; administer a modifier or a Safe; change its own permissions |
-| `governance` | EVMScriptExecutor, driven by Easy Track. **Operator modifier** | Write operator permissions through a typed shape of the universal factory, for a target named in a motion; narrow them by a raw write; set operator budgets and ceilings within their limits (OD-102, OD-105) | Submit a tree that widens a permission; grant or remove any role; touch the emergency role; target the modifier's avatar or any of its modules; grant delegatecall |
-| `insurance-funding` | EVMScriptExecutor, driven by Easy Track. **Operator modifier** | Transfer a listed token from the Asset Safe to the first-loss Safe, only as an enacted motion (OD-107) | Pay anyone but the first-loss Safe |
+| `governance` | Universal factory, in an enacted motion's one call. **Operator modifier** | Write operator permissions through a typed shape of the universal factory, for a target named in a motion; narrow them by a raw write; set operator budgets and ceilings within their limits (OD-102, OD-105) | Submit a tree that widens a permission; grant or remove any role; touch the emergency role; target the modifier's avatar or any of its modules; grant delegatecall |
+| `insurance-funding` | Universal factory, in an enacted motion's one call. **Operator modifier** | Transfer a listed token from the Asset Safe to the first-loss Safe, only as an enacted motion (OD-107) | Pay anyone but the first-loss Safe |
 | `emergency` | Emergency Safe, three of five: two TMC members, two Emergency Brakes members and one member of neither body. **Safety modifier** and the orders modifier | Set approvals to zero; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS; transfer assets to the Agent or to the orders account; on the orders account, cancel orders, set a relayer approval to zero, send tokens to the Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent; revoke the operator's targets and functions, for an emergency removal (OD-70); disable the **operator** modifier, with the module argument pinned, for a defect in the permission layer or on the cap-breach trigger (OD-29, OD-58) | Add any permission; enter any protocol except by staking ETH; borrow; reach the first-loss Safe; change the recovery destination; disable the safety modifier or the orders modifier; restore what it stopped (OD-59) |
-| exit governance | EVMScriptExecutor, driven by Easy Track. **Safety modifier** | Write the emergency role's exit for a target that a motion names, each tree pinned whole: redeem, withdraw and claim paid to the avatar; cancel, a redeem queue's redeem and unwrap; a transfer pinned to the Agent, or to the Agent or the orders account for a token that recovery sells; an approval set to zero (OD-49) | Write anything but an exit; write under any key but `emergency`; grant Send or delegatecall; touch membership or the switch; set an allowance; target the Asset Safe or any of its modules |
-| `restart` | EVMScriptExecutor, driven by Easy Track. **Safety modifier** | Call `enableModule` on the Asset Safe, with the operator modifier as its argument, only as an enacted motion (OD-104) | Anything else |
-| orders `governance` and approvals | EVMScriptExecutor, driven by Easy Track. **Orders modifier** | Add a token to the orders account's lists, on the sell side and the buy side, with delegatecall only to the order signer; write the token's return to the Asset Safe or the Agent, the emergency role's zeroing and the relayer approval, each pinned whole; restore the operator's cancels; raise an approval of CoW's vault relayer; each only as an enacted motion (OD-103) | Any other delegatecall, receiver or spender; write under its own key; touch membership or the switch; target the vault's accounts |
+| exit governance | Universal factory, in an enacted motion's one call. **Safety modifier** | Write the emergency role's exit for a target that a motion names, each tree pinned whole: redeem, withdraw and claim paid to the avatar; cancel, a redeem queue's redeem and unwrap; a transfer pinned to the Agent, or to the Agent or the orders account for a token that recovery sells; an approval set to zero (OD-49) | Write anything but an exit; write under any key but `emergency`; grant Send or delegatecall; touch membership or the switch; set an allowance; target the Asset Safe or any of its modules |
+| `restart` | Universal factory, in an enacted motion's one call. **Safety modifier** | Call `enableModule` on the Asset Safe, with the operator modifier as its argument, only as an enacted motion (OD-104) | Anything else |
+| orders `governance` and approvals | Universal factory, in an enacted motion's one call. **Orders modifier** | Add a token to the orders account's lists, on the sell side and the buy side, with delegatecall only to the order signer; write the token's return to the Asset Safe or the Agent, the emergency role's zeroing and the relayer approval, each pinned whole; restore the operator's cancels; raise an approval of CoW's vault relayer; each only as an enacted motion (OD-103) | Any other delegatecall, receiver or spender; write under its own key; touch membership or the switch; target the vault's accounts |
 | `first-loss` | Committee's Safe, the TMC signers, four of seven, screened once the launch cap lifts. **First-loss modifier** | Request and claim the redemption of the DAO's earnETH and earnUSD shares, with the proceeds pinned to the Asset Safe; on the Earn team's written instruction under the March 2026 terms (OD-60, OD-108) | Burn, transfer or approve the shares; pay anyone but the Asset Safe; act on the Asset Safe or the orders account |
-| `first-loss-burn` | EVMScriptExecutor, driven by Easy Track. **First-loss modifier** | Burn the DAO's earnETH and earnUSD shares, only as an enacted motion of the universal factory that the committee's Safe created (OD-67, OD-102) | Anything else |
-| insurance roles | EVMScriptExecutor, driven by Easy Track. **First-loss modifier** | Create a fund's permissions through a typed shape; deposit into earnETH, earnUSD or a Lido Lend vault with the first-loss Safe as the receiver; burn a fund's shares; pay a fund's pinned payout address within its cap; each only as an enacted motion (OD-107) | Pay any other address; transfer or approve the first-loss shares |
+| `first-loss-burn` | Universal factory, in an enacted motion's one call. **First-loss modifier** | Burn the DAO's earnETH and earnUSD shares, only as an enacted motion of the universal factory that the committee's Safe created (OD-67, OD-102) | Anything else |
+| insurance roles | Universal factory, in an enacted motion's one call. **First-loss modifier** | Create a fund's permissions through a typed shape; deposit into earnETH, earnUSD or a Lido Lend vault with the first-loss Safe as the receiver; burn a fund's shares; pay a fund's pinned payout address within its cap; each only as an enacted motion (OD-107) | Pay any other address; transfer or approve the first-loss shares |
 
 **Two classes of risk, and who answers each.**
 
@@ -301,7 +302,7 @@ The principals and their roles follow. Role keys are `bytes32`; the encoding mus
 
 *Technical risk* is rarer and different in kind: a defect in the permission layer itself, or a report arriving through the bug-bounty programme. Two mechanisms cover it. The global Easy Track pause, held by the Emergency Brakes multisig, stops any pending governance change from enacting. Module disabling, held by the emergency role, switches the operator modifier off, and with it every queued vault motion that writes through that modifier. The safety modifier keeps working, so recovery survives.
 
-The switch sits with the emergency Safe, whose two Emergency Brakes members bring the engineering view and the bug-bounty channel. The Emergency Brakes multisig keeps only the global Easy Track pause, as its 2022 mandate says, and touches no funds (OD-58). No emergency body restarts what it stopped (OD-59). A motion restarts the operator: after the objection window, the Easy Track executor's `restart` role enables the operator modifier again (OD-104). Only Aragon Voting unpauses Easy Track, as a direct Voting item [s17].
+The switch sits with the emergency Safe, whose two Emergency Brakes members bring the engineering view and the bug-bounty channel. The Emergency Brakes multisig keeps only the global Easy Track pause, as its 2022 mandate says, and touches no funds (OD-58). No emergency body restarts what it stopped (OD-59). A motion restarts the operator: after the objection window, the universal factory's `restart` role enables the operator modifier again (OD-104). Only Aragon Voting unpauses Easy Track, as a direct Voting item [s17].
 
 The two stops answer different failures. Pausing Easy Track stops every pending motion of the DAO, Clutch's included. It does not stop an operator transaction, and it does not stop a defect in the permission layer from being exercised. Only module disabling does that. At every stop, the emergency Safe also raises the universal factory's counter, so every open Clutch motion fails at enactment (OD-102).
 
@@ -326,7 +327,7 @@ Rules that constrain how policy must be written:
 
 #### Part 4: Governance — the new contracts **[Implemented in part]**
 
-One universal Easy Track EVM script factory is the only new contract (OD-102). CoW's order signer counts as new code with it (OD-96). The factory holds no assets or independent authority.
+One universal Easy Track EVM script factory, with the thin companion contract that it creates for its orders shape, is the only new code (OD-102, OD-117). CoW's order signer counts as new code with it (OD-96). The factory holds no assets. It holds the motion roles, and uses them only in an enacted motion's one call (OD-118).
 It builds scripts; the modifiers check the resulting calls.
 
 The factory emits the production script format, `[specId(4)][to(20)][calldataLength(uint32)][calldata]`, where the length covers the selector and the arguments. This matches `EVMScriptCreator` in the Easy Track source. A 32-byte length field is **not** the production format and must be rejected.
@@ -350,15 +351,15 @@ A factory bug can still grant calls on ordinary targets; the shapes and the obje
 
 Not yet built. One universal factory carries every Clutch motion. EM chose this design, option A, on 2026-11-05 (OD-102) [s1]. The parts marked as proposed are the agent's draft, which EM has not accepted as text [s15].
 
-**Address book.** Easy Track lets a factory's script call only the addresses and functions that the factory's registration lists. It checks this at creation and again at enactment [s17]. The factory's registration lists `execTransactionWithRole` on the vault's four modifiers (operator, safety, orders and first-loss) and the factory's own `commit`. Nothing else is callable (INV-032). Aragon Voting holds the admin role that registers or changes a factory [s17].
+**Address book.** Easy Track lets a factory's script call only the addresses and functions that the factory's registration lists. It checks this at creation and again at enactment [s17]. The factory's registration lists one call: the factory's own `applyMotion`. Nothing else is callable (INV-032). Easy Track's executor copies a script into memory three times for each call that the script makes, so a script of one call keeps a motion that adds a token under EIP-7825's cap (OD-118). Aragon Voting holds the admin role that registers or changes a factory [s17].
 
-**Roles.** The Easy Track executor holds one role per kind of write: `governance` and `insurance-funding` on the operator modifier; exit governance and `restart` on the safety modifier; the governance and approvals roles on the orders modifier; and `first-loss-burn` and the insurance roles on the first-loss modifier (Part 2) [s15].
+**Roles.** The universal factory holds one role per kind of write: `governance` and `insurance-funding` on the operator modifier; exit governance and `restart` on the safety modifier; the governance and approvals roles on the orders modifier; and `first-loss-burn` and the insurance roles on the first-loss modifier (Part 2) [s15]. Easy Track's executor, which every Easy Track factory of the DAO shares, holds none. It reaches the vault only through the factory's `applyMotion`, which checks the motion again before it writes (OD-118).
 
 **Shapes widen; raw writes narrow.** A shape is a typed change, such as an ERC-4626 vault with its asset. The factory builds the complete tree from the shape. Each shape pins every receiver, owner and beneficiary to the vault, draws a budget key and writes the emergency exit (OD-102). A raw write only narrows: it revokes a target or a function, or it writes the complete content of a scope without some of its entries (INV-029, INV-034).
 
 **No upgrade, one delegatecall.** The factory cannot be upgraded. A motion grants no delegatecall, except the order signer's on the orders account (section 6.1, OD-103). The guards of section 4.1 stay [s15].
 
-**Versions.** Motions have no order, and the later enactment wins [s17]. The factory therefore keeps a version for each scope that a motion writes. It checks the versions at creation and again at enactment. The script's last call, `commit`, stores the new versions (OD-100, OD-102). A motion whose scope changed after its creation fails at enactment, and its creator or Aragon Voting cancels it (INV-033). As proposed, a scope is one modifier's role, target and selector, one allowance key, or one ceiling. Its version is the hash of its current content, as the factory last wrote it. The enabling vote seeds the versions from the committed policy artifact [s15].
+**Versions.** Motions have no order, and the later enactment wins [s17]. The factory therefore keeps a version for each scope that a motion writes. It checks the versions at creation and again at enactment. The script's one call, `applyMotion`, stores the new versions and then makes the writes, and a write that fails reverts the whole enactment (OD-100, OD-102, OD-118). A motion whose scope changed after its creation fails at enactment, and its creator or Aragon Voting cancels it (INV-033). As proposed, a scope is one modifier's role, target and selector, one allowance key, or one ceiling. Its version is the hash of its current content, as the factory last wrote it. The enabling vote seeds the versions from the committed policy artifact [s15].
 
 **The counter.** One counter makes every open motion fail at enactment. The emergency Safe raises it at every stop, and whenever an open motion must not enact. Aragon Voting can raise it too (OD-102) [s15].
 
@@ -433,7 +434,7 @@ Not yet built. EM decided on 2026-10-13 that no first-loss burn runs without the
 
 - The motion carries an amount and a share token. The factory accepts only earnETH and earnUSD for a burn through `first-loss-burn`, and refuses any other token.
 - The script calls `execTransactionWithRole` on the first-loss modifier with the role key `first-loss-burn`, and the call `burn` on the share token, so the first-loss Safe burns its own shares.
-- The `first-loss-burn` role allows only `burn` on the two share tokens, with no value and no delegatecall. The EVMScriptExecutor holds it.
+- The `first-loss-burn` role allows only `burn` on the two share tokens, with no value and no delegatecall. The universal factory holds it.
 - The trusted caller is the committee's Safe. The forum post with the Earn team's written instruction and the curators' confirmation goes up with the motion.
 - A burn writes no permission. It passes the shares' value to the vault's other depositors, as the March 2026 terms intend.
 
@@ -502,7 +503,7 @@ The emergency role holds, and nothing else:
 - `transfer(to, amount)` with `to` pinned by `EqualTo` to the orders account, and on the orders account: cancel any order, revoke the operator's targets and functions, set a relayer approval to zero, send any listed token to the Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent (see 6.1). Tested on a fork [s19].
 - the exits that a motion adds through the exit-governance role, each tree pinned whole: redeem, withdraw and claim pinned to the avatar, cancel, a redeem queue's redeem and unwrap, a transfer pinned to the Agent or, for a token that recovery sells, to the Agent or the orders account, and an approval set to zero (OD-49). Built and tested on a fork.
 
-Nothing in this role restores authority: no `enableModule`, no grant, no budget and no non-zero approval. The compiler refuses a policy that gives it one (OD-59). Only the `restart` role holds `enableModule`, pinned to the operator modifier, and only the Easy Track executor holds that role (section 6.3).
+Nothing in this role restores authority: no `enableModule`, no grant, no budget and no non-zero approval. The compiler refuses a policy that gives it one (OD-59). Only the `restart` role holds `enableModule`, pinned to the operator modifier, and only the universal factory holds that role (section 6.3).
 
 At every stop, the emergency Safe also raises the universal factory's counter. Every open Clutch motion then fails at enactment (OD-102). This is specified, not built.
 
@@ -525,7 +526,7 @@ The path:
 | `operator` | Market, limit and TWAP, between the operator's listed tokens | Asset Safe | The operator can trade but cannot move value out |
 | `emergency` | Market and limit orders that buy USDC, or USDT as the second destination, and live at most 1 day | Aragon Agent | Proceeds go to the DAO treasury, the mandate's fixed recovery destination |
 
-**Custody in the account.** The orders account carries the fallback handler that the Asset Safe lacks (OD-17), and holds only tokens in transit. The budgets bound the operator's transfers into it; the emergency role's transfers have no budget. The enabling vote has the account approve CoW's vault relayer for the maximum amount of every token on the lists, so a recovery order settles even when the operator is revoked. Only the approvals role of the Easy Track executor raises an approval there, by motion, and only to CoW's vault relayer (OD-103). If the emergency role sets an approval to zero, every order in that token stops, recovery orders included, until a motion raises it again; sending the token to the Agent stays open. A change of its fallback handler or domain verifier is a critical alert.
+**Custody in the account.** The orders account carries the fallback handler that the Asset Safe lacks (OD-17), and holds only tokens in transit. The budgets bound the operator's transfers into it; the emergency role's transfers have no budget. The enabling vote has the account approve CoW's vault relayer for the maximum amount of every token on the lists, so a recovery order settles even when the operator is revoked. Only the approvals role of the universal factory raises an approval there, by motion, and only to CoW's vault relayer (OD-103). If the emergency role sets an approval to zero, every order in that token stops, recovery orders included, until a motion raises it again; sending the token to the Agent stays open. A change of its fallback handler or domain verifier is a critical alert.
 
 **Price protection.** Nothing on chain bounds the price of the vault's orders: the order signer and TWAP orders leave the amounts to the caller, and the modifier can compare a parameter only with fixed values. ComposableCoW's GoodAfterTime order type can check a price checker's expected output, but it needs an order poster of Lido's own and a checker that ignores stale feeds, so the design does not use it (OD-48) [s11]. CoW's rules hold every fill to at least the on-chain market: bonded solvers compete on the surplus for users, and a solver that fills worse than on-chain AMM routing must refund the user or loses its bond [s11]. The bound is the order's own terms, with CoW's solvers competing to fill above the limit; from the lift, the screening of every operator transaction, with a price check requested from the vendor; the budgets on the operator's transfers into the account; and monitoring of each fill against a market price [s12]. The emergency role's orders are not screened, so for them only paging and monitoring remain.
 
@@ -568,7 +569,7 @@ Tested on 2026-10-13 (`test_D4_the_switch_is_the_emergency_role_s_and_pinned`): 
 
 Not yet built. A motion restarts the operator after the switch (OD-104).
 
-- The `restart` role on the safety modifier may only call `enableModule` on the Asset Safe, with the operator modifier as its argument. Only the Easy Track executor holds it (INV-035).
+- The `restart` role on the safety modifier may only call `enableModule` on the Asset Safe, with the operator modifier as its argument. Only the universal factory holds it (INV-035).
 - The committee's Safe creates the restart motion. After the 72-hour objection window, anyone enacts it.
 - Motions of the universal factory bring back what the emergency role revoked, relayer approvals included, through the shapes that cover them.
 - No emergency body resumes what it stopped (OD-59). The emergency Safe holds no `enableModule`, and the Emergency Brakes multisig cannot unpause Easy Track.
@@ -687,23 +688,24 @@ Costs: two policy applications, two sets of role keys, two modules enabled on th
 | Budget motions | 2 | A motion cannot shorten the refill period; per-key ceilings are expressible with native conditions |
 | Operator lifecycle | 5 | sUSDS, staking, wstETH and WETH round trips on real contracts; the DAI–USDS converter pays the Safe both ways; the withdrawal queue is refused; receiver pinning enforced; asynchronous vault deposit authorised at the policy layer |
 | Emergency and the switch | 4 | Revoke, zero approval, exit and return to the Agent; WETH unwrapped, staked and sent to the Agent, through WETH's 2,300-gas transfer; the switch is the emergency role's and pinned, and the owner restores the module; the switch freezes queued motions until a restart motion |
-| The executor's roles | 2 | The restart role enables only the operator modifier, and only the executor holds it; insurance funding pays only the first-loss Safe |
+| The motion roles | 2 | The restart role enables only the operator modifier, and only the motion roles' holder, which stands in for the universal factory, holds it; insurance funding pays only the first-loss Safe |
 | Approvals | 4 | An approval spends its spender's key or stays below a fixed ceiling, and zero is free; the emergency role gives no non-zero approval and durably stops the operator's re-approval; one approve scope per token keeps every spender |
 | Budgets | 2 | Consumption, exhaustion, refill; keys of different assets and decimals are independent |
 | Adversarial and launch scope | 3 | The operator cannot widen, reach administration or act as another role; it holds only the `operator` key; out-of-scope venues are refused |
-| Policy shape | 3 | The policy builds; the `operator` key is the only operator key, and the executor's other keys are pinned; no out-of-scope target, spender or receiver |
+| Policy shape | 3 | The policy builds; the `operator` key is the only operator key, and the keys of the motion roles' holder are pinned; no out-of-scope target, spender or receiver |
 | Asset Safe shape | 1 | A stand-in for Aragon Voting is the only owner, threshold one; pinned singleton; no fallback handler, guard or module guard; the Safe owns both modifiers |
 | Known limits recorded as tests | 1 | A single-child match leaves trailing parameters unconstrained |
 | One orders modifier, on a stand-in | 6 | One modifier is enabled; unassigning the operator's role stops it, and recovery survives; the switch is pinned; the operator cannot restore itself; the emergency role revokes on its own modifier; the DAO restores the operator |
 | Funding bootstrap | 1 | The dry-run funding script |
 | Enabling-vote rehearsal | 6 | The vote with the live Aragon Voting, Finance and Easy Track: a vote that carries the policy cannot start; the vote that registers the factory, pays the first tranche and approves the batches, end to end; the ramp-up with a later tranche, a budget motion, a ceiling motion, the switch and a restart motion; Earn deposits from the Asset Safe; the first-loss burn and redemption request; the manifest |
-| The universal factory's prototype | 18 | The address book is the registration; the factory writes the compiler's trees; versions settle a conflict on one scope in both orders, disjoint scopes enact in any order, and the counter fails every open motion; widening only through the shape, raw writes only narrow; budgets within their ceilings; a ceiling rises at most twofold, once in 15 days; a token is introduced once, with both of its ceilings; a revoked target comes back by motion, with what was stored under it; the restart motion; insurance money; the factory's own guards; the measures |
-| The orders account | 7 | Signer orders by delegatecall and TWAP orders through ComposableCoW, from the Safe v1.5.0, settled through CoW's settlement contract and paying the Asset Safe; their receivers, tokens, balances, app data, fee bound, life and TWAP shapes; the emergency role's cancels, sweeps, zeroed approvals and recovery orders paying the Agent; the revoke that stops the operator while recovery works; the funding from the Asset Safe under the orders budgets |
-| **Total** | **84** | |
+| The universal factory's prototype | 20 | The address book is the registration, one call; the factory holds the motion roles and Easy Track's executor none, and a write that the vault refuses fails the whole motion; the factory writes the compiler's trees; versions settle a conflict on one scope in both orders, disjoint scopes enact in any order, and the counter fails every open motion; widening only through the shape, raw writes only narrow; budgets within their ceilings; a ceiling rises at most twofold, once in 15 days; a token is introduced once, with both of its ceilings; a revoked target comes back by motion, with what was stored under it; the restart motion; insurance money; the factory's own guards; the measures |
+| The orders account | 18 | Signer orders by delegatecall and TWAP orders through ComposableCoW, from the Safe v1.5.0, settled through CoW's settlement contract and paying the Asset Safe; their receivers, tokens, balances, app data, fee bound, life and TWAP shapes; the emergency role's cancels, sweeps, zeroed approvals and recovery orders paying the Agent; the revoke that stops the operator while recovery works; the funding from the Asset Safe under the orders budgets; the universal factory's governance and approvals roles on the orders modifier, with their one delegatecall, pinned trees and restores; a motion's writes that add a token, run by hand; and the factory's orders operation through the live Easy Track: one motion adds a token under EIP-7825's cap, its checks, and versions that keep two token motions apart |
+| The exit-governance role | 3 | It writes only the emergency role's exits, each tree pinned whole; a new token gets its exit on the Asset Safe; an ERC-4626 position exits to the Asset Safe |
+| **Total** | **100** | |
 
 Reproduce with `forge test` against an archive RPC. The kit forks block 25946643, and the rehearsal and the factory block 26249900.
 
-The rehearsal's vote follows the current design: it registers the universal factory and pays the first tranche through Finance (OD-102, OD-106). No test covers the factory's other shapes, each shape's emergency exit, the first-loss modifier's insurance roles, the orders account's roles or the operator's return to the Agent yet. ADR 013 and ADR 014 list the fork tests that they owe [s15][s16].
+The rehearsal's vote follows the current design: it registers the universal factory and pays the first tranche through Finance (OD-102, OD-106). No test covers the factory's other shapes, the emergency exits of the shapes other than the orders operation, the first-loss modifier's insurance roles or the operator's return to the Agent yet. ADR 013 and ADR 014 list the fork tests that they owe [s15][s16].
 
 ## Configuration
 
@@ -748,7 +750,7 @@ The rehearsal's vote follows the current design: it registers the universal fact
 | Return assets to the DAO outside an emergency | Committee's Safe | A transfer pinned to the Aragon Agent, with no motion and no vote (OD-108) | Minutes |
 | Replace the whole policy | DAO | A Voting item, as the Asset Safe's owner | Five days |
 | Replace a role holder | DAO | A Voting item; a new committee Safe also needs a new universal factory with it as the trusted caller (OD-101) | Five days |
-| Burn first-loss Earn shares | Committee's Safe proposes, on the Earn team's written instruction; anyone enacts | A burn motion of the universal factory; the EVMScriptExecutor calls `burn` through the first-loss-burn role (OD-67) | 72 hours |
+| Burn first-loss Earn shares | Committee's Safe proposes, on the Earn team's written instruction; anyone enacts | A burn motion of the universal factory; the universal factory calls `burn` through the first-loss-burn role, in the motion's one call (OD-67, OD-118) | 72 hours |
 | Exit the first-loss shares | Committee's Safe, on the Earn team's written instruction | The first-loss role redeems and claims, paid to the Asset Safe (OD-108); before the screening guard is set, the committee returns the excess above the first tranche to the Aragon Agent | Minutes to initiate, then the redeem queue |
 | Create, fund or pay out an insurance fund | Committee's Safe proposes; anyone enacts | Insurance motions of the universal factory (OD-107) | 72 hours |
 

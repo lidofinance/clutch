@@ -58,7 +58,7 @@ nodes:
   label: Easy Track
   sub: universal factory · 72 h
   summary: Lido's optimistic governance. A motion enacts unless LDO holders object within 72 hours. One universal factory
-    builds every Clutch motion, and Easy Track's script executor holds the roles that motions use.
+    builds every Clutch motion and holds the roles that motions use.
   domain: gov
   kind: contract
   status: mixed
@@ -251,7 +251,7 @@ edges:
   to: operator-modifier
   kind: role
   short: governance role
-  label: Easy Track's script executor holds the governance role on the operator modifier. An enacted motion acts through it.
+  label: The universal factory holds the governance role on the operator modifier. An enacted motion's one call acts through it.
   label_at:
   - 322
   - 318

@@ -132,11 +132,11 @@
 
 - name: The universal factory
   column: new
-  what: "One Easy Track factory for every Clutch motion: typed shapes that widen, raw writes that only narrow, a version for each scope, a motion counter, budgets and ceilings. It is the only new contract, and the most critical one."
+  what: "One Easy Track factory for every Clutch motion: typed shapes that widen, raw writes that only narrow, a version for each scope, a motion counter, budgets and ceilings. With the thin companion contracts that it creates for its largest shapes (OD-117), it is the only new code, and the most critical."
   why: "After the enabling vote, motions do the administrative work without Aragon votes: onboarding and removals, budgets and ceilings, tokens for the orders account, the restart, burns and insurance. One factory and one calldata format are fewer moving parts to audit and to watch (OD-101, OD-102)."
   owner: "`@lidofinance/defi-tech`; an external audit in phase 3, with the order signer"
   sources: ["ADR-006#d1", "ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d10", "ADR-013#d13",
-    "ADR-013#consequences", "ADR-007#d41", OD-101, OD-102, INV-032, "lip:part-4"]
+    "ADR-013#consequences", "ADR-007#d41", OD-101, OD-102, INV-032, "lip:part-4", "ADR-013#d17", OD-117]
 
 - name: The enabling-vote script
   column: new
