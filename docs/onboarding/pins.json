@@ -1666,7 +1666,7 @@
         "runbook:Change a ceiling": "6d7cd8a7b40ca4b9",
         "test:test_uf_a_new_token_is_introduced_with_its_ceilings": "2a79f0f7e76fc621",
         "test:test_uf_a_token_is_introduced_once": "220deb4975631e22",
-        "test:test_uf_ceiling_rises_at_most_twofold_once_in_15_days": "0649c4246cd4bd6b"
+        "test:test_uf_ceiling_rises_at_most_twofold_once_in_15_days": "6550a74c320cb184"
       }
     },
     "flow:dao-change": {

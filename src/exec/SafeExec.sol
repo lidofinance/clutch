@@ -14,10 +14,10 @@ struct Call {
 
 /// @dev Executes transactions through a Safe *as its owner*: the
 ///      MockAragonVoting in the dry run; in production Aragon Voting, through
-///      a passed vote's call script, with no Dual Governance (OD-73). Voting
+///      a passed vote's call script, with no Dual Governance. Voting
 ///      approves the transaction's hash, and anyone sends the transaction with
 ///      that approval as the owner's signature (v=1): the only authorization
-///      path that ADR 005 allows the owner (OD-17, INV-001).
+///      path that the owner uses.
 library SafeExec {
     address internal constant SENTINEL_MODULES = address(0x0000000000000000000000000000000000000001);
 
@@ -45,7 +45,7 @@ library SafeExec {
 ///      governance role — the same avatar-execution mechanism the emergency
 ///      role uses. The mock EVMScript executor is a member of that role, so
 ///      enacted motions change policy without any Agent authority, and Easy
-///      Track never needs RUN_SCRIPT_ROLE on the Agent (docs/specs/lip-draft.md).
+///      Track never needs RUN_SCRIPT_ROLE on the Agent.
 library EVMScriptLib {
     bytes4 internal constant SPEC = 0x00000001;
 

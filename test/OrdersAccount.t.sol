@@ -540,6 +540,85 @@ contract OrdersAccountRehearsal is EnabledVault {
         );
     }
 
+    /// @dev After the emergency role stops the operator on the orders account and zeroes a relayer approval, one motion
+    ///      gives both back: an order then settles, a signer order is cancelled, a TWAP order is created, the operator
+    ///      returns a token, and the relayer's approval is the maximum again.
+    function test_factory_orders_restore_after_an_emergency_stop() public enabled {
+        address signer = Mainnet.ORDER_SIGNER;
+        _ordersOk(address(emergency), EMERGENCY, address(ordersMod), abi.encodeCall(IRoles.revokeTarget, (OPERATOR, signer)), CALL);
+        _ordersOk(
+            address(emergency), EMERGENCY, address(ordersMod), abi.encodeCall(IRoles.revokeTarget, (OPERATOR, Mainnet.COMPOSABLE_COW)), CALL
+        );
+        _ordersOk(address(emergency), EMERGENCY, address(ordersMod), abi.encodeCall(IRoles.revokeTarget, (OPERATOR, Mainnet.USDC)), CALL);
+        // the emergency role also revokes each of the operator's functions there, so the restore must write each again
+        (address[5] memory targets, bytes4[5] memory selectors) = (
+            [signer, signer, Mainnet.COMPOSABLE_COW, Mainnet.COMPOSABLE_COW, Mainnet.USDC],
+            [SIGN_ORDER, UNSIGN_ORDER, CREATE_WITH_CONTEXT, REMOVE, TRANSFER]
+        );
+        for (uint256 i = 0; i < 5; i++) {
+            _ordersOk(
+                address(emergency), EMERGENCY, address(ordersMod), abi.encodeCall(IRoles.revokeFunction, (OPERATOR, targets[i], selectors[i])), CALL
+            );
+        }
+        _ordersOk(address(emergency), EMERGENCY, Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.COW_VAULT_RELAYER, 0)), CALL);
+        Order memory o = _order(Mainnet.USDC, Mainnet.USDT, address(asset), 1_000e6, 999e6, _in(1 hours));
+        _refused(OPERATOR, signer, _sign(o, LIFE, 0), DELEGATECALL);
+        assertEq(IERC20(Mainnet.USDC).allowance(address(orders), Mainnet.COW_VAULT_RELAYER), 0, "the emergency role zeroed it");
+
+        address[] memory approvals = new address[](1);
+        approvals[0] = Mainnet.USDC;
+        console2.log(
+            "FACTORY orders restore: enactMotion gas under the cap",
+            _motionUnderCap(_one(_ordersRestoreOp(launchOrderTokens(), launchRecoveryTokens(), approvals)))
+        );
+        assertEq(IERC20(Mainnet.USDC).allowance(address(orders), Mainnet.COW_VAULT_RELAYER), type(uint256).max, "the approval is back");
+
+        o = _order(Mainnet.USDC, Mainnet.USDT, address(asset), 1_000e6, 999e6, _in(1 hours));
+        deal(Mainnet.USDC, address(orders), 2_000e6);
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, signer, _sign(o, LIFE, 0), DELEGATECALL);
+        uint256 before = IERC20(Mainnet.USDT).balanceOf(address(asset));
+        _settle(o, PRESIGN, abi.encodePacked(address(orders)));
+        assertEq(IERC20(Mainnet.USDT).balanceOf(address(asset)) - before, 999e6, "the order settles and pays the Asset Safe");
+        Order memory c = _order(Mainnet.USDC, Mainnet.USDT, address(asset), 10e6, 9e6, _in(1 hours));
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, signer, _sign(c, LIFE, 0), DELEGATECALL);
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, signer, abi.encodeCall(IOrderSigner.unsignOrder, (c)), DELEGATECALL);
+        _ordersOk(
+            Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.COMPOSABLE_COW, _create(_twap(Mainnet.USDC, Mainnet.USDT, address(asset), 2, 1 days)), CALL
+        );
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.COMPOSABLE_COW, abi.encodeWithSelector(REMOVE, bytes32(uint256(1))), CALL);
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(asset), 1_000e6)), CALL);
+    }
+
+    /// @dev The restore's checks, each refused when the motion is created: lists that are not the current ones, an
+    ///      approval for a token that recovery does not sell, approvals out of order, and a restore in the motion that
+    ///      adds a token.
+    function test_factory_orders_restore_refusals() public enabled {
+        address[] memory operatorTokens = launchOrderTokens();
+        address[] memory recoveryTokens = launchRecoveryTokens();
+        address[] memory none = new address[](0);
+        address[] memory shortList = new address[](5);
+        for (uint256 i = 0; i < 5; i++) shortList[i] = operatorTokens[i];
+        _refusedAtCreation(
+            _one(_ordersRestoreOp(shortList, recoveryTokens, none)),
+            abi.encodeWithSelector(UniversalFactory.StaleVersion.selector, uf.ORDERS_SCOPE())
+        );
+        address[] memory wbtc = new address[](1);
+        wbtc[0] = Mainnet.WBTC;
+        _refusedAtCreation(
+            _one(_ordersRestoreOp(operatorTokens, recoveryTokens, wbtc)),
+            abi.encodeWithSelector(UniversalFactory.NotListed.selector, Mainnet.WBTC)
+        );
+        address[] memory unsorted = new address[](2);
+        (unsorted[0], unsorted[1]) = (Mainnet.USDT, Mainnet.USDC);
+        _refusedAtCreation(
+            _one(_ordersRestoreOp(operatorTokens, recoveryTokens, unsorted)), abi.encodeWithSelector(UniversalFactory.NotCanonical.selector)
+        );
+        UniversalFactory.Op[] memory both = new UniversalFactory.Op[](2);
+        both[0] = _ordersTokenOp(Mainnet.WBTC, 10e8, 0);
+        both[1] = _ordersRestoreOp(operatorTokens, recoveryTokens, none);
+        _refusedAtCreation(both, abi.encodeWithSelector(UniversalFactory.DuplicateScope.selector, uf.ORDERS_SCOPE()));
+    }
+
     /// @dev A budget motion for a launch order token now sets the token's launch orders budget, which the
     ///      operator's funding transfer spends; before, the factory derived a key that no permission spends.
     function test_factory_budget_motion_sets_a_launch_orders_budget() public enabled {
@@ -869,6 +948,15 @@ contract OrdersAccountRehearsal is EnabledVault {
 
     function _governRefused(bytes memory write) internal {
         _refused(GOVERNANCE, address(ordersMod), write, CALL);
+    }
+
+    /// @dev The universal factory's orders restore, against the lists that the motion states.
+    function _ordersRestoreOp(address[] memory operatorTokens, address[] memory recoveryTokens, address[] memory approvalTokens)
+        internal
+        view
+        returns (UniversalFactory.Op memory)
+    {
+        return _op(uf.ORDERS_RESTORE(), abi.encode(operatorTokens, recoveryTokens, approvalTokens));
     }
 
     /// @dev The universal factory's orders operation against the launch lists.

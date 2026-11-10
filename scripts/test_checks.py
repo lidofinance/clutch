@@ -129,6 +129,11 @@ CASES = [
     ("the blob hash equals git's", lambda: LIC.blob(b"hello\n") == "ce013625030ba8dba906f756967f9e9ca394464a"),
     ("an SPDX line is read from the header", lambda: _spdx("// SPDX-License-Identifier: LGPL-3.0-only\npragma x;\n") == "LGPL-3.0-only"),
     ("a file without an SPDX line has none", lambda: _spdx("pragma x;\n") is None),
+    ("a contract comment that cites an ADR fails", lambda: len(_cites("/// @notice Builds it (ADR 013, decision 5).\ncontract C {}\n")) == 1),
+    ("a contract comment that cites an OD, an invariant or a test fails",
+     lambda: len(_cites("// OD-12\n/// INV-004 holds\n * see test_a\ncontract C {}\n")) == 3),
+    ("a contract comment without a citation passes", lambda: _cites("/// @notice Builds the script.\ncontract C {}\n") == []),
+    ("code that is not a comment is not checked", lambda: _cites("uint256 constant decision = 1; // the first\n") == []),
     # Invariants.
     ("a Draft invariant with an existing test passes", lambda: _invariants(ROW.format(state="Draft", tests="`test_a`"), {"test_a"}) == []),
     ("a missing test fails", lambda: any("which no test/*.t.sol file defines" in p for p in _invariants(ROW.format(state="Draft", tests="`test_gone`"), {"test_a"}))),
@@ -154,6 +159,13 @@ CASES = [
     ("the report puts kept items first and counts every change", lambda: (lambda md: "3 pins changed" in md and md.index("Text kept after a source change") < md.index("Text changed") < md.index("New items"))(
         PINS.markdown(_pins(flow__b={"content": "c2", "sources": {"OD-01": "s9", "INV-001": "s3"}}, actor__a={"content": "c9", "sources": {"ADR-001": "s1"}}, term__c={"content": "c3", "sources": {}}), "origin/main"))),
 ]
+
+
+def _cites(text: str):
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "x.sol"
+        path.write_text(text, encoding="utf-8")
+        return LIC.citations(path)
 
 
 def _spdx(text: str):

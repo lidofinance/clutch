@@ -4,24 +4,24 @@ pragma solidity >=0.8.24 <0.9.0;
 import {IRoles} from "../interfaces/IRoles.sol";
 import {OrdersShape} from "./OrdersShape.sol";
 
-/// @title UniversalFactory — a prototype of Clutch's one Easy Track factory (ADR 013).
-/// @notice Easy Track registers this factory with one permission: its own `applyMotion` (ADR 013,
-///         decisions 6 and 18). The factory holds the motion roles on the vault's modifiers. A
+/// @title UniversalFactory — a prototype of Clutch's one Easy Track factory.
+/// @notice Easy Track registers this factory with one permission: its own `applyMotion`. The
+///         factory holds the motion roles on the vault's modifiers. A
 ///         motion carries the counter that it saw and a list of operations. The factory checks
 ///         every operation when the motion is created and again when it is enacted: Easy Track
 ///         builds the script again at enactment, and the script's one call, `applyMotion`, checks
-///         the operations once more, stores the new versions (decision 10) and makes the writes.
+///         the operations once more, stores the new versions and makes the writes.
 ///         A script of one call keeps the enactment under EIP-7825's cap on a transaction's gas,
 ///         because Easy Track's executor copies a script into memory three times for each call.
 /// @dev Prototype scope: versions and the counter; the operator's approval list of one token,
-///      which widens only through its typed shape and narrows by removal (decision 7); the
+///      which widens only through its typed shape and narrows by removal; the
 ///      revoke of one function; budgets within ceilings; ceilings that a motion lowers at any
-///      time and raises at most twofold, once in 15 days (decision 13); the introduction of a
-///      token, which sets its ceilings in the same operation (decision 15); the restore of a
-///      target that the emergency role revoked (OD-104, decision 16); the restart (decision
-///      12); insurance money from the Asset Safe to the first-loss Safe (ADR 014, decision
-///      7); and a token for the orders account, with its orders, approvals and exit (ADR 007,
-///      decisions 41, 44 and 45), whose writes a stateless companion contract builds. The other
+///      time and raises at most twofold, once in 15 days; the introduction of a
+///      token, which sets its ceilings in the same operation; the restore of a
+///      target that the emergency role revoked; the restart; insurance money from the Asset Safe
+///      to the first-loss Safe; a token for the orders account, with its orders, approvals and
+///      exit, and the restore of the orders account after an emergency stop, whose writes a
+///      stateless companion contract builds. The other
 ///      shapes, and their emergency exits, are not built. Every check here sits behind the
 ///      modifiers' own guards.
 contract UniversalFactory {
@@ -44,7 +44,7 @@ contract UniversalFactory {
     /// @dev Move a token from the Asset Safe to the first-loss Safe, for insurance.
     uint8 public constant FUND = 6;
     /// @dev Introduce a token: its first approval list and both of its ceilings, together
-    ///      (decision 15). A token is introduced once; the enabling vote introduces the launch
+    ///     . A token is introduced once; the enabling vote introduces the launch
     ///      tokens by seeding their ceilings.
     uint8 public constant INTRODUCE = 7;
     /// @dev Scope again, for the operator, a target that the emergency role revoked as a whole.
@@ -55,9 +55,12 @@ contract UniversalFactory {
     ///      and transfer, the operator's return, the token's exit on the Asset Safe, the operator's
     ///      transfer into the orders account under the token's derived budget key, and the token in
     ///      the orders account's lists, on both sides of signer and TWAP orders and in what recovery
-    ///      orders sell (ADR 007, decisions 41, 44 and 45). A new token's ceilings come with it
-    ///      (decision 15).
+    ///      orders sell. A new token's ceilings come with it
+    ///     .
     uint8 public constant ORDERS_TOKEN = 9;
+    /// @dev Give the operator back its authority on the orders account after the emergency role revoked it, for the
+    ///      current lists, and raise the relayer approval of the listed tokens that the motion names.
+    uint8 public constant ORDERS_RESTORE = 10;
 
     /// @dev The classes of ceiling, each per token: a budget key's figures, and the fixed cap
     ///      of an approval that spends no key.
@@ -201,6 +204,7 @@ contract UniversalFactory {
     error AlreadyListed(address token);
     error CeilingsForIntroducedToken(address token);
     error WriteFailed(address modifier_);
+    error NotListed(address token);
 
     event CounterRaised(uint256 epoch, address by);
     event VersionSet(bytes32 indexed scope, bytes32 version);
@@ -257,10 +261,10 @@ contract UniversalFactory {
             versions[seeds[i].scope] = seeds[i].version;
             emit VersionSet(seeds[i].scope, seeds[i].version);
         }
+        // A launch ceiling's seed counts as its first raise, so its next raise waits the interval.
         for (uint256 i = 0; i < caps.length; i++) {
-            ceilings[caps[i].key].value = caps[i].value;
-            ceilings[caps[i].key].set = true;
-            emit CeilingSet(caps[i].key, caps[i].value, false);
+            ceilings[caps[i].key] = Ceiling(caps[i].value, uint64(block.timestamp), true);
+            emit CeilingSet(caps[i].key, caps[i].value, true);
         }
     }
 
@@ -280,8 +284,8 @@ contract UniversalFactory {
 
     /// @notice The one call of every motion's script, which only Easy Track's executor makes, at
     ///         enactment. It checks the motion again, stores the versions and ceilings that the
-    ///         motion writes (decision 10), and makes the motion's writes through the motion roles
-    ///         that this factory holds (decision 18).
+    ///         motion writes, and makes the motion's writes through the motion roles
+    ///         that this factory holds.
     function applyMotion(bytes calldata callData) external {
         if (msg.sender != executor) revert NotExecutor(msg.sender);
         Plan memory p = _build(callData);
@@ -317,8 +321,7 @@ contract UniversalFactory {
         return abi.decode(callData, (uint256, Op[]));
     }
 
-    /// @notice Easy Track's permissions for this factory: one call, its own `applyMotion` (ADR 013,
-    ///         decisions 6 and 18).
+    /// @notice Easy Track's permissions for this factory: one call, its own `applyMotion`.
     function addressBook() public view returns (bytes memory) {
         return abi.encodePacked(address(this), this.applyMotion.selector);
     }
@@ -365,7 +368,7 @@ contract UniversalFactory {
     }
 
     /// @notice The budget key of a spender of a token: its launch key, or the derived key, "k:"
-    ///         then the spender then the token's first ten bytes (ADR 013, decision 9).
+    ///         then the spender then the token's first ten bytes.
     function keyFor(address token, address spender) public view returns (bytes32) {
         bytes32 launch = launchKeys[_pair(token, spender)];
         if (launch != bytes32(0)) return launch;
@@ -447,7 +450,7 @@ contract UniversalFactory {
         }
     }
 
-    /// @dev A token's introduction (decision 15): the token's first approval list, which fills
+    /// @dev A token's introduction: the token's first approval list, which fills
     ///      the shape under the new approval ceiling, and both of its ceilings. The operations
     ///      after it in the same motion check the token's budgets against the new budget
     ///      ceiling. The introduction counts as each ceiling's first raise.
@@ -469,7 +472,7 @@ contract UniversalFactory {
         p.introducedBudgetCeilings[p.introductions++] = budgetCeiling;
     }
 
-    /// @dev The restore of a target (OD-104): `scopeTarget` under the operator key. Roles keeps a
+    /// @dev The restore of a target: `scopeTarget` under the operator key. Roles keeps a
     ///      target's function permissions when the target is revoked, so they come back as they
     ///      were; a target with none stored gives the operator nothing. The policy holds no
     ///      whole-target clearance, so a restore never narrows one.
@@ -479,7 +482,7 @@ contract UniversalFactory {
         _govern(p, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, target)));
     }
 
-    /// @dev A token for the orders account (ADR 007, decisions 41, 44 and 45). The motion states the
+    /// @dev A token for the orders account. The motion states the
     ///      token, a new token's two ceilings, and the orders account's current lists, which their
     ///      version checks. The token joins both lists in its sorted place, so a token that either list
     ///      holds is refused. The shape builds the token's own writes on the orders modifier, its exit
@@ -520,7 +523,7 @@ contract UniversalFactory {
         (to, calls) = ordersShape.listWrites(x, operatorNext, recoveryNext);
         for (uint256 i = 0; i < to.length; i++) _call(p, to[i], calls[i]);
 
-        // A new token's ceilings come with it, as with an introduction (ADR 013, decision 15).
+        // A new token's ceilings come with it, as with an introduction.
         if (introduced) {
             if (budgetCeiling != 0 || approvalCeiling != 0) revert CeilingsForIntroducedToken(token);
         } else {
@@ -531,13 +534,36 @@ contract UniversalFactory {
         }
     }
 
+    /// @dev The restore of the orders account after an emergency stop. The motion states the current lists, which
+    ///      their version checks, and the tokens whose relayer approval the emergency role set to zero; each of them is a
+    ///      token that recovery sells. It writes no version, and it claims the lists' scope, so that no other operation
+    ///      in the motion changes the lists.
+    function _ordersRestore(Plan memory p, bytes memory data) internal view {
+        (address[] memory operatorTokens, address[] memory recoveryTokens, address[] memory approvalTokens) =
+            abi.decode(data, (address[], address[], address[]));
+        if (versions[ORDERS_SCOPE] != ordersVersion(operatorTokens, recoveryTokens)) revert StaleVersion(ORDERS_SCOPE);
+        _claim(p, ORDERS_SCOPE);
+        for (uint256 i = 0; i < approvalTokens.length; i++) {
+            if (i > 0 && approvalTokens[i - 1] >= approvalTokens[i]) revert NotCanonical();
+            if (!_holds(recoveryTokens, approvalTokens[i])) revert NotListed(approvalTokens[i]);
+        }
+        (address[] memory to, bytes[] memory calls) =
+            ordersShape.restoreWrites(_context(), operatorTokens, recoveryTokens, approvalTokens);
+        for (uint256 i = 0; i < to.length; i++) _call(p, to[i], calls[i]);
+    }
+
+    function _holds(address[] memory tokens, address token) internal pure returns (bool) {
+        for (uint256 i = 0; i < tokens.length; i++) if (tokens[i] == token) return true;
+        return false;
+    }
+
     /// @dev The vault's accounts that the orders shape's writes name.
     function _context() internal view returns (OrdersShape.Context memory) {
         return OrdersShape.Context(assetSafe, agent, ordersAccount, ordersModifier, safetyModifier);
     }
 
     /// @notice The operator's transfer of a token into the orders account, spending `key`: the
-    ///         tree of every orders budget (ADR 007, decision 18).
+    ///         tree of every orders budget.
     function fundingTree(bytes32 key) public view returns (IRoles.ConditionFlat[] memory c) {
         c = new IRoles.ConditionFlat[](3);
         c[0] = IRoles.ConditionFlat(0, T_CALLDATA, OP_MATCHES, "");
@@ -576,7 +602,7 @@ contract UniversalFactory {
     function _ceiling(Plan memory p, bytes memory data) internal view {
         (bytes32 key, uint256 expected, uint256 value) = abi.decode(data, (bytes32, uint256, uint256));
         Ceiling memory c = ceilings[key];
-        // A token's first ceilings come only with its introduction (decision 15).
+        // A token's first ceilings come only with its introduction.
         if (!c.set) revert CeilingNotSet(key);
         // The ceiling's value is its version.
         if (c.value != expected) revert StaleVersion(_ceilingScope(key));
@@ -632,6 +658,7 @@ contract UniversalFactory {
             else if (kind == INTRODUCE) _introduce(p, ops[i].data);
             else if (kind == RESTORE) _restore(p, ops[i].data);
             else if (kind == ORDERS_TOKEN) _ordersToken(p, ops[i].data);
+            else if (kind == ORDERS_RESTORE) _ordersRestore(p, ops[i].data);
             else revert UnknownOperation(kind);
         }
     }
@@ -653,12 +680,24 @@ contract UniversalFactory {
     }
 
     /// @dev The plan holds room for the most that each operation adds: an orders token makes 15
-    ///      calls and any other operation at most two; each writes at most two versions, sets at
+    ///      calls, an orders restore seven and two for each operator token and one for each approval,
+    ///      and any other operation at most two; each writes at most two versions, sets at
     ///      most two ceilings and claims at most four scopes.
     function _plan(Op[] memory ops) internal pure returns (Plan memory p) {
         uint256 n = ops.length;
         uint256 calls;
-        for (uint256 i = 0; i < n; i++) calls += ops[i].kind == ORDERS_TOKEN ? 15 : 2;
+        for (uint256 i = 0; i < n; i++) {
+            uint8 kind = ops[i].kind;
+            if (kind == ORDERS_TOKEN) {
+                calls += 15;
+            } else if (kind == ORDERS_RESTORE) {
+                (address[] memory operatorTokens,, address[] memory approvalTokens) =
+                    abi.decode(ops[i].data, (address[], address[], address[]));
+                calls += 7 + 2 * operatorTokens.length + approvalTokens.length;
+            } else {
+                calls += 2;
+            }
+        }
         p.to = new address[](calls);
         p.data = new bytes[](calls);
         p.scopes = new bytes32[](2 * n);

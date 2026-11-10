@@ -124,6 +124,8 @@ abstract contract RehearsalBase is Test {
     address[] internal emergencySigners;
 
     UniversalFactory internal uf;
+    /// @dev When the factory was deployed: its launch ceilings count that moment as their first raise.
+    uint256 internal deployedAt;
 
     address internal deployer = makeAddr("clutch-deployer");
     address internal anyone = makeAddr("anyone");
@@ -230,6 +232,7 @@ abstract contract RehearsalBase is Test {
 
         vm.prank(deployer);
         uf = new UniversalFactory(c, keys, seeds, caps);
+        deployedAt = block.timestamp;
         assertEq(address(uf), vm.computeCreateAddress(deployer, 0), "the deployer's first creation");
     }
 

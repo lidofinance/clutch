@@ -16,6 +16,9 @@ carries `SPDX-License-Identifier: AGPL-3.0-or-later`. Two exceptions:
   to EASY_TRACK_DERIVED in a reviewed pull request.
 
 This replaces the grep command that ADR 001 gives for a manual check.
+
+It also checks the rule of the specification policy that a contract's comments under src/ cite no
+specification, ADR, open decision, invariant or test (OD-123).
 """
 
 from __future__ import annotations
@@ -34,6 +37,19 @@ LOCK = ROOT / PROVIDER / "provenance.lock"
 EASY_TRACK_DERIVED: tuple[str, ...] = ()
 SPDX = re.compile(r"SPDX-License-Identifier:\s*([A-Za-z0-9.+-]+)")
 HEADER_LINES = 10
+# A comment in a contract under src/ that cites a page of the repository (OD-123).
+COMMENT = re.compile(r"^\s*(///|/\*\*|\*|//)")
+CITATION = re.compile(r"\bADR[ -]?\d|\bOD-\d|\bINV-\d|\bdecisions? \d|docs/|\btest_\w")
+
+
+def citations(path: Path) -> list[str]:
+    """The comment lines of a contract that cite a page of the repository."""
+    out = []
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if COMMENT.match(line) and CITATION.search(line):
+            name = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path.name
+            out.append(f"{name}:{number}: a contract comment cites a repository page: {line.strip()}")
+    return out
 
 
 def blob(data: bytes) -> str:
@@ -129,11 +145,15 @@ def main(argv: list[str]) -> int:
         print(f"wrote {LOCK.relative_to(ROOT)}")
         return 0
     found = problems()
+    contracts = sorted(p for p in (ROOT / "src").rglob("*.sol"))
+    for path in contracts:
+        found += citations(path)
     for problem in found:
         print(problem)
     if found:
         return 1
-    print(f"Every source file carries an allowed licence ({len(sources())} files).")
+    print(f"Every source file carries an allowed licence ({len(sources())} files), "
+          f"and no contract comment cites a repository page ({len(contracts)} contracts).")
     return 0
 
 

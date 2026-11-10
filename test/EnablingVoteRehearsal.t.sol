@@ -129,8 +129,11 @@ contract EnablingVoteRehearsal is EnabledVault {
         assertEq(maxRefill, 400_000e6);
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, 300_000e6)), true);
 
-        // 3f. A ceiling motion: twofold now, and no second raise within 15 days (OD-105).
+        // 3f. A ceiling motion: twofold, 15 days after the launch seed, which counts as the first raise (OD-120),
+        //     and no second raise within 15 days (OD-105).
         bytes32 key = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDC);
+        (, uint64 seededAt,) = uf.ceilings(key);
+        if (block.timestamp < uint256(seededAt) + 15 days) vm.warp(uint256(seededAt) + 15 days);
         _motion(_one(_ceilingOp(key, BUDGET_CEILING_USDC, 2 * BUDGET_CEILING_USDC)));
         (uint256 ceiling,,) = uf.ceilings(key);
         assertEq(ceiling, 2 * BUDGET_CEILING_USDC, "the ceiling rose twofold");
