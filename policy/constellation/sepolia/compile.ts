@@ -102,15 +102,21 @@ export function buildNodes(manifest: Record<string, any>) {
   return nodes;
 }
 
+/** The shared compiler names the orders Safe `ordersAccount`; the stand manifest calls it `ordersSafe`. */
+export function compileStand(nodes: Parameters<typeof compile>[0], m: Record<string, any>, names: Parameters<typeof compile>[2]) {
+  return compile(nodes, { ...m, ordersAccount: m.ordersSafe }, names);
+}
+
 export function build(manifest: Record<string, any>) {
   const m = manifest;
   const nodes = buildNodes(m);
   const allSafes = [m.assetSafe, m.ordersSafe, m.firstLossSafe, m.operatorSafe, m.emergencySafe];
   const protectedAccounts = [...allSafes, m.operatorModifier, m.safetyModifier, m.ordersModifier, m.firstLossModifier];
   const names = Object.fromEntries(Object.entries(m).filter(([, value]) => typeof value === "string" && /^0x[0-9a-fA-F]{40}$/.test(value)).map(([name, value]) => [getAddress(value as string), name]));
-  const artifact = compile(nodes, m, names);
-  for (const [avatar, modules] of [[m.ordersSafe, [m.ordersModifier]], [m.firstLossSafe, [m.firstLossModifier]]] as [string, string[]][]) {
-    checkProtected(artifact.modifiers, { assetSafe: avatar, modules });
+  const artifact = compileStand(nodes, m, names);
+  // The shared compiler protects the Asset Safe and the orders account; the stand adds the first-loss Safe.
+  for (const [avatar, modules] of [[m.firstLossSafe, [m.firstLossModifier]]] as [string, string[]][]) {
+    checkProtected(artifact.modifiers, { assetSafe: avatar, modules, ordersModifier: m.ordersModifier, ordersAccount: m.ordersSafe });
   }
   const grants = new Set(["scopeTarget(bytes32,address)", "allowFunction(bytes32,address,bytes4,uint8)", "scopeFunction(bytes32,address,bytes4,(uint8,uint8,uint8,bytes)[],uint8)"].map((fn) => id(fn).slice(0, 10)));
   for (const modifier of artifact.modifiers) for (const r of modifier.roles) for (const target of r.targets) {

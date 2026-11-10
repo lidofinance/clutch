@@ -149,7 +149,7 @@ contract MainnetLidoCoverageTest is ClutchFixture {
         bytes32 before = keccak256(abi.encode(state()));
         vm.prank(operatorSafe); vm.expectRevert("GS104"); roles.execTransactionWithRole(a.steth, 1 ether, abi.encodeCall(IStETH.submit, (address(0))), 0, OPERATOR, true);
         assertEq(keccak256(abi.encode(state())), before); submitAndCheck(true, 1 ether);
-        vm.startPrank(principal); SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))); vm.stopPrank();
+        vm.startPrank(principal); SafeExec.execAsOwner(voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))); vm.stopPrank();
         submitAndCheck(false, 1 ether); assertEq(address(safe).balance, 0);
     }
 }

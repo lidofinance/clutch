@@ -7,7 +7,7 @@ import {IRoles} from "../../src/interfaces/IRoles.sol";
 import {IERC20} from "../../src/interfaces/Tokens.sol";
 import {Mainnet} from "./Mainnet.sol";
 import {VoteBuilder} from "./VoteBuilder.sol";
-import {BudgetFactoryStandIn} from "./BudgetFactoryStandIn.sol";
+import {UniversalFactory} from "../../src/factory/UniversalFactory.sol";
 
 interface IVoting {
     function vote(uint256 voteId, bool inSupport, bool executesIfDecidedDeprecated) external;
@@ -19,17 +19,6 @@ interface IVoting {
 
 interface ITokenManager {
     function forward(bytes calldata evmScript) external;
-}
-
-interface IACL {
-    function grantPermissionP(address entity, address app, bytes32 role, uint256[] calldata params) external;
-    function revokePermission(address entity, address app, bytes32 role) external;
-    function hasPermission(address who, address where, bytes32 what, uint256[] calldata how) external view returns (bool);
-    function getPermissionParamsLength(address entity, address app, bytes32 role) external view returns (uint256);
-    function getPermissionParam(address entity, address app, bytes32 role, uint256 index)
-        external
-        view
-        returns (uint8 id, uint8 op, uint240 value);
 }
 
 interface IFinance {
@@ -56,46 +45,8 @@ interface IEasyTrack {
     function getMotions() external view returns (Motion[] memory);
     function motionsCountLimit() external view returns (uint256);
     function motionDuration() external view returns (uint256);
-}
-
-interface IRecipientsFactory {
-    function deployAllowedRecipientsRegistry(
-        address defaultAdmin,
-        address[] calldata addRecipientHolders,
-        address[] calldata removeRecipientHolders,
-        address[] calldata setLimitParametersHolders,
-        address[] calldata updateSpentAmountHolders,
-        address dateTime
-    ) external returns (address);
-
-    /// @dev The multi-token factory takes a token registry and the
-    ///      single-token factory a token; both take five addresses.
-    function deployTopUpAllowedRecipients(
-        address trustedCaller,
-        address registry,
-        address tokenOrTokenRegistry,
-        address finance,
-        address easyTrack
-    ) external returns (address);
-}
-
-interface IRecipientsRegistry {
-    function addRecipient(address recipient, string calldata title) external;
-    function setLimitParameters(uint256 limit, uint256 periodDurationMonths) external;
-    function renounceRole(bytes32 role, address account) external;
-    function hasRole(bytes32 role, address account) external view returns (bool);
-    function getLimitParameters() external view returns (uint256, uint256);
-    function spendableBalance() external view returns (uint256);
-    function getPeriodState() external view returns (uint256, uint256, uint256, uint256);
-    function updateSpentAmount(uint256 amount) external;
-}
-
-interface IAllowedTokensRegistry {
-    function addToken(address token) external;
-    function isTokenAllowed(address token) external view returns (bool);
-    function grantRole(bytes32 role, address account) external;
-    function renounceRole(bytes32 role, address account) external;
-    function hasRole(bytes32 role, address account) external view returns (bool);
+    function cancelMotion(uint256 motionId) external;
+    function evmScriptFactoryPermissions(address factory) external view returns (bytes memory);
 }
 
 interface ISafeAdmin {
@@ -135,15 +86,25 @@ abstract contract RehearsalBase is Test {
     bytes32 internal constant FIRST_LOSS = bytes32("first-loss");
     bytes32 internal constant FIRST_LOSS_BURN = bytes32("first-loss-burn");
     bytes32 internal constant CREATE_PAYMENTS_ROLE = keccak256("CREATE_PAYMENTS_ROLE");
-    bytes32 internal constant ADD_RECIPIENT_ROLE = keccak256("ADD_RECIPIENT_TO_ALLOWED_LIST_ROLE");
-    bytes32 internal constant SET_PARAMETERS_ROLE = keccak256("SET_PARAMETERS_ROLE");
-    bytes32 internal constant ADD_TOKEN_ROLE = keccak256("ADD_TOKEN_TO_ALLOWED_LIST_ROLE");
 
-    // Test stand-ins. The production limits are one mandate size per month, a
-    // backstop under the mandate's ceiling (ADR 008, OD-89); they come from the
-    // attested computation and are not in this repository.
-    uint256 internal constant STABLE_LIMIT_STANDIN = 1_000_000e18;
-    uint256 internal constant STETH_LIMIT_STANDIN = 300e18;
+    // Test stand-ins for the factory's ceilings, per token. The production
+    // figures come from the attested computation and are not in this repository.
+    uint256 internal constant BUDGET_CEILING_USDC = 1_000_000e6;
+    uint256 internal constant BUDGET_CEILING_USDS = 1_000_000e18;
+    uint256 internal constant BUDGET_CEILING_WSTETH = 300e18;
+    // The approval caps of the launch policy: one mandate size, at dry-run scale
+    // (policy/constellation/constellation/parameters.ts).
+    uint256 internal constant SIZE_STANDIN_STETH = 10e18;
+    uint256 internal constant SIZE_STANDIN_USD = 10_000e18;
+    // The launch budgets (policy/constellation/constellation/allowances).
+    uint128 internal constant SKY_SAVINGS_USDS = 1_000e18;
+    uint128 internal constant EARN_USD_DEPOSIT = 500e6;
+    uint128 internal constant EARN_ETH_DEPOSIT_WSTETH = 1e18;
+    uint64 internal constant MONTH = 30 days;
+
+    address internal constant DAI_USDS = 0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A;
+    address internal constant EARN_ETH_DEPOSIT_QUEUE = 0xe39EED9A454C4918F8d0682062777cB251cd513F;
+    address internal constant EARN_USD_REDEEM_QUEUE = 0x9e36A74FE278906a76e7615263e46a83fC40c47F;
 
     ISafe internal asset;
     ISafe internal orders;
@@ -155,11 +116,7 @@ abstract contract RehearsalBase is Test {
     IRoles internal firstLossMod;
     address[] internal emergencySigners;
 
-    address internal stableRegistry;
-    address internal stethRegistry;
-    address internal stableTopUp;
-    address internal stethTopUp;
-    BudgetFactoryStandIn internal budgetFactory;
+    UniversalFactory internal uf;
 
     address internal deployer = makeAddr("clutch-deployer");
     address internal anyone = makeAddr("anyone");
@@ -204,43 +161,79 @@ abstract contract RehearsalBase is Test {
         firstLossMod = _modifier(address(firstLoss), _salt("first-loss-modifier"));
     }
 
-    /// @dev The funding registries and top-up factories. The standard
-    ///      builders make the Aragon Agent each registry's admin, so the
-    ///      rehearsal calls the same factories directly with Aragon Voting as
-    ///      admin (finding 2 of the research note), then gives up its own roles.
-    function _deployFunding() internal {
-        vm.startPrank(deployer);
-        stableRegistry = _registry(Mainnet.RECIPIENTS_FACTORY_MULTI, STABLE_LIMIT_STANDIN, 1);
-        stethRegistry = _registry(Mainnet.RECIPIENTS_FACTORY_SINGLE, STETH_LIMIT_STANDIN, 1);
-        stableTopUp = IRecipientsFactory(Mainnet.RECIPIENTS_FACTORY_MULTI).deployTopUpAllowedRecipients(
-            Mainnet.COMMITTEE_SAFE, stableRegistry, Mainnet.STABLECOIN_LIST, Mainnet.FINANCE, Mainnet.EASY_TRACK
-        );
-        stethTopUp = IRecipientsFactory(Mainnet.RECIPIENTS_FACTORY_SINGLE).deployTopUpAllowedRecipients(
-            Mainnet.COMMITTEE_SAFE, stethRegistry, Mainnet.STETH, Mainnet.FINANCE, Mainnet.EASY_TRACK
-        );
-        budgetFactory = new BudgetFactoryStandIn(Mainnet.COMMITTEE_SAFE, address(opMod));
-        vm.stopPrank();
+    /// @dev The universal factory (ADR 013), seeded with what the enabling
+    ///      vote's policy writes: the operator's approval lists and budgets,
+    ///      the launch keys, and the ceilings per token. Its trusted caller is
+    ///      the committee's Safe, and only the live executor calls `commit`.
+    function _deployFactory() internal {
+        UniversalFactory.Config memory c = UniversalFactory.Config({
+            trustedCaller: Mainnet.COMMITTEE_SAFE,
+            executor: Mainnet.ET_EXECUTOR,
+            emergencySafe: address(emergency),
+            voting: Mainnet.VOTING,
+            assetSafe: address(asset),
+            operatorModifier: address(opMod),
+            safetyModifier: address(safetyMod),
+            ordersModifier: address(ordersMod),
+            firstLossModifier: address(firstLossMod),
+            firstLossSafe: address(firstLoss)
+        });
+        UniversalFactory.LaunchKey[] memory keys = new UniversalFactory.LaunchKey[](3);
+        keys[0] = UniversalFactory.LaunchKey(Mainnet.USDS, Mainnet.SUSDS, bytes32("sky_savings_usds"));
+        keys[1] = UniversalFactory.LaunchKey(Mainnet.USDC, Mainnet.EARN_USD_DEPOSIT_QUEUE, bytes32("earn_usd_deposit"));
+        keys[2] = UniversalFactory.LaunchKey(Mainnet.WSTETH, EARN_ETH_DEPOSIT_QUEUE, bytes32("earn_eth_deposit_wsteth"));
+
+        // The factory's version helpers are pure, so a scratch instance computes the seeds.
+        UniversalFactory scratch = new UniversalFactory(c, keys, new UniversalFactory.Seed[](0), new UniversalFactory.CeilingSeed[](0));
+        UniversalFactory.Seed[] memory seeds = new UniversalFactory.Seed[](8);
+        address[5] memory tokens = [Mainnet.STETH, Mainnet.USDS, Mainnet.DAI, Mainnet.USDC, Mainnet.WSTETH];
+        for (uint256 i = 0; i < tokens.length; i++) {
+            seeds[i] = UniversalFactory.Seed(
+                scratch.functionScope(tokens[i], IERC20.approve.selector), scratch.listVersion(launchApprovals(tokens[i]))
+            );
+        }
+        seeds[5] = _budgetSeed(scratch, bytes32("sky_savings_usds"), SKY_SAVINGS_USDS);
+        seeds[6] = _budgetSeed(scratch, bytes32("earn_usd_deposit"), EARN_USD_DEPOSIT);
+        seeds[7] = _budgetSeed(scratch, bytes32("earn_eth_deposit_wsteth"), EARN_ETH_DEPOSIT_WSTETH);
+
+        UniversalFactory.CeilingSeed[] memory caps = new UniversalFactory.CeilingSeed[](6);
+        uint8 budget = scratch.BUDGET_CEILING();
+        uint8 cap = scratch.APPROVAL_CAP_CEILING();
+        caps[0] = UniversalFactory.CeilingSeed(scratch.ceilingKey(budget, Mainnet.USDC), BUDGET_CEILING_USDC);
+        caps[1] = UniversalFactory.CeilingSeed(scratch.ceilingKey(budget, Mainnet.USDS), BUDGET_CEILING_USDS);
+        caps[2] = UniversalFactory.CeilingSeed(scratch.ceilingKey(budget, Mainnet.WSTETH), BUDGET_CEILING_WSTETH);
+        caps[3] = UniversalFactory.CeilingSeed(scratch.ceilingKey(cap, Mainnet.STETH), SIZE_STANDIN_STETH);
+        caps[4] = UniversalFactory.CeilingSeed(scratch.ceilingKey(cap, Mainnet.DAI), SIZE_STANDIN_USD);
+        caps[5] = UniversalFactory.CeilingSeed(scratch.ceilingKey(cap, Mainnet.USDS), SIZE_STANDIN_USD);
+
+        vm.prank(deployer);
+        uf = new UniversalFactory(c, keys, seeds, caps);
     }
 
-    function _registry(address factory, uint256 limit, uint256 months) internal returns (address reg) {
-        address[] memory add = new address[](2);
-        add[0] = Mainnet.VOTING;
-        add[1] = deployer;
-        address[] memory remove = new address[](1);
-        remove[0] = Mainnet.VOTING;
-        address[] memory setLimit = new address[](2);
-        setLimit[0] = Mainnet.VOTING;
-        setLimit[1] = deployer;
-        address[] memory spend = new address[](2);
-        spend[0] = Mainnet.VOTING;
-        spend[1] = Mainnet.ET_EXECUTOR;
-        reg = IRecipientsFactory(factory).deployAllowedRecipientsRegistry(
-            Mainnet.VOTING, add, remove, setLimit, spend, Mainnet.DATE_TIME
-        );
-        IRecipientsRegistry(reg).addRecipient(address(asset), "Clutch Asset Safe");
-        IRecipientsRegistry(reg).setLimitParameters(limit, months);
-        IRecipientsRegistry(reg).renounceRole(ADD_RECIPIENT_ROLE, deployer);
-        IRecipientsRegistry(reg).renounceRole(SET_PARAMETERS_ROLE, deployer);
+    function _budgetSeed(UniversalFactory f, bytes32 key, uint128 perMonth) internal pure returns (UniversalFactory.Seed memory) {
+        return UniversalFactory.Seed(f.allowanceScope(key), f.budgetVersion(perMonth, perMonth, perMonth, MONTH));
+    }
+
+    /// @dev The operator's approval list of a token at launch, sorted by spender: the
+    ///      same entries as APPROVALS in policy/constellation/constellation/roles/operator.
+    function launchApprovals(address token) public pure returns (UniversalFactory.Entry[] memory e) {
+        if (token == Mainnet.STETH) {
+            e = new UniversalFactory.Entry[](1);
+            e[0] = UniversalFactory.Entry(Mainnet.WSTETH, bytes32(0), SIZE_STANDIN_STETH);
+        } else if (token == Mainnet.USDS) {
+            e = new UniversalFactory.Entry[](2);
+            e[0] = UniversalFactory.Entry(DAI_USDS, bytes32(0), SIZE_STANDIN_USD);
+            e[1] = UniversalFactory.Entry(Mainnet.SUSDS, bytes32("sky_savings_usds"), 0);
+        } else if (token == Mainnet.DAI) {
+            e = new UniversalFactory.Entry[](1);
+            e[0] = UniversalFactory.Entry(DAI_USDS, bytes32(0), SIZE_STANDIN_USD);
+        } else if (token == Mainnet.USDC) {
+            e = new UniversalFactory.Entry[](1);
+            e[0] = UniversalFactory.Entry(Mainnet.EARN_USD_DEPOSIT_QUEUE, bytes32("earn_usd_deposit"), 0);
+        } else if (token == Mainnet.WSTETH) {
+            e = new UniversalFactory.Entry[](1);
+            e[0] = UniversalFactory.Entry(EARN_ETH_DEPOSIT_QUEUE, bytes32("earn_eth_deposit_wsteth"), 0);
+        }
     }
 
     function _manifestJson() internal returns (string memory) {
@@ -267,7 +260,10 @@ abstract contract RehearsalBase is Test {
         vm.serializeAddress(o, "modules", mods);
         vm.serializeAddress(o, "operatorSafe", Mainnet.COMMITTEE_SAFE);
         vm.serializeAddress(o, "emergencySafe", address(emergency));
-        return vm.serializeAddress(o, "easyTrackExecutor", Mainnet.ET_EXECUTOR);
+        vm.serializeAddress(o, "easyTrackExecutor", Mainnet.ET_EXECUTOR);
+        vm.serializeAddress(o, "firstLossSafe", address(firstLoss));
+        vm.serializeAddress(o, "ordersAccount", address(orders));
+        return vm.serializeAddress(o, "ordersModifier", address(ordersMod));
     }
 
     function _checkManifest() internal view {
@@ -279,6 +275,9 @@ abstract contract RehearsalBase is Test {
         assertEq(vm.parseJsonAddress(m, ".operatorSafe"), Mainnet.COMMITTEE_SAFE, "manifest: committee's Safe");
         assertEq(vm.parseJsonAddress(m, ".emergencySafe"), address(emergency), "manifest: emergency Safe");
         assertEq(vm.parseJsonAddress(m, ".easyTrackExecutor"), Mainnet.ET_EXECUTOR, "manifest: executor");
+        assertEq(vm.parseJsonAddress(m, ".firstLossSafe"), address(firstLoss), "manifest: first-loss Safe");
+        assertEq(vm.parseJsonAddress(m, ".ordersAccount"), address(orders), "manifest: orders account");
+        assertEq(vm.parseJsonAddress(m, ".ordersModifier"), address(ordersMod), "manifest: orders modifier");
     }
 
     function _cold(address[] memory accounts) internal {

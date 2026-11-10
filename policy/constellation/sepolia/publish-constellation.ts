@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { reconstructPermissions } from "zodiac-roles-sdk";
-import { compile } from "../compiler/compile";
+import { compileStand as compile } from "./compile";
 import { build } from "./compile";
 import { checkPayload, workspacePolicyIssues, type RuntimeAllowance } from "./constellation";
 import { diffPolicy } from "./diff";
@@ -28,7 +28,7 @@ export type Deps = {
   now: () => Date;
 };
 
-/** ADR 013: a human publishes to the Sepolia workspace from a pushed, clean testnet/sepolia. */
+/** ADR 015: a human publishes to the Sepolia workspace from a pushed, clean testnet/sepolia. */
 export function sepoliaRefusals(env: Record<string, string | undefined>, git: Git, workspace: string): string[] {
   const reasons: string[] = [];
   if (env.CLUTCH_SEPOLIA_PUSH !== "1") reasons.push("set CLUTCH_SEPOLIA_PUSH=1 to confirm a human publication to the Sepolia workspace");
@@ -98,7 +98,7 @@ export async function run(command: string, deps: Deps): Promise<number> {
   const context = JSON.parse(readFileSync(path.join(deps.input, "context.json"), "utf8"));
   const git = deps.git();
   const reasons = sepoliaRefusals(deps.env, git, context.workspace);
-  if (reasons.length) throw new Error(`Refused (ADR 013): ${reasons.join("; ")}.`);
+  if (reasons.length) throw new Error(`Refused (ADR 015): ${reasons.join("; ")}.`);
   const manifest = JSON.parse(readFileSync(deps.manifestFile, "utf8"));
   if (JSON.stringify(manifest) !== JSON.stringify(context.manifest)) throw new Error("The prepared context uses another manifest; run constellation <workspace UUID> again");
   const payload = JSON.parse(raw.toString());

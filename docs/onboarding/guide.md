@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:36:19Z
+  at: 2026-10-22T21:40:14Z
 verified: []
 sources:
   - id: s1
@@ -18,7 +18,7 @@ sources:
     title: Specification policy — the onboarding guide is generated, and a change updates it in the same pull request
   - id: s3
     resource: /adr/001-repository-scope-visibility-licence-name.md
-    title: ADR 001 — the repository is private until deployment, and nothing enters it that could not be published then
+    title: ADR 001 — the repository is public, and nothing enters it that could not be published (decision 10)
   - id: s4
     resource: /adr/004-specifications-and-policy-as-data.md
     title: ADR 004 — the committed policy artifact that the guide reads
@@ -26,8 +26,8 @@ sources:
     resource: /registers/decision-log.md
     title: Decision log — EM's request for the mandate and constellation tabs, the detail switch and the console error, 2026-10-06
   - id: s6
-    resource: /adr/009-budgets-caps-reporting-and-monitoring.md
-    title: ADR 009 — the eleven changes that the mandate text owes, and the control on each layer
+    resource: /specs/lip-draft.md
+    title: LIP draft, open item 2 — the mandate text owed, sorted into the Snapshot text and the forum post (OD-90)
   - id: s7
     resource: /research/zodiac-constellation-2026-10-06.md
     title: Research note — the policy provider's constellation and its differences from the decided design
@@ -54,11 +54,11 @@ The [interactive guide](clutch-onboarding.html) explains Clutch to signers, engi
 
 ## Open the guide
 
-Open the published address from the repository's Pages settings: `https://lidofinance.github.io/clutch/` for a public site.
+Open the published address: `https://lidofinance.github.io/clutch/`.
 CI publishes it from `main` [s10]. Or download `clutch-onboarding.html` and open it in a browser; GitHub shows HTML as source [s1].
 
 The file works offline, makes no network request and stores nothing.
-EM decided to publish the guide ahead of the private repository on 2026-10-07 [s3][s10].
+EM decided on 2026-10-07 to publish the guide before the repository [s10]. The repository is public now (OD-95) [s3].
 The banner and footer identify a hypothetical draft: nothing is deployed or ratified, figures can change, and the page is not advice.
 The build requires this disclaimer. The page asks search engines not to index it.
 
@@ -69,7 +69,7 @@ Flows play on the map step by step. Each claim links to its source and shows its
 
 | Tab | Content |
 |---|---|
-| Mandate | Each block's rule, controls, changes and reasons. Badges distinguish text owed, design choices and proposals [s5][s6]. The tab paraphrases only repository evidence about the private draft. The build rejects currency signs and percentages [s3]. |
+| Mandate | Each block's rule, controls, changes and reasons. Badges distinguish Snapshot text owed, forum-post items, design choices and proposals [s5][s6]. The tab paraphrases only repository evidence about the private draft. The build rejects currency signs and percentages [s3]. |
 | Constellation | Accounts, modifiers, roles, holders, target and call counts from the committed artifact [s4]. Specified but unbuilt parts and changes from the provider's constellation appear separately, with reasons [s5][s7]. |
 | RFP | Each original ask, its answer and verdict: asked, changed or unanswered. Changed asks have reasons; each part lists additions. The research note records the asks [s8][s9]. |
 
@@ -78,7 +78,7 @@ Technical adds addresses, permissions, signatures and implementation notes [s5].
 A text list repeats the map's boxes and arrows, so tooltips contain no exclusive facts.
 The full page works without JavaScript and prints with all sections open. On phones, tabs scroll in one row.
 
-The guide omits personal names, unannounced counterparties, financial figures and fork stand-in addresses.
+The guide omits personal names, unannounced counterparties, figures from the mandate or the attested computation, and fork stand-in addresses. Its only dollar figure is the launch cap, which EM set (OD-55).
 The screening vendor stays "[the screening vendor]".
 
 ## How it is built

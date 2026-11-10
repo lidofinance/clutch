@@ -4,7 +4,7 @@ pragma solidity >=0.8.24 <0.9.0;
 import {ClutchFixture} from "./utils/Fixture.sol";
 import {ISafe, ISafeProxyFactory} from "../src/interfaces/ISafe.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
-import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
+import {MockAragonVoting} from "../src/mocks/MockAragonVoting.sol";
 import {SafeExec} from "../src/exec/SafeExec.sol";
 import {CoWOrder} from "../script/sepolia/CoWInterfaces.sol";
 import {Mainnet} from "./rehearsal/Mainnet.sol";
@@ -213,7 +213,7 @@ contract MainnetCowCoverageTest is ClutchFixture {
 
     function ownerCall(address account, address to, bytes memory data) internal {
         vm.startPrank(principal);
-        SafeExec.execAsOwner(MockAragonAgent(payable(address(agent))), ISafe(payable(account)), to, data);
+        SafeExec.execAsOwner(MockAragonVoting(payable(address(agent))), ISafe(payable(account)), to, data);
         vm.stopPrank();
     }
 }

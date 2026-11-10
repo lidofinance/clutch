@@ -136,7 +136,7 @@ contract MainnetWstethCoverageTest is ClutchFixture {
         roles.execTransactionWithRole(a.wsteth, 0, abi.encodeCall(IWstETH.unwrap, (minted)), 0, OPERATOR, true);
         assertEq(keccak256(abi.encode(state())), before); approve(true, 0); unwrapAndCheck(true, minted);
         assertTrue(safe.isModuleEnabled(address(safety))); assertFalse(safe.isModuleEnabled(address(roles)));
-        vm.startPrank(principal); SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))); vm.stopPrank();
+        vm.startPrank(principal); SafeExec.execAsOwner(voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))); vm.stopPrank();
         approve(false, 1 ether); minted = wrapAndCheck(1 ether); unwrapAndCheck(false, minted);
     }
 }

@@ -44,7 +44,7 @@ constellation-diff:
 constellation-inspect:
     cd policy/constellation && bun run inspect sepolia/entrypoint.ts
 
-# Human-only hosted calls to the Sepolia workspace (ADR 013). Agents never run these.
+# Human-only hosted calls to the Sepolia workspace (ADR 015). Agents never run these.
 # Each run compares the chain again, then resolves; publish applies once, as a draft.
 constellation-resolve:
     bun policy/constellation/sepolia/publish-constellation.ts resolve
@@ -52,7 +52,7 @@ constellation-resolve:
 constellation-publish:
     bun policy/constellation/sepolia/publish-constellation.ts apply
 
-# OD-100: preparation and verification are read-only; publication and execution are human-only.
+# OD-122: preparation and verification are read-only; publication and execution are human-only.
 migration-prepare workspace:
     bun policy/constellation/sepolia/prepare-migration.ts prepare {{quote(workspace)}}
 

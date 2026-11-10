@@ -9,10 +9,10 @@ valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
 superseded_by:
   ref: /adr/007-swapping-through-an-orders-account.md
-  note: "In part: decision 27 of ADR 007 (2026-10-08) took the withdrawal queue out of the design. Recovery into USDC or USDT stands (OD-26)."
+  note: "In part: decision 27 of ADR 007 (2026-10-08) took the withdrawal queue out of the design. Recovery into USDC or USDT stands (OD-26). CoW recovery orders replaced the Stonks recovery instances on 2026-10-06 (OD-43, ADR 007 decisions 17 to 19)."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  at: 2026-10-22T20:29:49Z
 verified: []
 sources:
   - id: s1

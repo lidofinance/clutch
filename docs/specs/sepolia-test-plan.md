@@ -6,15 +6,15 @@ tags: [sepolia, testing, roles, cow, first-loss]
 status: draft
 review_status: slop
 generated:
-  by: codex/gpt-6
-  at: 2026-10-25T19:35:38Z
+  by: claude-code/opus-5.5
+  at: 2026-11-10T13:02:24Z
 verified: []
 sources:
   - id: s1
     resource: /specs/sepolia-setup-checklist.md
     title: Complete coverage obligations and their status
   - id: s2
-    resource: /adr/013-tests-on-sepolia.md
+    resource: /adr/015-tests-on-sepolia.md
     title: Sepolia account-specific roles and execution boundaries
   - id: s3
     resource: urn:clutch:source:sepolia-current-stand-tests
@@ -89,7 +89,7 @@ Run these against deployed protocol contracts on a pinned fork. A dash means the
 | MAIN-06 | Earn deposits for each allowed asset, request/cancel, report/claim, proof/account gates, caps, pause and liquidity failures | [MainnetEarnCoverage](../../test/MainnetEarnCoverage.t.sol): `test_MAIN06_*` [s4] |
 | MAIN-07 | Earn Asset and separate First-loss redemptions: report delay, batches, liquidity and token-transfer failure/retry, claim variants, fee/rounding boundaries and no double claim | Asset: [MainnetEarnCoverage](../../test/MainnetEarnCoverage.t.sol): `test_MAIN07_*`; First-loss: [MainnetFirstLossCoverage](../../test/MainnetFirstLossCoverage.t.sol): `test_MAIN07_first_loss_*` [s1][s4] |
 | MAIN-08 | Real First-loss burn: trusted factory, full motion lifecycle, snapshot objections/threshold boundaries and exact shares/supply | [MainnetFirstLossCoverage](../../test/MainnetFirstLossCoverage.t.sol): `test_MAIN08_*` [s1][s4] |
-| MAIN-09 | Treasury registries/funding: assets, recipient, permissions, creator, monthly limit, objection/cancel and paused-payment retry | [EnablingVoteRehearsal](../../test/EnablingVoteRehearsal.t.sol): `test_02_enabling_vote_end_to_end`, `test_03_ramp_up`, `test_06_the_payment_rewrite_changes_only_usds`, `test_MAIN09_*` [s1][s4] |
+| MAIN-09 | Treasury funding. OD-106 replaced the registry top-ups with tranche votes through Finance (ADR 014), so the merge with `main` removed the registry cases | [EnablingVoteRehearsal](../../test/EnablingVoteRehearsal.t.sol): `test_02_enabling_vote_end_to_end`, `test_03_ramp_up` [s1][s4] |
 | MAIN-10 | Governance templates, creation/enactment, narrow permissions, complete removal, stale recovery and Emergency exit | — [s1] |
 | MAIN-11 | Full launch swap/recovery token matrix, decimals, rounding, approvals/transfers and refusal of non-launch tokens | [MainnetCowCoverage](../../test/MainnetCowCoverage.t.sol): `test_MAIN11_*` for the Settlement/token matrix [s1][s4] |
 | MAIN-12 | Committee guard: exact build, full transaction/nonce binding, replay/bypass, outage/removal and independent Emergency/Voting | — [s1] |

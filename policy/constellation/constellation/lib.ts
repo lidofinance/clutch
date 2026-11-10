@@ -7,7 +7,7 @@
  * receives the same entry. No entry made here needs the hosted app to compile
  * it, so local tooling can verify every one (ADR 004, decision 11).
  */
-import { c, encodeKey, Operator, ParameterType } from "zodiac-roles-sdk";
+import { c, encodeKey, flattenCondition, Operator, ParameterType, processPermissions } from "zodiac-roles-sdk";
 import { zeroPadValue } from "ethers";
 
 export { c };
@@ -72,6 +72,19 @@ export const noneOf =
     })),
   });
 
+/**
+ * A budget key that the universal factory derives for a new spender: "k:",
+ * then the spender, then the token's first ten bytes (ADR 013, decision 9).
+ * Bitmask checks the first two bytes. The roles SDK has no helper for
+ * Bitmask, so this writes the raw condition: two bytes of shift, fifteen of
+ * mask and fifteen of expected value.
+ */
+export const derivedKey = () => ({
+  paramType: ParameterType.Static,
+  operator: Operator.Bitmask,
+  compValue: ("0x" + "0000" + "ffff" + "00".repeat(13) + "6b3a" + "00".repeat(13)) as `0x${string}`,
+});
+
 /** A role or allowance key, encoded as the Zodiac app encodes it: the label as bytes32. */
 export function key(label: string): `0x${string}` {
   if (new TextEncoder().encode(label).length > 32) throw new Error(`key label longer than 32 bytes: ${label}`);
@@ -81,4 +94,16 @@ export function key(label: string): `0x${string}` {
 /** The distinct values of a list, in first-seen order. */
 export function unique<T>(values: readonly T[]): T[] {
   return [...new Set(values)];
+}
+
+/**
+ * The condition tree of a permission entry for one function, flat, as `scopeFunction` takes it: the parent, the
+ * parameter type, the operator and the compared value of each node, in the SDK's form. A governance role can pin a
+ * grant's tree to it whole, so that a motion writes exactly that permission.
+ */
+export function flatTree(entry: { targetAddress: string; signature: string; condition?: unknown }) {
+  const [target] = processPermissions([entry] as any).targets;
+  const fn = target.functions[0];
+  if (target.functions.length !== 1 || fn.wildcarded) throw new Error(`${entry.signature}: no single condition to pin`);
+  return flattenCondition(fn.condition!).map((n) => [n.parent, n.paramType, n.operator, n.compValue ?? "0x"] as const);
 }

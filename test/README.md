@@ -1,6 +1,6 @@
 # Dry-run harness
 
-This harness runs the Clutch permission policy against production contracts on a pinned mainnet fork. Only the governance heads are mocked: the Aragon Agent, the Easy Track script executor and Easy Track. The Safe, the Roles modifier, the tokens and the protocols are the deployed mainnet contracts. The policy comes only from the committed artifact that the constellation compiler writes ([ADR 004](../docs/adr/004-specifications-and-policy-as-data.md)).
+This harness runs the Clutch permission policy against production contracts on a pinned mainnet fork. Only the governance heads are mocked: Aragon Voting, which owns the Asset Safe (OD-73), the Aragon Agent, the Easy Track script executor and Easy Track. The Safe, the Roles modifier, the tokens and the protocols are the deployed mainnet contracts. The policy comes only from the committed artifact that the constellation compiler writes ([ADR 004](../docs/adr/004-specifications-and-policy-as-data.md)).
 
 **Nothing has been deployed to mainnet.** Every result comes from `forge test` against a fork.
 
@@ -12,34 +12,41 @@ This harness runs the Clutch permission policy against production contracts on a
 | Safe v1.5.0 proxy factory | deployed, `0x14F2982D601c9458F93bd70B218933A6f8165e7b` |
 | Roles modifier mastercopy | deployed, `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5`, behind minimal proxies from the canonical module proxy factory |
 | Tokens and protocols | deployed mainnet contracts |
-| `MockAragonAgent` | the Aragon Agent: single-argument `forward(bytes)`, `execute`, `canForward` |
+| `MockAragonVoting` | Aragon Voting, the Asset Safe's only owner (OD-73): `execute` stands in for one call of a passed vote's script, which approves a Safe transaction's hash |
+| `MockAragonAgent` | the Aragon Agent, where recovery returns assets: single-argument `forward(bytes)`, `execute`, `canForward` |
 | `MockEVMScriptExecutor` | the Easy Track script executor: parses the production CallsScript format |
 | `MockEasyTrack` | Easy Track: re-invokes the factory at enactment and requires a matching script hash |
-| Committee's Safe, emergency Safe | plain addresses that stand in for them |
-| The policy | `policy/constellation/artifacts/fork-25946643.json`, compiled from the constellation against `manifests/fork-25946643.json`; `utils/Fixture.sol` deploys at the manifest's addresses, checks each, checks that the manifest's `modules` are exactly the Asset Safe's modules (OD-38), and applies the artifact's calls through the Agent and the Asset Safe |
+| Committee's Safe, emergency Safe, first-loss Safe, orders account | plain addresses that stand in for them |
+| The policy | `policy/constellation/artifacts/fork-25946643.json`, compiled from the constellation against `manifests/fork-25946643.json`; `utils/Fixture.sol` deploys at the manifest's addresses, checks each, checks that the manifest's `modules` are exactly the Asset Safe's modules (OD-38), and applies the artifact's calls through Voting and the Asset Safe |
+
+The rehearsal suites, `EnablingVoteRehearsal.t.sol` and `UniversalFactory.t.sol`, fork block 26249900 and use the live Aragon Voting, Finance and Easy Track with its executor instead of the mocks. They deploy the universal factory's prototype from `src/factory/UniversalFactory.sol` ([ADR 013](../docs/adr/013-one-easy-track-factory.md)).
 
 ## What the policy follows
 
-The constellation in `policy/constellation/constellation` follows the decisions in [ADR 005](../docs/adr/005-account-graph-and-roles.md) to [ADR 011](../docs/adr/011-launch-scope.md):
+The constellation in `policy/constellation/constellation` follows the decisions in [ADR 005](../docs/adr/005-account-graph-and-roles.md) to [ADR 011](../docs/adr/011-launch-scope.md), [ADR 013](../docs/adr/013-one-easy-track-factory.md) and [ADR 014](../docs/adr/014-funding-by-tranche-votes.md):
 
 - The launch scope of ADR 011: no Aave, no sDAI and no other third-party lending market. The operator converts DAI to USDS and back through Sky's converter, with the receiver pinned to the Asset Safe (OD-22).
 - No order pre-signing and no CoW relayer approval on the Asset Safe (ADR 007).
 - Staking and WETH (OD-20): the operator and the emergency role stake ETH through Lido's `submit` with the referral pinned to zero; the operator wraps and unwraps WETH; the emergency role unwraps WETH. The withdrawal queue left the design on 2026-10-08, and both roles are refused it (ADR 007, decision 27).
 - Approvals (ADR 009, OD-08): an approval to a protocol spender spends the budget key that the spender serves; zero spends nothing; deposits spend no budget. The stETH approval to the wstETH contract, and the DAI and USDS approvals to the converter, have a fixed ceiling instead (OD-08, OD-22).
-- Governance (ADR 006): every operator permission lives under the `operator` key; the governance role holds no `assignRoles`, and a budget motion cannot set a refill period below 30 days.
-- Emergency (ADR 005, decisions 23 to 26): the emergency Safe holds the only role on the safety modifier. Its switch disables the operator modifier, pinned to it, and also freezes the queued motions. It restores nothing: the compiler refuses a grant or a budget for it, and only the DAO enables the modifier again. The Emergency Brakes multisig holds no role.
-- Keys: each role and budget key is its label as `bytes32`, such as `bytes32("operator")`, which is how the Zodiac app encodes a key (ADR 004, decision 10).
+- Governance (ADR 006): every operator permission lives under the `operator` key; the governance role holds no `assignRoles`, and a budget motion cannot set a refill period below 30 days. Its `setAllowance` takes a launch key, or a key that starts with `k:`, which the universal factory derives for a new spender (ADR 013).
+- Emergency (ADR 005, decisions 23 to 26): the emergency Safe holds the only role on the safety modifier. Its switch disables the operator modifier, pinned to it, and also freezes the queued motions. It restores nothing: the compiler refuses a grant or a budget for it. A restart motion, or a DAO vote, enables the operator modifier again (OD-104). The Emergency Brakes multisig holds no role.
+- Restart (ADR 013, OD-104): the Easy Track executor holds `restart` on the safety modifier. It may only call `enableModule` on the Asset Safe, with the operator modifier as its argument. The compiler gives `enableModule` to no other role and refuses a restart that is not pinned.
+- Insurance money (ADR 014, OD-107): the executor holds `insurance-funding` on the operator modifier. It may only transfer the eight listed tokens to the first-loss Safe.
+- Exit governance (ADR 006 decision 13, OD-49): the executor holds `exit-governance` on the safety modifier. It writes only the emergency role's exits, under the `emergency` key, each tree pinned whole: a transfer to the Agent, or to the Agent or the orders account; a zero approval; an ERC-4626 redeem or withdrawal and a queue's claim paid to the Asset Safe; and a cancel, a queue's redeem or an unwrap. The compiler keeps every other key of the safety modifier from motions.
+- The orders account (ADR 007): the operator funds it by a transfer of an order token pinned to it, which spends that token's orders budget, and the emergency role may send it any asset that recovery sells. On the orders modifier, which only the rehearsal deploys, the operator signs market and limit orders through CoW's order signer by delegatecall and creates TWAP orders through ComposableCoW, each paying the Asset Safe; the emergency role places recovery orders paying the Agent, cancels, revokes the operator, sets relayer approvals to zero and sweeps. The compiler allows a delegatecall only there, to the order signer. The Easy Track executor holds the governance role, which writes a token's orders, return, zeroing and relayer approval and restores the operator's cancels, and the approvals role, which approves only CoW's vault relayer (decision 41).
+- Keys: each role and budget key is its label as `bytes32`, such as `bytes32("operator")`, which is how the Zodiac app encodes a key (ADR 004, decision 10). A key that the universal factory derives is `k:`, then the spender, then the token's first ten bytes.
 
 Budgets and fixed ceilings are dry-run stand-ins. The production figures come from the attested computation and are not in this repository.
 
 ## Known divergence from the design
 
-- **Swaps.** The shared mainnet policy fixture deploys no Orders account, so neither role has a swap path ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). `MainnetCowCoverage.t.sol` adds a local Orders Safe for the live Settlement/token matrix through owner presigning. It installs no Clutch Orders policy or order signer. The separate Sepolia stand tests those components for WETH/USDC.
-- **First-loss Safe.** The harness deploys no first-loss Safe ([ADR 008](../docs/adr/008-funding-through-existing-payments.md)). It enters the deployment in phase 2.
-- **Exit-governance role.** The safety modifier has no exit-governance role yet, so no motion can add an emergency exit ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md) decision 13). It comes with the template factories in phase 2.
+- **Swaps.** The kit deploys no orders account: its operator funds a plain address that stands in for it. The enabling-vote rehearsal deploys the orders account with its policy, and `OrdersAccount.t.sol` settles its orders through CoW's settlement contract ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The orders modifier's governance and approvals roles are built, and `OrdersAccount.t.sol` runs a token motion's writes by hand; the universal factory's shape that writes them is not built (decision 41). `MainnetCowCoverage.t.sol` adds a local Orders Safe for the live Settlement/token matrix through owner presigning. It installs no Clutch Orders policy or order signer. The separate Sepolia stand tests those components for WETH/USDC.
+- **First-loss Safe.** The kit deploys no first-loss Safe; a plain address stands in for it as the receiver of the insurance-funding role ([ADR 008](../docs/adr/008-funding-through-existing-payments.md), [ADR 014](../docs/adr/014-funding-by-tranche-votes.md)). The enabling-vote rehearsal deploys one, with its modifier. It enters the kit's deployment in phase 2.
+- **Exit-governance role.** The role is built, and `ExitGovernance.t.sol` tests it on the rehearsal ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md) decision 13). The universal factory's shapes that write exits through it come in phase 2.
 - **Pre-execution screening.** The operator is a plain address, not the committee's Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
-- **Factories and registries.** The budget factory, the template factories and the funding registries are not built ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md), [ADR 008](../docs/adr/008-funding-through-existing-payments.md)). The drills drive Easy Track with a pass-through factory.
-- **Per-key budget ceilings.** The governance role's budget permission pins the key and the period floor only. Ceilings per key wait for the attested figures; `test_budget_motion_bounds_are_expressible_per_key` shows the shape.
+- **The universal factory.** The kit's drills drive the mock Easy Track with a pass-through factory. The factory's prototype, with its core and the shape of an approval list, runs against the live Easy Track in `UniversalFactory.t.sol`. Its other shapes and their emergency exits are not built ([ADR 013](../docs/adr/013-one-easy-track-factory.md)). The design has no funding registry ([ADR 014](../docs/adr/014-funding-by-tranche-votes.md)).
+- **Budget ceilings.** The governance role's budget permission pins the key and the period floor only. The universal factory holds a ceiling for each token, and the prototype's ceilings are stand-ins until the attested figures. `test_budget_motion_bounds_are_expressible_per_key` shows how native conditions could also bound a key.
 
 ## The policy pipeline
 
@@ -107,12 +114,12 @@ The mainnet recipes are in `mainnet.just`, which the Justfile never loads. They 
 ```sh
 CLUTCH_MAINNET=1 just --justfile mainnet.just dry-run    # deploy on mainnet, compile against its manifest, apply; not run
 CLUTCH_MAINNET=1 just --justfile mainnet.just fund       # fund from a throwaway EOA with 0.05 ETH; not run
-CLUTCH_MAINNET=1 just --justfile mainnet.just teardown   # sweep, disable both modifiers, write a manifest; not run
+CLUTCH_MAINNET=1 just --justfile mainnet.just teardown   # sweep, disable both modifiers, write a manifest; VOTING, SAFE and ROLES from dryrun-manifest.json; not run
 ```
 
 A local rehearsal on an anvil fork may set `PRIVATE_KEY` to one of anvil's public test keys in the environment of a single command; `mainnet.just` refuses to run while `PRIVATE_KEY` is set.
 
-The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy, compile against the written manifest, apply 105 calls, then a permitted and a refused operator call. It was rehearsed again after OD-38, at block 26133512: the written manifest lists both modules, and the governance role is refused the safety modifier, the operator modifier and the Asset Safe as targets.
+The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy, compile against the written manifest, apply 105 calls, then a permitted and a refused operator call. It was rehearsed again after OD-38, at block 26133512: the written manifest lists both modules, and the governance role is refused the safety modifier, the operator modifier and the Asset Safe as targets. It was rehearsed again on 2026-10-22 at block 26249900, with Aragon Voting's stand-in as the Asset Safe's only owner: deploy, compile against the written manifest, apply 97 calls as Voting, a permitted and a refused operator call, and the teardown, which disabled both modifiers.
 
 `RPC` must be an archive node, because the suite forks block 25946643. Never commit a key or an RPC URL that contains one; keep them in a local `.env`.
 
@@ -127,9 +134,8 @@ The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy
 | `MainnetConverterCoverage.t.sol` | seven real DaiUsds cases for exact token supply/balances and Vat RAD, approval boundaries, rollback, Emergency return/restart, actual USDS deny/rely recovery and five cage refusals; legacy keys and mock governance remain limits |
 | `MainnetWstethCoverage.t.sol` | five real wstETH cases for independently computed share rounding/dust, approval boundaries/zeroing, rollback, both unwrap roles and stop/recovery/restart; legacy roles and mock governance remain explicit limits |
 | `MainnetLidoCoverage.t.sol` | six real Lido v4 submission cases: independent internal-share accounting, boundaries, pause/resume with fork-only ACL prerequisites, stake limit and stop/restart; legacy roles and mocked governance remain explicit limits |
-| `EnablingVoteRehearsal.t.sol` | fourteen fork cases use live Aragon Voting, ACL, Finance and Easy Track for the enabling vote, USDC/stETH/USDS top-ups, payment permissions, creator/recipient and limit-role refusals, objection/cancellation, monthly-limit race/rollover and paused-USDC rollback/retry; registry deployments and funding limits are local stand-ins, and budget factory is not production |
 | `MainnetWethCoverage.t.sol` | five WETH boundary, balance/event, malformed-route and stop/recovery/restart cases on the committed legacy-key mainnet fork profile; production role migration and signer configuration remain separate |
-| `Drills.t.sol` | governance encoding and enactment, the four kinds of permission change and the budget-motion floor, the direct DAO path, operator lifecycle on in-scope venues, the emergency role and its switch, budgets, adversarial cases, the launch scope, and the Asset Safe's shape |
+| `Drills.t.sol` | governance encoding and enactment, the four kinds of permission change and the budget-motion floor, the direct DAO path, operator lifecycle on in-scope venues, the emergency role and its switch, the executor's restart and insurance-funding roles, budgets, adversarial cases, the launch scope, and the Asset Safe's shape |
 | `ReviewProbe.t.sol` | escalation guards, approval bounds, budget keys, budget-motion bounds, and regression tests and probes for defects found in review |
 | `PolicyShape.t.sol` | static checks of the committed artifact: role keys and members, and no out-of-scope target, spender or receiver |
 | `SingleModifierProbe.t.sol` | one modifier per account (OD-57), on a stand-in for the orders account: the emergency role's revoke on its own modifier, and the membership removal that ADR 005 decision 25 replaced |
@@ -137,5 +143,9 @@ The dry run was rehearsed on a local anvil fork of mainnet on 2026-10-06: deploy
 | `utils/MotionCalls.sol` | the admin calls that the governance drills put in a motion; test inputs, not the policy |
 | `Bootstrap.t.sol` | the funding script |
 | `SepoliaCoverage.t.sol` | current-stand role and failure matrices, governance and emergency key/target cross-products, combined queue/order/governance restart, alternate stop orderings and pending-burn cancellation in the separate `SepoliaStopOrderingCoverageTest` suite, delegatecall downgrade, allowance timestamp overflow/recovery, typed-order domains, all 104 minimum/daily/weekly TWAP part identities, cancellation isolation, conditional entrypoint and StopLoss-payload refusals in `SepoliaConditionalEntryCoverageTest`, nonzero-remainder partial fee/price rounding in `SepoliaSettlementRoundingCoverageTest`, overfill rollback, approvals and synthetic First-loss failures |
+| `EnablingVoteRehearsal.t.sol` | the enabling vote on a fork of block 26249900, with the live Aragon Voting, Finance and Easy Track: a vote that carries the policy cannot start; the vote that registers the universal factory, pays the first tranche and approves the Safe batches; a later tranche vote, a budget motion, a ceiling motion, the switch and a restart motion; Earn deposits; the first-loss burn and redemption request; the manifest |
+| `UniversalFactory.t.sol` | the universal factory's prototype against the live Easy Track: its address book, its trees against the compiler's, versions and the counter, the shape of an approval list, budgets and ceilings, a token's introduction with its ceilings, the restore of a revoked target, the restart, insurance money, its guards and its measures |
+| `OrdersAccount.t.sol` | the orders account's policy on the rehearsal's vault, with CoW's deployed contracts: signer and TWAP orders settled through CoW's settlement contract, their refusals and life limits, the emergency role's cancels, sweeps and recovery orders, the revoke that keeps recovery, and the funding from the Asset Safe |
+| `rehearsal/` | the rehearsal's deployment, the vote's builder, and the helpers that create and enact the factory's motions |
 
 Negative drills require the modifier's own error, so a revert inside a protocol cannot pass for a refused permission.

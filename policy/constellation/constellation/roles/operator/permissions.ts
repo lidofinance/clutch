@@ -7,20 +7,34 @@
 // operator role (ADR 005, decision 31).
 // Changed for Clutch on 2026-10-21: the approval ceilings' stand-ins are named
 // after the mandate size (OD-89).
+// Changed for Clutch on 2026-11-07: the operator funds the orders account
+// (ADR 007, decision 18).
 import { c, call, callWithValue } from "../../lib";
 import {
   DAI,
   DAI_USDS,
   EARN_ETH,
   EARN_USD,
+  manifest,
   STETH,
   SUSDS,
   USDC,
   USDS,
+  USDT,
   WETH,
   WSTETH,
 } from "../../addresses";
-import { earn_eth_deposit_wsteth, earn_usd_deposit, sky_savings_usds } from "../../allowances";
+import {
+  earn_eth_deposit_wsteth,
+  earn_usd_deposit,
+  orders_steth,
+  orders_usdc,
+  orders_usds,
+  orders_usdt,
+  orders_weth,
+  orders_wsteth,
+  sky_savings_usds,
+} from "../../allowances";
 import { SIZE_STANDIN_STETH, SIZE_STANDIN_USD } from "../../parameters";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -46,10 +60,24 @@ export const APPROVALS: readonly { token: string; spender: string; budget?: stri
 ];
 
 /**
+ * How the operator funds the orders account for an order: one transfer per order token, pinned to the orders
+ * account, under that token's orders budget (ADR 007, decision 18).
+ */
+export const ORDER_FUNDING: readonly { token: string; budget: string }[] = [
+  { token: STETH, budget: orders_steth.key },
+  { token: WSTETH, budget: orders_wsteth.key },
+  { token: WETH, budget: orders_weth.key },
+  { token: USDC, budget: orders_usdc.key },
+  { token: USDT, budget: orders_usdt.key },
+  { token: USDS, budget: orders_usds.key },
+];
+
+/**
  * What the committee's Safe, as the operator, may do with the Asset Safe. Default deny: anything
  * absent here is refused. Every receiver and owner is pinned to the Asset
- * Safe (`c.avatar`), and the operator holds no `transfer`, so assets can
- * move into and out of the approved venues but not leave the Asset Safe.
+ * Safe (`c.avatar`). The operator's only transfers fund the orders account,
+ * pinned to it and under its orders budgets, so assets can move into and out
+ * of the approved venues and into the orders account, but nowhere else.
  */
 export default [
   ...APPROVALS.map(({ token, spender, budget, ceiling }) =>
@@ -88,4 +116,8 @@ export default [
     call(vault.redeemQueue, "redeem(uint256)"),
     call(vault.redeemQueue, "claim(address,uint32[])", c.avatar),
   ]),
+  // The orders account, for CoW orders: each transfer spends its token's orders budget (ADR 007, decision 18).
+  ...ORDER_FUNDING.map(({ token, budget }) =>
+    call(token, "transfer(address,uint256)", manifest.ordersAccount, c.withinAllowance(budget)),
+  ),
 ] satisfies Permissions;

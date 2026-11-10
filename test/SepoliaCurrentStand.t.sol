@@ -6,6 +6,7 @@ import {ISafe} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
+import {MockAragonVoting} from "../src/mocks/MockAragonVoting.sol";
 import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 import {SepoliaEasyTrack} from "../src/mocks/SepoliaStand.sol";
 import {SafeExec, Call, EVMScriptLib} from "../src/exec/SafeExec.sol";
@@ -68,7 +69,7 @@ abstract contract SepoliaCurrentStandFixture is SepoliaStandFixture {
 
     function ownerCall(address safe, address to, bytes memory data) internal {
         vm.startPrank(controller);
-        SafeExec.execAsOwner(MockAragonAgent(payable(a("voting"))), ISafe(payable(safe)), to, data);
+        SafeExec.execAsOwner(MockAragonVoting(payable(a("voting"))), ISafe(payable(safe)), to, data);
         vm.stopPrank();
     }
 

@@ -5,7 +5,7 @@ import {Script, console2} from "forge-std/Script.sol";
 import {ISafe} from "../../src/interfaces/ISafe.sol";
 import {MockAragonAgent} from "../../src/mocks/MockAragonAgent.sol";
 
-/// @dev Human-only execution of the reviewed OD-100 package, through the existing test Voting.
+/// @dev Human-only execution of the reviewed OD-122 package, through the existing test Voting.
 contract MigrateRolesSepolia is Script {
     function run() external {
         require(block.chainid == 11155111 && vm.envOr("CLUTCH_SEPOLIA", uint256(0)) == 1, "Sepolia opt-in required");

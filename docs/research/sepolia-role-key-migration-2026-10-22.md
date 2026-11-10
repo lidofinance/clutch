@@ -8,13 +8,13 @@ review_status: slop
 valid_as_of: 2026-10-22
 stale_after: 2026-10-29T00:00:00Z
 generated:
-  by: codex/gpt-6
-  at: 2026-10-22T22:34:04Z
+  by: claude-code/opus-5.5
+  at: 2026-11-10T13:02:24Z
 verified: []
 sources:
   - id: s1
-    resource: /adr/013-tests-on-sepolia.md
-    title: OD-100 proposal and acceptance checks
+    resource: /adr/015-tests-on-sepolia.md
+    title: OD-122 proposal and acceptance checks
   - id: s2
     resource: "https://docs.zodiac.eco/developers/constellations"
     title: Constellation partial updates — omission preserves a role and null clears it
@@ -37,7 +37,7 @@ sources:
 - The prepared declaration has three vault flags, seven policy labels and no policy-key conflicts. It omits allowances. The local package preserves permissions and holders, changes the governance/revoke key references, and clears old memberships, functions and targets [s1][s5].
 - At block `11971984`, the source profile had zero policy differences. Safe owners, nonces, modules, singleton/guard/fallback slots and allowance values were recorded in the package [s5].
 - Two owner transactions contain the 87 configuration calls. Each Safe batch is atomic. A fork test checks the mixed state between the Asset and Orders batches [s5].
-- Mainnet still uses its current keys. The added Sepolia `roleKeyScheme: account` profile is a proposed migration target, and the mainnet design dependencies remain open in ADR 013 [s1][s5].
+- Mainnet still uses its current keys. The added Sepolia `roleKeyScheme: account` profile is a proposed migration target, and the mainnet design dependencies remain open in ADR 015 [s1][s5].
 
 ## Reads and preparation
 
@@ -66,4 +66,4 @@ Payload SHA-256: `1c33e4b11883eb318d97b36ecb0d19ce2985646e7fddda494e70fe1dfa6a24
 
 ## Limits
 
-The public stand has not migrated. Hosted resolution, draft publication and Vaults/Policies persistence for this payload remain unverified. EM chose OD-100 B, OD-97 C and OD-98 A on 2026-10-22. The owner must review and authorise the exact package before signing; preparation and fork tests do not execute public transactions [s1][s5].
+The public stand has not migrated. Hosted resolution, draft publication and Vaults/Policies persistence for this payload remain unverified. EM chose OD-122 B, OD-119 C and OD-120 A on 2026-10-22. The owner must review and authorise the exact package before signing; preparation and fork tests do not execute public transactions [s1][s5].

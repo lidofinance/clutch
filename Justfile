@@ -66,7 +66,7 @@ check-workflows:
 stale:
 	{{py}} scripts/build_onboarding.py --stale
 
-# After a review, pin guide items again: just repin actor:asset-safe flow:topup
+# After a review, pin guide items again: just repin actor:asset-safe flow:tranche
 repin +items:
 	{{py}} scripts/build_onboarding.py --repin {{items}}
 

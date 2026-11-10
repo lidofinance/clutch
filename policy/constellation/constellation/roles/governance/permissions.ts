@@ -1,26 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { anyOf, c, call, key, noneOf } from "../../lib";
+import { anyOf, c, call, derivedKey, key } from "../../lib";
 import { manifest } from "../../addresses";
+import { NOT_ADMINISTRATION } from "../../administration";
 import * as budgets from "../../allowances";
 import { MIN_REFILL_PERIOD } from "../../parameters";
 
 const MODIFIER = manifest.operatorModifier;
 const OPERATOR = key("operator");
-
-/**
- * Pinning only the role key leaves an indirect escalation: a motion grants
- * the operator a permission whose target is the Asset Safe or one of its
- * modules, and the operator then reaches owner-only administration through
- * the avatar. A fork probe did this with the safety modifier (OD-38). So
- * every scope below forbids, as the administered target, the Asset Safe and
- * every module that the manifest lists, with Nor, and the compiler checks
- * the guard. This deny-list is necessary and not sufficient: the Easy Track
- * template factories carry the positive rules (ADR 006).
- */
-if (!Array.isArray(manifest.modules) || manifest.modules.length === 0) {
-  throw new Error("the manifest must list every module of the Asset Safe in `modules` (OD-38)");
-}
-const NOT_ADMINISTRATION = noneOf(manifest.assetSafe, ...manifest.modules);
 
 /**
  * The execution options that a motion may grant: None or Send. DelegateCall
@@ -30,8 +16,12 @@ const NOT_ADMINISTRATION = noneOf(manifest.assetSafe, ...manifest.modules);
  */
 const NO_DELEGATECALL = c.lt(2);
 
-/** The operator's own budget keys: the only keys that a budget motion may set. */
-const BUDGET_KEYS = Object.values(budgets).map((budget) => key(budget.key));
+/**
+ * The keys that a budget motion may set: the operator's launch keys, and the
+ * keys that the universal factory derives for a new spender, which start with
+ * "k:" (ADR 013, decision 9).
+ */
+const BUDGET_KEYS = [...Object.values(budgets).map((budget) => key(budget.key)), derivedKey];
 
 /**
  * What an enacted Easy Track motion may do, as the governance role on the

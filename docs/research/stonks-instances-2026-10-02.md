@@ -3,7 +3,7 @@ type: Research Note
 title: Stonks 2.0 instances, 2026-10-02
 description: OD-05 and OD-18 evidence on Stonks roles, order lifecycle, factories, funding and price coverage.
 tags: [stonks, swaps, cow, evidence]
-status: stable
+status: deprecated
 review_status: slop
 valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
@@ -12,7 +12,7 @@ superseded_by:
   note: "Decisions 17 to 20 of ADR 007 (OD-43, 2026-10-06): CoW orders from a dedicated orders account replaced the Stonks 2.0 instances."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-10-22T20:29:49Z
 verified: []
 sources:
   - id: s1

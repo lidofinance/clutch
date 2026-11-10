@@ -3,7 +3,7 @@ pragma solidity >=0.8.24 <0.9.0;
 
 import {Script, console2} from "forge-std/Script.sol";
 import {ISafe} from "../../src/interfaces/ISafe.sol";
-import {MockAragonAgent} from "../../src/mocks/MockAragonAgent.sol";
+import {MockAragonVoting} from "../../src/mocks/MockAragonVoting.sol";
 import {SafeExec} from "../../src/exec/SafeExec.sol";
 
 contract ApplySepolia is Script {
@@ -17,7 +17,7 @@ contract ApplySepolia is Script {
         address[] memory avatars = vm.parseJsonAddressArray(json, ".calls.avatar");
         bytes[] memory data = vm.parseJsonBytesArray(json, ".calls.data");
         require(to.length > 0 && to.length == avatars.length && to.length == data.length, "Artifact calls");
-        MockAragonAgent voting = MockAragonAgent(payable(vm.parseJsonAddress(json, ".manifest.voting")));
+        MockAragonVoting voting = MockAragonVoting(payable(vm.parseJsonAddress(json, ".manifest.voting")));
         vm.startBroadcast(controller);
         for (uint256 i; i < to.length; ++i) {
             require(ISafe(payable(avatars[i])).getOwners()[0] == address(voting), "Safe owner differs");

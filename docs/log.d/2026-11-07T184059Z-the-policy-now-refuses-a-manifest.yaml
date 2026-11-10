@@ -1,0 +1,3 @@
+date: '2026-11-07'
+kind: Update
+text: The policy now refuses a manifest that misses an address that a permission pins, which would have left a transfer open. The mainnet dry run's manifest names stand-ins for the first-loss Safe and the orders account.

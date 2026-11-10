@@ -15,6 +15,11 @@ contract PolicyShape is Test {
     bytes32 internal constant OPERATOR = bytes32("operator");
     bytes32 internal constant GOVERNANCE = bytes32("governance");
     bytes32 internal constant EMERGENCY = bytes32("emergency");
+    bytes32 internal constant RESTART = bytes32("restart");
+    bytes32 internal constant EXIT_GOVERNANCE = bytes32("exit-governance");
+    bytes32 internal constant INSURANCE_FUNDING = bytes32("insurance-funding");
+    bytes4 internal constant TRANSFER = 0xa9059cbb; // transfer(address,uint256)
+    bytes4 internal constant ENABLE_MODULE = 0x610b5925; // enableModule(address)
 
     // Outside the launch scope (ADR 007, ADR 011).
     address internal constant AAVE_V3_POOL = 0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2;
@@ -27,6 +32,8 @@ contract PolicyShape is Test {
     address internal operatorSafe;
     address internal emergencySafe;
     address internal governanceMember;
+    address internal assetSafe;
+    address internal firstLossSafe;
     address[] internal to;
     bytes[] internal data;
 
@@ -37,6 +44,8 @@ contract PolicyShape is Test {
         operatorSafe = vm.parseJsonAddress(m, ".operatorSafe");
         emergencySafe = vm.parseJsonAddress(m, ".emergencySafe");
         governanceMember = vm.parseJsonAddress(m, ".easyTrackExecutor");
+        assetSafe = vm.parseJsonAddress(m, ".assetSafe");
+        firstLossSafe = vm.parseJsonAddress(m, ".firstLossSafe");
         string memory j = vm.readFile(ARTIFACT);
         to = vm.parseJsonAddressArray(j, ".calls.to");
         data = vm.parseJsonBytesArray(j, ".calls.data");
@@ -78,12 +87,16 @@ contract PolicyShape is Test {
         assertGt(onSafety, 0, "empty safety policy");
     }
 
-    /// @dev INV-018: the operator holds only the `operator` key, every
-    ///      operator-modifier permission is either the operator's or the
-    ///      governance role's on the modifier itself, and the safety modifier
-    ///      never names the operator. The emergency Safe is the safety
-    ///      modifier's only member, so the Emergency Brakes multisig holds no
-    ///      role (ADR 005, decision 23).
+    /// @dev INV-018: the operator holds only the `operator` key, and every
+    ///      operator-modifier permission is the operator's, the governance
+    ///      role's on the modifier itself, or the insurance-funding role's
+    ///      transfer to the first-loss Safe (ADR 014, decision 7). The safety
+    ///      modifier never names the operator: the emergency Safe holds the
+    ///      emergency key, so the Emergency Brakes multisig holds no role (ADR
+    ///      005, decision 23). The Easy Track executor holds the restart key,
+    ///      whose one permission enables the operator modifier on the Asset
+    ///      Safe (INV-035; ADR 013, decision 12), and the exit-governance key,
+    ///      whose permissions administer only the safety modifier (INV-025).
     function test_operator_holds_only_the_operator_key() public view {
         for (uint256 i = 0; i < to.length; i++) {
             (bytes4 sel, bytes memory args) = _args(data[i]);
@@ -94,23 +107,54 @@ contract PolicyShape is Test {
                     assertEq(keys.length, 1);
                     if (member == operatorSafe) assertEq(keys[0], OPERATOR, "operator key only");
                     else assertEq(member, governanceMember, "unexpected member");
+                    if (member == governanceMember) {
+                        assertTrue(keys[0] == GOVERNANCE || keys[0] == INSURANCE_FUNDING, "the executor's operator-modifier keys");
+                    }
                 }
                 if (key == bytes32(0)) continue;
                 if (key == GOVERNANCE) {
                     assertEq(target, operatorRoles, "governance administers only the modifier");
+                } else if (key == INSURANCE_FUNDING) {
+                    _assertPinnedTransfer(sel, args, firstLossSafe);
                 } else {
                     assertEq(key, OPERATOR, "every other permission is the operator's");
                 }
             } else {
                 if (sel == IRoles.assignRoles.selector) {
-                    (address member,,) = abi.decode(args, (address, bytes32[], bool[]));
+                    (address member, bytes32[] memory keys,) = abi.decode(args, (address, bytes32[], bool[]));
                     assertTrue(member != operatorSafe, "the operator holds no safety key");
-                    assertEq(member, emergencySafe, "the emergency Safe is the safety modifier's only member");
+                    if (member == governanceMember) {
+                        assertTrue(keys[0] == RESTART || keys[0] == EXIT_GOVERNANCE, "the executor's safety-modifier keys");
+                    } else {
+                        assertEq(member, emergencySafe, "the emergency Safe and the executor are the only members");
+                    }
                 }
                 if (key == bytes32(0)) continue;
-                assertEq(key, EMERGENCY, "the emergency key only");
+                if (key == RESTART) {
+                    assertEq(target, assetSafe, "the restart role acts only on the Asset Safe");
+                    if (sel == IRoles.scopeFunction.selector) {
+                        (,, bytes4 fn,,) = abi.decode(args, (bytes32, address, bytes4, IRoles.ConditionFlat[], uint8));
+                        assertEq(fn, ENABLE_MODULE, "the restart role only enables a module");
+                    }
+                } else if (key == EXIT_GOVERNANCE) {
+                    assertEq(target, safetyRoles, "exit-governance administers only the safety modifier");
+                } else {
+                    assertEq(key, EMERGENCY, "the emergency key only");
+                }
             }
         }
+    }
+
+    /// @dev A scoped transfer whose receiver is pinned to `receiver`.
+    function _assertPinnedTransfer(bytes4 sel, bytes memory args, address receiver) internal pure {
+        if (sel == IRoles.scopeTarget.selector) return;
+        assertEq(sel, IRoles.scopeFunction.selector, "insurance-funding: scoped functions only");
+        (,, bytes4 fn, IRoles.ConditionFlat[] memory c,) =
+            abi.decode(args, (bytes32, address, bytes4, IRoles.ConditionFlat[], uint8));
+        assertEq(fn, TRANSFER, "insurance-funding: transfer only");
+        assertEq(c.length, 2, "insurance-funding: the receiver, pinned");
+        assertEq(c[1].operator_, 16, "insurance-funding: EqualTo");
+        assertEq(address(uint160(uint256(bytes32(c[1].compValue)))), receiver, "insurance-funding: the first-loss Safe");
     }
 
     /// @dev INV-013 and INV-015: no permission targets Aave, sDAI or the CoW

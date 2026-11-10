@@ -247,7 +247,7 @@ contract MainnetEarnCoverageTest is ClutchFixture {
             roles.execTransactionWithRole(v.queue,0,abi.encodeCall(ILidoEarnDepositQueue.claim,(address(safe))),0,OPERATOR,true); assertEq(keccak256(abi.encode(state(v))),before);
             if (priced==1) claim(v,true,expected); else cancel(v,true);
             assertTrue(safe.isModuleEnabled(address(safety))); assertFalse(safe.isModuleEnabled(address(roles)));
-            vm.startPrank(principal); SafeExec.execAsOwner(agent,safe,address(safe),abi.encodeCall(ISafe.enableModule,(address(roles)))); vm.stopPrank();
+            vm.startPrank(principal); SafeExec.execAsOwner(voting,safe,address(safe),abi.encodeCall(ISafe.enableModule,(address(roles)))); vm.stopPrank();
             approve(v); deposit(v); cancel(v,true); assertTrue(vm.revertToState(snap));
         }
     }

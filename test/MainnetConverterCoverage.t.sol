@@ -154,7 +154,7 @@ contract MainnetConverterCoverageTest is ClutchFixture {
             assertEq(IERC20(tokens[i]).balanceOf(address(safe)), 0); assertEq(IERC20(tokens[i]).balanceOf(address(agent)), treasury + amount);
         }
         assertTrue(safe.isModuleEnabled(address(safety))); assertFalse(safe.isModuleEnabled(address(roles)));
-        vm.startPrank(principal); SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))); vm.stopPrank();
+        vm.startPrank(principal); SafeExec.execAsOwner(voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))); vm.stopPrank();
         deal(a.dai, address(safe), 1 ether); approve(false, false, 1 ether); convertAndCheck(false, 1 ether);
     }
     function test_MAIN04_dai_join_cage_refuses_known_actors_without_balance_changes() public {

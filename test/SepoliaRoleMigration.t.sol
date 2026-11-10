@@ -5,11 +5,11 @@ import {Test} from "forge-std/Test.sol";
 import {ISafe} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
-import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
+import {MockAragonVoting} from "../src/mocks/MockAragonVoting.sol";
 import {SafeExec} from "../src/exec/SafeExec.sol";
 import {CoWOrder, ICoWSettlement, IOrderSigner} from "../script/sepolia/CoWInterfaces.sol";
 
-/// @dev OD-100 acceptance on a pinned fork of the existing Sepolia stand. No deployment or public writes.
+/// @dev OD-122 acceptance on a pinned fork of the existing Sepolia stand. No deployment or public writes.
 contract SepoliaRoleMigrationTest is Test {
     string internal manifest;
     string internal packageFile;
@@ -18,7 +18,7 @@ contract SepoliaRoleMigrationTest is Test {
     address internal emergency;
     address internal asset;
     address internal orders;
-    MockAragonAgent internal voting;
+    MockAragonVoting internal voting;
     IRoles internal operator;
     IRoles internal safety;
     IRoles internal ordersRoles;
@@ -45,7 +45,7 @@ contract SepoliaRoleMigrationTest is Test {
         require(block.chainid == 11155111, "Sepolia fork required");
         controller = a("controller"); committee = a("operatorSafe"); emergency = a("emergencySafe");
         asset = a("assetSafe"); orders = a("ordersSafe");
-        voting = MockAragonAgent(payable(a("voting")));
+        voting = MockAragonVoting(payable(a("voting")));
         operator = IRoles(a("operatorModifier")); safety = IRoles(a("safetyModifier"));
         ordersRoles = IRoles(a("ordersModifier"));
     }

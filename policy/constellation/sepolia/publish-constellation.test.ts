@@ -48,7 +48,7 @@ function resolvedFrom(source: any) {
 const governance = (nodes: any[]) => nodes.find((n) => n.ref === "operator_modifier").roles.find((r: any) => r.key === key("governance"));
 const norOf = (role: any) => role.targets[0].functions.map((f: any) => f.condition?.children?.[1]).find((c: any) => c?.operator === 3);
 
-test("the Sepolia guard refuses each missing condition of ADR 013", () => {
+test("the Sepolia guard refuses each missing condition of ADR 015", () => {
   expect(sepoliaRefusals(env, git, workspace)).toEqual([]);
   const cases: [Record<string, string | undefined>, Partial<Git>, string][] = [
     [{ CLUTCH_SEPOLIA_PUSH: undefined }, {}, "CLUTCH_SEPOLIA_PUSH=1"],
@@ -295,7 +295,7 @@ test("an apply with a body that is not JSON keeps the status and the text", asyn
 });
 
 test("refusals, a stale payload and another manifest stop before any request", async () => {
-  await expect(run("apply", deps({}, { env: { ...env, CI: "true" } }))).rejects.toThrow("Refused (ADR 013)");
+  await expect(run("apply", deps({}, { env: { ...env, CI: "true" } }))).rejects.toThrow("Refused (ADR 015)");
   const stale = allowances.map((a, i) => i ? a : { ...a, balance: "1" });
   await expect(run("apply", deps({}, { snapshot: async () => ({ block: 1, blockHash: "0x00", allowances: stale }) }))).rejects.toThrow("differs");
   writeFileSync(path.join(dir, "manifest.json"), JSON.stringify({ ...manifest, voting: manifest.agent }));

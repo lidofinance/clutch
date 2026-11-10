@@ -2,7 +2,35 @@
 
 ## 2026-11-10
 
+* **Update**: Merge main into testnet/sepolia: renumber the Sepolia decisions OD-95 to OD-100 as OD-117 to OD-122 and ADR 013 as ADR 015, and drop the registry top-up tests that OD-106 superseded.
 * **Evidence**: Review the Sepolia stand coverage: rerun 88 fork tests at blocks 11992758 and 12104452, check 239 public receipts and list covered, uncovered and still-testable cases.
+
+## 2026-11-08
+
+* **Evidence**: Built the exit-governance role on the safety modifier (ADR 006, decision 13; OD-49): it writes only the emergency role's exits, under the emergency key, each tree pinned whole. The compiler now keeps each modifier's keys from motions. Fork tests run a token motion's writes with its exit on the Asset Safe; the fork suite passes 93 tests.
+* **Decision**: Recorded EM's decisions of 2026-11-08: EM accepted INV-040's amendment and the pinned trees of the orders modifier's governance role (ADR 007, decision 44), and decided to build the exit-governance role now, so that the motion that adds a token to the order lists also writes the token's exit on the Asset Safe, a transfer to the Agent or the orders account (ADR 007, decision 45).
+* **Evidence**: Built the orders modifier's governance and approvals roles of ADR 007 decision 41, held by the Easy Track executor: governance writes a token's signer and TWAP orders and three trees pinned whole, grants delegatecall only to the order signer and restores the operator's cancels; the approvals role approves only CoW's vault relayer. The compiler gained grant rules for role keys and delegatecall. Fork tests run a token motion's writes by hand; the fork suite passes 90 tests. INV-040 is amended to add the approvals key.
+
+## 2026-11-07
+
+* **Decision**: Recorded EM's decision of 2026-11-07, OD-116: an order of the orders account signs no fee; the policy pins the order's own fee field to zero, and the signer's fee bound stays zero (ADR 007, decision 43).
+* **Decision**: Recorded EM's decision of 2026-11-07, OD-115: every order of the orders account carries zero app data, so no hooks and no partner fee (ADR 007, decision 42). Opened OD-116 on the signed fee, with the research and the agent's recommendation.
+* **Update**: The policy now refuses a manifest that misses an address that a permission pins, which would have left a transfer open. The mainnet dry run's manifest names stand-ins for the first-loss Safe and the orders account.
+* **Evidence**: Built the orders account's policy and ran the fork tests that ADR 007 owed: CoW's order signer by delegatecall and TWAP orders through ComposableCoW, from a Safe v1.5.0 behind the orders modifier, settled through CoW's settlement contract and paying their pinned receivers; recovery orders, cancels and the emergency revoke. CoW's fallback handler works on Safe v1.5.0. The fork suite passes 84 tests.
+
+## 2026-11-06
+
+* **Update**: Fixed the onboarding guide's constellation tab, which named the Aragon Agent as the Asset Safe's owner. Aragon Voting is its only owner (OD-73).
+* **Evidence**: Added the restore of a revoked target to the factory prototype (OD-104): a motion scopes again a target that the emergency role revoked as a whole, and the permissions stored under it come back as they were, with nothing written again. The fork suite passes 77 tests.
+* **Decision**: Recorded EM's confirmation of 2026-11-06 that a token's introduction counts as its ceilings' first raise, so the next raise waits 15 days (OD-113; ADR 013, decision 15).
+* **Evidence**: Built decision 15 of ADR 013 (OD-113) into the factory prototype: one operation introduces a token with its first approval list and both of its ceilings, a token is introduced once, and a ceiling that was never set changes only by an introduction. The fork suite passes 76 tests, and seven new mutants are caught.
+* **Decision**: Recorded EM decisions of 2026-11-06, OD-113 and OD-114: the motion that introduces a token sets the token's ceilings, and a motion created after an emergency revoke may still enact (ADR 013, decisions 15 and 16).
+
+## 2026-11-05
+
+* **Evidence**: Built a prototype of the universal factory and tested it on a fork against the live Easy Track: versions, the motion counter, the shape of an approval list, budgets within their ceilings, the ceiling's twofold limit, the restart and insurance money. Added the restart and insurance-funding roles to the policy, rebuilt step 1 of the enabling-vote rehearsal, and recorded the factory's size and gas for the choice between options A and B.
+* **Decision**: Recorded EM decisions of 2026-11-01 and 2026-11-05, OD-100 to OD-112: one universal Easy Track factory with versions, no Aragon vote after launch except funding tranches and break-glass actions, funding by tranche votes with the first inside the enabling vote, insurance for earnETH, earnUSD and Lido Lend at launch, and only emergency and recovery paying the Aragon Agent (ADR 013, ADR 014).
+* **Update**: Brought the enabling-vote spec, the invariants, the control matrix, the parameters, the runbooks, the roadmap, the LIP and the guide in line with OD-100 to OD-112, and added the research note on Easy Track, Roles and Finance payments.
 
 ## 2026-10-25
 
@@ -116,7 +144,11 @@
 ## 2026-10-22
 
 * **Decision**: Record OD-100 B, OD-97 C and OD-98 A: four account-specific keys for both networks, local Sepolia execution through test Voting and guarded public stand transactions.
+* **Update**: Recorded EM's verification of ADR 001, ADR 003 and ADR 004 after the fixes of 2026-10-22, at EM's written instruction. ADR 002 did not change, so its verification of 2026-10-20 stands.
+* **Update**: Made Aragon Voting the only owner of the Asset Safe in the kit's harness, at EM's request (OD-73). A Voting stand-in now approves every owner action by approveHash, and the mock Agent stays the recovery destination. The fork Asset Safe and its two modifiers moved, so the fork manifest and the artifact follow, with the same 97 calls. 59 fork tests pass, and the dry run was rehearsed again on anvil at block 26249900. The LIP's test table, INV-001 and ADR 005 now cite commit 03efa77.
+* **Decision**: Recorded EM's choices for OD-95 to OD-99. The repository is public (ADR 001 decision 10). CoW's order signer counts as new code with the Easy Track factories, and the external audit covers it (ADR 007 decision 40). A motion may bring back a single permission that the emergency role revoked, and a restart after the switch stays a vote (ADR 006 decision 19). The seed counts the first-loss shares at the report's price rule (ADR 008 decision 37). Every security report goes to the Lido bug bounty programme (SECURITY.md). Fixed the stale text of the accepted ADR 001, ADR 003 and ADR 004 for EM to verify again, and updated AGENTS.md, the README, CONTRIBUTING, the roadmap, the LIP, the parameters, the enabling-vote spec and the guide.
 * **Update**: Prepare the four-key Sepolia migration, two verified Safe batches and an explicit-deletion Constellation draft; retain public execution and mainnet changes for human decisions.
+* **Update**: Swept every document for inconsistencies with the decided design. Fixed stale text in ADR 005 to ADR 011, the LIP draft, the invariants, the control matrix, the enabling-vote spec, the registers, the roadmap, the README, CONTRIBUTING and the guide: the guard screens only from the lift of the launch cap, routine removals are motions (OD-70), Aragon Voting is the owner (OD-73), LDO is out (OD-91), the owed mandate text is sorted in the LIP (OD-90), and the rehearsal ran the owner and first-loss checks (OD-92). Cut repeated text, about 1,250 words from the LIP. Archived the three superseded research notes as deprecated. OD-28 now shows as replaced in part, and OD-27 carries the withdrawal-queue note. Repinned 195 reviewed guide items.
 * **Decision**: Propose OD-100 in ADR 013: migrate four Sepolia role keys and use the same scheme in the mainnet design; define migration checks and support three-digit OD references.
 * **Update**: Synchronize testnet/sepolia with main and renumber its open Sepolia questions as OD-95 to OD-99.
 * **Update**: Update Zodiac SDK and API types, declare all Sepolia workspace metadata, and block publication of incompatible shared policy keys.

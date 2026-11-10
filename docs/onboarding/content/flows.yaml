@@ -6,16 +6,16 @@ groups:
     summary: "What the committee does on a normal day. The policy checks every operator transaction before it runs, and so does the screening guard once the launch cap lifts (OD-54)."
   - id: governance
     title: Changing what the operator may do
-    summary: "Motions widen the operator's permissions only through fixed templates, with 72 hours for LDO holders to object. Everything else is a DAO vote."
+    summary: "Motions change the vault's permissions only through one universal factory, with 72 hours for LDO holders to object. The factory widens a permission only through typed shapes. After the enabling vote, no administrative action needs an Aragon vote. A screening rule changes by review and a forum notice."
   - id: funding
-    title: Funding the vault
-    summary: "Money comes from the DAO treasury through Easy Track top-ups. The objection window is the control; the registry limit is the backstop."
+    title: Funding, insurance and returns
+    summary: "Money comes from the DAO treasury in rare tranches, each an Aragon vote. Insurance money moves from the Asset Safe by motion. Money goes back to the treasury only in an emergency or a recovery."
   - id: reporting
     title: Reporting and monitoring
     summary: "Caps are detective. Monitoring and reports measure the vault, publish the numbers and start the fix. No contract reverts on a cap."
   - id: emergencies
     title: Emergencies
-    summary: "Two fast stops and one slow restart. The emergency Safe pulls assets back and can switch the operator off; the Emergency Brakes multisig can pause Easy Track; only the DAO restarts, in days."
+    summary: "Two fast stops and one slow restart. The emergency Safe pulls assets back, can switch the operator off and can make every open motion fail; the Emergency Brakes multisig can pause Easy Track. No emergency body restarts what it stopped: a motion restarts the operator, after its 72-hour window."
   - id: deployment
     title: Building, deploying and changing the system
     summary: "How the policy changes, how the system goes live, and the duties that keep it in step."
@@ -26,9 +26,9 @@ flows:
     group: operations
     title: An operator transaction
     label: built
-    summary: "How the committee changes a position, for example a USDS deposit into sUSDS. The screening guard and the policy both check the transaction before it runs."
+    summary: "How the committee changes a position, for example a USDS deposit into sUSDS. The policy checks the transaction before it runs, and so does the screening guard once the launch cap lifts."
     trigger: "The committee decides to change a position within the mandate."
-    time: "Minutes, after [the screening vendor] approves."
+    time: "Minutes. Once the launch cap lifts, [the screening vendor] approves first."
     steps:
       - who: "Committee Safe signers, 4 of 7"
         text: "The signers build the transaction in the Zodiac UI or with local tooling. It calls the operator modifier with the operator role."
@@ -64,7 +64,7 @@ flows:
   - id: swap-order
     group: operations
     title: A market or limit order
-    label: specified
+    label: built
     summary: "How the vault swaps one token for another. The operator sends the token to the orders account and places a CoW order there. The order pays the Asset Safe, because the policy pins the receiver."
     trigger: "The committee wants a different mix of assets, for example less stETH and more USDC, now or at a set price."
     time: "A market order fills in minutes. A limit order can stand for up to 90 days (OD-61)."
@@ -73,13 +73,13 @@ flows:
         text: "The operator transfers the token from the Asset Safe to the [[orders account]]. The transfer spends that token's orders budget, and the policy pins the recipient."
         nodes: [committee, operator-modifier, asset-safe, orders]
         edges: [op-role, own-op, swaps]
-        check: "Specified: the orders account and its permissions are not in the policy yet."
+        check: "Tested on a fork: the transfer spends the token's orders budget, and goes nowhere else."
       - who: "Committee Safe"
-        text: "On the orders account, the committee's Safe signs a market or [[limit order]] through CoW's order signer. The screening guard checks this transaction too."
+        text: "On the orders account, the committee's Safe signs a market or [[limit order]] through CoW's order signer. Once the launch cap lifts, the screening guard checks this transaction too."
         nodes: [committee, screening, orders]
         edges: [screen]
-        check: "INV-022: the order's receiver is the Asset Safe."
-        tech: "A delegatecall to `signOrder(order, validDuration, feeAmountBP)` on the order signer. The policy pins the sell and buy tokens to the operator's lists, the receiver to the Asset Safe, `validDuration` to the maximum order life, and the fee bound. The enabling vote has already approved CoW's vault relayer for each listed token."
+        check: "INV-022: the order's receiver is the Asset Safe. Tested on a fork: the order settles through CoW's settlement contract and pays the Asset Safe."
+        tech: "A delegatecall to `signOrder(order, validDuration, feeAmountBP)` on the order signer. The policy pins the sell and buy tokens to the operator's lists, the receiver to the Asset Safe, plain ERC-20 balances, `validDuration` to the maximum order life, the signed fee and the fee bound to zero, and the app data to zero, so the order carries no hooks and no partner fee. CoW charges its fees within the order's limit. The enabling vote, or the motion that added the token, has already approved CoW's vault relayer for each listed token."
       - who: "CoW Protocol"
         text: "CoW's solvers compete to fill the order at its limit or better. The settlement pays the Asset Safe directly."
         nodes: [orders, asset-safe]
@@ -96,12 +96,14 @@ flows:
       - "A fill comes in far below the market: monitoring alerts, and the emergency Safe can cancel the open orders and sweep the account."
     sources: ["ADR-007#d18", "ADR-007#d23", "ADR-007#d26", "ADR-007#d29", "ADR-007#proposed-direction", OD-43, OD-61,
       INV-013, INV-022, INV-024, "runbook:Re-affirm open orders", "runbook:Cancel orders on a policy change",
-      "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer"]
+      "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer", "ADR-007#d41", OD-103, "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests",
+      "test:test_orders_signer_order_settles_to_the_asset_safe", "test:test_orders_funding_from_the_asset_safe", "ADR-007#d42", OD-115,
+      "ADR-007#d43", OD-116, "test:test_orders_signer_refusals"]
 
   - id: standing-order
     group: operations
     title: A TWAP order
-    label: specified
+    label: built
     summary: "How the vault buys or sells over time. ComposableCoW holds the order, and CoW's watch-tower posts it to the order book."
     trigger: "The committee wants to average into a position over weeks."
     time: "Until the last part fills or the order expires."
@@ -111,14 +113,15 @@ flows:
         nodes: [committee, operator-modifier, asset-safe, orders]
         edges: [op-role, own-op, swaps]
       - who: "Committee Safe"
-        text: "The committee's Safe creates a [[TWAP]] order on ComposableCoW, in equal parts. It starts at once and ends within 90 days. The screening guard checks it."
+        text: "The committee's Safe creates a [[TWAP]] order on ComposableCoW, in equal parts. It starts at once and ends within 90 days. Once the launch cap lifts, the screening guard checks it."
         nodes: [committee, screening, orders]
         edges: [screen]
-        check: "INV-022: the receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."
-        tech: "`ComposableCoW.createWithContext` with a start of zero and CoW's current-timestamp value factory, so the order starts at its creation, and the handler pinned to the deployed TWAP handler. A TWAP order has at most 90 parts at most a day apart, or 12 parts at most 7 days apart (INV-024). The orders account's fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it (INV-023)."
+        check: "INV-022: the receiver is the Asset Safe. The launch has no stop-loss orders (OD-79). Tested on a fork: a part settles through the Safe's EIP-1271 check and pays the Asset Safe."
+        tech: "`ComposableCoW.createWithContext` with a start of zero and CoW's current-timestamp value factory, so the order starts at its creation, the handler pinned to the deployed TWAP handler, and zero app data. A TWAP order has at most 90 parts at most a day apart, or 12 parts at most 7 days apart (INV-024). The orders account's fallback handler is CoW's `ExtensibleFallbackHandler`, and ComposableCoW verifies CoW's settlement domain for it (INV-023)."
       - who: "CoW's watch-tower"
         text: "The [[watch-tower]] posts each part of a TWAP order when it is due."
         nodes: [orders]
+        check: "CoW's own service: the fork tests build the part with ComposableCoW instead."
       - who: "CoW Protocol"
         text: "Each part fills at its minimum or better, and pays the Asset Safe directly."
         nodes: [orders, asset-safe]
@@ -131,14 +134,16 @@ flows:
       - "The emergency Safe can cancel every open order and sweep the orders account."
     sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d24", "ADR-007#d29", "ADR-007#proposed-direction", OD-43, OD-61,
       INV-022, INV-023, INV-024, "runbook:Re-affirm open orders",
-      "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss", "ADR-007#d39", OD-79]
+      "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss", "ADR-007#d39", OD-79,
+      "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests", "test:test_orders_twap_part_settles_through_the_fallback_handler",
+      "ADR-007#d42", OD-115]
 
   # --- Governance ---------------------------------------------------------------------------------
   - id: onboard
     group: governance
     title: Onboarding a new protocol by motion
     label: specified
-    summary: "How the committee adds a protocol without a full DAO vote. It creates an Easy Track motion through a fixed template, and LDO holders have 72 hours to object. The policy's limits on the governance role are built and tested on a fork; the template factories are not built."
+    summary: "How the committee adds a protocol without a DAO vote. It creates an Easy Track motion on the universal factory, which builds the permission from a typed shape, and LDO holders have 72 hours to object. The policy's limits on the governance role are built and tested on a fork; the factory is a prototype, tested on a fork against the live Easy Track."
     trigger: "The committee wants a new target, for example Lido Lend after its launch."
     time: "At least 72 hours, then enactment."
     steps:
@@ -146,27 +151,27 @@ flows:
         text: "The committee posts a disclosure on the forum. It sets up monitoring for the new target and updates the runbooks."
         nodes: [committee, reporting, monitoring]
       - who: "Committee Safe"
-        text: "The committee's Safe creates the motion on the template factory, with typed values only: a target, an asset and a budget key. The screening guard checks this transaction."
+        text: "The committee's Safe creates the motion on the universal factory, with a [[shape]] and its typed values only, such as a target, an asset and a budget. The motion names the [[version]] of each scope that it writes, and the [[motion counter]]. Once the launch cap lifts, the screening guard checks this transaction."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
-        check: "The budget key must already be in the policy: a new spender takes one of the spare keys that the enabling vote holds (OD-69). A token new to the orders account needs a DAO vote (OD-46, OD-78)."
+        check: "INV-034: a motion widens a permission only through a shape. The factory derives a new budget key for a new spender. A token new to the orders account joins by a motion of its own (OD-103)."
       - who: "LDO holders"
         text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails. This window is the timelock for every structural increase of exposure. The Emergency Brakes multisig can also pause Easy Track."
         nodes: [dao, easytrack]
         edges: [object]
       - who: "Easy Track"
-        text: "At enactment, Easy Track rebuilds the script and requires the hash stored at creation. A changed script fails."
+        text: "At enactment, Easy Track rebuilds the script through the factory and requires the hash stored at creation. The factory checks the versions and the counter again: if another motion changed a scope first, this motion fails."
         nodes: [easytrack]
-        check: "INV-005, tested on a mock Easy Track."
+        check: "INV-005, tested on a mock Easy Track. INV-033 is tested on a fork, with the factory's prototype and the live Easy Track."
       - who: "Governance role"
         text: "The script executor writes the new operator permission through the governance role. The modifier checks this write too: the operator key only, no role change, no delegatecall and no administrative target."
         nodes: [easytrack, operator-modifier]
         edges: [gov-role]
         check: "INV-004: the Asset Safe and every module of it are refused as targets (OD-38)."
       - who: "Exit-governance role"
-        text: "The same script gives the emergency role the new target's exits on the safety modifier: redeem, withdraw, claim and cancel pinned to the Asset Safe, a transfer pinned to the Agent, and an approval set to zero."
+        text: "The same script gives the emergency role the new target's exits on the safety modifier: redeem, withdraw and claim paid to the Asset Safe, cancel and unwrap, a transfer pinned to the Agent, and an approval set to zero. The script's last call, the factory's `commit`, stores the new versions."
         nodes: [easytrack, safety-modifier]
-        check: "INV-025: this role writes only under the emergency key, with no delegatecall, allowance or administrative target. Specified, not built (OD-49)."
+        check: "INV-025: this role writes only the emergency role's exits, under the emergency key, each tree pinned whole, with no delegatecall, allowance or administrative target. The role is built and tested on a fork; the factory's shapes that emit the exits are not built (OD-49)."
       - who: "Operator, and the emergency Safe if needed"
         text: "The operator can use the new permission. The emergency Safe can revoke it at once."
         nodes: [committee, operator-modifier, emergency-safe, safety-modifier]
@@ -174,13 +179,15 @@ flows:
     escapes:
       - "An objection of 0.5% of LDO stops the motion."
       - "The Emergency Brakes multisig pauses Easy Track. Only the DAO can unpause it."
-      - "The emergency Safe's switch freezes the motion, because its write goes through the operator modifier. The DAO's restart vote cancels the motion first (OD-59)."
+      - "The emergency Safe raises the factory's motion counter, alone or with the switch. The motion then fails at enactment, also after a restart."
       - "The committee's Safe cancels its own motion."
-      - "After enactment, the emergency Safe revokes the new operator permission at once. A write to the safety modifier cannot be revoked that way: only an objection, the Easy Track pause or a DAO vote stops it (OD-49)."
-    sources: ["ADR-006#d2", "ADR-006#d3", "ADR-006#d4", "ADR-006#d5", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9",
-      "ADR-006#d10", "ADR-006#d11", "ADR-006#d13", "ADR-006#context", "ADR-006#proposed-direction", "ADR-005#d26",
-      INV-004, INV-005, INV-025, OD-36, OD-38, OD-45, OD-49, OD-59, "lip:part-4",
-      "test:test_D1_substituted_script_rejected_at_enactment", OD-69, OD-78, "ADR-007#d38", OD-46]
+      - "After enactment, the emergency Safe revokes the new operator permission at once. A write to the safety modifier cannot be revoked that way: before enactment an objection, the Easy Track pause or the counter stops it, and after enactment a DAO vote replaces it (OD-49)."
+    sources: ["ADR-006#d2", "ADR-006#d3", "ADR-006#d4", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-006#d11",
+      "ADR-006#d13", "ADR-006#context", "ADR-013#d2", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d9",
+      "ADR-013#d10", "ADR-013#proposed-direction", "ADR-007#d41", INV-004, INV-005, INV-025, INV-033, INV-034, OD-36, OD-38,
+      OD-45, OD-49, OD-103, "lip:part-4", "test:test_D1_substituted_script_rejected_at_enactment",
+      "runbook:Raise the motion counter", "test:test_uf_same_scope_conflict_the_first_enactment_wins",
+      "test:test_uf_counter_fails_every_open_motion"]
 
   - id: budget
     group: governance
@@ -191,30 +198,99 @@ flows:
     time: "72 hours."
     steps:
       - who: "Committee"
-        text: "The attested computation derives the key's new budget, under that key's ceiling. The forum post names the event."
+        text: "The attested computation derives the key's new budget, under that key's [[ceiling]]. The forum post names the event."
         nodes: [committee, asset-safe]
-        check: "A motion sets only a key that the policy already holds, so a new spender takes a spare key (OD-69). A new mandate size also needs a DAO vote for the funding limits and the fixed approval ceilings, by design (OD-71, OD-89)."
+        check: "A new spender gets a new key that the universal factory derives, so the policy holds no spare keys. A ceiling changes by its own motion, within its limit (OD-105)."
       - who: "Committee Safe"
-        text: "The committee's Safe creates a motion on the budget factory. The guard screens it, once the guard is set (OD-54)."
+        text: "The committee's Safe creates a budget motion on the universal factory. One motion can set several keys (OD-94). The guard screens it, once the guard is set (OD-54)."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
       - who: "Easy Track"
         text: "After 72 hours without an objection, the executor sets the budget through the governance role. The refill period stays at 30 days or more."
         nodes: [easytrack, operator-modifier, dao]
         edges: [gov-role, object]
-        check: "INV-012: the 30-day floor is tested; the per-key ceilings wait for the attested figures."
+        check: "INV-012: the 30-day floor is tested on the modifier. The factory's prototype also holds each budget within its token's ceiling, at stand-in figures; the real ceilings wait for the attested figures."
       - who: "Monitoring"
         text: "Monitoring flags every budget motion, and checks that its forum post names an event."
         nodes: [monitoring]
-    sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d31", "ADR-009#proposed-direction", "ADR-009#consequences", INV-011,
-      INV-012, OD-56, OD-69, OD-71, "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period", OD-54, OD-89]
+    sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d31", "ADR-009#d45", "ADR-009#proposed-direction", "ADR-009#consequences",
+      "ADR-013#d9", "ADR-013#d13", INV-011, INV-012, INV-036, OD-56, OD-94, OD-105, "lip:part-7",
+      "test:test_D1_budget_motion_cannot_shorten_the_refill_period", OD-54, "test:test_uf_budget_stays_within_its_ceiling"]
+
+  - id: ceiling
+    group: governance
+    title: A ceiling motion
+    label: specified
+    summary: "How a ceiling changes. The enabling vote, or the motion that introduces a token, sets a token's first ceilings (OD-113), and an introduction counts as their first raise. A motion lowers a ceiling at any time. It raises one to at most twice its value, at most once in 15 days for that ceiling (OD-105). Why the limit: a ceiling that one motion could set to any value would bound nothing."
+    trigger: "A budget or an approval needs more room under its ceiling, or the committee wants less."
+    time: "72 hours."
+    steps:
+      - who: "Committee"
+        text: "The committee posts the change on the forum, with its reason."
+        nodes: [committee, reporting]
+      - who: "Committee Safe"
+        text: "The committee's Safe creates a ceiling motion on the universal factory. Once the launch cap lifts, the screening guard checks it."
+        nodes: [committee, screening, easytrack]
+        edges: [motions, screen]
+      - who: "LDO holders"
+        text: "LDO holders have 72 hours to object. An objection of 0.5% of LDO stops the motion."
+        nodes: [dao, easytrack]
+        edges: [object]
+      - who: "Universal factory"
+        text: "At creation and again at enactment, the factory refuses a raise above twice the ceiling, and a second raise of that ceiling within 15 days. It keeps the time of each raise."
+        nodes: [easytrack]
+        check: "INV-036: a ceiling falls at any time, and rises only by motion, at most twofold and at most once in 15 days. Tested on a fork with the factory's prototype, a new token's first ceilings (OD-113) included."
+      - who: "Monitoring"
+        text: "Monitoring alerts on every ceiling motion."
+        nodes: [monitoring, easytrack]
+    escapes:
+      - "An objection stops the motion, and the ceiling stays as it is."
+      - "A raise of the factory's motion counter makes the open motion fail."
+    sources: ["ADR-013#d13", "ADR-013#d10", "ADR-013#context", "ADR-013#proposed-direction", "ADR-009#d14", "ADR-011#d8",
+      INV-036, OD-105, OD-113, "ADR-013#d15", "runbook:Change a ceiling", "test:test_uf_ceiling_rises_at_most_twofold_once_in_15_days",
+      "test:test_uf_a_new_token_is_introduced_with_its_ceilings", "test:test_uf_a_token_is_introduced_once"]
+
+  - id: orders-token
+    group: governance
+    title: A new token for the orders account
+    label: specified
+    summary: "How a token joins the operator's order lists. One motion adds it on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders (OD-103). The factory grants only one delegatecall, to CoW's order signer."
+    trigger: "The committee wants to sell or buy a token that is not on its lists."
+    time: "72 hours."
+    steps:
+      - who: "Committee"
+        text: "The committee posts a disclosure on the forum, and sets up monitoring for the token."
+        nodes: [committee, reporting, monitoring]
+      - who: "Committee Safe"
+        text: "The committee's Safe creates the motion on the universal factory, with the shape of the orders account's token lists. Once the launch cap lifts, the screening guard checks it."
+        nodes: [committee, screening, easytrack]
+        edges: [motions, screen]
+      - who: "LDO holders"
+        text: "LDO holders have 72 hours to object. An objection of 0.5% of LDO stops the motion."
+        nodes: [dao, easytrack]
+        edges: [object]
+      - who: "Easy Track"
+        text: "The executor writes the token into the order lists through the orders modifier's governance role, and approves CoW's vault relayer for it through the approvals role. The same motion adds the emergency transfer, the recovery orders and the operator's return of the token to the Aragon Agent, and, through the exit-governance role, the token's exit from the Asset Safe to the Agent or the orders account (ADR 007, decision 45)."
+        nodes: [easytrack, orders]
+        check: "INV-040: the governance role grants delegatecall only to the order signer, for signing and unsigning orders, pins whole the trees that do not depend on the token, and the approvals role approves only CoW's vault relayer. Both roles are built, and a fork test runs the motion's writes by hand; the factory's shape is not built."
+      - who: "Operator"
+        text: "The operator can now sell or buy the token in market, limit and TWAP orders that pay the Asset Safe."
+        nodes: [committee, asset-safe, orders]
+        edges: [swaps]
+    escapes:
+      - "An objection stops the motion, and the token stays off the lists."
+      - "The emergency Safe can set the token's relayer approval to zero at once. Only a motion raises it again."
+    sources: ["ADR-007#d41", "ADR-007#d22", "ADR-007#proposed-direction", "ADR-013#d8", "ADR-013#proposed-direction",
+      "ADR-014#proposed-direction", "ADR-006#d4", OD-103, INV-008, INV-040,
+      "runbook:Cancel orders and sweep the orders account", "test:test_orders_motion_adds_a_token",
+      "test:test_orders_approvals_role_approves_only_the_relayer"]
 
   - id: dao-change
     group: governance
     title: A change that only the DAO can make
     label: built
-    summary: "The owner path. The DAO can do anything to the Asset Safe: replace the policy, change who holds a role, enable a module again or move the operator role to another Safe. It is also the only path that restarts after an emergency stop (OD-59). Each such change takes days."
-    trigger: "A change outside the motions' limits, a repair after a defect in the safety modifier, or a restart after the switch."
+    summary: "The owner path. The DAO can do anything to the vault's Safes. After the enabling vote, an Aragon vote is needed only to fund a tranche or to replace a role holder. As the agent reads OD-101, a break-glass action is also a vote: an owner action on a vault Safe, a new or changed factory, or an Easy Track unpause. Each such vote takes days."
+    trigger: "A role holder to replace, such as a new committee Safe in the operator role; a repair of the safety modifier or another owner action; a shape that the universal factory lacks; or an Easy Track unpause."
     time: "About five days: the Aragon Voting vote."
     steps:
       - who: "LDO holders"
@@ -228,9 +304,9 @@ flows:
         text: "The Asset Safe runs the change, for example a new policy on both modifiers."
         nodes: [asset-safe, operator-modifier, safety-modifier]
         edges: [own-op, own-sf]
-    sources: ["ADR-005#d14", "ADR-005#d26", "ADR-005#context", "ADR-005#proposed-direction", OD-59, INV-001,
-      "test:test_D2_direct_DAO_path", "runbook:Move the operator role to another Safe", "runbook:Replace the operator modifier",
-      "runbook:Restart after a stop", OD-73, "ADR-005#d28", "ADR-005#d30"]
+    sources: ["ADR-005#d14", "ADR-005#context", "ADR-005#proposed-direction", "ADR-013#d3", "ADR-013#d4",
+      "ADR-013#proposed-direction", OD-101, INV-001, INV-032, "test:test_D2_direct_DAO_path",
+      "runbook:Move the operator role to another Safe", "runbook:Replace the operator modifier", OD-73, "ADR-005#d28"]
 
   - id: unlock
     group: governance
@@ -244,7 +320,7 @@ flows:
         text: "The committee posts on the forum which maturity criteria the product meets."
         nodes: [committee, reporting]
       - who: "Committee Safe"
-        text: "The committee's Safe creates a budget motion that raises the product's budget key. The screening guard checks it."
+        text: "The committee's Safe creates a budget motion that raises the product's budget key. Once the launch cap lifts, the screening guard checks it."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
       - who: "LDO holders"
@@ -278,72 +354,75 @@ flows:
       "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
 
   # --- Funding ------------------------------------------------------------------------------------
-  - id: topup
+  - id: tranche
     group: funding
-    title: A top-up
+    title: A tranche vote
     label: specified
-    summary: "How money moves from the DAO treasury to the vault after the seed. The committee's Safe creates an Easy Track top-up motion, within the mandate size and the treasury share."
-    trigger: "The mandate's published eligibility conditions for a replenishment are met, and the vault has headroom under the mandate size (OD-89)."
-    time: "72 hours."
+    summary: "How money moves from the DAO treasury to the vault. Funding is rare: each funding is an Aragon vote that moves a tranche through Aragon Finance to the Asset Safe. The first tranche, one million dollars, is part of the enabling vote, and later tranches are larger (OD-106)."
+    trigger: "The vault needs more funds and has headroom under the mandate size, and the mandate's published eligibility conditions are met (OD-89). The second tranche also waits for the screening guard (OD-54)."
+    time: "About five days: the Aragon Voting vote, without Dual Governance."
     steps:
       - who: "Committee"
-        text: "The committee posts the top-up on the forum: the funded value, the headroom under the mandate size, and the vault's share of the DAO's non-LDO treasury. The post links both readings' latest reports (OD-85)."
+        text: "The committee posts the tranche on the forum: the funded value, the headroom under the mandate size, and the vault's share of the DAO's non-LDO treasury. The post links both readings' latest reports (OD-85)."
         nodes: [committee, reporting]
-        check: "No top-up starts while the report is late, while the committee's estimate prices more than the set share of the vault (OD-62), or while Lido's reading and the policy provider's differ by more than the band (OD-84). Until the launch cap lifts, the committee asks for a top-up only while the vault stays at or below the cap, and the post states the room left under it (OD-54)."
-      - who: "Committee Safe"
-        text: "The committee's Safe creates a top-up motion. The guard screens it, once the guard is set (OD-54)."
-        nodes: [committee, screening, easytrack]
-        edges: [motions, screen]
+        check: "Proposed: no tranche vote starts while the monthly report is late, while the committee's estimate prices more than the set share of the vault (OD-62), or while Lido's reading and the policy provider's differ by more than the band (OD-84)."
       - who: "LDO holders"
-        text: "LDO holders have 72 hours to object."
-        nodes: [dao, easytrack]
-        edges: [object]
-      - who: "Easy Track and Aragon Finance"
-        text: "At enactment, the registry checks its limit for the month again, and Aragon Finance pays the Asset Safe from the treasury."
-        nodes: [easytrack, funding, dao, asset-safe]
-        edges: [topup-motion, treasury, topup]
-        check: "INV-017: only the Asset Safe, only allowed tokens, within the limit. Pending: nothing is built yet."
-      - who: "Monitoring"
-        text: "Monitoring flags a top-up above the posted headroom, a top-up that would take the vault above the mandate size or the treasury share, and any top-up after an objected one. Until the launch cap lifts, it also alerts on a top-up motion that would take the vault above the cap."
-        nodes: [monitoring]
+        text: "LDO holders vote on the tranche in Aragon Voting. The vote names its tokens."
+        nodes: [dao]
+      - who: "Aragon Voting and Aragon Finance"
+        text: "When the vote executes, Aragon Finance pays the Asset Safe from the Aragon Agent: one payment for each token. No Dual Governance proposal is on the path."
+        nodes: [dao, funding, asset-safe]
+        edges: [treasury, tranche]
+        check: "INV-037: only Aragon Voting moves treasury funds to the vault. Pending: a chain check before the enabling vote."
+      - who: "Aragon Voting, for the second tranche"
+        text: "The second tranche's vote also lifts the launch cap. It starts only after the screening guard is set on the committee's Safe with its bypass mode off, and the check runs until the vote executes."
+        nodes: [dao, screening, committee]
+        edges: [screen]
+      - who: "Reporting"
+        text: "Reports count each tranche in US dollars at its value when it is funded."
+        nodes: [reporting, asset-safe]
+        edges: [report]
     escapes:
-      - "An objection stops the top-up. The mandate then asks for a Snapshot vote."
-      - "The registry refuses a payment above its remaining limit."
-    sources: ["ADR-008#d3", "ADR-008#d4", "ADR-008#d5", "ADR-008#d6", "ADR-008#d20", "ADR-008#d32", "ADR-008#d33", "ADR-008#d34", "ADR-008#proposed-direction",
-      "ADR-009#d19", "ADR-009#d21", "ADR-009#d36", "ADR-009#d41", "ADR-009#d42", OD-54, OD-62, OD-84, OD-85, OD-89, INV-017, "runbook:Top up the vault",
-      "runbook:Re-set a funding limit", "lip:part-5"]
+      - "LDO holders vote against the tranche: nothing moves."
+      - "No motion can pull funds from the treasury, so the vault works with the funds that it has."
+    sources: ["ADR-014#d1", "ADR-014#d2", "ADR-014#d3", "ADR-014#context", "ADR-014#proposed-direction", "ADR-008#d32",
+      "ADR-008#d33", "ADR-008#d34", "ADR-009#d19", "ADR-009#d21", "ADR-009#d36", "ADR-009#d41", "ADR-009#d42",
+      "ADR-010#d22", OD-54, OD-62, OD-84, OD-85, OD-89, OD-106, INV-037, "runbook:Fund a tranche", "lip:part-5"]
 
   - id: seed
     group: funding
     title: Launch funding and the first-loss shares
     label: specified
-    summary: "How the vault gets its first assets. After the enabling vote, the Growth Committee moves the DAO's first-loss Earn shares to the first-loss Safe. Then one seed motion funds the rest."
-    trigger: "The enabling vote has executed, its Safe batches have run, and the Safes exist (OD-92)."
+    summary: "How the vault gets its first assets. The enabling vote pays the first tranche, one million dollars, to the Asset Safe. After the vote, the Growth Committee moves the DAO's first-loss Earn shares to the first-loss Safe."
+    trigger: "The enabling vote executes."
     steps:
+      - who: "Aragon Voting and Aragon Finance"
+        text: "When the enabling vote executes, its tranche item pays the first tranche from the Aragon Agent to the Asset Safe through Finance. The tokens wait in the Asset Safe, which only Aragon Voting controls, until the Safe batches run."
+        nodes: [dao, funding, asset-safe]
+        edges: [treasury, tranche]
+        check: "The first tranche is the launch cap, so the cap holds by the tranche's size."
+      - who: "Anyone"
+        text: "Anyone sends the Safe batches with Voting's approval of their hash. They apply the policy and grant the roles (OD-92)."
+        nodes: [asset-safe, operator-modifier, safety-modifier, orders, first-loss]
+        edges: [own-op, own-sf]
       - who: "Growth Committee Safe"
         text: "The Growth Committee Safe transfers the first-loss earnETH and earnUSD shares to the [[first-loss Safe]]. That Safe needs no permission to receive them."
         nodes: [funding, first-loss]
-      - who: "Committee Safe"
-        text: "The committee's Safe creates the seed motion. It is at most the mandate size, less the value of the first-loss shares (OD-89). Until the launch cap lifts, it is also at most the cap (OD-54)."
-        nodes: [committee, easytrack, funding]
-        edges: [motions, topup-motion]
-      - who: "Easy Track and Aragon Finance"
-        text: "After 72 hours, Aragon Finance pays the Asset Safe through the funding registries."
-        nodes: [easytrack, funding, asset-safe, dao]
-        edges: [treasury, topup]
       - who: "The committee"
-        text: "From then on, on the Earn team's written instruction, a burn motion burns the shares, and the first-loss role of the committee's Safe redeems them to the Agent. No other role reaches the first-loss Safe, and monitoring alerts on any change of its balance."
+        text: "From then on, on the Earn team's written instruction, a burn motion burns the shares, and the first-loss role of the committee's Safe redeems them to the Asset Safe. No role can transfer or approve the shares, and monitoring alerts on any change of the first-loss Safe's balance."
         nodes: [committee, first-loss, monitoring]
         edges: [first-loss-shares]
-        check: "INV-021: the first-loss Safe has Aragon Voting as its only owner, and one modifier with two narrow roles. Specified, not built."
-    sources: ["ADR-008#d4", "ADR-008#d13", "ADR-008#d19", "ADR-008#d20", "ADR-008#d21", "ADR-008#d23",
-      "ADR-008#proposed-direction", OD-21, OD-42, OD-54, OD-60, OD-67, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", OD-89, OD-92]
+        check: "INV-021: the first-loss Safe has Aragon Voting as its only owner, and one modifier. Specified, not built. A redemption also runs before the guard is set; if its proceeds take the vault above the first tranche, the committee's Safe returns the excess to the Aragon Agent."
+    sources: ["ADR-014#d2", "ADR-014#d10", "ADR-014#proposed-direction", "ADR-010#d20", "ADR-008#d13", "ADR-008#d19",
+      "ADR-008#d21", "ADR-008#d23", "ADR-008#proposed-direction", "ADR-005#d32", OD-21, OD-42, OD-54, OD-60, OD-67, OD-92,
+      OD-106, OD-108, INV-021, "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares",
+      "runbook:Fund a tranche"]
 
   - id: first-loss-burn
     group: funding
     title: A first-loss burn or exit
     label: specified
-    summary: "How the DAO's first-loss Earn shares absorb a loss, as the March 2026 terms say. The committee executes the terms without a DAO vote: a burn is an Easy Track motion, with its objection window, and an exit goes through one narrow role (OD-60, OD-67)."
+    summary: "How the DAO's first-loss Earn shares absorb a loss, as the March 2026 terms say. The committee executes the terms without a DAO vote: a burn is an Easy Track motion, with its objection window, and an exit goes through one narrow role and pays the Asset Safe (OD-60, OD-67, OD-108)."
     trigger: "A loss of at least 1% in earnETH or earnUSD that the curators confirm, or a confirmed material risk."
     time: "A burn: at least 72 hours, the objection window. An exit: minutes to initiate, then the redeem queue. Both start after the Earn team's written instruction."
     steps:
@@ -352,10 +431,10 @@ flows:
         nodes: [protocols, committee]
         check: "Below 1%, a Snapshot exception comes first, as after the Kelp incident."
       - who: "Committee Safe, 4 of 7"
-        text: "For a burn, the committee's Safe creates a motion on the first-loss burn factory, and the forum post with the instruction goes up with it. For an exit, it requests and claims the redemption through the first-loss role, and the proceeds go to the Aragon Agent. Once the launch cap lifts, the screening guard checks both transactions."
+        text: "For a burn, the committee's Safe creates a burn motion on the universal factory, and the forum post with the instruction goes up with it. For an exit, it requests and claims the redemption through the first-loss role, and the proceeds go to the Asset Safe. Once the launch cap lifts, the screening guard checks both transactions."
         nodes: [committee, screening, easytrack, first-loss, protocols]
         edges: [screen, motions, first-loss-shares]
-        check: "INV-021: only an enacted motion can burn the shares, and neither role can transfer or approve them. Specified, not built."
+        check: "INV-021: only an enacted motion can burn the shares, and no role can transfer or approve them. Specified, not built. A redemption also runs before the guard is set; if its proceeds take the vault above the first tranche, the committee's Safe returns the excess to the Aragon Agent."
       - who: "Easy Track, after 72 hours"
         text: "If LDO holders do not object, anyone enacts the motion. The Easy Track script executor calls `burn` on the share token through the first-loss burn role."
         nodes: [easytrack, first-loss, protocols]
@@ -370,11 +449,78 @@ flows:
       - "LDO holders object: the motion fails, and nothing burns. The DAO can still burn by vote, as the Safe's owner."
       - "Depositors see the motion for 72 hours and can time their entries and exits, so the vault should pause deposits and redemptions until the burn, as Lido Earn did after the Kelp incident."
       - "A curator freezes the vault: an exit waits for the vault, and a burn still works."
-      - "The DAO changes or ends the authorisation: a vote changes or removes the roles and the burn factory."
+      - "The DAO changes or ends the authorisation: a vote changes or removes the roles."
     sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-008#context", "ADR-008#proposed-direction",
-      "ADR-008#consequences", "ADR-005#d27", OD-60, OD-67, INV-021, "runbook:Burn first-loss Earn shares",
-      "runbook:Exit the first-loss shares",
+      "ADR-008#consequences", "ADR-005#d27", "ADR-013#d5", "ADR-014#d10", "ADR-014#proposed-direction", OD-60, OD-67, OD-108,
+      INV-021, "runbook:Burn first-loss Earn shares", "runbook:Exit the first-loss shares",
       "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms"]
+
+  - id: insurance
+    group: funding
+    title: An insurance fund
+    label: specified
+    summary: "How the vault insures Lido products. Insurance is built in at launch, for earnETH, earnUSD and Lido Lend. Each step is a motion: the creation of a fund, its money from the Asset Safe, a burn and a payout (OD-107)."
+    trigger: "The committee decides to insure a product, under the framework that one Snapshot sets."
+    time: "72 hours for each motion."
+    steps:
+      - who: "Committee"
+        text: "The committee posts the fund's checklist on the forum: the product, the share token or the payout address, the cap, the loss trigger with its independent confirming party, the incident-update deadline and the end of the terms."
+        nodes: [committee, reporting]
+      - who: "Committee Safe"
+        text: "The committee's Safe creates the motions on the universal factory: one creates the fund and pins its terms, and one moves its money from the Asset Safe. Once the launch cap lifts, the screening guard checks them."
+        nodes: [committee, screening, easytrack]
+        edges: [motions, screen]
+      - who: "LDO holders"
+        text: "LDO holders have 72 hours to object to each motion."
+        nodes: [dao, easytrack]
+        edges: [object]
+      - who: "Easy Track"
+        text: "The executor moves the tokens from the Asset Safe to the first-loss Safe through the insurance-funding role, pinned to the first-loss Safe. For a fund of shares, an insurance role then deposits them into the insured product, with the first-loss Safe as the receiver."
+        nodes: [easytrack, operator-modifier, asset-safe, first-loss, protocols]
+        edges: [own-op, insure, first-loss-shares]
+        check: "INV-039: insurance money reaches the first-loss Safe only by motion, from the Asset Safe. Tested on a fork with the factory's prototype."
+      - who: "Committee Safe, then Easy Track"
+        text: "After a confirmed loss, a burn motion burns the fund's shares, or a payout motion pays the fund's pinned payout address, at most its remaining cap."
+        nodes: [committee, easytrack, first-loss, protocols]
+        edges: [motions, first-loss-shares]
+        check: "INV-039: a payout goes only to the address that the creating motion pinned, at most the fund's remaining cap, and only by motion."
+      - who: "Monitoring"
+        text: "Monitoring alerts on every change of the first-loss Safe's balance."
+        nodes: [monitoring, first-loss]
+    escapes:
+      - "LDO holders object: the motion fails, and no money moves."
+      - "An exit from a fund pays the Asset Safe, not the treasury (OD-108)."
+    sources: ["ADR-014#d4", "ADR-014#d5", "ADR-014#d6", "ADR-014#d7", "ADR-014#d10", "ADR-014#proposed-direction",
+      "ADR-008#d25", "ADR-008#d26", "ADR-008#d29", "ADR-005#proposed-direction", "ADR-009#proposed-direction", OD-107, OD-108,
+      INV-039, "runbook:Run an insurance motion", "test:test_uf_insurance_money_goes_to_the_first_loss_safe"]
+
+  - id: return-to-agent
+    group: funding
+    title: Returning funds to the treasury
+    label: specified
+    summary: "Funds go back to the Aragon Agent rarely: only in an emergency or a recovery. The emergency Safe can send them, and so can the committee's Safe, by a transfer pinned to the Agent. Neither needs a motion or a vote (OD-108). Why no vote: a return to the treasury loses nothing, and at worst the vault stops working."
+    trigger: "An emergency, or a recovery, such as the excess above the launch cap or the end of the mandate."
+    time: "Minutes."
+    steps:
+      - who: "Committee Safe"
+        text: "The committee's Safe sends a vault token to the Aragon Agent through the operator role, from the Asset Safe or from the orders account. The permission pins the receiver to the Agent."
+        nodes: [committee, operator-modifier, asset-safe, dao]
+        edges: [op-role, own-op, own]
+        check: "From the orders account, the return is in the policy. From the Asset Safe, it is specified and not in the policy yet. Once the launch cap lifts, the screening guard checks it."
+      - who: "Emergency Safe"
+        text: "In an emergency, the emergency Safe sends tokens to the Agent through the safety modifier, or places recovery orders that pay the Agent."
+        nodes: [emergency-safe, safety-modifier, asset-safe, dao]
+        edges: [em-role, own-sf, own]
+        check: "INV-038: funds reach the Aragon Agent only through these paths. Every redemption, claim and exit of a fund pays the Asset Safe."
+      - who: "Monitoring"
+        text: "Monitoring alerts on every transfer to the Agent."
+        nodes: [monitoring, asset-safe]
+        edges: [watch]
+    escapes:
+      - "A captured committee returns funds early: the vault stops working, and the funds stay safe in the treasury. A DAO vote can move the operator role to another Safe."
+    sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#proposed-direction", "ADR-014#consequences",
+      "ADR-007#proposed-direction", "ADR-013#d4", OD-108, INV-002, INV-038, "runbook:Return assets to the Agent",
+      "runbook:Move the operator role to another Safe"]
 
   # --- Reporting and monitoring -------------------------------------------------------------------
   - id: fortnightly
@@ -409,7 +555,7 @@ flows:
     time: "Within 7 calendar days."
     steps:
       - who: "Report generator"
-        text: "The generator reads the chain at a pinned block, with prices at the Snapshot Date from the five-level waterfall, Coingecko first. Each price carries its level and its source, and the report lists every open order."
+        text: "The generator reads the chain at a pinned block, with prices at the Snapshot Date from the five-level waterfall, Coingecko first. Each price carries its level and its source. The report lists every open order and shows the [[TMC-6 ratio]] for the whole treasury."
         nodes: [reporting, asset-safe]
         edges: [report]
       - who: "Committee"
@@ -419,40 +565,10 @@ flows:
         text: "The forum post cites the report's IPFS identifier, and the policy provider's report next to it. The post is the reports' only anchor (OD-85)."
         nodes: [reporting]
       - who: "Monitoring"
-        text: "If the report is late, no top-up starts. Monitoring flags it on day 8, and the committee explains the delay on the forum."
+        text: "If the report is late, no tranche vote starts. Monitoring flags it on day 8, and the committee explains the delay on the forum."
         nodes: [monitoring, funding]
-    sources: ["ADR-009#d2", "ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#d35", "ADR-009#d36", "ADR-009#d42", "ADR-007#d29",
-      OD-14, OD-61, OD-62, OD-85, "lip:part-9"]
-
-  - id: buffer-low
-    group: reporting
-    title: The liquidity buffer runs low
-    label: specified
-    summary: "The vault keeps at least one month of baseline spend in stablecoins and sUSDS. A detector watches it all the time, and the committee restores it within the mandate's window."
-    trigger: "The buffer falls toward its floor, for example after a large deposit or a missed top-up."
-    time: "The mandate's window."
-    steps:
-      - who: "Monitoring"
-        text: "The buffer detector warns at a margin above the floor, and alerts at the floor."
-        nodes: [monitoring, asset-safe]
-        edges: [watch]
-      - who: "[the screening vendor]"
-        text: "If the vendor can check it, screening refuses an operator transaction that would take the buffer below its floor."
-        nodes: [screening, committee]
-        edges: [screen]
-        check: "Requested from the vendor, not confirmed."
-      - who: "Zodiac UI"
-        text: "The UI's signing flow refuses an operator transaction that would take the buffer below its floor, in its own interface only (OD-86)."
-        nodes: [policy, committee]
-      - who: "Committee"
-        text: "The committee restores the buffer: it exits a position, or sells through a CoW order into a stablecoin."
-        nodes: [committee, operator-modifier, asset-safe, protocols, orders]
-        edges: [op-role, own-op, positions, swaps]
-      - who: "Reporting"
-        text: "Every report of both readings shows the buffer against its floor (OD-84)."
-        nodes: [reporting, policy]
-    sources: ["ADR-009#d27", "ADR-009#d29", "ADR-009#d40", "ADR-009#d43", "ADR-009#proposed-direction", OD-40, OD-44, OD-84, OD-86,
-      "runbook:Restore the liquidity buffer", "doc:docs/specs/control-matrix.md#the-matrix"]
+    sources: ["ADR-009#d2", "ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#d35", "ADR-009#d36", "ADR-009#d42", "ADR-009#d47",
+      "ADR-007#d29", "ADR-014#proposed-direction", OD-14, OD-61, OD-62, OD-85, OD-111, "lip:part-9"]
 
   # --- Emergencies --------------------------------------------------------------------------------
   - id: financial-incident
@@ -468,14 +584,14 @@ flows:
         nodes: [monitoring, emergency-safe]
         edges: [page]
       - who: "Emergency Safe, 3 of 5"
-        text: "Revoke the operator's targets or functions. One revoke reaches every operator permission on the operator modifier; the orders modifier needs one more, once it exists."
+        text: "Revoke the operator's targets or functions. One revoke reaches every operator permission on the operator modifier; the orders modifier needs one more."
         nodes: [emergency-safe, safety-modifier, operator-modifier]
         edges: [em-role, revoke]
         check: "INV-018: every operator permission is under one key."
       - who: "Emergency Safe"
-        text: "On the orders account, cancel the open orders and send its tokens to the Agent or the Asset Safe. Setting a relayer approval to zero also stops recovery orders in that token until a DAO vote."
+        text: "On the orders account, cancel the open orders and send its tokens to the Agent or the Asset Safe. Setting a relayer approval to zero also stops recovery orders in that token, until a motion raises the approval again."
         nodes: [emergency-safe, orders, dao]
-        check: "Specified: the orders account does not exist yet."
+        check: "Tested on a fork: on the orders account the emergency role revokes the operator and cancels its orders."
       - who: "Emergency Safe"
         text: "Set the operator's approvals to zero."
         nodes: [emergency-safe, safety-modifier, asset-safe, protocols]
@@ -489,24 +605,24 @@ flows:
         text: "Send assets home to the Aragon Agent. The transfer goes only to this fixed address."
         nodes: [safety-modifier, asset-safe, dao]
         edges: [own-sf, own]
-        check: "INV-002: assets leave only for the Agent, or for the orders account once it exists."
+        check: "INV-002: assets leave only for the Agent or for the orders account."
       - who: "Committee"
         text: "Post on the forum after the revoke."
         nodes: [committee, reporting]
     escapes:
-      - "A queued motion would restore a revoked permission: the emergency Safe's switch freezes it, or the Emergency Brakes multisig pauses Easy Track. Only the DAO restarts, and its vote cancels the motion first (OD-59)."
+      - "A queued motion would restore a revoked permission: the emergency Safe raises the factory's motion counter, so every open motion fails at enactment. The Emergency Brakes multisig can also pause Easy Track."
       - "No recovery order can fill at a price that the signers accept: send the assets to the Agent instead."
     sources: ["ADR-005#d2", "ADR-005#d4", "ADR-005#d11", "ADR-005#d24", "ADR-005#d26", "ADR-005#context",
-      "ADR-005#proposed-direction", "ADR-007#d19", "ADR-007#proposed-direction", OD-58, OD-59, INV-002, INV-018,
-      "runbook:Remove a strategy", "test:test_D4_emergency_flow",
+      "ADR-005#proposed-direction", "ADR-007#d19", "ADR-007#d41", "ADR-007#proposed-direction", "ADR-013#d10", OD-58,
+      OD-103, INV-002, INV-018, INV-033, "runbook:Remove a strategy", "test:test_D4_emergency_flow",
       "test:test_emergency_can_durably_stop_operator_reapproval", "runbook:Revoke the operator",
       "runbook:Zero the approvals", "runbook:Exit positions to the Safe", "runbook:Return assets to the Agent",
-      "ADR-005#d30"]
+      "runbook:Raise the motion counter", "test:test_orders_emergency_revocation_keeps_recovery"]
 
   - id: recovery-order
     group: emergencies
     title: A recovery order
-    label: specified
+    label: built
     summary: "When an asset must become a stablecoin in an emergency. The emergency Safe sends it to the orders account and places an order that buys USDC or USDT and pays the Aragon Agent."
     trigger: "An incident where holding the asset is the risk, for example a depeg."
     time: "Initiate within 6 hours. A recovery order lives at most 1 day, and the emergency Safe signs a new one if it does not fill. The order names its own limit, so it can fill in a depeg at a price that the signers accept."
@@ -519,25 +635,26 @@ flows:
         text: "Transfer the asset to the orders account. The policy pins the recipient."
         nodes: [safety-modifier, asset-safe, orders]
         edges: [own-sf, swaps]
-        check: "Specified: the orders account is not in the policy yet."
+        check: "Tested on a fork: the emergency role sends the asset to the orders account."
       - who: "Emergency Safe"
         text: "Place a [[recovery order]] that buys USDC, or USDT as the second destination, and pays the Aragon Agent. No guard screens it, and nothing on chain bounds its price, so every emergency swap pages at high severity."
         nodes: [emergency-safe, orders]
-        check: "INV-014: the emergency role's orders buy only USDC or USDT and pay only the Aragon Agent. CoW's EBBO rule holds the fill to the on-chain market, and monitoring alerts on a limit far below a market price (OD-48)."
+        check: "INV-014: the emergency role's orders buy only USDC or USDT and pay only the Aragon Agent. CoW's EBBO rule holds the fill to the on-chain market, and monitoring alerts on a limit far below a market price (OD-48). Tested on a fork: the recovery order settles and pays the Agent."
       - who: "CoW Protocol"
         text: "CoW settles, and the proceeds go straight to the Aragon Agent. If the order does not fill, the emergency Safe signs a new one, or cancels it and sends the tokens to the Agent."
         nodes: [orders, dao]
         check: "USDS and DAI carry USDC risk, so recovery can buy USDT when USDC is the problem."
     sources: ["ADR-007#d5", "ADR-007#d15", "ADR-007#d19", "ADR-007#d25", "ADR-007#d26", "ADR-007#proposed-direction",
       OD-26, OD-43, OD-47, OD-48, INV-014, INV-024, "runbook:Recovery order",
-      "runbook:Cancel orders and sweep the orders account"]
+      "runbook:Cancel orders and sweep the orders account", "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests",
+      "test:test_orders_emergency_cancels_sweeps_and_recovers"]
 
   - id: technical-defect
     group: emergencies
     title: A defect in the permission layer
     label: built
-    summary: "If the operator's permissions themselves are wrong, the emergency Safe switches the operator modifier off. The safety modifier keeps working, and only the DAO restarts."
-    trigger: "A defect in the policy, the modifier or a factory, for example a bug-bounty report."
+    summary: "If the operator's permissions themselves are wrong, the emergency Safe switches the operator modifier off. The safety modifier keeps working, and a motion restarts the operator after the fix."
+    trigger: "A defect in the policy, the modifier or the factory, for example a bug-bounty report."
     time: "Initiate within 6 hours."
     steps:
       - who: "Lido incident process"
@@ -545,26 +662,69 @@ flows:
         nodes: [monitoring, emergency-safe]
         edges: [page]
       - who: "Emergency Safe, 3 of 5"
-        text: "The emergency Safe calls `disableModule` on the Asset Safe through the emergency role. The module argument is pinned to the operator modifier. On the orders account it revokes the operator's targets and functions instead, and cancels the operator's open orders, so recovery keeps working there (OD-58)."
-        nodes: [emergency-safe, safety-modifier, asset-safe, orders]
+        text: "The emergency Safe calls `disableModule` on the Asset Safe through the emergency role. The module argument is pinned to the operator modifier. On the orders account it revokes the operator's targets and functions instead, and cancels the operator's open orders, so recovery keeps working there (OD-58). Then it raises the universal factory's [[motion counter]]."
+        nodes: [emergency-safe, safety-modifier, asset-safe, orders, easytrack]
         edges: [em-role, own-sf]
-        check: "Built for the Asset Safe. Specified for the orders account."
+        check: "Built for the Asset Safe and the orders account. The counter is tested on a fork with the factory's prototype."
       - who: "Operator modifier"
-        text: "The operator and governance roles stop at once, and so does every queued motion that writes through them."
+        text: "The operator, governance and insurance-funding roles stop at once. Every open motion of the factory fails at enactment, because the counter changed."
         nodes: [operator-modifier, committee, easytrack]
-        check: "The switch does not stop the exit-governance role on the safety modifier. A motion that writes there stops only by an objection, the Easy Track pause or a DAO vote (OD-49)."
+        check: "The switch does not stop the exit-governance role on the safety modifier, but the raised counter makes the open motions that write there fail too (OD-49)."
       - who: "Emergency Safe"
         text: "The emergency Safe can still act through the safety modifier."
         nodes: [emergency-safe, safety-modifier]
         edges: [em-role]
+      - who: "Committee Safe and Easy Track"
+        text: "After the fix, a restart motion enables the operator modifier again, after its 72-hour window. Other motions bring back what the emergency role revoked, also motions created after the revoke (OD-104, OD-114)."
+        nodes: [committee, easytrack, safety-modifier, asset-safe, operator-modifier]
+        edges: [motions, own-sf, own-op]
+        check: "INV-035: the restart role may only enable the operator modifier. Tested on a fork, with the factory's prototype for the motion."
+    sources: ["ADR-005#d25", "ADR-005#d26", "ADR-005#context", "ADR-005#proposed-direction", "ADR-013#d10", "ADR-013#d12",
+      "ADR-013#d16", OD-49, OD-58, OD-104, OD-114, INV-009, INV-027, INV-033, INV-035,
+      "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned",
+      "test:test_D4_the_switch_freezes_queued_motions_until_a_restart_motion", "runbook:Switch the operator off",
+      "runbook:Raise the motion counter", "runbook:Restart after a stop"]
+
+  - id: restart
+    group: emergencies
+    title: Restarting the operator after a stop
+    label: specified
+    summary: "No emergency body resumes what it stopped. After the switch, a motion restarts the operator, and LDO holders have 72 hours to object (OD-104). Why a motion: after the enabling vote, no administrative action needs an Aragon vote."
+    trigger: "The cause of the stop is fixed, and the committee wants to run the vault again."
+    time: "At least 72 hours."
+    steps:
+      - who: "Committee"
+        text: "The committee posts the cause and the fix on the forum."
+        nodes: [committee, reporting]
+      - who: "Committee Safe"
+        text: "The committee's Safe cancels the motions that it queued before the stop: they fail on the raised counter and hold motion slots. Then it creates the restart motion on the universal factory. Once the launch cap lifts, the screening guard checks it."
+        nodes: [committee, screening, easytrack]
+        edges: [motions, screen]
       - who: "LDO holders"
-        text: "Only the DAO can enable the operator modifier again. Its vote first cancels the queued motions, because a motion does not expire, and also grants again the operator's permissions on the orders account (OD-59)."
-        nodes: [dao, asset-safe, orders]
-        edges: [own]
-    sources: ["ADR-005#d25", "ADR-005#d26", "ADR-005#context", "ADR-005#proposed-direction", OD-58, OD-59, INV-009,
-      INV-027, "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned",
-      "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts", "runbook:Switch the operator off",
-      "runbook:Restart after a stop", "ADR-005#d30", OD-49]
+        text: "LDO holders have 72 hours to object. An objection of 0.5% of LDO stops the restart."
+        nodes: [dao, easytrack]
+        edges: [object]
+      - who: "Restart role"
+        text: "After the window, the executor's restart role on the safety modifier enables the operator modifier on the Asset Safe. The role can do nothing else."
+        nodes: [easytrack, safety-modifier, asset-safe, operator-modifier]
+        edges: [own-sf, own-op]
+        check: "INV-035: the restart role, held only by the Easy Track executor, may only call `enableModule` with the operator modifier as its argument. Tested on a fork, with the factory's prototype for the motion."
+      - who: "Easy Track"
+        text: "Other motions bring back what the emergency role revoked, on the Asset Safe and on the orders account, relayer approvals included."
+        nodes: [easytrack, operator-modifier, orders]
+        edges: [gov-role]
+        check: "A restore motion brings back a revoked target with the permissions stored under it, tested on a fork for the operator modifier. On the orders account, the governance role restores by hand, tested on a fork; the factory's restore for it is not built."
+      - who: "Monitoring"
+        text: "Monitoring alerts on every restart motion. The emergency Safe can stop the operator again at any time."
+        nodes: [monitoring, emergency-safe]
+    escapes:
+      - "LDO holders object: the operator stays off."
+      - "A new stop raises the counter again, so a restart motion that has not enacted fails."
+      - "Easy Track is paused: only Aragon Voting unpauses it, by vote."
+    sources: ["ADR-013#d3", "ADR-013#d10", "ADR-013#d12", "ADR-013#proposed-direction", "ADR-013#consequences",
+      "ADR-005#d26", "ADR-005#proposed-direction", OD-104, INV-027, INV-035, "runbook:Restart after a stop",
+      "runbook:Raise the motion counter", "test:test_D4_the_restart_role_enables_only_the_operator_modifier",
+      "test:test_uf_restart_motion_after_the_switch", "test:test_uf_restore_brings_back_a_revoked_target"]
 
   - id: cap-breach
     group: emergencies
@@ -585,11 +745,11 @@ flows:
         nodes: [monitoring, emergency-safe]
         edges: [page]
       - who: "Emergency Safe"
-        text: "The emergency Safe switches the Asset Safe's operator modifier off. Once the orders account exists, it also revokes the operator there (OD-58). The trigger is fixed, so the duty needs no judgment."
+        text: "The emergency Safe switches the Asset Safe's operator modifier off. Once the orders account exists, it also revokes the operator there (OD-58). Then it raises the universal factory's motion counter. The trigger is fixed, so the duty needs no judgment."
         nodes: [emergency-safe, safety-modifier, asset-safe, operator-modifier, orders]
         edges: [em-role, own-sf]
     sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d25", "ADR-009#d33", "ADR-009#d34", "ADR-009#d41", "ADR-005#d25",
-      OD-29, OD-32, OD-58, OD-84, "runbook:Switch the operator off"]
+      "ADR-013#d10", OD-29, OD-32, OD-58, OD-84, "runbook:Switch the operator off"]
 
   - id: vendor-outage
     group: emergencies
@@ -614,11 +774,12 @@ flows:
         text: "The owners can start the guard's removal. It takes 10 days, and monitoring sees it."
         nodes: [committee, screening, monitoring]
       - who: "LDO holders"
-        text: "The DAO can also give the operator role to another Safe by vote."
+        text: "The DAO can also give the operator role to another Safe by vote, with a new universal factory that has that Safe as its trusted caller."
         nodes: [dao, asset-safe]
         edges: [own]
-    sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#d22", "ADR-010#d26", "ADR-010#proposed-direction", OD-54,
-      "runbook:Remove the screening guard", "runbook:Move the operator role to another Safe", OD-83, OD-88]
+    sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#d22", "ADR-010#d26", "ADR-010#proposed-direction", "ADR-013#d4",
+      "ADR-013#proposed-direction", OD-54, "runbook:Remove the screening guard", "runbook:Move the operator role to another Safe",
+      OD-83, OD-88]
 
   - id: unsafe-motion
     group: emergencies
@@ -639,9 +800,10 @@ flows:
         text: "If time is short, the multisig pauses Easy Track. This stops every DAO motion, and only the DAO can unpause it."
         nodes: [easytrack]
       - who: "Emergency Safe"
-        text: "For a vault motion, the emergency Safe can also switch the operator off. The motion's write goes through the operator modifier, so it cannot enact. Only the DAO restarts, and its vote cancels the motion first (OD-59)."
-        nodes: [emergency-safe, safety-modifier, operator-modifier]
+        text: "The emergency Safe raises the universal factory's [[motion counter]]. Every open motion of the factory then fails at enactment, and its creator or Aragon Voting cancels it. For a vault motion, the emergency Safe can also switch the operator off."
+        nodes: [emergency-safe, easytrack, safety-modifier, operator-modifier]
         edges: [em-role, revoke]
+        check: "INV-033 is tested on a fork, with the factory's prototype and the live Easy Track."
       - who: "Committee Safe"
         text: "The committee's Safe can cancel its own motion before it enacts."
         nodes: [committee, easytrack]
@@ -650,9 +812,10 @@ flows:
         text: "If the motion enacts, the emergency Safe revokes the new operator permission at once. An exit written to the safety modifier cannot be revoked that way; a DAO vote replaces it (OD-49)."
         nodes: [emergency-safe, safety-modifier, operator-modifier]
         edges: [em-role, revoke]
-    sources: ["ADR-006#d4", "ADR-006#d7", "ADR-006#d13", "ADR-006#context", "ADR-006#proposed-direction", "ADR-005#d4",
-      "ADR-005#d11", "ADR-005#d25", "ADR-005#d26", "ADR-005#context", OD-49, OD-59, "test:test_D1_objection_rejection",
-      "test:test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts", "runbook:Pause Easy Track"]
+    sources: ["ADR-006#d4", "ADR-006#d13", "ADR-006#context", "ADR-005#d4", "ADR-005#d11", "ADR-005#d25", "ADR-005#d26",
+      "ADR-005#context", "ADR-013#d10", "ADR-013#proposed-direction", OD-49, INV-033, "test:test_D1_objection_rejection",
+      "test:test_D4_the_switch_freezes_queued_motions_until_a_restart_motion", "runbook:Pause Easy Track",
+      "runbook:Raise the motion counter", "test:test_uf_counter_fails_every_open_motion"]
 
   # --- Building, deploying and changing ------------------------------------------------------------
   - id: policy-change
@@ -677,7 +840,7 @@ flows:
         nodes: [policy]
         check: "The workspace is planned (OD-35)."
       - who: "The DAO or a motion"
-        text: "The change reaches the chain only through the enabling vote, a DAO vote or a bounded motion."
+        text: "The change reaches the chain only through the enabling vote, a DAO vote or a motion of the universal factory. Clutch's own `motion` command builds each motion from the merged commit."
         nodes: [dao, easytrack, operator-modifier, safety-modifier, asset-safe]
         edges: [own, own-op, own-sf, gov-role]
       - who: "Monitoring"
@@ -686,7 +849,7 @@ flows:
         edges: [watch]
         check: "INV-016 is pending."
     sources: ["ADR-004#d7", "ADR-004#d9", "ADR-004#d10", "ADR-004#d11", "ADR-004#d12", "ADR-004#d13", "ADR-004#d14",
-      "ADR-004#d16", OD-33, OD-35, INV-016, "doc:.github/workflows/policy.yml",
+      "ADR-004#d16", "ADR-013#proposed-direction", OD-33, OD-35, INV-016, "doc:.github/workflows/policy.yml",
       "doc:docs/specs/specification-policy.md#the-permission-policy"]
 
   - id: roadmap
@@ -697,68 +860,68 @@ flows:
     trigger: "The roadmap."
     steps:
       - who: "Phase 0: decisions"
-        text: "EM accepts the setup and design ADRs. [the screening vendor]'s written terms are due before the launch cap lifts (OD-54)."
+        text: "EM has accepted the setup ADRs, 001 to 004, and accepts the design ADRs 005 to 011, 013 and 014, and the process ADR 012. [the screening vendor]'s written terms are due before the launch cap lifts (OD-54)."
         nodes: [committee, screening]
       - who: "Phase 1: specification"
         text: "The specifications and the detector specification, the control matrix and the screening rule list with the vendor's questions, the Zodiac UI requirement list, the orders account's fork tests, the runbook drafts and the Lido Zodiac workspace."
         nodes: [policy, monitoring, screening, orders]
       - who: "Phase 2: build"
-        text: "The round-trip check, the orders account and its permissions, the first-loss Safe with its two roles, the Easy Track factories with their emergency exits, the funding path, the report generator, the buffer detector, the mandate's rule data, the comparison of the two readings, and the invariant-to-test check."
-        nodes: [policy, orders, first-loss, easytrack, funding, reporting, monitoring]
+        text: "The round-trip check, the orders account, the first-loss Safe with its roles and the insurance roles, the universal factory with its address book, versions, counter, shapes, ceilings and restart role, the `motion` command, reporting with the TMC-6 line, the mandate's rule data, the comparison of the two readings, and the invariant-to-test check."
+        nodes: [policy, orders, first-loss, easytrack, reporting, monitoring]
       - who: "Phase 3: assurance"
-        text: "An external audit, Lido's review of the guard change and of CoW's order signer, and fork drills that initiate within 6 hours."
+        text: "An external audit of the universal factory and of CoW's order signer, which counts as new code (OD-96), Lido's review of the guard change, and fork drills that initiate within 6 hours."
         nodes: [policy, screening, orders]
       - who: "Phase 4: governance and deployment"
-        text: "The mandate's Snapshot vote, a Snapshot that appoints the emergency Safe's fifth signer, the LIP, the enabling vote and deployment without the guard under a cap of one million dollars, the share transfer to the first-loss Safe and the seed motion."
+        text: "The mandate's Snapshot vote, a Snapshot that appoints the emergency Safe's fifth signer, the LIP, deployment without the guard, and the enabling vote, which pays the first tranche, one million dollars: the [[launch cap]]. Then the share transfer to the first-loss Safe."
         nodes: [dao, asset-safe, first-loss, funding]
       - who: "Phase 5: operation"
-        text: "Monthly reports, the fortnightly cap reading, budget motions after events and recurring drills. Once the guard is set with its bypass mode off, the committee's forum post lifts the launch cap."
+        text: "Monthly reports, the fortnightly cap reading, budget motions after events and recurring drills. Once the guard is set with its bypass mode off, the second tranche's vote lifts the launch cap. Later tranches come by vote, only when needed."
         nodes: [committee, reporting, monitoring]
-    sources: ["doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates", OD-54]
+    sources: ["ADR-007#d40", OD-96, "doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates", OD-54, OD-106]
 
   - id: enabling-vote
     group: deployment
     title: The enabling vote
     label: specified
-    summary: "One DAO vote turns the system on. The enabling-vote page lists what it holds, what comes before it and what follows without a vote."
+    summary: "One DAO vote turns the system on and pays the first tranche. The enabling-vote page lists what it holds, what comes before it and what follows without a vote."
     trigger: "The mandate is approved and phase 3 is done."
     steps:
       - who: "Lido"
         text: "Before the vote, fork tests show that CoW's order signer and fallback handler work on Safe v1.5.0 behind a Roles modifier."
         nodes: [orders]
-        check: "INV-022 and INV-023 are pending."
+        check: "INV-022 and INV-023 passed on a fork on 2026-11-07. The tests run again at a recent block before the vote."
       - who: "Committee"
-        text: "The vote does not wait for the guard. The vault launches under a cap of one million dollars, which the committee keeps by procedure until the guard is set with its bypass mode off and its forum post lifts the cap (OD-54, OD-55)."
+        text: "The vote does not wait for the guard. The vault launches under the [[launch cap]] (OD-54, OD-55): the first tranche is the cap, so the cap holds by the tranche's size."
         nodes: [screening, committee]
         edges: [screen]
       - who: "Lido"
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, committee, emergency-safe]
       - who: "LDO holders"
-        text: "The vote registers the factories and adds USDS to the payment permission and to the shared stablecoin token list (OD-93). Aragon Voting runs these items itself, without Dual Governance (OD-73). For the vault's Safes, it approves the hash of each Safe batch: the batches apply the policy compiled for mainnet from the reviewed constellation, grant the roles, the exit-governance role and the two first-loss roles included, and set up the orders account with its order lists and relayer approvals (OD-92)."
+        text: "The vote registers the [[universal factory]], with its address book, and pays the first tranche, one million dollars, from the Aragon Agent to the Asset Safe through Finance (OD-106). Aragon Voting runs these items itself, without Dual Governance (OD-73). For the vault's Safes, it approves the hash of each Safe batch: the batches apply the policy compiled for mainnet from the reviewed constellation, grant the roles, the Easy Track executor's roles included, and set up the orders account with its order lists and relayer approvals (OD-92). The factory's versions of the launch policy come from the compiled artifact."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
-        edges: [own, own-op, own-sf]
+        edges: [own, own-op, own-sf, treasury, tranche]
       - who: "Anyone"
         text: "After the vote executes, anyone sends each Safe batch with Voting's approval of its hash. The batches of one Safe run in nonce order (OD-92)."
         nodes: [asset-safe, orders, first-loss]
         check: "One command computes each batch's hash again from the published batch, so a reviewer can match it to the vote. The command is owed."
       - who: "Growth Committee, then the committee's Safe"
-        text: "After the batches run, the Growth Committee moves the first-loss shares to the first-loss Safe, and the seed motion funds the vault."
-        nodes: [funding, first-loss, asset-safe, committee, easytrack]
-        edges: [topup, motions]
-    sources: ["ADR-004#d14", "ADR-007#proposed-direction", "ADR-007#confirmation", "ADR-008#d9", "ADR-008#d13",
-      "ADR-008#d19", "ADR-008#d21", "ADR-008#proposed-direction", "ADR-010#d16", "ADR-010#d20", "ADR-010#d21",
-      "ADR-010#d22", "ADR-008#d10", INV-022, INV-023, OD-54, "doc:ROADMAP.md#roadmap",
-      "doc:docs/specs/enabling-vote.md#the-vote",
+        text: "After the batches run, the Growth Committee moves the first-loss shares to the first-loss Safe. The committee's Safe creates motions only after the batches ran."
+        nodes: [funding, first-loss, committee, easytrack]
+        edges: [motions]
+    sources: ["ADR-004#d14", "ADR-007#proposed-direction", "ADR-007#confirmation", "ADR-008#d13", "ADR-008#d19",
+      "ADR-008#d21", "ADR-008#proposed-direction", "ADR-010#d16", "ADR-010#d20", "ADR-010#d22", "ADR-013#d6",
+      "ADR-013#proposed-direction", "ADR-014#d1", "ADR-014#d2", "ADR-014#proposed-direction", INV-022, INV-023, INV-032,
+      OD-54, "doc:ROADMAP.md#roadmap", "doc:docs/specs/enabling-vote.md#the-vote",
+      "doc:docs/specs/enabling-vote.md#before-the-vote",
       "doc:docs/research/single-vote-review-2026-10-14.md#how-one-vote-carries-two-kinds-of-item", OD-73, "ADR-005#d28",
-      OD-78, OD-79, OD-55, OD-92, OD-93, "ADR-005#d32", "ADR-008#d35", "ADR-008#d36",
-      "doc:docs/research/enabling-vote-rehearsal-2026-10-15.md#the-vote-that-fits"]
+      OD-55, OD-92, OD-106, "ADR-005#d32", "doc:docs/research/enabling-vote-rehearsal-2026-10-15.md#the-vote-that-fits"]
 
   - id: signer-rotation
     group: deployment
     title: Rotating a signer
     label: specified
-    summary: "The committee's Safe carries the committee's seven signers, and two of them sit on the emergency Safe. Nothing on chain keeps them in step, so a rotation is a manual duty."
+    summary: "The committee's Safe carries the committee's seven signers, and two of them sit on the emergency Safe. Nothing on chain keeps them in step, so a rotation is a manual duty. A change of the committee's members needs no Snapshot each time: an alert and a runbook cover it (OD-109)."
     trigger: "A signer joins or leaves the committee, or a seat holder leaves the Emergency Brakes multisig."
     steps:
       - who: "Committee"
@@ -769,7 +932,7 @@ flows:
         nodes: [committee, emergency-safe]
         edges: [signers-em]
       - who: "Monitoring"
-        text: "Monitoring alerts on each owner change of the committee's Safe and the emergency Safe, as critical on the emergency Safe."
+        text: "Monitoring alerts on every change of the owners or the threshold of the committee's Safe, and on each owner change of the emergency Safe, as critical there."
         nodes: [monitoring, committee, emergency-safe]
         check: "INV-026: exactly two owners of the emergency Safe are owners of the committee's Safe, two are owners of the Emergency Brakes Safe, and one is an owner of neither. Pending: the Safe is not deployed."
-    sources: ["ADR-005#d24", "ADR-005#proposed-direction", OD-58, INV-026, "runbook:Rotate a signer"]
+    sources: ["ADR-005#d24", "ADR-005#d33", "ADR-005#proposed-direction", OD-58, OD-109, INV-026, "runbook:Rotate a signer"]

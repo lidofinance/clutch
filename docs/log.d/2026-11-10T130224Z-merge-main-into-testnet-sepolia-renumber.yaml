@@ -1,0 +1,3 @@
+date: '2026-11-10'
+kind: Update
+text: 'Merge main into testnet/sepolia: renumber the Sepolia decisions OD-95 to OD-100 as OD-117 to OD-122 and ADR 013 as ADR 015, and drop the registry top-up tests that OD-106 superseded.'

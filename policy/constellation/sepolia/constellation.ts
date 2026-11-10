@@ -2,7 +2,7 @@
 import { constellation, push } from "@zodiaceco/sdk";
 import { processPermissions, reconstructPermissions } from "zodiac-roles-sdk";
 import { build, buildNodes, ROLE_MIGRATION } from "./compile";
-import { compile } from "../compiler/compile";
+import { compileStand as compile } from "./compile";
 import { key } from "../constellation/lib";
 
 export type RuntimeAllowance = { modifier: string; key: string; balance: string; timestamp: string };

@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T18:22:59Z
+  at: 2026-11-05T19:22:54Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the launch assets, DAI and Lido Lend, 2026-09-22, on WETH and DAI, 2026-10-05, and on LDO, 2026-10-22
+    title: Decision log — EM on the launch assets, DAI and Lido Lend, 2026-09-22, on WETH and DAI, 2026-10-05, on LDO, 2026-10-22, and on tranche votes, tokens by motion and ceilings, 2026-11-05
   - id: s2
     resource: /specs/lip-draft.md
     title: LIP draft — launch asset and action matrix
@@ -97,21 +97,28 @@ Decision 15 replaces LDO in decisions 1 and 14, and in the operator's lists of [
 
 Since OD-89, the TM Floor Value of decision 8 means one mandate size ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 32 to 34).
 
+Since EM's decisions of 2026-11-05:
+
+- Each tranche vote names its tokens, so decision 5's funding assets are no longer a fixed list (OD-106, [ADR 014](/adr/014-funding-by-tranche-votes.md) decision 3). LDO stays off the launch list (decision 15).
+- A later token joins the order lists by motion, which replaces the vote in decision 12 (OD-103, [ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 41).
+- The fixed ceiling of decision 8 changes by motion within the limit of [ADR 013](/adr/013-one-easy-track-factory.md) decision 13 (OD-105).
+- Lido Lend's onboarding motion of decision 13 runs through the universal factory, and its insurance ships with the launch (OD-102, OD-107).
+
 ## Proposed direction
 
 The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
 
 | Asset or venue | Role in the vault | Notes |
 |---|---|---|
-| ETH, WETH | held; wrap and unwrap; WETH bought and sold in CoW orders by the operator, and sold by recovery; staking stays available; no withdrawal queue (decision 14) | not a funding asset |
-| stETH, wstETH | held; wrap and unwrap; sold through CoW orders | stETH can seed the vault |
-| USDC, USDT | held | can seed the vault |
-| DAI | held; converted to USDS and back through Sky's converter, one to one | can seed the vault; recovery sells it into USDC or USDT (OD-26) |
-| USDS | held; receives converted DAI | can fund the vault once a DAO vote adds it to the payment permission |
-| sUSDS | savings position | tokenized-vault template; can also fund the vault; the operator redeems it, and recovery can sell it in a CoW order |
-| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares go from the Growth Committee to the first-loss Safe, where a burn runs only by Easy Track motion and the narrow role of the committee's Safe redeems them to the Aragon Agent (OD-21, OD-28, OD-42, OD-60, OD-67) |
+| ETH, WETH | held; wrap and unwrap; WETH bought and sold in CoW orders by the operator, and sold by recovery; staking stays available; no withdrawal queue (decision 14) | can come in a tranche vote ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 3) |
+| stETH, wstETH | held; wrap and unwrap; sold through CoW orders | can come in a tranche vote |
+| USDC, USDT | held | can come in a tranche vote |
+| DAI | held; converted to USDS and back through Sky's converter, one to one | can come in a tranche vote; recovery sells it into USDC or USDT (OD-26) |
+| USDS | held; receives converted DAI | can come in a tranche vote, because Aragon Voting pays any token through Finance |
+| sUSDS | savings position | the universal factory's tokenized-vault shape; can come in a tranche vote; the operator redeems it, and recovery can sell it in a CoW order |
+| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares go from the Growth Committee to the first-loss Safe, where a burn runs only by Easy Track motion and the narrow role of the committee's Safe redeems them to the Asset Safe (OD-21, OD-42, OD-60, OD-67, OD-108); insurance for both vaults is built in at launch (OD-107) |
 | Orders account | CoW market, limit and TWAP orders for the operator, and no stop-loss orders ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 39); recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Lido Lend | lending, after launch | one motion through the Morpho Blue template once Lido Lend's own contract exists, which also adds its emergency exit (OD-49); the protocol cap applies until it matures and a budget motion unlocks it (OD-41) |
+| Lido Lend | lending, after launch | one motion through the universal factory's Morpho Blue shape once Lido Lend's own contract exists, which also adds its emergency exit (OD-49, OD-102); the protocol cap applies until it matures and a budget motion unlocks it (OD-41); its insurance is built in at launch (OD-107) |
 
 Out of the launch scope: sDAI, Aave and every other third-party lending market, Lido's withdrawal queue (decision 14), LDO (decision 15), and router swaps on Uniswap and 1inch until the screening vendor can bound their output (OD-43).
 
@@ -124,7 +131,7 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market, 
 
 ## Consequences
 
-- The Morpho Blue template ships before its target market exists. Acceptance requires end-to-end fork tests against deployed Morpho Blue.
+- The universal factory's Morpho Blue shape ships before its target market exists. Acceptance requires end-to-end fork tests against deployed Morpho Blue.
 - The kit's policy no longer grants Aave v3, sDAI or order pre-signing; fork tests refuse them [s8].
 - The kit authorizes asynchronous vault deposits at the policy layer; settlement is untested.
 - DAI earns only after conversion into upgradeable USDS [s5]. The operator can keep each stablecoin within its cap through DAI/USDS conversion and CoW sales of USDS.
@@ -133,12 +140,12 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market, 
 ## Confirmation
 
 - INV-015 in the [invariants](/specs/invariants.md); tests refuse every out-of-scope venue [s8].
-- The Morpho Blue template's end-to-end test remains unbuilt.
+- The universal factory's Morpho Blue shape's end-to-end test remains unbuilt.
 - Converter tests pay the Asset Safe in both directions, refuse other receivers and refuse approvals at or above the ceiling [s7]. The kit ceiling stands in for one mandate size.
 
 ## Reversal conditions
 
-- Lido Lend ships with an interface that the Morpho Blue template cannot express.
+- Lido Lend ships with an interface that the universal factory's Morpho Blue shape cannot express.
 - The mandate changes the asset list.
 
 ## Open questions

@@ -1,0 +1,3 @@
+date: '2026-11-06'
+kind: Evidence
+text: 'Built decision 15 of ADR 013 (OD-113) into the factory prototype: one operation introduces a token with its first approval list and both of its ceilings, a token is introduced once, and a ceiling that was never set changes only by an introduction. The fork suite passes 76 tests, and seven new mutants are caught.'

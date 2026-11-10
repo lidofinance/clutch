@@ -227,8 +227,8 @@ def main() -> int:
     states = validator.od_states(validator.load_closed(ROOT))
     checks = [
         ("an OD that a later one replaced shows the replacement", states["OD-68"]["replaced_by"] == ["OD-78"]),
-        ("a replaced OD no longer replaces what it replaced", states["OD-46"] == {"replaced_by": [], "in_part_by": [], "refined_by": []}),
-        ("a replaced OD no longer refines what it refined", states["OD-59"] == {"replaced_by": [], "in_part_by": [], "refined_by": []}),
+        ("a replaced OD no longer replaces what it replaced", states["OD-46"] == {"replaced_by": [], "in_part_by": ["OD-103"], "refined_by": []}),
+        ("a replaced OD no longer refines what it refined", states["OD-59"] == {"replaced_by": [], "in_part_by": ["OD-104"], "refined_by": []}),
         ("a replacement in part and in full both show", states["OD-74"]["replaced_by"] == ["OD-79"] and states["OD-74"]["in_part_by"] == ["OD-78"]),
     ]
     with tempfile.TemporaryDirectory() as tmp:

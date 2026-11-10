@@ -8,8 +8,8 @@ valid_as_of: 2026-10-25
 stale_after: 2026-11-25T00:00:00Z
 review_status: slop
 generated:
-  by: codex/gpt-6
-  at: 2026-10-25T20:11:26Z
+  by: claude-code/opus-5.5
+  at: 2026-11-10T13:02:24Z
 verified: []
 sources:
   - id: s1
@@ -25,8 +25,8 @@ sources:
     resource: /adr/006-governance-through-easy-track-factories.md
     title: ADR 006 — governance permissions and motion restrictions
   - id: s5
-    resource: /adr/013-tests-on-sepolia.md
-    title: ADR 013 — four account-specific keys and Sepolia execution boundaries
+    resource: /adr/015-tests-on-sepolia.md
+    title: ADR 015 — four account-specific keys and Sepolia execution boundaries
   - id: s6
     resource: /specs/sepolia-stand-plan.md
     title: Existing stand, funding procedure and recorded deployment evidence

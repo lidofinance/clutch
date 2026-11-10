@@ -191,7 +191,7 @@ contract MainnetSavingsCoverageTest is ClutchFixture {
         roles.execTransactionWithRole(a.susds, 0, abi.encodeCall(IERC4626.deposit, (1, address(safe))), 0, OPERATOR, true);
         assertEq(keccak256(abi.encode(state())), before); approve(true, 0); exitAndCheck(true, true, 100e18);
         exitAndCheck(true, false, state().shares); assertTrue(safe.isModuleEnabled(address(safety))); assertFalse(safe.isModuleEnabled(address(roles)));
-        vm.startPrank(principal); SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))); vm.stopPrank();
+        vm.startPrank(principal); SafeExec.execAsOwner(voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles)))); vm.stopPrank();
         approve(false, 10e18); depositAndCheck(10e18);
     }
 }

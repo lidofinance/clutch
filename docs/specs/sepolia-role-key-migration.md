@@ -6,13 +6,13 @@ tags: [sepolia, zodiac, migration, roles]
 status: draft
 review_status: slop
 generated:
-  by: codex/gpt-6
-  at: 2026-10-22T22:34:04Z
+  by: claude-code/opus-5.5
+  at: 2026-11-10T13:02:24Z
 verified: []
 sources:
   - id: s1
-    resource: /adr/013-tests-on-sepolia.md
-    title: ADR 013 — OD-100 proposal and migration acceptance checks
+    resource: /adr/015-tests-on-sepolia.md
+    title: ADR 015 — OD-122 proposal and migration acceptance checks
   - id: s2
     resource: /research/sepolia-role-key-migration-2026-10-22.md
     title: Migration package, account batches, fork checks and remaining public steps
@@ -23,7 +23,7 @@ sources:
 
 # Sepolia role-key migration
 
-Use the existing Safes and Roles modifiers on chain `11155111`. EM chose OD-100 B, OD-97 C and OD-98 A on 2026-10-22. The stand owner reviews the locally compiled package, authorises its exact calls and signs public transactions. Preparing or publishing a draft executes no migration [s1][s3].
+Use the existing Safes and Roles modifiers on chain `11155111`. EM chose OD-122 B, OD-119 C and OD-120 A on 2026-10-22. The stand owner reviews the locally compiled package, authorises its exact calls and signs public transactions. Preparing or publishing a draft executes no migration [s1][s3].
 
 | Safe | Modifier | Old key | New key |
 |---|---|---|---|
@@ -47,7 +47,7 @@ The package contains 87 configuration calls in two atomic Safe batches. The Asse
 
 ## 2. Publish the Constellation draft
 
-The owner runs hosted commands from a clean, pushed `testnet/sepolia`, with the workspace key in the ignored `.env`. An agent needs an explicit exception to use that key. OD-95 and OD-96 remain open; hosted publication still needs its applicable authorisation. Public execution needs the owner's authorisation in ADR 013 [s1][s3].
+The owner runs hosted commands from a clean, pushed `testnet/sepolia`, with the workspace key in the ignored `.env`. An agent needs an explicit exception to use that key. OD-117 and OD-118 remain open; hosted publication still needs its applicable authorisation. Public execution needs the owner's authorisation in ADR 015 [s1][s3].
 
 ```sh
 CLUTCH_SEPOLIA_PUSH=1 just --justfile sepolia.just migration-resolve
@@ -97,4 +97,4 @@ Reload Zodiac. Confirm three Vaults and seven Policies with the new key mapping 
 
 ## Mainnet
 
-Use the same four keys in the initial mainnet policy after the ADR 013 design dependencies are complete. Update factory and exit-governance pins, invariants, execution clients, monitoring and runbooks together. These Sepolia commands authorise no mainnet action [s1].
+Use the same four keys in the initial mainnet policy after the ADR 015 design dependencies are complete. Update factory and exit-governance pins, invariants, execution clients, monitoring and runbooks together. These Sepolia commands authorise no mainnet action [s1].

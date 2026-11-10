@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:33:22Z
+  at: 2026-10-22T21:39:40Z
 verified: []
 sources:
   - id: s1
@@ -67,6 +67,8 @@ EM decided on 2026-10-07 [s1]:
 
 10. A CI workflow publishes the onboarding guide on GitHub Pages from `main`. The page says that it is a hypothetical draft: nothing is deployed or ratified, every number can change, and it is not advice. This replaces "internal first" of OD-37 for the guide's page alone. The repository stays private until deployment (ADR 001).
 
+Since OD-95, the repository is public ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md) decision 10).
+
 EM decided on 2026-10-12 [s7]:
 
 11. The onboarding guide gets every check that the agent's triage of 2026-10-12 proposed, in one pull request, with no part deferred [s8]. The browser tests check every presentation state and the page without its script. Each item of the guide is pinned to the text of its sources, and a reference names a decision or a section of an ADR, not the whole ADR. Every ADR, invariant, LIP part and runbook is cited by the guide or excluded with a reason. CI attaches the built page to each pull request, reports the pin changes, checks the workflows, and checks the guide's outside links each week.
@@ -122,7 +124,7 @@ EM requested implementation of steps needing no further decision [s1]. The propo
 - Until phase 2, broken fork tests need not make CI red. The template asks authors to run `just test-fork`.
 - Local anvil rehearsals may use one public test `PRIVATE_KEY` for one command. `mainnet.just` refuses it.
 - Contributors need uv, bun, Foundry, git and an archive RPC for fork tests.
-- The guide is readable by anyone with its URL. Private repository source links require access.
+- The guide is readable by anyone with its URL, and its source links work for every reader, because the repository is public (OD-95).
 
 ## Confirmation
 

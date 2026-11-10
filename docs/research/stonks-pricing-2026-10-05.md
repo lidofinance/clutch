@@ -3,7 +3,7 @@ type: Research Note
 title: Stonks 2.0 pricing, 2026-10-05
 description: OD-20 evidence on Stonks pricing, router control, Chainlink coverage, feed replacements and the WETH route.
 tags: [stonks, pricing, oracle, chainlink, evidence]
-status: stable
+status: deprecated
 review_status: slop
 valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
@@ -12,7 +12,7 @@ superseded_by:
   note: "Decisions 17 to 20 of ADR 007 (OD-43, 2026-10-06): the vault no longer uses Stonks pricing."
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  at: 2026-10-22T20:29:49Z
 verified: []
 sources:
   - id: s1

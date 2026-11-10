@@ -116,7 +116,7 @@ contract MainnetWethCoverageTest is ClutchFixture {
         assertEq(address(safe).balance, 2 ether); assertEq(IERC20(a.weth).balanceOf(address(safe)), 1 ether);
         assertTrue(safe.isModuleEnabled(address(safety))); assertFalse(safe.isModuleEnabled(address(roles)));
         vm.startPrank(principal);
-        SafeExec.execAsOwner(agent, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
+        SafeExec.execAsOwner(voting, safe, address(safe), abi.encodeCall(ISafe.enableModule, (address(roles))));
         vm.stopPrank();
         callWeth(false, 1 ether, abi.encodeCall(IWETH.deposit, ()));
         callWeth(false, 0, abi.encodeCall(IWETH.withdraw, (2 ether)));

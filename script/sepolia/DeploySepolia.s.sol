@@ -6,6 +6,7 @@ import {ISafe, ISafeProxyFactory, IModuleProxyFactory} from "../../src/interface
 import {IRoles} from "../../src/interfaces/IRoles.sol";
 import {IERC20} from "../../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../../src/mocks/MockAragonAgent.sol";
+import {MockAragonVoting} from "../../src/mocks/MockAragonVoting.sol";
 import {MockEVMScriptExecutor} from "../../src/mocks/MockEVMScriptExecutor.sol";
 import {
     SepoliaToken,
@@ -19,7 +20,7 @@ import {ICoWSettlement, ICoWFallback} from "./CoWInterfaces.sol";
 
 contract DeploySepolia is Script {
     string internal network;
-    MockAragonAgent internal voting;
+    MockAragonVoting internal voting;
     uint256 internal salt;
 
     struct Stand {
@@ -103,7 +104,7 @@ contract DeploySepolia is Script {
 
     function _accounts(address controller) internal {
         // Two instances of the existing Agent mock: Voting owns; Agent receives recovery.
-        voting = new MockAragonAgent();
+        voting = new MockAragonVoting();
         s.agent = new MockAragonAgent();
         s.committee = _safe(dependency("safe13"), controller, address(0), salt);
         s.emergency = _safe(dependency("safe15"), controller, address(0), salt + 1);

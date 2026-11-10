@@ -3,13 +3,13 @@ type: Research Note
 title: Easy Track funding registries, 2026-10-02
 description: OD-06 evidence on registry limits, calendar periods, payment references and twelve live registries.
 tags: [funding, easy-track, registry, evidence]
-status: stable
+status: deprecated
 review_status: slop
 valid_as_of: 2026-10-02
 stale_after: 2027-01-31T00:00:00Z
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  at: 2026-11-05T19:22:23Z
 verified: []
 sources:
   - id: s1
@@ -54,6 +54,8 @@ sources:
 ---
 
 # Easy Track funding registries, 2026-10-02
+
+> **Replaced:** on 2026-11-05 EM chose funding by tranche votes, so the vault has no funding registry (OD-106, [ADR 014](/adr/014-funding-by-tranche-votes.md)). This note stays as dated evidence.
 
 An agent read the Easy Track source at `3183d1f` and ran every chain read on this page on 2026-10-02. The reads use Ethereum mainnet block 26105012, hash `0xf2ec35ab8858185d18527a8be6418ac088531032e3b11ca804c10e776b64735c`, time 2026-10-02T13:43:23Z [s10].
 

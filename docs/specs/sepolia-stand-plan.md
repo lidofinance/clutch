@@ -6,8 +6,8 @@ tags: [sepolia, deployment, testing, cow, first-loss]
 status: draft
 review_status: slop
 generated:
-  by: codex/gpt-6
-  at: 2026-10-25T09:15:26Z
+  by: claude-code/opus-5.5
+  at: 2026-11-10T13:02:24Z
 verified: []
 sources:
   - id: s1
@@ -86,8 +86,8 @@ sources:
     resource: urn:clutch:evidence:2026-10-22:sepolia-snapshot-retention
     title: CLI regression tests — failed RPC preparation preserves saved payload, context and diff
   - id: s32
-    resource: /adr/013-tests-on-sepolia.md
-    title: ADR 013 — proposed Sepolia permissions, role-key migration and mainnet design dependencies, OD-95 to OD-100
+    resource: /adr/015-tests-on-sepolia.md
+    title: ADR 015 — proposed Sepolia permissions, role-key migration and mainnet design dependencies, OD-117 to OD-122
   - id: s33
     resource: urn:clutch:evidence:2026-10-22:sepolia-resolution-check
     title: Local check — the resolution saved on 2026-10-20 against the current payload; the same 63 calls with the roles in another order; Safe owners and modules match
@@ -309,11 +309,11 @@ The exported payload uses legacy `targets` and empty `annotations` for governanc
 Local readback reconstructs permissions and checks the same 63 configuration calls [s30].
 The pinned SDK's generic `push` does not emit this legacy format [s30].
 Production hosted commands keep the repository-owner workflow from clean merged `main` [s11].
-ADR 013 proposes a separate route for the Sepolia workspace. EM decides it in OD-95 and OD-96 [s32].
+ADR 015 proposes a separate route for the Sepolia workspace. EM decides it in OD-117 and OD-118 [s32].
 
 ### Publish the declaration to the Sepolia workspace
 
-Run these commands only after EM's decisions on OD-95 and OD-96 [s32].
+Run these commands only after EM's decisions on OD-117 and OD-118 [s32].
 Commit and push `testnet/sepolia` first.
 In the local `.env`, set `SEPOLIA_ZODIAC_API_KEY` and `SEPOLIA_ZODIAC_WORKSPACE`, the workspace of the prepared context.
 Set `SEPOLIA_ZODIAC_API_URL` only for another API origin; it must use https.
@@ -339,14 +339,14 @@ The resolution saved on 2026-10-20 in the earlier workspace passes this comparis
 
 After the publication, check the saved draft.
 The governance role keeps `Nor`, no node is marked as modified and the hosted diff is empty.
-Do not press Deploy or Apply in the Zodiac app (OD-97) [s32].
+Do not press Deploy or Apply in the Zodiac app (OD-119) [s32].
 
 - [x] Publish the existing-state declaration and check it in the workspace. On 2026-10-22, Zodiac marks it `Deployed`; the deployment page says `Nothing to deploy`. The three Safe addresses, four modifiers and seven role keys match the prepared declaration. The original governance `Nor` conditions remain. The RPC comparison found zero differences across 82 events at block `11970750` [s36].
 
 - [x] Update to SDK 2.10.0 and API types 1.13.0. Prepare all three `vault: true` flags and seven policy labels locally. The payload differs only in those ten metadata fields; the RPC comparison found zero policy differences at block `11971576` [s37].
-- [x] Draft OD-100 and the ADR 013 migration proposal for `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency`. Include the same key scheme in the mainnet design dependencies [s32].
-- [x] Record EM's choices on 2026-10-22: OD-100 B, OD-97 C and OD-98 A. The migration uses a locally compiled package through test Voting. The new keys separate the conflicting policies [s32].
-- [x] Prepare the migration package and pass ADR 013's fork checks. Nine pinned-fork tests pass; two local Anvil transactions leave zero policy differences and preserve allowance storage and Safe configuration. The 87 calls fit in two atomic Safe batches. Commands and remaining public steps are in [the migration guide](sepolia-role-key-migration.md) [s32].
+- [x] Draft OD-122 and the ADR 015 migration proposal for `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency`. Include the same key scheme in the mainnet design dependencies [s32].
+- [x] Record EM's choices on 2026-10-22: OD-122 B, OD-119 C and OD-120 A. The migration uses a locally compiled package through test Voting. The new keys separate the conflicting policies [s32].
+- [x] Prepare the migration package and pass ADR 015's fork checks. Nine pinned-fork tests pass; two local Anvil transactions leave zero policy differences and preserve allowance storage and Safe configuration. The 87 calls fit in two atomic Safe batches. Commands and remaining public steps are in [the migration guide](sepolia-role-key-migration.md) [s32].
 - [x] Publish the checked migration as a Constellation draft. The saved owner publication response on 2026-10-23 has HTTP status `200` and identifies Constellation `c0cc7061-5e89-4024-bf1b-2a3531f2f311` in the Sepolia workspace [s38].
 - [x] Execute the reviewed Asset and Orders batches. Both owner transactions succeeded on 2026-10-23, at blocks `11976805` and `11976806` [s38].
 - [x] Save and verify both canonical receipts against the exact package. The comparison at block `11976825` found zero policy differences, unchanged allowance storage and unchanged Safe configuration apart from the expected nonce increments. Activate the local `account` key profile; a fresh declaration at block `11976830` also has zero differences. Evidence: `cache/sepolia/role-key-migration/verification.json` and `cache/sepolia/constellation/diff.json` [s38].

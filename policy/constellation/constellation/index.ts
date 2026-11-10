@@ -3,14 +3,41 @@
 // four roles. See PROVENANCE.md.
 // Changed for Clutch on 2026-10-13: the technical role merged into the
 // emergency role (ADR 005, decision 25).
+// Changed for Clutch on 2026-11-06: the Easy Track executor's restart and
+// insurance-funding roles (ADR 013, decision 12; ADR 014, decision 7).
+// Changed for Clutch on 2026-11-07: the orders modifier (ADR 007, decision 30).
+// Changed for Clutch on 2026-11-08: the orders modifier's governance and
+// approvals roles (ADR 007, decision 41), and the safety modifier's
+// exit-governance role (ADR 006, decision 13).
 import { manifest } from "./addresses";
-import { operatorRolesNode, safetyRolesNode } from "./nodes";
-import { emergency, governance, operator } from "./roles";
-import { earn_eth_deposit_wsteth, earn_usd_deposit, sky_savings_usds } from "./allowances";
+import { operatorRolesNode, ordersRolesNode, safetyRolesNode } from "./nodes";
+import {
+  emergency,
+  exitGovernance,
+  governance,
+  insuranceFunding,
+  operator,
+  ordersApprovals,
+  ordersEmergency,
+  ordersGovernance,
+  ordersOperator,
+  restart,
+} from "./roles";
+import {
+  earn_eth_deposit_wsteth,
+  earn_usd_deposit,
+  orders_steth,
+  orders_usdc,
+  orders_usds,
+  orders_usdt,
+  orders_weth,
+  orders_wsteth,
+  sky_savings_usds,
+} from "./allowances";
 
 /**
- * The operator modifier: the operator role and the governance role that
- * administers it, with the operator's budgets. The Asset Safe is its owner,
+ * The operator modifier: the operator role, the governance role that
+ * administers it, and the insurance-funding role, with the operator's budgets. The Asset Safe is its owner,
  * avatar and target, so a permitted call executes as the Asset Safe.
  */
 export const operator_modifier = operatorRolesNode({
@@ -18,13 +45,25 @@ export const operator_modifier = operatorRolesNode({
   owner: manifest.assetSafe as `0x${string}`,
   avatar: manifest.assetSafe as `0x${string}`,
   target: manifest.assetSafe as `0x${string}`,
-  roles: { operator, governance },
-  allowances: { sky_savings_usds, earn_usd_deposit, earn_eth_deposit_wsteth },
+  roles: { operator, governance, "insurance-funding": insuranceFunding },
+  allowances: {
+    sky_savings_usds,
+    earn_usd_deposit,
+    earn_eth_deposit_wsteth,
+    orders_steth,
+    orders_wsteth,
+    orders_weth,
+    orders_usdc,
+    orders_usdt,
+    orders_usds,
+  },
 });
 
 /**
- * The safety modifier: the emergency role. It sits on a separate module, so
- * that the emergency role's switch, which disables the operator modifier,
+ * The safety modifier: the emergency role, the restart role that enables
+ * the operator modifier again after the switch (ADR 013, decision 12), and the exit-governance role that
+ * writes the emergency role's exit for a target that a motion names (ADR 006, decision 13). It sits on a
+ * separate module, so that the emergency role's switch, which disables the operator modifier,
  * does not disarm recovery (ADR 005).
  */
 export const safety_modifier = safetyRolesNode({
@@ -32,5 +71,21 @@ export const safety_modifier = safetyRolesNode({
   owner: manifest.assetSafe as `0x${string}`,
   avatar: manifest.assetSafe as `0x${string}`,
   target: manifest.assetSafe as `0x${string}`,
-  roles: { emergency },
+  roles: { emergency, restart, "exit-governance": exitGovernance },
 });
+
+/**
+ * The orders modifier: the operator and emergency roles on the orders account (ADR 007, decision 30), and the
+ * Easy Track executor's governance and approvals roles (decision 41). The orders account is its owner, avatar and
+ * target, so a permitted call executes as the orders account. Only a manifest that names the modifier compiles
+ * it: the kit deploys no orders account.
+ */
+export const orders_modifier = manifest.ordersModifier
+  ? ordersRolesNode({
+      address: manifest.ordersModifier as `0x${string}`,
+      owner: manifest.ordersAccount as `0x${string}`,
+      avatar: manifest.ordersAccount as `0x${string}`,
+      target: manifest.ordersAccount as `0x${string}`,
+      roles: { operator: ordersOperator, emergency: ordersEmergency, governance: ordersGovernance, approvals: ordersApprovals },
+    })
+  : undefined;

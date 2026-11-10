@@ -6,8 +6,8 @@ tags: [sepolia, testing, coverage, integrations]
 status: draft
 review_status: slop
 generated:
-  by: codex/gpt-6
-  at: 2026-10-25T20:11:26Z
+  by: claude-code/opus-5.5
+  at: 2026-11-10T13:02:24Z
 verified: []
 sources:
   - id: s1
@@ -32,7 +32,7 @@ sources:
     resource: /adr/011-launch-scope.md
     title: Current launch integrations and exclusions
   - id: s8
-    resource: /adr/013-tests-on-sepolia.md
+    resource: /adr/015-tests-on-sepolia.md
     title: Account keys and Sepolia execution boundaries
   - id: s9
     resource: /specs/sepolia-test-plan.md
@@ -205,15 +205,6 @@ sources:
   - id: s73
     resource: urn:clutch:evidence:2026-10-25:mainnet-first-loss-burn
     title: Six First-loss burn motion cases use real Earn shares and Easy Track on the pinned fork
-  - id: s74
-    resource: urn:clutch:evidence:2026-10-25:mainnet-enabling-vote-rehearsal
-    title: Live Easy Track and Finance top-ups, local registries and the payment permission rewrite on a pinned fork
-  - id: s75
-    resource: urn:clutch:evidence:2026-10-25:mainnet-main09-paused
-    title: Paused-USDC top-up refusal, atomic rollback and retry through live Easy Track and Finance
-  - id: s76
-    resource: urn:clutch:evidence:2026-10-25:mainnet-main09-boundaries
-    title: Trusted creator and recipient, Voting-only limit changes, objections, cancellation, monthly limit race and rollover
   - id: s78
     resource: /research/sepolia-test-results.md
     title: Recorded Sepolia results and diagnostics
@@ -485,7 +476,7 @@ Existing mainnet harness tests can supply partial evidence after their exact ass
 | MAIN-06 | EarnUSD and EarnETH deposits: each supported asset, approvals, request and any deployed cancellation path, pricing/settlement, claim to Asset, proof/caller fields, caps, queue pause and insufficient liquidity; record absent API paths rather than inventing them | P: eight real USDC/EarnUSD and wstETH/EarnETH deposit cases cover exact requests/cancel/refunds, actual early/eligible Oracle→Vault→Queue→Hook reports, exact allocated/active shares, both claimers, no double claim, auto-claim, referral/open-root behavior, proof/account independence, vault-cap boundary, pause/whitelist, atomic refusals and stop/restart. Controlled proof/cap parameters and grants exist only on the fork. Further amount/fee and hook/liquidity failures, production role graph and report consensus/valuation remain open [s67] |
 | MAIN-07 | EarnUSD and EarnETH redemptions: normal Asset positions and separate First-loss positions, pricing/report delay, multiple requests, claim variants, liquidity shortage, emergency completion and no double claim | P: sixteen Asset and four controlled First-loss cases cover real request/report/batch/claim ledgers, delays, multiple timestamps, bounded FIFO batches, replay, receiver/role pins, restrictions, oracle rollback, Emergency completion, fee conservation/exemption/extremes, rounding and zero-net cleanup. A USDC blacklist causes the real hook path to fail at token transfer, roll back and retry. Organic hook/subvault failure, production policies/signing and external valuation/consensus remain open [s68][s69][s70][s71][s72] |
 | MAIN-08 | Real First-loss burn: trusted factory, exact supply/share accounting and motion lifecycle; do not substitute the stand's unrestricted controller-mintable token | P: eight cases exercise both real Earn share tokens through the deployed Easy Track executor, exact window, objection thresholds and snapshot transfers, creator/Voting cancel, failure recovery, exact burn accounting and replay refusal. The factory and First-loss role graph are local fork fixtures registered by impersonating Voting; production factory registration and signing remain open [s73][s78] |
-| MAIN-09 | Treasury funding: stablecoin and stETH registries, allowed assets/recipient, shared payment permissions, trusted creator, monthly enactment limits, objection/cancel, paused payments, owner-only limit changes and enabling vote | P: live Voting, Easy Track and Finance cover USDC/stETH/USDS top-ups, payment permissions, trusted creator/recipient, Voting-only limit changes, cancellation, LDO objection, concurrent monthly-limit enforcement and calendar rollover, plus paused-USDC rollback/retry. Registry deployments and limits are local stand-ins; production registry values remain open [s74][s75][s76] |
+| MAIN-09 | Treasury funding: OD-106 replaced the funding registries and Easy Track top-ups with tranche votes through Finance (ADR 014) | X: the registry cases tested a superseded design, and the merge with `main` removed them. The tranche path is in `main`'s enabling-vote rehearsal |
 | MAIN-10 | Governance templates and exit-governance: each in-scope template's creation/enactment validation, narrow target/selector/receiver, complete-tree removal, stale-state recovery, emergency exit and forbidden admin/delegatecall | D |
 | MAIN-11 | Full CoW launch token matrix: allowed sell/buy/recovery pairs, USDC and USDT recovery, decimals, rounding and token-specific approval/transfer behavior; non-launch tokens refused | P: 30 distinct pairs to Asset, 10 stablecoin-destination pairs to Agent, decimals and exact per-token allowance deltas pass through live Settlement on a mainnet fork. Production Orders policy, non-launch refusal and remaining amount/fee/failure variants remain open [s78] |
 | MAIN-12 | Committee screening at cap lift: correct guard/build, no modules or bypass, one-use approval tied to full transaction/nonce, no replay/standing approval, outage, ten-day removal path and independent Emergency/Voting paths | D |

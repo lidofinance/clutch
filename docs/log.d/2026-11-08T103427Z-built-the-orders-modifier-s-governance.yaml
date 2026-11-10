@@ -1,0 +1,3 @@
+date: '2026-11-08'
+kind: Evidence
+text: 'Built the orders modifier''s governance and approvals roles of ADR 007 decision 41, held by the Easy Track executor: governance writes a token''s signer and TWAP orders and three trees pinned whole, grants delegatecall only to the order signer and restores the operator''s cancels; the approvals role approves only CoW''s vault relayer. The compiler gained grant rules for role keys and delegatecall. Fork tests run a token motion''s writes by hand; the fork suite passes 90 tests. INV-040 is amended to add the approvals key.'
