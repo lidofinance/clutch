@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T21:39:51Z
+  at: 2026-11-11T05:14:57Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -64,7 +64,7 @@ sources:
 ## Context
 
 - Decisions, specifications, policy, code, tests and deployment records need one consistent source.
-- The factories will reuse Easy Track's audited GPL-3.0 base contracts [s3].
+- Easy Track's audited base contracts are GPL-3.0 [s3]. The universal factory imports none of them.
 - The dry-run kit has six commits whose messages explain the corrections.
 - The design names an unannounced screening vendor.
 
@@ -112,7 +112,7 @@ EM decided on 2026-10-22, closing OD-95 [s1]:
 ## Confirmation
 
 - The visibility setting of `lidofinance/clutch` on GitHub.
-- `grep -rL --include='*.sol' --include='*.py' --include='*.ts' --exclude-dir=node_modules "SPDX-License-Identifier: AGPL-3.0-or-later" src script scripts test policy` lists only files derived from Easy Track or from the provider's constellation. A CI check replaces this command once the factories exist.
+- `scripts/check_licences.py` checks in CI that every source file carries an allowed licence line: AGPL-3.0-or-later, or the licence of the code that it derives from.
 
 ## Reversal conditions
 

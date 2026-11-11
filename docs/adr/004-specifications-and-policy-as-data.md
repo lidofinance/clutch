@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T21:39:51Z
+  at: 2026-11-11T05:14:57Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -79,7 +79,7 @@ EM accepted the positioned model on 2026-09-30 [s1]:
 
 1. **Conceptual specifications** are written by hand. They hold what code cannot say: the architecture, the roles matrix, the permission model, the invariants and the threat model.
 2. **The API reference** is generated from NatSpec. Nobody edits it by hand.
-3. **Invariants** have IDs `INV-NNN`. Each maps to a named test, and CI fails on an invariant without a test.
+3. **Invariants** have IDs `INV-NNN`. Each maps to a named test, and CI fails on a Draft invariant without one.
 4. **Behaviour** is written as WHEN/THEN scenarios. Tests derive from the specifications, never from the implementation. A behaviour change updates its specification in the same commit.
 5. **The LIP** is a third, external layer. It summarises and cites the conceptual specifications and must never contradict them.
 6. **Runbooks** are a separate class under `docs/runbooks/`. There is one per emergency or technical action. Each maps to a permission and carries a drill record.
@@ -98,7 +98,7 @@ EM decided on 2026-10-06, closing OD-33 [s1]:
 11. Local tooling replicates and verifies everything that the UI produces. No transaction that the hosted app builds is signed, or enters a vote or a motion, unless Clutch's compiler produces the same calls from the same commit. The policy changes only in the repository; a change made in the UI is drift.
 12. The policy source is the Zodiac constellation, written in TypeScript under `policy/`. It replaces the YAML file of decision 8. Decision 7 still applies through decision 14: the compiled artifact is the policy's data.
 13. Clutch's own compiler, written in TypeScript on the Zodiac roles SDK, replaces the Python compiler of decision 9. It runs offline from a frozen lockfile with pinned versions, and it emits the artifact of decision 9. It refuses an entry that only the hosted app can compile, such as an action or a DeFi Kit preset, because local tooling cannot verify it.
-14. The artifact is committed. A policy pull request carries the TypeScript change and the recompiled artifact, and CI fails when they differ. Reviewers approve the artifact. The enabling vote, the Easy Track templates and the drift detector consume the committed artifact.
+14. The artifact is committed. A policy pull request carries the TypeScript change and the recompiled artifact, and CI fails when they differ. Reviewers approve the artifact. The enabling vote, the universal factory's seeded versions and the drift detector consume the committed artifact.
 15. The Solidity builders go now. The port to the constellation deletes them and rebuilds the fork tests on the artifact. The port does not have to reproduce the builders' trees.
 
 Not chosen on 2026-10-06: the hosted app as an optional viewer only, the hosted app without local verification, a Python compiler that reads a JSON export of the constellation, review of the TypeScript only, and a gate that keeps the Solidity builders until the compiled trees equal theirs.
@@ -127,7 +127,6 @@ EM decided on 2026-10-13, closing OD-64 [s1]:
 
 - The compiler must emit a complete tree for each role, target and selector: writes replace slots [s4].
 - The round-trip check must use the mastercopy's enum values and `Allowance` order: `refill`, `maxRefill`, `period`, `balance`, `timestamp`.
-- The port deletes Solidity builders (decision 15). Until then, [test/README.md](https://github.com/lidofinance/clutch/blob/370e20a21883c5ded9f20b4122fdb79eca2eb28e/test/README.md) records their design differences [s5].
 - TypeScript compiles; Solidity tests. The round-trip check compares chain state with the artifact independently of both.
 - Compilation runs the SDK's npm dependencies. CI compiles offline from the frozen lockfile; the vote consumes only the reviewed artifact (decision 14).
 - Clutch must build the vote and motion hand-off around that artifact; the hosted app provides none [s8].
@@ -142,7 +141,7 @@ EM decided on 2026-10-13, closing OD-64 [s1]:
 ## Confirmation
 
 - INV-016: the round-trip check passes on a fork.
-- The invariant-to-test check in CI, once it exists.
+- `scripts/check_invariants.py` in CI: every named test exists, and every Draft invariant names one.
 
 ## Reversal conditions
 

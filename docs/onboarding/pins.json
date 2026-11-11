@@ -6,7 +6,7 @@
       "sources": {
         "ADR-003#d14": "3960ef8b26b00cd9",
         "ADR-003#d5": "27b4dabd1ac7149d",
-        "ADR-003#d6": "ac36139993be1f8a",
+        "ADR-003#d6": "0469a359660adea3",
         "ADR-003#d7": "405e94a48b6f0ade",
         "OD-106": "f60165e1e725bbdc",
         "OD-31": "4d2c16853b3feecf",
@@ -66,7 +66,7 @@
     "actor:artifact": {
       "content": "09cc613f5dac3edb",
       "sources": {
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-004#d15": "e8ef27487f8aa2bd",
         "ADR-004#d9": "04d53a4b074dd7ae",
         "ADR-013#proposed-direction": "de917e230a493ac4",
@@ -218,7 +218,7 @@
         "ADR-004#d10": "06653cca4da77af8",
         "ADR-004#d11": "d34b583a18a270ba",
         "ADR-004#d12": "b5b417361e57d9ca",
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-004#d16": "e9a28d32b40e8a03",
         "OD-103": "97ffb682ff6f44fa",
         "OD-104": "9ebfcaef28a3742d",
@@ -1073,7 +1073,7 @@
       "sources": {
         "ADR-004#d11": "d34b583a18a270ba",
         "ADR-004#d12": "b5b417361e57d9ca",
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-004#d7": "0988fac0f5e50f75",
         "ADR-013#proposed-direction": "de917e230a493ac4",
         "INV-016": "cd9f0a527584b5ab",
@@ -1492,7 +1492,7 @@
         "ADR-004#d10": "06653cca4da77af8",
         "ADR-004#d11": "d34b583a18a270ba",
         "ADR-004#d13": "28d45152ae99863d",
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-004#d16": "e9a28d32b40e8a03",
         "OD-33": "0fb334f1351ad5ba",
         "OD-35": "590de325e7b1dd47"
@@ -1694,7 +1694,7 @@
     "flow:enabling-vote": {
       "content": "273567c3eaae7939",
       "sources": {
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-005#d28": "01abc2953856b753",
         "ADR-005#d32": "98cc2295d4dfa9fb",
         "ADR-007#confirmation": "6e142ddf14cc5880",
@@ -1928,7 +1928,7 @@
         "ADR-004#d11": "d34b583a18a270ba",
         "ADR-004#d12": "b5b417361e57d9ca",
         "ADR-004#d13": "28d45152ae99863d",
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-004#d16": "e9a28d32b40e8a03",
         "ADR-004#d7": "0988fac0f5e50f75",
         "ADR-004#d9": "04d53a4b074dd7ae",
@@ -2696,7 +2696,7 @@
       "content": "e338beb6043c8126",
       "sources": {
         "ADR-004#d15": "e8ef27487f8aa2bd",
-        "ADR-004#d3": "4aa3abfb40ca3b89",
+        "ADR-004#d3": "94122684a443274e",
         "ADR-004#d4": "427995e5872efe67",
         "ADR-004#d7": "0988fac0f5e50f75",
         "doc:test/README.md#what-is-real-and-what-is-mocked": "b925cda83c473a56"
@@ -2705,7 +2705,7 @@
     "reuse:the-enabling-vote-script": {
       "content": "555040c79c7f0919",
       "sources": {
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-004#d9": "04d53a4b074dd7ae"
       }
     },
@@ -2753,7 +2753,7 @@
       "content": "9c5392195837f44c",
       "sources": {
         "ADR-004#d12": "b5b417361e57d9ca",
-        "ADR-004#d3": "4aa3abfb40ca3b89",
+        "ADR-004#d3": "94122684a443274e",
         "ADR-004#d7": "0988fac0f5e50f75",
         "ADR-005#d6": "9857ea8ab4ac4455",
         "ADR-005#proposed-direction": "7f70638accef046d",
@@ -2773,7 +2773,7 @@
       "sources": {
         "ADR-004#d11": "d34b583a18a270ba",
         "ADR-004#d13": "28d45152ae99863d",
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "OD-33": "0fb334f1351ad5ba"
       }
     },
@@ -3066,7 +3066,7 @@
     "rfp:governance": {
       "content": "ef991e41037c53f7",
       "sources": {
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-005#context": "cd990aec3cedd7de",
         "ADR-005#d28": "01abc2953856b753",
         "ADR-005#d32": "98cc2295d4dfa9fb",
@@ -3494,7 +3494,7 @@
     "term:artifact": {
       "content": "98a5edebb77774b1",
       "sources": {
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-004#d9": "04d53a4b074dd7ae"
       }
     },
@@ -3603,7 +3603,7 @@
     "term:drift-detector": {
       "content": "1e5939b4901e792f",
       "sources": {
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-004#d9": "04d53a4b074dd7ae",
         "ADR-009#proposed-direction": "3da150af445d6104"
       }
@@ -3638,7 +3638,7 @@
     "term:enabling-vote": {
       "content": "c3f9d5edbdb32a19",
       "sources": {
-        "ADR-004#d14": "adae758778527142",
+        "ADR-004#d14": "294031adf64a90e7",
         "ADR-005#d32": "98cc2295d4dfa9fb",
         "ADR-008#d19": "ab18428eeb49c353",
         "ADR-010#d22": "d31bb218b69e8d0a",
