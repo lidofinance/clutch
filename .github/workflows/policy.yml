@@ -2,7 +2,7 @@ name: policy
 
 # ADR 004, decision 14: the committed policy artifact must equal a fresh
 # compile of the constellation. Reviewers approve the artifact, and the
-# enabling vote, the Easy Track templates and the drift detector consume it.
+# enabling vote, the universal factory's seeded versions and the drift detector consume it.
 
 on:
   pull_request:

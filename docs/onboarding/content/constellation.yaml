@@ -3,23 +3,23 @@
 # the policy provider's constellation, with the reason for each change.
 # Kind: changed, added or removed (against the provider's constellation at 02ea37d).
 intro: >-
-  The constellation uses the format of the Zodiac UI. Clutch started from the policy provider's constellation for this
-  vault and rewrote it to the decided design. Clutch's own compiler turns it into the committed artifact that reviewers
-  approve, and this page reads the graph below from that artifact when it is built.
+  The [[constellation]] uses the format of the Zodiac UI. Clutch started from the policy provider's constellation for
+  this vault and rewrote it to the decided design. Clutch's [[compiler]] turns it into the committed [[artifact]], and
+  this page reads the graph below from that artifact.
 planned:
   - name: Orders account's token motion
     where: "The universal factory, through the orders modifier's governance and approvals roles"
-    what: "A motion adds a token to the order lists, on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders. The orders account and its four roles are in the constellation, compiled for the rehearsal, because the kit has no orders account: the governance role grants delegatecall only to CoW's order signer and pins whole the trees that do not depend on the token, and the approvals role approves only CoW's vault relayer. The universal factory's orders operation writes the motion in one call."
+    what: "The orders account's four roles and the motion that adds a token are built. The graph above leaves them out: they are compiled for the rehearsal, because the kit has no orders account. Still to build: the removal of a token from the order lists."
     sources: ["ADR-005#d21", "ADR-005#d25", "ADR-007#d41", "INV-023", "INV-040",
-      "doc:docs/research/orders-motion-roles-2026-11-08.md#what-was-built"]
+      "doc:docs/research/orders-motion-roles-2026-11-08.md#what-was-built", "doc:ROADMAP.md#roadmap"]
   - name: Insurance roles
     where: "On the first-loss modifier, held by the universal factory"
-    what: "The insurance-funding role on the operator modifier, which moves a listed token from the Asset Safe to the first-loss Safe, is in the constellation. The insurance roles on the first-loss modifier deposit into the insured product with the first-loss Safe as the receiver, burn, and pay a fund's pinned payout address within its cap. All act only by motion."
+    what: "The insurance roles deposit into the insured product with the first-loss Safe as the receiver, burn, and pay a fund's pinned payout address within its cap. All act only by motion."
     sources: ["ADR-014#d4", "ADR-014#d7", "ADR-014#proposed-direction", "ADR-005#proposed-direction",
       "INV-039"]
   - name: First-loss Safe and its roles
     where: "A Voting-owned Safe with one modifier of its own"
-    what: "One first-loss modifier. The first-loss burn role, held by the universal factory, burns the DAO's first-loss shares only in an enacted motion. The first-loss role, held by the committee's Safe, redeems them to the Asset Safe. The insurance roles act on the insurance funds, by motion. No role can transfer or approve the first-loss shares."
+    what: "One first-loss modifier. The first-loss burn role, held by the universal factory, burns the DAO's [[first-loss shares]] only in an enacted motion. The first-loss role, held by the committee's Safe, redeems them to the Asset Safe. No role can transfer or approve them."
     sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-014#d10", "OD-107", "INV-021"]
 changes:
   - area: Modifiers
@@ -32,20 +32,20 @@ changes:
   - area: Emergency holder
     kind: changed
     provider: "The Emergency Brakes multisig."
-    clutch: "A new emergency Safe at 3 of 5: two committee members, two Emergency Brakes members and one member of neither body. The Emergency Brakes multisig keeps only the Easy Track pause."
+    clutch: "A new [[Emergency Safe]] at 3 of 5: two committee members, two Emergency Brakes members and one member of neither body. The Emergency Brakes multisig keeps only the Easy Track pause."
     why: "Financial emergencies need the people who watch the portfolio every day, and no single body may act alone. The quorum without the committee is the mandate's independent exit."
     sources: ["ADR-005#d2", "ADR-005#d23", "ADR-005#d24"]
   - area: Module disabling
     kind: changed
     provider: "The emergency role could call `disableModule` with both arguments open."
     clutch: "The emergency role can disable only the operator modifier; the module argument is pinned. It holds no call that restores authority, and the compiler refuses one."
-    why: "An open `disableModule` could switch off the safety modifier, and with it every recovery path. A motion restarts the operator, through a restart role that may only enable the operator modifier."
+    why: "An open `disableModule` could switch off the safety modifier, and with it every recovery path. Only a motion restarts the operator, through a restart role that may only enable the operator modifier."
     sources: ["ADR-005#d25", "ADR-005#d26", "ADR-005#proposed-direction", "ADR-013#d12", "INV-009",
       "INV-027", "INV-035"]
   - area: Governance
     kind: added
     provider: "No role. It assumed that motions act as the Aragon Agent, which Easy Track cannot do."
-    clutch: "A governance role for the universal factory, which uses it in an enacted motion's one call. It writes operator permissions only through the universal factory's typed shapes, never delegatecall and never on the Asset Safe or its modules. An exit-governance role on the safety modifier writes only the emergency role's exits, each tree pinned whole."
+    clutch: "A governance role, which the [[universal factory]] uses only in an enacted motion. It writes operator permissions only through the factory's typed [[shape|shapes]], never delegatecall and never on the Asset Safe or its modules. An exit-governance role on the safety modifier writes only the emergency role's exits, each tree pinned whole."
     why: "Motions need their own narrow role; two fork probes showed how a wider one reaches the vault."
     sources: ["ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7", "ADR-013#proposed-direction",
       "INV-004", "INV-034", "ADR-006#d13", "INV-025"]
@@ -66,7 +66,7 @@ changes:
     kind: changed
     provider: "A CoW swap action over six sell and five buy tokens, with a TODO for bounds, compiled by the hosted app."
     clutch: "No swap on the Asset Safe. CoW orders from the orders account, with every receiver pinned and zero app data."
-    why: "An action that only the hosted app compiles cannot be reviewed here, and its price bounds were still a TODO."
+    why: "An action that only the hosted app compiles cannot be reviewed here."
     sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "OD-33", "ADR-007#d42"]
   - area: DAI
     kind: added
@@ -77,25 +77,25 @@ changes:
   - area: ETH and WETH
     kind: added
     provider: "No permission for staking, WETH or the withdrawal queue."
-    clutch: "Stake ETH, and wrap and unwrap WETH. No Lido withdrawal queue: stETH is sold in CoW orders instead (ADR 007, decision 27)."
-    why: "ETH and WETH are on the launch list. The vault does not use the withdrawal queue, because CoW orders already buy WETH and a request cannot be cancelled."
+    clutch: "Stake ETH, and wrap and unwrap WETH. No Lido withdrawal queue: CoW orders sell stETH instead."
+    why: "ETH and WETH are on the launch list. CoW orders already buy WETH, and a withdrawal request cannot be cancelled."
     sources: ["ADR-007#d13", "ADR-007#d27", "ADR-011#d1", "ADR-007#d22", "ADR-007#d41", "doc:docs/research/zodiac-constellation-2026-10-06.md#4-differences-from-the-decided-design"]
   - area: Approvals and budgets
     kind: changed
     provider: "Approvals pin the spender and leave the amount open; deposits spend monthly budgets with placeholder figures."
-    clutch: "Each approval spends its spender's budget key, or stays under a ceiling that a motion changes within its limit; deposits spend nothing; a budget motion cannot set a refill period under 30 days."
+    clutch: "Each approval spends its spender's [[budget key]], or stays under a [[ceiling]]. Deposits spend nothing. A budget motion cannot set a refill period under 30 days."
     why: "A spender can pull an approval without any deposit, so the approval is what must be bounded."
     sources: ["ADR-009#d13", "ADR-009#d14", "ADR-009#d15", "ADR-013#d13", "INV-008", "INV-012", "INV-036"]
   - area: First-loss shares
     kind: changed
     provider: "Both roles can redeem Earn shares."
-    clutch: "The first-loss shares sit in a first-loss Safe. Only an enacted motion burns them, and only a narrow role of the committee's Safe redeems them, to the Asset Safe; the operator and emergency roles never see them."
-    why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart. The narrow roles let the committee execute the first-loss terms without a DAO vote, and a burn waits for the objection window."
+    clutch: "The shares sit in a [[first-loss Safe]], which the operator and emergency roles cannot reach. Only an enacted motion burns them, and only a narrow role of the committee's Safe redeems them, to the Asset Safe."
+    why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart. The narrow roles let the committee execute the first-loss terms without a DAO vote."
     sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-014#d10"]
   - area: Compiling and pushing
     kind: changed
     provider: "The hosted app compiles actions and pushes the policy, with an API key."
-    clutch: "Clutch's own offline compiler writes the committed artifact, and CI checks it. The Zodiac UI is a view, and local tooling verifies everything it builds."
+    clutch: "Clutch's own offline compiler writes the committed artifact, and CI checks it. The Zodiac UI is a view: local tooling verifies everything that it builds."
     why: "Reviewers must approve exactly what the vote applies, so the compile runs here, from the reviewed commit."
     sources: ["ADR-004#d10", "ADR-004#d11", "ADR-004#d13", "ADR-004#d14", "ADR-004#d16", OD-33, OD-35]
   - area: Licence and provenance

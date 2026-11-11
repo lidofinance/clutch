@@ -7,7 +7,7 @@
     - "The committee's Safe"
     - "[the screening vendor]"
   answer: 1
-  why: "Aragon Voting is the only owner, at 1 of 1, and recovered assets go to the Aragon Agent, the DAO's treasury. The committee acts on the vault only through its roles: the operator role on the operator and orders modifiers, and the first-loss role on the first-loss modifier."
+  why: "Aragon Voting is the only owner, at 1 of 1. The committee acts on the vault only through its roles: the operator role and the first-loss role."
   sources: ["ADR-005#d6", "ADR-005#d28", "ADR-005#proposed-direction", "INV-001"]
 
 - id: outside-transfer
@@ -18,7 +18,7 @@
     - "The operator modifier: the policy has no such transfer, and every receiver is pinned to a vault account"
     - "The objection window"
   answer: 2
-  why: "The operator role holds no transfer to an outside address: its transfers go only to the orders account, under the orders budgets, and its planned return goes only to the Aragon Agent; every other receiver, owner and beneficiary in its permissions is the Asset Safe. Once the screening guard is set, it is a second, independent check."
+  why: "The operator role holds no transfer to an outside address: its transfers go only to the orders account, under the orders budgets, and its planned return goes only to the Aragon Agent; every other receiver in its permissions is the Asset Safe. Once the screening guard is set, it is a second, independent check."
   sources: [INV-002, INV-003, "ADR-014#d9", "test:test_D3_operator_cannot_route_around_avatar"]
 
 - id: depeg-first
@@ -41,7 +41,7 @@
     - "Nobody: the switch is final"
     - "The committee's Safe, at once"
   answer: 1
-  why: "No emergency body restores what it stopped. The committee's Safe creates a restart motion. After 72 hours without an objection, the universal factory's restart role enables the operator modifier again, and the role can do nothing else. Motions from before the stop fail, because the emergency Safe raised the factory's motion counter."
+  why: "No emergency body restores what it stopped. The committee's Safe creates a restart motion, and after 72 hours without an objection the universal factory's restart role enables the operator modifier again. Motions from before the stop fail, because the emergency Safe raised the factory's motion counter."
   sources: ["ADR-005#d26", "ADR-013#d10", "ADR-013#d12", "INV-035"]
 
 - id: vendor-offline
@@ -63,7 +63,7 @@
     - "The Zodiac Roles mastercopy"
     - "The CoW order signer"
   answer: 1
-  why: "The universal Easy Track factory, with the thin companion contracts that it creates, is the only new code, and Lido writes it. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so Clutch counts it as new code and the external audit covers it with the factory."
+  why: "The universal Easy Track factory, with the thin companion contracts that it creates, is the only new code, and Lido writes it. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so the external audit covers it as new code, with the factory."
   sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-007#proposed-direction", "ADR-007#d40",
     "ADR-013#d17"]
 
@@ -87,7 +87,7 @@
     - "Yes, but only for stablecoins"
     - "Yes, Easy Track checks it"
   answer: 1
-  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the emergency Safe to switch the operator off. The Zodiac UI refuses to build an operator transaction that would breach a cap, but only in its own interface. Screening may also refuse an operator transaction that breaches a cap, if the vendor confirms that it can check that."
+  why: "The permission layer cannot see value, so caps are kept by measurement, publication and remediation. A breach that gets worse leads the emergency Safe to switch the operator off. The Zodiac UI refuses to build an operator transaction that would breach a cap, but only in its own interface. Screening may refuse one too, if the vendor confirms that it can check that."
   sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d33", "ADR-009#d34", "ADR-009#d43",
     "ADR-009#proposed-direction"]
 

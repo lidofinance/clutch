@@ -1,7 +1,7 @@
 # Plain definitions. `[[term]]` or `[[term|shown text]]` anywhere in the content links here;
 # the build fails on a link to a term that this file does not define.
 - term: ADR
-  plain: "A numbered decision record in `docs/adr/`. An agent drafts it. It stays proposed until EM, and later the committee, accepts it. An acceptance authorises nothing on chain."
+  plain: "A numbered decision record in `docs/adr/`. An agent drafts it, and it stays proposed until EM, and later the committee, accepts it. An acceptance authorises nothing on chain."
   sources: ["ADR-002#d1", "ADR-002#d6", "ADR-002#d7"]
 
 - term: Allowance
@@ -9,11 +9,11 @@
   sources: ["ADR-009#d13"]
 
 - term: Approval
-  plain: "Permission for a named contract, the spender, to pull tokens from the Safe. In Clutch, an approval to a protocol spends that spender's budget key, or stays under a [[ceiling]]. An approval of zero is always allowed."
+  plain: "Permission for a named contract, the spender, to pull tokens from the Safe. In Clutch, an approval to a protocol spends that spender's [[budget key]], or stays under a [[ceiling]]. An approval of zero is always allowed."
   sources: ["ADR-009#d13", "ADR-009#d14", "ADR-013#d13", INV-008]
 
 - term: Aragon Agent
-  plain: "The DAO's treasury contract. Aragon Finance pays each tranche out of it. Funds come back to it only in an emergency or a recovery. Aragon Voting, not the Agent, owns the vault's Safes."
+  plain: "The DAO's treasury contract, which pays each [[tranche vote|tranche]]. Funds come back to it only in an emergency or a recovery. Aragon Voting, not the Agent, owns the vault's Safes."
   sources: ["ADR-008#d19", "ADR-007#d17", "ADR-007#d20", "ADR-005#d28", "ADR-005#proposed-direction",
     "ADR-014#d1", "ADR-014#d8"]
 
@@ -40,7 +40,7 @@
   sources: ["ADR-009#d1", "ADR-009#d9", "ADR-009#d33", "ADR-009#proposed-direction"]
 
 - term: Ceiling
-  plain: "The upper bound of a budget key or an approval. The enabling vote, or the motion that introduces a token, sets a token's first ceilings, and that counts as their first raise. A motion lowers a ceiling at any time. It raises a ceiling to at most twice its value, at most once in 15 days. Why the limit: a ceiling that one motion could set to any value would bound nothing."
+  plain: "The upper bound of a [[budget key]] or an approval. The enabling vote, or the motion that introduces a token, sets a token's first ceilings, and that counts as their first raise. A motion lowers a ceiling at any time, and raises it to at most twice its value, at most once in 15 days: a ceiling that one motion could set to any value would bound nothing."
   sources: ["ADR-013#d13", "ADR-013#d15", "ADR-009#d14", "INV-036", "runbook:Change a ceiling"]
 
 - term: Compiler
@@ -52,7 +52,7 @@
   sources: ["ADR-004#d12", OD-33]
 
 - term: Conditional order
-  plain: "A CoW order that ComposableCoW holds and checks, such as a TWAP order. CoW's watch-tower posts it to the order book when it is due."
+  plain: "A CoW order that ComposableCoW holds and checks, such as a [[TWAP]] order. CoW's [[watch-tower]] posts it to the order book when it is due."
   sources: ["ADR-007#d18", "ADR-007#proposed-direction",
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
@@ -61,7 +61,7 @@
   sources: [OD-39, "doc:docs/specs/control-matrix.md#the-matrix"]
 
 - term: CoW
-  plain: "CoW Protocol, an order-based exchange. Every vault swap is a CoW order from the orders account. Solvers compete to fill an order at its limit or better, and the [[EBBO]] rule holds a fill to the on-chain market; nothing on chain bounds the price."
+  plain: "CoW Protocol, an order-based exchange. Every vault swap is a CoW order from the [[orders account]]. Solvers compete to fill an order at its limit or better, and the [[EBBO]] rule holds a fill to the on-chain market; nothing on chain bounds the price."
   sources: ["ADR-007#d17", "ADR-007#d26"]
 
 - term: Default-deny
@@ -69,7 +69,7 @@
   sources: ["lip:part-3"]
 
 - term: Delegatecall
-  plain: "A call that runs another contract's code inside the caller's own storage. A delegatecall from a Safe can therefore rewrite the Safe itself. No motion can grant it to the operator on the Asset Safe. On the orders account, a motion grants only the delegatecall to CoW's order signer."
+  plain: "A call that runs another contract's code inside the caller's own storage. A delegatecall from a Safe can therefore rewrite the Safe itself. No motion can grant it to the operator on the Asset Safe; on the orders account, a motion grants it only to CoW's order signer."
   sources: ["ADR-006#d9", "ADR-007#d41"]
 
 - term: Drift
@@ -77,7 +77,7 @@
   sources: ["ADR-004#d11"]
 
 - term: Drift detector
-  plain: "A planned monitoring rule that compares the live policy with the committed artifact and alerts on any difference."
+  plain: "A planned monitoring rule that alerts on any [[drift]]."
   sources: ["ADR-004#d9", "ADR-004#d14", "ADR-009#proposed-direction"]
 
 - term: Drill
@@ -85,7 +85,7 @@
   sources: ["doc:docs/specs/specification-policy.md#runbooks"]
 
 - term: Dual Governance
-  plain: "The layer that a DAO vote passes through before the Aragon Agent executes it. It adds a delay. The vault does not use it: Aragon Voting owns the vault's Safes, so a vote on the vault runs directly."
+  plain: "The layer that delays a DAO vote before the Aragon Agent executes it. The vault does not use it: Aragon Voting owns the vault's Safes, so a vote on the vault runs directly."
   sources: ["ADR-005#context", "ADR-005#d28"]
 
 - term: Easy Track
@@ -101,7 +101,7 @@
   sources: ["ADR-005#d24", "ADR-005#d25", "ADR-005#d26"]
 
 - term: Enabling vote
-  plain: "The DAO vote that turns the system on. It registers the [[universal factory]], and it pays the first tranche, one million dollars, to the Asset Safe. For the vault's Safes, it approves the hash of each Safe batch, and anyone sends the batches after the vote: they apply the policy compiled for mainnet, grant the roles, and set up the orders account and the first-loss Safe."
+  plain: "The DAO vote that turns the system on. It registers the [[universal factory]], pays the first tranche, one million dollars, to the Asset Safe, and approves the hash of each Safe batch. Anyone sends the batches after the vote: they apply the policy compiled for mainnet, grant the roles, and set up the orders account and the first-loss Safe."
   sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-008#d19", "ADR-013#d6",
     "ADR-014#d2", "doc:docs/specs/enabling-vote.md#the-vote", "ADR-005#d32"]
 
@@ -114,12 +114,12 @@
   sources: ["ADR-005#d15", "ADR-007#d17", "ADR-007#d20"]
 
 - term: First-loss shares
-  plain: "The DAO's earnETH and earnUSD shares from the March 2026 Earn allocation. They take losses first, to protect other depositors. They move to the first-loss Safe. On the Earn team's written instruction, they burn by Easy Track motion, after the objection window, or the committee redeems them to the Asset Safe through one narrow role."
+  plain: "The DAO's earnETH and earnUSD shares from the March 2026 Earn allocation. They take losses first, to protect other depositors. The [[first-loss Safe]] holds them, and its roles burn or redeem them on the Earn team's written instruction."
   sources: ["ADR-008#d13", "ADR-008#d14", "ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23",
     "ADR-014#d10"]
 
 - term: First-loss Safe
-  plain: "A Safe that Aragon Voting owns, which holds the first-loss shares and the insurance funds. Its one modifier carries the universal factory's roles, which burn, fund and pay out only by enacted motion, and a role of the committee's Safe, which redeems to the Asset Safe."
+  plain: "A Safe that Aragon Voting owns, which holds the [[first-loss shares]] and the insurance funds. Its one modifier carries the universal factory's roles, which burn, fund and pay out only by enacted motion, and a role of the committee's Safe, which redeems to the Asset Safe."
   sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-014#d4", "ADR-014#d10", "INV-021"]
 
 - term: Fortnightly snapshot
@@ -127,7 +127,7 @@
   sources: ["ADR-009#d25", "ADR-009#d31"]
 
 - term: Guard
-  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard on the committee's Safe, set after the launch, before the vote that lifts the [[launch cap]] starts. A module guard does the same for module transactions; Clutch uses none."
+  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard on the committee's Safe; until it is set, the [[launch cap]] applies. A module guard does the same for module transactions; Clutch uses none."
   sources: ["ADR-010#d3", "ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction"]
 
 - term: Invariant
@@ -135,7 +135,7 @@
   sources: ["doc:docs/specs/specification-policy.md#invariants"]
 
 - term: Launch cap
-  plain: "A cap of one million dollars on the Asset Safe and the orders account while the screening guard is not live. The first tranche, inside the enabling vote, is the cap, so the cap holds by the tranche's size. If a first-loss redemption takes the vault above it, the committee's Safe returns the excess to the Aragon Agent. The second tranche's vote lifts the cap, and that vote starts only once the guard is set with its bypass mode off."
+  plain: "A cap of one million dollars on the Asset Safe and the orders account while the screening [[guard]] is not live. The first tranche is the cap, so its size holds the cap. If a first-loss redemption takes the vault above it, the committee's Safe returns the excess to the Aragon Agent. The second tranche's vote lifts the cap, and starts only once the guard is set with its bypass mode off."
   sources: ["ADR-010#d20", "ADR-010#d22", "ADR-014#d2", "ADR-014#proposed-direction"]
 
 - term: Limit order
@@ -152,7 +152,7 @@
   sources: ["ADR-009#d3", "ADR-009#proposed-direction", "doc:ROADMAP.md#roadmap"]
 
 - term: Mandate size
-  plain: "The upper bound of the vault's funding. The vault holds up to it in assets: each funding counts in US dollars at its value when it is funded, and the legacy positions count too. No tranche refills the vault to it by right, and a larger size needs a separate DAO approval. Its figure is not in the repository."
+  plain: "The upper bound of the vault's funding. The vault holds up to it in assets: each funding counts in US dollars at its value when it is funded, and the legacy positions count too. No tranche refills the vault to it by right, and a larger size needs a separate DAO approval."
   sources: ["ADR-008#d32", "ADR-008#d34", "ADR-014#d1"]
 
 - term: Manifest
@@ -164,11 +164,11 @@
   sources: ["ADR-005#d6"]
 
 - term: Motion
-  plain: "One Easy Track proposal. Its factory's trusted caller creates it, and it enacts after the objection window. Easy Track rebuilds and hash-checks its script at enactment. Every Clutch motion comes from the [[universal factory]]."
+  plain: "One Easy Track proposal. Its factory's [[trusted caller]] creates it, and it enacts after the [[objection window]]. Easy Track rebuilds and hash-checks its script at enactment. Every Clutch motion comes from the [[universal factory]]."
   sources: ["ADR-005#d31", "ADR-010#d24", "ADR-006#context", "ADR-013#d5", "INV-005"]
 
 - term: Motion counter
-  plain: "A number that the universal factory keeps. Each motion names the counter that it saw at creation. When the emergency Safe or Aragon Voting raises the counter, every open motion fails at enactment, and its creator or Aragon Voting cancels it. The emergency Safe raises it at every stop."
+  plain: "A number that the universal factory keeps. Each motion names the counter that it saw at creation. When the emergency Safe or Aragon Voting raises it, every open motion fails at enactment, and its creator or Aragon Voting cancels it. The emergency Safe raises it at every stop."
   sources: ["ADR-013#d10", "ADR-013#proposed-direction", INV-033, "runbook:Raise the motion counter"]
 
 - term: Objection window
@@ -201,7 +201,7 @@
   sources: ["ADR-007#d5", "ADR-007#d19", "ADR-007#proposed-direction", OD-26, INV-014, "ADR-007#d41", "ADR-007#d25"]
 
 - term: RFP
-  plain: "Request for solution: the requirements that Lido contributors sent to the policy provider. It asked what the provider supports today, what needs work and what it cannot do. The RFP tab maps each ask to Clutch's answer."
+  plain: "Request for solution: the requirements that Lido contributors sent to the policy provider. It asked what the provider supports today, what needs work and what it cannot do."
   sources: ["doc:docs/research/request-for-solution-2026-10-07.md#answer"]
 
 - term: Role
@@ -210,7 +210,7 @@
   sources: ["ADR-005#proposed-direction", "ADR-013#proposed-direction", "lip:part-2"]
 
 - term: Roles modifier
-  plain: "A Zodiac module that checks each call against the caller's role, refuses anything not explicitly allowed, and runs the rest as the Safe. Clutch has four: an operator modifier and a safety modifier on the Asset Safe, one orders modifier on the orders account, and one first-loss modifier on the first-loss Safe."
+  plain: "A Zodiac module that checks each call against the caller's role, refuses anything not explicitly allowed, and runs the rest as the Safe. Clutch has four: the operator and safety modifiers on the Asset Safe, the orders modifier on the orders account, and the first-loss modifier on the first-loss Safe."
   sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#proposed-direction"]
 
 - term: Round-trip check
@@ -231,7 +231,7 @@
   sources: ["ADR-013#d7", "ADR-013#d9", "ADR-013#proposed-direction", INV-034]
 
 - term: Snapshot vote
-  plain: "Lido's off-chain LDO vote. The mandate passes a Snapshot vote before the on-chain enabling vote. It is not the same as a holdings snapshot."
+  plain: "Lido's off-chain LDO vote. The mandate passes a Snapshot vote before the on-chain enabling vote. It is not the [[fortnightly snapshot]]."
   sources: ["doc:ROADMAP.md#roadmap"]
 
 - term: sUSDS
@@ -255,7 +255,7 @@
   sources: ["ADR-014#d1", "ADR-014#d2", "ADR-014#d3", "runbook:Fund a tranche"]
 
 - term: Treasury share
-  plain: "The largest part of the DAO's non-LDO treasury that the vault may hold. The mandate sets it. The mandate still owes the share's base, the time of its test, and the remedy for a breach that no vault transaction causes."
+  plain: "The largest part of the DAO's non-LDO treasury that the vault may hold. The mandate sets it."
   sources: ["ADR-008#d33", "ADR-008#proposed-direction"]
 
 - term: Trusted caller
@@ -268,7 +268,7 @@
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
 - term: Universal factory
-  plain: "The one Easy Track factory that builds every Clutch motion and holds the roles that motions use. Its registration is its address book: one call, its own `applyMotion`, in which it checks a motion again and makes the motion's writes. It widens a permission only through typed [[shape|shapes]], narrows one with raw writes, keeps a [[version]] for each scope, and cannot be upgraded."
+  plain: "The one Easy Track factory that builds every Clutch [[motion]] and holds the roles that motions use. Its registration allows one call, its own `applyMotion`, in which it checks a motion again and makes the motion's writes. It widens a permission only through a typed [[shape]], keeps a [[version]] for each scope, and cannot be upgraded."
   sources: ["ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d10", "ADR-013#d18", "INV-032"]
 
 - term: Version
