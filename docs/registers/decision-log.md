@@ -6,8 +6,8 @@ tags: [decisions, provenance]
 status: stable
 review_status: slop
 generated:
-  by: claude-code/mythos-5.2
-  at: 2026-11-11T16:50:31Z
+  by: claude-code/opus-5.5
+  at: 2026-11-11T20:36:01Z
 verified: []
 sources:
   - id: s1
@@ -109,6 +109,9 @@ sources:
   - id: s33
     resource: "urn:clutch:interview:2026-11-11-occam"
     title: EM's request for an Occam pass over every layer of the repository, 2026-11-11; the transcript is not in the repository
+  - id: s34
+    resource: "urn:clutch:interview:2026-11-11-occam-verify"
+    title: EM's instructions to record EM's verification of ADR 001 to ADR 004 after the Occam pass, and to list a second recording agent, 2026-11-11; the transcript is not in the repository
 ---
 
 # Decision log
@@ -118,6 +121,21 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-11 — ADR 001 to ADR 004 verified after the Occam pass, and a second recording agent
+
+The Occam pass brought the accepted ADR 001 to ADR 004 to the current-design form, which broke EM's verification of each page. The agent asked EM to verify the four pages again. EM wrote:
+
+> 1. run verification script for ADRs 001-004 on my behalf
+
+The session's agent, `claude-code/mythos-5.2`, was not in the actor list's agents, so it could not record a verification. EM then wrote:
+
+> add claude-code/mythos-5.2 to config/actors.yaml and run just verify on my behalf to bless ADR 001-004
+
+Recorded as:
+
+- `config/actors.yaml` lists `claude-code/mythos-5.2` as an agent that may record a human's verification, next to `claude-code/opus-5.5`. EM asked for this edit of a protected file in writing.
+- EM verifies ADR 001 to ADR 004 again after the edits of the Occam pass, so they stay accepted. At this instruction, the agent recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The session ran as `claude-code/opus-5.5` when it recorded them, so the entries name that agent. The verifications are EM's. [s34]
 
 ## 2026-11-11 — the Occam pass: one statement per fact
 
