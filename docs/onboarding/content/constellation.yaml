@@ -10,7 +10,7 @@ planned:
   - name: Orders account's token motion
     where: "The universal factory, through the orders modifier's governance and approvals roles"
     what: "A motion adds a token to the order lists, on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders. The orders account and its four roles are in the constellation, compiled for the rehearsal, because the kit has no orders account: the governance role grants delegatecall only to CoW's order signer and pins whole the trees that do not depend on the token, and the approvals role approves only CoW's vault relayer. The universal factory's orders operation writes the motion in one call (OD-103, OD-118)."
-    sources: ["ADR-007#d28", "ADR-007#d30", "ADR-007#d41", "OD-57", "OD-58", "OD-103", "INV-023", "INV-040",
+    sources: ["ADR-005#d21", "ADR-005#d25", "ADR-007#d41", "OD-57", "OD-58", "OD-103", "INV-023", "INV-040",
       "doc:docs/research/orders-motion-roles-2026-11-08.md#what-was-built", "OD-118"]
   - name: Insurance roles
     where: "On the first-loss modifier, held by the universal factory"
@@ -79,7 +79,7 @@ changes:
     provider: "No permission for staking, WETH or the withdrawal queue."
     clutch: "Stake ETH, and wrap and unwrap WETH. No Lido withdrawal queue: stETH is sold in CoW orders instead (ADR 007, decision 27)."
     why: "ETH and WETH are on the launch list. The vault does not use the withdrawal queue, because CoW orders already buy WETH and a request cannot be cancelled."
-    sources: ["ADR-007#d13", "ADR-007#d27", "ADR-011#d1", "ADR-011#d12", "ADR-011#d14", OD-20]
+    sources: ["ADR-007#d13", "ADR-007#d27", "ADR-011#d1", "ADR-007#d22", "ADR-007#d41", "OD-20"]
   - area: Approvals and budgets
     kind: changed
     provider: "Approvals pin the spender and leave the amount open; deposits spend monthly budgets with placeholder figures."

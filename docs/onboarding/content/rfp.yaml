@@ -12,14 +12,16 @@ properties_sources: ["doc:docs/research/request-for-solution-2026-10-07.md#what-
 properties:
   - name: DAO ownership
     how: "Aragon Voting is the only owner of every account that holds assets, and recovered assets go to the Aragon Agent. The Asset Safe owns both of its modifiers, which are proxies of a locked mastercopy."
-    sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#context", "ADR-005#proposed-direction", INV-001, INV-021, INV-023]
+    sources: ["ADR-008#d19", "ADR-007#d17", "ADR-007#d20", "ADR-005#context", "ADR-005#proposed-direction",
+      "INV-001", "INV-021", "INV-023"]
   - name: Default-deny permissions
     how: "Each role reaches only named targets and functions, and every receiver is pinned to the vault. A motion adds a permission only through a typed shape of the universal factory, fixed at audit time. It never grants administration, or a delegatecall other than the order signer's."
     sources: ["ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7", "ADR-013#d8", INV-003, INV-004,
       INV-034]
   - name: Rapid risk reduction
     how: "The emergency Safe revokes, exits and returns assets at once, and no guard sits on its path. It can also switch the operator off. Fork drills must show each action started within six hours."
-    sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#context", "ADR-005#proposed-direction", OD-58, INV-002, INV-009, INV-010,
+    sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d25", "ADR-005#context",
+      "ADR-005#proposed-direction", "OD-58", "INV-002", "INV-009", "INV-010",
       "doc:ROADMAP.md#standing-gates"]
   - name: Walk-away operation
     how: "Clutch compiles and checks the policy itself, from the reviewed commit, and the provider's hosted app is out of the path. Removal, recovery and DAO actions are plain on-chain calls with no vendor code on their path."
@@ -72,7 +74,7 @@ sections:
         why: "A motion that carried its own condition tree could widen authority past what the DAO approved, so every widening fills a shape. Versions stop two motions from undoing each other's change."
         sources: ["ADR-006#context", "ADR-013#d2", "ADR-013#d5", "ADR-013#d7", "ADR-013#d10", "ADR-013#d13",
           "ADR-013#proposed-direction", "ADR-007#d41", "OD-09", "OD-70", "OD-102", "OD-103", "OD-105",
-          "INV-004", "INV-034"]
+          "INV-004", "INV-034", "INV-027"]
       - asked: "Lido contributors design, build, audit, deploy and maintain the Easy Track helper contracts. The provider confirms that its access control exposes the administration functions and works safely with this path."
         verdict: kept
         clutch: "The universal Easy Track factory, with the thin companion contracts that it creates (OD-117), is the only new code. Lido builds it in phase 2, and an external audit covers it in phase 3, with CoW's order signer, which has no known audit (OD-96). The governance role calls six administration functions of the Roles modifier, each one guarded."
@@ -81,8 +83,9 @@ sections:
         verdict: changed
         clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe (OD-73). Easy Track never receives authority over the vault's owner or the Agent. On the Asset Safe, the universal factory holds only the governance, insurance-funding, exit-governance and restart roles, and uses them only in an enacted motion's one call; the restart role may only enable the operator modifier. Outside it, the factory holds the governance and approvals roles on the orders modifier, and the burn and insurance roles on the first-loss Safe, so every first-loss burn is a motion (OD-67). Easy Track's executor holds no role (OD-118). The committee's Safe, as the universal factory's trusted caller, creates every motion."
         why: "The reason is the one under Accounts: a vault vote passes no Dual Governance, and Aragon Voting gains no new power (OD-73)."
-        sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-008#d23", "ADR-013#d12",
-          "ADR-013#proposed-direction", "ADR-010#proposed-direction", OD-67, OD-73, INV-004, INV-035, "ADR-013#d18", OD-118]
+        sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-005#d31", "ADR-010#d24", "ADR-006#d13",
+          "ADR-008#d23", "ADR-013#d12", "ADR-013#proposed-direction", "ADR-010#proposed-direction", "OD-67",
+          "OD-73", "INV-004", "INV-035", "ADR-013#d18", "OD-118"]
       - asked: "A direct DAO path can make every change that Easy Track can make."
         verdict: kept
         clutch: "A DAO vote, a direct Aragon Voting item, can do everything on the owner path: replace the policy, change membership and apply any change without Easy Track. A fork test runs that path."
@@ -113,11 +116,12 @@ sections:
       - asked: "Adding or widening a permission and removing one are separate actions. A removal cannot add or widen, and an expansion cannot make an arbitrary call."
         verdict: kept
         clutch: "The universal factory's typed shapes widen, and its raw writes only narrow: a narrowing write writes the scope's complete content without the removed entries, and adds nothing. No shape can make an arbitrary call. An emergency removal is the emergency role's revoke, which cannot grant anything."
-        sources: ["ADR-005#d11", "ADR-013#d7", "ADR-013#proposed-direction", OD-70, OD-102, INV-004, INV-029, INV-034]
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-013#d7", "ADR-013#proposed-direction",
+          "OD-70", "OD-102", "INV-004", "INV-029", "INV-034"]
       - asked: "An expansion waits through a three-day objection period."
         verdict: kept
         clutch: "Every motion has a 72-hour objection window. Motions are the timelock for every structural increase of exposure, such as a new target or a higher budget."
-        sources: ["ADR-006#d11", "ADR-006#context", "ADR-009#d30", OD-45]
+        sources: ["ADR-006#d11", "ADR-006#context", "ADR-010#d19", "OD-45"]
       - asked: "A standard removal goes through an Easy Track removal motion, with the same three-day objection period."
         verdict: kept
         clutch: "A routine removal is a narrowing motion of the universal factory, with the same objection window. An emergency removal is the emergency Safe's immediate revoke, posted on the forum afterwards."
@@ -125,8 +129,8 @@ sections:
       - asked: "For an urgent risk, the emergency authority blocks or revokes within hours, and a durable change follows later."
         verdict: kept
         clutch: "The emergency Safe revokes the operator's targets and functions on the operator modifier and the orders modifier at once, and it can switch the operator off. It also raises the factory's motion counter, so no queued motion undoes the revoke. A revoke is durable: only a motion or a DAO vote grants the permission again, and a restart motion turns the operator on again."
-        sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#d26", "ADR-013#d10", "ADR-013#d12", OD-104, INV-009, INV-033,
-          "lip:part-6"]
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d25", "ADR-005#d26", "ADR-013#d10",
+          "ADR-013#d12", "OD-104", "INV-009", "INV-033", "lip:part-6"]
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#permission-change-paths", "ADR-013#d7"]
 
   - id: assets
@@ -136,7 +140,8 @@ sections:
         verdict: changed
         clutch: "Clutch takes EM's launch list (ADR 011): ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access and Lido Lend access. DAI earns through Sky's DAI–USDS converter, and sDAI and LDO are out."
         why: "EM set the list and later took LDO off it (OD-91). DAI earns through USDS without a swap or a third-party market, so sDAI is not needed. ETH and WETH need staking and wrapping. The vault does not use Lido's withdrawal queue: stETH is sold in CoW orders instead."
-        sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d7", "ADR-011#d14", "ADR-011#d15", "ADR-007#d13", "ADR-007#d27", OD-20, OD-22, OD-91, INV-015]
+        sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d7", "ADR-007#d13", "ADR-007#d22", "ADR-007#d27",
+          "ADR-011#d15", "OD-20", "OD-22", "OD-91", "INV-015"]
       - asked: "Unapproved actions are denied by default. On-chain rules restrict the target contracts, the functions, the transferred value and the relevant parameters."
         verdict: kept
         clutch: "Each role reaches only named targets and functions, and no target is open as a whole. Every receiver, owner and beneficiary is pinned to the vault, and only the staking and wrapping calls can carry ETH."
@@ -173,7 +178,8 @@ sections:
       - asked: "The emergency role revokes token approvals and exits approved positions."
         verdict: kept
         clutch: "The emergency role sets approvals to zero, exits positions to the Asset Safe, unwraps wstETH and WETH, redeems sUSDS and Earn shares, and revokes the operator's targets and functions. A motion that onboards a protocol also adds the exit from it."
-        sources: ["ADR-005#d11", "ADR-005#proposed-direction", OD-49, INV-025]
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#proposed-direction", "OD-49",
+          "INV-025"]
       - asked: "Recovered assets go only to the fixed DAO treasury address."
         verdict: changed
         clutch: "Recovered assets go to the Aragon Agent, or to the orders account, whose recovery orders buy USDC or USDT and pay only the Agent. A recovery order lives at most one day."
@@ -191,8 +197,8 @@ sections:
       - asked: "In an incident, new operator transactions stop first. The emergency signers check the event, revoke approvals, exit positions or start queued withdrawals, and return what is liquid to the treasury. The DAO disables a role or a module if needed, and an incident report follows."
         verdict: kept
         clutch: "The emergency Safe switches the operator off, revokes, exits and returns assets, redeems Earn shares through their queues, and sells stETH by a recovery order or sends it to the Agent. A DAO vote can disable anything, and the committee publishes an incident report within 72 hours."
-        sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#proposed-direction", "ADR-009#d19", INV-009,
-          "runbook:Return assets to the Agent", "runbook:Switch the operator off"]
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d25", "ADR-005#proposed-direction",
+          "ADR-009#d19", "INV-009", "runbook:Return assets to the Agent", "runbook:Switch the operator off"]
     tech: "The vault does not use Lido's withdrawal queue (ADR 007, decision 27): stETH leaves by a recovery order or by a transfer to the Agent. Earn shares leave through their redeem queues, and the role can cancel open deposit requests."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#emergency-response", "ADR-005#proposed-direction",
       "ADR-007#d27", "lip:part-6", "doc:policy/constellation/artifacts/fork-25946643.json"]
@@ -252,7 +258,8 @@ sections:
       - asked: "Permission removal, module disablement, emergency recovery and DAO ownership actions stay available through an outage, a suspension, a billing dispute or a contract termination."
         verdict: kept
         clutch: "All of them are on-chain calls by the emergency Safe or the DAO, and no vendor code is on their path."
-        sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#proposed-direction", INV-010, "doc:docs/specs/lip-draft.md#problem"]
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d25", "ADR-005#proposed-direction",
+          "INV-010", "doc:docs/specs/lip-draft.md#problem"]
     tech: "The repository-owner team holds the Zodiac workspace and its API key. CI and agents never push, and the key never enters the repository, CI or a vote."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#provider-independence", "ADR-004#d16", OD-35]
 

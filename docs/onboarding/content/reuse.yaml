@@ -66,7 +66,8 @@
   what: "stETH, wstETH, WETH, Lido Earn, sUSDS and Sky's DAI–USDS converter. Lido Lend comes later, by a motion of the universal factory with its shape for a market that is compatible with Morpho Blue. The vault does not use Lido's withdrawal queue."
   why: "EM's launch list (ADR 011). Clutch adds permissions only, never code, to these protocols."
   owner: "Their own governance"
-  sources: ["ADR-011#d1", "ADR-011#d3", "ADR-011#d7", "ADR-011#d13", "ADR-011#d14", "ADR-011#proposed-direction"]
+  sources: ["ADR-011#d1", "ADR-011#d3", "ADR-011#d7", "ADR-011#d13", "ADR-007#d13", "ADR-007#d22",
+    "ADR-007#d27", "ADR-011#proposed-direction"]
 
 - name: Lido on-chain monitoring platform and its guard detector
   column: reused
@@ -80,7 +81,7 @@
   what: "The vendor's existing service, which approves transactions and watches for depegs and protocol compromise."
   why: "Lido already has an arrangement with the vendor for four guarded multisigs. Above the launch cap, on-chain blocking before execution is a hard requirement (OD-54)."
   owner: "[the screening vendor]"
-  sources: ["ADR-010#d1", "ADR-010#d2", "ADR-010#d14", "ADR-010#d20", "ADR-009#d7", "ADR-009#proposed-direction", OD-54]
+  sources: ["ADR-010#d1", "ADR-010#d20", "ADR-010#d14", "ADR-009#d7", "ADR-009#proposed-direction", "OD-54"]
 
 # --- New instance of existing code --------------------------------------------------------------
 - name: The four new Safes
@@ -88,17 +89,17 @@
   what: "The Asset Safe, the emergency Safe, the orders account and the first-loss Safe: proxies of the Safe singleton."
   why: "Each Safe has one job: custody, unscreened recovery, orders in transit, or the first-loss shares and the insurance funds held apart. The committee's existing Safe holds the operator role, so Clutch deploys no operator Safe (OD-80). Clutch's own script deploys the four, because the Zodiac Safe node cannot set the version or the fallback handler."
   owner: "The DAO; the emergency Safe's signers"
-  sources: ["ADR-005#d12", "ADR-005#d13", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction",
-    "ADR-007#d17", "ADR-008#d19", "ADR-010#proposed-direction", "ADR-014#d4", "ADR-005#d31", OD-80]
+  sources: ["ADR-005#d12", "ADR-005#d13", "ADR-005#d15", "ADR-008#d19", "ADR-007#d17", "ADR-007#d20",
+    "ADR-005#proposed-direction", "ADR-010#proposed-direction", "ADR-014#d4", "ADR-005#d31", "OD-80"]
 
 - name: The four Roles modifiers
   column: instance
   what: "Two minimal proxies of the Roles mastercopy on the Asset Safe, one on the orders account and one on the first-loss Safe."
   why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator and emergency roles, and Easy Track's governance and approvals roles; there the emergency role's revoke stops the operator (OD-57, OD-58, OD-103). The first-loss modifier carries the committee's role, which redeems to the Asset Safe, and Easy Track's roles, which burn, fund and pay out by motion (OD-60, OD-67, OD-107, OD-108)."
   owner: "The DAO, through the Asset Safe, the orders account and the first-loss Safe"
-  sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#d25", "ADR-005#d27", "ADR-005#context", "ADR-005#proposed-direction",
-    "ADR-007#d28", "ADR-007#d30", "ADR-007#d41", "ADR-014#d7", "ADR-014#d10", OD-57, OD-58, OD-60, OD-67, OD-103, OD-107,
-    OD-108]
+  sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#d25", "ADR-008#d21", "ADR-008#d23", "ADR-005#context",
+    "ADR-005#proposed-direction", "ADR-007#d41", "ADR-014#d7", "ADR-014#d10", "OD-57", "OD-58", "OD-60",
+    "OD-67", "OD-103", "OD-107", "OD-108"]
 
 - name: The screening guard instance
   column: instance
@@ -166,7 +167,8 @@
   what: "A specification that maps every mandate rule to its controls on each layer, and the written list of the screening vendor's rules with their change control."
   why: "What the chain cannot enforce gets screening, monitoring and display. A relaxation of a screening rule gets review and notice (OD-39, OD-45)."
   owner: "`@lidofinance/defi-tech`; the committee configures the vendor's rules"
-  sources: ["ADR-009#d26", "ADR-009#d30", "ADR-010#d19", OD-39, OD-45, "doc:docs/specs/control-matrix.md#control-matrix"]
+  sources: ["ADR-009#d26", "ADR-006#d11", "ADR-010#d19", "OD-39", "OD-45",
+    "doc:docs/specs/control-matrix.md#control-matrix"]
 
 - name: The report generator
   column: new

@@ -14,8 +14,8 @@
 
 - term: Aragon Agent
   plain: "The DAO's treasury contract. Aragon Finance pays each tranche out of it. Funds come back to it only in an emergency or a recovery. Aragon Voting, not the Agent, owns the vault's Safes."
-  sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#d28", "ADR-005#proposed-direction", "ADR-014#d1", "ADR-014#d8", OD-73,
-    OD-108]
+  sources: ["ADR-008#d19", "ADR-007#d17", "ADR-007#d20", "ADR-005#d28", "ADR-005#proposed-direction",
+    "ADR-014#d1", "ADR-014#d8", "OD-73", "OD-108"]
 
 - term: Artifact
   plain: "The committed JSON file that reviewers approve. It holds the modifier calls in order, the expected condition tree for every role, target and function, and the budget keys."
@@ -107,7 +107,7 @@
 
 - term: Fallback handler
   plain: "A contract that a Safe forwards unknown calls to, for example to accept NFT safe transfers or to sign messages. The Asset Safe has none, on purpose. The orders account uses CoW's, because conditional orders need it."
-  sources: ["ADR-005#d15", "ADR-005#d20", "ADR-007#d17"]
+  sources: ["ADR-005#d15", "ADR-007#d17", "ADR-007#d20"]
 
 - term: First-loss shares
   plain: "The DAO's earnETH and earnUSD shares from the March 2026 Earn allocation. They take losses first, to protect other depositors. They move to the first-loss Safe. On the Earn team's written instruction, they burn by Easy Track motion, after the objection window, or the committee redeems them to the Asset Safe through one narrow role."
@@ -162,7 +162,7 @@
 
 - term: Motion
   plain: "One Easy Track proposal. Its factory's trusted caller creates it, and it enacts after the objection window. Easy Track rebuilds and hash-checks its script at enactment. Every Clutch motion comes from the [[universal factory]]."
-  sources: ["ADR-006#d3", "ADR-006#context", "ADR-013#d5", INV-005]
+  sources: ["ADR-005#d31", "ADR-010#d24", "ADR-006#context", "ADR-013#d5", "INV-005"]
 
 - term: Motion counter
   plain: "A number that the universal factory keeps. Each motion names the counter that it saw at creation. When the emergency Safe or Aragon Voting raises the counter, every open motion fails at enactment, and its creator or Aragon Voting cancels it. The emergency Safe raises it at every stop."
@@ -182,7 +182,7 @@
 
 - term: Orders account
   plain: "A Safe that Aragon Voting owns, with CoW's fallback handler and one modifier of its own. The roles place CoW orders from it. It holds only tokens in transit."
-  sources: ["ADR-007#d17", "ADR-007#d28", OD-43, OD-57, INV-023]
+  sources: ["ADR-007#d17", "ADR-005#d21", "OD-43", "OD-57", "INV-023"]
 
 - term: Permission
   plain: "The rule stored for one role, contract and function. It says which argument values are allowed. A new write replaces the old rule; it does not add to it."
@@ -256,7 +256,7 @@
 
 - term: Trusted caller
   plain: "The only address that may create motions on an Easy Track factory, fixed when the factory is deployed. For the universal factory it is the committee's Safe (OD-80). A new committee Safe therefore needs a new factory, which is a vote."
-  sources: ["ADR-006#d3", "ADR-013#d4", "ADR-013#proposed-direction", OD-80, OD-101]
+  sources: ["ADR-005#d31", "ADR-010#d24", "ADR-013#d4", "ADR-013#proposed-direction", "OD-80", "OD-101"]
 
 - term: TWAP
   plain: "Time-weighted average price: a CoW order in equal parts at a fixed spacing. It buys or sells a position over time, which is how the vault averages its cost."

@@ -578,8 +578,8 @@ def validate(root: Path) -> list[Issue]:
 
 
 # --------------------------------------------------------------------------
-# Generated blocks (ADR 012, OD-82): the register's closed index, the ADR index and the
-# open decisions of each proposed ADR. `--write-status` writes them; `--check-status` fails
+# Generated blocks (ADR 012, OD-82, OD-127): the ADR index and the open decisions of each
+# proposed ADR. `--write-status` writes them; `--check-status` fails
 # when one is stale. Accepted ADRs are left alone, because an edit would break their
 # recorded verification.
 # --------------------------------------------------------------------------

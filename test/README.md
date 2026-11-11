@@ -53,7 +53,7 @@ Budgets and fixed ceilings are dry-run stand-ins. The production figures come fr
 1. `policy/constellation/constellation/` holds the policy as a Zodiac constellation in TypeScript.
 2. `bun compiler/compile.ts --manifest manifests/fork-25946643.json` writes `artifacts/fork-25946643.json`: the ordered modifier calls, the expected condition tree for every role, target and selector, and the allowances.
 3. The fork suites apply that artifact and nothing else.
-4. `just policy-check` fails when the committed artifact differs from a fresh compile, and runs the compiler's tests. CI runs the same check in `.github/workflows/policy.yml`.
+4. `just check-policy` fails when the committed artifact differs from a fresh compile, and runs the compiler's tests. CI runs the same check in `.github/workflows/policy.yml`.
 
 A change to the policy changes the TypeScript and the artifact in the same commit. Reviewers approve the artifact (ADR 004, decision 14).
 
@@ -63,7 +63,7 @@ A change to the policy changes the TypeScript and the artifact in the same commi
 RPC=<archive mainnet RPC> forge test     # the whole suite on the pinned fork
 just test-fork                           # the same
 just policy-compile                      # compile the constellation into the committed artifact
-just policy-check                        # fail if the artifact differs from a fresh compile; compiler tests
+just check-policy                        # fail if the artifact differs from a fresh compile; compiler tests
 ```
 
 The mainnet recipes are in `mainnet.just`, which the Justfile never loads. They broadcast real transactions, so agents never run them (AGENTS.md). A human runs one with `CLUTCH_MAINNET=1 just --justfile mainnet.just <recipe>`, and a Foundry keystore signs it after a password prompt; `.env` holds the keystore's name and address, never a key (ADR 012):

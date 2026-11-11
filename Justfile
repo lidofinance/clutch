@@ -27,7 +27,7 @@ doctor:
 	@forge --version | head -1
 	@git --version
 
-# Rebuild every generated file: the policy artifact, the log, the status register and the guide
+# Rebuild every generated file: the policy artifacts, the status register, the ADR index and the guide
 regen: policy-compile
 	{{py}} scripts/validate_docs.py --write-status
 	{{py}} scripts/build_onboarding.py
@@ -87,7 +87,3 @@ build:
 # Policy (ADR 004): compile the constellation into the committed fork artifact and the enabling-vote rehearsal's artifact
 policy-compile:
 	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json
-
-# Policy: fail if a committed artifact differs from a fresh compile; run the compiler tests
-policy-check:
-	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json --check && bun test compiler

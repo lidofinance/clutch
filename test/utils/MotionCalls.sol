@@ -9,8 +9,8 @@ import {Call} from "../../src/exec/SafeExec.sol";
 /// @dev Encodes the admin calls that a governance motion carries in the
 ///      drills, such as a replacement approve scope. These are test inputs,
 ///      not the policy: the policy comes only from the compiled artifact
-///      (ADR 004, decision 15). The Easy Track template factories will build
-///      such trees on chain (ADR 006).
+///      (ADR 004, decision 15). The universal factory builds such trees on
+///      chain (ADR 013).
 library MotionCalls {
     bytes32 internal constant OPERATOR = bytes32("operator");
 

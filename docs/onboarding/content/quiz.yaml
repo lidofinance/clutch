@@ -30,7 +30,8 @@
     - "[the screening vendor], by freezing the vault"
   answer: 1
   why: "Financial emergencies go to the emergency Safe: two committee members, two Emergency Brakes members and one member of neither body, at 3 of 5. They revoke the operator, exit and send assets to the Agent. Six hours is the mandate's ceiling to start, and drills must prove it."
-  sources: ["ADR-005#d2", "ADR-005#d11", "ADR-005#d24", "ADR-005#context", "ADR-005#proposed-direction", OD-58, "lip:part-6"]
+  sources: ["ADR-005#d2", "ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d24", "ADR-005#context",
+    "ADR-005#proposed-direction", "OD-58", "lip:part-6"]
 
 - id: restart
   question: "The emergency Safe has switched the operator off. Who turns it on again?"

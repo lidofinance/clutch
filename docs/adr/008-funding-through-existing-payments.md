@@ -7,8 +7,8 @@ status: draft
 review_status: slop
 decision: proposed
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-11T04:36:24Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T07:13:23Z
 verified: []
 sources:
   - id: s1
@@ -35,7 +35,7 @@ sources:
 EM decided each decision below; its ODs lead to EM's words in the [decision log](/registers/decision-log.md) [s1].
 
 1. Lapsed (OD-106): tranche votes do not use Easy Track's payment permission.
-2. DAI is in the launch set, as [ADR 011](/adr/011-launch-scope.md) decision 2 states (decision log, 2026-09-22).
+2. Stated by [ADR 011](/adr/011-launch-scope.md) decision 2.
 3. Lapsed (OD-106): the vault has no funding registry.
 4. Replaced by ADR 014 decision 1 (OD-106).
 5. Replaced by ADR 014 decision 1 (OD-106).
@@ -76,11 +76,11 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
-- **First-loss custody.** The first-loss Safe is a Safe v1.5.0 that Voting owns one of one ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 13 and 28). It is its modifier's owner, avatar and target. The Growth Committee's plain transfers bring the first-loss shares (decision 13). Insurance money comes from the Asset Safe by a motion ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 7).
-- **First-loss burn.** The committee creates a motion that names an amount and the earnETH or earnUSD share. After 72 hours without objection, the universal factory calls `burn` through `first-loss-burn` (decision 23; [ADR 013](/adr/013-one-easy-track-factory.md) decision 18). Every burn waits, an urgent one too.
-- **First-loss exit.** The committee's `first-loss` role calls `redeem` and `claim` on the Earn vault's queue, and the proceeds go only to the Asset Safe (decision 21).
-- **Instructions and reporting.** A burn needs the Earn team's written instruction after a curator-confirmed loss of at least 1%; an exit needs it after a confirmed material risk. Publish the instruction and the curator's confirmation with the motion, and update the incident within seven days [s7]. Below the terms, get a Snapshot exception first, as for Kelp. The first-loss amount is the received shares less the burns; reports show it as a sub-allocation. Monitor balance, owner, module and singleton changes, and page on every burn motion and every action of the `first-loss` role ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
-- **Insurance funds.** Each fund fills in the checklist of decision 29 in its motion and its forum post. A fund for Lido Earn covers earnETH or earnUSD; a fund for Lido Lend holds burnable shares or pays a fixed payout address ([ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 5 and 6).
+- **First-loss custody.** A Safe v1.5.0 ([ADR 005](/adr/005-account-graph-and-roles.md) decision 13). Plain transfers bring the first-loss shares (decision 13), and a motion brings insurance money ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 7).
+- **First-loss burn.** The motion names an amount and the earnETH or earnUSD share (decision 23; [ADR 013](/adr/013-one-easy-track-factory.md#proposed-direction)).
+- **First-loss exit.** The committee's `first-loss` role calls `redeem` and `claim` on the Earn vault's queue (decision 21).
+- **Instructions and reporting.** Publish the Earn team's instruction and the curator's confirmation with the motion (decision 22). Below the terms, get a Snapshot exception first, as for Kelp. The first-loss amount is the received shares less the burns; reports show it as a sub-allocation. The [threat model](/specs/threat-model.md) lists the alerts.
+- **Insurance funds.** Each fund fills in the checklist of decision 29. [ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 5 and 6 state what a fund covers.
 
 ## Options considered
 
@@ -94,21 +94,19 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 ## Consequences
 
-- Separate custody keeps the protected shares apart from the Asset Safe's ordinary positions. Only an enacted burn or a redemption to the Asset Safe reaches the first-loss shares (decisions 21 and 23), so no written rule needs a check.
-- On the Earn team's instruction, the committee proposes burns or exits without a DAO vote. The capital still absorbs losses first; a curator's freeze can delay a redemption [s7].
-- Burns wait at least 72 hours, later than a Growth Committee burn would, and LDO holders can block them by objection. The public notice lets depositors time an entry or an exit, so the vault should pause deposits and redemptions until the burn, as after Kelp. The March 2026 terms allowed urgent burns before notice; public motions remove that option [s7].
-- A captured committee quorum cannot burn at once. It can propose a public 72-hour motion, or redeem only to the Asset Safe (OD-108). Burns move value to other depositors, so each burn motion pages monitoring. The emergency role cannot reach the first-loss Safe, and the DAO can remove both first-loss roles.
-- Burns reduce the vault's value. No funding refills it by right: a replenishment needs the mandate's published eligibility conditions (decision 34).
+- Only an enacted burn or a redemption to the Asset Safe reaches the first-loss shares (decisions 21 and 23), so no written rule needs a check.
+- The capital still absorbs losses first; a curator's freeze can delay a redemption [s7].
+- A burn by motion comes later than a Growth Committee burn would: the March 2026 terms allowed urgent burns before notice, and public motions remove that option [s7]. The public notice lets depositors time an entry or an exit, so the vault should pause deposits and redemptions until the burn, as after Kelp.
+- Burns move value to other depositors, so each burn motion pages monitoring. The [threat model](/specs/threat-model.md) covers a captured committee quorum.
+- Burns reduce the vault's value, and no funding refills it by right (decision 34).
 - The move depends on the Earn administrators keeping share transfers open until it happens; they can restrict transfers [s6].
-- Until a Twyne position's holder and form are shown, the position does not count in the funded value (decision 17).
 - The treasury share can break without a vault transaction, through the treasury's own spending or a price move. Until the mandate states the remedy, monitoring can report the breach, but no rule defines the response.
 
 ## Confirmation
 
-- INV-021 and INV-037 in the [invariants](/specs/invariants.md).
+- INV-021 and INV-037 in the [invariants](/specs/invariants.md); INV-039 for insurance money.
 - The enabling-vote rehearsal moved both first-loss share balances from the Growth Committee's Safe by plain transfer ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
-- Insurance money moves only from the Asset Safe to the first-loss Safe (`test_insurance_funding_pays_only_the_first_loss_safe`, `test_uf_insurance_money_goes_to_the_first_loss_safe`).
-- Owed, with the first-loss modifier's policy and the factory's burn and insurance shapes: a burn only through an enacted `first-loss-burn` motion, with every other caller refused; a `first-loss` redemption that pays only the Asset Safe and cannot transfer, approve or burn; and no role of the Asset Safe's modifiers that reaches the first-loss shares.
+- Owed, with the first-loss modifier's policy and the factory's burn and insurance shapes: the tests of INV-021 for the burn motion and the `first-loss` redemption, and a test that no role of the Asset Safe's modifiers reaches the first-loss shares.
 
 ## Reversal conditions
 

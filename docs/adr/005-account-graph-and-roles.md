@@ -7,8 +7,8 @@ status: draft
 review_status: slop
 decision: proposed
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-11T04:22:29Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T06:58:05Z
 verified: []
 sources:
   - id: s1
@@ -17,9 +17,6 @@ sources:
   - id: s2
     resource: /research/chain-reads-2026-09-30.md
     title: Chain reads, 2026-09-30 — Agent authority, committee Safes, Roles mastercopy
-  - id: s5
-    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L669"
-    title: Kit test at 7a8c661 — emergency flow, with transfers pinned to the Agent
   - id: s6
     resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/Drills.t.sol#L807"
     title: Kit test at 7a8c661 — adversarial operator
@@ -70,67 +67,57 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 1. Replaced by decision 24 (OD-58).
 2. Financial risk, such as depegs, dependency failure and curator misbehaviour, is the common case. The emergency Safe answers it, and it can swap, exit and claim (decision log, 2026-09-22; OD-58).
 3. The engineering organisation watches technical risk, bug-bounty submissions included, and pages the emergency Safe, which holds the switch (decision log, 2026-09-22; OD-58).
-4. The Emergency Brakes multisig keeps the global Easy Track pause (decision log, 2026-09-22).
+4. Stated by decision 23.
 5. Replaced by decision 24 (OD-58).
 6. The Asset Safe's policy splits across two modifiers, the operator modifier and the safety modifier. The orders account and the first-loss Safe carry one modifier each (decision log, 2026-09-22; OD-57, OD-60).
 7. Replaced by decision 31 (OD-80).
 8. Replaced by decision 12 (OD-17).
 9. Lapsed (OD-80): no operator Safe; the committee's Safe is 4 of 7.
 10. Lapsed (OD-80): the guard goes on the committee's v1.3.0 Safe.
-11. An emergency removal of an operator permission is the emergency Safe's immediate revoke. No DAO-scoped role key exists, so the revoke reaches every operator permission. A routine removal is a narrowing motion of the universal factory ([ADR 013](/adr/013-one-easy-track-factory.md) decision 7) (OD-09, OD-70, OD-102).
+11. Stated by [ADR 006](/adr/006-governance-through-easy-track-factories.md) decisions 7, 8 and 14.
 12. The Asset Safe uses Safe v1.5.0, after the due diligence [s7] (OD-02, OD-17).
 13. The emergency Safe, the orders account and the first-loss Safe use Safe v1.5.0 too (OD-17, OD-126).
 14. Aragon Voting authorizes an Asset Safe transaction only by `approveHash` or by sending it itself, never by a contract signature (OD-17, OD-73).
 15. The Asset Safe has no fallback handler. A protocol that needs one comes back to EM (OD-17).
 16. Replaced by decision 24 (OD-58).
 17. Replaced by decision 24 (OD-58).
-18. The emergency Safe disables the operator modifier when a cap breach gets worse, on the trigger of [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 34 (OD-29, OD-58).
-19. The DAO's first-loss Earn shares sit in a dedicated first-loss Safe, owned by Aragon Voting at one of one, with one modifier ([ADR 008](/adr/008-funding-through-existing-payments.md)) (OD-42, OD-60, OD-73).
-20. A dedicated orders account places every swap as a CoW order. It is a Safe owned by Aragon Voting at one of one, with CoW's fallback handler and one modifier ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 17) (OD-43, OD-57, OD-73).
-21. The orders account carries one modifier, with the operator and emergency roles and the universal factory's governance and approvals roles. One modifier suffices: the emergency role's revoke stops the operator there, and recovery keeps working (OD-57, OD-58, OD-103, OD-118).
+18. Stated by [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 24 and 34.
+19. Stated by [ADR 008](/adr/008-funding-through-existing-payments.md) decision 19.
+20. Stated by [ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 17 and 20.
+21. The orders account's one modifier carries the operator and emergency roles and the universal factory's governance and approvals roles. One modifier suffices: the emergency role's revoke stops the operator there, and recovery keeps working (OD-57, OD-58, OD-103, OD-118).
 22. Replaced by decision 25 (OD-58).
-23. The Emergency Brakes multisig touches no funds and holds no role on any modifier. In Clutch it keeps only the global Easy Track pause of decision 4 (OD-58).
-24. The emergency Safe has five signers and a threshold of three: two members of the committee, two members of the Emergency Brakes multisig, and a fifth signer who is a member of neither. The committee appoints two seats, the Emergency Brakes multisig appoints two, and a DAO Snapshot appoints the fifth. A signer who leaves their body also leaves the seat (OD-58).
+23. The Emergency Brakes multisig touches no funds and holds no role on any modifier. In Clutch it keeps only the global Easy Track pause (decision log, 2026-09-22; OD-58).
+24. The emergency Safe has five signers and a threshold of three. The committee appoints two of its members, the Emergency Brakes multisig appoints two of its members, and a DAO Snapshot appoints a fifth signer who is a member of neither. A signer who leaves their body also leaves the seat (OD-58).
 25. The emergency role holds the switch: it disables the operator modifier, with the module argument pinned. On the orders account, the emergency role's revoke stops the operator (OD-58).
-26. No emergency body resumes what it stopped. The emergency Safe and the Emergency Brakes multisig get no power to unpause Easy Track, to enable a module, to grant a permission again or to raise an approval. A motion restarts the operator ([ADR 013](/adr/013-one-easy-track-factory.md) decision 12) and brings back what the emergency role revoked, on the operator modifier ([ADR 013](/adr/013-one-easy-track-factory.md) decision 16) and on the orders account ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 46). An Easy Track unpause stays an Aragon vote (OD-59, OD-97, OD-104, OD-119).
-27. The first-loss Safe's modifier gives the committee's Safe a `first-loss` role, which requests and claims the redemption of the DAO's first-loss shares, with the proceeds pinned to the Asset Safe. A burn runs only as a motion that the universal factory makes through `first-loss-burn` ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23) (OD-60, OD-67, OD-80, OD-108, OD-118).
+26. No emergency body resumes what it stopped. The emergency Safe and the Emergency Brakes multisig get no power to unpause Easy Track, to enable a module, to grant a permission again or to raise an approval. Motions restart the operator and bring back what the emergency role revoked ([ADR 013](/adr/013-one-easy-track-factory.md) decisions 12 and 16; [ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 46). An Easy Track unpause stays an Aragon vote (OD-59, OD-97, OD-104, OD-119).
+27. Stated by [ADR 008](/adr/008-funding-through-existing-payments.md) decisions 21 and 23.
 28. Aragon Voting, not the Aragon Agent, is the only owner of the Asset Safe, the orders account and the first-loss Safe. A DAO action on the vault is a direct Voting item, without Dual Governance. Recovered assets go to the Aragon Agent (OD-73, OD-106).
 29. Replaced by decision 26 (OD-78, OD-104).
 30. Replaced by decision 26 (OD-104).
 31. The committee's own Safe holds the operator role and the first-loss role, and it is the universal factory's trusted caller. Clutch deploys no operator Safe. The committee's Safe runs Safe v1.3.0 at 4 of 7 (OD-80).
-32. The enabling vote applies the Safe batches by approved hash. Aragon Voting approves the hash of each batch, and anyone executes the batches after the vote. The vote cannot carry the batches as its own items: Aragon Voting stores its script when a vote starts, and that transaction would need more gas than EIP-7825 lets one transaction use ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)) (OD-92).
+32. The enabling vote applies the Safe batches by approved hash: Aragon Voting approves each batch's hash, and anyone executes the batches after the vote. The vote cannot carry the batches as its own items: Aragon Voting stores its script when a vote starts, and that transaction would need more gas than EIP-7825 lets one transaction use ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)) (OD-92).
 33. A change of the committee's members needs no Snapshot each time. Monitoring alerts on every change of the owners or the threshold of the committee's Safe, and a runbook covers the change (OD-109).
 
 ## Proposed direction
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
-- **Asset Safe.** A new Safe v1.5.0, owned one-of-one by Aragon Voting, without a guard or fallback handler. It holds the assets, except the first-loss shares and the orders account's tokens in transit. Voting sends each transaction or approves its hash for a type-1 signature (decisions 14 and 28).
-- **Committee's Safe.** The existing committee Safe, four-of-seven on v1.3.0 (decision 31). It holds `operator` and `first-loss` and is the universal factory's trusted caller ([ADR 013](/adr/013-one-easy-track-factory.md)). It creates every motion, the first-loss burn included ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23). The screening guard goes on it before the second tranche's vote ([ADR 010](/adr/010-pre-execution-screening.md) decisions 22 and 24).
-- **Emergency Safe.** A new Safe v1.5.0 at three-of-five, without assets or a guard. It holds `emergency` on the safety and orders modifiers, the switch included (decision 25). Exactly two owners belong to the committee's Safe, two to Emergency Brakes and one to neither (decision 24). Because one person can use several addresses, the fifth signer also confirms their independence in writing. Owner changes trigger critical alerts; a DAO vote can replace the role holder. The emergency Safe raises the universal factory's counter at every stop, so that no queued motion enacts.
-- **Operator modifier.** A Roles minimal proxy with the Asset Safe as owner, avatar and target. It carries `operator`, `governance` and `insurance-funding`.
-- **Safety modifier.** A second proxy with the same settings. It carries `emergency`, `exit-governance`, which adds emergency exits by motion ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13), and `restart`, which only enables the operator modifier again ([ADR 013](/adr/013-one-easy-track-factory.md) decision 12).
-- The Asset Safe owns both modifiers. A narrowly scoped role can administer a modifier as the Safe without a vote, which makes the emergency revoke possible.
-- **Orders account.** A new Voting-owned Safe, one-of-one, with CoW's fallback handler. It holds tokens only between transfer and fill. Its single modifier carries `operator`, `emergency`, and the universal factory's governance and approvals roles ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41 and 46). The emergency role stops the operator by revoking its targets and functions (decision 25).
-- **First-loss Safe.** A new Voting-owned Safe v1.5.0, one-of-one, without a guard or fallback handler. It holds the first-loss Earn shares and the insurance funds, and owns its modifier as owner, avatar and target. The committee's `first-loss` role redeems to the Asset Safe ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 10). The universal factory's `first-loss-burn` and insurance roles act only by motion ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23; [ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 4 to 7). The redemption and the burn need the Earn team's written instruction ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 22). Its policy is not built yet.
-- **Restart.** A motion enables the operator modifier again through the restart role ([ADR 013](/adr/013-one-easy-track-factory.md) decision 12). The emergency Safe raises the factory's counter at every stop, so the motions queued before the stop fail at enactment, and their creator cancels them. A motion also brings back what the emergency role revoked, on the operator modifier and on the orders account, with any relayer approval that the emergency role set to zero (decision 26). An Easy Track unpause stays a Voting item. No emergency body restores authority.
-- Easy Track receives no Agent authority, and its executor holds no role: the universal factory holds every role that an enacted motion uses, and makes a motion's writes in the motion's one call ([ADR 013](/adr/013-one-easy-track-factory.md) decision 18).
+- **Emergency Safe.** It holds no assets and has no guard. Because one person can use several addresses, the fifth signer also confirms their independence in writing. At every stop, the emergency Safe raises the universal factory's counter ([ADR 013](/adr/013-one-easy-track-factory.md) decision 10), and the creator of each motion queued before the stop cancels it.
+- **Modifiers.** The operator modifier and the safety modifier are Roles minimal proxies, each with the Asset Safe as owner, avatar and target. The first-loss Safe is the owner, avatar and target of its modifier. A narrowly scoped role can administer a modifier as the Safe without a vote, which makes the emergency revoke possible.
 
 | Role | Holder | Modifier | May do | May not do |
 |---|---|---|---|---|
 | DAO | Aragon Voting, by vote (decision 28) | owner path | everything: own the Safe, replace the policy, change membership | — |
-| `operator` | committee's Safe, the committee's signers, four of seven (decision 31), screened once the guard is set ([ADR 010](/adr/010-pre-execution-screening.md) decisions 22 and 24) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below its ceiling ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md); [ADR 013](/adr/013-one-easy-track-factory.md) decision 13); stake ETH ([ADR 007](/adr/007-swapping-through-an-orders-account.md)); convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md)); fund the orders account under budgets, and from it place CoW orders that pay the Asset Safe ([ADR 007](/adr/007-swapping-through-an-orders-account.md)) | move assets out, except into the orders account or, by a transfer pinned to it, to the Aragon Agent ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 9; not built yet on the Asset Safe); borrow; administer a modifier or a Safe; change its own permissions |
+| `operator` | committee's Safe, four of seven (decision 31), screened once the guard is set ([ADR 010](/adr/010-pre-execution-screening.md) decisions 22 and 24) | operator | open, adjust and close positions in approved protocols within budgets; approve approved spenders, each approval spending its spender's budget key or staying below its ceiling ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md); [ADR 013](/adr/013-one-easy-track-factory.md) decision 13); stake ETH ([ADR 007](/adr/007-swapping-through-an-orders-account.md)); convert DAI to USDS and back through Sky's converter, pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md)); fund the orders account under budgets, and from it place CoW orders that pay the Asset Safe ([ADR 007](/adr/007-swapping-through-an-orders-account.md)) | move assets out, except into the orders account or, by a transfer pinned to it, to the Aragon Agent ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 9; not built yet on the Asset Safe); borrow; administer a modifier or a Safe; change its own permissions |
 | `governance` | universal factory | operator | write operator permissions through a typed shape of the universal factory, for a target named in a motion; narrow them by a raw write; set operator budgets within the factory's ceilings; restore a revoked target | submit a tree that widens a permission outside a typed shape; grant or remove any role; touch the emergency role; target the modifier's avatar or any of its modules (OD-38); grant delegatecall (OD-36) |
-| `emergency` | emergency Safe, three of five: two committee members, two Emergency Brakes members and one member of neither body | safety, orders | zero approvals; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS; send assets to the orders account or to the Agent; revoke the operator's targets and functions on the operator modifier and on the orders modifier, which is how every emergency removal happens and how the operator stops on the orders account; disable the operator modifier, with the module argument pinned (decision 25); on the orders account, cancel orders, set a relayer approval to zero, send tokens to the Agent or the Asset Safe, and place orders that buy USDC or USDT and pay the Agent | add a permission; enter a protocol except by staking ETH; borrow; reach the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md)); change the recovery destination; disable the safety modifier or the orders modifier; restore what it stopped: enable a module, grant a permission again or raise an approval (decision 26) |
+| `emergency` | emergency Safe, three of five (decision 24) | safety, orders | zero approvals; exit positions to the Safe; unwrap wstETH and WETH, stake ETH and redeem sUSDS; send assets to the orders account or to the Agent; revoke the operator's targets and functions on the operator modifier and on the orders modifier; disable the operator modifier, with the module argument pinned (decision 25); on the orders account, cancel orders, set a relayer approval to zero, send tokens to the Agent or the Asset Safe, and place orders that buy USDC or USDT and pay the Agent | add a permission; enter a protocol except by staking ETH; borrow; reach the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md)); change the recovery destination; disable the safety modifier or the orders modifier; restore what it stopped (decision 26) |
 | exit governance | universal factory | safety | write an emergency exit for a target that a motion names, each tree pinned whole: redeem, withdraw and claim paid to the Asset Safe; cancel, a redeem queue's redeem and unwrap; a transfer pinned to the Agent, or to the Agent or the orders account for a token that recovery sells; an approval set to zero (OD-49; [ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 45) | write anything but an exit; write under any key but `emergency`; grant Send or delegatecall; touch membership or the switch; set an allowance; target the Asset Safe or a module of it |
-| `first-loss` | committee's Safe, the committee's signers, four of seven (decision 31), screened once the guard is set ([ADR 010](/adr/010-pre-execution-screening.md) decision 24) | first-loss | request and claim the redemption of the DAO's earnETH and earnUSD shares, with the proceeds pinned to the Asset Safe; on the Earn team's written instruction (decision 27; [ADR 008](/adr/008-funding-through-existing-payments.md); [ADR 014](/adr/014-funding-by-tranche-votes.md) decision 10) | burn, transfer or approve the shares; pay anyone but the Asset Safe; act on the Asset Safe or the orders account |
+| `first-loss` | committee's Safe, four of seven (decision 31), screened once the guard is set ([ADR 010](/adr/010-pre-execution-screening.md) decision 24) | first-loss | request and claim the redemption of the DAO's earnETH and earnUSD shares, with the proceeds pinned to the Asset Safe; on the Earn team's written instruction ([ADR 008](/adr/008-funding-through-existing-payments.md) decisions 21 and 22; [ADR 014](/adr/014-funding-by-tranche-votes.md) decision 10) | burn, transfer or approve the shares; pay anyone but the Asset Safe; act on the Asset Safe or the orders account |
 | `first-loss-burn` | universal factory | first-loss | burn the DAO's earnETH and earnUSD shares, only as an enacted motion that the committee's Safe created ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23) | anything else |
 | `restart` | universal factory | safety | `enableModule` on the Asset Safe, with the operator modifier as its argument, only as an enacted motion ([ADR 013](/adr/013-one-easy-track-factory.md) decision 12) | anything else |
 | `insurance-funding` | universal factory | operator | transfer a listed token from the Asset Safe to the first-loss Safe, only as an enacted motion ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 7) | pay anyone but the first-loss Safe |
 | insurance roles | universal factory | first-loss | create a fund's permissions through a typed shape, deposit into earnETH, earnUSD or a Lido Lend vault with the first-loss Safe as receiver, burn, and pay a fund's pinned payout address within its cap, only as enacted motions ([ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 4 to 7) | pay any other address; transfer or approve the first-loss shares |
 | orders `governance` and approvals | universal factory | orders | add a token to the orders account's lists, with delegatecall only to the order signer; restore the operator after an emergency stop; raise an approval of CoW's vault relayer ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41 and 46) | any other delegatecall; touch membership or the emergency role's revoke |
-
-The Emergency Brakes multisig holds no role in this table. It keeps the global Easy Track pause (decisions 4 and 23).
 
 - **The enabling vote's batches (decision 32).** Publish each batch with the vote, with one command that computes its hash again from the batch, the Safe and the Safe's nonce. The batches of one Safe run in nonce order. The builder starts a new batch below 12,000,000 gas and below 128 KiB. Rehearse the vote and the batches at a recent block before the vote starts and again before it executes.
 
@@ -148,35 +135,27 @@ The Emergency Brakes multisig holds no role in this table. It keeps the global E
 
 ## Consequences
 
-- Voters see the batches as hashes. The batches and the command that computes each hash must be published with the vote (decision 32). A batch that can never run blocks its Safe until another vote approves a replacement.
-- The committee's Safe holds `operator` (decision 31) and `first-loss` (decision 27). A compromised quorum can redeem first-loss shares only to the Asset Safe, or propose a burn with 72 hours for objection. Rotations affecting either body's emergency seat must update the emergency Safe (decision 24).
+- Voters see the batches as hashes (decision 32). A batch that can never run blocks its Safe until another vote approves a replacement.
 - Each emergency quorum includes someone outside the committee and someone outside Emergency Brakes. The committee cannot act alone; two compromised committee keys reach no emergency power.
-- The two Emergency Brakes members and the fifth signer can return assets within hours without the committee, which meets the mandate's independent three-of-five exit [s12]. This quorum has no spare signer; the fifth signer is pivotal.
+- The two Emergency Brakes members and the fifth signer can return assets within hours without the committee, which meets the mandate's independent three-of-five exit [s12]. This quorum has no spare signer; the fifth signer is pivotal. It can place recovery orders without an on-chain price floor (OD-48).
 - No response-time data exists for the mixed group. A timed drill is required before launch.
 - Any three emergency signers can change the Safe's owners. The controls are the seat rule, owner-change alerts and the DAO's replacement of the role holder.
-- A non-committee emergency quorum can place recovery orders without an on-chain price floor (OD-48).
-- The emergency powers are one-way permissions, transfers pinned to the Agent or the orders account, and recovery orders that pay the Agent; CoW market-fill rules, paging and limit alerts cover their price risk (OD-48). The DAO can replace the policy.
-- Governance refuses the Asset Safe's modules, the orders account and its modifier as targets. A vote that adds a module must apply policy compiled with it in the manifest (OD-38, [ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 10).
-- Four new Safes are required: Asset, emergency, orders and first-loss. Voting owns three; signers own the emergency Safe. Owner, module and singleton alerts cover all four plus the committee's Safe (decision 31).
-- The orders account uses fallback and contract-signature paths that the Asset Safe avoids. Its exposure is what enters it: operator transfers spend budgets; emergency transfers do not ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
-- Disabling the operator modifier leaves safety and recovery working. The orders account's single modifier cannot provide the same switch without stopping recovery, so the emergency role revokes its operator targets or functions one by one (decision 25); the DAO can still disable it.
-- Replacing the pinned operator modifier is a DAO vote that rewrites the safety policy in the same action, and replaces the universal factory, which holds the modifier's address, with the motion roles moved to the new factory ([ADR 013](/adr/013-one-easy-track-factory.md)) [s1].
-- The switch freezes queued operator-modifier writes, and the counter that the emergency Safe raises makes them fail ([ADR 013](/adr/013-one-easy-track-factory.md) decision 10). To freeze all Easy Track motions, exit writes included, the Lido incident process pages Emergency Brakes for its global pause.
-- Each restart is a motion with the 72-hour objection window ([ADR 013](/adr/013-one-easy-track-factory.md) decision 12). The runbook revokes first and uses the switch only for permission-layer defects, the cap-breach trigger ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 34), or a compromised or silent committee.
-- Voting ownership removes Dual Governance delay from vault actions (decision 28). Recovery still pays the Agent.
-- The Asset Safe, the emergency Safe, the orders account and the first-loss Safe use v1.5.0; the committee keeps v1.3.0 (decisions 12, 13 and 31). The LIP must disclose v1.5.0's short value-holding history [s7].
-- Certora verified transaction execution, `approveHash` and module execution on v1.5.0 [s7]. The Asset Safe avoids contract signatures and fallback handling, where this version and the next release change most. The orders account uses these paths for tokens in transit.
-- Without a fallback handler, the Asset Safe refuses ERC-721 and ERC-1155 safe transfers and EIP-1271 signing. A protocol that needs these returns to EM (decision 15). Lido's ERC-721 withdrawal queue is outside the scope ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 27).
+- Four new Safes are required: Asset, emergency, orders and first-loss.
+- On the orders account, the emergency role revokes the operator's targets or functions one by one (decision 25), because disabling its single modifier would stop recovery. The DAO can still disable it.
+- Replacing the pinned operator modifier is a DAO vote that rewrites the safety policy in the same action and replaces the universal factory, which holds the modifier's address ([ADR 013](/adr/013-one-easy-track-factory.md)) [s1].
+- The switch freezes queued operator-modifier writes. To freeze all Easy Track motions, exit writes included, the Lido incident process pages Emergency Brakes for its global pause.
+- Each restart waits for the 72-hour objection window ([ADR 013](/adr/013-one-easy-track-factory.md) decision 12). The runbook revokes first and uses the switch only for permission-layer defects, the cap-breach trigger ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 34), or a compromised or silent committee.
+- The LIP must disclose v1.5.0's short value-holding history [s7].
+- The Asset Safe avoids contract signatures and fallback handling, where v1.5.0 and the next release change most [s7].
+- Without a fallback handler, the Asset Safe refuses ERC-721 and ERC-1155 safe transfers and EIP-1271 signing (decision 15).
 - An Asset Safe version change is a DAO vote with a delegatecall to Safe's migration contract.
 
 ## Confirmation
 
-- On the orders account, the emergency revoke stops the operator and recovery keeps working (`test_orders_emergency_revocation_keeps_recovery`), and one motion restores the operator (`test_factory_orders_restore_after_an_emergency_stop`).
-- The emergency role holds the switch, pinned to the operator modifier, and cannot enable a module again (`test_D4_the_switch_is_the_emergency_role_s_and_pinned`); the compiler refuses a grant or a budget for the emergency role, and every approval of the emergency role is zero (`policy/constellation/compiler/compile.test.ts`).
-- The switch freezes a queued motion, and a restart motion enables the operator modifier again (`test_D4_the_switch_freezes_queued_motions_until_a_restart_motion`); the restart role enables only the operator modifier (`test_D4_the_restart_role_enables_only_the_operator_modifier`); the universal factory holds every motion role and no other (`compile.test.ts`).
-- The emergency flow returns assets to the Agent and nowhere else [s5]; the operator cannot widen or reach administration [s6]; the Asset Safe has a stand-in for Aragon Voting as its only owner, the pinned singleton, and no fallback handler or guard [s11].
-- The enabling-vote rehearsal: Aragon Voting approved a batch hash on each of the three Safes, and the batches ran (decision 32; [research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
 - INV-001, INV-002, INV-003, INV-009, INV-019, INV-021, INV-023, INV-025, INV-026, INV-027 and INV-035 in the [invariants](/specs/invariants.md).
+- The compiler's tests of INV-027 are in `policy/constellation/compiler/compile.test.ts`; `compile.test.ts` also checks that the universal factory holds every motion role and no other.
+- The operator cannot widen or reach administration [s6]; the Asset Safe has no guard [s11].
+- The enabling-vote rehearsal: Aragon Voting approved a batch hash on each of the three Safes, and the batches ran (decision 32; [research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
 
 ## Reversal conditions
 

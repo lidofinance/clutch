@@ -7,8 +7,8 @@ status: draft
 review_status: slop
 decision: proposed
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-10T21:28:47Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T07:42:18Z
 verified: []
 sources:
   - id: s1
@@ -62,18 +62,17 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
-- **Safe defaults.** The `Justfile` never loads `mainnet.just`. Mainnet recipes need `CLUTCH_MAINNET=1`, no CI and no `PRIVATE_KEY`, a confirmation and Foundry-keystore signing. Hosted-app scripts need an owner-team member's `CLUTCH_OWNER_PUSH=1` on a clean `main` and refuse CI [s5].
-- **Identity and verification.** Only listed agents record a human's verification, and only on that human's explicit instruction ([ADR 003](/adr/003-agent-operating-model.md) decision 14). Teams have their own list in `config/actors.yaml`. `just verify <page> <human>` runs `scripts/verify_page.py`; the hash covers the body, not the front matter.
-- **Commands.** `just setup`, `just check`, `just regen` and `just test-fork`; without just, `uvx --from rust-just==1.58.0 just <recipe>`. `AGENTS.md`, the README and `CONTRIBUTING.md` use these.
-- **Redaction.** `scripts/check_redaction.py` scans tracked and new files against salted hashes in `config/redaction.yaml`, and rejects private keys, keyed RPC URLs and API tokens. A finding shows the file, line and kind, never the value.
+`CONTRIBUTING.md` holds the workflow and the commands, `AGENTS.md` the agent rules, and [guide maintenance](/onboarding/guide.md) the guide's build, pins and tests. The bullets add only what those pages do not state.
+
+- **One owner per fact.** A page states a fact once, where it belongs, and other pages point to it: a decision in its ADR; EM's words and the history in the decision log; a property and its tests in the invariants; a value in the parameters; a control in the control matrix; a failure in the threat model; the vote's content in the enabling-vote specification; the workflow in `CONTRIBUTING.md`; evidence in a research note. A decision that another decision states in full becomes one line, "Stated by …", and the guide may not cite that line.
+- **Safe defaults.** The `Justfile` never loads `mainnet.just`. The mainnet recipes refuse CI and a `PRIVATE_KEY`. The hosted-app scripts, which only the owner team runs [s5], refuse CI.
+- **Identity and verification.** Only listed agents record a human's verification ([ADR 003](/adr/003-agent-operating-model.md) decision 14). `just verify <page> <human>` runs `scripts/verify_page.py`; the hash covers the body, not the front matter.
+- **Redaction.** `scripts/check_redaction.py` compares files with salted hashes in `config/redaction.yaml`, and rejects private keys, keyed RPC URLs and API tokens. A finding shows the file, line and kind, never the value.
 - **Merge queue.** Workflows run on `merge_group`. An admin turns the queue on, or requires up-to-date branches, in the branch rule on `main`.
-- **Generated files.** `.gitattributes` marks the status register and the guide; resolve a conflict by taking either side and running `just regen`. Policy artifacts stay unmarked, because reviewers read their diffs.
-- **IDs.** Take the next number from `main`. The validator rejects duplicate OD, ADR and INV IDs and incomplete open-decision rows.
-- **Pull requests.** One decision or feature per pull request. The template asks for the agent, the human checks, the commands run and the restricted-data confirmation.
-- **Procedures.** `CONTRIBUTING.md` holds the workflow, and the skills `decision-interview`, `record-decision`, `guide-update`, `research-note` and `adr-draft` hold the procedures.
+- **Generated files.** `.gitattributes` marks the status register and the guide. Policy artifacts stay unmarked, because reviewers read their diffs.
+- **Pull requests.** The template asks for the agent, the human checks, the commands run and the restricted-data confirmation.
 - **GitHub Pages.** `.github/workflows/pages.yml` checks the page's freshness and its disclaimer, and deploys it with `noindex` and a `robots.txt` that asks crawlers to stay away. Only the deploy job writes Pages; pull requests never deploy.
-- **Guide checks** [s8]. The `matrix` browser group runs axe-core in twelve states; the `static` group refuses controls that do nothing without JavaScript. Dark styles apply only to screens, and only JavaScript adds widget roles. `docs/onboarding/pins.json` pins each item's content and the text of its sources; `just stale` lists stale items and `just repin <item>` pins one again after a review. `docs/onboarding/content/coverage.yaml` lists every uncited ADR and invariant with a reason. The `docs` workflow keeps the built page for 14 days and reports pin changes through `scripts/pin_report.py`; actionlint and zizmor 1.30.1 check the workflows; `scripts/check_links.py` runs each Monday.
-- **CI checks.** `scripts/check_licences.py` checks each source file's licence line and that no contract comment cites a repository page. `scripts/check_invariants.py` rejects a missing named test and a Draft invariant without one. Fork tests stay local until phase 2 (decision 8).
+- **Guide checks** [s8]. Guide maintenance describes the `matrix` and `static` browser groups, `docs/onboarding/pins.json` and `docs/onboarding/content/coverage.yaml`. Dark styles apply only to screens. The `docs` workflow reports pin changes through `scripts/pin_report.py`; actionlint and zizmor 1.30.1 check the workflows; `scripts/check_links.py` checks the outside links.
 
 ## Options considered
 
@@ -91,15 +90,12 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 ## Consequences
 
-- Unlisted agents can author pages; reviewers see `generated.by` and the human commit author.
 - The queue increases merge time to keep `main` green.
 - EM remains the decision bottleneck; batched interviews reduce interruptions.
 - Hashed redaction lists deter casual discovery, not guessing.
-- Any edit of a verified body, a typo included, needs a new verification.
-- Until phase 2, broken fork tests need not make CI red. The template asks authors to run `just test-fork`.
-- Local anvil rehearsals may use one public test `PRIVATE_KEY` for one command. `mainnet.just` refuses it.
-- Contributors need uv, bun, Foundry, git and an archive RPC for fork tests.
-- The guide is readable by anyone with its URL, and its source links work for every reader, because the repository is public (OD-95).
+- Until phase 2, broken fork tests need not make CI red.
+- Local anvil rehearsals may use one public test `PRIVATE_KEY` for one command.
+- The guide's source links work for every reader, because the repository is public (OD-95).
 - A change of design rewrites the decision in place, so the pins of the guide items that cite it go stale and need a review (decision 14).
 
 ## Confirmation
