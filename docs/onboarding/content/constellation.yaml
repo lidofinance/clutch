@@ -19,7 +19,7 @@ planned:
       "INV-039"]
   - name: First-loss Safe and its roles
     where: "A Voting-owned Safe with one modifier of its own"
-    what: "One first-loss modifier. The first-loss burn role, held by the universal factory, burns the DAO's [[first-loss shares]] only in an enacted motion. The first-loss role, held by the committee's Safe, redeems them to the Asset Safe. No role can transfer or approve them."
+    what: "The first-loss modifier and its two roles are built. The graph above leaves them out: they are compiled for the rehearsal, because the kit has no first-loss Safe. The first-loss burn role, held by the universal factory, burns the DAO's [[first-loss shares]] only in an enacted motion. The first-loss role, held by the committee's Safe, redeems them to the Asset Safe. No role can transfer or approve them."
     sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-014#d10", "OD-107", "INV-021"]
 changes:
   - area: Modifiers

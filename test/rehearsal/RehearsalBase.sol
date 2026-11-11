@@ -313,6 +313,7 @@ abstract contract RehearsalBase is Test {
         vm.serializeAddress(o, "emergencySafe", address(emergency));
         vm.serializeAddress(o, "universalFactory", address(uf));
         vm.serializeAddress(o, "firstLossSafe", address(firstLoss));
+        vm.serializeAddress(o, "firstLossModifier", address(firstLossMod));
         vm.serializeAddress(o, "ordersAccount", address(orders));
         return vm.serializeAddress(o, "ordersModifier", address(ordersMod));
     }
@@ -327,6 +328,7 @@ abstract contract RehearsalBase is Test {
         assertEq(vm.parseJsonAddress(m, ".emergencySafe"), address(emergency), "manifest: emergency Safe");
         assertEq(vm.parseJsonAddress(m, ".universalFactory"), address(uf), "manifest: universal factory");
         assertEq(vm.parseJsonAddress(m, ".firstLossSafe"), address(firstLoss), "manifest: first-loss Safe");
+        assertEq(vm.parseJsonAddress(m, ".firstLossModifier"), address(firstLossMod), "manifest: first-loss modifier");
         assertEq(vm.parseJsonAddress(m, ".ordersAccount"), address(orders), "manifest: orders account");
         assertEq(vm.parseJsonAddress(m, ".ordersModifier"), address(ordersMod), "manifest: orders modifier");
     }

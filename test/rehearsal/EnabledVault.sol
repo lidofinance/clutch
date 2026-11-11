@@ -281,21 +281,13 @@ abstract contract EnabledVault is RehearsalBase {
         }
     }
 
-    /// @dev ADR 008: the first-loss modifier and its two roles. Its policy is not built yet. The burn role's
+    /// @dev ADR 008: the first-loss modifier with the artifact's policy and its two roles. The burn role's
     ///      member is the universal factory, which holds every motion role (ADR 013, decision 18).
     function _firstLossCalls() internal view returns (VoteBuilder.Item[] memory c) {
-        c = new VoteBuilder.Item[](3);
+        VoteBuilder.Item[] memory policy = _policyCalls(address(firstLossMod), address(0));
+        c = new VoteBuilder.Item[](1 + policy.length);
         c[0] = VoteBuilder.Item(address(firstLoss), abi.encodeCall(ISafe.enableModule, (address(firstLossMod))), "");
-        c[1] = VoteBuilder.Item(address(firstLossMod), _assign(Mainnet.COMMITTEE_SAFE, FIRST_LOSS), "");
-        c[2] = VoteBuilder.Item(address(firstLossMod), _assign(address(uf), FIRST_LOSS_BURN), "");
-    }
-
-    function _assign(address member, bytes32 key) internal pure returns (bytes memory) {
-        bytes32[] memory keys = new bytes32[](1);
-        keys[0] = key;
-        bool[] memory yes = new bool[](1);
-        yes[0] = true;
-        return abi.encodeCall(IRoles.assignRoles, (member, keys, yes));
+        for (uint256 i = 0; i < policy.length; i++) c[1 + i] = policy[i];
     }
 
     /// @dev The gas of each call on its own, with cold accounts, applied in

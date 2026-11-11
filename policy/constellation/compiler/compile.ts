@@ -224,6 +224,8 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
   const safe = getAddress(manifest.assetSafe);
   const ordersAccount = manifest.ordersModifier ? getAddress(manifest.ordersAccount) : null;
   const ordersModifier = manifest.ordersModifier ? getAddress(manifest.ordersModifier) : null;
+  const firstLossSafe = getAddress(manifest.firstLossSafe);
+  const firstLossModifier = manifest.firstLossModifier ? getAddress(manifest.firstLossModifier) : null;
   if (!Array.isArray(manifest.modules) || manifest.modules.length === 0) {
     throw new Error("the manifest must list every module of the Asset Safe in `modules` (OD-38)");
   }
@@ -236,7 +238,11 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
     if (ordersAccount !== null && m.avatar === ordersAccount && m.address !== ordersModifier) {
       throw new Error(`${m.ref} ${m.address} acts for the orders account, but the manifest's orders modifier is ${ordersModifier}`);
     }
+    if (m.avatar === firstLossSafe && m.address !== firstLossModifier) {
+      throw new Error(`${m.ref} ${m.address} acts for the first-loss Safe, but the manifest's first-loss modifier is ${firstLossModifier ?? "not named"}`);
+    }
   }
+  checkFirstLoss(modifiers, firstLossSafe, firstLossModifier);
   const protectedAccounts = [safe, ...modules, ...(ordersAccount !== null ? [ordersAccount, ordersModifier!] : [])];
   for (const m of modifiers) {
     for (const role of m.roles) {
@@ -278,6 +284,43 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
           if (kind === "grant") {
             checkGrantKeys(where, name, fn.conditions, role.key, writableKeys(manifest, target.address));
             checkGrantDelegatecall(where, name, fn.selector, fn.conditions, target.address === ordersModifier);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * The first-loss Safe and its modifier (ADR 008, decisions 19, 21 and 23). No role of any modifier may call
+ * either of them: Aragon Voting alone administers them. On the first-loss modifier, a role holds only single
+ * functions, each a plain call, and never a transfer or an approval, so no role moves the first-loss shares to
+ * another holder or lets a spender take them.
+ */
+const MOVES_SHARES = new Set([
+  selector("transfer(address,uint256)"),
+  selector("transferFrom(address,address,uint256)"),
+  selector("approve(address,uint256)"),
+]);
+export function checkFirstLoss(modifiers: Artifact["modifiers"], firstLossSafe: string, firstLossModifier: string | null) {
+  for (const m of modifiers) {
+    for (const role of m.roles) {
+      for (const target of role.targets) {
+        const where = `${m.ref}.${role.name} on ${target.name ?? target.address}`;
+        if (target.address === firstLossSafe || target.address === firstLossModifier) {
+          throw new Error(`${where}: no role may call the first-loss Safe or its modifier (ADR 008, decision 19)`);
+        }
+        if (m.address !== firstLossModifier) continue;
+        if (target.clearance !== Clearance.Function) {
+          throw new Error(`${where}: a role of the first-loss modifier may not call every function of a target (ADR 008, decision 21)`);
+        }
+        for (const fn of target.functions) {
+          const name = fn.signature ?? fn.selector;
+          if (fn.executionOptions !== 0) {
+            throw new Error(`${where}: ${name} must be a plain call, without value or delegatecall (ADR 008, decision 21)`);
+          }
+          if (MOVES_SHARES.has(fn.selector)) {
+            throw new Error(`${where}: ${name} would move or lend the first-loss shares (ADR 008, decision 21)`);
           }
         }
       }

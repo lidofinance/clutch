@@ -239,7 +239,7 @@ test("the rehearsal artifact passes the checks, the orders account included", ()
 // ADR 013, decision 18: the universal factory holds every motion role, and no other role. The kit, which has no
 // universal factory, names its mock script executor in the factory's place.
 test("the universal factory holds every motion role, and no other", () => {
-  const MOTION_ROLES = ["governance", "restart", "insurance-funding", "exit-governance", "approvals"];
+  const MOTION_ROLES = ["governance", "restart", "insurance-funding", "exit-governance", "approvals", "first-loss-burn"];
   const artifacts: [typeof REHEARSAL, string][] = [
     [artifact as typeof REHEARSAL, (artifact.manifest as Record<string, string>).universalFactory],
     [REHEARSAL, (REHEARSAL.manifest as Record<string, string>).universalFactory],
@@ -688,4 +688,138 @@ test("the compiler refuses exit-governance's grant of delegatecall", () => {
   const c = exitGrant(modifiers, ALLOW_FUNCTION).conditions as Flat[];
   c[branchesOf(c)[0].params[3]].compValue = word(2);
   expect(() => checkProtected(modifiers, manifest)).toThrow(/may grant delegatecall/);
+});
+
+// ---------------------------------------------------------------------------
+// The first-loss modifier (ADR 008, decisions 19, 21 and 23; INV-021)
+// ---------------------------------------------------------------------------
+
+const firstLossOf = (modifiers: typeof REHEARSAL.modifiers) => modifiers.find((m) => m.ref === "first_loss_modifier")!;
+const firstLossRole = (name: string) => firstLossOf(REHEARSAL.modifiers).roles.find((r) => r.name === name)!;
+const EARN_SHARES = ["0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4", "0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981"];
+const EARN_REDEEM_QUEUES = ["0x095bFAca9f1c6F2B063Cd67C6d6bfcd0c3aaB7b4", "0x9e36A74FE278906a76e7615263e46a83fC40c47F"];
+
+test("the first-loss modifier acts for the first-loss Safe and holds two roles", () => {
+  const m = firstLossOf(REHEARSAL.modifiers);
+  const manifest = REHEARSAL.manifest as Record<string, string>;
+  expect(m.address).toBe(manifest.firstLossModifier);
+  expect([m.owner, m.avatar, m.target]).toEqual([manifest.firstLossSafe, manifest.firstLossSafe, manifest.firstLossSafe]);
+  expect(m.roles.map((r) => r.name).sort()).toEqual(["first-loss", "first-loss-burn"]);
+});
+
+test("the first-loss role requests a redemption and claims it to the Asset Safe, and nothing else", () => {
+  const r = firstLossRole("first-loss");
+  expect(r.members.map((m: { address: string }) => m.address)).toEqual([REHEARSAL.manifest.operatorSafe]);
+  expect(r.targets.map((t) => t.address).sort()).toEqual([...EARN_REDEEM_QUEUES].sort());
+  for (const t of r.targets) {
+    expect(t.clearance).toBe(Clearance.Function);
+    expect(t.functions.map((f) => f.signature).sort()).toEqual(["claim(address,uint32[])", "redeem(uint256)"]);
+    const claim = t.functions.find((f) => f.signature === "claim(address,uint32[])")!;
+    const c = claim.conditions as Flat[];
+    expect(c.length).toBe(2);
+    expect([c[1].parent, c[1].operator, c[1].compValue.toLowerCase()]).toEqual([0, EQUAL_TO, pad(REHEARSAL.manifest.assetSafe as string)]);
+    for (const f of t.functions) expect(f.executionOptions).toBe(0);
+  }
+});
+
+test("the first-loss-burn role burns the two Earn shares, and nothing else", () => {
+  const r = firstLossRole("first-loss-burn");
+  expect(r.members.map((m: { address: string }) => m.address)).toEqual([factory]);
+  expect(r.targets.map((t) => t.address).sort()).toEqual([...EARN_SHARES].sort());
+  for (const t of r.targets) {
+    expect(t.clearance).toBe(Clearance.Function);
+    expect(t.functions.map((f) => [f.signature, f.executionOptions])).toEqual([["burn(uint256)", 0]]);
+  }
+});
+
+// A role of another modifier acts as another Safe, so it reaches the first-loss shares only through the first-loss
+// Safe or its modifier. No role names either as a target.
+test("no role names the first-loss Safe or its modifier as a target", () => {
+  const { firstLossSafe, firstLossModifier } = REHEARSAL.manifest as Record<string, string>;
+  for (const m of REHEARSAL.modifiers) {
+    for (const r of m.roles) {
+      for (const t of r.targets) expect([firstLossSafe, firstLossModifier]).not.toContain(t.address);
+    }
+  }
+});
+
+/** A copy of the rehearsal's modifiers, with one change to a role of the first-loss modifier. */
+const withFirstLoss = (role: string, change: (r: (typeof REHEARSAL.modifiers)[number]["roles"][number]) => void) => {
+  const copy = structuredClone(REHEARSAL.modifiers);
+  change(firstLossOf(copy).roles.find((r) => r.name === role)!);
+  return copy;
+};
+
+test("the compiler refuses a first-loss role that transfers or approves the shares", () => {
+  for (const signature of ["transfer(address,uint256)", "transferFrom(address,address,uint256)", "approve(address,uint256)"]) {
+    const bad = withFirstLoss("first-loss-burn", (r) => {
+      r.targets[0].functions[0] = { ...r.targets[0].functions[0], signature, selector: id(signature).slice(0, 10) as `0x${string}` };
+    });
+    expect(() => checkProtected(bad, REHEARSAL.manifest)).toThrow(/would move or lend the first-loss shares/);
+  }
+});
+
+test("the compiler refuses value, delegatecall and a whole-target clearance on the first-loss modifier", () => {
+  for (const options of [1, 2, 3]) {
+    const bad = withFirstLoss("first-loss", (r) => {
+      r.targets[0].functions[0].executionOptions = options;
+    });
+    expect(() => checkProtected(bad, REHEARSAL.manifest)).toThrow();
+  }
+  const whole = withFirstLoss("first-loss", (r) => {
+    r.targets[0].clearance = Clearance.Target;
+    r.targets[0].functions = [];
+  });
+  expect(() => checkProtected(whole, REHEARSAL.manifest)).toThrow(/may not call every function of a target/);
+});
+
+test("the compiler refuses any role that calls the first-loss Safe or its modifier", () => {
+  const { firstLossSafe, firstLossModifier } = REHEARSAL.manifest as Record<string, string>;
+  for (const account of [firstLossSafe, firstLossModifier]) {
+    for (const ref of ["operator_modifier", "safety_modifier", "orders_modifier", "first_loss_modifier"]) {
+      const copy = structuredClone(REHEARSAL.modifiers);
+      const target = copy.find((m) => m.ref === ref)!.roles[0].targets[0];
+      target.address = account;
+      expect(() => checkProtected(copy, REHEARSAL.manifest)).toThrow(/no role may call the first-loss Safe or its modifier/);
+    }
+  }
+});
+
+test("the compiler refuses a second modifier that acts for the first-loss Safe", () => {
+  const copy = structuredClone(REHEARSAL.modifiers);
+  firstLossOf(copy).address = "0x00000000000000000000000000000000000000f1";
+  expect(() => checkProtected(copy, REHEARSAL.manifest)).toThrow(/acts for the first-loss Safe/);
+});
+
+// ---------------------------------------------------------------------------
+// The operator's transfers on the Asset Safe (ADR 007, decision 18; ADR 014, decision 9; INV-002, INV-038)
+// ---------------------------------------------------------------------------
+
+test("each operator transfer on the Asset Safe pays the Aragon Agent, or the orders account within a budget", () => {
+  const TRANSFER = id("transfer(address,uint256)").slice(0, 10);
+  for (const a of [artifact as typeof REHEARSAL, REHEARSAL]) {
+    const { agent, ordersAccount } = a.manifest as Record<string, string>;
+    const operator = a.modifiers.find((m) => m.ref === "operator_modifier")!.roles.find((r) => r.name === "operator")!;
+    let seen = 0;
+    for (const t of operator.targets) {
+      for (const f of t.functions) {
+        if (f.selector !== TRANSFER) continue;
+        const c = f.conditions as Flat[];
+        const branches = branchesOf(c);
+        expect(branches.length).toBe(2);
+        const receivers = branches.map(({ params }) => c[params[0]]);
+        for (const r of receivers) expect(r.operator).toBe(EQUAL_TO);
+        expect(receivers.map((r) => r.compValue.toLowerCase()).sort()).toEqual([pad(agent), pad(ordersAccount)].sort());
+        for (const { params } of branches) {
+          const toOrders = c[params[0]].compValue.toLowerCase() === pad(ordersAccount);
+          // the funding spends a budget key; the return names no amount
+          if (toOrders) expect(c[params[1]].operator).toBe(WITHIN_ALLOWANCE);
+          else expect(c[params[1]].operator).toBe(0);
+        }
+        expect(f.executionOptions).toBe(0);
+        seen++;
+      }
+    }
+    expect(seen).toBe(6);
+  }
 });

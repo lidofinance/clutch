@@ -413,7 +413,7 @@ flows:
         text: "From then on, on the Earn team's written instruction, a motion burns the shares, or the committee's Safe redeems them to the Asset Safe. Monitoring alerts on any change of the first-loss Safe's balance."
         nodes: [committee, first-loss, monitoring]
         edges: [first-loss-shares]
-        check: "INV-021. The rehearsal deploys the first-loss Safe; its modifier's policy is not built."
+        check: "INV-021. The rehearsal deploys the first-loss Safe and applies its modifier's policy; the insurance roles are not built."
     sources: ["ADR-014#d2", "ADR-014#d10", "ADR-014#proposed-direction", "ADR-010#d20", "ADR-008#d13",
       "ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-008#proposed-direction", "ADR-005#d32", "INV-021",
       "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", "runbook:Fund a tranche"]
@@ -421,7 +421,7 @@ flows:
   - id: first-loss-burn
     group: funding
     title: A first-loss burn or exit
-    label: specified
+    label: built
     summary: "How the DAO's [[first-loss shares]] absorb a loss, as the March 2026 terms say. The committee executes the terms without a DAO vote: a burn by motion, or an exit through one narrow role."
     trigger: "A loss of at least 1% in earnETH or earnUSD that the curators confirm, or a confirmed material risk."
     time: "A burn: at least 72 hours, the objection window. An exit: minutes to initiate, then the redeem queue."
@@ -434,7 +434,7 @@ flows:
         text: "For a burn, the committee's Safe creates a burn motion, and the forum post with the instruction goes up with it. For an exit, it requests and claims the redemption through the first-loss role, which pays the Asset Safe. The guard, once set, screens both transactions."
         nodes: [committee, screening, easytrack, first-loss, protocols]
         edges: [screen, motions, first-loss-shares]
-        check: "INV-021: only an enacted motion can burn the shares, and no role can transfer or approve them. The first-loss modifier's policy and the burn shape are not built."
+        check: "INV-021: only an enacted motion can burn the shares, and no role can transfer or approve them. A burn motion runs on a fork through the live Easy Track."
       - who: "Easy Track, after 72 hours"
         text: "If LDO holders do not object, anyone enacts the motion. The universal factory calls `burn` on the share token through the first-loss burn role."
         nodes: [easytrack, first-loss, protocols]
@@ -451,6 +451,7 @@ flows:
       - "A curator freezes the vault: an exit waits for the vault, and a burn still works."
     sources: ["ADR-008#d14", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-008#context",
       "ADR-008#proposed-direction", "ADR-008#consequences", "ADR-013#d5", "ADR-014#d10",
+      "test:test_first_loss_burn_by_motion", "test:test_first_loss_claim_pays_only_the_asset_safe",
       "ADR-014#proposed-direction", "INV-021", "runbook:Burn first-loss Earn shares",
       "runbook:Exit the first-loss shares",
       "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms", "ADR-009#proposed-direction"]
@@ -497,7 +498,7 @@ flows:
   - id: return-to-agent
     group: funding
     title: Returning funds to the treasury
-    label: specified
+    label: built
     summary: "Funds go back to the Aragon Agent only in an emergency or a recovery. The emergency Safe or the committee's Safe sends them, by a transfer pinned to the Agent, with no motion and no vote: a return to the treasury loses nothing, and at worst the vault stops working."
     trigger: "An emergency, or a recovery, such as the excess above the launch cap or the end of the mandate."
     time: "Minutes."
@@ -506,7 +507,7 @@ flows:
         text: "The committee's Safe sends a vault token to the Aragon Agent through the operator role, from the Asset Safe or from the orders account."
         nodes: [committee, operator-modifier, asset-safe, dao]
         edges: [op-role, own-op, own]
-        check: "From the orders account, the return is in the policy. From the Asset Safe, it is not in the policy yet."
+        check: "Both returns are in the policy. On a fork, each order token goes to the Agent in any amount, spends no budget and reaches no other receiver."
       - who: "Emergency Safe"
         text: "In an emergency, the emergency Safe sends tokens to the Agent through the safety modifier, or places [[recovery order|recovery orders]] that pay the Agent."
         nodes: [emergency-safe, safety-modifier, asset-safe, dao]
@@ -520,6 +521,7 @@ flows:
       - "A captured committee returns funds early: the vault stops working, and the funds stay safe in the treasury. A DAO vote can move the operator role to another Safe."
     sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#proposed-direction",
       "ADR-014#consequences", "ADR-007#proposed-direction", "ADR-013#d4", "INV-002", "INV-038",
+      "test:test_operator_returns_each_order_token_to_the_agent", "test:test_operator_return_spends_no_budget",
       "runbook:Return assets to the Agent", "runbook:Move the operator role to another Safe"]
 
   # --- Reporting and monitoring -------------------------------------------------------------------

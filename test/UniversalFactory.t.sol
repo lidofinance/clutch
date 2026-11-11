@@ -140,6 +140,26 @@ contract UniversalFactoryRehearsal is EnabledVault {
         assertEq(seen, 5, "every launch approval list");
     }
 
+    /// @dev The factory writes the operator's `transfer` tree of an orders token exactly as the policy compiler
+    ///      does: the return to the Aragon Agent, or the funding of the orders account under the token's key.
+    function test_uf_transfer_tree_matches_the_compiler() public enabled {
+        string memory j = vm.readFile(ARTIFACT);
+        address[] memory to = vm.parseJsonAddressArray(j, ".calls.to");
+        bytes[] memory data = vm.parseJsonBytesArray(j, ".calls.data");
+        uint256 seen;
+        for (uint256 i = 0; i < to.length; i++) {
+            if (to[i] != address(opMod) || bytes4(data[i]) != IRoles.scopeFunction.selector) continue;
+            (bytes32 key, address target, bytes4 selector, IRoles.ConditionFlat[] memory c, uint8 options) =
+                abi.decode(_args(data[i]), (bytes32, address, bytes4, IRoles.ConditionFlat[], uint8));
+            if (key != OPERATOR || selector != IERC20.transfer.selector) continue;
+            IRoles.ConditionFlat[] memory built = uf.transferTree(uf.keyFor(target, address(orders)));
+            assertEq(abi.encode(built), abi.encode(c), "the same tree");
+            assertEq(options, 0, "no delegatecall");
+            seen++;
+        }
+        assertEq(seen, 6, "every launch order token");
+    }
+
     // ---------------------------------------------------------------------
     // INV-033: versions and the counter
     // ---------------------------------------------------------------------

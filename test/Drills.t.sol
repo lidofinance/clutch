@@ -736,6 +736,29 @@ contract Drills is ClutchFixture {
         assertFalse(okOp, "the committee's Safe does not hold the role");
     }
 
+    /// @dev INV-038 and ADR 014, decision 9: the operator returns an order
+    ///      token from the Asset Safe to the Aragon Agent, and to no other
+    ///      receiver but the orders account.
+    function test_operator_return_pays_only_the_agent() public {
+        deal(a.usdc, address(safe), 10e6);
+        uint256 before = IERC20(a.usdc).balanceOf(address(agent));
+        vm.prank(operatorSafe);
+        roles.execTransactionWithRole(a.usdc, 0, abi.encodeCall(IERC20.transfer, (address(agent), 4e6)), 0, OPERATOR, true);
+        assertEq(IERC20(a.usdc).balanceOf(address(agent)) - before, 4e6, "the return reached the Agent");
+        address[3] memory receivers = [attacker, firstLossSafe, operatorSafe];
+        for (uint256 i = 0; i < receivers.length; i++) {
+            vm.prank(operatorSafe);
+            (bool ok, bytes memory ret) = address(roles).call(
+                abi.encodeCall(
+                    IRoles.execTransactionWithRole,
+                    (a.usdc, 0, abi.encodeCall(IERC20.transfer, (receivers[i], 1e6)), 0, OPERATOR, true)
+                )
+            );
+            assertFalse(ok, "no other receiver");
+            assertEq(bytes4(ret), CONDITION_VIOLATION, "the modifier refuses it");
+        }
+    }
+
     // ------------------------------------------------------------------
     // D5: budgets. An approval spends the key of its spender; zero spends
     // nothing; deposits spend nothing (OD-08).

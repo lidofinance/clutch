@@ -12,6 +12,7 @@
 // contracts (ADR 007).
 // Changed for Clutch on 2026-11-08: the universal factory holds the motion
 // roles in place of Easy Track's script executor (ADR 013, decision 18).
+// Changed for Clutch on 2026-11-11: the first-loss modifier (ADR 008).
 import { readFileSync } from "node:fs";
 
 /**
@@ -64,6 +65,12 @@ export type Manifest = {
    * deploys no orders account, so its manifest names none, and the orders policy compiles only where it does.
    */
   ordersModifier?: string;
+  /**
+   * The first-loss Safe's one modifier, with the `first-loss` and `first-loss-burn` roles (ADR 008, decisions 21
+   * and 23). The kit deploys no first-loss Safe, so its manifest names none, and the first-loss policy compiles
+   * only where it does.
+   */
+  firstLossModifier?: string;
 };
 
 /** The addresses that permissions pin: each must be in the manifest. */
@@ -90,6 +97,9 @@ export function checkManifest(m: Record<string, unknown>) {
   }
   if (m.ordersModifier !== undefined && !isAddress(m.ordersModifier)) {
     throw new Error("the manifest's ordersModifier must be an address");
+  }
+  if (m.firstLossModifier !== undefined && !isAddress(m.firstLossModifier)) {
+    throw new Error("the manifest's firstLossModifier must be an address");
   }
 }
 
@@ -162,6 +172,7 @@ export const NAMES: Record<string, string> = {
   [manifest.firstLossSafe]: "first-loss Safe",
   [manifest.ordersAccount]: "orders account",
   ...(manifest.ordersModifier ? { [manifest.ordersModifier]: "orders modifier" } : {}),
+  ...(manifest.firstLossModifier ? { [manifest.firstLossModifier]: "first-loss modifier" } : {}),
   [COW_SETTLEMENT]: "CoW settlement",
   [COW_VAULT_RELAYER]: "CoW vault relayer",
   [ORDER_SIGNER]: "CoW order signer",

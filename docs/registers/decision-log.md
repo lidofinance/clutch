@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T21:07:14Z
+  at: 2026-11-11T21:45:08Z
 verified: []
 sources:
   - id: s1
@@ -124,6 +124,16 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-11 — the first-loss slice: the operator's return, the first-loss policy and the burn
+
+Step 2 of the agent's list in the entry below was the first-loss slice: the operator's return to the Aragon Agent on the Asset Safe, the first-loss modifier's permissions, and the factory's burn and insurance shapes. EM's instruction, "do 1, 4, and 2", is quoted in that entry.
+
+Recorded as:
+
+- The agent built three parts. The operator's `transfer` of an order token on the Asset Safe has two branches in one tree: any amount to the Aragon Agent, or an amount within the token's orders budget to the orders account; the universal factory writes the same tree for a token that a motion adds ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 9). The first-loss modifier holds the `first-loss` role of the committee's Safe, which requests a redemption and claims it to the Asset Safe, and the `first-loss-burn` role of the universal factory ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 21 and 23). The factory has one new operation, the first-loss burn.
+- Three readings are the agent's, and EM has not confirmed them. The return covers the operator's order tokens only: DAI and sUSDS have none, so the operator converts or redeems them first. A burn motion names a share token and an amount, and the first-loss policy names the two Earn shares, so a burn of another token passes its creation and fails at its enactment, as insurance money of an unlisted token does. A redemption request names no receiver, so only the claim is pinned to the Asset Safe.
+- The agent did not build the insurance shapes. It opened OD-129 to OD-131 in the [register](/registers/open-decisions.md) for three points that no decision settles: a bound on insurance money, the operation that gives Lido Earn its insurance, and the forms of a Lido Lend fund before Lido Lend exists. [s35]
 
 ## 2026-11-11 — the policy workflow installs bun without a third-party action
 

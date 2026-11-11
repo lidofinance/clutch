@@ -425,7 +425,7 @@ contract OrdersAccountRehearsal is EnabledVault {
     /// @dev Decisions 41, 44 and 45 by one motion, through the live Easy Track: the token's relayer approval, its
     ///      exits, its funding budget and its place in the lists. The enactment fits one transaction under
     ///      EIP-7825's cap, with cold accounts. After it, the operator funds the orders account within the token's
-    ///      budget and no further, an operator order in the token settles and pays the Asset Safe, a TWAP order in
+    ///      budget and no further, returns the token to the Agent, an operator order in the token settles and pays the Asset Safe, a TWAP order in
     ///      it is created, and a recovery order sells it and pays the Agent.
     function test_factory_orders_token_motion() public enabled {
         address token = Mainnet.WBTC;
@@ -441,10 +441,15 @@ contract OrdersAccountRehearsal is EnabledVault {
         );
 
         // the operator funds the orders account within the token's budget, and no further
-        deal(token, address(asset), 2e8);
+        deal(token, address(asset), 4e8);
         _operator(token, abi.encodeCall(IERC20.transfer, (address(orders), 6e7)), true);
         _operatorRefused(token, abi.encodeCall(IERC20.transfer, (address(orders), 5e7)));
         _operatorRefused(token, abi.encodeCall(IERC20.transfer, (stranger, 1)));
+
+        // the operator returns it to the Aragon Agent, in an amount above the whole budget
+        uint256 agentToken = IERC20(token).balanceOf(Mainnet.AGENT);
+        _operator(token, abi.encodeCall(IERC20.transfer, (Mainnet.AGENT, 2e8)), true);
+        assertEq(IERC20(token).balanceOf(Mainnet.AGENT) - agentToken, 2e8, "the Agent receives the return");
 
         // an operator order sells it and pays the Asset Safe; a TWAP order in it is created
         Order memory o = _order(token, Mainnet.USDC, address(asset), 6e7, 36_000e6, _in(1 hours));
@@ -632,20 +637,88 @@ contract OrdersAccountRehearsal is EnabledVault {
     // INV-002: the Asset Safe funds the orders account
     // ---------------------------------------------------------------------
 
-    /// @dev The operator sends an order token to the orders account under its orders budget, and nowhere
-    ///      else; the emergency role may send a recovery asset there too.
+    /// @dev The operator sends an order token to the orders account under its orders budget; the emergency role
+    ///      may send a recovery asset there too.
     function test_orders_funding_from_the_asset_safe() public enabled {
         deal(Mainnet.USDC, address(asset), 20_000e6);
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 10_000e6)), true);
         assertEq(IERC20(Mainnet.USDC).balanceOf(address(orders)), 10_000e6, "the orders account is funded");
         _operatorRefused(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 1)));
         _operatorRefused(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (stranger, 1)));
-        _operatorRefused(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (Mainnet.AGENT, 1)));
         deal(Mainnet.DAI, address(asset), 1e18);
         _operatorRefused(Mainnet.DAI, abi.encodeCall(IERC20.transfer, (address(orders), 1e18)));
 
         _safety(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 1_000e6)));
         assertEq(IERC20(Mainnet.USDC).balanceOf(address(orders)), 11_000e6, "the emergency role may fund recovery");
+    }
+
+    // ---------------------------------------------------------------------
+    // INV-038: the operator's return to the Aragon Agent (ADR 014, decision 9)
+    // ---------------------------------------------------------------------
+
+    /// @dev On the Asset Safe, the operator sends each order token to the Aragon Agent and to no other receiver.
+    ///      stETH moves by shares, so its amount may differ by two wei.
+    function test_operator_returns_each_order_token_to_the_agent() public enabled {
+        address[] memory tokens = launchOrderTokens();
+        address[4] memory others = [stranger, Mainnet.COMMITTEE_SAFE, address(firstLoss), address(emergency)];
+        uint256 amount = 1e6;
+        for (uint256 i = 0; i < tokens.length; i++) {
+            address token = tokens[i];
+            if (token == Mainnet.STETH) {
+                vm.prank(Mainnet.WSTETH);
+                IERC20(token).transfer(address(asset), 1e18);
+            } else {
+                deal(token, address(asset), 1e18);
+            }
+            uint256 before = IERC20(token).balanceOf(Mainnet.AGENT);
+            _operator(token, abi.encodeCall(IERC20.transfer, (Mainnet.AGENT, amount)), true);
+            assertApproxEqAbs(IERC20(token).balanceOf(Mainnet.AGENT) - before, amount, 2, "the Agent receives the return");
+            for (uint256 k = 0; k < others.length; k++) {
+                _operatorRefused(token, abi.encodeCall(IERC20.transfer, (others[k], 1)));
+            }
+            _operatorRefused(token, abi.encodeCall(IERC20.transferFrom, (address(asset), Mainnet.AGENT, 1)));
+            _operatorRefused(token, abi.encodeCall(IERC20.approve, (Mainnet.AGENT, 1)));
+        }
+    }
+
+    /// @dev The return spends no budget and needs none: after the orders budget of a token is spent, the operator
+    ///      still returns the token, and the budget stays as it was.
+    function test_operator_return_spends_no_budget() public enabled {
+        deal(Mainnet.USDC, address(asset), 60_000e6);
+        _operator(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 10_000e6)), true);
+        _operatorRefused(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 1)));
+        bytes32 key = uf.keyFor(Mainnet.USDC, address(orders));
+        (,,, uint128 spent,) = opMod.allowances(key);
+        assertEq(spent, 0, "the orders budget is spent");
+
+        uint256 before = IERC20(Mainnet.USDC).balanceOf(Mainnet.AGENT);
+        _operator(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (Mainnet.AGENT, 50_000e6)), true);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(Mainnet.AGENT) - before, 50_000e6, "a return above the budget");
+        (,,, uint128 after_,) = opMod.allowances(key);
+        assertEq(after_, spent, "the return leaves the budget as it was");
+    }
+
+    /// @dev A token outside the order lists has no return: the operator converts or redeems it first.
+    function test_operator_return_only_for_order_tokens() public enabled {
+        deal(Mainnet.DAI, address(asset), 1e18);
+        deal(Mainnet.SUSDS, address(asset), 1e18);
+        _operatorRefused(Mainnet.DAI, abi.encodeCall(IERC20.transfer, (Mainnet.AGENT, 1e18)));
+        _operatorRefused(Mainnet.SUSDS, abi.encodeCall(IERC20.transfer, (Mainnet.AGENT, 1e18)));
+    }
+
+    /// @dev On the orders account, the operator sends an order token back to the Asset Safe or to the Aragon Agent,
+    ///      and to no other receiver.
+    function test_orders_operator_returns_tokens_to_the_asset_safe_or_the_agent() public enabled {
+        deal(Mainnet.USDC, address(orders), 9_000e6);
+        uint256 agentBefore = IERC20(Mainnet.USDC).balanceOf(Mainnet.AGENT);
+        uint256 assetBefore = IERC20(Mainnet.USDC).balanceOf(address(asset));
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.USDC, abi.encodeCall(IERC20.transfer, (Mainnet.AGENT, 4_000e6)), CALL);
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(asset), 5_000e6)), CALL);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(Mainnet.AGENT) - agentBefore, 4_000e6, "the Agent receives the return");
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)) - assetBefore, 5_000e6, "the Asset Safe receives the return");
+        deal(Mainnet.USDC, address(orders), 1e6);
+        _refused(OPERATOR, Mainnet.USDC, abi.encodeCall(IERC20.transfer, (stranger, 1)), CALL);
+        _refused(OPERATOR, Mainnet.USDC, abi.encodeCall(IERC20.transfer, (Mainnet.COMMITTEE_SAFE, 1)), CALL);
     }
 
 
