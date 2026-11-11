@@ -47,7 +47,6 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/dai-usds-conversion-2026-10-05.md](/research/dai-usds-conversion-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/easy-track-first-2026-11-05.md](/research/easy-track-first-2026-11-05.md) | Research Note | slop |  | 2026-11-05 | none |
 | [research/enabling-vote-rehearsal-2026-10-15.md](/research/enabling-vote-rehearsal-2026-10-15.md) | Research Note | slop |  | 2026-10-22 | none |
-| [research/funding-registries-2026-10-02.md](/research/funding-registries-2026-10-02.md) | Research Note | slop |  | 2026-11-05 | none |
 | [research/guide-invariants-2026-10-12.md](/research/guide-invariants-2026-10-12.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/legacy-investments-2026-10-05.md](/research/legacy-investments-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/operator-safe-review-2026-10-15.md](/research/operator-safe-review-2026-10-15.md) | Research Note | slop |  | 2026-10-19 | none |
@@ -58,10 +57,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/request-for-solution-2026-10-07.md](/research/request-for-solution-2026-10-07.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-10-22 | none |
-| [research/simplification-2026-10-08.md](/research/simplification-2026-10-08.md) | Research Note | slop |  | 2026-10-22 | none |
 | [research/single-vote-review-2026-10-14.md](/research/single-vote-review-2026-10-14.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/stonks-instances-2026-10-02.md](/research/stonks-instances-2026-10-02.md) | Research Note | slop |  | 2026-10-22 | none |
-| [research/stonks-pricing-2026-10-05.md](/research/stonks-pricing-2026-10-05.md) | Research Note | slop |  | 2026-10-22 | none |
 | [research/universal-factory-prototype-2026-11-05.md](/research/universal-factory-prototype-2026-11-05.md) | Research Note | slop |  | 2026-11-06 | none |
 | [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-10-19 | none |
 | [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-11 | none |

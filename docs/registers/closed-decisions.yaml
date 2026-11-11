@@ -114,7 +114,6 @@
 - id: OD-18
   question: "Does the Stonks price source cover every pair?"
   closed: 2026-10-02
-  see: [/research/stonks-instances-2026-10-02.md]
   note: "Answered by evidence, not by a decision: the deployed Stonks stack prices only stETH and LDO, and the configuration moved to OD-20."
 - id: OD-19
   question: "The operator Safe's threshold"
@@ -127,7 +126,6 @@
   log:
     - "2026-10-05 — OD-20: swap pricing"
   adr: [ADR-007, ADR-007#d27]
-  see: [/research/stonks-pricing-2026-10-05.md]
   note: "The withdrawal-queue route left the design on 2026-10-08 (ADR 007, decision 27)."
 - id: OD-21
   question: "How do the legacy investments that the mandate carries over move into the vault, and who holds them now?"

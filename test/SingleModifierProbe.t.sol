@@ -8,7 +8,7 @@ import {SafeExec} from "../src/exec/SafeExec.sol";
 import {ClutchFixture} from "./utils/Fixture.sol";
 
 /// @title SingleModifierProbe — option C of the simplification note
-///        (docs/research/simplification-2026-10-08.md): one Roles modifier
+///        (https://github.com/lidofinance/clutch/blob/6d5ebb8cd72732b1e531bb562af8a1c3be3f8a2d/docs/research/simplification-2026-10-08.md): one Roles modifier
 ///        per account instead of two.
 /// @dev The probe disables the safety modifier and puts the emergency and
 ///      technical roles on the operator modifier. The technical role's switch
