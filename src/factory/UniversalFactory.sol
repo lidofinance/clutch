@@ -43,8 +43,8 @@ contract UniversalFactory {
     uint8 public constant RESTART = 5;
     /// @dev Move a token from the Asset Safe to the first-loss Safe, for insurance.
     uint8 public constant FUND = 6;
-    /// @dev Introduce a token: its first approval list and both of its ceilings, together
-    ///     . A token is introduced once; the enabling vote introduces the launch
+    /// @dev Introduce a token: its first approval list and both of its ceilings, together.
+    ///      A token is introduced once; the enabling vote introduces the launch
     ///      tokens by seeding their ceilings.
     uint8 public constant INTRODUCE = 7;
     /// @dev Scope again, for the operator, a target that the emergency role revoked as a whole.
@@ -55,8 +55,7 @@ contract UniversalFactory {
     ///      and transfer, the operator's return, the token's exit on the Asset Safe, the operator's
     ///      transfer into the orders account under the token's derived budget key, and the token in
     ///      the orders account's lists, on both sides of signer and TWAP orders and in what recovery
-    ///      orders sell. A new token's ceilings come with it
-    ///     .
+    ///      orders sell. A new token's ceilings come with it.
     uint8 public constant ORDERS_TOKEN = 9;
     /// @dev Give the operator back its authority on the orders account after the emergency role revoked it, for the
     ///      current lists, and raise the relayer approval of the listed tokens that the motion names.
