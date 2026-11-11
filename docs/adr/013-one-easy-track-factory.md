@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-10T21:27:28Z
+  at: 2026-11-11T04:57:10Z
 verified: []
 sources:
   - id: s1
@@ -59,7 +59,28 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **Scopes and versions.** A scope is one modifier's role, target and selector, one allowance key, one ceiling, or the orders account's lists. Its version is the hash of its current content, as the factory last wrote it. The factory's constructor seeds the versions and the ceilings of the launch policy, which the enabling vote applies. A motion names the version that it expects for each scope it writes, and the counter it saw; the factory refuses it, at creation and at enactment, if a version or the counter changed. A failed enactment reverts as a whole and leaves no partial write; the motion stays open until the committee's Safe or Aragon Voting cancels it [s2].
 - **Narrowing.** A raw write names the scope's current content, which must match its version, and writes a subset of it, or revokes the target or the function.
 - **Roles.** The factory holds one role per kind of write: `governance` and `insurance-funding` on the operator modifier, `exit-governance` and `restart` on the safety modifier, the governance and approvals roles on the orders modifier, and `first-loss-burn` with the insurance roles on the first-loss modifier ([ADR 014](/adr/014-funding-by-tranche-votes.md)). Easy Track's executor holds none.
-- **Shapes at launch.** An ERC-20 approval list; an ERC-4626 vault; an asynchronous queue vault; a market compatible with Morpho Blue, for Lido Lend; a wrapper; Sky's DAI–USDS converter; a token for the orders account and the orders account's restore after an emergency stop ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41 and 46); budgets, with a refill period of at least 30 days; ceilings; the restore of an operator target; the first-loss burn; the insurance funds of ADR 014; the restart; and a claim, if a launch protocol pays rewards. Each onboarding shape also writes its target's exit for the emergency role through `exit-governance`. The prototype builds the approval list, budgets, ceilings, introductions, the target restore, the restart, insurance money, the orders token and the orders restore.
+- **Shapes at launch.** The agent proposes the list below; a shape that the factory lacks needs a changed factory, which is a vote (decision 4). Each onboarding shape also writes its target's exit for the emergency role through `exit-governance`. No shape covers a third-party lending pool such as Aave, which is outside the launch scope. The prototype builds the approval list, the introduction, budgets, ceilings, the revoke, the target restore, the restart, insurance money, the orders token and the orders restore.
+
+| Shape | Motion fields | Writes |
+|---|---|---|
+| ERC-20 approval list | token; the current and the next list | the token's complete `approve` list, each new spender's amount spending a key derived for it; zero spends nothing |
+| Introduction | token; its first list; its budget and approval ceilings | the token's first approval list and both of its ceilings, which count as their first raise (decision 15) |
+| Wrapper | wrapper, underlying | `wrap` and `unwrap`, or `deposit` and `withdraw` on WETH; the output returns to the avatar |
+| ERC-4626 vault | vault, asset | the asset's `approve` to the vault, spending a key derived for the vault; `deposit` with receiver `EqualToAvatar`; `redeem` and `withdraw` with receiver and owner `EqualToAvatar` |
+| Asynchronous queue vault | vault, asset | the asset's `approve` to the queue, spending a key derived for the queue; the asynchronous deposit request with any owner pinned to the avatar; the redeem request, cancel and claim with receiver and owner pinned to the avatar |
+| Market compatible with Morpho Blue | contract, market parameters | the loan token's `approve` to that contract, spending a key derived for it; `supply` with `onBehalf` pinned to the avatar; `withdraw` with `onBehalf` and `receiver` pinned to the avatar. Lido Lend's address arrives with the motion (OD-49); end-to-end tests against the deployed Morpho Blue prove the shape before Lido Lend exists |
+| Sky's DAI–USDS converter | none | the conversions in both directions, with the receiver pinned to the avatar, and the DAI and USDS approvals to the converter below their ceiling (OD-22) |
+| Orders account token | token; its budget and approval ceilings; the current lists | the operator's transfer into the orders account under a key derived for the token; the token on both sides of signer and TWAP orders and in what recovery orders sell; its relayer approval; the emergency role's zeroing and transfer; the operator's return; and the token's exit on the Asset Safe ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41, 44 and 45) |
+| Orders account restore | the current lists; the tokens whose relayer approval it raises | the operator's targets, order trees, cancels and returns for the current lists, and the named relayer approvals ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 46) |
+| Budget | token, spender, balance, maximum refill, refill, period, expected version | `setAllowance` within the token's budget ceiling, with a period of at least 30 days |
+| Ceiling | key, expected value, new value | a lower ceiling at any time, or a raise to at most twice the ceiling, at most once in 15 days (decision 13) |
+| Revoke | target, selector, expected version | the revoke of one operator function: a raw write that only narrows (decision 7) |
+| Target restore | target | the function permissions stored under a revoked target, as they were last written (decision 16) |
+| Restart | none | `enableModule` for the operator modifier, through the `restart` role (decision 12) |
+| Insurance money | token, amount | a transfer from the Asset Safe to the first-loss Safe ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 7) |
+| First-loss burn | share token, amount | `burn` through the `first-loss-burn` role ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23) |
+| Insurance fund | the framework's checklist | the fund's permissions, its deposit, its burn and its payout ([ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 4 to 7) |
+| Claim | protocol, reward contract | the protocol's reward claim with the receiver pinned to the avatar; only if a launch protocol pays rewards (OD-72) |
 - **The counter.** The emergency Safe raises it with every switch, so a motion queued before a stop fails at enactment. Aragon Voting can raise it too.
 - **Ceilings.** The factory keeps each ceiling with the time of its last raise. A ceiling belongs to a class, budget or approval cap, and to a token; every budget key of a token shares the token's budget ceiling.
 - **The `motion` command.** It takes a change of the policy from a merged commit, reads the versions and the counter on chain, builds the motion's calldata, runs the motion against the live Easy Track on a fork, prints the writes that the factory's `writesOf` returns and the permission difference from the modifiers' events, and drafts the forum post. The Zodiac UI does not know the factory's format or its versions, so it is not the planner.

@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-11T04:54:32Z
+  at: 2026-11-11T04:58:54Z
 verified: []
 ---
 
@@ -32,7 +32,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-11-10 | none |
-| [adr/013-one-easy-track-factory.md](/adr/013-one-easy-track-factory.md) | Decision | slop | proposed | 2026-11-10 | none |
+| [adr/013-one-easy-track-factory.md](/adr/013-one-easy-track-factory.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [adr/014-funding-by-tranche-votes.md](/adr/014-funding-by-tranche-votes.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-10-22 | none |
 | [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-05 | none |
@@ -67,5 +67,6 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-11 | none |
 | [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-11 | none |
 | [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-11 | none |
-| [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-08 | none |
+| [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-11 | none |
 | [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-11-11 | none |
+| [specs/threat-model.md](/specs/threat-model.md) | Specification | slop |  | 2026-11-11 | none |
