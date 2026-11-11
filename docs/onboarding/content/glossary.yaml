@@ -40,8 +40,8 @@
   sources: ["ADR-009#d1", "ADR-009#d9", "ADR-009#d33", "ADR-009#proposed-direction"]
 
 - term: Ceiling
-  plain: "The upper bound of a budget key or an approval. The enabling vote, or the motion that introduces a token, sets a token's first ceilings. A motion lowers a ceiling at any time. It raises a ceiling to at most twice its value, at most once in 15 days. Why the limit: a ceiling that one motion could set to any value would bound nothing."
-  sources: ["ADR-013#d13", "ADR-013#d15", "ADR-009#d14", INV-036, OD-105, OD-113, "runbook:Change a ceiling"]
+  plain: "The upper bound of a budget key or an approval. The enabling vote, or the motion that introduces a token, sets a token's first ceilings, and that counts as their first raise. A motion lowers a ceiling at any time. It raises a ceiling to at most twice its value, at most once in 15 days. Why the limit: a ceiling that one motion could set to any value would bound nothing."
+  sources: ["ADR-013#d13", "ADR-013#d15", "ADR-009#d14", "INV-036", "OD-105", "OD-113", "runbook:Change a ceiling", "OD-120"]
 
 - term: Compiler
   plain: "Clutch's own TypeScript program on the Zodiac roles SDK. It turns the constellation into the artifact offline, and it refuses entries that only the hosted app can compile."
@@ -124,7 +124,7 @@
   sources: ["ADR-009#d25", "ADR-009#d31", OD-32, OD-56]
 
 - term: Guard
-  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard on the committee's Safe, set after the launch and before the [[launch cap]] lifts (OD-83). A module guard does the same for module transactions; Clutch uses none."
+  plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard on the committee's Safe, set after the launch, before the vote that lifts the [[launch cap]] starts (OD-83). A module guard does the same for module transactions; Clutch uses none."
   sources: ["ADR-010#d3", "ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction", OD-83]
 
 - term: Invariant
@@ -137,7 +137,7 @@
 
 - term: Limit order
   plain: "A CoW order that sells only at a set price or better. It can stand for up to 90 days, like every operator order. A sale when a price rises to a target is a limit order."
-  sources: ["ADR-007#d18", "ADR-007#d23", "ADR-007#d29", OD-43, OD-61]
+  sources: ["ADR-007#d18", "ADR-007#d29", "OD-43", "OD-61"]
 
 
 - term: LIP
@@ -170,7 +170,7 @@
 
 - term: Objection window
   plain: "The time that a motion must wait before enactment: 72 hours today, the same for every motion, and never less than 48 hours."
-  sources: ["ADR-006#d6", "ADR-006#context"]
+  sources: ["ADR-006#context"]
 
 - term: New Lido product
   plain: "A Lido product, such as Lido Lend, that counts against the protocol cap until it meets the mandate's maturity criteria and a motion unlocks it. earnETH and earnUSD are not new."
@@ -220,7 +220,7 @@
 
 - term: Safe
   plain: "A smart-contract wallet that runs a transaction only when enough of its owners approve it. The threshold says how many: for example, 4 of 7."
-  sources: ["ADR-005#d9"]
+  sources: ["ADR-005#d31"]
 
 
 - term: Shape
@@ -230,10 +230,6 @@
 - term: Snapshot vote
   plain: "Lido's off-chain LDO vote. The mandate passes a Snapshot vote before the on-chain enabling vote. It is not the same as a holdings snapshot."
   sources: ["doc:ROADMAP.md#roadmap"]
-
-- term: Stonks
-  plain: "Lido's treasury swap contracts. The design used Stonks 2.0 instances until 2026-10-06, when the orders account replaced them: they offered no limit or TWAP orders (OD-43)."
-  sources: ["ADR-007#d1", "ADR-007#d17", OD-43]
 
 - term: sUSDS
   plain: "Sky's savings token for USDS. The vault holds it as a savings position. It counts in the [[TMC-6 ratio]] for the whole treasury."
@@ -280,6 +276,3 @@
   sources: ["ADR-007#proposed-direction",
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
-- term: Withdrawal queue
-  plain: "Lido's contract that turns stETH back into ETH. A request cannot be cancelled and takes days to finalize. The vault does not use it: it left the design on 2026-10-08, and stETH is sold in CoW orders instead."
-  sources: ["ADR-007#d27", "ADR-011#d14"]

@@ -20,8 +20,9 @@
   nodes: [committee, operator-modifier, asset-safe, protocols]
   edges: [op-role, own-op, positions]
   flows: [op-tx, swap-order, return-to-agent]
-  sources: ["ADR-005#d9", "ADR-005#d27", "ADR-005#proposed-direction", "ADR-008#d23", "ADR-014#d9", "ADR-014#d10", OD-60,
-    OD-67, OD-108, INV-003, INV-038, "test:test_D3_operator_cannot_route_around_avatar", "ADR-005#d31", OD-80]
+  sources: ["ADR-005#d27", "ADR-005#proposed-direction", "ADR-008#d23", "ADR-014#d9", "ADR-014#d10", "OD-60",
+    "OD-67", "OD-108", "INV-003", "INV-038", "test:test_D3_operator_cannot_route_around_avatar",
+    "ADR-005#d31", "OD-80"]
 
 - title: Every operator transaction is screened
   text: "[the screening vendor]'s [[guard]] sits on the committee's Safe. It refuses any transaction that the vendor has not approved, once and exactly, the committee's other duties included (OD-83).\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nAt launch the guard is not set yet. The vault starts with one tranche of one million dollars, which is its [[launch cap]]. The second tranche's vote lifts the cap, and that vote starts only once the guard is live (OD-54)."
@@ -49,8 +50,9 @@
   nodes: [asset-safe, orders]
   edges: [swaps]
   flows: [swap-order, standing-order, orders-token, recovery-order]
-  sources: ["ADR-007#d5", "ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d23", "ADR-007#d26", "ADR-007#d41",
-    "ADR-007#proposed-direction", OD-43, OD-103, INV-013, INV-014, INV-022, INV-024]
+  sources: ["ADR-007#d5", "ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d29", "ADR-007#d26",
+    "ADR-007#d41", "ADR-007#proposed-direction", "OD-43", "OD-103", "INV-013", "INV-014", "INV-022",
+    "INV-024"]
 
 - title: "Money in, money back"
   text: "Funding comes from the DAO treasury in rare tranches. Each tranche is an Aragon vote that pays the Asset Safe through Aragon Finance, in the tokens that the vote names. The first tranche, one million dollars, is part of the enabling vote. The vault holds up to the [[mandate size]].\n\nMoney goes back to the treasury only in an emergency or a recovery: through the emergency Safe's transfers and recovery orders, or the committee's transfer pinned to the Agent. Monitoring alerts on each one. Insurance money moves from the Asset Safe to the first-loss Safe, by motion."

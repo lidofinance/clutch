@@ -137,7 +137,7 @@ The committee's Safe holds `operator` and `first-loss`. The emergency Safe holds
 
 #### Part 3: Permission encoding **[Implemented]**
 
-The policy is a Zodiac constellation in TypeScript. Clutch's compiler turns it into one committed artifact of modifier calls, trees and allowances, and CI refuses an artifact that differs from a fresh compile. Owners: [ADR 004](/adr/004-specifications-and-policy-as-data.md) and the [specification policy](/specs/specification-policy.md).
+Each Roles modifier refuses every call that its policy does not list: default deny. The policy is a Zodiac constellation in TypeScript. Clutch's compiler turns it into one committed artifact of modifier calls, trees and allowances, and CI refuses an artifact that differs from a fresh compile. Owners: [ADR 004](/adr/004-specifications-and-policy-as-data.md) and the [specification policy](/specs/specification-policy.md).
 
 #### Part 4: Governance — the new contracts **[Implemented in part]**
 
@@ -161,7 +161,7 @@ Each protocol spender has a budget key that its approvals spend. Ceilings bound 
 
 #### Part 9: Reporting and detective controls **[Specified]**
 
-The caps are detective. Lido's report generator and the policy provider's reading publish fortnightly cap readings, both count, and a breach that gets worse triggers the switch. [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) and the [control matrix](/specs/control-matrix.md) hold the reports, the price waterfall and the detectors, and [ADR 010](/adr/010-pre-execution-screening.md) holds screening. Nothing in this part is built.
+The caps are detective. Lido's report generator and the policy provider's reading publish fortnightly cap readings, both count, and a breach that gets worse triggers the switch. [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) and the [control matrix](/specs/control-matrix.md) hold the reports, the price waterfall and the detectors, and [ADR 010](/adr/010-pre-execution-screening.md) holds screening. When the LIP is published, this part states the price waterfall of ADR 009 decisions 35 to 37, because the mandate's text leaves it to the LIP (OD-90). Nothing in this part is built.
 
 ### Test Cases
 

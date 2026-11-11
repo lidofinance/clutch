@@ -30,7 +30,7 @@ blocks:
     says: "A launch list of assets and venues. It names four main stablecoins: USDC, USDT, USDS and DAI."
     kept:
       - "On chain: default deny. A new target needs a motion of the universal factory, with a 72-hour objection window."
-      - "Before execution: the screening vendor checks every operator transaction and every new motion, once the launch cap lifts (OD-54)."
+      - "Before execution: the screening vendor checks every operator transaction and every new motion, once the guard is set (OD-54)."
       - "Detection: drift of the chain from the committed policy."
     tech: "INV-004 and INV-005 bound what a motion can add. INV-015 keeps the operator inside the launch scope."
     changes:
@@ -131,7 +131,7 @@ blocks:
     says: "The emergency path may swap any asset into any of the four main stablecoins."
     kept:
       - "On chain: every swap is a CoW order from the orders account, and each role's permissions pin the receiver: the Asset Safe for the operator, the Aragon Agent for recovery."
-      - "Before execution: once the launch cap lifts, the screening vendor checks every operator order. Recovery orders are never screened."
+      - "Before execution: once the guard is set, the screening vendor checks every operator order. Recovery orders are never screened."
       - "Detection: each fill against a market price, open orders, and a page on every emergency swap."
     tech: "Orders live at most 90 days, recovery orders 1 day (INV-024). Nothing on chain bounds an order's price; CoW's competition and EBBO rule hold a fill to the on-chain market."
     changes:
@@ -143,8 +143,9 @@ blocks:
         why: "The committee needs those order types, and a router swap without a bounded output loses value to front-running. One venue at launch is a trade-off, so the text names it."
         state: owed
         sources: ["ADR-007#d18", "ADR-007#d20", "ADR-007#d26", OD-43, OD-48, OD-90]
-    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d23", "ADR-007#d25", "ADR-007#d26", "ADR-007#d29",
-      "ADR-007#proposed-direction", OD-26, OD-43, OD-48, OD-61, INV-024, "runbook:Recovery order"]
+    sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d25", "ADR-007#d26", "ADR-007#d29",
+      "ADR-007#proposed-direction", "OD-26", "OD-43", "OD-48", "OD-61", "INV-024",
+      "runbook:Recovery order"]
 
   - id: emergency
     title: Emergency exit
@@ -168,7 +169,7 @@ blocks:
     says: "The committee publishes a monthly report within seven calendar days after month-end, a post before each top-up, and an incident report."
     kept:
       - "A report generator in this repository that anyone can run again at a pinned block."
-      - "No tranche vote starts while the monthly report is late; monitoring flags it on day 8."
+      - "The proposer starts no tranche vote while the monthly report is late; monitoring flags the late report on day 8 and alerts on a vote that starts (OD-122)."
       - "Each monthly report shows the TMC-6 ratio for the whole treasury."
       - "Monitoring publishes the cap reading of each fortnightly snapshot to IPFS."
       - "Each monthly report lists every open order with its limit, its age and the idle balance behind it."
@@ -179,13 +180,14 @@ blocks:
         why: "Reviewers can then hold the committee to how each figure was priced, and the Snapshot text stays short."
         state: design
         sources: ["ADR-009#d23", "ADR-009#d35", "ADR-009#d37", OD-14, OD-62, OD-90]
-      - text: "The reporting section states the late-report rule: no tranche vote while the report is late."
+      - text: "The reporting section states the late-report rule: the proposer starts no tranche vote while the report is late."
         why: "The report is the evidence for every tranche vote."
         state: owed
         sources: ["ADR-009#d21", "ADR-009#d23", "ADR-014#proposed-direction", OD-14]
-    sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#d25", "ADR-009#d35", "ADR-009#d36", "ADR-009#d40",
-      "ADR-009#d41", "ADR-009#d42", "ADR-009#d44", "ADR-009#d47", "ADR-007#d29", "ADR-014#proposed-direction", OD-14, OD-32,
-      OD-61, OD-62, OD-84, OD-85, OD-87, OD-111]
+    sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#d25", "ADR-009#d35", "ADR-009#d36",
+      "ADR-009#d40", "ADR-009#d41", "ADR-009#d42", "ADR-009#d44", "ADR-009#d47", "ADR-007#d29",
+      "ADR-014#proposed-direction", "OD-14", "OD-32", "OD-61", "OD-62", "OD-84", "OD-85", "OD-87",
+      "OD-111", "OD-122"]
 
   - id: legacy
     title: Legacy investments

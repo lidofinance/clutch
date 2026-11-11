@@ -12,7 +12,7 @@ description: The Lido DAO owns the Asset Safe; it also owns the orders account a
   governance and approvals roles on the orders account's modifier, and the first-loss burn and insurance roles on the
   first-loss modifier. The operator and emergency roles act on the orders account through its own modifier, and the
   committee's Safe also holds the first-loss role. The map draws no arrow for these roles. Each funding is an Aragon
-  vote that pays a tranche through Finance to the Asset Safe. Once the launch cap lifts, the screening guard approves
+  vote that pays a tranche through Finance to the Asset Safe. Once the screening guard is set, it approves
   each transaction of the committee's Safe (OD-83). The Asset Safe uses approved protocols, swaps through CoW orders
   from the orders account, and pays insurance money to the first-loss Safe by motion. The first-loss Safe holds the
   DAO's first-loss Earn shares and the insurance funds. Monitoring watches the vault and pages the emergency Safe.
@@ -289,7 +289,7 @@ edges:
   to: committee
   kind: screens
   short: approves each transaction
-  label: From the lift of the launch cap, the vendor's guard on the committee's Safe refuses a transaction that the vendor has not approved, once and exactly.
+  label: Once it is set, before the second tranche's vote, the vendor's guard on the committee's Safe refuses a transaction that the vendor has not approved, once and exactly.
   label_at:
   - 170
   - 330

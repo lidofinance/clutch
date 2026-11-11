@@ -8,7 +8,7 @@
   name: Treasury Management Committee and its Safe
   status: existing
   label: existing
-  what: "The people who run the [[mandate]] day to day, and their existing Safe, which holds the operator role (OD-80). Two of the seven signers also sit on the emergency Safe. Once the launch cap lifts, every transaction of the Safe needs [the screening vendor]'s approval first, the committee's other duties included (OD-83). Until then the [[launch cap]] applies (OD-54, OD-55)."
+  what: "The people who run the [[mandate]] day to day, and their existing Safe, which holds the operator role (OD-80). Two of the seven signers also sit on the emergency Safe. Once the guard is set, every transaction of the Safe needs [the screening vendor]'s approval first, the committee's other duties included (OD-83). Until then the [[launch cap]] applies (OD-54, OD-55)."
   controlled_by: "Seven signers, at 4 of 7. Safe v1.3.0. A change of the committee's members needs no Snapshot each time: monitoring alerts on every change of the Safe's owners or threshold (OD-109)."
   can:
     - "Hold the operator role: change positions in approved protocols, within budgets."
@@ -19,7 +19,7 @@
     - "Act in an emergency through its two seats on the emergency Safe, at 3 of 5 with two Emergency Brakes members and one member of neither body (OD-58)."
     - "Configure the vault's rules in [the screening vendor]'s monitoring service."
     - "Review and publish the monthly report, and fix a [[cap]] breach within two working days."
-    - "Explain on the forum a difference above the band between Lido's reading and the policy provider's; no [[tranche vote]] starts until they agree (OD-84)."
+    - "Explain on the forum a difference above the band between Lido's reading and the policy provider's; the proposer starts no [[tranche vote]] until they agree (OD-84, OD-122)."
     - "Unlock a matured Lido product by a forum post and a budget motion (OD-41)."
     - "Restart the operator after the switch, by a motion that waits for the objection window (OD-104)."
     - "Accept decision records as the permanent acceptor, after EM's interim period."
@@ -34,15 +34,17 @@
     - "Lose the operator role without a DAO vote. Easy Track fixes a factory's trusted caller, so a move to another Safe also needs a new universal factory (OD-101)."
   numbers: ["Safe v1.3.0", "4 of 7", "rebalancing window: 2 working days", "two seats on the emergency Safe", "guard removal: 10-day timelock"]
   address: "0xa02FC823cCE0D016bD7e17ac684c9abAb2d6D647"
-  sources: ["ADR-005#d9", "ADR-005#d21", "ADR-005#d24", "ADR-005#d27", "ADR-005#d31", "ADR-005#d33",
-    "ADR-005#proposed-direction", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-009#d6", "ADR-009#d18",
-    "ADR-009#d19", "ADR-009#d24", "ADR-009#d28", "ADR-009#d41", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10",
-    "ADR-010#d19", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "ADR-010#d23", "ADR-010#proposed-direction",
-    "ADR-006#d3", "ADR-007#d18", "ADR-002#d1", "ADR-013#d4", "ADR-013#d12", "ADR-013#proposed-direction",
-    "ADR-013#consequences", "ADR-014#d9", "ADR-014#d10", "ADR-014#proposed-direction", INV-010, OD-41, OD-45, OD-54,
-    OD-58, OD-60, OD-64, OD-67, OD-80, OD-83, OD-84, OD-101, OD-104, OD-108, OD-109,
+  sources: ["ADR-005#d21", "ADR-005#d24", "ADR-005#d27", "ADR-005#d31", "ADR-005#d33",
+    "ADR-005#proposed-direction", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-009#d6",
+    "ADR-009#d18", "ADR-009#d19", "ADR-009#d24", "ADR-009#d28", "ADR-009#d41", "ADR-010#d4",
+    "ADR-010#d9", "ADR-010#d10", "ADR-010#d19", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22",
+    "ADR-010#d23", "ADR-010#proposed-direction", "ADR-006#d3", "ADR-007#d18", "ADR-002#d1", "ADR-013#d4",
+    "ADR-013#d12", "ADR-013#proposed-direction", "ADR-013#consequences", "ADR-014#d9", "ADR-014#d10",
+    "ADR-014#proposed-direction", "INV-010", "OD-41", "OD-45", "OD-54", "OD-58", "OD-60", "OD-64",
+    "OD-67", "OD-80", "OD-83", "OD-84", "OD-101", "OD-104", "OD-108", "OD-109",
     "runbook:Return assets to the Agent", "runbook:Exit the first-loss shares",
-    "doc:docs/registers/parameters.md#parameters", "doc:docs/research/chain-reads-2026-09-30.md#committees", OD-55]
+    "doc:docs/registers/parameters.md#parameters",
+    "doc:docs/research/chain-reads-2026-09-30.md#committees", "OD-55", "OD-122"]
 
 # --- Lido DAO ----------------------------------------------------------------------------------
 - id: ldo-holders
@@ -53,7 +55,7 @@
   controlled_by: "Token holders."
   can:
     - "Vote in Aragon Voting: the [[enabling vote]], each [[tranche vote]], and the replacement of a role holder, such as the committee's Safe in the operator role (OD-101)."
-    - "Vote on a break-glass action, as the agent reads OD-101: an owner action on a vault Safe, a new or changed factory, or an Easy Track unpause."
+    - "Vote on a break-glass action: an owner action on a vault Safe, a new or changed factory, or an Easy Track unpause (OD-125)."
     - "Appoint the emergency Safe's fifth signer by Snapshot: a member of neither the committee nor the Emergency Brakes multisig (OD-58)."
     - "Object to any Easy Track motion in its [[objection window]]. An objection of 0.5% of LDO stops it."
     - "Approve the mandate in a [[Snapshot vote]] before the on-chain vote."
@@ -61,9 +63,10 @@
     - "Act on the vault without a vote. A vote on the vault is a direct Aragon Voting item, about five days, without Dual Governance (OD-73)."
     - "Shorten a motion's objection window."
   numbers: ["objection threshold: 0.5% of LDO", "objection window: 72 h"]
-  sources: ["ADR-006#d4", "ADR-006#d6", "ADR-006#d8", "ADR-006#context", "ADR-005#context", "ADR-005#d24",
-    "ADR-005#proposed-direction", "ADR-013#d3", "ADR-013#d4", "ADR-014#d1", OD-58, OD-101, OD-106,
-    "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap", OD-73, "ADR-005#d28"]
+  sources: ["ADR-006#d4", "ADR-006#d8", "ADR-006#context", "ADR-005#context", "ADR-005#d24",
+    "ADR-005#proposed-direction", "ADR-013#d3", "ADR-013#d4", "ADR-014#d1", "OD-58", "OD-101", "OD-106",
+    "doc:docs/registers/parameters.md#parameters", "doc:ROADMAP.md#roadmap", "OD-73", "ADR-005#d28",
+    "OD-125"]
 
 - id: aragon-voting
   node: dao
@@ -186,10 +189,10 @@
     - "Hold more than 20 open motions at once. Every committee shares the limit, and a stale motion holds a slot until it is cancelled, so monitoring warns when few slots are free (OD-94)."
   numbers: ["window: 72 h", "objection: 0.5% of LDO", "window floor: 48 h", "open motions: at most 20, shared"]
   address: "0xF0211b7660680B49De1A7E9f25C65660F0a13Fea"
-  sources: ["ADR-006#d1", "ADR-006#d4", "ADR-006#d6", "ADR-006#d11", "ADR-006#context", "ADR-013#d2", "ADR-013#d10",
-    "ADR-013#context", "ADR-013#consequences", "ADR-013#proposed-direction", INV-005, INV-033, OD-45, OD-100, OD-102,
-    "doc:docs/research/chain-reads-2026-09-30.md#easy-track", "doc:docs/research/easy-track-first-2026-11-05.md#easy-track",
-    "ADR-009#d45", OD-94]
+  sources: ["ADR-006#d1", "ADR-006#d4", "ADR-006#d11", "ADR-006#context", "ADR-013#d2", "ADR-013#d10",
+    "ADR-013#context", "ADR-013#consequences", "ADR-013#proposed-direction", "INV-005", "INV-033",
+    "OD-45", "OD-100", "OD-102", "doc:docs/research/chain-reads-2026-09-30.md#easy-track",
+    "doc:docs/research/easy-track-first-2026-11-05.md#easy-track", "ADR-009#d45", "OD-94"]
 
 - id: evmscript-executor
   node: easytrack
@@ -222,9 +225,10 @@
     - "Widen a permission only through a typed [[shape]]. Each shape pins receivers, owners and beneficiaries to the vault, draws a [[budget key]] and writes the emergency exit."
     - "Narrow a permission with a raw write: a revoke, or a complete list that removes entries. A routine removal is such a write (OD-70)."
     - "Bring back a target that the emergency role revoked as a whole: a restore scopes it again, and the permissions stored under it come back as they were. It writes nothing new (OD-104)."
+    - "Restore the orders account after an emergency stop, in one motion: the operator's targets, order trees, cancels and returns for the current lists, and the relayer approvals that the motion names (OD-119)."
     - "Derive a new budget key for each new spender, so the policy holds no spare keys."
     - "Keep a [[version]] for each scope that a motion writes. It checks the versions at creation and again at enactment, and the motion's one call stores the new versions before it writes. Two motions on one scope therefore cannot undo each other (OD-100)."
-    - "Change a [[ceiling]]: lower it at any time, or raise it to at most twice its value, at most once in 15 days (OD-105). The motion that introduces a token sets the token's first ceilings (OD-113)."
+    - "Change a [[ceiling]]: lower it at any time, or raise it to at most twice its value, at most once in 15 days (OD-105). The motion that introduces a token sets the token's first ceilings, and a ceiling's seed and an introduction each count as its first raise (OD-113, OD-120)."
     - "Onboard Lido Lend in one motion, once its own contract exists, through its shape for a market that is compatible with Morpho Blue. The same motion adds the emergency exit (OD-49)."
     - "Carry the other motions: budgets, a token for the orders account in one motion, the restart, the first-loss burn and the insurance funds (OD-103, OD-104, OD-107)."
   cannot:
@@ -234,17 +238,21 @@
     - "Use its roles outside an enacted motion. Only Easy Track's executor calls `applyMotion` (INV-032)."
     - "Enact a motion if a version that it names, or the [[motion counter]], changed since its creation. The emergency Safe raises the counter at every stop, and every open motion then fails (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke (OD-09)."
-  numbers: ["one factory for every Clutch motion", "a ceiling's raise: at most twofold, once in 15 days", "the prototype: 16,410 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 10,489 (OD-117)", "a motion that adds a token: 7,796,336 of EIP-7825's 16,777,216 gas (OD-118)", "external audit in phase 3"]
+  numbers: ["one factory for every Clutch motion", "a ceiling's raise: at most twofold, once in 15 days", "the prototype: 17,295 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 12,524 (OD-117)", "a motion that adds a token: 7,789,536 of EIP-7825's 16,777,216 gas (OD-118)", "a motion that restores the orders account: 7,102,619 gas (OD-119)", "external audit in phase 3"]
   sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d9", "ADR-013#d10",
-    "ADR-013#d11", "ADR-013#d13", "ADR-013#proposed-direction", "ADR-013#consequences", "ADR-007#d41", "ADR-006#d9",
-    "ADR-006#d10", "ADR-011#d13", OD-09, OD-36, OD-38, OD-49, OD-70, OD-100, OD-102, OD-103, OD-104, OD-105, OD-107,
-    OD-113, "ADR-013#d15", OD-117, "ADR-013#d18", "ADR-013#d12", "ADR-006#d13", "ADR-008#d23", "ADR-014#d7", OD-67,
-    OD-118, INV-035, INV-040, "test:test_uf_the_factory_holds_the_motion_roles", "test:test_factory_orders_token_motion",
-    INV-029, INV-032, INV-033, INV-034, INV-036, INV-037, "lip:part-4", "doc:ROADMAP.md#roadmap",
+    "ADR-013#d11", "ADR-013#d13", "ADR-013#proposed-direction", "ADR-013#consequences", "ADR-007#d41",
+    "ADR-006#d9", "ADR-006#d10", "ADR-011#d13", "OD-09", "OD-36", "OD-38", "OD-49", "OD-70", "OD-100",
+    "OD-102", "OD-103", "OD-104", "OD-105", "OD-107", "OD-113", "ADR-013#d15", "OD-117", "ADR-013#d18",
+    "ADR-013#d12", "ADR-006#d13", "ADR-008#d23", "ADR-014#d7", "OD-67", "OD-118", "INV-035", "INV-040",
+    "test:test_uf_the_factory_holds_the_motion_roles", "test:test_factory_orders_token_motion",
+    "INV-029", "INV-032", "INV-033", "INV-034", "INV-036", "INV-037", "lip:part-4",
+    "doc:ROADMAP.md#roadmap",
     "doc:docs/research/orders-token-motions-2026-11-08.md#one-contract-does-not-hold-the-shape",
     "doc:docs/research/universal-factory-prototype-2026-11-05.md#measures-for-the-choice-between-options-a-and-b",
     "doc:docs/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06",
-    "doc:docs/research/universal-factory-prototype-2026-11-05.md#the-restore-of-a-revoked-target-built-on-2026-11-06", "test:test_uf_restore_brings_back_a_revoked_target"]
+    "doc:docs/research/universal-factory-prototype-2026-11-05.md#the-restore-of-a-revoked-target-built-on-2026-11-06",
+    "test:test_uf_restore_brings_back_a_revoked_target", "OD-119", "OD-120",
+    "test:test_factory_orders_restore_after_an_emergency_stop", "ADR-013#confirmation"]
 
 # --- Emergency Safe -----------------------------------------------------------------------------
 - id: emergency-safe
@@ -290,7 +298,7 @@
     - "Touch the Asset Safe, the emergency Safe or the DAO path. Recovery and the switch never wait for the vendor."
     - "Act as a module guard. Safe v1.5.0 refuses it as one."
     - "Hold a standing approval under the agreement, except its two built-in timelock approvals. The code allows them, so monitoring alerts on one, and the vendor's written acceptance is still owed."
-  numbers: ["removal timelock: 10 days", "bypass timelock: 10 days", "bypass off before the cap lifts"]
+  numbers: ["removal timelock: 10 days", "bypass timelock: 10 days", "bypass off before the second tranche's vote"]
   address: "To be deployed"
   sources: ["ADR-010#d1", "ADR-010#d2", "ADR-010#d3", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d20",
     "ADR-010#d22", "ADR-010#proposed-direction", "ADR-014#proposed-direction", INV-010, OD-54,
@@ -393,11 +401,11 @@
     - "Grant the operator delegatecall (OD-36)."
     - "Widen a permission except through a typed shape: a raw write only narrows. The factory checks this, not the modifier; the factory's prototype passes it on a fork (INV-034)."
   numbers: ["refill period: 30 days or more"]
-  sources: ["ADR-006#d5", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7",
-    "ADR-013#proposed-direction", "ADR-005#proposed-direction", INV-004, INV-034, OD-36, OD-38,
+  sources: ["ADR-013#d18", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7",
+    "ADR-013#proposed-direction", "ADR-005#proposed-direction", "INV-004", "INV-034", "OD-36", "OD-38",
     "test:test_policyadmin_cannot_grant_operator_the_safety_modifier",
-    "test:test_policyadmin_refuses_every_module_of_the_asset_safe", OD-70, "test:test_uf_raw_writes_only_narrow",
-    "test:test_uf_widening_fills_the_shape"]
+    "test:test_policyadmin_refuses_every_module_of_the_asset_safe", "OD-70",
+    "test:test_uf_raw_writes_only_narrow", "test:test_uf_widening_fills_the_shape"]
 
 - id: budget-keys
   node: operator-modifier
@@ -447,7 +455,7 @@
     - "Revoke any operator target or function. One revoke reaches every operator permission on the modifier; on the orders modifier the emergency role holds a revoke of its own."
     - "Switch the operator off: `disableModule` on the Asset Safe, with the module pinned to the operator modifier. The operator, governance and insurance-funding roles stop at once, and so does every queued motion that writes through them (OD-58)."
     - "Set any operator spender's approval to zero."
-    - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, and redeem sUSDS. A protocol that a motion onboards gets its emergency exit from the same motion, through the exit-governance role, which is tested on a fork; the factory's shapes that write the exits are not built (OD-49)."
+    - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, and redeem sUSDS. A protocol that a motion onboards gets its emergency exit from the same motion, through the exit-governance role, which is tested on a fork; the orders token operation writes a token's exit, and the other shapes are not built (OD-49)."
     - "Unwrap wstETH and WETH, and stake ETH."
     - "Transfer the vault's tokens and Earn shares, but only to the Aragon Agent."
   cannot:
@@ -566,7 +574,7 @@
     - "Show the system and its drift in a UI."
     - "Show its own reading of the three Safes as one whole, with the mandate's rubrics, and publish its reports to IPFS with Lido's pinning key (OD-84, OD-85)."
     - "Refuse, in its signing flow, an operator transaction that would breach a cap (OD-86)."
-    - "From the lift, send each transaction of the committee's Safe that it builds to [the screening vendor] for approval, and show the approval state (OD-88)."
+    - "From the moment the guard is set, send each transaction of the committee's Safe that it builds to [the screening vendor] for approval, and show the approval state (OD-88)."
     - "Take a push from a team member, from the merged `main`, with the key in a local file that git ignores."
   cannot:
     - "Change the policy or the mandate's rules. A change made in the UI is drift (OD-87)."
@@ -667,7 +675,7 @@
   addresses:
     - {name: "Safe v1.5.0 singleton", address: "0xFf51A5898e281Db6DfC7855790607438dF2ca44b"}
     - {name: "Safe proxy factory", address: "0x14F2982D601c9458F93bd70B218933A6f8165e7b"}
-  sources: ["ADR-005#d8", "ADR-005#d12", "ADR-005#d13", "ADR-005#context", INV-019,
+  sources: ["ADR-005#d12", "ADR-005#d13", "ADR-005#context", "INV-019",
     "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
 - id: vault-tokens
@@ -723,7 +731,7 @@
   status: new
   label: specified
   what: "The committee's narrow role on the first-loss Safe. Under the first-loss terms of the March 2026 Earn allocation, it exits the shares to the Asset Safe, in place of the Growth Committee. A burn uses another role, by motion only (OD-67)."
-  controlled_by: "Held by the committee's Safe, at 4 of 7. Once the launch cap lifts, the screening guard checks each action (OD-83). It acts on the Earn team's written instruction. The DAO can change or remove the role by vote."
+  controlled_by: "Held by the committee's Safe, at 4 of 7. Once the screening guard is set, it checks each action (OD-83). It acts on the Earn team's written instruction. The DAO can change or remove the role by vote."
   can:
     - "Request and claim the shares' redemption on a confirmed material risk, with the proceeds pinned to the Asset Safe (OD-108)."
     - "Redeem before the screening guard is set too, as the March 2026 terms allow. If the proceeds take the vault above the first tranche, the committee's Safe returns the excess to the Aragon Agent."
@@ -878,11 +886,14 @@
     - "Swap through a router at launch. Uniswap and 1inch wait until [the screening vendor] can check a swap's minimum output (OD-43)."
   numbers: ["owner: Aragon Voting, 1 of 1", "order life: 90 days; a recovery order: 1 day", "orders budgets: from the attested computation"]
   address: "To be deployed"
-  sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d20", "ADR-007#d23", "ADR-007#d25", "ADR-007#d26",
-    "ADR-007#d28", "ADR-007#d29", "ADR-007#d30", "ADR-007#d41", "ADR-007#proposed-direction", "ADR-005#d15",
-    "ADR-005#d20", "ADR-005#d21", OD-43, OD-47, OD-48, OD-61, OD-103, INV-013, INV-023, INV-040,
-    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design", OD-73, "ADR-005#d28", OD-57,
-    "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests", "test:test_orders_signer_order_settles_to_the_asset_safe", "test:test_orders_twap_part_settles_through_the_fallback_handler"]
+  sources: ["ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d20", "ADR-007#d25", "ADR-007#d26",
+    "ADR-007#d28", "ADR-007#d29", "ADR-007#d30", "ADR-007#d41", "ADR-007#proposed-direction",
+    "ADR-005#d15", "ADR-005#d20", "ADR-005#d21", "OD-43", "OD-47", "OD-48", "OD-61", "OD-103", "INV-013",
+    "INV-023", "INV-040",
+    "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design", "OD-73",
+    "ADR-005#d28", "OD-57", "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests",
+    "test:test_orders_signer_order_settles_to_the_asset_safe",
+    "test:test_orders_twap_part_settles_through_the_fallback_handler"]
 
 - id: orders-modifiers
   node: orders
@@ -895,7 +906,7 @@
     - "Let the operator sign orders through the order signer and create TWAP orders. The receiver is the Asset Safe. The launch has no stop-loss orders (OD-79)."
     - "Let the emergency role cancel any order, set a relayer approval to zero, send any listed token to the Aragon Agent or the Asset Safe, and place recovery orders that buy USDC or USDT and pay the Agent."
     - "Let the emergency role stop the operator by revoking its targets and functions. The stop also cancels the operator's open orders, because a fill does not consult the policy (OD-58)."
-    - "Let a motion add a token to the lists, on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders (OD-103). The governance role is built and tested on a fork; the factory's shape that writes the motion is not built."
+    - "Let a motion add a token to the lists, on the sell side and the buy side, with its relayer approval, its emergency transfer and its recovery orders (OD-103). The governance role and the factory's orders operation are built and tested on a fork."
     - "Let a motion raise an approval of CoW's vault relayer again, after the emergency role set it to zero. The approvals role is built and tested on a fork."
   cannot:
     - "Take a delegatecall from a motion, except to the order signer, for signing and unsigning orders (INV-040)."
@@ -920,8 +931,8 @@
     - "Pin a receiver or amounts. The permission must pin them."
     - "Show an audit. None was found, so it counts as new code: the external audit covers it with the universal factory (OD-96)."
   address: "0x23dA9AdE38E4477b23770DeD512fD37b12381FAB"
-  sources: ["ADR-007#d40", OD-96, "ADR-007#d18", "ADR-007#d23", "ADR-007#proposed-direction", "ADR-013#consequences",
-    "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer"]
+  sources: ["ADR-007#d40", "OD-96", "ADR-007#d18", "ADR-007#d29", "ADR-007#proposed-direction",
+    "ADR-013#consequences", "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer"]
 
 - id: composable-cow
   node: orders
@@ -1080,7 +1091,7 @@
   can:
     - "Price each asset in a report. When Coingecko's price is missing, more than 24 hours old or outside a band around a second aggregator's price, the next level applies: a second aggregator, a Chainlink feed or a pool's time-weighted price, the on-chain rate into a priced underlying, and last the committee's estimate with its method."
   cannot:
-    - "Leave an asset unpriced. Every price carries its level and its source, and a tranche vote waits while the committee's estimate prices more than the set share of the vault."
+    - "Leave an asset unpriced. Every price carries its level and its source, and the proposer holds back a tranche vote while the committee's estimate prices more than the set share of the vault (OD-122)."
   numbers: ["a price older than 24 h counts as missing", "five levels", "band and level-5 share: not set"]
-  sources: ["ADR-009#d35", "ADR-009#d36", "ADR-009#d37", "ADR-014#proposed-direction", OD-62,
-    "doc:docs/research/cfo-feedback-2026-10-13.md#prices-under-stress"]
+  sources: ["ADR-009#d35", "ADR-009#d36", "ADR-009#d37", "ADR-014#proposed-direction", "OD-62",
+    "doc:docs/research/cfo-feedback-2026-10-13.md#prices-under-stress", "OD-122"]

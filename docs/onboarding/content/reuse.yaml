@@ -28,7 +28,7 @@
   what: "The audited Safe code for the new Safes."
   why: "Certora (with formal verification) and Ackee audited v1.5.0. Its record is short, so the vault avoids the paths that changed most, and Safe's advisories are checked again before the vote."
   owner: "Safe"
-  sources: ["ADR-005#d8", "ADR-005#d12", "ADR-005#d13", "ADR-005#d14", "ADR-005#d15", "ADR-005#context", "ADR-010#d16",
+  sources: ["ADR-005#d12", "ADR-005#d13", "ADR-005#d14", "ADR-005#d15", "ADR-005#context", "ADR-010#d16",
     "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
 - name: Easy Track and its script executor
@@ -36,7 +36,7 @@
   what: "Lido's optimistic governance, with its settings unchanged."
   why: "Its global objection window and its rebuild-and-hash check at enactment bound every motion, so Clutch needs no controller contract."
   owner: "The DAO"
-  sources: ["ADR-006#d1", "ADR-006#d6", "ADR-006#context"]
+  sources: ["ADR-006#d1", "ADR-006#context"]
 
 - name: Aragon Agent, Aragon Voting and Dual Governance
   column: reused
@@ -63,7 +63,7 @@
 
 - name: The protocols of the launch scope
   column: reused
-  what: "stETH, wstETH, WETH, Lido Earn, sUSDS and Sky's DAI–USDS converter. Lido Lend comes later, by a motion of the universal factory with its shape for a market that is compatible with Morpho Blue. The withdrawal queue left the design on 2026-10-08."
+  what: "stETH, wstETH, WETH, Lido Earn, sUSDS and Sky's DAI–USDS converter. Lido Lend comes later, by a motion of the universal factory with its shape for a market that is compatible with Morpho Blue. The vault does not use Lido's withdrawal queue."
   why: "EM's launch list (ADR 011). Clutch adds permissions only, never code, to these protocols."
   owner: "Their own governance"
   sources: ["ADR-011#d1", "ADR-011#d3", "ADR-011#d7", "ADR-011#d13", "ADR-011#d14", "ADR-011#proposed-direction"]
@@ -103,7 +103,7 @@
 - name: The screening guard instance
   column: instance
   what: "One instance of the vendor's existing transaction guard, of the build that the guarded Lido multisigs run."
-  why: "Lido writes no guard code. Lido reviews the one change made after the guard's audit: both timelocks went from 1 day to 10 days. The instance is set after the launch, before the launch cap lifts (OD-54)."
+  why: "Lido writes no guard code. Lido reviews the one change made after the guard's audit: both timelocks went from 1 day to 10 days. The instance is set after the launch, before the second tranche's vote starts (OD-54)."
   owner: "[the screening vendor]"
   sources: ["ADR-010#d3", "ADR-010#d10", "ADR-010#d20", "ADR-010#d22", OD-54]
 
