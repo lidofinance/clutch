@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-10-06
 stale_after: 2026-12-31T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -60,15 +60,6 @@ sources:
   - id: s16
     resource: "https://github.com/lidofinance/clutch/blob/3bb5c065f6faf641cf9be087e190796fcd3e21e9/src/interfaces/IRoles.sol#L9-L18"
     title: Kit interface at 3bb5c06 — the deployed mastercopy's enum values
-  - id: s17
-    resource: /adr/004-specifications-and-policy-as-data.md
-    title: ADR 004 — the YAML file and the Python compiler, and the rejected TypeScript format
-  - id: s18
-    resource: /adr/005-account-graph-and-roles.md
-    title: ADR 005 — two modifiers, the four roles, their holders, and the Safe settings
-  - id: s19
-    resource: /adr/011-launch-scope.md
-    title: ADR 011 — the launch scope, without Aave, sDAI or another third-party lending market
   - id: s20
     resource: /adr/001-repository-scope-visibility-licence-name.md
     title: ADR 001 — the licence
@@ -87,9 +78,6 @@ sources:
   - id: s25
     resource: "https://github.com/gnosisguild/lido-atm-constellation/blob/02ea37d44efb324a7be395726618d5e76da490bc/README.md#L6-L7"
     title: The provider's README at 02ea37d — the graph is pushed to Zodiac, which diffs it against on-chain state and produces the transactions to sign
-  - id: s26
-    resource: /adr/007-swapping-through-an-orders-account.md
-    title: ADR 007 — swaps through Stonks 2.0 instances; no order pre-signing and no CoW relayer approval
   - id: s27
     resource: "https://etherscan.io/address/0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5#code"
     title: The Roles mastercopy — its runtime code, read at block 26131786
@@ -107,9 +95,9 @@ EM asked on 2026-10-06 whether the policy provider's constellation still works, 
 
 - **The configuration still builds after a one-line fix, and the addresses that the agent checked still match the chain.** Without the fix, the offline build stops. Its comment on Easy Track is false (section 1).
 - **It does not match the Clutch design.** The roles, the role holders, the protocols, the approval rule and the governance path all differ (section 4). The change is a rewrite of `constellation/`, not an edit.
-- **Clutch can use the constellation as the source of the policy.** The `allow` kit and the condition builders express the condition shapes that the kit's Solidity policy uses. A probe compiled three of them to the same flat condition arrays (section 3). The constellation describes Safes, modifiers, roles, permissions and allowances only [s9]. The Easy Track factories ([ADR 006](/adr/006-governance-through-easy-track-factories.md)), the swap instances ([ADR 007](/adr/007-swapping-through-an-orders-account.md)), the funding registries ([ADR 008](/adr/008-funding-through-existing-payments.md)), monitoring and reporting ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)) and the screening guard ([ADR 010](/adr/010-pre-execution-screening.md)) stay outside it.
-- **Clutch cannot use the hosted path today.** `push` sends the specification to the hosted app. The app compiles some entries, builds the transactions and compares the specification with the chain. That path needs an API key and has no hand-off to an Aragon vote or an Easy Track motion. Its Safe node cannot set the Safe version, a guard or the fallback handler. Clutch must compile, apply and check the policy with its own code (section 5).
-- **Two decisions followed.** On 2026-10-06, EM decided OD-33, which amends ADR 004: the constellation and a TypeScript compiler replace the YAML file and the Python compiler. EM also decided OD-34, which adds an ADR 001 exception for the copied LGPL-3.0-only files. See the [open decisions](/registers/open-decisions.md).
+- **Clutch can use the constellation as the source of the policy.** A probe compiled three of the kit's condition shapes to the same flat condition arrays (section 3). The constellation describes Safes, modifiers, roles, permissions and allowances only [s9].
+- **Clutch cannot use the hosted path as it is.** The hosted app compiles some entries, builds the transactions and compares the specification with the chain. That path needs an API key and has no hand-off to an Aragon vote or an Easy Track motion. Its Safe node cannot set the Safe version, a guard or the fallback handler (section 2).
+- **Two decisions followed** on 2026-10-06: OD-33 ([ADR 004](/adr/004-specifications-and-policy-as-data.md) decisions 10 to 15) and OD-34, the ADR 001 exception for the copied LGPL-3.0-only files.
 
 ## 1. Does the configuration still work?
 
@@ -183,48 +171,39 @@ Other findings:
 
 - **Operators.** The SDK's enum has the mastercopy's values for every operator that the kit uses, except `Nor`. `Nor`, `ArraySome` and `ArraySubset` are not in the SDK's enum or in its `c` builders [s10][s11][s16]. A raw condition with operator 3 passes `processPermissions` and `flattenCondition` unchanged.
 - **Keys.** `encodeKey("operator")` is the text padded to 32 bytes, `0x6f70657261746f72…`. The kit uses `keccak256("operator")`. `c.withinAllowance` also encodes the text. The port must choose one form, because the tests and the runbooks name the keys.
-- **Node references.** A node reference resolves as a target, an owner, an avatar or a module. It does not resolve inside a condition's compValue [s5]. That is why the provider left both parameters of `disableModule` open [s4]. The technical role pins the module, so the port needs the modifier's address as a literal.
+- **Node references.** A node reference resolves as a target, an owner, an avatar or a module. It does not resolve inside a condition's compValue [s5]. That is why the provider left both parameters of `disableModule` open [s4]. The emergency role's switch pins the module ([ADR 005](/adr/005-account-graph-and-roles.md) decision 25), so the port needs the modifier's address as a literal.
 - **The ABI.** The SDK's `rolesAbi` matches the deployed mastercopy. All 22 of its state-changing selectors are in the mastercopy's runtime code as `PUSH4` constants [s27]. They include `setUp(bytes)`, which the mastercopy uses instead of the newer `setUp(address,address,address)` [s16]. The topics of the policy events are in the code as `PUSH32` constants: `ScopeFunction`, `ScopeTarget`, `AllowTarget`, `AllowFunction`, `RevokeTarget`, `RevokeFunction`, `SetAllowance`, `ConsumeAllowance`, `AssignRoles` and `SetDefaultRole`. This check covers the signatures. It does not decode real events.
 - **The Safe node.** Its fields are the chain, an optional address, the nonce, the ref, the threshold, the owners, the modules, the label and `vault` [s9]. No field sets the Safe version, a transaction guard, a module guard or the fallback handler. An existing Safe can be bound by address.
 
 ## 4. Differences from the decided design
 
-| Area | Clutch decision | Constellation at `02ea37d` |
-|---|---|---|
-| Modifiers | Two: the operator modifier carries `operator` and `governance`; the safety modifier carries `emergency` and `technical` [s18] | One, with `operator` and `emergency` [s1] |
-| Operator holder | A new operator Safe, v1.5.0, 4 of 7, with the screening guard, which is also the trusted caller of every factory [s18] | The committee's existing Safe [s1] |
-| Emergency holder | A new emergency Safe: the committee's signers at 2 of 7, v1.5.0 [s18] | The Emergency Brakes Safe [s1] |
-| Technical role | The Emergency Brakes Safe; it disables the operator modifier only, with the module argument pinned [s18] | None. The emergency role holds `disableModule` with both parameters open [s4] |
-| Governance | A `governance` role, held by the Easy Track executor, writes operator permissions from fixed templates and sets budgets within ceilings; no permission that it writes targets a modifier or the Safe [s18] | No role. It assumes that motions execute as the Agent, which is false (section 1) [s3] |
-| Asset Safe | Safe v1.5.0, the Agent as its only owner, no guard and no fallback handler [s18] | Agent-owned; `zodiac.config.ts` names the v1.4.1 singleton as its implementation; the Safe node cannot set the version, a guard or the fallback handler |
-| Lending and savings | No Aave, no sDAI, no other third-party lending market; sUSDS stays [s19] | Aave v3 Core supply and withdraw, aToken transfers, and sDAI [s1] |
-| Swaps | Stonks 2.0 instances; no order pre-signing and no CoW relayer approval [s26] | A CoW `swap` action over six sell and five buy tokens, with a TODO for bounds, compiled by the hosted app [s1] |
-| DAI | Converted to USDS and back through Sky's converter, with the receiver pinned to the Asset Safe [s19] | No converter; DAI goes to Aave or sDAI [s1] |
-| ETH and WETH | Stake ETH; wrap and unwrap WETH; request and claim Lido withdrawals for the Asset Safe [s18][s19] | No permission for staking, WETH or the withdrawal queue |
-| Approvals | Each approval to a protocol spender spends that spender's budget key, or stays below a fixed ceiling for the wstETH contract, the withdrawal queue and the converter; deposits spend nothing (OD-08, OD-22, OD-27) [s21] | Approvals pin the spender and leave the amount open; deposits spend six monthly budgets |
-| Budgets | Placeholder stand-ins until the attested figures; a budget motion cannot set a refill period below 30 days (OD-08) [s21] | The provider's placeholder figures; no governance role, so no floor |
-| Recovery | The emergency role sends assets to the recovery swap instances or to the Agent (OD-26) [s18] | Transfers to the Agent only |
-| First-loss Earn shares | Neither the operator nor the emergency role redeems them; in an emergency they go to the Agent (OD-21, OD-28) [s21] | Both roles can redeem Earn shares |
-| LDO | In the rebalancing set [s19] | Out of both sides of the swap |
+ADR 005 to ADR 011 hold the decided design. This table records what the provider's constellation held [s1]:
 
-Later on 2026-10-06, EM's decisions changed several rows of Clutch's column. An orders account places CoW orders for both roles instead of the Stonks instances, and the emergency role sends assets to it or to the Agent (OD-43, [ADR 007](/adr/007-swapping-through-an-orders-account.md)). The orders account has its own two modifiers, so the modifier, technical-role and governance rows extend to it. The first-loss shares move to a first-loss Safe that no role can reach (OD-42, [ADR 008](/adr/008-funding-through-existing-payments.md)).
+| Area | Constellation at `02ea37d` |
+|---|---|
+| Modifiers | One, with `operator` and `emergency` [s1] |
+| Operator holder | The committee's existing Safe [s1] |
+| Emergency holder | The Emergency Brakes Safe [s1] |
+| Module disabling | The emergency role holds `disableModule` with both parameters open [s4] |
+| Governance | No role. It assumes that motions execute as the Agent, which is false (section 1) [s3] |
+| Asset Safe | Agent-owned; `zodiac.config.ts` names the v1.4.1 singleton as its implementation; the Safe node cannot set the version, a guard or the fallback handler |
+| Lending and savings | Aave v3 Core supply and withdraw, aToken transfers, and sDAI [s1] |
+| Swaps | A CoW `swap` action over six sell and five buy tokens, with a TODO for bounds, compiled by the hosted app [s1] |
+| DAI | No converter; DAI goes to Aave or sDAI [s1] |
+| ETH and WETH | No permission for staking, WETH or the withdrawal queue |
+| Approvals | Approvals pin the spender and leave the amount open; deposits spend six monthly budgets |
+| Budgets | The provider's placeholder figures; no governance role, so no floor |
+| Recovery | Transfers to the Agent only |
+| First-loss Earn shares | Both roles can redeem Earn shares |
+| LDO | Out of both sides of the swap |
 
 ## 5. What Clutch must build to use the constellation as the backbone
 
-1. **A new `constellation/`** that follows ADR 005 to ADR 011: two ROLES nodes, the four roles, the Safes bound by address, and the rows of section 4. It holds no `swap` action and no DeFi Kit entry, because the hosted app compiles those and the repository would not hold their permissions.
-2. **An offline compiler** in TypeScript, pinned and run in CI. It loads the constellation, compiles it with `processPermissions` and `flattenCondition`, and encodes the calls with `rolesAbi`. It emits the artifact of ADR 004: the ordered modifier calls, the expected tree for every role, target and selector, and the allowances [s17]. It refuses entries that it cannot compile.
-3. **`Nor` support.** Either a typed raw-condition helper, or a guard rewritten as a list of allowed targets. The probe shows that the raw form compiles.
-4. **Address resolution inside conditions.** The compiler predicts each modifier's address from the module proxy factory and the salt, and the deploy check compares the prediction with the deployed address.
-5. **Safe deployment in Clutch's own script.** It deploys the three Safes on v1.5.0, with no fallback handler on the Asset Safe and the screening guard on the operator Safe. The constellation binds each Safe by address and does not manage the owners or the threshold.
-6. **The governance encoding.** The enabling vote script and the Easy Track factory templates consume the artifact. The provider's README says that the provider "would like to agree how Zodiac should hand a permission change to an LDO vote or an Easy Track motion" [s2].
-7. **The round-trip check and the drift detector.** These stay Clutch code, as ADR 004 and ADR 009 already require. The hosted diff does not replace them.
-8. **The toolchain.** bun 1.3.0, exact versions instead of caret ranges, `bun install --frozen-lockfile`, and a review of the lockfile, which lists 182 packages. The npm package `defi-kit` 2.26.13, a dependency of the SDK, has no licence field [s13].
-9. **The tests.** The fork tests consume the artifact instead of the Solidity builders, as ADR 004 already plans [s17].
-10. **The licence.** The copied files are LGPL-3.0-only. ADR 001 allows AGPL-3.0-or-later and, for files derived from Easy Track, GPL-3.0 [s20]. LGPL-3.0 is the GNU GPL, version 3, with added permissions [s24], so the reasoning that ADR 001 uses for the Easy Track files also applies. This is the agent's reading, not a legal review. EM granted the exception on 2026-10-06 (OD-34).
+[ADR 004](/adr/004-specifications-and-policy-as-data.md) decisions 10 to 15 hold what Clutch builds. The evidence behind them, besides sections 2 and 3:
 
-## 6. What the change replaces
-
-ADR 004 rejected "the TypeScript policy format of the original proposal" because "it adds a toolchain, and the kit never applied it". It chose a YAML file and a Python compiler (OD-16) [s17]. OD-33 asked EM to replace decisions 8 and 9 of ADR 004, and EM did so on 2026-10-06. Decision 7 stays: the policy is data, a compiler turns it into modifier calls, and a round-trip check compares the chain with the data. Of the two reasons for the rejection, the toolchain reason remains. The probe of section 3 answers the second reason in part: the SDK compiles the kit's shapes to the same arrays, but the kit has not yet applied a compiled constellation on a fork.
+- **The hand-off.** The provider's README says that the provider "would like to agree how Zodiac should hand a permission change to an LDO vote or an Easy Track motion" [s2].
+- **The toolchain.** The lockfile lists 182 packages. The npm package `defi-kit` 2.26.13, a dependency of the SDK, has no licence field [s13].
+- **The licence.** The copied files are LGPL-3.0-only. ADR 001 allows AGPL-3.0-or-later and, for files derived from Easy Track, GPL-3.0 [s20]. LGPL-3.0 is the GNU GPL, version 3, with added permissions [s24], so the reasoning that ADR 001 uses for the Easy Track files also applies. This is the agent's reading, not a legal review (OD-34).
 
 ## Reproduce
 

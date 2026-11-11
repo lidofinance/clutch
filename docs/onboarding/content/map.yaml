@@ -4,19 +4,15 @@
 width: 1180
 height: 750
 description: The Lido DAO owns the Asset Safe; it also owns the orders account and the first-loss Safe, which the map
-  shows without an arrow. The Asset Safe owns two Roles modifiers. The committee's Safe holds the operator role and Easy
-  Track holds the governance role on the operator modifier. The emergency Safe holds the emergency role on the safety
-  modifier, the switch included. Two of its five signers come from the committee and two from the Emergency Brakes
-  multisig, which can pause Easy Track. One universal factory builds every Clutch motion. Easy Track also holds the
-  insurance-funding role on the operator modifier, the exit-governance and restart roles on the safety modifier, the
-  governance and approvals roles on the orders account's modifier, and the first-loss burn and insurance roles on the
-  first-loss modifier. The operator and emergency roles act on the orders account through its own modifier, and the
-  committee's Safe also holds the first-loss role. The map draws no arrow for these roles. Each funding is an Aragon
-  vote that pays a tranche through Finance to the Asset Safe. Once the screening guard is set, it approves
-  each transaction of the committee's Safe (OD-83). The Asset Safe uses approved protocols, swaps through CoW orders
-  from the orders account, and pays insurance money to the first-loss Safe by motion. The first-loss Safe holds the
-  DAO's first-loss Earn shares and the insurance funds. Monitoring watches the vault and pages the emergency Safe.
-  Reporting publishes from the vault's snapshots.
+  shows without an arrow. The Asset Safe owns two Roles modifiers. The committee's Safe holds the operator role, and the
+  universal factory the governance role, on the operator modifier. The emergency Safe holds the emergency role on the safety modifier, the switch included. Two of
+  its five signers come from the committee and two from the Emergency Brakes multisig, which can pause Easy Track. One
+  universal factory builds every Clutch motion and holds every role that a motion uses, on all four modifiers. The map
+  draws no arrow for the factory's other roles, for the roles on the orders account's modifier, or for the committee's
+  first-loss role. Each funding is an Aragon vote that pays a tranche through Finance to the Asset Safe. Once the
+  screening guard is set, it approves each transaction of the committee's Safe. The Asset Safe uses approved protocols,
+  swaps through CoW orders from the orders account, and pays insurance money to the first-loss Safe by motion.
+  Monitoring watches the vault and pages the emergency Safe. Reporting publishes from the vault's snapshots.
 nodes:
 - id: committee
   label: Committee Safe
@@ -82,7 +78,7 @@ nodes:
 - id: screening
   label: Screening guard
   sub: '[the screening vendor]'
-  summary: A transaction guard on the committee's Safe (OD-83). It refuses any transaction that the vendor has not approved once. It is set after the launch, before the second tranche's vote lifts the launch cap (OD-54).
+  summary: A transaction guard on the committee's Safe. It refuses any transaction that the vendor has not approved once. It is set after the launch, before the second tranche's vote lifts the launch cap.
   domain: ext
   kind: service
   status: instance

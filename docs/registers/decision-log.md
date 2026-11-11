@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-11T05:49:53Z
+  at: 2026-11-11T20:36:01Z
 verified: []
 sources:
   - id: s1
@@ -106,6 +106,12 @@ sources:
   - id: s32
     resource: "urn:clutch:interview:2026-11-11-verify"
     title: EM's instruction to record EM's verification of ADR 001 to ADR 004, 2026-11-11; the transcript is not in the repository
+  - id: s33
+    resource: "urn:clutch:interview:2026-11-11-occam"
+    title: EM's request for an Occam pass over every layer of the repository, 2026-11-11; the transcript is not in the repository
+  - id: s34
+    resource: "urn:clutch:interview:2026-11-11-occam-verify"
+    title: EM's instructions to record EM's verification of ADR 001 to ADR 004 after the Occam pass, and to list a second recording agent, 2026-11-11; the transcript is not in the repository
 ---
 
 # Decision log
@@ -115,6 +121,36 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-11 — ADR 001 to ADR 004 verified after the Occam pass, and a second recording agent
+
+The Occam pass brought the accepted ADR 001 to ADR 004 to the current-design form, which broke EM's verification of each page. The agent asked EM to verify the four pages again. EM wrote:
+
+> 1. run verification script for ADRs 001-004 on my behalf
+
+The session's agent, `claude-code/mythos-5.2`, was not in the actor list's agents, so it could not record a verification. EM then wrote:
+
+> add claude-code/mythos-5.2 to config/actors.yaml and run just verify on my behalf to bless ADR 001-004
+
+Recorded as:
+
+- `config/actors.yaml` lists `claude-code/mythos-5.2` as an agent that may record a human's verification, next to `claude-code/opus-5.5`. EM asked for this edit of a protected file in writing.
+- EM verifies ADR 001 to ADR 004 again after the edits of the Occam pass, so they stay accepted. At this instruction, the agent recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The session ran as `claude-code/opus-5.5` when it recorded them, so the entries name that agent. The verifications are EM's. [s34]
+
+## 2026-11-11 — the Occam pass: one statement per fact
+
+EM asked for a pass over every layer of the repository:
+
+> learn the repo structure from the ground, start with ADRs, ODs, specs, docs, and other stuff.
+>
+> I need you to run Occam's razor against every layer of artifacts: if something is redundant, repeated, cycled back and forth, too complex or inadequate — cut, squeeze, compress. Your goal is to have the least possible side of the repo without losing the essence and design principals of the stuff that we build. We need this repo to be manageable both by humans and agents — to-the-point, concise, simple wording, neat ideas, lean structure.
+>
+> Do the full path over everything and plan first, don't execute on the go, build evals needed to secure the changes will be made. Then go over the plan one more time and find additional things to correct the plan or evals. Only third pass will be execution of the plan under control of evals.
+
+Recorded as:
+
+- No decision changes and no OD opens: the pass changes the form of the pages, not the design. The agent's rule for it is one owner per fact ([ADR 012](/adr/012-contributing-with-many-agents.md), proposed direction): a page states a fact once, and other pages point to it. A decision that another decision states in full becomes one line, "Stated by …". EM has not accepted the rule or that line's form as text (agent's proposal).
+- The agent compared the result with the commit before the pass, `d60c221`: every decision number, OD, invariant with its tests, and quoted line of this log stays; every figure, address and identifier of the owner pages still has an owner page; the contracts' runtime bytecode is the same. [s33]
 
 ## 2026-11-11 — ADR 001 to ADR 004 verified again
 

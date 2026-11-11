@@ -26,8 +26,8 @@ An ADR reference names what the claim rests on: `ADR-007#d27` pins decision 27
 and every other block of the Decision section that names it, such as "Decision 27
 replaces the route of decision 13", and `ADR-007#<heading>` pins that section. A
 whole ADR is refused, because each new decision would flag every item that cites it,
-and so is a replaced or lapsed decision, whose line only names what holds now
-(OD-128). A closed OD pins its entry in docs/registers/closed-decisions.yaml.
+and so is a replaced or lapsed decision, or one that another decision states, whose
+line only names what holds now (OD-128). A closed OD pins its entry in docs/registers/closed-decisions.yaml.
 
 The output is one self-contained HTML file with no external requests. The
 content renders without JavaScript; the script only adds interaction, and it
@@ -378,6 +378,9 @@ def resolve(ref: str, f: dict[str, Any]) -> dict[str, str]:
             if re.match(r"\d+\.\s+(?:Replaced by|Lapsed)\b", body):
                 raise BuildError(f"{adr} decision {decision.group(1)} is replaced or lapsed; "
                                  "cite the decision that holds now (OD-128)")
+            if re.match(r"\d+\.\s+Stated by\b", body):
+                raise BuildError(f"{adr} decision {decision.group(1)} only points to the decision that states it; "
+                                 "cite that decision")
             out.update(label=f"{out['label']}, decision {decision.group(1)}", href=out["href"] + "#decision")
         else:
             section = next((s for s in parse_sections(text) if s["slug"] == anchor), None)

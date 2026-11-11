@@ -11,8 +11,8 @@ superseded_by:
   ref: /adr/007-swapping-through-an-orders-account.md
   note: "In part: decision 27 of ADR 007 (2026-10-08) took the withdrawal queue out of the design. Recovery into USDC or USDT stands (OD-26). CoW recovery orders replaced the Stonks recovery instances on 2026-10-06 (OD-43, ADR 007 decisions 17 to 19)."
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-22T20:29:49Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -24,9 +24,6 @@ sources:
   - id: s3
     resource: "https://www.coindesk.com/markets/2023/03/11/dai-depegs-as-stablecoin-rout-plagues-crypto"
     title: CoinDesk, 2023-03-11 — DAI hits an all-time low of 88 cents as USDC loses its peg; DAI's collateral includes USDC
-  - id: s4
-    resource: /adr/007-swapping-through-an-orders-account.md
-    title: ADR 007 — the recovery topology before OD-26, and the recovery instances pinned by the safety policy
   - id: s5
     resource: "https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1#readProxyContract"
     title: Lido withdrawal queue — proxy admin, implementation, request limits and bunker mode, read at block 26128295
@@ -36,14 +33,9 @@ sources:
   - id: s7
     resource: "https://etherscan.io/block/26128295"
     title: Ethereum block 26128295, used for every chain read on this page
-  - id: s8
-    resource: /adr/007-swapping-through-an-orders-account.md
-    title: ADR 007 — the withdrawal queue leaves the design, decision 27
 ---
 
 # Recovery into USDT and the withdrawal-queue approval, 2026-10-05
-
-> **Superseded in part** on 2026-10-08: the vault no longer uses Lido's withdrawal queue [s8]. Recovery into USDC or USDT stands (OD-26).
 
 An agent ran every chain read on this page on 2026-10-05. The reads use Ethereum mainnet block 26128295, hash `0x08a472b1b87fab25173d5e2101050989c068ee6a128b80e0cd98170639d4bf74`, time 2026-10-05T19:35:23Z [s7].
 
@@ -52,12 +44,6 @@ An agent ran every chain read on this page on 2026-10-05. The reads use Ethereum
 - Sky's USDC peg stability module is `0xf6e72Db5454dd049d0788e411b06CfAF16853042`. Its gem is USDC [s1].
 - Its pocket, `0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341`, holds 4,290,965,112.39 USDC at the block [s1][s2].
 - On 2023-03-11, when USDC lost its peg, DAI fell to an all-time low of 88 cents. The report names USDC among DAI's collateral [s3].
-
-## The recovery topology before OD-26
-
-- Recovery had seven instances: stETH, LDO, USDT, USDS and DAI into USDC, and stETH and LDO into USDT [s4].
-- In a USDC depeg, recovery had no swap for USDC, and it could swap USDS and DAI only into USDC [s4].
-- The safety policy pins the recovery instances, so a later addition needs a DAO vote [s4].
 
 ## The withdrawal queue
 
@@ -90,4 +76,3 @@ The function list comes from the implementation's verified ABI, through the Ethe
 
 - Every read describes its block. The peg stability module's balance changes daily.
 - The CoinDesk report is a press source, not a price record.
-- EM's decisions are in the [decision log](/registers/decision-log.md).

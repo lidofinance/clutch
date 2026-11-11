@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-09-30
 stale_after: 2027-03-31T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -90,11 +90,3 @@ OKF 0.2 is the current version. It makes provenance, trust and freshness first-c
 - In a dataset of 8.1 million pull requests, 79 percent of agent-opened pull requests merged in the top decile of organisations, against 92 percent of human-only ones [s11].
 - Feature-branch throughput rose 59 percent year on year while median main-branch success fell to 70.8 percent [s11].
 - At Bloomberg, small agentic pull requests were accepted at 82.1 percent [s12].
-
-## What this means for Clutch
-
-- Keep `AGENTS.md` short, rules only, with exact commands. The architecture belongs in `docs/`, which agents read on demand.
-- Check instruction files for freshness in CI: broken paths and commands that no longer exist.
-- Protect instruction files, workflows and skills with CODEOWNERS and required human review.
-- Optimise for how fast a reviewer can verify a change, not for how fast an agent can write it. This is the North Star Metric in the [product brief](/product/brief.md).
-- Write skill descriptions so that they trigger, and test them.

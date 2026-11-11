@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-10-15
 stale_after: 2026-12-31T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -46,15 +46,11 @@ sources:
 
 # The committee's Safe as the operator, reviewed again, 2026-10-15
 
-On 2026-10-15 EM asked whether reusing the committee's Safe as the operator (OD-80, with the guard on it from the lift, OD-83) is better than the earlier design of a new operator Safe with the same signers. EM asked for a corridor test, the strongest and weakest case of each design, and Lido's earlier practice. This note keeps the evidence that can be published. The parts that identify the screening vendor stay restricted [s9].
-
-## The answer
-
-EM kept the recorded design: "let it be A still, I don't like to have a nested interim safe" [s1]. OD-80 and OD-83 stand. The committee's Safe holds the operator role and the first-loss role, it is the trusted caller of every Clutch factory, and from the lift of the launch cap it carries the screening guard ([ADR 010](/adr/010-pre-execution-screening.md) decision 24).
+On 2026-10-15 EM asked whether reusing the committee's Safe as the operator (OD-80, with the screening guard on it, OD-83) is better than the earlier design of a new operator Safe with the same signers. EM asked for a corridor test, the strongest and weakest case of each design, and Lido's earlier practice. This note keeps the evidence that can be published. The parts that identify the screening vendor stay restricted [s9].
 
 ## What else the committee's Safe does
 
-From the lift, the guard screens every transaction of the committee's Safe, so its other duties come under screening too [s10]. Those duties, read on chain for the committee's Safe [s2] (commands below):
+The guard screens every transaction of the committee's Safe, so its other duties come under screening too [s10]. Those duties, read on chain for the committee's Safe [s2] (commands below):
 
 | Duty | Contract | Read |
 |---|---|---|
@@ -84,20 +80,10 @@ None was urgent.
 
 ## The two alternatives
 
-1. **A new operator Safe with the same seven signers** (the design of 2026-10-02 to 2026-10-14). This needs a second signer set that must follow the committee by hand. The committee changed six seats in 29 months. At Aave, a governance post of 2025-06-24 had to bring several Safes back to the finance committee's signer composition [s7]. SEAL also advises a dedicated signer address per multisig [s8], which would add seven new signer addresses.
-2. **An operator Safe owned 1 of 1 by the committee's Safe, with the guard on it only.** Safe accepts a transaction that its owner sends itself (a type-1 signature) [s5].
-   - A restricted fork test passed with the vendor's guard bytecode on Safe v1.3.0 and v1.5.0 [s9]: the guard refused an unapproved action and let an approved one run through the Roles modifier as the Asset Safe; the owner swap and the 10-day removal path also worked.
-   - Gain: the guard stays on vault activity, and one owner swap could move the operator without new factories.
-   - Cost: one more Safe, and every operator action becomes a nested execution.
-   - EM did not choose it [s1].
+1. **A new operator Safe with the same seven signers.** It needs a second signer set that must follow the committee by hand. The committee changed six seats in 29 months. At Aave, a governance post of 2025-06-24 had to bring several Safes back to the finance committee's signer composition [s7]. SEAL also advises a dedicated signer address per multisig [s8].
+2. **An operator Safe owned 1 of 1 by the committee's Safe, with the guard on it only.** Safe accepts a transaction that its owner sends itself (a type-1 signature) [s5]. A restricted fork test passed with the vendor's guard bytecode on Safe v1.3.0 and v1.5.0 [s9]: the guard refused an unapproved action and let an approved one run through the Roles modifier as the Asset Safe; the owner swap and the 10-day removal path also worked. EM did not choose it [s1].
 
-Aave's finance committee holds its scoped Finance Steward role directly on its own Safe [s6][s7]. That is the same shape as OD-80.
-
-## Consequences of keeping the design
-
-- A vendor outage can stop the duties in the table for at most the 10 days of the removal timelock. The buyback pause stays with Emergency Brakes.
-- The committee's Safe keeps no module while the guard is set (INV-010).
-- To move the operator role to another Safe, the DAO must vote to deploy and register every Clutch factory again, because the trusted caller is fixed.
+Aave's finance committee holds its scoped Finance Steward role directly on its own Safe [s6][s7].
 
 ## How to reproduce
 

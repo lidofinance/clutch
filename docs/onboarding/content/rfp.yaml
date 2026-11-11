@@ -12,15 +12,16 @@ properties_sources: ["doc:docs/research/request-for-solution-2026-10-07.md#what-
 properties:
   - name: DAO ownership
     how: "Aragon Voting is the only owner of every account that holds assets, and recovered assets go to the Aragon Agent. The Asset Safe owns both of its modifiers, which are proxies of a locked mastercopy."
-    sources: ["ADR-005#d19", "ADR-005#d20", "ADR-005#context", "ADR-005#proposed-direction", INV-001, INV-021, INV-023]
+    sources: ["ADR-008#d19", "ADR-007#d17", "ADR-007#d20", "ADR-005#context", "ADR-005#proposed-direction",
+      "INV-001", "INV-021", "INV-023"]
   - name: Default-deny permissions
     how: "Each role reaches only named targets and functions, and every receiver is pinned to the vault. A motion adds a permission only through a typed shape of the universal factory, fixed at audit time. It never grants administration, or a delegatecall other than the order signer's."
     sources: ["ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7", "ADR-013#d8", INV-003, INV-004,
       INV-034]
   - name: Rapid risk reduction
     how: "The emergency Safe revokes, exits and returns assets at once, and no guard sits on its path. It can also switch the operator off. Fork drills must show each action started within six hours."
-    sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#context", "ADR-005#proposed-direction", OD-58, INV-002, INV-009, INV-010,
-      "doc:ROADMAP.md#standing-gates"]
+    sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d25", "ADR-005#context",
+      "ADR-005#proposed-direction", "INV-002", "INV-009", "INV-010", "doc:ROADMAP.md#standing-gates"]
   - name: Walk-away operation
     how: "Clutch compiles and checks the policy itself, from the reviewed commit, and the provider's hosted app is out of the path. Removal, recovery and DAO actions are plain on-chain calls with no vendor code on their path."
     sources: ["ADR-004#d11", "ADR-004#d13", OD-33, INV-010]
@@ -30,23 +31,24 @@ sections:
     items:
       - asked: "An Asset Safe holds the assets and the positions. The Aragon Agent is its only owner, and the DAO cannot lose that ownership because a provider service is unavailable."
         verdict: changed
-        clutch: "The Asset Safe is a Safe v1.5.0 with Aragon Voting as its only owner, at a threshold of one, with no guard and no fallback handler. No vendor code is on the DAO's path, and the DAO cannot lose that ownership because a provider service is unavailable."
-        why: "A vote on the vault then runs without Dual Governance, which protects stETH holders, not the treasury. Aragon Voting already pays from the treasury through Finance, so it gains no new power (OD-73)."
-        sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#d28", "ADR-005#proposed-direction", OD-73, INV-001, INV-010]
+        clutch: "Aragon Voting, not the Aragon Agent, is the Asset Safe's only owner. The Safe has no guard and no fallback handler, so no vendor code is on the DAO's path."
+        why: "A vote on the vault then runs without Dual Governance, which protects stETH holders, not the treasury. Aragon Voting already pays from the treasury through Finance, so it gains no new power."
+        sources: ["ADR-005#d12", "ADR-005#d14", "ADR-005#d15", "ADR-005#d28", "ADR-005#proposed-direction",
+          "INV-001", "INV-010"]
       - asked: "An Operator Safe at 4 of 7 makes routine transactions through a restricted role. It cannot change its own permissions, block their removal, borrow, or use an asset or a function that a motion or the DAO did not approve."
         verdict: kept
-        clutch: "The committee's existing Safe, at 4 of 7, holds the operator role (OD-80). Once the screening vendor's guard is set, before the second tranche's vote, it screens the Safe (OD-83). It cannot borrow, administer a modifier or a Safe, or change its own permissions. It moves assets out only into the orders account, or back to the Aragon Agent by a transfer pinned to it (OD-108)."
-        sources: ["ADR-005#proposed-direction", "ADR-010#d1", "ADR-010#proposed-direction", "ADR-014#d9", "INV-002",
-          "ADR-005#d31", "OD-80", "OD-83", "OD-108"]
+        clutch: "The committee's existing Safe, at 4 of 7, holds the operator role. It cannot borrow, administer a modifier or a Safe, or change its own permissions. It moves assets out only into the orders account, or back to the Aragon Agent."
+        sources: ["ADR-005#proposed-direction", "ADR-010#d1", "ADR-010#proposed-direction", "ADR-014#d9",
+          "INV-002", "ADR-005#d31", "OD-83"]
       - asked: "An Emergency Safe at 3 of 5, which the RFP links to the Emergency Brakes multisig, revokes approvals, exits approved positions and returns assets to the fixed DAO treasury address."
         verdict: changed
-        clutch: "A new emergency Safe at 3 of 5 holds the emergency role and the switch: two Emergency Brakes members, two committee members and one member of neither body. The Emergency Brakes multisig itself keeps only the Easy Track pause."
+        clutch: "A new [[Emergency Safe]] at 3 of 5 holds the emergency role and the [[switch]]: two Emergency Brakes members, two committee members and one member of neither body. The Emergency Brakes multisig itself keeps only the Easy Track pause."
         why: "Financial emergencies need people who watch the portfolio every day, and technical ones need the engineering view. No single body acts alone, and the quorum without the committee returns assets without it."
-        sources: ["ADR-005#d2", "ADR-005#d23", "ADR-005#d24", "ADR-005#d25", "ADR-005#proposed-direction", OD-58, INV-009,
-          "lip:part-2"]
+        sources: ["ADR-005#d2", "ADR-005#d23", "ADR-005#d24", "ADR-005#d25", "ADR-005#proposed-direction",
+          "INV-009", "lip:part-2"]
       - asked: "Neither Safe can block the removal of its own authority, and the Operator Safe cannot block a DAO recovery action."
         verdict: kept
-        clutch: "The Asset Safe owns both modifiers, so a DAO vote can remove any role. The emergency Safe can switch the operator off. Recovery runs through the emergency Safe, which has no guard, and the safety modifier, which carries no operator role."
+        clutch: "The Asset Safe owns both modifiers, so a DAO vote can remove any role. The emergency Safe can switch the operator off, and the operator has no role on the recovery path."
         sources: ["ADR-005#d6", "ADR-005#d25", "ADR-005#proposed-direction", INV-009, INV-010]
     added:
       - text: "Two modifiers on the Asset Safe: the operator modifier for the operator and governance roles, and the safety modifier for the emergency, exit-governance and restart roles."
@@ -54,11 +56,10 @@ sections:
         sources: ["ADR-005#d6", "ADR-005#context", "ADR-005#proposed-direction"]
       - text: "An orders account, owned by Aragon Voting, places CoW orders for the operator and for recovery."
         why: "Conditional orders need CoW's fallback handler, and the Asset Safe has none."
-        sources: ["ADR-007#d17", OD-43, "lip:part-6"]
-      - text: "A first-loss Safe, owned by Aragon Voting, holds the DAO's first-loss Earn shares and the insurance funds. An Easy Track motion burns the shares, and one narrow role of the committee's Safe redeems them to the Asset Safe."
+        sources: ["ADR-007#d17", "lip:part-6"]
+      - text: "A [[first-loss Safe]], owned by Aragon Voting, holds the DAO's first-loss Earn shares and the insurance funds."
         why: "The chain cannot tell first-loss shares from other Earn shares, so a separate Safe keeps them apart, and the committee executes the first-loss terms without a DAO vote."
-        sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-014#d4", "ADR-014#d10", OD-42, OD-60, OD-67, OD-107, OD-108,
-          INV-021]
+        sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-014#d4", "ADR-014#d10", "INV-021"]
     tech: "The Asset Safe, the emergency Safe and the first-loss Safe run Safe v1.5.0, and the committee's Safe runs Safe v1.3.0 (OD-80). Each modifier is an EIP-1167 minimal proxy of the locked Roles mastercopy, deployed through the Zodiac module proxy factory, with the Asset Safe as its owner, avatar and target."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#accounts", "ADR-005#d12", "ADR-005#d13",
       "ADR-005#context", "ADR-005#proposed-direction", "lip:part-1", OD-80]
@@ -68,41 +69,43 @@ sections:
     items:
       - asked: "Easy Track manages the operator allowlist: it adds or removes an asset, a protocol target or a function selector, and changes a parameter constraint inside an allowed function."
         verdict: changed
-        clutch: "Motions add and remove through one universal factory, fixed at audit time. A motion widens a permission only through a typed shape, such as a vault, a market or an approval list, which pins receivers to the vault, draws a budget and writes the emergency exit. A raw write only narrows: a revoke, or a complete list that removes entries. A budget motion sets budgets within their ceilings, and a ceiling motion changes a ceiling within its limit. A motion also adds a token to the orders account. An emergency removal is the emergency Safe's immediate revoke."
-        why: "A motion that carried its own condition tree could widen authority past what the DAO approved, so every widening fills a shape. Versions stop two motions from undoing each other's change."
+        clutch: "Motions add and remove through one [[universal factory]], fixed at audit time. A motion widens a permission only through a typed [[shape]], such as a vault, a market or an approval list; a raw write only narrows. A budget motion sets budgets within their ceilings, and a ceiling motion changes a ceiling within its limit. A motion also adds a token to the orders account."
+        why: "A motion that carried its own condition tree could widen authority past what the DAO approved, so every widening fills a shape."
         sources: ["ADR-006#context", "ADR-013#d2", "ADR-013#d5", "ADR-013#d7", "ADR-013#d10", "ADR-013#d13",
-          "ADR-013#proposed-direction", "ADR-007#d41", "OD-09", "OD-70", "OD-102", "OD-103", "OD-105",
-          "INV-004", "INV-034"]
+          "ADR-013#proposed-direction", "ADR-007#d41", "OD-09", "OD-70", "INV-004", "INV-034", "INV-027", "ADR-006#options-considered"]
       - asked: "Lido contributors design, build, audit, deploy and maintain the Easy Track helper contracts. The provider confirms that its access control exposes the administration functions and works safely with this path."
         verdict: kept
-        clutch: "The universal Easy Track factory, with the thin companion contracts that it creates (OD-117), is the only new code. Lido builds it in phase 2, and an external audit covers it in phase 3, with CoW's order signer, which has no known audit (OD-96). The governance role calls six administration functions of the Roles modifier, each one guarded."
-        sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", INV-004, "doc:ROADMAP.md#roadmap", "ADR-007#d40", OD-96, "ADR-013#d17", OD-117]
+        clutch: "The universal Easy Track factory, with the thin companion contracts that it creates, is the only new code. Lido builds it in phase 2, and an external audit covers it in phase 3, with CoW's order signer, which has no known audit. The governance role calls six administration functions of the Roles modifier, each one guarded."
+        sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "INV-004", "doc:ROADMAP.md#roadmap",
+          "ADR-007#d40", "ADR-013#d17"]
       - asked: "The Aragon Agent stays the only owner of the Asset Safe. Easy Track gets no ownership and no unrestricted execution, and it executes only the permission changes that the Operator Safe proposes in motions."
         verdict: changed
-        clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe (OD-73). Easy Track never receives authority over the vault's owner or the Agent. On the Asset Safe, the universal factory holds only the governance, insurance-funding, exit-governance and restart roles, and uses them only in an enacted motion's one call; the restart role may only enable the operator modifier. Outside it, the factory holds the governance and approvals roles on the orders modifier, and the burn and insurance roles on the first-loss Safe, so every first-loss burn is a motion (OD-67). Easy Track's executor holds no role (OD-118). The committee's Safe, as the universal factory's trusted caller, creates every motion."
-        why: "The reason is the one under Accounts: a vault vote passes no Dual Governance, and Aragon Voting gains no new power (OD-73)."
-        sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-006#d3", "ADR-006#d13", "ADR-008#d23", "ADR-013#d12",
-          "ADR-013#proposed-direction", "ADR-010#proposed-direction", OD-67, OD-73, INV-004, INV-035, "ADR-013#d18", OD-118]
+        clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe. Easy Track never receives authority over the vault's owner or the Agent. The universal factory holds narrow motion roles and uses them only in an enacted motion's one call; Easy Track's executor holds no role. The committee's Safe, as the factory's [[trusted caller]], creates every motion."
+        why: "As under Accounts: a vault vote passes no Dual Governance, and Aragon Voting gains no new power."
+        sources: ["ADR-005#d28", "ADR-005#proposed-direction", "ADR-005#d31", "ADR-010#d24", "ADR-006#d13",
+          "ADR-008#d23", "ADR-013#d12", "ADR-013#proposed-direction", "ADR-010#proposed-direction",
+          "INV-004", "INV-035", "ADR-013#d18"]
       - asked: "A direct DAO path can make every change that Easy Track can make."
         verdict: kept
-        clutch: "A DAO vote, a direct Aragon Voting item, can do everything on the owner path: replace the policy, change membership and apply any change without Easy Track. A fork test runs that path."
+        clutch: "A direct Aragon Voting item can do everything on the owner path: replace the policy, change membership and apply any change without Easy Track. A fork test runs that path."
         sources: ["ADR-005#context", "ADR-005#proposed-direction", "test:test_D2_direct_DAO_path"]
       - asked: "The complete initial configuration is in place before ownership passes to the DAO, so no separate setup-only vote is needed."
         verdict: changed
-        clutch: "Ownership never passes: the Asset Safe is created with Aragon Voting as its only owner. The enabling vote approves the hash of each Safe batch, and the batches apply the committed policy artifact, grant every role and set up the orders account and the first-loss Safe; the vote also registers the universal factory and pays the first tranche. No setup-only vote is needed (OD-92)."
-        why: "Aragon Voting is the only owner of the Asset Safe at all times, so only the DAO can configure the vault. Its enabling vote approves the Safe batches, and anyone sends them after the vote (OD-73, OD-92)."
-        sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-013#d6", "ADR-014#d2", INV-001, "ADR-005#d32",
-          OD-92, "doc:script/DeployDryRun.s.sol", "doc:docs/specs/enabling-vote.md#the-vote", OD-73]
+        clutch: "Ownership never passes. The [[enabling vote]] approves the Safe batches that configure the vault, registers the universal factory and pays the first tranche, so no setup-only vote is needed."
+        why: "The Asset Safe is created with Aragon Voting as its only owner, so only the DAO can configure the vault."
+        sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-013#d6", "ADR-014#d2",
+          "INV-001", "ADR-005#d32", "doc:script/DeployDryRun.s.sol",
+          "doc:docs/specs/enabling-vote.md#the-vote", "OD-73"]
     added:
       - text: "An exit-governance role on the safety modifier: the motion that onboards a protocol also writes the emergency role's exit from it."
         why: "Without it, a protocol that a motion onboards would have no emergency exit until a DAO vote added one."
-        sources: ["ADR-006#d13", OD-49, INV-025]
+        sources: ["ADR-006#d13", "INV-025"]
       - text: "A restart role on the safety modifier: after the switch, a motion enables the operator modifier again, and the role can do nothing else."
         why: "No emergency body resumes what it stopped, and after the enabling vote no administrative action needs an Aragon vote."
-        sources: ["ADR-013#d3", "ADR-013#d12", OD-104, INV-035]
-      - text: "A version for each scope that a motion writes, and a motion counter that the emergency Safe raises at every stop."
+        sources: ["ADR-013#d3", "ADR-013#d12", "INV-035"]
+      - text: "A [[version]] for each scope that a motion writes, and a [[motion counter]] that the emergency Safe raises at every stop."
         why: "Motions have no order, so two motions on one scope could undo each other. The counter makes every open motion fail at once, so a stale motion cannot undo a revoke."
-        sources: ["ADR-013#d2", "ADR-013#d10", "ADR-013#context", OD-100, OD-102, INV-033]
+        sources: ["ADR-013#d2", "ADR-013#d10", "ADR-013#context", "INV-033"]
     tech: "The governance role holds `scopeTarget`, `revokeTarget`, `allowFunction`, `revokeFunction`, `scopeFunction` and `setAllowance` on the operator modifier. The first five pin the role key to `operator` and refuse the Asset Safe and its modules as targets; `allowFunction` and `scopeFunction` allow no delegatecall; `setAllowance` takes only the operator's budget keys."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#governance-and-easy-track", "ADR-006#d8",
       "ADR-006#d9", "ADR-006#d10", "ADR-006#proposed-direction", "lip:part-4"]
@@ -112,21 +115,22 @@ sections:
     items:
       - asked: "Adding or widening a permission and removing one are separate actions. A removal cannot add or widen, and an expansion cannot make an arbitrary call."
         verdict: kept
-        clutch: "The universal factory's typed shapes widen, and its raw writes only narrow: a narrowing write writes the scope's complete content without the removed entries, and adds nothing. No shape can make an arbitrary call. An emergency removal is the emergency role's revoke, which cannot grant anything."
-        sources: ["ADR-005#d11", "ADR-013#d7", "ADR-013#proposed-direction", OD-70, OD-102, INV-004, INV-029, INV-034]
+        clutch: "The universal factory's typed shapes widen, and its raw writes only narrow: a narrowing write writes the scope's complete content without the removed entries. No shape can make an arbitrary call. An emergency removal is the emergency role's revoke, which cannot grant anything."
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-013#d7", "ADR-013#proposed-direction",
+          "INV-004", "INV-029", "INV-034"]
       - asked: "An expansion waits through a three-day objection period."
         verdict: kept
-        clutch: "Every motion has a 72-hour objection window. Motions are the timelock for every structural increase of exposure, such as a new target or a higher budget."
-        sources: ["ADR-006#d11", "ADR-006#context", "ADR-009#d30", OD-45]
+        clutch: "Every motion has a 72-hour [[objection window]]: the timelock for every structural increase of exposure, such as a new target or a higher budget."
+        sources: ["ADR-006#d11", "ADR-006#context", "ADR-010#d19"]
       - asked: "A standard removal goes through an Easy Track removal motion, with the same three-day objection period."
         verdict: kept
-        clutch: "A routine removal is a narrowing motion of the universal factory, with the same objection window. An emergency removal is the emergency Safe's immediate revoke, posted on the forum afterwards."
-        sources: ["ADR-006#d14", "ADR-013#d7", "OD-09", "OD-70", "OD-102", "runbook:Remove a strategy", "ADR-006#d7"]
+        clutch: "A routine removal is a narrowing motion of the universal factory, with the same objection window."
+        sources: ["ADR-006#d14", "ADR-013#d7", "runbook:Remove a strategy", "ADR-006#d7"]
       - asked: "For an urgent risk, the emergency authority blocks or revokes within hours, and a durable change follows later."
         verdict: kept
-        clutch: "The emergency Safe revokes the operator's targets and functions on the operator modifier and the orders modifier at once, and it can switch the operator off. It also raises the factory's motion counter, so no queued motion undoes the revoke. A revoke is durable: only a motion or a DAO vote grants the permission again, and a restart motion turns the operator on again."
-        sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#d26", "ADR-013#d10", "ADR-013#d12", OD-104, INV-009, INV-033,
-          "lip:part-6"]
+        clutch: "The emergency Safe revokes the operator's targets and functions at once, posts on the forum afterwards, and can switch the operator off. It also raises the motion counter, so no queued motion undoes the revoke. A revoke is durable: only a motion or a DAO vote grants the permission again."
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d25", "ADR-005#d26", "ADR-013#d10",
+          "ADR-013#d12", "INV-009", "INV-033", "lip:part-6"]
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#permission-change-paths", "ADR-013#d7"]
 
   - id: assets
@@ -134,9 +138,10 @@ sections:
     items:
       - asked: "A launch set of stETH, wstETH, LDO, USDC, USDT, DAI, sDAI, USDS, sUSDS, earnUSD and earnETH, with a note of the assets or actions that need custom policy work."
         verdict: changed
-        clutch: "Clutch takes EM's launch list (ADR 011): ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access and Lido Lend access. DAI earns through Sky's DAI–USDS converter, and sDAI and LDO are out."
-        why: "EM set the list and later took LDO off it (OD-91). DAI earns through USDS without a swap or a third-party market, so sDAI is not needed. ETH and WETH need staking and wrapping. The vault does not use Lido's withdrawal queue: stETH is sold in CoW orders instead."
-        sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d7", "ADR-011#d14", "ADR-011#d15", "ADR-007#d13", "ADR-007#d27", OD-20, OD-22, OD-91, INV-015]
+        clutch: "Clutch takes EM's launch list: ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW Swap access and Lido Lend access. DAI earns through Sky's DAI–USDS converter, and sDAI and LDO are out."
+        why: "EM set the list, without LDO. DAI earns through USDS without a swap or a third-party market, so sDAI is not needed. ETH and WETH need staking and wrapping."
+        sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d7", "ADR-007#d13", "ADR-007#d22", "ADR-007#d27",
+          "ADR-011#d15", "INV-015"]
       - asked: "Unapproved actions are denied by default. On-chain rules restrict the target contracts, the functions, the transferred value and the relevant parameters."
         verdict: kept
         clutch: "Each role reaches only named targets and functions, and no target is open as a whole. Every receiver, owner and beneficiary is pinned to the vault, and only the staking and wrapping calls can carry ETH."
@@ -148,17 +153,17 @@ sections:
         sources: ["ADR-009#d4", "ADR-009#d9", "ADR-011#d1"]
       - asked: "The answer explains which limits hold before execution and which depend on reporting and remediation."
         verdict: kept
-        clutch: "No limit reverts on chain, because the policy cannot see value. Budgets per spender bound how much can move each month, a screening rule is requested that refuses an operator transaction that breaks a cap, and the Zodiac UI refuses one in its own interface (OD-86). Monitoring publishes the cap reading every two weeks, next to the policy provider's own, and a breach in either counts (OD-84). If a breach is not fixed within two working days and is larger at the next reading, the emergency Safe switches the operator off (OD-58)."
-        sources: ["ADR-009#d1", "ADR-009#d13", "ADR-009#d24", "ADR-009#d25", "ADR-009#d41", "ADR-009#d43", "ADR-009#proposed-direction",
-          OD-29, OD-32, OD-39, "doc:docs/specs/control-matrix.md#the-matrix", OD-58, OD-84, OD-86]
+        clutch: "No limit reverts on chain, because the policy cannot see value. Before execution, budgets per spender bound how much can move each month, a requested screening rule refuses an operator transaction that breaks a cap, and the Zodiac UI refuses one in its own interface. The rest depends on reporting: a published cap reading every two weeks, and the emergency Safe's switch if a breach is not fixed within two working days and is larger at the next reading."
+        sources: ["ADR-009#d1", "ADR-009#d13", "ADR-009#d24", "ADR-009#d25", "ADR-009#d41", "ADR-009#d43",
+          "ADR-009#proposed-direction", "OD-39", "doc:docs/specs/control-matrix.md#the-matrix"]
       - asked: "The Operator Safe cannot add a target, a function, an asset or a wider parameter range without the governance process."
         verdict: kept
-        clutch: "The operator holds no administration function, and only motions and DAO votes write its permissions. A fork test checks that the operator cannot widen its own scope or reach administration."
+        clutch: "The operator holds no administration function: only motions and DAO votes write its permissions. A fork test checks that it cannot widen its own scope."
         sources: ["ADR-005#proposed-direction", "INV-004", "test:test_operator_holds_only_the_operator_key"]
       - asked: "The permission detail separates protocol targets, function selectors, asset parameters and other policy parameters."
         verdict: kept
         clutch: "The committed artifact lists every target, function and condition tree of each role, and the budget keys of each modifier. The Actors and Constellation tabs read it."
-        sources: ["ADR-004#d9", "doc:policy/constellation/artifacts/fork-25946643.json"]
+        sources: ["ADR-004#d13", "doc:policy/constellation/artifacts/fork-25946643.json"]
     tech: "Functions that act only for the calling Safe, such as wrapping, unwrapping and claims, take any arguments. Only stETH's `submit` and WETH's `deposit` can carry ETH."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#assets-and-permissions", "ADR-011#d1",
       "doc:policy/constellation/artifacts/fork-25946643.json"]
@@ -172,13 +177,14 @@ sections:
         sources: ["ADR-002#d9", "doc:ROADMAP.md#standing-gates"]
       - asked: "The emergency role revokes token approvals and exits approved positions."
         verdict: kept
-        clutch: "The emergency role sets approvals to zero, exits positions to the Asset Safe, unwraps wstETH and WETH, redeems sUSDS and Earn shares, and revokes the operator's targets and functions. A motion that onboards a protocol also adds the exit from it."
-        sources: ["ADR-005#d11", "ADR-005#proposed-direction", OD-49, INV-025]
+        clutch: "The emergency role sets approvals to zero, exits positions to the Asset Safe, unwraps wstETH and WETH, redeems sUSDS and Earn shares, and revokes the operator's targets and functions."
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#proposed-direction", "OD-49",
+          "INV-025"]
       - asked: "Recovered assets go only to the fixed DAO treasury address."
         verdict: changed
         clutch: "Recovered assets go to the Aragon Agent, or to the orders account, whose recovery orders buy USDC or USDT and pay only the Agent. A recovery order lives at most one day."
-        why: "The mandate lets the emergency path swap assets into stablecoins, and a swap needs an order. Aragon Voting owns the orders account, and its recovery orders pay only the Aragon Agent."
-        sources: ["ADR-007#d19", "ADR-007#d25", "ADR-007#proposed-direction", OD-26, OD-43, INV-002, INV-024]
+        why: "The mandate lets the emergency path swap assets into stablecoins, and a swap needs an order. Aragon Voting owns the orders account."
+        sources: ["ADR-007#d19", "ADR-007#d25", "ADR-007#proposed-direction", "OD-26", "INV-002", "INV-024"]
       - asked: "The Operator Safe cannot veto an emergency action."
         verdict: kept
         clutch: "Recovery runs through the emergency Safe, which has no guard, and the safety modifier, which carries no operator role. Switching the operator off leaves both working."
@@ -191,8 +197,8 @@ sections:
       - asked: "In an incident, new operator transactions stop first. The emergency signers check the event, revoke approvals, exit positions or start queued withdrawals, and return what is liquid to the treasury. The DAO disables a role or a module if needed, and an incident report follows."
         verdict: kept
         clutch: "The emergency Safe switches the operator off, revokes, exits and returns assets, redeems Earn shares through their queues, and sells stETH by a recovery order or sends it to the Agent. A DAO vote can disable anything, and the committee publishes an incident report within 72 hours."
-        sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#proposed-direction", "ADR-009#d19", INV-009,
-          "runbook:Return assets to the Agent", "runbook:Switch the operator off"]
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d25", "ADR-005#proposed-direction",
+          "ADR-009#d19", "INV-009", "runbook:Return assets to the Agent", "runbook:Switch the operator off"]
     tech: "The vault does not use Lido's withdrawal queue (ADR 007, decision 27): stETH leaves by a recovery order or by a transfer to the Agent. Earn shares leave through their redeem queues, and the role can cancel open deposit requests."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#emergency-response", "ADR-005#proposed-direction",
       "ADR-007#d27", "lip:part-6", "doc:policy/constellation/artifacts/fork-25946643.json"]
@@ -202,21 +208,21 @@ sections:
     items:
       - asked: "Monitoring covers transactions, assets, protocols and permission changes."
         verdict: kept
-        clutch: "Lido's on-chain monitoring carries policy drift against the committed artifact, the approval inventory, budget burn, module, owner and singleton changes on the new Safes, transfers to the Aragon Agent, and every motion of the universal factory, decoded from one format. A motion that onboards a protocol needs monitoring of it before enactment."
-        sources: ["ADR-009#proposed-direction", "ADR-013#proposed-direction", "ADR-014#d9", OD-108, "lip:part-4"]
+        clutch: "Lido's on-chain monitoring carries policy [[drift]] against the committed artifact, the approval inventory, budget burn, module, owner and singleton changes on the new Safes, transfers to the Aragon Agent, and every motion of the universal factory, decoded from one format. A motion that onboards a protocol needs monitoring of it before enactment."
+        sources: ["ADR-009#proposed-direction", "ADR-013#proposed-direction", "ADR-014#d9", "lip:part-4"]
       - asked: "Alerts reach the operator, the emergency signers and DAO operations, with the supported signals and the expected alert times."
         verdict: owed
         clutch: "The detector specification lists each detector with what it watches, its severity and where it runs. It is owed in phase 1, and it sets no alert time yet."
-        sources: ["ADR-009#d8", "ADR-009#d17", "ADR-009#proposed-direction", OD-13]
+        sources: ["ADR-009#d8", "ADR-009#d17", "ADR-009#proposed-direction"]
       - asked: "Each operator transaction is simulated and checked before execution, and the answer names the service that checks it."
         verdict: changed
-        clutch: "Once the guard is set, before the second tranche's vote, the screening vendor checks each operator transaction before it runs. Its transaction guard on the committee's Safe refuses any transaction that the vendor did not approve on chain, once (OD-83). Every motion is screened too, because that Safe creates it. Until the cap lifts, the vault runs without the guard. The repository does not record whether the vendor simulates each transaction. From the launch, the Zodiac UI's signing flow refuses an operator transaction that would breach a cap, in its own interface only (OD-86), and from the lift it requests the vendor's approval for each transaction it builds (OD-88)."
+        clutch: "Once the [[guard]] is set, the screening vendor checks each transaction of the committee's Safe before it runs, new motions included, and the guard refuses any that the vendor did not approve on chain, once. Until the [[launch cap]] lifts, the vault runs without the guard. The repository does not record whether the vendor simulates each transaction. From the launch, the Zodiac UI's signing flow refuses an operator transaction that would breach a cap, in its own interface only, and from the lift it requests the vendor's approval for each transaction it builds."
         why: "EM allowed a launch without the guard under this cap, so the vendor is not on the launch's critical path. Above the cap, blocking before execution stays a hard requirement."
         sources: ["ADR-010#d1", "ADR-010#d4", "ADR-010#d9", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22",
-          "ADR-010#proposed-direction", "ADR-010#d25", "ADR-009#d43", OD-01, OD-54, OD-55, INV-010, "lip:part-9", OD-83, OD-86, OD-88]
+          "ADR-010#proposed-direction", "ADR-010#d25", "ADR-009#d43", "OD-01", "INV-010", "lip:part-9"]
       - asked: "The answer explains what happens when the monitoring or blocking service is unavailable. On-chain permissions stay the final enforcement layer, and losing monitoring never widens them."
         verdict: kept
-        clutch: "The guard fails closed: the operator, new motions and the committee's other duties on its Safe stop, and recovery is unaffected (OD-83). The owners can remove the guard after ten days. If monitoring stops, the permissions on chain still hold and do not widen."
+        clutch: "The guard [[fail closed|fails closed]]: the operator, new motions and the committee's other duties on its Safe stop, and recovery is unaffected. The owners can remove the guard after ten days. If monitoring stops, the permissions on chain still hold and do not widen."
         sources: ["ADR-010#d4", "ADR-010#d10", "ADR-010#proposed-direction",
           "doc:docs/specs/threat-model.md#failure-modes", "OD-83"]
     tech: "The guard is set on the committee's Safe with `setGuard`, and its bypass mode stays off. The vendor's key approves each transaction hash once, and the guard holds no standing approval except its two built-in timelock approvals."
@@ -228,10 +234,10 @@ sections:
     items:
       - asked: "The NAV shows the total in USD, the valuation time and the freshness of the data, by asset, protocol, strategy and position. The answer says whether NAV is the provider's product, a partner's or custom work."
         verdict: changed
-        clutch: "Two readings. Lido's report generator reads the vault at a pinned block, with each price's source and timestamp. The policy provider makes its own reading in the Zodiac UI, with the same rules, and shows the value per account, asset and protocol. Neither reads the other's data, both go to IPFS, and both count: a breach in either triggers the switch, and no tranche vote starts while they differ by more than a band."
+        clutch: "Two readings. Lido's report generator reads the vault at a pinned block, with each price's source and timestamp. The policy provider makes its own in the Zodiac UI, with the same rules, and shows the value per account, asset and protocol. Neither reads the other's data, both go to IPFS, and both count: a breach in either triggers the [[switch]], and no tranche vote starts while they differ by more than a band."
         why: "Two independent readings check each other, and anyone can re-run Lido's at a pinned block."
-        sources: ["ADR-009#d19", "ADR-009#d40", "ADR-009#d41", "ADR-009#d42", "ADR-009#d44", "ADR-009#proposed-direction",
-          OD-14, OD-84, OD-85, OD-87, "ADR-009#d35", "ADR-009#d36", "ADR-014#proposed-direction"]
+        sources: ["ADR-009#d19", "ADR-009#d40", "ADR-009#d41", "ADR-009#d42", "ADR-009#d44",
+          "ADR-009#proposed-direction", "ADR-009#d35", "ADR-009#d36", "ADR-014#proposed-direction"]
       - asked: "The launch design permits no debt, but the NAV still detects and shows any unexpected liability."
         verdict: owed
         clutch: "No role can borrow, so the design has no source of debt. The report and the Zodiac UI's requirement list do not name a liability line yet."
@@ -252,7 +258,8 @@ sections:
       - asked: "Permission removal, module disablement, emergency recovery and DAO ownership actions stay available through an outage, a suspension, a billing dispute or a contract termination."
         verdict: kept
         clutch: "All of them are on-chain calls by the emergency Safe or the DAO, and no vendor code is on their path."
-        sources: ["ADR-005#d11", "ADR-005#d25", "ADR-005#proposed-direction", INV-010, "doc:docs/specs/lip-draft.md#problem"]
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d25", "ADR-005#proposed-direction",
+          "INV-010", "doc:docs/specs/lip-draft.md#problem"]
     tech: "The repository-owner team holds the Zodiac workspace and its API key. CI and agents never push, and the key never enters the repository, CI or a vote."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#provider-independence", "ADR-004#d16", OD-35]
 
@@ -260,23 +267,23 @@ sections:
     title: What the RFP did not cover
     items: []
     added:
-      - text: "Funding: each funding is an Aragon vote that moves a tranche from the treasury to the Asset Safe, through Finance. The first tranche, one million dollars, is part of the enabling vote."
+      - text: "Funding: each funding is a [[tranche vote]]. The first tranche, one million dollars, is part of the enabling vote."
         why: "Funding is not regular, so a vote for each tranche costs little, and the vault needs no funding contract of its own."
-        sources: ["ADR-014#d1", "ADR-014#d2", "ADR-014#d3", OD-106, INV-037]
+        sources: ["ADR-014#d1", "ADR-014#d2", "ADR-014#d3", "INV-037"]
       - text: "Insurance: funds for earnETH, earnUSD and Lido Lend, built in at launch. Their money comes from the Asset Safe by motion, and every burn and payout is a motion."
-        why: "EM wants insurance for Lido Earn and Lido Lend ready at launch. Every flow of insurance money is a motion, so LDO holders can object to each one."
-        sources: ["ADR-014#d4", "ADR-014#d5", "ADR-014#d6", "ADR-014#d7", "ADR-008#d26", OD-107, INV-039]
-      - text: "Returns: funds go back to the Aragon Agent only in an emergency or a recovery. The committee's Safe may send any vault token to the Agent too, pinned to it, with no motion and no vote, and monitoring alerts on every transfer to the Agent."
+        why: "EM wants insurance for Lido Earn and Lido Lend ready at launch, and LDO holders can object to each flow of its money."
+        sources: ["ADR-014#d4", "ADR-014#d5", "ADR-014#d6", "ADR-014#d7", "ADR-008#d26", "INV-039"]
+      - text: "Returns: funds go back to the Aragon Agent only in an emergency or a recovery. The committee's Safe may also send any vault token to the Agent, with no motion and no vote."
         why: "A return to the treasury loses nothing; at worst the vault stops working. Redemption and fund-exit proceeds stay in the vault."
-        sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#consequences", OD-108, INV-038]
-      - text: "Budgets: each approval to a protocol spender spends that spender's budget key, which refills no more often than every 30 days. A motion raises a ceiling at most twofold, at most once in 15 days; the motion that introduces a token sets its first ceilings."
-        why: "A spender can pull an approval without any deposit, so the approval is what must be bounded. A ceiling that one motion could set to any value would bound nothing."
-        sources: ["ADR-009#d13", "ADR-009#d15", "ADR-013#d13", OD-08, OD-105, INV-008, INV-012, INV-036]
-      - text: "Reports: a monthly report that anyone can re-run at a pinned block, and a cap reading every two weeks on IPFS. The policy provider publishes its own reading next to Lido's, with the same rules, and both count."
-        why: "Tokenholders hold the committee to the mandate through its reports, and a breach in either cap reading is what makes the emergency Safe switch the operator off. Two independent readings check each other."
-        sources: ["ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", "ADR-009#d40", "ADR-009#d41", "ADR-009#d42", OD-14, OD-32,
-          OD-58, OD-84, OD-85]
-      - text: "A control matrix that gives every rule of the mandate a control on each layer that can carry it, with an owner."
-        why: "Much of the mandate cannot be enforced on chain, so each rule needs a named control and owner."
-        sources: ["ADR-009#d26", OD-39, "doc:docs/specs/control-matrix.md#the-matrix"]
+        sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#consequences", "INV-038"]
+      - text: "Budgets: each approval to a protocol spender spends that spender's [[budget key]], which refills no more often than every 30 days. A motion raises a [[ceiling]] at most twofold, at most once in 15 days."
+        why: "A spender can pull an approval without any deposit, so the approval is what must be bounded."
+        sources: ["ADR-009#d13", "ADR-009#d15", "ADR-013#d13", "INV-008", "INV-012", "INV-036"]
+      - text: "Reports: a monthly report that anyone can re-run at a pinned block, and a cap reading every two weeks on IPFS, Lido's next to the policy provider's own."
+        why: "Tokenholders hold the committee to the mandate through its reports."
+        sources: ["ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", "ADR-009#d40", "ADR-009#d41",
+          "ADR-009#d42"]
+      - text: "A [[control matrix]] that gives every rule of the mandate a control on each layer that can carry it, with an owner."
+        why: "Much of the mandate cannot be enforced on chain."
+        sources: ["ADR-009#d26", "doc:docs/specs/control-matrix.md#the-matrix"]
     sources: ["ADR-014#d1", "ADR-009#d13", "ADR-009#d19", "ADR-009#d26"]

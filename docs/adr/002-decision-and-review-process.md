@@ -8,8 +8,8 @@ review_status: human-reviewed
 decision: accepted
 accepted_by: human:em
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-11T05:14:57Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T16:58:31Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -34,6 +34,11 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-again
     sha256: 79b9fedd2fec63527ec8a160cc20b6f97add1201166313a699d7d7c1b8cd4c0d
+  - by: human:em
+    at: 2026-11-11T20:36:04Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-after-the-occam-pass-and-a-second-recording-agent
+    sha256: df7dbdafdc8fb627f63dfde636d8abac4542ff7c4b11eb886210ebe00ffd2f20
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -44,9 +49,6 @@ sources:
   - id: s3
     resource: "https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/ad30107c31c06aec8a7d5636e0d1058118604e6f/SPEC.md"
     title: Open Knowledge Format 0.2 — trust fields and trust tiers
-  - id: s4
-    resource: /research/chain-reads-2026-09-30.md
-    title: Chain reads, 2026-09-30 — committee Safes and their quorums
 ---
 
 # ADR 002: Decision and review process
@@ -56,38 +58,24 @@ sources:
 - Readers must distinguish agent drafts from human-reviewed text.
 - lido-lend-markets uses review states from `slop` to `finalized` and resets them after substantial rewrites [s2].
 - OKF 0.2 records a page's author, verifiers and sources [s3].
-- The committee operates the vault and supplies two emergency signers. Without outside verification, it would approve its own limits.
-- At block 26092572, the three-of-five Emergency Brakes Safe shared no owner address with the committee's Safe [s4]. It held ADR 005's technical role until 2026-10-13.
-- On 2026-10-13, the emergency Safe became three-of-five: two committee members, two Emergency Brakes members and one member of neither body. The Emergency Brakes multisig lost all vault roles ([ADR 005](/adr/005-account-graph-and-roles.md), decisions 23 and 24).
+- The Emergency Brakes multisig holds no role in the vault ([ADR 005](/adr/005-account-graph-and-roles.md) decision 23), and an accepted ADR authorizes nothing on chain.
 
 ## Decision
 
-EM decided on 2026-09-30 [s1]:
+EM decided each decision below; its ODs lead to EM's words in the [decision log](/registers/decision-log.md) [s1].
 
-1. EM accepts ADRs in the interim. The Treasury Management Committee is the permanent acceptor.
-2. An ADR that constrains the committee also needs a verification from the Emergency Brakes multisig before it is accepted. The constraining class covers any ADR that changes the operator's permissions, the emergency powers, the technical role or module disabling, the funding path, or budget and approval ceilings.
-
-The answer about the acceptor did not object to the rest of the positioned process, so the rest is read as accepted [s1]. EM confirmed this reading on 2026-10-05, closing OD-12 [s1]:
-
-3. `docs/` is an OKF 0.2 bundle. Every page carries `generated`, `verified`, `sources`, `status` and `review_status` [s3].
-4. `review_status` uses the ladder `slop`, `human-skimmed`, `human-reviewed`, `finalized` [s2]. Agents set only `slop`.
-5. A review status above `slop` needs a human verification at or after `generated.at`. An edit that changes the content bumps `generated.at`, so it resets the page to `slop`.
-6. ADRs use one global sequence. An ADR moves from `proposed` to `accepted`, `rejected` or `superseded`. `accepted` needs `accepted_by`, a human actor, and that actor's verification after the last edit.
-7. An accepted ADR is an engineering decision. It authorises nothing on chain.
-8. Decisions made before the repository existed enter as `proposed` ADRs, and EM accepts each text separately.
-9. A runbook needs a fork drill record, and a permission-policy change needs the output of the verification procedure, before either rises above `slop`.
-
-EM decided on 2026-10-05, closing OD-15 [s1]:
-
-10. A verification by the committee or by the Emergency Brakes multisig is committed by a member of that body through a reviewed pull request. The entry carries `ref`, an https or urn link to the body's decision record, such as a forum post or minutes.
-
-EM decided on 2026-10-06, closing OD-31 [s1]:
-
-11. Point 4 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry names the agent in `recorded_by` and links, in `ref`, the decision-log heading that quotes the instruction. An agent never records a body's verification ([ADR 003](/adr/003-agent-operating-model.md) decision 14).
-
-EM decided on 2026-10-13, closing OD-63 [s1]:
-
-12. The Emergency Brakes multisig no longer verifies an ADR before it is accepted, and nothing replaces it. This replaces decision 2. Decision 10 now covers the committee only.
+1. EM accepts ADRs in the interim. The Treasury Management Committee is the permanent acceptor (decision log, 2026-09-30).
+2. Replaced by decision 12 (OD-63).
+3. `docs/` is an OKF 0.2 bundle. Every page carries `generated`, `verified`, `sources`, `status` and `review_status` [s3] (OD-12).
+4. `review_status` uses the ladder `slop`, `human-skimmed`, `human-reviewed`, `finalized` [s2]. Agents set only `slop` (OD-12).
+5. A review status above `slop` needs a human verification at or after `generated.at`. An edit that changes the content bumps `generated.at`, so it resets the page to `slop` (OD-12).
+6. ADRs use one global sequence. An ADR moves from `proposed` to `accepted`, `rejected` or `superseded`. `accepted` needs `accepted_by`, a human actor, and that actor's verification after the last edit (OD-12).
+7. An accepted ADR is an engineering decision. It authorises nothing on chain (OD-12).
+8. Decisions made before the repository existed enter as `proposed` ADRs, and EM accepts each text separately (OD-12).
+9. A runbook needs a fork drill record, and a permission-policy change needs the output of the verification procedure, before either rises above `slop` (OD-12).
+10. A verification by the committee is committed by a member of the committee through a reviewed pull request. The entry carries `ref`, an https or urn link to the committee's decision record, such as a forum post or minutes (OD-15, OD-63).
+11. Decision 4 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry names the agent in `recorded_by` and links, in `ref`, the decision-log heading that quotes the instruction. An agent never records a body's verification ([ADR 003](/adr/003-agent-operating-model.md) decision 14) (OD-31).
+12. No body other than the acceptor verifies an ADR before it is accepted (OD-63).
 
 ## How the validator enforces it
 
@@ -101,11 +89,10 @@ The validator does not yet check policy-verification output. That check arrives 
 
 ## Options considered
 
-- Committee-only acceptance: rejected because the committee would approve its own limits.
 - Each body's quorum signs a Safe message over the page, which a script checks on chain. EM rejected this because each verification would need a signing round.
 - DAO acceptance of each ADR: rejected because ADRs authorize no on-chain action; votes and motions already govern those actions.
 - OKF fields without review states: rejected because they would not distinguish review depth.
-- Emergency Brakes verification of constraining ADRs: EM replaced this on 2026-10-13 (decision 12). The multisig has no vault role, and ADR acceptance authorizes no on-chain action.
+- Emergency Brakes verification of ADRs that constrain the committee: not chosen (decision 12). The multisig has no vault role, and ADR acceptance authorizes no on-chain action.
 
 ## Consequences
 
@@ -128,4 +115,4 @@ The validator does not yet check policy-verification output. That check arrives 
 
 ## Open questions
 
-None open. OD-12 and OD-15 were decided on 2026-10-05, and OD-63 on 2026-10-13.
+None.

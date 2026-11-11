@@ -1,15 +1,15 @@
 ---
 type: Research Note
 title: One Easy Track factory and funding by tranche votes, 2026-11-05
-description: "OD-100 to OD-112 evidence: Easy Track's script permissions, cancel and pause; Roles storage; Merkle-root engines; the two-modifier alternative; Finance payments by Aragon Voting; and the flows to the Aragon Agent."
+description: "OD-100 to OD-112 evidence: Easy Track's script permissions, roles, cancel and pause; Roles storage; Merkle-root engines; Finance payments by Aragon Voting; the Aragon Agent's roles; and the treasury rules that the committee's items touch."
 tags: [governance, easy-track, roles, funding, evidence]
 status: stable
 review_status: slop
 valid_as_of: 2026-11-05
 stale_after: 2027-02-28T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-05T19:07:00Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -38,24 +38,27 @@ sources:
     title: ADR 006 — a write replaces the role, target and selector tree
   - id: s9
     resource: /research/chain-reads-2026-09-30.md
-    title: Chain reads, 2026-09-30 — Easy Track's settings, and the Emergency Brakes multisig's pause without unpause
+    title: Chain reads, 2026-09-30 — Easy Track's settings, the Emergency Brakes multisig's pause without unpause, and the executor's payment permission with its 22 parameters and its ceilings per payment
   - id: s10
     resource: /research/enabling-vote-rehearsal-2026-10-15.md
     title: The enabling vote rehearsed on a mainnet fork — the policy batch's gas and size, and EIP-7825's limit per transaction
-  - id: s11
-    resource: /adr/008-funding-through-existing-payments.md
-    title: ADR 008 — the executor's payment permission, its 22 parameters and its ceilings per payment
   - id: s12
     resource: "https://research.lido.fi/t/4279"
     title: Lido forum — Treasury Management Principles and the Treasury Management Committee, 2023-04-04
   - id: s13
     resource: "https://research.lido.fi/t/10868/3"
     title: Lido forum — TMC-6 operational rules, 2025-11-17; the Snapshot ended on 2025-12-01
+  - id: s14
+    resource: "https://etherscan.io/address/0xF0211b7660680B49De1A7E9f25C65660F0a13Fea"
+    title: Easy Track — the holders of its admin role, read at block 26192012 with the commands in the page
+  - id: s15
+    resource: "https://etherscan.io/address/0x9895F0F17cc1d1891b6f18ee0b483B6f221b37Bb"
+    title: Lido's Aragon ACL — the Aragon Agent's roles, read at block 26192300 with the commands in the page
 ---
 
 # One Easy Track factory and funding by tranche votes, 2026-11-05
 
-On 2026-11-01 EM asked three questions. Could a Merkle tree of allowed actions, as in Veda's and Mellow's vaults, let Easy Track manage everything? Is the Roles modifier compatible with it? And can a trusted caller cancel a pending motion? On 2026-11-05 EM set the aim that no administrative action after the enabling vote needs an Aragon vote [s1]. This note keeps the evidence behind OD-100 to OD-112. All chain reads are at block 26350608 unless a row says otherwise.
+On 2026-11-01 EM asked three questions. Could a Merkle tree of allowed actions, as in Veda's and Mellow's vaults, let Easy Track manage everything? Is the Roles modifier compatible with it? And can a trusted caller cancel a pending motion? On 2026-11-05 EM set the aim that no administrative action after the enabling vote needs an Aragon vote [s1]. This note keeps the evidence behind OD-100 to OD-112. All chain reads are at block 26350608 unless a line names another block.
 
 ## Easy Track
 
@@ -67,12 +70,23 @@ On 2026-11-01 EM asked three questions. Could a Merkle tree of allowed actions, 
 - **No order between motions.** Each motion enacts after its own window. Two motions that write the same function both pass their checks if nothing changed when they were created, and the later enactment wins.
 - **Monitoring can decode every motion.** `MotionCreated` carries the creator, the factory, the calldata and the script [s2].
 - **Settings.** The objection window is 259,200 seconds, the threshold is 50 basis points, and at most 20 motions are open at once. Easy Track was not paused.
+- **The admin role on 2026-10-14.** At block 26192012, Aragon Voting holds Easy Track's admin role and the Aragon Agent does not [s14]. Registering a factory is therefore a Voting item.
+
+```sh
+ET=0xF0211b7660680B49De1A7E9f25C65660F0a13Fea
+VOTING=0x2e59A20f205bB85a89C53f1936454680651E618e
+AGENT=0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c
+ADMIN=0x0000000000000000000000000000000000000000000000000000000000000000
+cast call $ET 'hasRole(bytes32,address)(bool)' $ADMIN $VOTING --block 26192012   # true
+cast call $ET 'hasRole(bytes32,address)(bool)' $ADMIN $AGENT --block 26192012    # false
+cast call $ET 'evmScriptExecutor()(address)' --block 26192012                    # 0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977
+```
 
 ## The Roles modifier
 
 - **The trees are private storage.** The Roles mastercopy keeps `roles` internal and `allowances` public [s5]. No contract can read a permission tree on chain, so a factory cannot compare a write with the current tree. A factory that versions writes must keep the versions itself.
 - **A write replaces a tree.** A write sets the whole tree of a role, target and selector [s8]. Adding a branch means writing the complete list.
-- **Modifiers can chain.** `execTransactionFromModule` checks the calling module's default role [s5]. One modifier can therefore be the module of another.
+- **Modifiers can chain.** `execTransactionFromModule` checks the calling module's default role [s5]. One modifier can therefore be the module of another. A chain of two adds a modifier and a second policy to keep in sync.
 - **A custom condition is a view call.** Its `check` gets the call's fields and the condition's data, and nothing else [s5]. A Merkle proof cannot pass through it.
 
 ## Merkle-root engines
@@ -88,12 +102,6 @@ The Roles modifier has no root to set and no proof channel. A Merkle policy woul
 ## Whole writes, scope writes and versions
 
 - **A whole write per motion does not scale.** The rehearsal's largest batch, the Asset Safe's 99 calls, took 6,304,514 gas and 60,292 bytes [s10]. EIP-7825 caps a transaction at 16,777,216 gas, and the policy grows with every protocol.
-- **A scope write is small, but it races.** A motion that writes one function's complete list stays small. Two such motions on one function, created before either enacts, undo each other's change.
-- **Versions close the race.** If the factory keeps a version per scope, checks it at creation and at enactment, and the script's last call commits the new version, then the second motion fails at enactment. Its creator cancels it, or Voting does. One counter that the emergency Safe and Voting can raise makes every open motion fail, so a stale motion cannot undo a revoke.
-
-## The two-modifier alternative
-
-An alternative chained two Roles modifiers: an outer one, whose bounds only a vote changes, and an inner one that motions change. Chaining works, because a module call uses the default role [s5]. The alternative adds a modifier and a second policy to keep in sync, and each change of a bound needs a vote. EM did not adopt it; the factory's typed shapes give the bound instead (OD-112) [s1].
 
 ## Finance payments by Aragon Voting
 
@@ -106,8 +114,9 @@ An alternative chained two Roles modifiers: an outer one, whose bounds only a vo
 | The same, for more DAI than the Agent holds | `VAULT_TOKEN_TRANSFER_REVERTED` |
 | The same, from any other address | `APP_AUTH_FAILED` |
 
-- The executor's `false` without arguments is not a defect. The ACL fails a parameter that reads an argument when no argument is given, and the executor's permission limits the token and the amount [s11].
-- Aragon Voting pays from the Aragon Agent through Finance itself, in any token, when its vote executes. No Dual Governance proposal is on that path. The reason "votes add Dual Governance delay to each payment" in ADR 008's options is therefore wrong for a Finance payment.
+- The executor's `false` without arguments is not a defect. The ACL fails a parameter that reads an argument when no argument is given, and the executor's permission limits the token and the amount [s9].
+- Aragon Voting pays from the Aragon Agent through Finance itself, in any token, when its vote executes. No Dual Governance proposal is on that path.
+- **The Agent's roles on 2026-10-14.** At block 26192300, Finance holds the Agent's `TRANSFER_ROLE`. The Dual Governance admin executor holds the Agent's `RUN_SCRIPT_ROLE`, and Aragon Voting does not [s15].
 
 ```sh
 # B=26350608; RPC holds an archive endpoint and is never committed.
@@ -126,19 +135,14 @@ for r in DEFAULT_ADMIN_ROLE PAUSE_ROLE UNPAUSE_ROLE CANCEL_ROLE; do
   cast call $ET 'hasRole(bytes32,address)(bool)' $(cast call $ET "$r()(bytes32)") $VOT --block $B   # true for each
 done
 cast call $ET 'hasRole(bytes32,address)(bool)' $(cast call $ET 'CANCEL_ROLE()(bytes32)') $EB --block $B   # false
+# The Agent's roles, at block 26192300.
+AGENT=0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c
+DG=0x23E0B465633FF5178808F4A75186E2F2F9537021   # Dual Governance admin executor
+cast call $ACL 'hasPermission(address,address,bytes32)(bool)' $FIN $AGENT $(cast keccak TRANSFER_ROLE) --block 26192300    # true
+cast call $ACL 'hasPermission(address,address,bytes32)(bool)' $DG $AGENT $(cast keccak RUN_SCRIPT_ROLE) --block 26192300   # true
+cast call $ACL 'hasPermission(address,address,bytes32)(bool)' $VOT $AGENT $(cast keccak RUN_SCRIPT_ROLE) --block 26192300  # false
+cast call $FIN 'vault()(address)' --block 26192300                                                                         # the Aragon Agent
 ```
-
-## Flows to the Aragon Agent
-
-| Flow | Who | Before OD-108 | After OD-108 |
-|---|---|---|---|
-| Emergency transfers from the Asset Safe and the orders account | the emergency Safe | the Agent | the Agent |
-| Recovery orders (OD-48) | the emergency Safe | the Agent | the Agent |
-| First-loss redemption and claim | the committee's Safe | the Agent (ADR 008 decisions 21 and 23) | the Asset Safe |
-| Exit from an insurance fund | the committee's Safe | the Agent (ADR 008 decision 28; not built) | the Asset Safe |
-| A return of vault funds | the committee's Safe | none | the Agent, by a transfer pinned to it |
-
-Only emergency and recovery paths, and the operator's pinned return, now reach the Agent. Monitoring alerts on every transfer to it.
 
 ## Treasury rules that the committee's items touch
 

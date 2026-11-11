@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -84,9 +84,6 @@ sources:
   - id: s24
     resource: "https://etherscan.io/address/0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
     title: Aragon Agent — its EIP-1271 answers and its designated signer, read at block 26126347
-  - id: s25
-    resource: /research/safe-v150-guard-compatibility-2026-10-02.md
-    title: Safe v1.5.0 and the screening guard, 2026-10-02 — the committee's owners and the Lido Safes checked
   - id: s26
     resource: "https://github.com/safe-global/safe-deployments/blob/7b1fb6d615ab2d2999550ec9166554b180e813e5/src/assets/v1.5.0/multi_send_call_only.json"
     title: Safe deployment record — MultiSendCallOnly v1.5.0, canonical address and code hash
@@ -179,10 +176,9 @@ No loss in this list came from a defect in Safe's contracts.
 
 ## What the vault uses
 
-- **Asset Safe.** The Aragon Agent approves the transaction hash with `approveHash`, and the transaction runs on a type-1 signature: the owner sent the transaction or approved its hash [s14]. The kit does exactly this [s16]. The two modifiers call the Safe through module execution. Certora's formal verification covers both paths [s2].
-- **The contract-signature path.** Safe v1.5.0 changed this path [s5][s15], and the next release changes it again [s6]. The Aragon Agent implements both EIP-1271 functions. At block 26126347, both return `0x00000000` for an unknown hash, and its designated signer is the zero address [s24]. A DAO vote could still pre-sign a hash for the Agent. Only a rule keeps the Asset Safe off this path.
+- **Asset Safe.** The owner approves the transaction hash with `approveHash`, and the transaction runs on a type-1 signature: the owner sent the transaction or approved its hash [s14]. The kit does exactly this [s16]. The two modifiers call the Safe through module execution. Certora's formal verification covers both paths [s2].
+- **The contract-signature path.** Safe v1.5.0 changed this path [s5][s15], and the next release changes it again [s6]. The Aragon Agent implements both EIP-1271 functions. At block 26126347, both return `0x00000000` for an unknown hash, and its designated signer is the zero address [s24]. A DAO vote could still pre-sign a hash for the Agent. The Agent was the Asset Safe's owner in the design of 2026-10-05; this note has no such read of Aragon Voting, the owner under [ADR 005](/adr/005-account-graph-and-roles.md) decision 28. Only a rule keeps the Asset Safe off this path (decision 14).
 - **The fallback handler.** The kit sets up the Asset Safe without a fallback handler [s17]. The compatibility fallback handler holds most of the code that only Ackee reviewed, and the `simulate` fix [s2][s7].
-- **Operator Safe and emergency Safe.** Their owners are the committee's seven externally owned accounts, which sign with their own keys [s25]. A change to the contract-signature path does not affect them.
 - **Delegatecall.** At Bybit, one signed delegatecall replaced the wallet's implementation [s19]. A Safe emits no event of its own for such a change. Safe's MultiSendCallOnly v1.5.0, the library that batches calls by delegatecall, is at `0xA83c336B20401Af773B6219BA5027174338D1836`. At block 26126347 its code hash is `0xcdbdcec38d2f1c7d961b0029ff8416b7e86e9974d6f0e9c9580c7d17fcfb6663`, as in Safe's deployment record [s26].
 
 ## How to reproduce
@@ -214,4 +210,3 @@ The run of 2026-10-05 wrote a creations file with sha256 `76198f484daaaf7e1a7a1b
 - The value reads cover seven assets and no DeFi positions, and they give no prices.
 - The incident list holds the large and recent cases at Safe accounts that the agent found. It is not complete, and three of its sources are news reports.
 - The deployer sample has 40 transactions.
-- EM's decision is in the [decision log](/registers/decision-log.md).

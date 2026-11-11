@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Tests of the repository checks of ADR 012: the log build, the redaction and secret
+"""Tests of the repository checks of ADR 012: the redaction and secret
 check, the licence check, the invariant check and the pin report of the onboarding guide.
 
 Run:

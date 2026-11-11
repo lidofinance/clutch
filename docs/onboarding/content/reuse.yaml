@@ -5,23 +5,24 @@
 - name: Zodiac Roles mastercopy and module proxy factory
   column: reused
   what: "The deployed, locked Roles code behind all four modifiers, and the factory that makes their proxies."
-  why: "Audited, permission code that is already in production. The deployed mastercopy is older than the upstream source, so an audit must pin the deployed bytecode."
+  why: "Audited permission code, already in production. The deployed mastercopy is older than the upstream source, so an audit must pin the deployed bytecode."
   owner: "Nobody: the mastercopy is locked"
   sources: ["ADR-005#context", "doc:docs/research/chain-reads-2026-09-30.md#safe-and-zodiac"]
 
 - name: Zodiac roles SDK and constellation SDK
   column: reused
   what: "`zodiac-roles-sdk` 4.1.3 and `@zodiaceco/sdk` 2.1.2, at exact versions from a frozen lockfile."
-  why: "The SDK encodes conditions the way the mastercopy reads them. Its selectors and event topics match the deployed mastercopy."
+  why: "The SDK encodes conditions the way the deployed mastercopy reads them: its selectors and event topics match."
   owner: "The policy provider"
   sources: ["ADR-004#d13", "doc:policy/constellation/PROVENANCE.md#build"]
 
 - name: Zodiac hosted app
   column: reused
-  what: "The provider's UI shows the account graph, the policy, the difference from the chain and the transactions that a change needs."
-  why: "The team works in the Zodiac UI (OD-33). It is a view: local tooling verifies everything that it produces. Lido gives the provider a written requirement list. The provider makes its own reading of the vault, with the mandate's rules from this repository, and Lido makes its own; both count (OD-84, OD-87)."
+  what: "The provider's UI: the account graph, the policy, the difference from the chain and the transactions that a change needs."
+  why: "The team works in it. It is a view: local tooling verifies everything that it produces. Lido gives the provider a written requirement list."
   owner: "The policy provider"
-  sources: ["ADR-004#d10", "ADR-004#d11", "ADR-009#d29", "ADR-009#d40", "ADR-009#d41", "ADR-009#d44", OD-33, OD-44, OD-84, OD-87]
+  sources: ["ADR-004#d10", "ADR-004#d11", "ADR-009#d29", "ADR-009#d40", "ADR-009#d41", "ADR-009#d44",
+    "OD-33"]
 
 - name: Safe v1.5.0 singleton and proxy factory
   column: reused
@@ -40,140 +41,141 @@
 
 - name: Aragon Agent, Aragon Voting and Dual Governance
   column: reused
-  what: "The DAO path: Aragon Voting, which owns the vault's Safes, and the Aragon Agent, the treasury that receives recovered assets. Dual Governance gates only the Agent's own execution, which the vault does not use (OD-73)."
+  what: "The DAO path: Aragon Voting, which owns the vault's Safes, and the [[Aragon Agent]], which receives recovered assets. The vault does not use [[Dual Governance]]."
   why: "The DAO keeps custody and the final say. Clutch adds no authority over the Agent."
   owner: "The DAO"
-  sources: ["ADR-005#context", "ADR-005#proposed-direction", OD-73, "ADR-005#d28"]
+  sources: ["ADR-005#context", "ADR-005#proposed-direction", "ADR-005#d28"]
 
 - name: Aragon Finance
   column: reused
-  what: "The existing payment app of the DAO. Aragon Voting pays each tranche through it, with its own payment permission. Clutch changes no permission and no token list."
-  why: "Funding is rare, so a vote that pays through Finance is enough. Clutch adds no funding contract and changes no Easy Track payment (OD-106)."
+  what: "The DAO's payment app. Aragon Voting pays each tranche through it, with its own payment permission."
+  why: "Funding is rare, so a vote that pays through Finance is enough. Clutch adds no funding contract, and changes no permission and no token list."
   owner: "Aragon Voting"
-  sources: ["ADR-014#d1", "ADR-014#d3", "ADR-014#context", "ADR-014#consequences", OD-106, INV-037,
+  sources: ["ADR-014#d1", "ADR-014#d3", "ADR-014#context", "ADR-014#consequences", "INV-037",
     "doc:docs/research/easy-track-first-2026-11-05.md#finance-payments-by-aragon-voting"]
 
 - name: CoW Protocol, its order signer and ComposableCoW
   column: reused
   what: "The exchange that settles every vault order; the deployed order signer for market and limit orders; ComposableCoW, its TWAP handler and CoW's fallback handler for TWAP orders."
-  why: "Ackee audited ComposableCoW and the fallback handler, and Gnosis reviewed ComposableCoW. Whether the TWAP handler is in scope is not checked, so Lido reviews it in phase 3. The 40-line order signer has no audit that the repository found, so it counts as new code and the external audit covers it with the universal factory (OD-96)."
+  why: "Ackee audited ComposableCoW and the fallback handler, and Gnosis reviewed ComposableCoW. The TWAP handler's audit scope is not checked, so Lido reviews it in phase 3. The 40-line order signer has no known audit, so it counts as new code, and the external audit covers it with the universal factory."
   owner: "CoW Protocol"
-  sources: ["ADR-007#d40", OD-96, "ADR-007#d17", "ADR-007#d18", "ADR-007#proposed-direction", "ADR-013#consequences", OD-43,
+  sources: ["ADR-007#d40", "ADR-007#d17", "ADR-007#d18", "ADR-007#proposed-direction",
+    "ADR-013#consequences",
     "doc:docs/research/cow-orders-account-2026-10-06.md#the-chain-read-on-2026-10-06-at-block-26134502"]
 
 - name: The protocols of the launch scope
   column: reused
-  what: "stETH, wstETH, WETH, Lido Earn, sUSDS and Sky's DAI–USDS converter. Lido Lend comes later, by a motion of the universal factory with its shape for a market that is compatible with Morpho Blue. The vault does not use Lido's withdrawal queue."
-  why: "EM's launch list (ADR 011). Clutch adds permissions only, never code, to these protocols."
+  what: "stETH, wstETH, WETH, Lido Earn, sUSDS and Sky's DAI–USDS converter. Lido Lend comes later, by a motion."
+  why: "EM's launch list. Clutch adds permissions only, never code, to these protocols."
   owner: "Their own governance"
-  sources: ["ADR-011#d1", "ADR-011#d3", "ADR-011#d7", "ADR-011#d13", "ADR-011#d14", "ADR-011#proposed-direction"]
+  sources: ["ADR-011#d1", "ADR-011#d3", "ADR-011#d7", "ADR-011#d13", "ADR-007#d13", "ADR-007#d22",
+    "ADR-007#d27", "ADR-011#proposed-direction"]
 
 - name: Lido on-chain monitoring platform and its guard detector
   column: reused
   what: "The platform, the engine, the bot, and the existing detector for the vendor's guard."
   why: "Lido already runs it for other multisigs. The vault adds detectors to it, not a new platform."
   owner: "`@lidofinance/lido-valset-vroom`"
-  sources: ["ADR-009#d7", "ADR-009#d17", "ADR-010#d12", OD-13]
+  sources: ["ADR-009#d7", "ADR-009#d17", "ADR-010#d12"]
 
 - name: "[the screening vendor]'s approval and monitoring service"
   column: reused
   what: "The vendor's existing service, which approves transactions and watches for depegs and protocol compromise."
-  why: "Lido already has an arrangement with the vendor for four guarded multisigs. Above the launch cap, on-chain blocking before execution is a hard requirement (OD-54)."
+  why: "Lido already has an arrangement with the vendor for four guarded multisigs."
   owner: "[the screening vendor]"
-  sources: ["ADR-010#d1", "ADR-010#d2", "ADR-010#d14", "ADR-010#d20", "ADR-009#d7", "ADR-009#proposed-direction", OD-54]
+  sources: ["ADR-010#d1", "ADR-010#d20", "ADR-010#d14", "ADR-009#d7", "ADR-009#proposed-direction", "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
 
 # --- New instance of existing code --------------------------------------------------------------
 - name: The four new Safes
   column: instance
   what: "The Asset Safe, the emergency Safe, the orders account and the first-loss Safe: proxies of the Safe singleton."
-  why: "Each Safe has one job: custody, unscreened recovery, orders in transit, or the first-loss shares and the insurance funds held apart. The committee's existing Safe holds the operator role, so Clutch deploys no operator Safe (OD-80). Clutch's own script deploys the four, because the Zodiac Safe node cannot set the version or the fallback handler."
+  why: "Each Safe has one job: custody, unscreened recovery, orders in transit, or the first-loss shares and the insurance funds held apart. The committee's existing Safe holds the operator role, so Clutch deploys no operator Safe."
   owner: "The DAO; the emergency Safe's signers"
-  sources: ["ADR-005#d12", "ADR-005#d13", "ADR-005#d15", "ADR-005#d19", "ADR-005#d20", "ADR-005#proposed-direction",
-    "ADR-007#d17", "ADR-008#d19", "ADR-010#proposed-direction", "ADR-014#d4", "ADR-005#d31", OD-80]
+  sources: ["ADR-005#d12", "ADR-005#d13", "ADR-005#d15", "ADR-008#d19", "ADR-007#d17", "ADR-007#d20",
+    "ADR-005#proposed-direction", "ADR-010#proposed-direction", "ADR-014#d4", "ADR-005#d31"]
 
 - name: The four Roles modifiers
   column: instance
   what: "Two minimal proxies of the Roles mastercopy on the Asset Safe, one on the orders account and one on the first-loss Safe."
-  why: "On the Asset Safe, one modifier for operation and governance and one for recovery, so recovery survives when the operator modifier is switched off. The orders account's one modifier carries the operator and emergency roles, and Easy Track's governance and approvals roles; there the emergency role's revoke stops the operator (OD-57, OD-58, OD-103). The first-loss modifier carries the committee's role, which redeems to the Asset Safe, and Easy Track's roles, which burn, fund and pay out by motion (OD-60, OD-67, OD-107, OD-108)."
+  why: "On the Asset Safe, one modifier for operation and one for recovery, so recovery survives the [[switch]]. On the orders account, the emergency role's revoke stops the operator."
   owner: "The DAO, through the Asset Safe, the orders account and the first-loss Safe"
-  sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#d25", "ADR-005#d27", "ADR-005#context", "ADR-005#proposed-direction",
-    "ADR-007#d28", "ADR-007#d30", "ADR-007#d41", "ADR-014#d7", "ADR-014#d10", OD-57, OD-58, OD-60, OD-67, OD-103, OD-107,
-    OD-108]
+  sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#d25", "ADR-008#d21", "ADR-008#d23", "ADR-005#context",
+    "ADR-005#proposed-direction", "ADR-007#d41", "ADR-014#d7", "ADR-014#d10"]
 
 - name: The screening guard instance
   column: instance
   what: "One instance of the vendor's existing transaction guard, of the build that the guarded Lido multisigs run."
-  why: "Lido writes no guard code. Lido reviews the one change made after the guard's audit: both timelocks went from 1 day to 10 days. The instance is set after the launch, before the second tranche's vote starts (OD-54)."
+  why: "Lido writes no guard code. It reviews the one change made after the guard's audit: both timelocks went from 1 day to 10 days."
   owner: "[the screening vendor]"
-  sources: ["ADR-010#d3", "ADR-010#d10", "ADR-010#d20", "ADR-010#d22", OD-54]
+  sources: ["ADR-010#d3", "ADR-010#d10", "ADR-010#d20", "ADR-010#d22"]
 
 - name: The constellation
   column: instance
   what: "The policy provider's Zodiac constellation, copied at `02ea37d` and rewritten for Clutch's roles, holders and protocols."
-  why: "The team works in the Zodiac UI, so the policy uses the provider's format. Copied files keep LGPL-3.0-only (OD-34)."
+  why: "The team works in the Zodiac UI, so the policy uses the provider's format. Copied files keep LGPL-3.0-only."
   owner: "`@lidofinance/defi-tech`"
   sources: ["ADR-004#d10", "ADR-004#d12", OD-33, OD-34, "doc:policy/constellation/PROVENANCE.md#changes-from-upstream"]
 
 # --- New code or configuration -------------------------------------------------------------------
 - name: The permission policy
   column: new
-  what: "The roles and their permissions: what the operator, governance, emergency, exit-governance, restart, orders approvals, first-loss, first-loss burn and insurance roles may call, and with which arguments. Built: the operator, governance and emergency roles, on the Asset Safe and on the orders account; the restart, insurance-funding and exit-governance roles; and the orders approvals role. Specified: first-loss, first-loss burn and the insurance roles (OD-49, OD-60, OD-67, OD-103, OD-104, OD-107)."
-  why: "This is the heart of Clutch. Every permission traces back to a decision and forward to a test."
+  what: "The roles and their permissions: what each role may call, and with which arguments."
+  why: "The heart of Clutch. Every permission traces back to a decision and forward to a test."
   owner: "`@lidofinance/defi-tech`; reviewers approve each change"
-  sources: ["ADR-005#d6", "ADR-005#proposed-direction", "ADR-004#d3", "ADR-004#d7", "ADR-004#d12", "ADR-013#proposed-direction",
-    INV-004, INV-018, OD-49, OD-60, OD-67, OD-103, OD-104, OD-107]
+  sources: ["ADR-005#d6", "ADR-005#proposed-direction", "ADR-004#d3", "ADR-004#d7", "ADR-004#d12",
+    "ADR-013#proposed-direction", "INV-004", "INV-018", "OD-49", "OD-67", "OD-103", "OD-104", "OD-107"]
 
 - name: The policy compiler and artifact
   column: new
-  what: "Clutch's own TypeScript compiler, and the committed JSON artifact that it writes."
+  what: "Clutch's own TypeScript [[compiler]], and the committed JSON [[artifact]] that it writes."
   why: "Local tooling must verify everything that the hosted app produces. Reviewers approve the artifact, and the vote consumes it."
   owner: "`@lidofinance/defi-tech`"
   sources: ["ADR-004#d11", "ADR-004#d13", "ADR-004#d14", OD-33]
 
 - name: The universal factory
   column: new
-  what: "One Easy Track factory for every Clutch motion: typed shapes that widen, raw writes that only narrow, a version for each scope, a motion counter, budgets and ceilings. With the thin companion contracts that it creates for its largest shapes (OD-117), it is the only new code, and the most critical."
-  why: "After the enabling vote, motions do the administrative work without Aragon votes: onboarding and removals, budgets and ceilings, tokens for the orders account, the restart, burns and insurance. One factory and one calldata format are fewer moving parts to audit and to watch (OD-101, OD-102)."
+  what: "One Easy Track factory for every Clutch [[motion]]. With the thin companion contracts that it creates for its largest shapes, it is the only new code, and the most critical."
+  why: "One factory and one calldata format are fewer moving parts to audit and to watch."
   owner: "`@lidofinance/defi-tech`; an external audit in phase 3, with the order signer"
-  sources: ["ADR-006#d1", "ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d10", "ADR-013#d13",
-    "ADR-013#consequences", "ADR-007#d41", OD-101, OD-102, INV-032, "lip:part-4", "ADR-013#d17", OD-117]
+  sources: ["ADR-006#d1", "ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d10",
+    "ADR-013#d13", "ADR-013#consequences", "ADR-007#d41", "INV-032", "lip:part-4", "ADR-013#d17"]
 
 - name: The enabling-vote script
   column: new
   what: "The script of the DAO vote that turns the system on. It reads the committed artifact."
   why: "The vote must apply exactly what reviewers approved."
   owner: "`@lidofinance/defi-tech`"
-  sources: ["ADR-004#d9", "ADR-004#d14"]
+  sources: ["ADR-004#d13", "ADR-004#d14"]
 
 - name: The round-trip check
   column: new
   what: "A check that rebuilds the applied permissions from the modifier's events on a fork and compares them with the artifact."
   why: "The chain then checks the compiler, not only the other way round."
   owner: "`@lidofinance/defi-tech`"
-  sources: ["ADR-004#d7", "ADR-004#d9", INV-016]
+  sources: ["ADR-004#d7", "ADR-004#d13", "INV-016"]
 
 - name: The vault's detectors
   column: new
-  what: "New detectors on Lido's monitoring platform: drift, approvals, budgets, every motion of the universal factory, the motion counter, Safe changes, orders and fills, transfers to the Aragon Agent, the first-loss Safe, the cap reading and missing reports; the comparison of the two readings, rule changes made in the Zodiac UI, and late approvals of the screening vendor."
-  why: "Caps are detective. Monitoring is how a breach is seen and how the emergency Safe is paged."
+  what: "New detectors on Lido's monitoring platform: [[drift]], approvals, budgets, the universal factory's motions and its motion counter, Safe changes, orders and fills, transfers to the Aragon Agent, the first-loss Safe, the cap reading and missing reports, the comparison of the two readings, rule changes made in the Zodiac UI, and late approvals of the screening vendor."
+  why: "Caps are detective: monitoring sees a breach and pages the emergency Safe."
   owner: "`@lidofinance/defi-tech` writes the specification"
-  sources: ["ADR-009#d1", "ADR-009#d17", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", "ADR-009#d41", "ADR-009#d44", "ADR-010#d26",
-    "ADR-009#proposed-direction", "ADR-013#proposed-direction", "ADR-014#d9", OD-13, OD-84, OD-87, OD-88,
-    OD-32, OD-43, OD-58, OD-108]
+  sources: ["ADR-009#d1", "ADR-009#d17", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", "ADR-009#d41",
+    "ADR-009#d44", "ADR-010#d26", "ADR-009#proposed-direction", "ADR-013#proposed-direction", "ADR-014#d9",
+    "OD-43"]
 
 - name: The control matrix and the screening rule list
   column: new
-  what: "A specification that maps every mandate rule to its controls on each layer, and the written list of the screening vendor's rules with their change control."
-  why: "What the chain cannot enforce gets screening, monitoring and display. A relaxation of a screening rule gets review and notice (OD-39, OD-45)."
+  what: "The [[control matrix]], and the written list of the screening vendor's rules with their change control."
+  why: "What the chain cannot enforce gets screening, monitoring and display. A relaxation of a screening rule gets review and notice."
   owner: "`@lidofinance/defi-tech`; the committee configures the vendor's rules"
-  sources: ["ADR-009#d26", "ADR-009#d30", "ADR-010#d19", OD-39, OD-45, "doc:docs/specs/control-matrix.md#control-matrix"]
+  sources: ["ADR-009#d26", "ADR-006#d11", "ADR-010#d19", "doc:docs/specs/control-matrix.md#control-matrix"]
 
 - name: The report generator
   column: new
   what: "A program in the repository that builds each report from the chain at a pinned block."
   why: "Anyone can re-run a report and get the same numbers. Reports are the evidence for caps and tranche votes."
   owner: "`@lidofinance/defi-tech`; the committee publishes"
-  sources: ["ADR-009#d19", "ADR-014#proposed-direction", OD-14]
+  sources: ["ADR-009#d19", "ADR-014#proposed-direction"]
 
 - name: Runbooks and drills
   column: new

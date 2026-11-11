@@ -1,13 +1,13 @@
 ---
 type: Policy
 title: Specification policy
-description: Rules for specification layers, invariant tests, runbooks, policy artifacts and the generated guide.
+description: Rules for invariants and their tests, behaviour scenarios, runbooks and the policy artifact.
 tags: [specs, invariants, testing, runbooks, policy]
 status: draft
 review_status: slop
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-11T04:53:28Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:24:01Z
 verified: []
 sources:
   - id: s1
@@ -19,9 +19,6 @@ sources:
   - id: s3
     resource: /adr/002-decision-and-review-process.md
     title: ADR 002 — the runbook and policy-change gates
-  - id: s4
-    resource: /registers/decision-log.md
-    title: Decision log — EM on the onboarding guide (OD-37) and its browser tests, 2026-10-06
   - id: s5
     resource: /adr/012-contributing-with-many-agents.md
     title: ADR 012 — the invariant check in CI, the generated files rebuilt instead of merged, and the guide on GitHub Pages
@@ -29,15 +26,7 @@ sources:
 
 # Specification policy
 
-This policy applies [ADR 004](/adr/004-specifications-and-policy-as-data.md) [s1].
-
-## Three layers
-
-| Layer | Content and maintenance |
-|---|---|
-| Conceptual specifications | Hand-written architecture, roles, permissions, invariants and threat model. Reviewers read these before code [s1][s2]. |
-| API reference | Generated from the contracts' NatSpec. Behaviour changes update NatSpec and regenerate the reference. Do not edit it by hand [s1]. |
-| LIP | Summary for delegates, with links to the conceptual specifications. If they disagree, fix the LIP in the same commit [s1]. |
+This policy applies [ADR 004](/adr/004-specifications-and-policy-as-data.md), which sets the three layers: conceptual specifications written by hand, an API reference generated from NatSpec, and the LIP [s1].
 
 ## Invariants
 
@@ -55,17 +44,13 @@ Write scenarios as "WHEN a condition, THEN an expected result". Map each to a sc
 Give each emergency or technical action a runbook under `docs/runbooks/`, with `type: Runbook` [s1].
 Name its `permission` and give the exact transaction for each step.
 
-A runbook can rise above `slop` only with a passing fork `drill` record [s3].
-Record the time, network, block and time to initiate, which must be at most six hours. The validator enforces these drill requirements [s3].
+A runbook can rise above `slop` only with a passing fork `drill` record: the time, network, block and time to initiate, which must be at most six hours. The validator enforces this [s3].
 
 ## The permission policy
 
-Write the policy as a Zodiac constellation in TypeScript.
-Clutch's compiler produces one committed artifact with modifier calls, expected trees and allowances [s1].
 Each role, target and selector needs one complete tree: a write replaces its slot.
-
-CI rejects an artifact that differs from a fresh compile. Reviewers approve the artifact.
-The team views the policy in the Zodiac UI ([ADR 004](/adr/004-specifications-and-policy-as-data.md) decision 10). A change after launch is a motion of the universal factory ([ADR 013](/adr/013-one-easy-track-factory.md)); local tooling verifies its writes before signing.
+CI rejects an artifact that differs from a fresh compile, and reviewers approve the artifact [s1].
+A change after launch is a motion of the universal factory ([ADR 013](/adr/013-one-easy-track-factory.md)); local tooling verifies its writes before signing.
 A round-trip check compares the modifier's conditions on a fork with the artifact.
 Behaviour tests check each role's allowed and refused actions independently of the encoding.
 A policy change can rise above `slop` only with verification output [s3].
@@ -75,12 +60,3 @@ A policy change can rise above `slop` only with verification output [s3].
 - Derive tests from specifications, never from implementation. Recompute expected values independently [s1][s2].
 - Update affected specifications and invariants in the same commit as a behaviour change [s1].
 - Specifications reference code; code does not reference specifications. A contract's comments cite no ADR, open decision, invariant, specification or test, and `scripts/check_licences.py` refuses one (OD-123).
-
-## The onboarding guide
-
-The [guide](/onboarding/guide.md) is generated from `docs/onboarding/content/` and repository sources [s4].
-A change to a decision, role, permission, flow or runbook must update the guide in the same pull request.
-Commit the rebuilt page. CI rejects stale output and unresolved references [s4].
-
-Browser tests exercise every control on each pull request [s4].
-CI publishes the page from `main` after it checks freshness and the draft disclaimer [s5].

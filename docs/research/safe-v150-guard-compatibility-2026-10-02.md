@@ -11,8 +11,8 @@ superseded_by:
   ref: /adr/010-pre-execution-screening.md
   note: "In part: since OD-80 and OD-83, the guard goes on the committee's v1.3.0 Safe, so the v1.5.0 condition lapsed (decision 24). The fork test's v1.3.0 run still backs OD-83."
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-22T20:29:49Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -57,11 +57,11 @@ The guard rebuilds the Safe transaction hash itself. It uses the Safe's domain s
 
 ## What Safe v1.5.0 does
 
-- `execTransaction` computes the transaction hash with `nonce++`, checks the owners' signatures, and only then calls the guard. The guard receives the full signatures and the sender [s1]. So the nonce minus one is the nonce of the transaction under check, exactly as in v1.3.0 and v1.4.1.
-- The transaction typehash is the one that v1.3.0 and v1.4.1 use [s2].
+Safe v1.5.0 calls the guard as v1.3.0 and v1.4.1 do:
+
+- `execTransaction` computes the transaction hash with `nonce++`, checks the owners' signatures, and only then calls the guard, with the full signatures and the sender [s1]. The transaction typehash is the same [s2].
 - A signature string longer than the threshold needs is accepted [s3]. The guard's in-band approval rides in those extra bytes.
-- `setGuard` accepts only a contract that reports the transaction-guard interface [s4]. The guard reports it [s10].
-- The `ChangedGuard` event indexes the guard address in v1.5.0 [s5], as it does in v1.4.1 [s6]. Monitoring rules written for the v1.4.1 Safe that runs the guard today therefore apply unchanged.
+- `setGuard` accepts only a contract that reports the transaction-guard interface [s4], which the guard does [s10]. `ChangedGuard` indexes the guard address in v1.5.0 [s5], as in v1.4.1 [s6].
 
 ## Fork test of the vendor's guard
 
@@ -89,5 +89,4 @@ Result: 5 of 5 tests passed at block 26104388 [s9][s10]. Three deliberate defect
 ## Limits
 
 - The guard has no production history on v1.5.0. Its one enforcing instance runs on v1.4.1 [s10].
-- The vendor's approval service runs off chain. Its support for v1.5.0 Safes is not tested here. EM made the vendor's written confirmation a gate before deployment, with v1.4.1 for the operator Safe as the fallback (OD-07, decided 2026-10-02). On 2026-10-05, EM reported that the vendor confirmed its support, and closed the gate (OD-17).
-- The audits and the incident history of Safe v1.5.0 are in the [due-diligence note of 2026-10-05](/research/safe-v150-due-diligence-2026-10-05.md) (OD-17).
+- The vendor's approval service runs off chain. Its support for v1.5.0 Safes is not tested here.
