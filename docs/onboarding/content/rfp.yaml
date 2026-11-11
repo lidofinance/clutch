@@ -72,7 +72,7 @@ sections:
         clutch: "Motions add and remove through one universal factory, fixed at audit time. A motion widens a permission only through a typed shape, such as a vault, a market or an approval list, which pins receivers to the vault, draws a budget and writes the emergency exit. A raw write only narrows: a revoke, or a complete list that removes entries. A budget motion sets budgets within their ceilings, and a ceiling motion changes a ceiling within its limit. A motion also adds a token to the orders account. An emergency removal is the emergency Safe's immediate revoke."
         why: "A motion that carried its own condition tree could widen authority past what the DAO approved, so every widening fills a shape. Versions stop two motions from undoing each other's change."
         sources: ["ADR-006#context", "ADR-013#d2", "ADR-013#d5", "ADR-013#d7", "ADR-013#d10", "ADR-013#d13",
-          "ADR-013#proposed-direction", "ADR-007#d41", "OD-09", "OD-70", "INV-004", "INV-034", "INV-027"]
+          "ADR-013#proposed-direction", "ADR-007#d41", "OD-09", "OD-70", "INV-004", "INV-034", "INV-027", "ADR-006#options-considered"]
       - asked: "Lido contributors design, build, audit, deploy and maintain the Easy Track helper contracts. The provider confirms that its access control exposes the administration functions and works safely with this path."
         verdict: kept
         clutch: "The universal Easy Track factory, with the thin companion contracts that it creates, is the only new code. Lido builds it in phase 2, and an external audit covers it in phase 3, with CoW's order signer, which has no known audit. The governance role calls six administration functions of the Roles modifier, each one guarded."

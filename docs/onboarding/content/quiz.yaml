@@ -77,7 +77,7 @@
   answer: 2
   why: "Nothing on chain bounds a CoW order's price: its limit is a number that the caller chooses. The orders budgets bound what the operator can move into the orders account, screening checks every operator order once the guard is set, and monitoring alerts on a fill below the market. CoW's EBBO rule also holds the fill to the on-chain market."
   sources: ["ADR-007#d18", "ADR-007#d26", "ADR-007#proposed-direction",
-    "doc:docs/specs/control-matrix.md#the-matrix"]
+    "doc:docs/specs/control-matrix.md#the-matrix", "doc:docs/specs/threat-model.md#failure-modes"]
 
 - id: cap-breach-revert
   question: "A cap ratio is above its limit. Does the next operator transaction revert?"

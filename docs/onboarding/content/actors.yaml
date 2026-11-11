@@ -422,7 +422,7 @@
   address: "To be deployed"
   sources: ["ADR-005#d6", "ADR-005#d25", "ADR-005#context", "ADR-005#proposed-direction", "ADR-013#d12",
     "INV-009", "OD-49", "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned", "INV-035",
-    "test:test_D4_the_restart_role_enables_only_the_operator_modifier"]
+    "test:test_D4_the_restart_role_enables_only_the_operator_modifier", "INV-025"]
 
 - id: role-emergency
   node: safety-modifier
@@ -837,7 +837,7 @@
   numbers: ["the end-to-end test of its shape: owed", "budget key: from the attested computation"]
   sources: ["ADR-011#d3", "ADR-009#d28", "ADR-011#d13", "ADR-006#d13", "ADR-009#d3",
     "ADR-011#proposed-direction", "ADR-013#proposed-direction", "ADR-014#d6",
-    "doc:docs/registers/parameters.md#parameters"]
+    "doc:docs/registers/parameters.md#parameters", "ADR-014#d4"]
 
 # --- Orders account -----------------------------------------------------------------------------
 - id: orders-account
@@ -999,7 +999,7 @@
     - "Watch for depegs, protocol compromise and counterparty anomalies."
   cannot:
     - "Replace Lido's own monitoring of the vault's permissions."
-  sources: ["ADR-009#d7", "ADR-009#d18", "ADR-009#proposed-direction"]
+  sources: ["ADR-009#d7", "ADR-009#d18", "ADR-009#proposed-direction", "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
 
 - id: incident-process
   node: monitoring

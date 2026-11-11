@@ -71,7 +71,7 @@ blocks:
       - text: "Exposure to mature Lido products is unbounded. A new Lido product, Lido Lend first, stays in the protocol cap until it meets the maturity criteria and a budget motion with a forum post unlocks it. earnETH and earnUSD are not new."
         why: "The mandate backs Lido's own products without a cap. The maturity step keeps a product without a track record from taking the whole vault on its first day."
         state: owed
-        sources: ["ADR-009#d28", "OD-90"]
+        sources: ["ADR-009#d28", "OD-90", "ADR-009#consequences"]
       - text: "The illustrative balance renames its \"USD-denominated\" heading."
         why: "The heading read like the base of the yield-bearing cap, which it is not."
         state: owed
@@ -110,7 +110,7 @@ blocks:
       - text: "The funding section replaces the seed and the top-ups through Easy Track with tranche votes. Each funding is an Aragon vote that moves a tranche through Finance, and each vote names its tokens. The first tranche, one million dollars, is part of the enabling vote."
         why: "Funding is not regular, so a vote for each tranche costs little, and the vault needs no funding contract of its own."
         state: owed
-        sources: ["ADR-014#d1", "ADR-014#d2", "ADR-014#d3", "ADR-014#proposed-direction"]
+        sources: ["ADR-014#d1", "ADR-014#d2", "ADR-014#d3", "ADR-014#proposed-direction", "doc:docs/specs/enabling-vote.md#the-mandates-owed-text"]
       - text: "Until the screening guard is live, the vault stays under a cap of one million dollars on the Asset Safe and the orders account. The first tranche is the cap, and the second tranche's vote lifts it once the guard is set with its bypass mode off."
         why: "EM allowed a launch without the guard under this cap. The first tranche's size holds the cap. If a first-loss redemption takes the vault above it, the committee's Safe returns the excess to the Aragon Agent."
         state: owed

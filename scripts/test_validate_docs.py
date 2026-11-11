@@ -15,6 +15,7 @@ from __future__ import annotations
 import importlib.util
 import shutil
 import subprocess
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -85,7 +86,7 @@ def _edited(validator, edits: list[tuple[str, Any]]) -> list[str]:
 
 
 def _author(actor: str):
-    return lambda text: text.replace("  by: claude-code/opus-5.5\n  at:", f"  by: {actor}\n  at:", 1)
+    return lambda text: re.sub(r"  by: [^\n]+\n  at:", f"  by: {actor}\n  at:", text, count=1)
 
 
 def _verified(actor: str):

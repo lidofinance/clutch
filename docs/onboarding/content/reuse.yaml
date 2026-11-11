@@ -83,7 +83,7 @@
   what: "The vendor's existing service, which approves transactions and watches for depegs and protocol compromise."
   why: "Lido already has an arrangement with the vendor for four guarded multisigs. Above the launch cap, on-chain blocking before execution is a hard requirement."
   owner: "[the screening vendor]"
-  sources: ["ADR-010#d1", "ADR-010#d20", "ADR-010#d14", "ADR-009#d7", "ADR-009#proposed-direction"]
+  sources: ["ADR-010#d1", "ADR-010#d20", "ADR-010#d14", "ADR-009#d7", "ADR-009#proposed-direction", "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
 
 # --- New instance of existing code --------------------------------------------------------------
 - name: The four new Safes

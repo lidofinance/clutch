@@ -18,7 +18,7 @@
   watched_by: [INV-001, "test:test_asset_safe_shape"]
   watch_note: "No test checks that Aragon Voting never signs as a contract. The owner, guard, module and singleton alerts are not built."
   sources: ["ADR-005#d14", "ADR-005#d15", "ADR-005#context", "ADR-005#proposed-direction", "ADR-010#d18",
-    "ADR-010#proposed-direction", "INV-001", "ADR-005#d28"]
+    "ADR-010#proposed-direction", "INV-001", "ADR-005#d28", "INV-023"]
 
 - id: dao-sound
   assumption: "The DAO stays sound and able to act."
@@ -51,7 +51,7 @@
   watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector supports Safe v1.3.0 and must add this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before the second tranche's vote, not before the launch (OD-54)."
   sources: ["ADR-010#d20", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d12", "ADR-010#d17",
     "ADR-010#d22", "ADR-010#proposed-direction", "INV-010", "OD-54",
-    "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard"]
+    "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard", "ADR-010#context"]
 
 - id: launch-cap
   assumption: "Until the guard is live, the vault holds no more than its first tranche of one million dollars, the launch cap."
@@ -61,7 +61,7 @@
   watched_by: []
   watch_note: "The alerts on a redemption before the guard is set, on an excess that stays, and on a vault value above the cap, are not built."
   sources: ["ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-014#d2",
-    "ADR-014#proposed-direction"]
+    "ADR-014#proposed-direction", "doc:docs/specs/control-matrix.md#the-matrix"]
 
 - id: artifact-is-policy
   assumption: "The committed artifact, compiled from the constellation, is the only statement of the policy."
@@ -90,7 +90,7 @@
   watch_note: "Safe's releases, advisories and bug-bounty records are checked again before the enabling vote. The critical alert on a singleton change is not built."
   sources: ["ADR-005#d12", "ADR-005#d13", "ADR-007#d17", "ADR-007#d20", "ADR-005#context", "ADR-010#d16",
     "ADR-010#d18", "ADR-010#proposed-direction", "INV-019",
-    "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
+    "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary", "doc:docs/specs/threat-model.md#failure-modes", "ADR-010#context"]
 
 - id: factory-shapes-safe
   assumption: "Every shape of the universal factory pins each receiver, owner and beneficiary, draws a budget key, writes the emergency exit and never emits an administrative function or a delegatecall other than the order signer's. Every raw write only narrows, and versions stop two motions from undoing each other."
@@ -183,7 +183,7 @@
   breaks: "If funding becomes regular, the votes become a burden. A motion path for top-ups would then remove votes: a reversal condition of ADR 014."
   watched_by: []
   watch_note: "INV-037 is a chain check before the enabling vote: no Easy Track registry lists a vault Safe, and the factory's address book holds no payment call."
-  sources: ["ADR-014#d1", "ADR-014#consequences", "ADR-014#reversal-conditions", "INV-037"]
+  sources: ["ADR-014#d1", "ADR-014#consequences", "ADR-014#reversal-conditions", "INV-037", "ADR-005#d28"]
 
 - id: returns-rare
   assumption: "Funds go back to the Aragon Agent only in an emergency or a recovery."

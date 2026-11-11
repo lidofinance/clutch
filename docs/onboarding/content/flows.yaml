@@ -462,7 +462,7 @@ flows:
       "ADR-008#proposed-direction", "ADR-008#consequences", "ADR-013#d5", "ADR-014#d10",
       "ADR-014#proposed-direction", "INV-021", "runbook:Burn first-loss Earn shares",
       "runbook:Exit the first-loss shares",
-      "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms"]
+      "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms", "ADR-009#proposed-direction"]
 
   - id: insurance
     group: funding
@@ -629,7 +629,7 @@ flows:
       "test:test_emergency_can_durably_stop_operator_reapproval", "runbook:Revoke the operator",
       "runbook:Zero the approvals", "runbook:Exit positions to the Safe",
       "runbook:Return assets to the Agent", "runbook:Raise the motion counter",
-      "test:test_orders_emergency_revocation_keeps_recovery"]
+      "test:test_orders_emergency_revocation_keeps_recovery", "ADR-011#consequences", "ADR-009#d34"]
 
   - id: recovery-order
     group: emergencies
@@ -739,7 +739,7 @@ flows:
       "runbook:Restart after a stop", "runbook:Raise the motion counter",
       "test:test_D4_the_restart_role_enables_only_the_operator_modifier",
       "test:test_uf_restart_motion_after_the_switch", "test:test_uf_restore_brings_back_a_revoked_target",
-      "OD-119", "ADR-005#consequences"]
+      "OD-119", "ADR-005#consequences", "ADR-006#context"]
 
   - id: cap-breach
     group: emergencies

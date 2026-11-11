@@ -79,7 +79,7 @@ changes:
     provider: "No permission for staking, WETH or the withdrawal queue."
     clutch: "Stake ETH, and wrap and unwrap WETH. No Lido withdrawal queue: stETH is sold in CoW orders instead (ADR 007, decision 27)."
     why: "ETH and WETH are on the launch list. The vault does not use the withdrawal queue, because CoW orders already buy WETH and a request cannot be cancelled."
-    sources: ["ADR-007#d13", "ADR-007#d27", "ADR-011#d1", "ADR-007#d22", "ADR-007#d41"]
+    sources: ["ADR-007#d13", "ADR-007#d27", "ADR-011#d1", "ADR-007#d22", "ADR-007#d41", "doc:docs/research/zodiac-constellation-2026-10-06.md#4-differences-from-the-decided-design"]
   - area: Approvals and budgets
     kind: changed
     provider: "Approvals pin the spender and leave the amount open; deposits spend monthly budgets with placeholder figures."
