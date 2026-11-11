@@ -16,7 +16,7 @@
     "actor:aragon-agent": {
       "content": "ffdee2a522eec746",
       "sources": {
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-007#d19": "ed130a5d5abd45f8",
         "ADR-014#d1": "59026b5de57543a1",
@@ -31,7 +31,7 @@
       "content": "c90fa9375448355d",
       "sources": {
         "ADR-005#d14": "29c40c35be6f55bc",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#d32": "c96587fa96f8d374",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-006#d9": "7ac8a593c0a2b8e6",
@@ -73,7 +73,7 @@
         "ADR-005#context": "cd990aec3cedd7de",
         "ADR-005#d12": "15531fbdd0ad214c",
         "ADR-005#d15": "f93f9d56ee2e6221",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#d6": "9857ea8ab4ac4455",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-007#d17": "1eef5313a16c2b48",
@@ -225,7 +225,7 @@
       "content": "2bf7d80f851f2808",
       "sources": {
         "ADR-005#context": "cd990aec3cedd7de",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-014#d1": "59026b5de57543a1",
         "doc:docs/research/chain-reads-2026-09-30.md#governance-authority": "5e5f461994b2e03c"
       }
@@ -331,7 +331,7 @@
     "actor:first-loss-safe": {
       "content": "f09cdac0ffbba3a2",
       "sources": {
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-008#d13": "464731ba2429d173",
         "ADR-008#d19": "ab18428eeb49c353",
@@ -412,7 +412,7 @@
       "sources": {
         "ADR-005#context": "cd990aec3cedd7de",
         "ADR-005#d24": "2bce1afb976212bd",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-006#context": "976d158652125705",
         "ADR-006#d4": "ddb3934acf2ef650",
@@ -518,7 +518,7 @@
         "ADR-005#d15": "f93f9d56ee2e6221",
         "ADR-005#d21": "a26c7ab6db320cab",
         "ADR-005#d25": "f86791aba9b98ed0",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-007#d17": "1eef5313a16c2b48",
         "ADR-007#d18": "a656035e2b6fef69",
         "ADR-007#d19": "ed130a5d5abd45f8",
@@ -904,7 +904,7 @@
         "ADR-005#context": "cd990aec3cedd7de",
         "ADR-005#d14": "29c40c35be6f55bc",
         "ADR-005#d15": "f93f9d56ee2e6221",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-010#d18": "1ba8e3e16f01df9a",
         "ADR-010#proposed-direction": "541b4c24335f1267",
@@ -1008,7 +1008,7 @@
     "assumption:dao-sound": {
       "content": "680a85757c2b419f",
       "sources": {
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-013#d3": "d5a79e8c6a3b3ca1",
         "ADR-013#d4": "12faab6f7f2d396d",
@@ -1267,7 +1267,7 @@
     "assumption:tranche-votes": {
       "content": "9b9e5d2fc15d3821",
       "sources": {
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-014#consequences": "685a1aed7e92b24f",
         "ADR-014#d1": "59026b5de57543a1",
         "ADR-014#reversal-conditions": "9ef59911f5158226",
@@ -1300,7 +1300,7 @@
         "ADR-005#d12": "15531fbdd0ad214c",
         "ADR-005#d14": "29c40c35be6f55bc",
         "ADR-005#d15": "f93f9d56ee2e6221",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "INV-001": "522b561d1b5962a7"
       }
@@ -1473,7 +1473,7 @@
       "sources": {
         "ADR-005#context": "cd990aec3cedd7de",
         "ADR-005#d14": "29c40c35be6f55bc",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-013#d3": "d5a79e8c6a3b3ca1",
         "ADR-013#d4": "12faab6f7f2d396d",
@@ -1489,7 +1489,7 @@
       "content": "1bca2a6cfaa72e47",
       "sources": {
         "ADR-004#d14": "294031adf64a90e7",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#d32": "c96587fa96f8d374",
         "ADR-007#confirmation": "157d5396ba9a9838",
         "ADR-007#proposed-direction": "7e0cf8642554f23f",
@@ -2036,7 +2036,7 @@
     "mandate:custody": {
       "content": "9e7ab1920d6e5ad7",
       "sources": {
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-007#d17": "1eef5313a16c2b48",
         "ADR-007#d20": "088bb6a89b7ca65d",
@@ -2189,7 +2189,7 @@
     "quiz:asset-safe-owner": {
       "content": "b8b246c3392e4b80",
       "sources": {
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#d6": "9857ea8ab4ac4455",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "INV-001": "522b561d1b5962a7"
@@ -2280,7 +2280,7 @@
       "content": "9b3f49973a63bda4",
       "sources": {
         "ADR-005#context": "cd990aec3cedd7de",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7"
       }
     },
@@ -2565,7 +2565,7 @@
         "ADR-005#d23": "d99f8356f3af2660",
         "ADR-005#d24": "2bce1afb976212bd",
         "ADR-005#d25": "f86791aba9b98ed0",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#d31": "5b68be533417691b",
         "ADR-005#d6": "9857ea8ab4ac4455",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
@@ -2696,7 +2696,7 @@
       "sources": {
         "ADR-004#d14": "294031adf64a90e7",
         "ADR-005#context": "cd990aec3cedd7de",
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#d31": "5b68be533417691b",
         "ADR-005#d32": "c96587fa96f8d374",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
@@ -3069,7 +3069,7 @@
     "term:aragon-agent": {
       "content": "dce22d5f82905f7b",
       "sources": {
-        "ADR-005#d28": "01abc2953856b753",
+        "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#proposed-direction": "6e5bebafb2714ee7",
         "ADR-007#d17": "1eef5313a16c2b48",
         "ADR-007#d20": "088bb6a89b7ca65d",
@@ -3199,7 +3199,7 @@
       "content": "a98cf0016a036c83",
       "sources": {
         "ADR-005#context": "cd990aec3cedd7de",
-        "ADR-005#d28": "01abc2953856b753"
+        "ADR-005#d28": "3be850a3867549a6"
       }
     },
     "term:easy-track": {

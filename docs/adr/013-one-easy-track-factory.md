@@ -1,6 +1,6 @@
 ---
 type: Decision
-title: "ADR 013: One Easy Track factory, and no Aragon votes after launch"
+title: "ADR 013: One Easy Track factory; Aragon votes after launch only for tranches and break-glass actions"
 description: One universal Easy Track factory carries every Clutch motion, with versioned writes, holds the motion roles and makes each motion's writes in one call; after the enabling vote, Aragon votes remain only for funding tranches, role holders and break-glass actions.
 tags: [governance, easy-track, factory, versioning]
 status: draft
@@ -19,7 +19,7 @@ sources:
     title: Research note — Easy Track's script permissions, enactment, cancel and pause; Roles storage; Merkle-root engines; the two-modifier alternative
 ---
 
-# ADR 013: One Easy Track factory, and no Aragon votes after launch
+# ADR 013: One Easy Track factory; Aragon votes after launch only for tranches and break-glass actions
 
 ## Context
 

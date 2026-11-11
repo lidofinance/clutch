@@ -91,7 +91,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 25. The emergency role holds the switch: it disables the operator modifier, with the module argument pinned. On the orders account, the emergency role's revoke stops the operator (OD-58).
 26. No emergency body resumes what it stopped. The emergency Safe and the Emergency Brakes multisig get no power to unpause Easy Track, to enable a module, to grant a permission again or to raise an approval. Motions restart the operator and bring back what the emergency role revoked ([ADR 013](/adr/013-one-easy-track-factory.md) decisions 12 and 16; [ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 46). An Easy Track unpause stays an Aragon vote (OD-59, OD-97, OD-104, OD-119).
 27. Stated by [ADR 008](/adr/008-funding-through-existing-payments.md) decisions 21 and 23.
-28. Aragon Voting, not the Aragon Agent, is the only owner of the Asset Safe, the orders account and the first-loss Safe. A DAO action on the vault is a direct Voting item, without Dual Governance. Recovered assets go to the Aragon Agent (OD-73, OD-106).
+28. Aragon Voting, not the Aragon Agent, is the only owner of the Asset Safe, the orders account and the first-loss Safe, each at one of one. A DAO action on the vault is a direct Voting item, without Dual Governance. Recovered assets go to the Aragon Agent (OD-73, OD-106).
 29. Replaced by decision 26 (OD-78, OD-104).
 30. Replaced by decision 26 (OD-104).
 31. The committee's own Safe holds the operator role and the first-loss role, and it is the universal factory's trusted caller. Clutch deploys no operator Safe. The committee's Safe runs Safe v1.3.0 at 4 of 7 (OD-80).
