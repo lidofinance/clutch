@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-10-13
 stale_after: 2026-12-31T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -95,7 +95,7 @@ The CFO, a member of the committee, sent six points of feedback on the design on
 
 ## The feedback
 
-The CFO finds the architecture scalable for the committee's purposes. Some complexity comes from Easy Track and from the existing monitoring. Less complexity would need weaker mandate rules or more DAO votes, and the CFO proposes neither [s2]. The six points [s2]:
+The CFO finds the architecture scalable for the committee's purposes, and proposes neither weaker mandate rules nor more DAO votes [s2]. The six points [s2]:
 
 1. Give the Emergency Brakes multisig the right to withdraw funds from any protocol to the Asset Safe or the treasury, as a body that is independent of the committee.
 2. Let the Emergency Brakes multisig unpause Easy Track.
@@ -123,10 +123,8 @@ Read at block 26181761 [s3], with `cast call 0xF0211b7660680B49De1A7E9f25C65660F
 | Aragon Voting `0x2e59A20f205bB85a89C53f1936454680651E618e` | yes | yes | yes |
 | Aragon Agent `0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c` | no | no | no |
 
-- `paused()` is false, and the motion duration is 259,200 seconds [s3].
-- A pause stops `createMotion` and `enactMotion` for every Easy Track motion of the DAO, not only the vault's. An objection and a creator's own cancel still work [s4].
-- A motion does not expire. After an unpause, a queued motion whose window has ended can enact at once, unless someone cancels it first. Only a holder of `CANCEL_ROLE`, Aragon Voting, cancels another party's motion [s4].
-- Aragon Voting holds the Easy Track roles itself, so a vote item that unpauses or cancels runs when the vote runs: five days. An item that has the Aragon Agent act also passes Dual Governance, about nine days.
+- A pause stops every Easy Track motion of the DAO, not only the vault's. An objection still works [s4]. [The Easy Track note](/research/easy-track-first-2026-11-05.md#easy-track) holds the pause and cancel rules.
+- A motion does not expire. After an unpause, a queued motion whose window has ended can enact at once, unless someone cancels it first [s4].
 - A restart takes long in practice. Bridge deposits that the Emergency Brakes multisig paused on 2026-03-03 came back with a vote and a Dual Governance proposal in mid-April, after the code fix [s15].
 
 ## 2026 incidents that bear on emergency powers
@@ -134,7 +132,6 @@ Read at block 26181761 [s3], with `cast call 0xF0211b7660680B49De1A7E9f25C65660F
 - Resolv, 2026-03-22: a key compromise with no mint cap [s17]. One report says that collecting four signatures for the pause took about an hour [s20].
 - Drift, 2026-04-01: council signers were socially engineered into pre-signed transactions, under a governance with no timelock; about $285 million left [s16]. A low threshold did not fail here; the signers did.
 - Kelp, 2026-04-18: the Lido Earn team learned of the exploit from an outside signal 78 minutes after it, and paused deposits after about three hours. The curator froze earnETH for 27 days, so no one could exit in that time [s11].
-- Lesson for the vault: an emergency power is safest when its destinations are fixed and it cannot restore what it stopped. An exit can wait on a curator's freeze.
 
 ## The committee's signing speed
 
@@ -145,7 +142,7 @@ The committee's Safe executed 80 routine transactions from 2024-04-19 to 2026-09
 | 2nd | 8 | 64 of 80 | 70 of 80 |
 | 4th | 16 | 45 of 80 | 60 of 80 |
 
-No such data exists for a group that mixes members of different bodies. The first drill measures it.
+No such data exists for a group that mixes members of different bodies.
 
 ## The first-loss terms
 
@@ -176,25 +173,13 @@ Five seats: two committee members (C), two Emergency Brakes members (B) and one 
 
 ## What the model simplifies
 
-- One role key, not two. The technical role had one permission, `disableModule` pinned to the operator modifier, and now has the same holder as the emergency role. It merges into `emergency` (OD-58).
-- The orders account's membership removal (OD-57) is redundant. The same holder already revokes the operator's targets and functions there.
-- The cap-breach trigger stops being a limit, because the emergency role can revoke everything at any time. It stays a duty.
-- The mandate and the LIP no longer need to say that the fast exit is not independent of the committee.
-- One emergency pager: the cap-breach trigger, a defect in the permission layer and a financial emergency all page the emergency Safe.
-- The duty to keep the emergency Safe's owners equal to the committee's goes. A seat rule replaces it.
-- The Emergency Brakes multisig's own mandate does not change, so it needs no Snapshot.
-
-It does not simplify the two modifiers on the Asset Safe, because recovery must survive the switch, or the granular revoke, because every removal is a revoke.
-
-## The switch freezes queued motions
-
-The drill `test_D4_the_switch_freezes_queued_motions_until_the_dao_restarts` ran on the pinned fork on 2026-10-13 and passed. A motion that writes through the governance role is queued. The emergency role disables the operator modifier. After the objection window, the enactment reverts with the Safe's `GS104`, while the emergency role's transfer to the Agent still works. The owner path enables the modifier again, and the same motion then enacts. So a restart must cancel the queued motions first.
+[ADR 005](/adr/005-account-graph-and-roles.md) decisions 21 and 23 to 26 hold the emergency model that OD-58 set: one `emergency` role, a seat rule for the emergency Safe, and no power to resume.
 
 ## Follow-up: insurance funds for other products
 
-On 2026-10-13 the CFO asked whether the vault can manage more insurance funds, for other products too (OD-66) [s21]. A first-loss fund needs a way for the DAO's position to take a loss before other depositors. Each product's contracts decide that way.
+On 2026-10-13 the CFO asked whether the vault can manage insurance funds for other products too (OD-66) [s21]. A first-loss fund needs a way for the DAO's position to take a loss before other depositors. Each product's contracts decide that way.
 
-| Product contracts | How a holder's position can take a loss | Template that fits |
+| Product contracts | How a holder's position can take a loss | Form that fits |
 |---|---|---|
 | A Mellow vault with the burnable share manager, as Lido Earn uses | `burn(uint256)` burns the caller's own shares [s22] | burnable shares |
 | A Mellow vault with the plain share manager | only a queue can burn shares [s23] | none, unless the product gives a payout address |
@@ -202,11 +187,4 @@ On 2026-10-13 the CFO asked whether the vault can manage more insurance funds, f
 | A Morpho Blue market, the base of Lido Lend | a liquidation that leaves bad debt lowers the market's supply assets, so every lender of that market takes the loss [s25] | none, unless the product gives a payout address, for example a reserve that covers bad debt |
 | A product on another chain | its shares are on that chain | none: the first-loss Safe is on Ethereum |
 
-So the burnable-shares template serves the Lido Earn family. Any other product needs a fixed payout address that its own design defines, or a new template. A new template needs a factory that the DAO registers by vote, once for each kind of product.
-
-## Open after the decisions
-
-- The fifth signer: who, on what terms, and the Snapshot that appoints them (OD-65).
-- Insurance funds for products other than Lido Earn (OD-66).
-- The committee's valuation policy: the band of level 2 and the level-5 share (OD-62).
-- The policy provider's answer on display and monitoring in the Zodiac UI (OD-44, OD-62).
+So burnable shares serve the Lido Earn family. Any other product needs a fixed payout address that its own design defines ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 6).

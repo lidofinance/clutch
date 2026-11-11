@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-11T05:49:53Z
+  at: 2026-11-11T11:50:32Z
 verified: []
 ---
 
@@ -31,35 +31,34 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-11-11 | none |
-| [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-11-10 | none |
+| [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [adr/013-one-easy-track-factory.md](/adr/013-one-easy-track-factory.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [adr/014-funding-by-tranche-votes.md](/adr/014-funding-by-tranche-votes.md) | Decision | slop | proposed | 2026-11-11 | none |
-| [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-10-22 | none |
+| [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-11-11 | none |
 | [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-05 | none |
 | [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-11-11 | none |
 | [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-11 | none |
 | [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-11 | none |
-| [research/ai-first-practice-2026-09.md](/research/ai-first-practice-2026-09.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/cfo-feedback-2026-10-13.md](/research/cfo-feedback-2026-10-13.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/chain-reads-2026-09-30.md](/research/chain-reads-2026-09-30.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/contributor-readiness-2026-10-07.md](/research/contributor-readiness-2026-10-07.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/cow-orders-account-2026-10-06.md](/research/cow-orders-account-2026-10-06.md) | Research Note | slop |  | 2026-10-19 | none |
+| [research/ai-first-practice-2026-09.md](/research/ai-first-practice-2026-09.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/cfo-feedback-2026-10-13.md](/research/cfo-feedback-2026-10-13.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/chain-reads-2026-09-30.md](/research/chain-reads-2026-09-30.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/contributor-readiness-2026-10-07.md](/research/contributor-readiness-2026-10-07.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/cow-orders-account-2026-10-06.md](/research/cow-orders-account-2026-10-06.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/dai-usds-conversion-2026-10-05.md](/research/dai-usds-conversion-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/easy-track-first-2026-11-05.md](/research/easy-track-first-2026-11-05.md) | Research Note | slop |  | 2026-11-05 | none |
-| [research/enabling-vote-rehearsal-2026-10-15.md](/research/enabling-vote-rehearsal-2026-10-15.md) | Research Note | slop |  | 2026-10-22 | none |
-| [research/guide-invariants-2026-10-12.md](/research/guide-invariants-2026-10-12.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/legacy-investments-2026-10-05.md](/research/legacy-investments-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/operator-safe-review-2026-10-15.md](/research/operator-safe-review-2026-10-15.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/orders-account-fork-tests-2026-11-07.md](/research/orders-account-fork-tests-2026-11-07.md) | Research Note | slop |  | 2026-11-08 | none |
-| [research/orders-motion-roles-2026-11-08.md](/research/orders-motion-roles-2026-11-08.md) | Research Note | slop |  | 2026-11-08 | none |
-| [research/orders-token-motions-2026-11-08.md](/research/orders-token-motions-2026-11-08.md) | Research Note | slop |  | 2026-11-08 | none |
-| [research/recovery-and-withdrawal-queue-2026-10-05.md](/research/recovery-and-withdrawal-queue-2026-10-05.md) | Research Note | slop |  | 2026-10-22 | none |
+| [research/easy-track-first-2026-11-05.md](/research/easy-track-first-2026-11-05.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/enabling-vote-rehearsal-2026-10-15.md](/research/enabling-vote-rehearsal-2026-10-15.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/guide-invariants-2026-10-12.md](/research/guide-invariants-2026-10-12.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/legacy-investments-2026-10-05.md](/research/legacy-investments-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/operator-safe-review-2026-10-15.md](/research/operator-safe-review-2026-10-15.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/orders-account-fork-tests-2026-11-07.md](/research/orders-account-fork-tests-2026-11-07.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/orders-motion-roles-2026-11-08.md](/research/orders-motion-roles-2026-11-08.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/orders-token-motions-2026-11-08.md](/research/orders-token-motions-2026-11-08.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/recovery-and-withdrawal-queue-2026-10-05.md](/research/recovery-and-withdrawal-queue-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/request-for-solution-2026-10-07.md](/research/request-for-solution-2026-10-07.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-10-22 | none |
-| [research/single-vote-review-2026-10-14.md](/research/single-vote-review-2026-10-14.md) | Research Note | slop |  | 2026-10-19 | none |
-| [research/universal-factory-prototype-2026-11-05.md](/research/universal-factory-prototype-2026-11-05.md) | Research Note | slop |  | 2026-11-06 | none |
-| [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-10-19 | none |
+| [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/universal-factory-prototype-2026-11-05.md](/research/universal-factory-prototype-2026-11-05.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-11-11 | none |
 | [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-11 | none |
 | [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-11 | none |
 | [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-11 | none |

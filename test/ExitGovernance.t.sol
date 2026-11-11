@@ -72,7 +72,7 @@ contract ExitGovernanceRehearsal is EnabledVault {
 
     /// @dev INV-025: exit-governance writes the emergency role's exits and nothing else: only under the emergency key,
     ///      only the five pinned trees and the four exits without conditions, only as plain calls, and never on a
-    ///      vault account. It holds no membership setter and no administration, and only the executor holds it.
+    ///      vault account. It holds no membership setter and no administration, and only the universal factory holds it.
     function test_exit_governance_writes_only_exits() public enabled {
         Exits memory e = _exits();
         address token = Mainnet.WBTC;
@@ -138,7 +138,7 @@ contract ExitGovernanceRehearsal is EnabledVault {
             (bool ok,) = address(safetyMod).call(
                 abi.encodeCall(IRoles.execTransactionWithRole, (address(safetyMod), 0, write, CALL, EXIT_GOVERNANCE, true))
             );
-            assertFalse(ok, "only the executor holds the exit-governance role");
+            assertFalse(ok, "only the universal factory holds the exit-governance role");
         }
     }
 

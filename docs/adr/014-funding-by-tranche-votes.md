@@ -16,7 +16,7 @@ sources:
     title: Decision log — EM on funding by tranche votes, insurance at launch and the flows back to the treasury, 2026-11-05
   - id: s2
     resource: /research/easy-track-first-2026-11-05.md
-    title: Research note — Finance payments by Aragon Voting, the executor's payment permission, and the flows to the Aragon Agent
+    title: Research note — Finance payments by Aragon Voting, and the executor's payment permission
   - id: s4
     resource: "urn:clutch:restricted:mandate-draft-v0.1"
     title: Mandate draft v0.1 — seeding and top-ups through Easy Track; outside the repository until the mandate is published

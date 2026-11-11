@@ -930,7 +930,7 @@ flows:
       "ADR-013#proposed-direction", "ADR-014#d1", "ADR-014#d2", "ADR-014#proposed-direction", INV-022, INV-023, INV-032,
       OD-54, "doc:ROADMAP.md#roadmap", "doc:docs/specs/enabling-vote.md#the-vote",
       "doc:docs/specs/enabling-vote.md#before-the-vote",
-      "doc:docs/research/single-vote-review-2026-10-14.md#how-one-vote-carries-two-kinds-of-item", OD-73, "ADR-005#d28",
+      "doc:docs/research/easy-track-first-2026-11-05.md#easy-track", OD-73, "ADR-005#d28",
       OD-55, OD-92, OD-106, "ADR-005#d32", "doc:docs/research/enabling-vote-rehearsal-2026-10-15.md#the-vote-that-fits"]
 
   - id: signer-rotation

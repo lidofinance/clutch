@@ -29,8 +29,8 @@ sources:
     resource: /adr/010-pre-execution-screening.md
     title: ADR 010 — the launch without the guard, and the guard before the second tranche's vote
   - id: s8
-    resource: /research/single-vote-review-2026-10-14.md
-    title: One Aragon vote to launch, Easy Track afterwards, 2026-10-14 — the review, and Easy Track's admin role read on chain
+    resource: /research/easy-track-first-2026-11-05.md
+    title: One Easy Track factory and funding by tranche votes, 2026-11-05 — Easy Track's admin role and the Aragon Agent's roles, read on chain on 2026-10-14
   - id: s9
     resource: /research/enabling-vote-rehearsal-2026-10-15.md
     title: The enabling vote rehearsed on a mainnet fork, 2026-10-15 and 2026-10-22 — the vote of approved hashes under EIP-7825

@@ -25,7 +25,7 @@ sources:
     title: Kit test at 7a8c661 — the emergency role unwraps WETH into the Asset Safe through WETH's 2,300-gas transfer, stakes the ETH and sends the stETH to the Agent
   - id: s9
     resource: /research/recovery-and-withdrawal-queue-2026-10-05.md
-    title: Recovery into USDT and the withdrawal-queue approval, 2026-10-05 — USDC risk in USDS and DAI, the recovery topology, and the withdrawal queue's upgrader, limits and missing cancel
+    title: Recovery into USDT and the withdrawal-queue approval, 2026-10-05 — USDC risk in USDS and DAI, and the withdrawal queue's upgrader, limits and missing cancel
   - id: s10
     resource: "urn:clutch:restricted:mandate-draft-v0.1"
     title: Mandate draft v0.1 — the emergency path may swap any asset into any of the four main stablecoins; outside the repository until the mandate is published

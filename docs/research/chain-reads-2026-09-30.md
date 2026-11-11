@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-09-30
 stale_after: 2026-12-31T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -42,14 +42,11 @@ sources:
   - id: s10
     resource: "https://github.com/safe-global/safe-smart-account/tree/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/docs"
     title: Safe smart account docs at the v1.5.0 tag — Ackee and Certora audit reports for 1.5.0
-  - id: s11
-    resource: "https://etherscan.io/address/0x632C0CCDca849eeD780FC685BBa9AbC3c7407Cb2"
-    title: Stonks factory
 ---
 
 # Chain reads for the design ADRs, 2026-09-30
 
-An agent ran every read on this page on 2026-09-30. All chain reads use Ethereum mainnet block 26092572, hash `0x7edb82d69fe2c018376bc6404ac94b278578e0f42af90fc2c7a217f23bfe23c5`, time 2026-09-30T20:05:47Z [s1]. Every command exited with status 0, except the two `RECEIVER()` calls that the Stonks table marks as reverted.
+An agent ran every read on this page on 2026-09-30. All chain reads use Ethereum mainnet block 26092572, hash `0x7edb82d69fe2c018376bc6404ac94b278578e0f42af90fc2c7a217f23bfe23c5`, time 2026-09-30T20:05:47Z [s1]. Every command exited with status 0.
 
 ## How to reproduce
 
@@ -87,8 +84,6 @@ These results agree with the ACL [s2].
 | The Easy Track executor holds a parametrised payment permission | `cast call $ACL 'getPermissionParamsLength(address,address,bytes32)(uint256)' $EXE $FIN $PAY --block $B` | 22 |
 | Aragon Voting manages that permission | `cast call $ACL 'getPermissionManager(address,bytes32)(address)' $FIN $PAY --block $B` | `0x2e59A20f205bB85a89C53f1936454680651E618e` |
 | Finance token budgets are off | `cast call $FIN $(cast calldata 'getBudget(address)' <token>) --block $B` for USDC, DAI and stETH | 64 zero bytes: budget 0, budgeted flag false |
-| The committee is the trusted caller of an existing top-up factory | `cast call 0x6e04aED774B7c89BB43721AcDD7D03C872a51B69 'trustedCaller()(address)' --block $B` | the committee Safe; the factory's `finance()` is Finance and its `token()` is stETH |
-| That factory's registry limits spending per period | `cast call 0x1a7cFA9EFB4D5BfFDE87B0FaEb1fC65d653868C0 'getLimitParameters()(uint256,uint256)' --block $B` | limit `12000000000000000000000`, period 6 months |
 
 The 22 parameters come from `cast call $ACL 'getPermissionParam(address,address,bytes32,uint256)(uint8,uint8,uint240)' $EXE $FIN $PAY <i> --block $B` for `i` from 0 to 21 [s2][s4]. They form one chain: for each token, if argument 0 equals the token, then argument 2 must be at most the ceiling. The last entry returns false for every other token. Argument 1, the receiver, appears nowhere in the chain.
 
@@ -148,20 +143,6 @@ Runtime code hashes recorded for later provenance checks, each from `cast keccak
 | Safe v1.5.0 proxy factory | `0x14F2982D601c9458F93bd70B218933A6f8165e7b` | `0x967dae4cda22b0c9ef7f31b010bdc1ceb0af9904b0c3dc060b5302e4c18a4529` |
 | Roles mastercopy | `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5` | `0x471d8b3b419f1eb955230c0326c8812176df49bf3c7b414a563fda5a3c6c10b6` |
 | Zodiac module proxy factory | `0x000000000000aDdB49795b0f9bA5BC298cDda236` | `0x01623cbcf010a1c326230f1b2d5f48a66b440232ee49096102bc84967dc5f21e` |
-| Stonks factory | `0x632C0CCDca849eeD780FC685BBa9AbC3c7407Cb2` | `0x9df901283e3dea92a6255ef02ee93821876141faa13e7243145f97d67a8fbe83` |
-
-## Stonks
-
-Each row calls `RECEIVER()`, `manager()`, `TOKEN_FROM()`, `TOKEN_TO()`, `ORDER_DURATION_IN_SECONDS()`, `MARGIN_IN_BASIS_POINTS()` and `PRICE_TOLERANCE_IN_BASIS_POINTS()` on the instance with `--block $B`.
-
-| Instance | Pair | `RECEIVER` | `manager` | Duration, margin, tolerance |
-|---|---|---|---|---|
-| Stonks 2.0 `0xb368586CB980895E51e1D82102E63b3F69d3F151` | stETH to LDO | the Agent | `0x6c213ca5A10Cc26548C742229569B4AeD2A9C9B7` | 1800 s, 110 bp, 550 bp |
-| Stonks 2.0 `0x8c595aA4AEc6F42B9e7D77F83179768D37CE3042` | stETH to LDO | `0x6c213ca5A10Cc26548C742229569B4AeD2A9C9B7` | `0x6c213ca5A10Cc26548C742229569B4AeD2A9C9B7` | 1800 s, 110 bp, 550 bp |
-| earlier revision `0xf4F6A03E3dbf0aA22083be80fDD340943d275Ea5` | stETH to USDC | reverted: no receiver getter | the committee Safe | 1800 s, 110 bp, 550 bp |
-| earlier revision `0x278f7B6CBB3Cc37374e6a40bDFEBfff08f65A5C7` | USDC to USDT | reverted: no receiver getter | the committee Safe | 1800 s, 30 bp, 150 bp |
-
-The first Stonks 2.0 instance exposes `estimateTradeOutput(uint256)`, `placeOrder(uint256)`, `recoverERC20(address,uint256)`, `recoverEther()` and `recoverERC721(address,uint256)`: each selector is present in its runtime code. New instances come from the Stonks factory [s11].
 
 ## Limits of these reads
 

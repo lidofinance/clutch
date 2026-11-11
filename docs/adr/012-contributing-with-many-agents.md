@@ -28,7 +28,7 @@ sources:
     title: ADR 004 — the hosted Zodiac app is outside the path, and the repository-owner team holds its key
   - id: s8
     resource: /research/guide-invariants-2026-10-12.md
-    title: Research note — the guide's defects in print and without its script, the churn of whole-ADR pins, and the drift that the decision-level references found
+    title: Research note — the guide's defects in print and without its script, and the churn of whole-ADR pins
 ---
 
 # ADR 012: Contributing with many agents
