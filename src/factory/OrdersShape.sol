@@ -3,8 +3,7 @@ pragma solidity >=0.8.24 <0.9.0;
 
 import {IRoles} from "../interfaces/IRoles.sol";
 
-/// @title OrdersShape — the universal factory's shape for a token of the orders account (ADR 007, decisions 41,
-///        44 and 45; ADR 013, decision 7).
+/// @title OrdersShape — the universal factory's shape for the orders account.
 /// @notice A stateless companion of the universal factory. The factory creates it in its own constructor and calls
 ///         it only to read. It holds no state, makes no call and cannot be upgraded. It builds the writes of the
 ///         orders operation: a token's own permissions on the orders modifier and its exit on the safety
@@ -28,8 +27,8 @@ contract OrdersShape {
     bytes32 internal constant APPROVALS_ROLE = "approvals";
     bytes32 internal constant EXIT_GOVERNANCE = "exit-governance";
 
-    /// @dev CoW Protocol's deployed contracts that the orders policy names (ADR 007), and the two tokens that a
-    ///      recovery order buys: USDC, then USDT (decision 5), in the SDK's order.
+    /// @dev CoW Protocol's deployed contracts that the orders policy names, and the two tokens that a
+    ///      recovery order buys: USDC, then USDT, in the SDK's order.
     address public constant ORDER_SIGNER = 0x23dA9AdE38E4477b23770DeD512fD37b12381FAB;
     address public constant COMPOSABLE_COW = 0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74;
     address public constant TWAP_HANDLER = 0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5;
@@ -40,12 +39,14 @@ contract OrdersShape {
 
     bytes4 internal constant SIGN_ORDER = 0x569d3489; // signOrder(GPv2Order.Data,uint32,uint256)
     bytes4 internal constant CREATE_WITH_CONTEXT = 0x0d0d9800; // createWithContext((address,bytes32,bytes),address,bytes,bool)
+    bytes4 internal constant UNSIGN_ORDER = 0x5a66c223; // unsignOrder(GPv2Order.Data)
+    bytes4 internal constant REMOVE = 0x95bc2673; // remove(bytes32)
     bytes4 internal constant APPROVE = 0x095ea7b3; // approve(address,uint256)
     bytes4 internal constant TRANSFER = 0xa9059cbb; // transfer(address,uint256)
 
     /// @dev `GPv2Order.BALANCE_ERC20`: plain ERC-20 balances.
     bytes32 internal constant ERC20_BALANCE = keccak256("erc20");
-    /// @dev An operator order lives at most 90 days, a recovery order 1 day (decisions 25 and 29).
+    /// @dev An operator order lives at most 90 days, a recovery order 1 day.
     uint256 public constant ORDER_LIFE = 90 days;
     uint256 public constant RECOVERY_LIFE = 1 days;
     /// @dev A grant's execution option for the order signer, which runs only by delegatecall.
@@ -68,7 +69,7 @@ contract OrdersShape {
     ///           emergency role's zeroing and transfer, and the approvals role's relayer approval, each tree that
     ///           the role's guard pins whole; then, through the approvals role, the relayer approval itself;
     ///         - on the safety modifier, through the exit-governance role: the token's exit, a transfer to the
-    ///           Aragon Agent or to the orders account (decision 45).
+    ///           Aragon Agent or to the orders account.
     function tokenWrites(Context calldata x, address token) external pure returns (address[] memory to, bytes[] memory data) {
         to = new address[](10);
         data = new bytes[](10);
@@ -100,6 +101,48 @@ contract OrdersShape {
     ///         role: the operator's signer and TWAP orders, on both sides, and the recovery orders' sell side.
     function listWrites(Context calldata x, address[] calldata operatorTokens, address[] calldata recoveryTokens)
         external
+        pure
+        returns (address[] memory to, bytes[] memory data)
+    {
+        return _listWrites(x, operatorTokens, recoveryTokens);
+    }
+
+    /// @notice The calls that give the operator back its authority on the orders account after the emergency role
+    ///         revoked it, for the current lists: its two targets, the three order trees, its two cancels, and each
+    ///         operator token's target with its return; then, through the approvals role, the relayer approval of
+    ///         each token in `approvalTokens`, which the emergency role set to zero.
+    function restoreWrites(
+        Context calldata x,
+        address[] calldata operatorTokens,
+        address[] calldata recoveryTokens,
+        address[] calldata approvalTokens
+    ) external pure returns (address[] memory to, bytes[] memory data) {
+        uint256 n = 7 + 2 * operatorTokens.length + approvalTokens.length;
+        to = new address[](n);
+        data = new bytes[](n);
+        for (uint256 i = 0; i < n; i++) to[i] = x.ordersModifier;
+        data[0] = _govern(x.ordersModifier, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, ORDER_SIGNER)));
+        data[1] = _govern(x.ordersModifier, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, COMPOSABLE_COW)));
+        (, bytes[] memory trees) = _listWrites(x, operatorTokens, recoveryTokens);
+        (data[2], data[3], data[4]) = (trees[0], trees[1], trees[2]);
+        data[5] = _govern(x.ordersModifier, abi.encodeCall(IRoles.allowFunction, (OPERATOR, ORDER_SIGNER, UNSIGN_ORDER, DELEGATECALL)));
+        data[6] = _govern(x.ordersModifier, abi.encodeCall(IRoles.allowFunction, (OPERATOR, COMPOSABLE_COW, REMOVE, 0)));
+        IRoles.ConditionFlat[] memory returnTree = _anyOfTwo(x.assetSafe, x.agent);
+        uint256 k = 7;
+        for (uint256 i = 0; i < operatorTokens.length; i++) {
+            data[k++] = _govern(x.ordersModifier, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, operatorTokens[i])));
+            data[k++] = _govern(
+                x.ordersModifier, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, operatorTokens[i], TRANSFER, returnTree, 0))
+            );
+        }
+        bytes memory approval = abi.encodeWithSelector(APPROVE, COW_VAULT_RELAYER, type(uint256).max);
+        for (uint256 i = 0; i < approvalTokens.length; i++) {
+            data[k++] = abi.encodeCall(IRoles.execTransactionWithRole, (approvalTokens[i], 0, approval, 0, APPROVALS_ROLE, true));
+        }
+    }
+
+    function _listWrites(Context memory x, address[] memory operatorTokens, address[] memory recoveryTokens)
+        internal
         pure
         returns (address[] memory to, bytes[] memory data)
     {
@@ -138,7 +181,7 @@ contract OrdersShape {
 
     /// @notice The condition tree of `signOrder` on the order signer, in the SDK's form: the listed tokens on
     ///         each side, the receiver, plain ERC-20 balances, zero app data, no signed fee, a fee bound of zero
-    ///         and a `validDuration` of at most `life` (ADR 007, decisions 29, 42 and 43). Each list is sorted, as
+    ///         and a `validDuration` of at most `life`. Each list is sorted, as
     ///         the SDK sorts an Or of values, and holds at least two tokens.
     function signTree(address[] memory sell, address[] memory buy, address receiver, uint256 life)
         public
@@ -167,7 +210,7 @@ contract OrdersShape {
     }
 
     /// @notice The condition tree of a TWAP order through ComposableCoW, in the SDK's form: CoW's TWAP handler and
-    ///         current-timestamp factory, and one of decision 29's two shapes, each with the listed tokens, the
+    ///         current-timestamp factory, and one of the two allowed shapes, each with the listed tokens, the
     ///         receiver, a start at creation and zero app data. The shape of 12 parts at most 7 days apart comes
     ///         first, as the SDK orders the two.
     function twapTree(address[] memory sell, address[] memory buy, address receiver)

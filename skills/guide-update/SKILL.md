@@ -14,4 +14,4 @@ license: AGPL-3.0-or-later
 6. A new ADR, invariant, LIP part or runbook needs a citation in the guide, or an entry with a reason in `docs/onboarding/content/coverage.yaml`. A new box or arrow on the map needs a flow step or a tour scene that lights it.
 7. A new control gets its own browser test in `scripts/test_onboarding_page.py`. A new build check gets a negative case in `scripts/test_build_onboarding.py`. Break the page on purpose once to see the new test fail, then restore it. To test a broken copy of the page, set `ONBOARDING_PAGE` to its path.
 8. Look at the result: screenshot the changed tab in the light and the dark theme, in Plain and in Technical, in print and at phone width.
-9. Update `docs/onboarding/guide.md` when the guide gains a tab, a control or a check. Add a log fragment with `just log Update "..."`.
+9. Update `docs/onboarding/guide.md` when the guide gains a tab, a control or a check.

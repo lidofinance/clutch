@@ -6,7 +6,6 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 
 - `just check` — every check that CI runs. Run it before every commit; errors block the merge. Without just: `uvx --from rust-just==1.58.0 just check`.
 - `just regen` — rebuild every generated file after a change, and commit them. On a merge conflict in a generated file, take either side and run it again.
-- `just log KIND "TEXT"` — add the change's log entry as a fragment in `docs/log.d/`. Never edit `docs/log.md`.
 - `just test-fork` — the fork suite, with `RPC=<archive RPC>` in `.env`. Never commit a key, or an RPC URL that contains one.
 - `CONTRIBUTING.md` has the workflow; `skills/` has the procedures.
 
@@ -22,15 +21,17 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 - Write in Simplified Technical English: one idea per sentence, active voice, controlled `must`, `should`, `can` and `may`, absolute ISO dates.
 - Refer to people by role. The only names used are EM and YT, the two people that `config/actors.yaml` lists.
 - Call the screening vendor "the screening vendor" until the vendor is announced. `scripts/check_redaction.py` refuses restricted terms and secrets; never work around it.
-- Open a decision only as a complete row of the open-decision register: the question with its options, the page that closes it, your recommendation and who decides. EM triages and decides in batched interviews, one decisions branch at a time (ADR 012).
+- Open a decision only as a complete row of the open-decision register: the question with its options, the page that closes it, your recommendation and who decides. EM triages and decides in batched interviews, one decisions branch at a time; a build branch may also record the decisions that it raises (ADR 012, OD-124).
 - Take a new OD, ADR or INV number from `main` when you open the pull request. The validator refuses a number that is used twice.
+- Pages other than the decision log show the current design only. Keep every decision number: a replaced decision becomes one line, "Replaced by …" or "Lapsed …", and an amended one carries its current text with its ODs (OD-128).
 
 ## Rules for code and tests
 
 - Tests derive from specs and ADRs, never from the implementation. Recompute expected values independently.
 - A behaviour change updates its spec and invariants in the same commit.
 - Every invariant `INV-NNN` maps to a named test.
-- Easy Track factories are the only new contracts allowed. CoW's order signer has no known audit, so it counts as new code with them (OD-96). Everything else reuses deployed contracts.
+- The universal Easy Track factory and its thin companion contracts are the only new contracts allowed. CoW's order signer has no known audit, so it counts as new code with them (OD-96, OD-102, OD-117). Everything else reuses deployed contracts.
+- A contract's comments cite no ADR, OD, invariant, specification or test; `scripts/check_licences.py` refuses one (OD-123).
 - Source files carry `SPDX-License-Identifier: AGPL-3.0-or-later`. Files derived from Easy Track keep GPL-3.0. Files derived from the policy provider's Zodiac constellation keep LGPL-3.0-only and get `SPDX-License-Identifier: LGPL-3.0-only` when they change (OD-34).
 
 ## Out of scope for agents
@@ -39,7 +40,7 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 - A GitHub account of their own. An agent works through the account of the human who runs it, and the commit carries a `Co-Authored-By` trailer (ADR 012).
 - Any recipe in `mainnet.just`, and the package scripts that call the hosted Zodiac app (`push`, `pull`, `pull-org`, `pull-contracts`). Agents never use the Zodiac API key.
 - Anything under `deployed/`, and any governance action or deployment.
-- Parameters: budgets, approval ceilings, the orders account's token lists and the maximum order life, tranche amounts (OD-106), factory allowlists and role membership. Agents draft options; the acceptor decides.
+- Parameters: budgets, approval ceilings, the orders account's token lists and the maximum order life, tranche amounts (OD-106), the factory's shapes and role membership. Agents draft options; the acceptor decides.
 - Raising a runbook above `slop` without a fork drill record, or a policy change without the verification output.
 - Security assessments, audit opinions, release sign-off and legal opinions.
 - Edits to `LICENSE`, `SECURITY.md`, `AGENTS.md`, `config/actors.yaml` or `.github/` without an explicit human request.

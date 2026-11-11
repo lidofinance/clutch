@@ -71,7 +71,7 @@ def _coverage(group, name, reason=None, drop=False):
 CONTENT_CASES = [
     ("the committed content passes", lambda c: None, None),
     ("an unknown ADR", _source("ADR-999"), "unknown ADR ADR-999"),
-    ("an unknown open decision", _source("OD-999"), "unknown open decision OD-999"),
+    ("an unknown open decision", _source("OD-999"), "unknown decision OD-999"),
     ("an open decision that a later one replaced", _source("OD-68"), "OD-68 was replaced by OD-78"),
     ("an OD in the text that the sources do not cite", lambda c: c["actors"][0].update(what=c["actors"][0]["what"] + " See OD-65."),
      "actor committee: the text names OD-65, which its sources do not cite"),
@@ -108,7 +108,7 @@ CONTENT_CASES = [
     ("a percentage from the mandate draft", lambda c: c["mandate"]["blocks"][0].update(says="Up to 99 % each."), "must not appear"),
     ("a dollar figure from the mandate draft", lambda c: _first_change(c).update(why="It frees $1."), "must not appear"),
     ("a constellation change of an unknown kind", lambda c: c["constellation"]["changes"][0].update(kind="moved"), "bad kind moved"),
-    ("an unknown source in the constellation", lambda c: c["constellation"]["changes"][0]["sources"].append("OD-999"), "unknown open decision OD-999"),
+    ("an unknown source in the constellation", lambda c: c["constellation"]["changes"][0]["sources"].append("OD-999"), "unknown decision OD-999"),
     ("a planned part without sources", lambda c: c["constellation"]["planned"][0].update(sources=[]), "no sources"),
     ("an ask that the research note does not hold", lambda c: _first_ask(c).update(asked="An ask that the request never made."),
      "the ask is not in docs/research/request-for-solution-2026-10-07.md"),
@@ -125,6 +125,8 @@ CONTENT_CASES = [
     ("a reference to one decision of an ADR", _source("ADR-007#d27"), None),
     ("a reference to a section of an ADR", _source("ADR-007#consequences"), None),
     ("a reference to a decision that the ADR lacks", _source("ADR-007#d999"), "ADR-007 has no decision 999"),
+    ("a replaced decision as a source", _source("ADR-007#d23"), "ADR-007 decision 23 is replaced or lapsed"),
+    ("a lapsed decision as a source", _source("ADR-007#d9"), "ADR-007 decision 9 is replaced or lapsed"),
     ("a reference to a heading that the ADR lacks", _source("ADR-007#no-such-heading"), "ADR-007 has no heading #no-such-heading"),
     ("an assumption without an id", lambda c: c["assumptions"][0].pop("id"), "assumption 1: needs an id"),
     ("two assumptions with one id", lambda c: c["assumptions"][1].update(id=c["assumptions"][0]["id"]), "duplicate id"),
@@ -205,13 +207,14 @@ def main() -> int:
     where = {
         "decision": b.locate("ADR-007#d27", facts),
         "section": b.locate("ADR-007#proposed-direction", facts),
-        "row": b.locate("OD-57", facts),
+        "row": b.locate("OD-65", facts),
+        "entry": b.locate("OD-57", facts),
         "test": b.locate("test:test_D3_withdrawal_queue_is_out_of_scope", facts),
         "lip": b.locate("lip:part-8", facts),
     }
     texts = {k: b.extract((ROOT / w["path"]).read_text(encoding="utf-8"), w) for k, w in where.items()}
-    report(texts["decision"].startswith("27. ") and "Decision 27 replaces" in texts["decision"] and "\n28. " not in texts["decision"],
-           "a decision reference pins that decision and the notes that name it", texts["decision"][:80])
+    report(texts["decision"].startswith("27. ") and "16. Replaced by decision 27" in texts["decision"] and "\n28. " not in texts["decision"],
+           "a decision reference pins that decision and the lines that name it", texts["decision"][:80])
     report(texts["section"].startswith("## Proposed direction") and "## Options considered" not in texts["section"],
            "a heading reference pins that section alone", texts["section"][:80])
 
@@ -226,8 +229,9 @@ def main() -> int:
     report(b._named_decisions("Decisions 17 to 20 replace decisions 1, 3, 6 to 12 and 14; decision 15's count", "ADR-007")
            == {str(n) for n in [1, 3, 6, 7, 8, 9, 10, 11, 12, 14, 15, 17, 18, 19, 20]}, "lists and ranges of decisions are read")
     adr9 = (ROOT / facts["adrs"]["ADR-009"]["path"]).read_text(encoding="utf-8")
-    report("Decision 31 replaces decision 5" in b.decision_text(adr9, "ADR-009", "5"), "ADR 009's decision 5 pins the note that replaces it")
-    report(texts["row"].startswith("| OD-57 |"), "an OD reference pins its row", texts["row"][:80])
+    report("5. Replaced by decision 31 (OD-56)." in b.decision_text(adr9, "ADR-009", "31"), "ADR 009's decision 31 pins the line of the decision that it replaced")
+    report(texts["row"].startswith("| OD-65 |"), "an open OD reference pins its row", texts["row"][:80])
+    report(texts["entry"].startswith("- id: OD-57\n") and "\n- id: " not in texts["entry"], "a closed OD reference pins its entry", texts["entry"][:80])
     report(texts["test"].startswith("function test_D3_withdrawal_queue_is_out_of_scope(") and texts["test"].endswith("}"),
            "a test reference pins the test function", texts["test"][-80:])
     report(texts["lip"].startswith("#### Part 8"), "a LIP reference pins its part", texts["lip"][:80])

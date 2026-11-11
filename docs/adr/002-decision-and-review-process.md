@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:29:31Z
+  at: 2026-11-11T05:14:57Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -29,6 +29,11 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-20--adr-001-to-adr-004-verified-again-and-yt-registered
     sha256: d808f1c17061264a7585c626eb516cf8f810a62d590c851585a63c1ae9f5b253
+  - by: human:em
+    at: 2026-11-11T05:49:57Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-again
+    sha256: 79b9fedd2fec63527ec8a160cc20b6f97add1201166313a699d7d7c1b8cd4c0d
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -106,7 +111,7 @@ The validator does not yet check policy-verification output. That check arrives 
 
 - Agent edits reset reviewed pages to `slop`.
 - EM accepts through one explicit edit, not in conversation. The committee re-ratifies interim acceptances.
-- The validator cannot detect an edit that leaves `generated.at` unchanged. A base-branch comparison is planned for phase 1.
+- The validator detects an edit of a verified page by its body hash (OD-51). It cannot detect an edit of an unverified page that leaves `generated.at` unchanged.
 - The validator cannot identify who wrote a `human:` entry. Human pull request review is the control; CODEOWNERS and the `main` branch rule enforce it (OD-10, 2026-10-05).
 - A committee verification's `ref` makes the member's claim checkable against the decision record (decision 10). The entry remains a member's claim, not proof.
 - `recorded_by` identifies an entry made on instruction (decision 11). Entries without it still depend on human review.

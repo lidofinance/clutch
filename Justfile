@@ -29,7 +29,6 @@ doctor:
 
 # Rebuild every generated file: the policy artifact, the log, the status register and the guide
 regen: policy-compile
-	{{py}} scripts/build_log.py
 	{{py}} scripts/validate_docs.py --write-status
 	{{py}} scripts/build_onboarding.py
 
@@ -41,7 +40,6 @@ check-docs:
 	{{py}} scripts/validate_docs.py
 	{{py}} scripts/validate_docs.py --check-status
 	{{py}} scripts/test_validate_docs.py
-	{{py}} scripts/build_log.py --check
 	{{py}} scripts/build_onboarding.py --check
 	{{py}} scripts/test_build_onboarding.py
 	{{py}} scripts/check_redaction.py
@@ -77,10 +75,6 @@ links:
 # The fork suite on the pinned mainnet fork; needs RPC (no keys)
 test-fork:
 	RPC=${RPC} forge test -vvv
-
-# Add a log entry dated now, and rebuild the log. KIND: Decision, Evidence, Import, Initialization or Update
-log kind text:
-	{{py}} scripts/build_log.py --new {{quote(kind)}} {{quote(text)}}
 
 # Record a human's own verification of a page, with the hash of its body. Humans only (CONTRIBUTING.md)
 verify page by *flags:

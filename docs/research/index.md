@@ -24,9 +24,4 @@
 
 ## Archived
 
-Later decisions replaced the designs in these notes. They stay as the evidence of the decisions that closed them.
-
-* [Easy Track funding registries, 2026-10-02](funding-registries-2026-10-02.md) - OD-06: registry limits, periods, payment reference and live examples. OD-106 replaced the registries with tranche votes on 2026-11-05.
-* [Simplification options, 2026-10-08](simplification-2026-10-08.md) - OD-54–OD-57: launch cap, budgets and modifier alternatives. EM answered on 2026-10-08 and 2026-10-09; OD-58, OD-80 and OD-83 changed the design again.
-* [Stonks 2.0 pricing, 2026-10-05](stonks-pricing-2026-10-05.md) - OD-20: router, feeds and WETH pricing. OD-43 replaced this design on 2026-10-06.
-* [Stonks 2.0 instances, 2026-10-02](stonks-instances-2026-10-02.md) - OD-05 and OD-18: roles, orders, funding and pricing. OD-43 replaced this design on 2026-10-06.
+A note whose design later decisions replaced leaves this folder; git keeps it, and the decision log links it at the commit where it last stood (OD-128).

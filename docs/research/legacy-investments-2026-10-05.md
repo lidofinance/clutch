@@ -58,7 +58,7 @@ sources:
     resource: "https://github.com/lidofinance/docs/blob/fa199bc5e33e4e47d0a6232abec241f1cac69eba/docs/multisigs/committees.md"
     title: Lido multisig documentation at fa199bc — the LOL committee Safe and the Growth Committee
   - id: s16
-    resource: /research/funding-registries-2026-10-02.md
+    resource: "https://github.com/lidofinance/clutch/blob/6d5ebb8cd72732b1e531bb562af8a1c3be3f8a2d/docs/research/funding-registries-2026-10-02.md"
     title: Easy Track funding registries, 2026-10-02 — the twelve top-up registries
 ---
 

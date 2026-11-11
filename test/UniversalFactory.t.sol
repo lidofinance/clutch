@@ -358,6 +358,11 @@ contract UniversalFactoryRehearsal is EnabledVault {
     function test_uf_ceiling_rises_at_most_twofold_once_in_15_days() public enabled {
         bytes32 key = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDC);
         uint256 c = BUDGET_CEILING_USDC;
+        // the launch seed counts as the first raise, so the next one waits 15 days from it
+        (, uint64 seededAt,) = uf.ceilings(key);
+        assertEq(seededAt, deployedAt, "the seed's time");
+        _refuse(_ceilingOp(key, c, 2 * c), abi.encodeWithSelector(UniversalFactory.RaiseTooSoon.selector, key, uint256(seededAt) + 15 days));
+        vm.warp(uint256(seededAt) + 15 days);
         _refuse(_ceilingOp(key, c, 2 * c + 1), abi.encodeWithSelector(UniversalFactory.RaiseTooLarge.selector, key, 2 * c + 1, 2 * c));
         _motion(_one(_ceilingOp(key, c, 2 * c)));
         (, uint64 raisedAt,) = uf.ceilings(key);
@@ -601,6 +606,8 @@ contract UniversalFactoryRehearsal is EnabledVault {
         _measureMotion("approval list, one spender added", _one(_approvalsOp(Mainnet.USDC, usdc, _with(usdc, _derived(Mainnet.USDC, newVault)))));
         _measureMotion("budget", _one(_budgetOp(Mainnet.USDC, newVault, 1_000e6, bytes32(0))));
         bytes32 key = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDC);
+        (, uint64 seededAt,) = uf.ceilings(key);
+        vm.warp(uint256(seededAt) + 15 days);
         _measureMotion("ceiling", _one(_ceilingOp(key, BUDGET_CEILING_USDC, 2 * BUDGET_CEILING_USDC)));
         _measureMotion("insurance money", _one(_op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(1_000e6)))));
         UniversalFactory.Entry[] memory fresh = new UniversalFactory.Entry[](1);

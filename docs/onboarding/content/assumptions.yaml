@@ -38,17 +38,17 @@
   breaks: "A captured quorum of the committee's Safe can propose any motion, and LDO holders see each one for 72 hours. Such a motion can onboard a bad protocol and lose up to its budgets in each period. It can raise a ceiling at most twofold in 15 days, set any first ceilings for a token that it introduces (OD-113), or restart the operator after a stop. A burn motion moves the first-loss shares' value to the vault's other depositors. The quorum can also redeem the first-loss shares to the Asset Safe, and return vault tokens to the Aragon Agent, which stops the vault but loses nothing. Two compromised committee keys do not reach the emergency role (OD-58)."
   watched_by: ["test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval"]
   watch_note: "INV-002, INV-021 and INV-038 are pending. Paging on every emergency action, every burn motion and every action of the first-loss role is not built, and nor are the alerts on ceiling and restart motions and on transfers to the Agent."
-  sources: ["ADR-005#d2", "ADR-005#d9", "ADR-005#d24", "ADR-005#d27", "ADR-008#d21", "ADR-008#d23",
-    "ADR-008#consequences", "ADR-013#consequences", "ADR-014#consequences", OD-67, "ADR-006#d3", OD-58, OD-60, OD-108,
-    INV-002, INV-014, INV-021, INV-038, "ADR-005#d31", OD-80, OD-113, "ADR-013#d15"]
+  sources: ["ADR-005#d2", "ADR-005#d24", "ADR-005#d27", "ADR-008#d21", "ADR-008#d23", "ADR-008#consequences",
+    "ADR-013#consequences", "ADR-014#consequences", "OD-67", "ADR-006#d3", "OD-58", "OD-60", "OD-108",
+    "INV-002", "INV-014", "INV-021", "INV-038", "ADR-005#d31", "OD-80", "OD-113", "ADR-013#d15"]
 
 - id: guard-single-use
   assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
   kind: trust
-  why: "Above the launch cap, on-chain blocking before execution is a hard requirement. Once the cap lifts, the guard screens every transaction of the committee's Safe: every operator action, every new motion and the committee's other duties (OD-83)."
+  why: "Above the launch cap, on-chain blocking before execution is a hard requirement. Once the guard is set, before the second tranche's vote, it screens every transaction of the committee's Safe: every operator action, every new motion and the committee's other duties (OD-83)."
   breaks: "One standing approval of the modifier's execution function would approve all vault activity. One approved stray delegatecall can replace the code of the committee's Safe and drop the guard, and a module on that Safe would skip it. An outage stops the operator and new motions for up to ten days."
   watched_by: []
-  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector supports Safe v1.3.0 and must add this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before the cap lifts, not before the launch (OD-54)."
+  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector supports Safe v1.3.0 and must add this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before the second tranche's vote, not before the launch (OD-54)."
   sources: ["ADR-010#d2", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d12", "ADR-010#d17", "ADR-010#d20",
     "ADR-010#d22", "ADR-010#proposed-direction", INV-010, OD-54,
     "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard", OD-83]
@@ -88,8 +88,9 @@
   breaks: "Custody or recovery could fail. A delegatecall can replace a Safe's code without any Safe event."
   watched_by: [INV-019, "test:test_asset_safe_shape"]
   watch_note: "Safe's releases, advisories and bug-bounty records are checked again before the enabling vote. The critical alert on a singleton change is not built."
-  sources: ["ADR-005#d8", "ADR-005#d12", "ADR-005#d13", "ADR-005#d20", "ADR-005#context", "ADR-010#d16", "ADR-010#d18",
-    "ADR-010#proposed-direction", INV-019, "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
+  sources: ["ADR-005#d12", "ADR-005#d13", "ADR-005#d20", "ADR-005#context", "ADR-010#d16", "ADR-010#d18",
+    "ADR-010#proposed-direction", "INV-019",
+    "doc:docs/research/safe-v150-due-diligence-2026-10-05.md#summary"]
 
 - id: factory-shapes-safe
   assumption: "Every shape of the universal factory pins each receiver, owner and beneficiary, draws a budget key, writes the emergency exit and never emits an administrative function or a delegatecall other than the order signer's. Every raw write only narrows, and versions stop two motions from undoing each other."
@@ -97,10 +98,10 @@
   why: "Motions change the vault without a DAO vote. The factory is new code and the most critical contract: its shapes are the bound."
   breaks: "Any motion that survives its objection window can use a flaw in a shape. A sound shape can still point the operator at an unaudited contract; then only the attached budget bounds the loss. If the shapes prove too complex, the fallback's raw writes leave the objection window as the only bound on where funds go."
   watched_by: []
-  watch_note: "The factory's prototype passes INV-032 to INV-036 on a fork against the live Easy Track, for its core, the shape of an approval list, a token's introduction with its ceilings (OD-113), the restore of a revoked target (OD-104), and a token for the orders account in one motion (OD-118). The other shapes and their emergency exits are not built. The motion roles' limits are a second layer: the governance role's (INV-004), the exit-governance role's pinned exits (INV-025) and the orders modifier's roles (INV-040). An external audit is due in phase 3."
-  sources: ["ADR-013#d7", "ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#consequences", "ADR-013#confirmation",
-    INV-004, INV-032, INV-033, INV-034, INV-035, INV-036, OD-49, OD-102, "lip:part-4", OD-113, OD-104, INV-025, INV-040,
-    OD-118]
+  watch_note: "The factory's prototype passes INV-032 to INV-036 on a fork against the live Easy Track, for its core, the shape of an approval list, a token's introduction with its ceilings (OD-113), the restore of a revoked target (OD-104), a token for the orders account in one motion (OD-118), and the orders account's restore after an emergency stop (OD-119). The other shapes are not built; the orders token writes its own exit. The motion roles' limits are a second layer: the governance role's (INV-004), the exit-governance role's pinned exits (INV-025) and the orders modifier's roles (INV-040). An external audit is due in phase 3."
+  sources: ["ADR-013#d7", "ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#consequences",
+    "ADR-013#confirmation", "INV-004", "INV-032", "INV-033", "INV-034", "INV-035", "INV-036", "OD-49",
+    "OD-102", "lip:part-4", "OD-113", "OD-104", "INV-025", "INV-040", "OD-118", "OD-119"]
 
 - id: easy-track-window
   assumption: "Easy Track gives every motion an objection window of at least 48 hours, and rebuilds and hash-checks each script through its factory at enactment."
@@ -109,7 +110,7 @@
   breaks: "A motion could enact with changed content, too fast to object to, or over a newer change of the same scope. The guard screens the creation of a motion, not its enactment."
   watched_by: [INV-005, INV-006, "test:test_D1_substituted_script_rejected_at_enactment"]
   watch_note: "The tests use a mock Easy Track. The motion-lifecycle detector is not built."
-  sources: ["ADR-006#d1", "ADR-006#d3", "ADR-006#d6", "ADR-006#context", "ADR-013#context", "ADR-013#d10", INV-005, INV-006]
+  sources: ["ADR-006#d1", "ADR-006#d3", "ADR-006#context", "ADR-013#context", "ADR-013#d10", "INV-005", "INV-006"]
 
 - id: six-hour-start
   assumption: "The emergency Safe's signers can start any emergency action within six hours, and the Emergency Brakes multisig can pause Easy Track in that time."
@@ -240,11 +241,11 @@
 - id: monthly-report
   assumption: "The committee publishes each monthly report within seven days, from a generator that anyone can re-run."
   kind: operational
-  why: "Reports are the evidence for caps and tranche votes. No tranche vote starts while a report is late."
+  why: "Reports are the evidence for caps and tranche votes. The proposer starts no tranche vote while a report is late, and monitoring alerts on one that starts (OD-122)."
   breaks: "Tranche votes wait. A report that cannot be reproduced is a reversal condition. Reports have no on-chain anchor."
   watched_by: []
   watch_note: "The report generator and the day-8 flag are phase 2 work."
-  sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#reversal-conditions", "ADR-014#proposed-direction", OD-14]
+  sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#reversal-conditions", "ADR-014#proposed-direction", "OD-14", "OD-122"]
 
 - id: signer-rotation
   assumption: "Every rotation of a seat holder reaches the emergency Safe: a signer who leaves the committee or the Emergency Brakes multisig leaves the seat."

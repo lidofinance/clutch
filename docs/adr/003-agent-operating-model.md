@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T21:39:51Z
+  at: 2026-11-11T05:14:57Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -29,6 +29,11 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-22--adr-001-adr-003-and-adr-004-verified-again
     sha256: f6e1f8b3d0ce27dc614564333c6a0868092cad631ae173c65e08576531e80c8e
+  - by: human:em
+    at: 2026-11-11T05:49:57Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-again
+    sha256: e092343930158cba60bd02192cf82ba208c000f1f22f4c5c7802be2c9ab95b10
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -56,7 +61,7 @@ EM accepted the positioned model on 2026-09-30, with the line cap enforced by th
 3. An agent drafts the first `AGENTS.md`. EM prunes it by hand.
 4. Repeatable procedures are Agent Skills under `skills/`. The ADR-drafting skill is shared with Gaggle. Three skills are specific to Clutch: the permission-change verification procedure, the fork drill runner and a policy diff.
 5. Agents may branch, draft, write code and tests, and open pull requests.
-6. Agents never merge, never touch `deployed/` and never mark a page reviewed. Agents never change budgets, approval ceilings, swap instance settings, funding limits, factory allowlists or role membership.
+6. Agents never merge, never touch `deployed/` and never mark a page reviewed. Agents never change budgets, ceilings, the orders account's token lists, tranche amounts, the factory's shapes or role membership (OD-43, OD-102, OD-106).
 7. The licence, the security policy, `AGENTS.md`, the actor list and the CI files change only on an explicit human request. CODEOWNERS with required human review covers `AGENTS.md`, `skills/`, the CI files and the permission policy.
 8. The fork tests need an archive RPC. Keys never enter the repository or its logs.
 
@@ -67,7 +72,7 @@ EM decided on 2026-10-05, closing OD-10 [s1]:
 9. The `@lidofinance/defi-tech` team owns the repository. `@lidofinance/review-gh-workflows` owns `/.github/`. No new team is created.
 10. A branch rule on `main` requires a pull request and a code-owner review, allows no direct pushes, and dismisses approvals when new commits arrive.
 11. Every merge needs at least one approval from someone other than the pull request's creator.
-12. The agent's own GitHub identity comes later (OD-23).
+12. Replaced by ADR 012 decision 5 (decision log, 2026-10-07).
 
 EM confirmed on 2026-10-05, closing OD-25 [s1]:
 
@@ -90,7 +95,7 @@ Since OD-96, the swap instance settings of decision 6 are the orders account's t
 - Humans choose parameters. Agents can draft options but never pick one.
 - The human-written instruction-file goal remains unmet until EM prunes the initial agent draft.
 - A freshness check is owed; it must fail on broken paths and obsolete commands. Until it exists, that goal remains unmet.
-- Of the four planned skills, only `skills/adr-draft/` exists. The three Clutch-specific skills arrive with their tools in phase 2.
+- The procedures live in `skills/`: `adr-draft`, `decision-interview`, `record-decision`, `guide-update` and `research-note`.
 - An agent owns no GitHub account: its work lands through the account of the human who runs it (OD-23, [ADR 012](/adr/012-contributing-with-many-agents.md) decision 5). Another owning-team member must approve; the creator's approval does not count.
 - The rules bind only while both owner teams have write access and the branch rule is active. The agent's environment cannot check either.
 - A `human:` entry alone no longer proves human authorship. `recorded_by` and the quoted instruction identify agent-recorded entries (decision 14); the register marks them `(recorded)`.

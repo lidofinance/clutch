@@ -1,3 +1,0 @@
-date: '2026-11-08'
-kind: Decision
-text: 'Recorded EM''s decisions of 2026-11-08: the universal factory may carry a shape in a thin companion contract that it creates and only reads (OD-117, ADR 013 decision 17). EM did not accept two motions for one orders token and asked for a hash-approving helper; OD-118 stays open, with the agent''s measured alternative: the factory applies a motion''s writes in its one call.'

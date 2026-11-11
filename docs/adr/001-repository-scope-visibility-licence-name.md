@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-22T21:39:51Z
+  at: 2026-11-11T05:14:57Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -29,6 +29,11 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-22--adr-001-adr-003-and-adr-004-verified-again
     sha256: b4c7ee4d2ae6e9021c14ca736f9c3864059c407a6cf4401579e546ecec6c12af
+  - by: human:em
+    at: 2026-11-11T05:49:57Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-again
+    sha256: 52cfdbfbc42b23ae8d8d23fa7d83c33dfbe067c7c871f975887f76f42767eeab
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -64,7 +69,7 @@ sources:
 ## Context
 
 - Decisions, specifications, policy, code, tests and deployment records need one consistent source.
-- The factories will reuse Easy Track's audited GPL-3.0 base contracts [s3].
+- Easy Track's audited base contracts are GPL-3.0 [s3]. The universal factory imports none of them.
 - The dry-run kit has six commits whose messages explain the corrections.
 - The design names an unannounced screening vendor.
 
@@ -112,7 +117,7 @@ EM decided on 2026-10-22, closing OD-95 [s1]:
 ## Confirmation
 
 - The visibility setting of `lidofinance/clutch` on GitHub.
-- `grep -rL --include='*.sol' --include='*.py' --include='*.ts' --exclude-dir=node_modules "SPDX-License-Identifier: AGPL-3.0-or-later" src script scripts test policy` lists only files derived from Easy Track or from the provider's constellation. A CI check replaces this command once the factories exist.
+- `scripts/check_licences.py` checks in CI that every source file carries an allowed licence line: AGPL-3.0-or-later, or the licence of the code that it derives from.
 
 ## Reversal conditions
 

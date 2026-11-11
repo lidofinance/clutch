@@ -1,3 +1,0 @@
-date: '2026-11-08'
-kind: Decision
-text: 'Recorded EM''s decision of 2026-11-08 on OD-118 ("do A"): the universal factory holds the motion roles, and a motion''s script makes one call, the factory''s applyMotion, which checks the motion again, stores its versions and makes its writes (ADR 013 decision 18). One motion adds a token to the orders account.'
