@@ -100,6 +100,9 @@ sources:
   - id: s30
     resource: "urn:clutch:interview:2026-11-08-od118"
     title: EM's choice of the factory that makes a motion's writes in one call, 2026-11-08; the transcript is not in the repository
+  - id: s31
+    resource: "urn:clutch:interview:2026-11-10-consolidation"
+    title: EM's request for a hard consolidation, and EM's answers to its eight questions and two cards, 2026-11-10; the transcript is not in the repository
 ---
 
 # Decision log
@@ -109,6 +112,43 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-10 — OD-119 to OD-128: the consolidation's answers
+
+EM asked for a consolidation of the whole repository:
+
+> before you start first-loss slice let's re-derive everything from ADRs and ODs and find inconsistencies, stale facts, broken semantics. repetitive and redundant artifacts; try hard on minimizing the written artifacts especially when they move in cycles (e.g. we started with X, then tried Y, then rolled back to X, and etc.) — I want to compress and cut complexity, do a hard run on this
+
+The agent audited every ADR, specification and register against the decisions. Of the 263 numbered decisions of ADRs 005 to 014, 67 were replaced and 75 amended, and about 370 passages were stale, contradictory or redundant. It asked eight design questions and proposed seven cards of cuts, K1 to K7.
+
+> Answers on design issues
+> 1. Add one orders-restore operation
+> 2. Count the vote's seed as the first raise
+> 3. The guard goes on before the second tranche's vote starts, and the UI requests approvals from that moment.
+> 4. Tranche-vote gates: make it the proposer's duty, plus an alert.
+> 5. Don't allow ADR references in natspec
+> 6. Allow this
+> 7. Confirm
+> 8. Confirm
+>
+> K6: yes
+> K7: I approve edits for AGENTS.md and the accepted ADRs
+>
+> Go ahead will all of this
+
+Recorded as:
+
+- (OD-119, question 1) One motion restores the orders account after an emergency stop: the operator's targets, its order trees and cancels and each operator token's return, for the current lists, and the relayer approval of the listed tokens that the motion names ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 46). EM chose the agent's recommendation.
+- (OD-120, question 2) A launch ceiling's seed counts as its first raise, so its next raise waits 15 days ([ADR 013](/adr/013-one-easy-track-factory.md), decision 15). EM chose the agent's recommendation.
+- (OD-121, question 3) The guard goes on the committee's Safe, with its bypass mode off, before the second tranche's vote starts, and the Zodiac UI requests the screening vendor's approval from that moment ([ADR 010](/adr/010-pre-execution-screening.md), decisions 22 and 25). EM chose the agent's recommendation.
+- (OD-122, question 4) The gates on a tranche vote are a duty of the vote's proposer, and monitoring alerts on a tranche vote that starts while a gate holds ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 19, 21, 36 and 41). EM chose the agent's recommendation.
+- (OD-123, question 5) A contract's comments cite no ADR, open decision, invariant, specification or test, and a check refuses one ([specification policy](/specs/specification-policy.md)). The agent had recommended allowing stable IDs; EM decided otherwise.
+- (OD-124, question 6) A decision may be recorded on the build branch that raised it ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 4). EM chose the agent's recommendation.
+- (OD-125, question 7) Besides funding tranches and the replacement of a role holder, three actions stay Aragon votes: an owner action on a vault Safe, a new or changed factory, and the unpause of Easy Track ([ADR 013](/adr/013-one-easy-track-factory.md), decision 4). EM confirmed the agent's reading.
+- (OD-126, question 8) The orders account and the first-loss Safe use Safe v1.5.0, as the Asset Safe and the emergency Safe do ([ADR 005](/adr/005-account-graph-and-roles.md), decision 13). EM confirmed.
+- (OD-127, K6) The open-decision register lists open items only, and the activity log goes: git and this decision log keep the history ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 13). EM chose the agent's recommendation.
+- (OD-128, K1 to K5) Pages show the current design only. An ADR keeps every decision number; a replaced decision becomes one line that names what replaced it; an amended decision carries its current text; the history stays in this decision log and in git ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 14). EM approved the cards with "Go ahead will all of this".
+- (K7) EM approved edits of AGENTS.md and of the accepted ADRs 001 to 004. Each edited accepted ADR needs EM's verification again. [s31]
 
 ## 2026-11-08 — OD-118: the factory makes a motion's writes in one call
 

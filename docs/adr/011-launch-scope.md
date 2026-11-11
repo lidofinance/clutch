@@ -1,28 +1,19 @@
 ---
 type: Decision
 title: "ADR 011: Launch scope"
-description: Launch assets and venues, the later Lido Lend onboarding and excluded integrations.
+description: The launch assets and venues, the later onboarding of Lido Lend, and the integrations outside the launch.
 tags: [scope, assets, launch, lido-lend]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-05T19:22:54Z
+  at: 2026-11-11T04:42:44Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the launch assets, DAI and Lido Lend, 2026-09-22, on WETH and DAI, 2026-10-05, on LDO, 2026-10-22, and on tranche votes, tokens by motion and ceilings, 2026-11-05
-  - id: s2
-    resource: /specs/lip-draft.md
-    title: LIP draft — launch asset and action matrix
-  - id: s3
-    resource: "https://github.com/lidofinance/clutch/blob/7a8c6613602a0078807298b1cebb513af2d74bd5/test/README.md"
-    title: Kit harness README at 7a8c661 — the policy follows the launch scope; what the kit still lacks
-  - id: s4
-    resource: /research/chain-reads-2026-09-30.md
-    title: Chain reads, 2026-09-30 — USDS is not in the payment ACL chain
+    title: Decision log — EM on the launch assets, DAI, WETH, LDO and Lido Lend, 2026-09-22 to 2026-11-05
   - id: s5
     resource: /research/dai-usds-conversion-2026-10-05.md
     title: DAI and the DAI–USDS converter, 2026-10-05 — the treasury's stablecoins, the converter, and the two tokens
@@ -41,107 +32,68 @@ sources:
 
 ## Context
 
-- Lido Lend is expected in October 2026 with Morpho Blue compatibility [s1].
-- Existing payments exclude USDS [s4]; EM chose its addition by vote on 2026-10-05 (decision 5).
-- The kit follows this scope since 2026-10-05 [s3].
-- The mandate caps each of USDC, USDT, USDS and DAI as a share of stablecoins, with one month of baseline spend as a stablecoin buffer [s6].
-- Sky converts DAI/USDS one-to-one in either direction, without admin or fee, to a caller-named receiver. USDS is upgradeable by Sky; DAI is not. The Agent holds 4,673,791.03 DAI [s5].
+- Lido Lend is a lending product that is compatible with Morpho Blue [s1].
+- The mandate caps each of USDC, USDT, USDS and DAI as a share of stablecoins [s6].
+- Sky converts DAI and USDS one to one in either direction, without an admin or a fee, to a receiver that the caller names. Sky can upgrade USDS; DAI is not upgradeable. The Agent holds 4,673,791.03 DAI [s5].
 
 ## Decision
 
-EM decided on 2026-09-22 [s1]:
+EM decided each decision below; its ODs lead to EM's words in the [decision log](/registers/decision-log.md) [s1].
 
-1. The launch list: "ETH, WETH, stETH, wstETH, EarnETH, EarnUSD, USDC, USDT, USDS, sUSDS, CowSwap access, Lido Lend access (which is basically Morpho Blue compat), LDO".
-2. Add DAI.
-3. Launch without Lido Lend, but with the Morpho Blue template and end-to-end tests for it. Lido Lend must be ready on the day it deploys, through an Easy Track motion.
-4. CoW access runs through Stonks 2.0, the default swap engine ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
-
-EM decided on 2026-10-05, closing OD-11 [s1]:
-
-5. The funding assets are USDC, USDT, DAI, USDS, sUSDS and stETH. ETH is not one ([ADR 008](/adr/008-funding-through-existing-payments.md)).
-
-EM decided on 2026-10-05, closing OD-20 [s1]:
-
-6. WETH is supported through stETH: it is unwrapped and staked to sell, and bought back through Lido's withdrawal queue. Only stETH, LDO, USDC, USDT, USDS and DAI are swapped ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
-
-EM decided on 2026-10-05, closing OD-22 [s1]:
-
-7. DAI earns through Sky's DAI–USDS converter. The operator may convert DAI to USDS and back, one to one, with the receiver pinned to the Asset Safe.
-8. The DAI and USDS approvals to the converter carry a fixed ceiling of one TM Floor Value, as the stETH approval to the wstETH contract does ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
-9. DAI stays out of the Stonks rebalancing set. Recovery keeps its DAI→USDC instance.
-
-EM decided on 2026-10-06, closing OD-41 and OD-43 [s1]:
-
-10. Lido Lend stays in the protocol cap until it matures, and a motion unlocks it ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28). earnETH and earnUSD are not new products.
-11. Every swap is a CoW order placed from the orders account. Uniswap and 1inch wait until the screening vendor can bound a swap's minimum output ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). This replaces decision 4. Decision 6 stands for WETH; its list of swapped tokens gives way to the order lists of ADR 007. Decision 9 stands for the operator's order lists: DAI stays out of them, and recovery can still sell DAI into USDC or USDT.
-
-EM decided on 2026-10-06, closing OD-46 [s1]:
-
-12. WETH joins the operator's order lists ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 22). The route of decision 6 through stETH stays available, but it is no longer the only one. A later token needs a DAO vote.
-
-EM stated on 2026-10-06, closing OD-49 [s1]:
-
-13. Lido Lend is a separate deployment that is compatible with Morpho Blue, not markets on Morpho Blue's own contract. Its address enters with the onboarding motion, and that motion also adds its emergency exit ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13).
-
-EM decided on 2026-10-08 [s1]:
-
-14. Lido's withdrawal queue leaves the launch scope. WETH is bought and sold in CoW orders, and ETH is staked through `submit` ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 27). The other assets of the launch list stay: ETH staking, WETH, DAI with Sky's converter, and LDO.
-
-Decision 14 replaces the withdrawal-queue route of decision 6.
-
-EM decided on 2026-10-22, closing OD-91 [s1]:
-
-15. LDO leaves the launch list. It is on neither the operator's order lists nor the recovery sell list.
-
-Decision 15 replaces LDO in decisions 1 and 14, and in the operator's lists of [ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 4 and 22.
-
-Since OD-89, the TM Floor Value of decision 8 means one mandate size ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 32 to 34).
-
-Since EM's decisions of 2026-11-05:
-
-- Each tranche vote names its tokens, so decision 5's funding assets are no longer a fixed list (OD-106, [ADR 014](/adr/014-funding-by-tranche-votes.md) decision 3). LDO stays off the launch list (decision 15).
-- A later token joins the order lists by motion, which replaces the vote in decision 12 (OD-103, [ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 41).
-- The fixed ceiling of decision 8 changes by motion within the limit of [ADR 013](/adr/013-one-easy-track-factory.md) decision 13 (OD-105).
-- Lido Lend's onboarding motion of decision 13 runs through the universal factory, and its insurance ships with the launch (OD-102, OD-107).
+1. The launch list is ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW access, and Lido Lend access, which is compatibility with Morpho Blue (decision log, 2026-09-22; OD-91).
+2. The launch list includes DAI (decision log, 2026-09-22).
+3. The vault launches without Lido Lend, but with the universal factory's Morpho Blue shape and end-to-end tests for it. Lido Lend must be ready on the day it deploys, through a motion (decision log, 2026-09-22; OD-102).
+4. Replaced by decision 11 (OD-43).
+5. Replaced by ADR 014 decision 3 (OD-106).
+6. Replaced by decision 12 (OD-46).
+7. DAI earns through Sky's DAI–USDS converter. The operator may convert DAI to USDS and back, one to one, with the receiver pinned to the Asset Safe (OD-22).
+8. The DAI and USDS approvals to the converter have a fixed ceiling of one mandate size, as the stETH approval to the wstETH contract does, and a motion changes it as [ADR 013](/adr/013-one-easy-track-factory.md) decision 13 allows (OD-22, OD-89, OD-105).
+9. DAI stays off the operator's order lists, and recovery can sell DAI into USDC or USDT (OD-22, OD-43).
+10. Lido Lend stays in the protocol cap until it matures, and a motion unlocks it ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28). earnETH and earnUSD are not new products (OD-41).
+11. Every swap is a CoW order placed from the orders account. Uniswap and 1inch wait until the screening vendor can bound a swap's minimum output ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 20) (OD-43).
+12. WETH is on the operator's order lists ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 22). A later token joins the lists by motion ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 41) (OD-46, OD-103).
+13. Lido Lend is a separate deployment that is compatible with Morpho Blue, not markets on Morpho Blue's own contract. Its address enters with the universal factory's onboarding motion, and that motion also adds its emergency exit ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13) (OD-49, OD-102).
+14. Lido's withdrawal queue is outside the launch scope. WETH is bought and sold in CoW orders, and ETH is staked through `submit` ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 27) (decision log, 2026-10-08).
+15. LDO is off the launch list. It is on neither the operator's order lists nor the recovery sell list (OD-91).
 
 ## Proposed direction
 
-The rest of this section is agent-drafted [s2]. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM has not accepted it as text.
 
 | Asset or venue | Role in the vault | Notes |
 |---|---|---|
-| ETH, WETH | held; wrap and unwrap; WETH bought and sold in CoW orders by the operator, and sold by recovery; staking stays available; no withdrawal queue (decision 14) | can come in a tranche vote ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 3) |
+| ETH, WETH | held; wrap and unwrap; ETH staked through `submit`; WETH bought and sold in CoW orders by the operator, and sold by recovery (decision 14) | can come in a tranche vote ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 3) |
 | stETH, wstETH | held; wrap and unwrap; sold through CoW orders | can come in a tranche vote |
 | USDC, USDT | held | can come in a tranche vote |
-| DAI | held; converted to USDS and back through Sky's converter, one to one | can come in a tranche vote; recovery sells it into USDC or USDT (OD-26) |
+| DAI | held; converted to USDS and back through Sky's converter, one to one | can come in a tranche vote; recovery sells it into USDC or USDT (decision 9) |
 | USDS | held; receives converted DAI | can come in a tranche vote, because Aragon Voting pays any token through Finance |
 | sUSDS | savings position | the universal factory's tokenized-vault shape; can come in a tranche vote; the operator redeems it, and recovery can sell it in a CoW order |
-| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares go from the Growth Committee to the first-loss Safe, where a burn runs only by Easy Track motion and the narrow role of the committee's Safe redeems them to the Asset Safe (OD-21, OD-42, OD-60, OD-67, OD-108); insurance for both vaults is built in at launch (OD-107) |
-| Orders account | CoW market, limit and TWAP orders for the operator, and no stop-loss orders ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 39); recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Lido Lend | lending, after launch | one motion through the universal factory's Morpho Blue shape once Lido Lend's own contract exists, which also adds its emergency exit (OD-49, OD-102); the protocol cap applies until it matures and a budget motion unlocks it (OD-41); its insurance is built in at launch (OD-107) |
+| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares sit in the first-loss Safe, where a burn runs only by a motion of the universal factory and the role of the committee's Safe redeems them to the Asset Safe ([ADR 008](/adr/008-funding-through-existing-payments.md) decisions 21 and 23); insurance for both vaults is built in at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
+| Orders account | CoW market, limit and TWAP orders for the operator; recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
+| Lido Lend | lending, after launch | one motion through the universal factory's Morpho Blue shape, once Lido Lend's own contract exists, which also adds its emergency exit (decision 13); the protocol cap applies until it matures and a budget motion unlocks it (decision 10); its insurance is built in at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
 
-Out of the launch scope: sDAI, Aave and every other third-party lending market, Lido's withdrawal queue (decision 14), LDO (decision 15), and router swaps on Uniswap and 1inch until the screening vendor can bound their output (OD-43).
+Out of the launch scope: sDAI, Aave and every other third-party lending market, Lido's withdrawal queue (decision 14), LDO (decision 15), and router swaps on Uniswap and 1inch until the screening vendor can bound their output (decision 11).
 
 ## Options considered
 
-- Wait for Lido Lend: EM rejected; onboard it later by motion.
-- Keep Aave v3/sDAI: rejected because EM's list excludes them.
-- Rebalance DAI through Stonks: EM rejected because each conversion pays stablecoin-pair margin.
-- Leave DAI idle in the buffer: EM rejected because it earns nothing, and excess above its cap could only be fixed by recovery or a vote.
+- **Wait for Lido Lend:** not chosen (decision 3). A motion onboards it later.
+- **Aave v3 or sDAI:** not chosen. EM's launch list leaves them out.
+- **Swap DAI for USDS in CoW orders:** not chosen. Each swap pays a stablecoin-pair margin; Sky's converter is one to one, without a fee [s5].
+- **Leave DAI idle:** not chosen (decision 7). It earns nothing.
 
 ## Consequences
 
-- The universal factory's Morpho Blue shape ships before its target market exists. Acceptance requires end-to-end fork tests against deployed Morpho Blue.
-- The kit's policy no longer grants Aave v3, sDAI or order pre-signing; fork tests refuse them [s8].
-- The kit authorizes asynchronous vault deposits at the policy layer; settlement is untested.
-- DAI earns only after conversion into upgradeable USDS [s5]. The operator can keep each stablecoin within its cap through DAI/USDS conversion and CoW sales of USDS.
-- The converter adds a policy target with fixed-ceiling approvals, like stETH-to-wstETH.
+- The universal factory's Morpho Blue shape ships before its target market exists. Its acceptance needs end-to-end fork tests against the deployed Morpho Blue.
+- The policy grants no Aave v3, no sDAI and no order pre-signing on the Asset Safe; tests refuse them [s8].
+- The policy authorizes asynchronous vault deposits; their settlement is untested.
+- DAI earns only after its conversion into USDS, which Sky can upgrade [s5]. The operator can keep each stablecoin within its cap through the DAI–USDS conversion and CoW sales of USDS.
+- The converter adds a policy target with fixed-ceiling approvals, like the stETH approval to the wstETH contract.
 
 ## Confirmation
 
-- INV-015 in the [invariants](/specs/invariants.md); tests refuse every out-of-scope venue [s8].
-- The universal factory's Morpho Blue shape's end-to-end test remains unbuilt.
-- Converter tests pay the Asset Safe in both directions, refuse other receivers and refuse approvals at or above the ceiling [s7]. The kit ceiling stands in for one mandate size.
+- INV-015 in the [invariants](/specs/invariants.md); tests refuse every venue outside the scope [s8].
+- Converter tests pay the Asset Safe in both directions, refuse other receivers and refuse approvals at or above the ceiling [s7]. The kit's ceiling stands in for one mandate size.
+- Owed: the universal factory's Morpho Blue shape and its end-to-end test.
 
 ## Reversal conditions
 

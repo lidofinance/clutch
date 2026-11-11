@@ -551,6 +551,7 @@
     - {od: OD-02, part: true}
     - {od: OD-07, part: true}
     - {od: OD-17, part: true}
+    - {od: OD-19}
 - id: OD-81
   question: "How do the guide and the diagrams show the Emergency Brakes multisig?"
   closed: 2026-10-14
@@ -736,6 +737,8 @@
     - {od: OD-36, part: true}
     - {od: OD-46, part: true}
     - {od: OD-78, part: true}
+    - {od: OD-57, part: true}
+    - {od: OD-58, part: true}
 
 - id: OD-104
   question: "Who restarts the operator after the emergency switch?"
@@ -776,6 +779,7 @@
     - {od: OD-07, part: true}
     - {od: OD-54, part: true}
     - {od: OD-92, part: true}
+    - {od: OD-73, part: true}
   refines: [OD-14, OD-62, OD-84, OD-89, OD-98]
 
 - id: OD-107
@@ -879,6 +883,7 @@
     - "2026-11-08 — OD-117 and OD-118: the companion contract, and one motion for a token"
   adr: [ADR-013#d17]
   see: [/research/orders-token-motions-2026-11-08.md]
+  refines: [OD-102]
 
 - id: OD-118
   question: "One motion that adds a token to the orders account fails under EIP-7825's gas cap: how does one motion fit?"
@@ -888,3 +893,82 @@
     - "2026-11-08 — OD-118: the factory makes a motion's writes in one call"
   adr: [ADR-013#d18]
   see: [/research/orders-token-motions-2026-11-08.md]
+  refines: [OD-102, OD-104]
+
+- id: OD-119
+  question: "How does the orders account come back after the emergency role stops the operator there?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  adr: [ADR-007#d46]
+  refines: [OD-103, OD-104]
+
+- id: OD-120
+  question: "Does a launch ceiling's seed count as its first raise?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  adr: [ADR-013#d15]
+  refines: [OD-105, OD-113]
+
+- id: OD-121
+  question: "When does the screening guard go on the committee's Safe, and when does the Zodiac UI request the vendor's approval?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  adr: [ADR-010#d22, ADR-010#d25]
+  refines: [OD-54, OD-83, OD-88]
+
+- id: OD-122
+  question: "How do the gates on a tranche vote hold, when any LDO holder can start a vote?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  adr: [ADR-009#d19, ADR-009#d21, ADR-009#d36, ADR-009#d41]
+  refines: [OD-106]
+
+- id: OD-123
+  question: "May a contract's comments cite ADRs, open decisions, invariants, specifications or tests?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  see: [/specs/specification-policy.md]
+
+- id: OD-124
+  question: "May a decision be recorded on the build branch that raised it?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  adr: [ADR-012#d4]
+
+- id: OD-125
+  question: "Which actions, besides funding tranches and the replacement of a role holder, stay Aragon votes after launch?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  adr: [ADR-013#d4]
+  refines: [OD-101]
+
+- id: OD-126
+  question: "Which Safe version do the orders account and the first-loss Safe use?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  adr: [ADR-005#d13]
+  refines: [OD-02, OD-17]
+
+- id: OD-127
+  question: "Do the register's closed index and the activity log stay?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  adr: [ADR-012#d13]
+  replaces:
+    - {od: OD-82, part: true}
+
+- id: OD-128
+  question: "How do pages show the decisions that later decisions replaced or amended?"
+  closed: 2026-11-10
+  log:
+    - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
+  adr: [ADR-012#d14]
