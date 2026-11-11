@@ -8,8 +8,8 @@ review_status: human-reviewed
 decision: accepted
 accepted_by: human:em
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-11T05:14:57Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T16:59:06Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -80,47 +80,31 @@ sources:
 
 ## Decision
 
-EM accepted the positioned model on 2026-09-30 [s1]:
+EM decided each decision below; its ODs lead to EM's words in the [decision log](/registers/decision-log.md) [s1].
 
-1. **Conceptual specifications** are written by hand. They hold what code cannot say: the architecture, the roles matrix, the permission model, the invariants and the threat model.
-2. **The API reference** is generated from NatSpec. Nobody edits it by hand.
-3. **Invariants** have IDs `INV-NNN`. Each maps to a named test, and CI fails on a Draft invariant without one.
-4. **Behaviour** is written as WHEN/THEN scenarios. Tests derive from the specifications, never from the implementation. A behaviour change updates its specification in the same commit.
-5. **The LIP** is a third, external layer. It summarises and cites the conceptual specifications and must never contradict them.
-6. **Runbooks** are a separate class under `docs/runbooks/`. There is one per emergency or technical action. Each maps to a permission and carries a drill record.
-7. **The permission policy is a data file.** A script compiles it into modifier calls. A round-trip check reads the applied conditions back from the modifier on a fork and compares them with the data file, so the chain checks the compiler. Behaviour tests assert what each role can and cannot do, independent of the encoding.
-
-Rejected: keeping the Solidity builders as the source of truth, and adopting the TypeScript policy format of the original proposal [s1].
-
-EM decided on 2026-10-05, closing OD-16 [s1]:
-
-8. The policy data file is YAML with a strict schema. Addresses and amounts are quoted strings, YAML anchors and aliases are not allowed, and CI checks the file against a JSON Schema.
-9. The compiler is a Python program run with uv and pinned dependencies. It emits one JSON artifact: the ordered modifier calls, the expected condition tree for every role, target and selector, and the allowances. The Foundry tests, the enabling vote script and the policy-drift detector all consume that artifact. The round-trip check rebuilds the trees from the modifier's events on a fork and compares them with the artifact.
-
-EM decided on 2026-10-06, closing OD-33 [s1]:
-
-10. Clutch works in the Zodiac UI. The team pushes the constellation to a Lido Zodiac workspace. The UI shows the account graph and the policy, the difference from the chain, and the transactions that a change needs.
-11. Local tooling replicates and verifies everything that the UI produces. No transaction that the hosted app builds is signed, or enters a vote or a motion, unless Clutch's compiler produces the same calls from the same commit. The policy changes only in the repository; a change made in the UI is drift.
-12. The policy source is the Zodiac constellation, written in TypeScript under `policy/`. It replaces the YAML file of decision 8. Decision 7 still applies through decision 14: the compiled artifact is the policy's data.
-13. Clutch's own compiler, written in TypeScript on the Zodiac roles SDK, replaces the Python compiler of decision 9. It runs offline from a frozen lockfile with pinned versions, and it emits the artifact of decision 9. It refuses an entry that only the hosted app can compile, such as an action or a DeFi Kit preset, because local tooling cannot verify it.
-14. The artifact is committed. A policy pull request carries the TypeScript change and the recompiled artifact, and CI fails when they differ. Reviewers approve the artifact. The enabling vote, the universal factory's seeded versions and the drift detector consume the committed artifact.
-15. The Solidity builders go now. The port to the constellation deletes them and rebuilds the fork tests on the artifact. The port does not have to reproduce the builders' trees.
-
-Not chosen on 2026-10-06: the hosted app as an optional viewer only, the hosted app without local verification, a Python compiler that reads a JSON export of the constellation, review of the TypeScript only, and a gate that keeps the Solidity builders until the compiled trees equal theirs.
-
-EM decided on 2026-10-06, closing OD-35 [s1]:
-
-16. The team that owns the repository, `@lidofinance/defi-tech`, owns the Lido Zodiac workspace and its API key. A member of that team pushes from the merged `main`, with the key in a local `.env` that git ignores. The committee and the Emergency Brakes multisig get access to view the workspace. CI holds no key.
-
-EM decided on 2026-10-13, closing OD-64 [s1]:
-
-17. The Emergency Brakes multisig does not get access to view the workspace. This replaces the Emergency Brakes multisig in decision 16.
+1. **Conceptual specifications** are written by hand. They hold what code cannot say: the architecture, the roles matrix, the permission model, the invariants and the threat model (decision log, 2026-09-30).
+2. **The API reference** is generated from NatSpec. Nobody edits it by hand (decision log, 2026-09-30).
+3. **Invariants** have IDs `INV-NNN`. Each maps to a named test, and CI fails on a Draft invariant without one (decision log, 2026-09-30).
+4. **Behaviour** is written as WHEN/THEN scenarios. Tests derive from the specifications, never from the implementation. A behaviour change updates its specification in the same commit (decision log, 2026-09-30).
+5. **The LIP** is a third, external layer. It summarises and cites the conceptual specifications and must never contradict them (decision log, 2026-09-30).
+6. **Runbooks** are a separate class under `docs/runbooks/`. There is one per emergency or technical action. Each maps to a permission and carries a drill record (decision log, 2026-09-30).
+7. **The permission policy is a data file.** A script compiles it into modifier calls. A round-trip check reads the applied conditions back from the modifier on a fork and compares them with the data file, so the chain checks the compiler. Behaviour tests assert what each role can and cannot do, independent of the encoding (decision log, 2026-09-30).
+8. Replaced by decision 12 (OD-33).
+9. Replaced by decision 13 (OD-33).
+10. Clutch works in the Zodiac UI. The team pushes the constellation to a Lido Zodiac workspace. The UI shows the account graph and the policy, the difference from the chain, and the transactions that a change needs (OD-33).
+11. Local tooling replicates and verifies everything that the UI produces. No transaction that the hosted app builds is signed, or enters a vote or a motion, unless Clutch's compiler produces the same calls from the same commit. The policy changes only in the repository; a change made in the UI is drift (OD-33).
+12. The policy source is the Zodiac constellation, written in TypeScript under `policy/`. Decision 7 applies through decision 14: the compiled artifact is the policy's data (OD-33).
+13. Clutch's own compiler is written in TypeScript on the Zodiac roles SDK. It runs offline from a frozen lockfile with pinned versions. It emits one JSON artifact: the ordered modifier calls, the expected condition tree for every role, target and selector, and the allowances. The round-trip check rebuilds the trees from the modifier's events on a fork and compares them with the artifact. The compiler refuses an entry that only the hosted app can compile, such as an action or a DeFi Kit preset, because local tooling cannot verify it (OD-16, OD-33).
+14. The artifact is committed. A policy pull request carries the TypeScript change and the recompiled artifact, and CI fails when they differ. Reviewers approve the artifact. The enabling vote, the universal factory's seeded versions and the drift detector consume the committed artifact (OD-33).
+15. The Solidity builders go now. The port to the constellation deletes them and rebuilds the fork tests on the artifact. The port does not have to reproduce the builders' trees (OD-33).
+16. The team that owns the repository, `@lidofinance/defi-tech`, owns the Lido Zodiac workspace and its API key. A member of that team pushes from the merged `main`, with the key in a local `.env` that git ignores. The committee gets access to view the workspace. CI holds no key (OD-35, OD-64).
+17. The Emergency Brakes multisig gets no access to view the workspace (OD-64).
 
 ## Options considered
 
 - Solidity builders as the source: rejected because intent and encoding would have no independent check.
-- The proposal's TypeScript format: rejected on 2026-09-30 because it adds a toolchain the kit never applied. Chosen on 2026-10-06 for the Zodiac UI and SDK parity (decision 12) [s8].
-- YAML with Python (decisions 8 and 9): replaced because the UI uses constellation, and two encoders would need to agree.
+- A YAML policy file with a Python compiler: not chosen. The UI uses constellation, and two encoders would need to agree.
+- The hosted app as an optional viewer only, the hosted app without local verification, or review of the TypeScript only: not chosen (decisions 10, 11 and 14).
 - Hosted authoring through execution: rejected because server-side compilation leaves part of the policy outside the repository, with no vote or motion hand-off [s8].
 - Python over a constellation JSON export: rejected because it duplicates SDK flattening. The round-trip check provides independence.
 - Keep Solidity builders until tree parity: EM rejected this; the port rebuilds tests around the artifact.
@@ -138,10 +122,10 @@ EM decided on 2026-10-13, closing OD-64 [s1]:
 - The UI's chain diff is a view. ADR 009's detector remains the source of drift alerts against the same artifact.
 - Clutch needs a Lido Zodiac workspace and API key, held by the repository-owner team (decision 16). The key stays outside the repository, CI and votes. Agents must not use it.
 - The hosted app may require a provider plan. Unannounced terms stay outside the repository.
-- From the lift of the launch cap, ADR 010's screening guard checks each transaction of the committee's Safe, those that the UI builds included (OD-83, OD-88). A fork drill before the lift must prove this.
+- Once ADR 010's screening guard is set, it checks each transaction of the committee's Safe, those that the UI builds included (OD-83, OD-88). A fork drill before the second tranche's vote must prove this.
 - Constellation-derived files keep LGPL-3.0-only ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md), decision 9).
 - SDK event signatures match the mastercopy [s8]. Verify real-event decoding before relying on the round-trip check.
-- The port, the compiler and the artifact format exist since 2026-10-06 (decision 15). The round-trip check comes in phase 2.
+- The port, the compiler and the artifact format exist (decision 15). The round-trip check comes in phase 2.
 
 ## Confirmation
 
@@ -158,4 +142,4 @@ EM decided on 2026-10-13, closing OD-64 [s1]:
 
 ## Open questions
 
-None open. OD-16 was decided on 2026-10-05. OD-33 and OD-35 were decided on 2026-10-06, and OD-64 on 2026-10-13.
+None.

@@ -513,7 +513,7 @@
     - "Run offline from a frozen lockfile with pinned versions."
   cannot:
     - "Compile an entry that only the hosted app can compile, such as an action or a DeFi Kit preset. It refuses one."
-  sources: ["ADR-004#d9", "ADR-004#d13", "doc:policy/constellation/PROVENANCE.md#build"]
+  sources: ["ADR-004#d13", "doc:policy/constellation/PROVENANCE.md#build"]
 
 - id: artifact
   node: policy
@@ -527,7 +527,7 @@
   cannot:
     - "Describe mainnet yet. The committed artifact is for the fork tests: stand-in holders and dry-run amounts."
   numbers: ["format `clutch.policy-artifact/1`"]
-  sources: ["ADR-004#d9", "ADR-004#d14", "ADR-004#d15", "ADR-013#proposed-direction", INV-016,
+  sources: ["ADR-004#d13", "ADR-004#d14", "ADR-004#d15", "ADR-013#proposed-direction", "INV-016",
     "doc:test/README.md#the-policy-pipeline", "doc:.github/workflows/policy.yml"]
 
 - id: round-trip
@@ -541,7 +541,7 @@
     - "Catch a compiler or SDK bug before it reaches the chain."
   cannot:
     - "Run yet. A decode of real modifier events must be checked first."
-  sources: ["ADR-004#d7", "ADR-004#d9", INV-016, "doc:ROADMAP.md#roadmap"]
+  sources: ["ADR-004#d7", "ADR-004#d13", "INV-016", "doc:ROADMAP.md#roadmap"]
 
 - id: zodiac-app
   node: policy
@@ -582,8 +582,8 @@
   cannot:
     - "Hold a key, a seed or an RPC credential."
     - "Take in anything that could not be published. The repository is public."
-  sources: ["ADR-001#d1", "ADR-001#d2", "ADR-001#d4", "ADR-001#d10", OD-95, "ADR-002#d3", "ADR-003#d8", "ADR-003#d9", "ADR-003#d10",
-    "ADR-003#d11", "doc:SECURITY.md#repository-rules"]
+  sources: ["ADR-001#d1", "ADR-001#d2", "ADR-001#d10", "OD-95", "ADR-002#d3", "ADR-003#d8", "ADR-003#d9",
+    "ADR-003#d10", "ADR-003#d11", "doc:SECURITY.md#repository-rules"]
 
 - id: em
   node: policy

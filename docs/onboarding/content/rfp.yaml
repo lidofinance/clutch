@@ -163,7 +163,7 @@ sections:
       - asked: "The permission detail separates protocol targets, function selectors, asset parameters and other policy parameters."
         verdict: kept
         clutch: "The committed artifact lists every target, function and condition tree of each role, and the budget keys of each modifier. The Actors and Constellation tabs read it."
-        sources: ["ADR-004#d9", "doc:policy/constellation/artifacts/fork-25946643.json"]
+        sources: ["ADR-004#d13", "doc:policy/constellation/artifacts/fork-25946643.json"]
     tech: "Functions that act only for the calling Safe, such as wrapping, unwrapping and claims, take any arguments. Only stETH's `submit` and WETH's `deposit` can carry ETH."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#assets-and-permissions", "ADR-011#d1",
       "doc:policy/constellation/artifacts/fork-25946643.json"]

@@ -20,7 +20,7 @@
 - term: Artifact
   plain: "The committed JSON file that reviewers approve. It holds the modifier calls in order, the expected condition tree for every role, target and function, and the budget keys."
   tech: "Format `clutch.policy-artifact/1`. The committed one is compiled against the fork-test manifest, not mainnet."
-  sources: ["ADR-004#d9", "ADR-004#d14"]
+  sources: ["ADR-004#d13", "ADR-004#d14"]
 
 - term: Attested computation
   plain: "A calculation that actually ran on pinned inputs, checked by an independent attester. It is the only allowed source of a financial figure."
@@ -78,7 +78,7 @@
 
 - term: Drift detector
   plain: "A planned monitoring rule that alerts on any [[drift]]."
-  sources: ["ADR-004#d9", "ADR-004#d14", "ADR-009#proposed-direction"]
+  sources: ["ADR-004#d13", "ADR-004#d14", "ADR-009#proposed-direction"]
 
 - term: Drill
   plain: "A timed rehearsal of a runbook on a fork. A runbook counts as reviewed only with a passing drill that starts the action within six hours."
@@ -215,7 +215,7 @@
 
 - term: Round-trip check
   plain: "A planned check that rebuilds the applied permissions from the modifier's on-chain events on a fork, and compares them with the artifact. The chain then checks the compiler."
-  sources: ["ADR-004#d7", "ADR-004#d9", INV-016]
+  sources: ["ADR-004#d7", "ADR-004#d13", "INV-016"]
 
 - term: Runbook
   plain: "Step-by-step instructions for one emergency or technical action, with the exact transaction for each step. Each runbook is tied to one permission."

@@ -79,7 +79,7 @@
   breaks: "Until the round-trip check exists, a compiler or SDK bug can reach the chain unseen. A change of SDK, plan or licence can block local compilation."
   watched_by: ["doc:.github/workflows/policy.yml"]
   watch_note: "CI runs the compiler tests and a type-check. The SDK's selectors and event topics match the mastercopy. A decode of real events is not checked yet."
-  sources: ["ADR-004#d7", "ADR-004#d9", "ADR-004#d13", "doc:docs/research/zodiac-constellation-2026-10-06.md#answer"]
+  sources: ["ADR-004#d7", "ADR-004#d13", "doc:docs/research/zodiac-constellation-2026-10-06.md#answer"]
 
 - id: safe-v150-sound
   assumption: "Safe v1.5.0 has no defect on the paths that the vault uses."

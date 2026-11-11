@@ -145,14 +145,14 @@
   what: "The script of the DAO vote that turns the system on. It reads the committed artifact."
   why: "The vote must apply exactly what reviewers approved."
   owner: "`@lidofinance/defi-tech`"
-  sources: ["ADR-004#d9", "ADR-004#d14"]
+  sources: ["ADR-004#d13", "ADR-004#d14"]
 
 - name: The round-trip check
   column: new
   what: "A check that rebuilds the applied permissions from the modifier's events on a fork and compares them with the artifact."
   why: "The chain then checks the compiler, not only the other way round."
   owner: "`@lidofinance/defi-tech`"
-  sources: ["ADR-004#d7", "ADR-004#d9", INV-016]
+  sources: ["ADR-004#d7", "ADR-004#d13", "INV-016"]
 
 - name: The vault's detectors
   column: new

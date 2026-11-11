@@ -851,9 +851,9 @@ flows:
         nodes: [policy, monitoring, asset-safe]
         edges: [watch]
         check: "INV-016 is pending."
-    sources: ["ADR-004#d7", "ADR-004#d9", "ADR-004#d10", "ADR-004#d11", "ADR-004#d12", "ADR-004#d13", "ADR-004#d14",
-      "ADR-004#d16", "ADR-013#proposed-direction", OD-33, OD-35, INV-016, "doc:.github/workflows/policy.yml",
-      "doc:docs/specs/specification-policy.md#the-permission-policy"]
+    sources: ["ADR-004#d7", "ADR-004#d13", "ADR-004#d10", "ADR-004#d11", "ADR-004#d12", "ADR-004#d14",
+      "ADR-004#d16", "ADR-013#proposed-direction", "OD-33", "OD-35", "INV-016",
+      "doc:.github/workflows/policy.yml", "doc:docs/specs/specification-policy.md#the-permission-policy"]
 
   - id: roadmap
     group: deployment
