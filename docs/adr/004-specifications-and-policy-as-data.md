@@ -34,6 +34,11 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-22--adr-001-adr-003-and-adr-004-verified-again
     sha256: c3d2212eb1878d512ab0c21d754fc1ef40af44d9abe6a2dc4f574be8255b6fe4
+  - by: human:em
+    at: 2026-11-11T05:49:58Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-again
+    sha256: b3bdb7b4fe47803eb501ee333ff207b4025b0df173bc941e5cd1ee4beb790136
 sources:
   - id: s1
     resource: /registers/decision-log.md

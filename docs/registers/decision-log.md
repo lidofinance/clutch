@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-08T14:24:34Z
+  at: 2026-11-11T05:49:53Z
 verified: []
 sources:
   - id: s1
@@ -103,6 +103,9 @@ sources:
   - id: s31
     resource: "urn:clutch:interview:2026-11-10-consolidation"
     title: EM's request for a hard consolidation, and EM's answers to its eight questions and two cards, 2026-11-10; the transcript is not in the repository
+  - id: s32
+    resource: "urn:clutch:interview:2026-11-11-verify"
+    title: EM's instruction to record EM's verification of ADR 001 to ADR 004, 2026-11-11; the transcript is not in the repository
 ---
 
 # Decision log
@@ -112,6 +115,16 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-11 — ADR 001 to ADR 004 verified again
+
+EM approved edits of the accepted ADR 001 to ADR 004 in the consolidation (K7). The agent fixed their stale text and asked EM to verify the four pages again. EM wrote:
+
+> run just verify on each ADR page on my behalf
+
+Recorded as:
+
+- EM verifies ADR 001 to ADR 004 again after the edits of 2026-11-11, so they stay accepted. The agent reads "each ADR page" as the four accepted ADRs whose verification the edits broke; the proposed ADR 005 to ADR 014 carry no verification (agent's reading). At this instruction, the agent recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verifications are EM's. [s32]
 
 ## 2026-11-10 — OD-119 to OD-128: the consolidation's answers
 
