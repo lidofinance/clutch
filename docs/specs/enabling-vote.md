@@ -6,8 +6,8 @@ tags: [governance, enabling-vote, deployment, specs]
 status: draft
 review_status: slop
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-11T04:51:50Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:24:17Z
 verified: []
 sources:
   - id: s1
@@ -108,15 +108,7 @@ The vote's items run when it executes, about five days after it starts: the fact
 
 ## What still needs a vote after launch
 
-| Kind | What | Where |
-|---|---|---|
-| Funding | Each tranche after the first: one Finance payment per token to the Asset Safe. The second tranche's vote is the only way above the launch cap, and it starts only after the screening guard is set | OD-106, OD-121 [s11] |
-| Break-glass | The replacement of a role holder, such as the committee's Safe in the operator role, with a new universal factory for the new trusted caller | OD-101 [s10] |
-| Break-glass | An owner action on a vault Safe, such as a module, a Safe version or an owner change; a new or changed factory, such as a shape that the factory lacks | OD-101, OD-125 [s10] |
-| Lido-wide | An Easy Track unpause, which only Aragon Voting can do | OD-125 [s12] |
-| How | Each vote above is a direct Voting item of about five days, without Dual Governance, because Aragon Voting owns the vault's Safes and pays through Finance | OD-73 [s1][s12] |
-
-Motions of the universal factory cover the rest: onboarding and removal, budgets and ceilings, tokens on both sides of the orders account, the restart after a stop and the restore of the orders account, the first-loss burn, and the creation, funding and payout of each insurance fund (OD-102 to OD-105, OD-107, OD-119) [s10][s11]. The emergency Safe and the committee's Safe return funds to the Aragon Agent without a motion (OD-108) [s11].
+[ADR 013](/adr/013-one-easy-track-factory.md) decision 4 lists the actions that stay Aragon votes: each tranche after the first, the replacement of a role holder, an owner action on a vault Safe, a new or changed factory, and an Easy Track unpause (OD-101, OD-125) [s10]. Each is a direct Voting item of about five days, without Dual Governance, because Aragon Voting owns the vault's Safes and pays through Finance (OD-73) [s1][s12]. Motions of the universal factory cover the rest. The emergency Safe and the committee's Safe return funds to the Aragon Agent without a motion (OD-108) [s11].
 
 ## The full rehearsal
 
