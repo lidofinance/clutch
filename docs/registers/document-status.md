@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-11T04:48:31Z
+  at: 2026-11-11T04:54:32Z
 verified: []
 ---
 
@@ -38,8 +38,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-05 | none |
 | [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-11-08 | none |
 | [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-11 | none |
-| [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-08 | none |
-| [registers/verification-requests.md](/registers/verification-requests.md) | Register | slop |  | 2026-10-13 | none |
+| [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-11 | none |
 | [research/ai-first-practice-2026-09.md](/research/ai-first-practice-2026-09.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/cfo-feedback-2026-10-13.md](/research/cfo-feedback-2026-10-13.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/chain-reads-2026-09-30.md](/research/chain-reads-2026-09-30.md) | Research Note | slop |  | 2026-10-19 | none |
@@ -65,8 +64,8 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/stonks-pricing-2026-10-05.md](/research/stonks-pricing-2026-10-05.md) | Research Note | slop |  | 2026-10-22 | none |
 | [research/universal-factory-prototype-2026-11-05.md](/research/universal-factory-prototype-2026-11-05.md) | Research Note | slop |  | 2026-11-06 | none |
 | [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-10-19 | none |
-| [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-08 | none |
-| [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-08 | none |
-| [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-08 | none |
+| [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-11 | none |
+| [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-11 | none |
+| [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-11 | none |
 | [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-08 | none |
-| [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-10-19 | none |
+| [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-11-11 | none |

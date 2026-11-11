@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-10-19T22:36:19Z
+  at: 2026-11-11T04:53:28Z
 verified: []
 sources:
   - id: s1
@@ -36,7 +36,7 @@ This policy applies [ADR 004](/adr/004-specifications-and-policy-as-data.md) [s1
 | Layer | Content and maintenance |
 |---|---|
 | Conceptual specifications | Hand-written architecture, roles, permissions, invariants and threat model. Reviewers read these before code [s1][s2]. |
-| API reference | Generated from NatSpec once the factories exist. Behaviour changes update NatSpec and regenerate the reference. Do not edit it by hand [s1]. |
+| API reference | Generated from the contracts' NatSpec. Behaviour changes update NatSpec and regenerate the reference. Do not edit it by hand [s1]. |
 | LIP | Summary for delegates, with links to the conceptual specifications. If they disagree, fix the LIP in the same commit [s1]. |
 
 ## Invariants
@@ -65,7 +65,7 @@ Clutch's compiler produces one committed artifact with modifier calls, expected 
 Each role, target and selector needs one complete tree: a write replaces its slot.
 
 CI rejects an artifact that differs from a fresh compile. Reviewers approve the artifact.
-The team uses the Zodiac UI; local tooling must verify its output before signing.
+The team views the policy in the Zodiac UI ([ADR 004](/adr/004-specifications-and-policy-as-data.md) decision 10). A change after launch is a motion of the universal factory ([ADR 013](/adr/013-one-easy-track-factory.md)); local tooling verifies its writes before signing.
 A round-trip check compares the modifier's conditions on a fork with the artifact.
 Behaviour tests check each role's allowed and refused actions independently of the encoding.
 A policy change can rise above `slop` only with verification output [s3].
@@ -74,7 +74,7 @@ A policy change can rise above `slop` only with verification output [s3].
 
 - Derive tests from specifications, never from implementation. Recompute expected values independently [s1][s2].
 - Update affected specifications and invariants in the same commit as a behaviour change [s1].
-- Specifications reference code. Contract NatSpec must not reference specifications, ADRs or tests.
+- Specifications reference code; code does not reference specifications. A contract's comments cite no ADR, open decision, invariant, specification or test, and `scripts/check_licences.py` refuses one (OD-123).
 
 ## The onboarding guide
 
