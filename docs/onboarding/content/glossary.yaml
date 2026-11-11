@@ -96,6 +96,10 @@
   plain: "Ethereum best bid and offer: CoW's rule that solvers must fill an order at least as well as on-chain AMM routing would. A solver that breaks it must refund the user, or its bond is slashed."
   sources: [OD-48, "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
 
+- term: Emergency Safe
+  plain: "A new Safe with five signers and a threshold of three: two committee members, two Emergency Brakes members and one member of neither body. It holds the emergency role and the [[switch]]: it revokes, exits, recovers and stops the operator. It restarts nothing; a [[motion]] does."
+  sources: ["ADR-005#d24", "ADR-005#d25", "ADR-005#d26"]
+
 - term: Enabling vote
   plain: "The DAO vote that turns the system on. It registers the [[universal factory]], and it pays the first tranche, one million dollars, to the Asset Safe. For the vault's Safes, it approves the hash of each Safe batch, and anyone sends the batches after the vote: they apply the policy compiled for mainnet, grant the roles, and set up the orders account and the first-loss Safe."
   sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-008#d19", "ADR-013#d6",
@@ -115,11 +119,11 @@
     "ADR-014#d10"]
 
 - term: First-loss Safe
-  plain: "A Safe that Aragon Voting owns, which holds the first-loss shares and the insurance funds. Its one modifier carries Easy Track's roles, which burn, fund and pay out only by enacted motion, and a role of the committee's Safe, which redeems to the Asset Safe."
+  plain: "A Safe that Aragon Voting owns, which holds the first-loss shares and the insurance funds. Its one modifier carries the universal factory's roles, which burn, fund and pay out only by enacted motion, and a role of the committee's Safe, which redeems to the Asset Safe."
   sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-014#d4", "ADR-014#d10", "INV-021"]
 
 - term: Fortnightly snapshot
-  plain: "A reading of the vault's holdings at a pinned block every two weeks. It drives the published cap reading. Budgets no longer follow it."
+  plain: "A reading of the vault's holdings at a pinned block every two weeks. It drives the published cap reading."
   sources: ["ADR-009#d25", "ADR-009#d31"]
 
 - term: Guard
