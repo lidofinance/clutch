@@ -8,7 +8,7 @@
     - "[the screening vendor]"
   answer: 1
   why: "Aragon Voting is the only owner, at 1 of 1, and recovered assets go to the Aragon Agent, the DAO's treasury. The committee acts on the vault only through its roles: the operator role on the operator and orders modifiers, and the first-loss role on the first-loss modifier."
-  sources: ["ADR-005#d6", "ADR-005#d28", "ADR-005#proposed-direction", OD-73, INV-001]
+  sources: ["ADR-005#d6", "ADR-005#d28", "ADR-005#proposed-direction", "INV-001"]
 
 - id: outside-transfer
   question: "The committee's Safe tries to send USDC from the Asset Safe to an outside address. What stops it?"
@@ -31,7 +31,7 @@
   answer: 1
   why: "Financial emergencies go to the emergency Safe: two committee members, two Emergency Brakes members and one member of neither body, at 3 of 5. They revoke the operator, exit and send assets to the Agent. Six hours is the mandate's ceiling to start, and drills must prove it."
   sources: ["ADR-005#d2", "ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d24", "ADR-005#context",
-    "ADR-005#proposed-direction", "OD-58", "lip:part-6"]
+    "ADR-005#proposed-direction", "lip:part-6"]
 
 - id: restart
   question: "The emergency Safe has switched the operator off. Who turns it on again?"
@@ -41,8 +41,8 @@
     - "Nobody: the switch is final"
     - "The committee's Safe, at once"
   answer: 1
-  why: "No emergency body restores what it stopped. The committee's Safe creates a restart motion. After 72 hours without an objection, the universal factory's restart role enables the operator modifier again, and the role can do nothing else. Motions from before the stop fail, because the emergency Safe raised the factory's motion counter (OD-104)."
-  sources: ["ADR-005#d26", "ADR-013#d10", "ADR-013#d12", OD-104, INV-035]
+  why: "No emergency body restores what it stopped. The committee's Safe creates a restart motion. After 72 hours without an objection, the universal factory's restart role enables the operator modifier again, and the role can do nothing else. Motions from before the stop fail, because the emergency Safe raised the factory's motion counter."
+  sources: ["ADR-005#d26", "ADR-013#d10", "ADR-013#d12", "INV-035"]
 
 - id: vendor-offline
   question: "[the screening vendor] goes offline. What still works?"
@@ -52,7 +52,7 @@
     - "The emergency Safe and the DAO; the operator stops"
     - "Everything: the guard lets transactions through"
   answer: 2
-  why: "The guard fails closed, so every transaction of the committee's Safe stops: the operator, new motions and the committee's other duties (OD-83). No guard sits on the emergency path or the DAO path, so recovery does not change."
+  why: "The guard fails closed, so every transaction of the committee's Safe stops: the operator, new motions and the committee's other duties. No guard sits on the emergency path or the DAO path, so recovery does not change."
   sources: ["ADR-010#d4", "ADR-010#proposed-direction", OD-83]
 
 - id: new-code
@@ -63,8 +63,9 @@
     - "The Zodiac Roles mastercopy"
     - "The CoW order signer"
   answer: 1
-  why: "The universal Easy Track factory, with the thin companion contracts that it creates (OD-117), is the only new code, and Lido writes it. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so Clutch counts it as new code and the external audit covers it with the factory (OD-96)."
-  sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-007#proposed-direction", "ADR-007#d40", OD-96, "ADR-013#d17", OD-117]
+  why: "The universal Easy Track factory, with the thin companion contracts that it creates, is the only new code, and Lido writes it. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so Clutch counts it as new code and the external audit covers it with the factory."
+  sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-007#proposed-direction", "ADR-007#d40",
+    "ADR-013#d17"]
 
 - id: limit-order-loss
   question: "The operator places a limit order far below the market price. What limits the loss?"
@@ -75,7 +76,8 @@
     - "CoW refuses the order"
   answer: 2
   why: "Nothing on chain bounds a CoW order's price: its limit is a number that the caller chooses. The orders budgets bound what the operator can move into the orders account, screening checks every operator order once the guard is set, and monitoring alerts on a fill below the market. CoW's EBBO rule also holds the fill to the on-chain market."
-  sources: ["ADR-007#d18", "ADR-007#d26", "ADR-007#proposed-direction", OD-43, "doc:docs/specs/control-matrix.md#the-matrix"]
+  sources: ["ADR-007#d18", "ADR-007#d26", "ADR-007#proposed-direction",
+    "doc:docs/specs/control-matrix.md#the-matrix"]
 
 - id: cap-breach-revert
   question: "A cap ratio is above its limit. Does the next operator transaction revert?"
@@ -85,9 +87,9 @@
     - "Yes, but only for stablecoins"
     - "Yes, Easy Track checks it"
   answer: 1
-  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the emergency Safe to switch the operator off. The Zodiac UI refuses to build an operator transaction that would breach a cap, but only in its own interface (OD-86). Screening may also refuse an operator transaction that breaches a cap, if the vendor confirms that it can check that."
-  sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d33", "ADR-009#d34", "ADR-009#d43", "ADR-009#proposed-direction", OD-29,
-    OD-58, OD-86]
+  why: "The permission layer cannot see value. Caps are kept by measurement, publication and remediation. A breach that gets worse leads the emergency Safe to switch the operator off. The Zodiac UI refuses to build an operator transaction that would breach a cap, but only in its own interface. Screening may also refuse an operator transaction that breaches a cap, if the vendor confirms that it can check that."
+  sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d33", "ADR-009#d34", "ADR-009#d43",
+    "ADR-009#proposed-direction"]
 
 - id: operator-threshold
   question: "A colleague says that the committee's Safe signs at 3 of 5. Where do you check?"
