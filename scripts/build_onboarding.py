@@ -25,7 +25,9 @@ the build fails until a person reviews the item and pins it again with --repin.
 An ADR reference names what the claim rests on: `ADR-007#d27` pins decision 27
 and every other block of the Decision section that names it, such as "Decision 27
 replaces the route of decision 13", and `ADR-007#<heading>` pins that section. A
-whole ADR is refused, because each new decision would flag every item that cites it.
+whole ADR is refused, because each new decision would flag every item that cites it,
+and so is a replaced or lapsed decision, whose line only names what holds now
+(OD-128). A closed OD pins its entry in docs/registers/closed-decisions.yaml.
 
 The output is one self-contained HTML file with no external requests. The
 content renders without JavaScript; the script only adds interaction, and it
@@ -246,12 +248,14 @@ def facts() -> dict[str, Any]:
         }
 
     od_text = (docs / "registers" / "open-decisions.md").read_text(encoding="utf-8")
-    open_part, _, closed_part = od_text.partition("## Closed")
     ods = {}
-    for cells in _rows(open_part, r"OD-\d{2,}"):
+    for cells in _rows(od_text, r"OD-\d{2,}"):
         ods[cells[0]] = {"question": _plain(cells[1]), "state": "open"}
-    for cells in _rows(closed_part, r"OD-\d{2,}"):
-        ods[cells[0]] = {"question": _plain(cells[1]), "state": "closed", "closed": cells[2]}
+    anchors = V._log_anchors(ROOT)
+    for entry in V.load_closed(ROOT):
+        heading = str((entry.get("log") or [""])[0])
+        ods[str(entry.get("id"))] = {"question": " ".join(str(entry.get("question", "")).split()), "state": "closed",
+                                     "closed": str(entry.get("closed")), "anchor": anchors.get(heading, "")}
     for od, state in V.od_states(V.load_closed(ROOT)).items():
         if od in ods:
             ods[od]["replaced_by"] = state["replaced_by"]
@@ -368,8 +372,12 @@ def resolve(ref: str, f: dict[str, Any]) -> dict[str, str]:
         text = (ROOT / info["path"]).read_text(encoding="utf-8")
         decision = re.fullmatch(r"d(\d+)", anchor)
         if decision:
-            if decision.group(1) not in _decisions(text):
+            body = _decisions(text).get(decision.group(1))
+            if body is None:
                 raise BuildError(f"{adr} has no decision {decision.group(1)}")
+            if re.match(r"\d+\.\s+(?:Replaced by|Lapsed)\b", body):
+                raise BuildError(f"{adr} decision {decision.group(1)} is replaced or lapsed; "
+                                 "cite the decision that holds now (OD-128)")
             out.update(label=f"{out['label']}, decision {decision.group(1)}", href=out["href"] + "#decision")
         else:
             section = next((s for s in parse_sections(text) if s["slug"] == anchor), None)
@@ -379,10 +387,15 @@ def resolve(ref: str, f: dict[str, Any]) -> dict[str, str]:
         return out
     if re.fullmatch(r"OD-\d{2,}", ref):
         if ref not in f["ods"]:
-            raise BuildError(f"unknown open decision {ref}")
-        if f["ods"][ref].get("replaced_by"):
-            raise BuildError(f"{ref} was replaced by {', '.join(f['ods'][ref]['replaced_by'])}; cite the decision in force (OD-82)")
-        return {"label": ref, "href": REPO_URL + "docs/registers/open-decisions.md", "title": f["ods"][ref]["question"]}
+            raise BuildError(f"unknown decision {ref}")
+        od = f["ods"][ref]
+        if od.get("replaced_by"):
+            raise BuildError(f"{ref} was replaced by {', '.join(od['replaced_by'])}; cite the decision in force (OD-82)")
+        if od["state"] == "closed":
+            href = REPO_URL + "docs/registers/decision-log.md" + (f"#{od['anchor']}" if od.get("anchor") else "")
+        else:
+            href = REPO_URL + "docs/registers/open-decisions.md"
+        return {"label": ref, "href": href, "title": od["question"]}
     if re.fullmatch(r"INV-\d{3}", ref):
         if ref not in f["invariants"]:
             raise BuildError(f"unknown invariant {ref}")
@@ -430,6 +443,8 @@ def locate(ref: str, f: dict[str, Any]) -> dict[str, str]:
             return {"path": path, "kind": "decision", "key": anchor[1:], "adr": adr}
         return {"path": path, "kind": "section", "key": anchor or "decision"}
     if re.fullmatch(r"OD-\d{2,}", ref):
+        if f["ods"].get(ref, {}).get("state") == "closed":
+            return {"path": "docs/registers/closed-decisions.yaml", "kind": "entry", "key": ref}
         return {"path": "docs/registers/open-decisions.md", "kind": "row", "key": ref}
     if re.fullmatch(r"INV-\d{3}", ref):
         return {"path": "docs/specs/invariants.md", "kind": "row", "key": ref}
@@ -454,6 +469,12 @@ def extract(text: str, where: dict[str, str]) -> str:
         return decision_text(text, where["adr"], key)
     if kind == "test":
         return _test_body(text, key)
+    if kind == "entry":
+        start = text.find(f"- id: {key}\n")
+        if start < 0:
+            return ""
+        end = text.find("\n- id: ", start + 1)
+        return text[start:] if end < 0 else text[start:end + 1]
     return next((line for line in text.splitlines() if line.startswith(f"| {key} |")), "")
 
 

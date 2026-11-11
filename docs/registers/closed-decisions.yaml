@@ -1,6 +1,5 @@
-# Closed decisions of the open-decision register (ADR 012, OD-82).
-# `python3 scripts/validate_docs.py --write-status` generates the register's closed index from this
-# file, and each OD's state from `replaces` and `refines`; `--check-status` fails when the index is stale.
+# Closed decisions (ADR 012, OD-82, OD-127). EM's words are in the decision log; each decision's text is in its ADR.
+# scripts/validate_docs.py checks this file. The guide's build refuses a citation of an OD that a later one replaced.
 # Fields: id; question; closed (date); log (the decision-log headings that record it, where EM's words stay);
 # adr (ADR-NNN#dN, or ADR-NNN for a record without numbered decisions); see (other pages);
 # replaces / refines (earlier ODs; `part: true` for a replacement in part); note (a short remark).

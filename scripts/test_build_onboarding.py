@@ -125,6 +125,8 @@ CONTENT_CASES = [
     ("a reference to one decision of an ADR", _source("ADR-007#d27"), None),
     ("a reference to a section of an ADR", _source("ADR-007#consequences"), None),
     ("a reference to a decision that the ADR lacks", _source("ADR-007#d999"), "ADR-007 has no decision 999"),
+    ("a replaced decision as a source", _source("ADR-007#d23"), "ADR-007 decision 23 is replaced or lapsed"),
+    ("a lapsed decision as a source", _source("ADR-007#d9"), "ADR-007 decision 9 is replaced or lapsed"),
     ("a reference to a heading that the ADR lacks", _source("ADR-007#no-such-heading"), "ADR-007 has no heading #no-such-heading"),
     ("an assumption without an id", lambda c: c["assumptions"][0].pop("id"), "assumption 1: needs an id"),
     ("two assumptions with one id", lambda c: c["assumptions"][1].update(id=c["assumptions"][0]["id"]), "duplicate id"),

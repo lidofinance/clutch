@@ -17,5 +17,4 @@
 - [ ] `just regen` ran, and the generated files are committed
 - [ ] `just check` passes (paste the last line of each check, or name the one that cannot run here)
 - [ ] `just test-fork` passes, or the change does not touch `src/`, `script/`, `test/` or `policy/`
-- [ ] A log fragment in `docs/log.d/` describes the change (`just log KIND "TEXT"`)
 - [ ] No restricted term, figure or secret: the screening vendor stays "the screening vendor", and no figure comes from the unapproved mandate

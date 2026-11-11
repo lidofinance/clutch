@@ -9,8 +9,8 @@
         "ADR-003#d6": "ac36139993be1f8a",
         "ADR-003#d7": "405e94a48b6f0ade",
         "OD-106": "611c0897a15203d3",
-        "OD-31": "c0ce21574d76b9d6",
-        "OD-96": "a3dc502692167b5a",
+        "OD-31": "4d2c16853b3feecf",
+        "OD-96": "5c2651c7700a84ad",
         "doc:AGENTS.md#out-of-scope-for-agents": "5828d6ade00ec961"
       }
     },
@@ -26,7 +26,7 @@
         "ADR-014#d9": "845cfc4647778352",
         "INV-038": "3d0cc12c5fbf0e2e",
         "OD-106": "611c0897a15203d3",
-        "OD-108": "eb8a054440fdca10",
+        "OD-108": "2d0dd0d8d75ba160",
         "OD-73": "0f2a26b393226461",
         "doc:docs/research/chain-reads-2026-09-30.md#governance-authority": "5e5f461994b2e03c"
       }
@@ -55,10 +55,10 @@
         "INV-037": "d02d3c465796aea1",
         "OD-103": "5473fa50e24e0ac6",
         "OD-106": "611c0897a15203d3",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-36": "d117a7aa5295347b",
+        "OD-107": "e47187405d48c405",
+        "OD-36": "c3a7f0d6c64b0555",
         "OD-73": "0f2a26b393226461",
-        "OD-92": "4e0e6629ce31ffad",
+        "OD-92": "65aaf4debaa4a4ee",
         "doc:docs/research/easy-track-first-2026-11-05.md#easy-track": "2a3debea62d1b174",
         "doc:docs/research/easy-track-first-2026-11-05.md#finance-payments-by-aragon-voting": "8b400cfd5fb5fad0"
       }
@@ -93,8 +93,8 @@
         "INV-002": "e0aea0e5a8df8cfa",
         "INV-039": "6c093d9bc9a59bc8",
         "OD-106": "611c0897a15203d3",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
         "OD-73": "0f2a26b393226461",
         "test:test_asset_safe_shape": "4b5f2ec5571beffb",
         "test:test_uf_insurance_money_goes_to_the_first_loss_safe": "966ffaa92d8e839d"
@@ -115,7 +115,7 @@
         "INV-036": "6c4c8be9bcece58d",
         "OD-102": "9b08fc5cc64ce2b4",
         "OD-105": "89cf2558e4d19cb6",
-        "OD-56": "255eb47895dd1e89",
+        "OD-56": "7df2d8665974b6b7",
         "test:test_D5_budget_enforcement_and_refill": "d7f7371252bec09b",
         "test:test_budget_keys_of_different_assets_are_independent": "a9cf582c36db5714"
       }
@@ -127,7 +127,7 @@
         "ADR-009#d36": "b39af82e2e75f8ac",
         "ADR-009#d37": "cf11348122ecd2a4",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-62": "e2f2d1a3bef8a0d3",
+        "OD-62": "400e7af0365218b3",
         "doc:docs/research/cfo-feedback-2026-10-13.md#prices-under-stress": "d1506f010b33dc24"
       }
     },
@@ -172,19 +172,19 @@
         "INV-010": "188a3bf9015fca69",
         "OD-101": "ecc0740257b19fb8",
         "OD-104": "e81480b2297805b8",
-        "OD-108": "eb8a054440fdca10",
-        "OD-109": "420beb171ed3065a",
-        "OD-41": "b377699a4544f042",
-        "OD-45": "0f1bfbb3e7d90f53",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-109": "df51e8d56eae286a",
+        "OD-41": "a9300569512eb3c3",
+        "OD-45": "c7e9d3bf64ac8f9a",
         "OD-54": "753db40a78f1f7f1",
-        "OD-55": "5ca56059ac95fd76",
+        "OD-55": "59db7b75a4802689",
         "OD-58": "34f2d86fd20c861b",
-        "OD-60": "e40055802a83b059",
-        "OD-64": "206d90757ee445fb",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-64": "26c9ce5f96358910",
+        "OD-67": "1a0cfc27b5801f7a",
         "OD-80": "20f31e0406d6c372",
         "OD-83": "abe512c35314873e",
-        "OD-84": "4d43d9ed82ec5d41",
+        "OD-84": "ae67f361ef873514",
         "doc:docs/registers/parameters.md#parameters": "6d6ba92836258463",
         "doc:docs/research/chain-reads-2026-09-30.md#committees": "9b585660acc680d2",
         "runbook:Exit the first-loss shares": "e6245c07ffe23363",
@@ -221,12 +221,12 @@
         "ADR-004#d16": "e9a28d32b40e8a03",
         "OD-103": "5473fa50e24e0ac6",
         "OD-104": "e81480b2297805b8",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-33": "a5227d94586cf05d",
-        "OD-34": "0976363da00dad42",
-        "OD-49": "e9e957d9808b5b0f",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-107": "e47187405d48c405",
+        "OD-33": "0fb334f1351ad5ba",
+        "OD-34": "d6634eb95658511b",
+        "OD-49": "5258e489baef2bbd",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "doc:policy/constellation/PROVENANCE.md#changes-from-upstream": "13e8dda5cb9c8f29"
       }
     },
@@ -250,7 +250,7 @@
         "ADR-007#d40": "d270d65eba72dca4",
         "ADR-007#proposed-direction": "7030a14d68720ead",
         "ADR-013#consequences": "8c58b270a45000fa",
-        "OD-96": "a3dc502692167b5a",
+        "OD-96": "5c2651c7700a84ad",
         "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer": "2f0c8c2364152741"
       }
     },
@@ -281,10 +281,10 @@
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "INV-005": "5044f42cd3c66d90",
         "INV-033": "04603b5c184d1e7a",
-        "OD-100": "f801004088de88e7",
+        "OD-100": "7e961ab4a4817ef6",
         "OD-102": "9b08fc5cc64ce2b4",
-        "OD-45": "0f1bfbb3e7d90f53",
-        "OD-94": "554f2f5e206c8413",
+        "OD-45": "c7e9d3bf64ac8f9a",
+        "OD-94": "350c67730cc7f4e7",
         "doc:docs/research/chain-reads-2026-09-30.md#easy-track": "f8ac05a5922cd937",
         "doc:docs/research/easy-track-first-2026-11-05.md#easy-track": "2a3debea62d1b174"
       }
@@ -294,7 +294,7 @@
       "sources": {
         "ADR-002#d1": "fbef8c1e24375017",
         "ADR-002#d7": "04f2137680376c15",
-        "OD-63": "182b61c7ee7d26f8",
+        "OD-63": "472ba631b85e1195",
         "doc:docs/registers/open-decisions.md#open-decisions": "826cf31cfdd47391"
       }
     },
@@ -320,12 +320,12 @@
         "INV-026": "83396dd09f3443e7",
         "OD-102": "9b08fc5cc64ce2b4",
         "OD-104": "e81480b2297805b8",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-43": "d156d2a89618d430",
+        "OD-107": "e47187405d48c405",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-43": "89305e9b2ce3c652",
         "OD-58": "34f2d86fd20c861b",
-        "OD-67": "0c1ed6b62d0fd182",
-        "OD-70": "5a57f4c12fdbce15",
+        "OD-67": "1a0cfc27b5801f7a",
+        "OD-70": "876544ad4d38df3a",
         "doc:docs/registers/parameters.md#parameters": "6d6ba92836258463",
         "lip:part-6": "ae0c2a1b5bc89dac",
         "runbook:Raise the motion counter": "29cb3572eb89fa74"
@@ -355,7 +355,7 @@
         "ADR-007#d45": "831cbbcad967afcd",
         "ADR-013#d7": "89b60a01b0ad3975",
         "INV-025": "8638ecfb785ce03e",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-49": "5258e489baef2bbd",
         "test:test_exit_governance_gives_a_new_token_its_exit": "21a902cf05aae08b",
         "test:test_exit_governance_writes_only_exits": "d37d14b69e4a91e6"
       }
@@ -394,11 +394,11 @@
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "INV-021": "af4dd8932aeae298",
         "INV-039": "6c093d9bc9a59bc8",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "OD-73": "0f2a26b393226461",
         "runbook:Burn first-loss Earn shares": "824dc842faffea59",
         "runbook:Exit the first-loss shares": "e6245c07ffe23363",
@@ -415,9 +415,9 @@
         "ADR-008#d22": "75b05eafe71007af",
         "ADR-008#d23": "60f3d40d183d68ba",
         "ADR-008#proposed-direction": "2589bdd14789be04",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "doc:docs/research/legacy-investments-2026-10-05.md#the-earn-positions": "9b8cfa81ff68f145",
         "runbook:Move the legacy Earn shares": "6b3aa872aea11037"
       }
@@ -449,8 +449,8 @@
         "ADR-014#d7": "b35ca0bf73747b39",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "INV-039": "6c093d9bc9a59bc8",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
         "runbook:Run an insurance motion": "e7eb93535728dead"
       }
     },
@@ -465,7 +465,7 @@
         "ADR-009#d25": "2b8d2c954b78d941",
         "ADR-009#d42": "8c78e882919eb91a",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-85": "680f538fc4bcc3e2"
+        "OD-85": "a84de04edfb39d7b"
       }
     },
     "actor:ldo-holders": {
@@ -501,11 +501,11 @@
         "ADR-014#d10": "f093b2ca4ce88427",
         "ADR-014#d5": "888add1ae513f28a",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move": "d32e555dae25026c",
         "test:test_D3b_earn_deposit_policy_layer": "410dc7bf630395e7"
       }
@@ -523,9 +523,9 @@
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "ADR-014#d6": "1120eaf7a4fdd35f",
         "OD-102": "9b08fc5cc64ce2b4",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-41": "b377699a4544f042",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-107": "e47187405d48c405",
+        "OD-41": "a9300569512eb3c3",
+        "OD-49": "5258e489baef2bbd",
         "doc:docs/registers/parameters.md#parameters": "6d6ba92836258463"
       }
     },
@@ -556,24 +556,24 @@
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "ADR-014#d9": "845cfc4647778352",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-108": "eb8a054440fdca10",
-        "OD-109": "420beb171ed3065a",
-        "OD-13": "f538306f02833379",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-41": "b377699a4544f042",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-43": "d156d2a89618d430",
-        "OD-45": "0f1bfbb3e7d90f53",
-        "OD-48": "ffa006ea6ee68ee9",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-109": "df51e8d56eae286a",
+        "OD-13": "ea32db184f66264b",
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-41": "a9300569512eb3c3",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-45": "c7e9d3bf64ac8f9a",
+        "OD-48": "64325b3596a96b60",
+        "OD-49": "5258e489baef2bbd",
         "OD-58": "34f2d86fd20c861b",
-        "OD-60": "e40055802a83b059",
-        "OD-61": "a7aa4de25fc5378d",
-        "OD-67": "0c1ed6b62d0fd182",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-87": "819b206301f4b0a5",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-61": "cf1688e9bc5eaf4f",
+        "OD-67": "1a0cfc27b5801f7a",
+        "OD-84": "ae67f361ef873514",
+        "OD-87": "3a344664b6c7b704",
         "OD-88": "85b9871a8395bebb",
-        "OD-94": "554f2f5e206c8413",
+        "OD-94": "350c67730cc7f4e7",
         "doc:ROADMAP.md#roadmap": "c35d7acd1bc64300"
       }
     },
@@ -622,11 +622,11 @@
         "INV-023": "d443eca50e03bf09",
         "INV-040": "9c0ec50ca75605b5",
         "OD-103": "5473fa50e24e0ac6",
-        "OD-43": "d156d2a89618d430",
-        "OD-47": "fd61cfa54437d7e5",
-        "OD-48": "ffa006ea6ee68ee9",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-47": "3f3ff41269384bb3",
+        "OD-48": "64325b3596a96b60",
         "OD-57": "cfe8ab092611151c",
-        "OD-61": "a7aa4de25fc5378d",
+        "OD-61": "cf1688e9bc5eaf4f",
         "OD-73": "0f2a26b393226461",
         "doc:docs/research/cow-orders-account-2026-10-06.md#what-this-means-for-the-design": "20b8d86c536405c9",
         "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests": "432b20e2dccb371e",
@@ -650,10 +650,10 @@
         "INV-022": "6a7703bdf5dc8a25",
         "INV-040": "9c0ec50ca75605b5",
         "OD-103": "5473fa50e24e0ac6",
-        "OD-43": "d156d2a89618d430",
+        "OD-43": "89305e9b2ce3c652",
         "OD-57": "cfe8ab092611151c",
         "OD-58": "34f2d86fd20c861b",
-        "OD-79": "cb1f76169ca699f7",
+        "OD-79": "c017b15b3b16b720",
         "test:test_orders_approvals_role_approves_only_the_relayer": "b334f6b40a175c18",
         "test:test_orders_emergency_cancels_sweeps_and_recovers": "cc6d31bdac54b650",
         "test:test_orders_emergency_revocation_keeps_recovery": "28e9278dd8d5a72c",
@@ -673,13 +673,13 @@
         "ADR-009#d44": "3bd4f57f8fa30ed2",
         "ADR-009#d47": "8a0d94fc7bd42417",
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
-        "OD-111": "f002b97c19a2eb08",
-        "OD-14": "d27d705d87850b3c",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-41": "b377699a4544f042",
-        "OD-61": "a7aa4de25fc5378d",
-        "OD-62": "e2f2d1a3bef8a0d3",
-        "OD-87": "819b206301f4b0a5",
+        "OD-111": "4a7556d925f6ff37",
+        "OD-14": "dccdfd827c7c947c",
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-41": "a9300569512eb3c3",
+        "OD-61": "cf1688e9bc5eaf4f",
+        "OD-62": "400e7af0365218b3",
+        "OD-87": "3a344664b6c7b704",
         "lip:part-9": "6e06adadf7d05574"
       }
     },
@@ -695,7 +695,7 @@
         "ADR-003#d11": "5c4d74b5b48a60ea",
         "ADR-003#d8": "5265f45d64ebc5fc",
         "ADR-003#d9": "aa0657485d8b3c2b",
-        "OD-95": "e27743b1b90cd216",
+        "OD-95": "5a508996ec1f1bfa",
         "doc:SECURITY.md#repository-rules": "61d7ed7abab90c85"
       }
     },
@@ -729,13 +729,13 @@
         "INV-002": "e0aea0e5a8df8cfa",
         "INV-009": "423da9cdd15c0594",
         "INV-027": "ce44206393c45e31",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-48": "ffa006ea6ee68ee9",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-48": "64325b3596a96b60",
+        "OD-49": "5258e489baef2bbd",
         "OD-58": "34f2d86fd20c861b",
-        "OD-59": "e58f62b588a336f3",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-59": "74332b7e95adc457",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "test:test_D4_emergency_flow": "361fef9856637f01",
         "test:test_D4_the_switch_freezes_queued_motions_until_a_restart_motion": "f345d5e470d3c8dd",
         "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned": "1c93276a3e5acdde",
@@ -756,9 +756,9 @@
         "ADR-014#d10": "f093b2ca4ce88427",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "INV-021": "af4dd8932aeae298",
-        "OD-108": "eb8a054440fdca10",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "OD-83": "abe512c35314873e",
         "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms": "1886f5abf041a398",
         "runbook:Exit the first-loss shares": "e6245c07ffe23363"
@@ -776,7 +776,7 @@
         "ADR-008#proposed-direction": "2589bdd14789be04",
         "ADR-013#d5": "a43f2ec04c861566",
         "INV-021": "af4dd8932aeae298",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-67": "1a0cfc27b5801f7a",
         "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms": "1886f5abf041a398",
         "runbook:Burn first-loss Earn shares": "824dc842faffea59"
       }
@@ -794,9 +794,9 @@
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "INV-004": "4764a8246a1b7439",
         "INV-034": "437f706b35e40043",
-        "OD-36": "d117a7aa5295347b",
-        "OD-38": "3d2c403df79d214f",
-        "OD-70": "5a57f4c12fdbce15",
+        "OD-36": "c3a7f0d6c64b0555",
+        "OD-38": "919f7b5a0389709b",
+        "OD-70": "876544ad4d38df3a",
         "test:test_policyadmin_cannot_grant_operator_the_safety_modifier": "70a8a9fb3fb663f3",
         "test:test_policyadmin_refuses_every_module_of_the_asset_safe": "2e4dc9764f4e0e7d",
         "test:test_uf_raw_writes_only_narrow": "3326456d48bf1067",
@@ -820,11 +820,11 @@
         "INV-018": "8db49d0ffff39854",
         "INV-038": "3d0cc12c5fbf0e2e",
         "OD-105": "89cf2558e4d19cb6",
-        "OD-108": "eb8a054440fdca10",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-43": "d156d2a89618d430",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "OD-80": "20f31e0406d6c372",
         "test:test_D3_operator_cannot_route_around_avatar": "109c8b32ddee05bb"
       }
@@ -851,7 +851,7 @@
         "ADR-007#d20": "8867ab5bf25ac318",
         "ADR-007#proposed-direction": "7030a14d68720ead",
         "ADR-011#d11": "659f28678939ddb8",
-        "OD-43": "d156d2a89618d430",
+        "OD-43": "89305e9b2ce3c652",
         "doc:docs/research/cow-orders-account-2026-10-06.md#uniswap-and-1inch": "246cc82644d3f915"
       }
     },
@@ -877,7 +877,7 @@
         "INV-009": "423da9cdd15c0594",
         "INV-035": "d2635b7fbbfe9dc6",
         "OD-104": "e81480b2297805b8",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-49": "5258e489baef2bbd",
         "OD-58": "34f2d86fd20c861b",
         "test:test_D4_the_restart_role_enables_only_the_operator_modifier": "60eef28bed6eb321",
         "test:test_D4_the_switch_is_the_emergency_role_s_and_pinned": "1c93276a3e5acdde"
@@ -888,8 +888,8 @@
       "sources": {
         "ADR-011#d7": "553fe204f7acaab4",
         "ADR-011#proposed-direction": "87d74436ba4324cc",
-        "OD-22": "58bf3ea830da1e28",
-        "OD-26": "18d1b81eb82801ff",
+        "OD-22": "47184e424ee32daf",
+        "OD-26": "d727860872f935ac",
         "doc:docs/research/dai-usds-conversion-2026-10-05.md#the-converter": "0d2ed24febbc2650",
         "doc:docs/research/recovery-and-withdrawal-queue-2026-10-05.md#usds-and-dai-carry-usdc-risk": "7aac433445970b1a",
         "test:test_D3_dai_usds_conversion_pays_the_asset_safe": "ac5a1bef4480bc77"
@@ -927,21 +927,21 @@
         "INV-036": "6c4c8be9bcece58d",
         "INV-037": "d02d3c465796aea1",
         "INV-040": "9c0ec50ca75605b5",
-        "OD-09": "363bde07469e31fc",
-        "OD-100": "f801004088de88e7",
+        "OD-09": "e03c1d844b7686b5",
+        "OD-100": "7e961ab4a4817ef6",
         "OD-102": "9b08fc5cc64ce2b4",
         "OD-103": "5473fa50e24e0ac6",
         "OD-104": "e81480b2297805b8",
         "OD-105": "89cf2558e4d19cb6",
-        "OD-107": "faee79b8bb3f601d",
+        "OD-107": "e47187405d48c405",
         "OD-113": "dab734a51e5b7dbb",
         "OD-117": "60d6b42065704a89",
         "OD-118": "506357a454bed5c0",
-        "OD-36": "d117a7aa5295347b",
-        "OD-38": "3d2c403df79d214f",
-        "OD-49": "e9e957d9808b5b0f",
-        "OD-67": "0c1ed6b62d0fd182",
-        "OD-70": "5a57f4c12fdbce15",
+        "OD-36": "c3a7f0d6c64b0555",
+        "OD-38": "919f7b5a0389709b",
+        "OD-49": "5258e489baef2bbd",
+        "OD-67": "1a0cfc27b5801f7a",
+        "OD-70": "876544ad4d38df3a",
         "doc:ROADMAP.md#roadmap": "c35d7acd1bc64300",
         "doc:docs/research/orders-token-motions-2026-11-08.md#one-contract-does-not-hold-the-shape": "98128d7fbbe14f64",
         "doc:docs/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06": "2dd144f4e1b9df67",
@@ -970,10 +970,10 @@
         "ADR-014#d3": "521a38c93c69b65e",
         "OD-103": "5473fa50e24e0ac6",
         "OD-106": "611c0897a15203d3",
-        "OD-22": "58bf3ea830da1e28",
-        "OD-26": "18d1b81eb82801ff",
-        "OD-46": "9fa696aa28d27810",
-        "OD-91": "620f5baff185d11d",
+        "OD-22": "47184e424ee32daf",
+        "OD-26": "d727860872f935ac",
+        "OD-46": "709ab5404d0655d9",
+        "OD-91": "f77918424035eef7",
         "doc:docs/registers/parameters.md#parameters": "6d6ba92836258463"
       }
     },
@@ -1002,7 +1002,7 @@
         "ADR-009#d18": "ecfd8480f306530e",
         "ADR-009#d7": "91e4e5e7ef9c3b01",
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
-        "OD-13": "f538306f02833379"
+        "OD-13": "ea32db184f66264b"
       }
     },
     "actor:vendor-service": {
@@ -1016,9 +1016,9 @@
         "ADR-010#d23": "ae2640b16e9badff",
         "ADR-010#d5": "9f20258ffac102e5",
         "ADR-010#proposed-direction": "fa446e4d7b119ace",
-        "OD-39": "e816f44264cf31fd",
-        "OD-45": "0f1bfbb3e7d90f53",
-        "OD-64": "206d90757ee445fb",
+        "OD-39": "01288ebae3ba5e44",
+        "OD-45": "c7e9d3bf64ac8f9a",
+        "OD-64": "26c9ce5f96358910",
         "OD-83": "abe512c35314873e",
         "doc:docs/specs/control-matrix.md#the-screening-vendors-rules": "2e9f0a9c02282cf6"
       }
@@ -1038,14 +1038,14 @@
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
         "ADR-010#d25": "77ea1652c6f171f8",
         "ADR-013#proposed-direction": "13f1e7f55005c434",
-        "OD-33": "a5227d94586cf05d",
-        "OD-35": "a76b8dcdf1f72cc9",
-        "OD-44": "ad8f665da7851404",
-        "OD-64": "206d90757ee445fb",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-85": "680f538fc4bcc3e2",
-        "OD-86": "3136a4334e5d2b22",
-        "OD-87": "819b206301f4b0a5",
+        "OD-33": "0fb334f1351ad5ba",
+        "OD-35": "590de325e7b1dd47",
+        "OD-44": "559619025caec3b8",
+        "OD-64": "26c9ce5f96358910",
+        "OD-84": "ae67f361ef873514",
+        "OD-85": "a84de04edfb39d7b",
+        "OD-86": "4cc162e0100d618e",
+        "OD-87": "3a344664b6c7b704",
         "OD-88": "85b9871a8395bebb",
         "doc:docs/research/cow-orders-account-2026-10-06.md#the-hosted-zodiac-app": "c5a3c569a2e78392",
         "doc:docs/research/zodiac-constellation-2026-10-06.md#2-what-runs-locally-and-what-only-the-hosted-app-runs": "bb15776d2621d030"
@@ -1075,7 +1075,7 @@
         "ADR-004#d7": "0988fac0f5e50f75",
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "INV-016": "cd9f0a527584b5ab",
-        "OD-33": "a5227d94586cf05d",
+        "OD-33": "0fb334f1351ad5ba",
         "doc:.github/workflows/policy.yml": "07f3cb2daeaf3179"
       }
     },
@@ -1114,7 +1114,7 @@
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
         "INV-011": "fba0679883331c23",
         "INV-012": "90462743ec0b5b63",
-        "OD-56": "255eb47895dd1e89",
+        "OD-56": "7df2d8665974b6b7",
         "test:test_D5_budget_enforcement_and_refill": "d7f7371252bec09b",
         "test:test_budget_keys_of_different_assets_are_independent": "a9cf582c36db5714"
       }
@@ -1128,8 +1128,8 @@
         "ADR-009#d33": "67975f375c64474c",
         "ADR-009#d6": "5e80a0de83eb84a2",
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
-        "OD-29": "f0338b92b7e00621",
-        "OD-32": "2c42c5be98c2fc52",
+        "OD-29": "aeeb7c3f322973e2",
+        "OD-32": "a6e015bd0ade2b41",
         "lip:part-9": "6e06adadf7d05574"
       }
     },
@@ -1143,7 +1143,7 @@
         "ADR-007#reversal-conditions": "207722cd2f139676",
         "INV-022": "6a7703bdf5dc8a25",
         "INV-023": "d443eca50e03bf09",
-        "OD-43": "d156d2a89618d430",
+        "OD-43": "89305e9b2ce3c652",
         "doc:docs/research/cow-orders-account-2026-10-06.md#limits": "8bac6fa249eaa4cc",
         "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests": "432b20e2dccb371e",
         "test:test_orders_signer_order_settles_to_the_asset_safe": "9a2d00bba39ed5f9",
@@ -1188,7 +1188,7 @@
         "ADR-008#d19": "4050e810bac1cf60",
         "ADR-008#reversal-conditions": "8203f85b3c36106b",
         "ADR-011#d1": "365f58ccded49917",
-        "OD-42": "4009c3d65a9f09a1",
+        "OD-42": "7a12b0de40f9981e",
         "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move": "d32e555dae25026c",
         "test:test_D3b_earn_deposit_policy_layer": "410dc7bf630395e7"
       }
@@ -1241,7 +1241,7 @@
         "OD-104": "e81480b2297805b8",
         "OD-113": "dab734a51e5b7dbb",
         "OD-118": "506357a454bed5c0",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-49": "5258e489baef2bbd",
         "lip:part-4": "867ad18913dfd1eb"
       }
     },
@@ -1280,7 +1280,7 @@
         "ADR-014#d6": "1120eaf7a4fdd35f",
         "ADR-014#d7": "b35ca0bf73747b39",
         "INV-039": "6c093d9bc9a59bc8",
-        "OD-107": "faee79b8bb3f601d"
+        "OD-107": "e47187405d48c405"
       }
     },
     "assumption:launch-cap": {
@@ -1293,7 +1293,7 @@
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "OD-106": "611c0897a15203d3",
         "OD-54": "753db40a78f1f7f1",
-        "OD-55": "5ca56059ac95fd76"
+        "OD-55": "59db7b75a4802689"
       }
     },
     "assumption:monthly-report": {
@@ -1304,7 +1304,7 @@
         "ADR-009#d22": "460f3b71e777beae",
         "ADR-009#reversal-conditions": "c5277f64735fc90a",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-14": "d27d705d87850b3c"
+        "OD-14": "dccdfd827c7c947c"
       }
     },
     "assumption:no-owner-path": {
@@ -1322,9 +1322,9 @@
         "INV-027": "ce44206393c45e31",
         "INV-035": "d2635b7fbbfe9dc6",
         "OD-104": "e81480b2297805b8",
-        "OD-36": "d117a7aa5295347b",
-        "OD-38": "3d2c403df79d214f",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-36": "c3a7f0d6c64b0555",
+        "OD-38": "919f7b5a0389709b",
+        "OD-49": "5258e489baef2bbd",
         "lip:part-2": "f7296d5d02dfdf72",
         "test:test_D6_adversarial": "c0fa330ce00c1210",
         "test:test_policyadmin_cannot_grant_operator_delegatecall": "86485d63b01b806e",
@@ -1338,8 +1338,8 @@
         "ADR-007#d26": "15f5deffc9e99ae8",
         "ADR-007#proposed-direction": "7030a14d68720ead",
         "ADR-010#proposed-direction": "fa446e4d7b119ace",
-        "OD-43": "d156d2a89618d430",
-        "OD-48": "ffa006ea6ee68ee9",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-48": "64325b3596a96b60",
         "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price": "67b42419b5da3877",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f"
       }
@@ -1351,7 +1351,7 @@
         "ADR-009#d36": "b39af82e2e75f8ac",
         "ADR-009#d37": "cf11348122ecd2a4",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-62": "e2f2d1a3bef8a0d3",
+        "OD-62": "400e7af0365218b3",
         "doc:docs/research/cfo-feedback-2026-10-13.md#prices-under-stress": "d1506f010b33dc24"
       }
     },
@@ -1363,7 +1363,7 @@
         "ADR-014#d8": "5bacc6e82b2fcce0",
         "ADR-014#d9": "845cfc4647778352",
         "INV-038": "3d0cc12c5fbf0e2e",
-        "OD-108": "eb8a054440fdca10"
+        "OD-108": "2d0dd0d8d75ba160"
       }
     },
     "assumption:roles-and-sdk": {
@@ -1420,11 +1420,11 @@
         "INV-014": "0ba49ab0ff8acc75",
         "INV-021": "af4dd8932aeae298",
         "INV-038": "3d0cc12c5fbf0e2e",
-        "OD-108": "eb8a054440fdca10",
+        "OD-108": "2d0dd0d8d75ba160",
         "OD-113": "dab734a51e5b7dbb",
         "OD-58": "34f2d86fd20c861b",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "OD-80": "20f31e0406d6c372",
         "test:test_D4_emergency_flow": "361fef9856637f01",
         "test:test_emergency_cannot_give_a_non_zero_approval": "652aa99a29f4ec60"
@@ -1467,7 +1467,7 @@
         "INV-008": "f146be07e646777b",
         "INV-012": "90462743ec0b5b63",
         "INV-036": "6c4c8be9bcece58d",
-        "OD-08": "ea012ebf5573410b",
+        "OD-08": "51b0e4f718df8a78",
         "OD-105": "89cf2558e4d19cb6"
       }
     },
@@ -1493,15 +1493,15 @@
         "ADR-004#d13": "28d45152ae99863d",
         "ADR-004#d14": "adae758778527142",
         "ADR-004#d16": "e9a28d32b40e8a03",
-        "OD-33": "a5227d94586cf05d",
-        "OD-35": "a76b8dcdf1f72cc9"
+        "OD-33": "0fb334f1351ad5ba",
+        "OD-35": "590de325e7b1dd47"
       }
     },
     "change:dai": {
       "content": "a62f66897269dfb2",
       "sources": {
         "ADR-011#d7": "553fe204f7acaab4",
-        "OD-22": "58bf3ea830da1e28"
+        "OD-22": "47184e424ee32daf"
       }
     },
     "change:emergency-holder": {
@@ -1521,7 +1521,7 @@
         "ADR-011#d1": "365f58ccded49917",
         "ADR-011#d12": "f920f71b7287805d",
         "ADR-011#d14": "ac65aba5f9f42369",
-        "OD-20": "b792ae8822128698"
+        "OD-20": "576cf3458fdac138"
       }
     },
     "change:first-loss-shares": {
@@ -1531,10 +1531,10 @@
         "ADR-008#d21": "bf3f0fd17bd5cdb6",
         "ADR-008#d23": "60f3d40d183d68ba",
         "ADR-014#d10": "f093b2ca4ce88427",
-        "OD-108": "eb8a054440fdca10",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182"
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a"
       }
     },
     "change:governance": {
@@ -1549,9 +1549,9 @@
         "INV-004": "4764a8246a1b7439",
         "INV-025": "8638ecfb785ce03e",
         "INV-034": "437f706b35e40043",
-        "OD-36": "d117a7aa5295347b",
-        "OD-38": "3d2c403df79d214f",
-        "OD-49": "e9e957d9808b5b0f"
+        "OD-36": "c3a7f0d6c64b0555",
+        "OD-38": "919f7b5a0389709b",
+        "OD-49": "5258e489baef2bbd"
       }
     },
     "change:lending-and-savings": {
@@ -1568,7 +1568,7 @@
       "content": "3b8d1845823114db",
       "sources": {
         "ADR-001#d9": "2bceec0020b639e9",
-        "OD-34": "0976363da00dad42",
+        "OD-34": "d6634eb95658511b",
         "doc:policy/constellation/PROVENANCE.md#changes-from-upstream": "13e8dda5cb9c8f29"
       }
     },
@@ -1593,7 +1593,7 @@
         "INV-035": "d2635b7fbbfe9dc6",
         "OD-104": "e81480b2297805b8",
         "OD-58": "34f2d86fd20c861b",
-        "OD-59": "e58f62b588a336f3"
+        "OD-59": "74332b7e95adc457"
       }
     },
     "change:swaps": {
@@ -1603,9 +1603,9 @@
         "ADR-007#d18": "ea5450893f7249dc",
         "ADR-007#d19": "8b9cd103799463a9",
         "ADR-007#d42": "770993542447042b",
-        "OD-115": "ee608c3775633082",
-        "OD-33": "a5227d94586cf05d",
-        "OD-43": "d156d2a89618d430"
+        "OD-115": "5bbe0c3ec326dacd",
+        "OD-33": "0fb334f1351ad5ba",
+        "OD-43": "89305e9b2ce3c652"
       }
     },
     "flow:budget": {
@@ -1624,8 +1624,8 @@
         "INV-036": "6c4c8be9bcece58d",
         "OD-105": "89cf2558e4d19cb6",
         "OD-54": "753db40a78f1f7f1",
-        "OD-56": "255eb47895dd1e89",
-        "OD-94": "554f2f5e206c8413",
+        "OD-56": "7df2d8665974b6b7",
+        "OD-94": "350c67730cc7f4e7",
         "lip:part-7": "f3a868fa828a8da3",
         "test:test_D1_budget_motion_cannot_shorten_the_refill_period": "cd7ef58b3f8d0c8e",
         "test:test_uf_budget_stays_within_its_ceiling": "98c6491e5d381484"
@@ -1643,10 +1643,10 @@
         "ADR-009#d41": "cd9fbb5c0d35f9e7",
         "ADR-009#d6": "5e80a0de83eb84a2",
         "ADR-013#d10": "2f76a7ff0d19f9ac",
-        "OD-29": "f0338b92b7e00621",
-        "OD-32": "2c42c5be98c2fc52",
+        "OD-29": "aeeb7c3f322973e2",
+        "OD-32": "a6e015bd0ade2b41",
         "OD-58": "34f2d86fd20c861b",
-        "OD-84": "4d43d9ed82ec5d41",
+        "OD-84": "ae67f361ef873514",
         "runbook:Switch the operator off": "e83c08dffb5f074b"
       }
     },
@@ -1713,9 +1713,9 @@
         "INV-032": "d1f172fb126892d3",
         "OD-106": "611c0897a15203d3",
         "OD-54": "753db40a78f1f7f1",
-        "OD-55": "5ca56059ac95fd76",
+        "OD-55": "59db7b75a4802689",
         "OD-73": "0f2a26b393226461",
-        "OD-92": "4e0e6629ce31ffad",
+        "OD-92": "65aaf4debaa4a4ee",
         "doc:ROADMAP.md#roadmap": "c35d7acd1bc64300",
         "doc:docs/research/enabling-vote-rehearsal-2026-10-15.md#the-vote-that-fits": "83a5dacad3ccefdd",
         "doc:docs/research/single-vote-review-2026-10-14.md#how-one-vote-carries-two-kinds-of-item": "ec4f3a582b989ef2",
@@ -1768,9 +1768,9 @@
         "ADR-014#d10": "f093b2ca4ce88427",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "INV-021": "af4dd8932aeae298",
-        "OD-108": "eb8a054440fdca10",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "doc:docs/research/cfo-feedback-2026-10-13.md#the-first-loss-terms": "1886f5abf041a398",
         "runbook:Burn first-loss Earn shares": "824dc842faffea59",
         "runbook:Exit the first-loss shares": "e6245c07ffe23363"
@@ -1787,10 +1787,10 @@
         "ADR-009#d41": "cd9fbb5c0d35f9e7",
         "ADR-009#d42": "8c78e882919eb91a",
         "ADR-009#d6": "5e80a0de83eb84a2",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-56": "255eb47895dd1e89",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-85": "680f538fc4bcc3e2",
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-56": "7df2d8665974b6b7",
+        "OD-84": "ae67f361ef873514",
+        "OD-85": "a84de04edfb39d7b",
         "lip:part-9": "6e06adadf7d05574"
       }
     },
@@ -1809,8 +1809,8 @@
         "ADR-014#d7": "b35ca0bf73747b39",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "INV-039": "6c093d9bc9a59bc8",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
         "runbook:Run an insurance motion": "e7eb93535728dead",
         "test:test_uf_insurance_money_goes_to_the_first_loss_safe": "966ffaa92d8e839d"
       }
@@ -1828,11 +1828,11 @@
         "ADR-009#d42": "8c78e882919eb91a",
         "ADR-009#d47": "8a0d94fc7bd42417",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-111": "f002b97c19a2eb08",
-        "OD-14": "d27d705d87850b3c",
-        "OD-61": "a7aa4de25fc5378d",
-        "OD-62": "e2f2d1a3bef8a0d3",
-        "OD-85": "680f538fc4bcc3e2",
+        "OD-111": "4a7556d925f6ff37",
+        "OD-14": "dccdfd827c7c947c",
+        "OD-61": "cf1688e9bc5eaf4f",
+        "OD-62": "400e7af0365218b3",
+        "OD-85": "a84de04edfb39d7b",
         "lip:part-9": "6e06adadf7d05574"
       }
     },
@@ -1862,10 +1862,10 @@
         "INV-033": "04603b5c184d1e7a",
         "INV-034": "437f706b35e40043",
         "OD-103": "5473fa50e24e0ac6",
-        "OD-36": "d117a7aa5295347b",
-        "OD-38": "3d2c403df79d214f",
-        "OD-45": "0f1bfbb3e7d90f53",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-36": "c3a7f0d6c64b0555",
+        "OD-38": "919f7b5a0389709b",
+        "OD-45": "c7e9d3bf64ac8f9a",
+        "OD-49": "5258e489baef2bbd",
         "lip:part-4": "867ad18913dfd1eb",
         "runbook:Raise the motion counter": "29cb3572eb89fa74",
         "test:test_D1_substituted_script_rejected_at_enactment": "828edd34c7885dbe",
@@ -1931,8 +1931,8 @@
         "ADR-004#d9": "04d53a4b074dd7ae",
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "INV-016": "cd9f0a527584b5ab",
-        "OD-33": "a5227d94586cf05d",
-        "OD-35": "a76b8dcdf1f72cc9",
+        "OD-33": "0fb334f1351ad5ba",
+        "OD-35": "590de325e7b1dd47",
         "doc:.github/workflows/policy.yml": "07f3cb2daeaf3179",
         "doc:docs/specs/specification-policy.md#the-permission-policy": "b81c0d8cef12086c"
       }
@@ -1948,10 +1948,10 @@
         "ADR-007#proposed-direction": "7030a14d68720ead",
         "INV-014": "0ba49ab0ff8acc75",
         "INV-024": "d18b9584555566c0",
-        "OD-26": "18d1b81eb82801ff",
-        "OD-43": "d156d2a89618d430",
-        "OD-47": "fd61cfa54437d7e5",
-        "OD-48": "ffa006ea6ee68ee9",
+        "OD-26": "d727860872f935ac",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-47": "3f3ff41269384bb3",
+        "OD-48": "64325b3596a96b60",
         "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests": "432b20e2dccb371e",
         "runbook:Cancel orders and sweep the orders account": "628dca1cbe35950b",
         "runbook:Recovery order": "29e819cf758b1c22",
@@ -1990,7 +1990,7 @@
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "INV-002": "e0aea0e5a8df8cfa",
         "INV-038": "3d0cc12c5fbf0e2e",
-        "OD-108": "eb8a054440fdca10",
+        "OD-108": "2d0dd0d8d75ba160",
         "runbook:Move the operator role to another Safe": "ffb9219a866d1f9a",
         "runbook:Return assets to the Agent": "17e25bb48a5c593a"
       }
@@ -2001,7 +2001,7 @@
         "ADR-007#d40": "d270d65eba72dca4",
         "OD-106": "611c0897a15203d3",
         "OD-54": "753db40a78f1f7f1",
-        "OD-96": "a3dc502692167b5a",
+        "OD-96": "5c2651c7700a84ad",
         "doc:ROADMAP.md#roadmap": "c35d7acd1bc64300",
         "doc:ROADMAP.md#standing-gates": "e73c8d2f9bcb613e"
       }
@@ -2012,9 +2012,9 @@
         "ADR-010#d19": "aa2500871cfc833f",
         "ADR-010#d23": "ae2640b16e9badff",
         "ADR-010#proposed-direction": "fa446e4d7b119ace",
-        "OD-39": "e816f44264cf31fd",
-        "OD-45": "0f1bfbb3e7d90f53",
-        "OD-64": "206d90757ee445fb",
+        "OD-39": "01288ebae3ba5e44",
+        "OD-45": "c7e9d3bf64ac8f9a",
+        "OD-64": "26c9ce5f96358910",
         "doc:docs/specs/control-matrix.md#the-screening-vendors-rules": "2e9f0a9c02282cf6"
       }
     },
@@ -2033,13 +2033,13 @@
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "INV-021": "af4dd8932aeae298",
         "OD-106": "611c0897a15203d3",
-        "OD-108": "eb8a054440fdca10",
-        "OD-21": "d8f19338da3bc1ae",
-        "OD-42": "4009c3d65a9f09a1",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-21": "1806143a1ff3af1e",
+        "OD-42": "7a12b0de40f9981e",
         "OD-54": "753db40a78f1f7f1",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
-        "OD-92": "4e0e6629ce31ffad",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
+        "OD-92": "65aaf4debaa4a4ee",
         "runbook:Burn first-loss Earn shares": "824dc842faffea59",
         "runbook:Fund a tranche": "422d29c3b01828fe",
         "runbook:Move the legacy Earn shares": "6b3aa872aea11037"
@@ -2052,7 +2052,7 @@
         "ADR-005#d33": "1551641a08fb4ee8",
         "ADR-005#proposed-direction": "a1e8edc9711fa5b5",
         "INV-026": "83396dd09f3443e7",
-        "OD-109": "420beb171ed3065a",
+        "OD-109": "df51e8d56eae286a",
         "OD-58": "34f2d86fd20c861b",
         "runbook:Rotate a signer": "f5c5ef21d4aeb61b"
       }
@@ -2070,10 +2070,10 @@
         "INV-022": "6a7703bdf5dc8a25",
         "INV-023": "d443eca50e03bf09",
         "INV-024": "d18b9584555566c0",
-        "OD-115": "ee608c3775633082",
-        "OD-43": "d156d2a89618d430",
-        "OD-61": "a7aa4de25fc5378d",
-        "OD-79": "cb1f76169ca699f7",
+        "OD-115": "5bbe0c3ec326dacd",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-61": "cf1688e9bc5eaf4f",
+        "OD-79": "c017b15b3b16b720",
         "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss": "05a7458d7baaed80",
         "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests": "432b20e2dccb371e",
         "runbook:Re-affirm open orders": "55820829cc60b9e2",
@@ -2095,10 +2095,10 @@
         "INV-022": "6a7703bdf5dc8a25",
         "INV-024": "d18b9584555566c0",
         "OD-103": "5473fa50e24e0ac6",
-        "OD-115": "ee608c3775633082",
-        "OD-116": "79514cadd01b9b23",
-        "OD-43": "d156d2a89618d430",
-        "OD-61": "a7aa4de25fc5378d",
+        "OD-115": "5bbe0c3ec326dacd",
+        "OD-116": "ad1f47eae1957fe3",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-61": "cf1688e9bc5eaf4f",
         "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer": "2f0c8c2364152741",
         "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests": "432b20e2dccb371e",
         "runbook:Cancel orders on a policy change": "8869f4bab0f12705",
@@ -2123,8 +2123,8 @@
         "INV-033": "04603b5c184d1e7a",
         "INV-035": "d2635b7fbbfe9dc6",
         "OD-104": "e81480b2297805b8",
-        "OD-114": "5243c34f28f04152",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-114": "cf860df48ec1fe80",
+        "OD-49": "5258e489baef2bbd",
         "OD-58": "34f2d86fd20c861b",
         "runbook:Raise the motion counter": "29cb3572eb89fa74",
         "runbook:Restart after a stop": "2e5b2182aecd4527",
@@ -2153,10 +2153,10 @@
         "INV-037": "d02d3c465796aea1",
         "OD-106": "611c0897a15203d3",
         "OD-54": "753db40a78f1f7f1",
-        "OD-62": "e2f2d1a3bef8a0d3",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-85": "680f538fc4bcc3e2",
-        "OD-89": "1e25c2226788ac5d",
+        "OD-62": "400e7af0365218b3",
+        "OD-84": "ae67f361ef873514",
+        "OD-85": "a84de04edfb39d7b",
+        "OD-89": "478caf7c4c1e7bd1",
         "lip:part-5": "c4f2639f7dec2fee",
         "runbook:Fund a tranche": "422d29c3b01828fe"
       }
@@ -2170,8 +2170,8 @@
         "ADR-009#d28": "5fc7cf5a7a65f623",
         "ADR-009#d30": "f7c5fb1ee071a13b",
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
-        "OD-41": "b377699a4544f042",
-        "OD-45": "0f1bfbb3e7d90f53",
+        "OD-41": "a9300569512eb3c3",
+        "OD-45": "c7e9d3bf64ac8f9a",
         "runbook:Unlock a matured product": "a2d38bf71be40bb5"
       }
     },
@@ -2189,7 +2189,7 @@
         "ADR-013#d10": "2f76a7ff0d19f9ac",
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "INV-033": "04603b5c184d1e7a",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-49": "5258e489baef2bbd",
         "runbook:Pause Easy Track": "c91d87b131a002e4",
         "runbook:Raise the motion counter": "29cb3572eb89fa74",
         "test:test_D1_objection_rejection": "36d110dfb28ad692",
@@ -2239,11 +2239,11 @@
         "INV-015": "dd74f9efad6062d9",
         "OD-103": "5473fa50e24e0ac6",
         "OD-106": "611c0897a15203d3",
-        "OD-22": "58bf3ea830da1e28",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-22": "47184e424ee32daf",
+        "OD-49": "5258e489baef2bbd",
         "OD-54": "753db40a78f1f7f1",
-        "OD-90": "633bc64d7820beb5",
-        "OD-91": "620f5baff185d11d",
+        "OD-90": "9906f29bc55dcaf2",
+        "OD-91": "f77918424035eef7",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f",
         "lip:part-8": "37d3bfbf87b429f8"
       }
@@ -2254,8 +2254,8 @@
         "ADR-009#d46": "9eaea814a89b8545",
         "ADR-009#d47": "8a0d94fc7bd42417",
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
-        "OD-110": "ec3f178266a89d98",
-        "OD-111": "f002b97c19a2eb08",
+        "OD-110": "f5dc9fca86315e11",
+        "OD-111": "4a7556d925f6ff37",
         "doc:docs/research/easy-track-first-2026-11-05.md#treasury-rules-that-the-committees-items-touch": "6966fbfadf5aa2f5"
       }
     },
@@ -2278,15 +2278,15 @@
         "ADR-009#d9": "fb531e21f011a6fa",
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
         "ADR-011#d10": "f5c9d3213fa7599e",
-        "OD-03": "700ba073e9678d8e",
-        "OD-29": "f0338b92b7e00621",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-41": "b377699a4544f042",
-        "OD-56": "255eb47895dd1e89",
+        "OD-03": "29ddcd8249fe719d",
+        "OD-29": "aeeb7c3f322973e2",
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-41": "a9300569512eb3c3",
+        "OD-56": "7df2d8665974b6b7",
         "OD-58": "34f2d86fd20c861b",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-86": "3136a4334e5d2b22",
-        "OD-90": "633bc64d7820beb5",
+        "OD-84": "ae67f361ef873514",
+        "OD-86": "4cc162e0100d618e",
+        "OD-90": "9906f29bc55dcaf2",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f",
         "lip:part-9": "6e06adadf7d05574"
       }
@@ -2298,10 +2298,10 @@
         "ADR-009#d30": "f7c5fb1ee071a13b",
         "ADR-010#d19": "aa2500871cfc833f",
         "ADR-010#d23": "ae2640b16e9badff",
-        "OD-39": "e816f44264cf31fd",
-        "OD-45": "0f1bfbb3e7d90f53",
-        "OD-64": "206d90757ee445fb",
-        "OD-90": "633bc64d7820beb5",
+        "OD-39": "01288ebae3ba5e44",
+        "OD-45": "c7e9d3bf64ac8f9a",
+        "OD-64": "26c9ce5f96358910",
+        "OD-90": "9906f29bc55dcaf2",
         "doc:ROADMAP.md#roadmap": "c35d7acd1bc64300",
         "doc:docs/specs/control-matrix.md#control-matrix": "e709d86d9dd6a0bb"
       }
@@ -2317,9 +2317,9 @@
         "INV-001": "522b561d1b5962a7",
         "INV-003": "ae7570f337217693",
         "INV-038": "3d0cc12c5fbf0e2e",
-        "OD-108": "eb8a054440fdca10",
+        "OD-108": "2d0dd0d8d75ba160",
         "OD-73": "0f2a26b393226461",
-        "OD-90": "633bc64d7820beb5",
+        "OD-90": "9906f29bc55dcaf2",
         "doc:docs/product/brief.md#the-system": "18f13df44581bd05",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f",
         "doc:docs/specs/lip-draft.md#simple-summary": "f1026099effa9a9d"
@@ -2339,10 +2339,10 @@
         "ADR-005#proposed-direction": "a1e8edc9711fa5b5",
         "ADR-013#d12": "302ede3531835f08",
         "OD-104": "e81480b2297805b8",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-49": "5258e489baef2bbd",
         "OD-58": "34f2d86fd20c861b",
-        "OD-59": "e58f62b588a336f3",
-        "OD-90": "633bc64d7820beb5",
+        "OD-59": "74332b7e95adc457",
+        "OD-90": "9906f29bc55dcaf2",
         "lip:part-6": "ae0c2a1b5bc89dac",
         "runbook:Restart after a stop": "2e5b2182aecd4527",
         "runbook:Return assets to the Agent": "17e25bb48a5c593a"
@@ -2365,8 +2365,8 @@
         "INV-037": "d02d3c465796aea1",
         "OD-106": "611c0897a15203d3",
         "OD-54": "753db40a78f1f7f1",
-        "OD-55": "5ca56059ac95fd76",
-        "OD-89": "1e25c2226788ac5d",
+        "OD-55": "59db7b75a4802689",
+        "OD-89": "478caf7c4c1e7bd1",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f",
         "runbook:Fund a tranche": "422d29c3b01828fe"
       }
@@ -2386,12 +2386,12 @@
         "ADR-014#d8": "5bacc6e82b2fcce0",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "INV-021": "af4dd8932aeae298",
-        "OD-108": "eb8a054440fdca10",
-        "OD-21": "d8f19338da3bc1ae",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
-        "OD-90": "633bc64d7820beb5",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-21": "1806143a1ff3af1e",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
+        "OD-90": "9906f29bc55dcaf2",
         "runbook:Burn first-loss Earn shares": "824dc842faffea59",
         "runbook:Move the legacy Earn shares": "6b3aa872aea11037"
       }
@@ -2414,15 +2414,15 @@
         "ADR-009#d44": "3bd4f57f8fa30ed2",
         "ADR-009#d47": "8a0d94fc7bd42417",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-111": "f002b97c19a2eb08",
-        "OD-14": "d27d705d87850b3c",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-61": "a7aa4de25fc5378d",
-        "OD-62": "e2f2d1a3bef8a0d3",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-85": "680f538fc4bcc3e2",
-        "OD-87": "819b206301f4b0a5",
-        "OD-90": "633bc64d7820beb5"
+        "OD-111": "4a7556d925f6ff37",
+        "OD-14": "dccdfd827c7c947c",
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-61": "cf1688e9bc5eaf4f",
+        "OD-62": "400e7af0365218b3",
+        "OD-84": "ae67f361ef873514",
+        "OD-85": "a84de04edfb39d7b",
+        "OD-87": "3a344664b6c7b704",
+        "OD-90": "9906f29bc55dcaf2"
       }
     },
     "mandate:swaps": {
@@ -2440,11 +2440,11 @@
         "ADR-007#d5": "b42f641da2748d1b",
         "ADR-007#proposed-direction": "7030a14d68720ead",
         "INV-024": "d18b9584555566c0",
-        "OD-26": "18d1b81eb82801ff",
-        "OD-43": "d156d2a89618d430",
-        "OD-48": "ffa006ea6ee68ee9",
-        "OD-61": "a7aa4de25fc5378d",
-        "OD-90": "633bc64d7820beb5",
+        "OD-26": "d727860872f935ac",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-48": "64325b3596a96b60",
+        "OD-61": "cf1688e9bc5eaf4f",
+        "OD-90": "9906f29bc55dcaf2",
         "runbook:Recovery order": "29e819cf758b1c22"
       }
     },
@@ -2457,11 +2457,11 @@
         "ADR-008#d23": "60f3d40d183d68ba",
         "ADR-014#d10": "f093b2ca4ce88427",
         "INV-021": "af4dd8932aeae298",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182"
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a"
       }
     },
     "planned:insurance-roles": {
@@ -2472,7 +2472,7 @@
         "ADR-014#d7": "b35ca0bf73747b39",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "INV-039": "6c093d9bc9a59bc8",
-        "OD-107": "faee79b8bb3f601d"
+        "OD-107": "e47187405d48c405"
       }
     },
     "planned:orders-account-s-token-motion": {
@@ -2509,9 +2509,9 @@
         "ADR-009#d43": "355697aaad252259",
         "ADR-009#d6": "5e80a0de83eb84a2",
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
-        "OD-29": "f0338b92b7e00621",
+        "OD-29": "aeeb7c3f322973e2",
         "OD-58": "34f2d86fd20c861b",
-        "OD-86": "3136a4334e5d2b22"
+        "OD-86": "4cc162e0100d618e"
       }
     },
     "quiz:depeg-first": {
@@ -2532,7 +2532,7 @@
         "ADR-007#d18": "ea5450893f7249dc",
         "ADR-007#d26": "15f5deffc9e99ae8",
         "ADR-007#proposed-direction": "7030a14d68720ead",
-        "OD-43": "d156d2a89618d430",
+        "OD-43": "89305e9b2ce3c652",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f"
       }
     },
@@ -2546,7 +2546,7 @@
         "ADR-013#d17": "f6fb6c85baf6c37e",
         "ADR-013#d5": "a43f2ec04c861566",
         "OD-117": "60d6b42065704a89",
-        "OD-96": "a3dc502692167b5a"
+        "OD-96": "5c2651c7700a84ad"
       }
     },
     "quiz:operator-threshold": {
@@ -2615,8 +2615,8 @@
         "ADR-007#d40": "d270d65eba72dca4",
         "ADR-007#proposed-direction": "7030a14d68720ead",
         "ADR-013#consequences": "8c58b270a45000fa",
-        "OD-43": "d156d2a89618d430",
-        "OD-96": "a3dc502692167b5a",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-96": "5c2651c7700a84ad",
         "doc:docs/research/cow-orders-account-2026-10-06.md#the-chain-read-on-2026-10-06-at-block-26134502": "f252867e7028a6fe"
       }
     },
@@ -2634,7 +2634,7 @@
         "ADR-009#d17": "bd1b54527158edf4",
         "ADR-009#d7": "91e4e5e7ef9c3b01",
         "ADR-010#d12": "6297c7507a3a6af4",
-        "OD-13": "f538306f02833379"
+        "OD-13": "ea32db184f66264b"
       }
     },
     "reuse:runbooks-and-drills": {
@@ -2663,8 +2663,8 @@
       "sources": {
         "ADR-004#d10": "06653cca4da77af8",
         "ADR-004#d12": "b5b417361e57d9ca",
-        "OD-33": "a5227d94586cf05d",
-        "OD-34": "0976363da00dad42",
+        "OD-33": "0fb334f1351ad5ba",
+        "OD-34": "d6634eb95658511b",
         "doc:policy/constellation/PROVENANCE.md#changes-from-upstream": "13e8dda5cb9c8f29"
       }
     },
@@ -2674,8 +2674,8 @@
         "ADR-009#d26": "db040dba517e1f19",
         "ADR-009#d30": "f7c5fb1ee071a13b",
         "ADR-010#d19": "aa2500871cfc833f",
-        "OD-39": "e816f44264cf31fd",
-        "OD-45": "0f1bfbb3e7d90f53",
+        "OD-39": "01288ebae3ba5e44",
+        "OD-45": "c7e9d3bf64ac8f9a",
         "doc:docs/specs/control-matrix.md#control-matrix": "e709d86d9dd6a0bb"
       }
     },
@@ -2687,7 +2687,7 @@
         "ADR-002#d5": "731b5d4450f2baa5",
         "ADR-002#d6": "2d292f7d65a611b1",
         "ADR-003#d9": "aa0657485d8b3c2b",
-        "OD-37": "b5147428594fd913"
+        "OD-37": "ef5b947ed1866b49"
       }
     },
     "reuse:the-dry-run-harness-and-the-fork-tests": {
@@ -2739,12 +2739,12 @@
         "ADR-014#d10": "f093b2ca4ce88427",
         "ADR-014#d7": "b35ca0bf73747b39",
         "OD-103": "5473fa50e24e0ac6",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
         "OD-57": "cfe8ab092611151c",
         "OD-58": "34f2d86fd20c861b",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182"
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a"
       }
     },
     "reuse:the-permission-policy": {
@@ -2760,10 +2760,10 @@
         "INV-018": "8db49d0ffff39854",
         "OD-103": "5473fa50e24e0ac6",
         "OD-104": "e81480b2297805b8",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-49": "e9e957d9808b5b0f",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182"
+        "OD-107": "e47187405d48c405",
+        "OD-49": "5258e489baef2bbd",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a"
       }
     },
     "reuse:the-policy-compiler-and-artifact": {
@@ -2772,7 +2772,7 @@
         "ADR-004#d11": "d34b583a18a270ba",
         "ADR-004#d13": "28d45152ae99863d",
         "ADR-004#d14": "adae758778527142",
-        "OD-33": "a5227d94586cf05d"
+        "OD-33": "0fb334f1351ad5ba"
       }
     },
     "reuse:the-protocols-of-the-launch-scope": {
@@ -2791,7 +2791,7 @@
       "sources": {
         "ADR-009#d19": "9d6a24c846f0f7dc",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-14": "d27d705d87850b3c"
+        "OD-14": "dccdfd827c7c947c"
       }
     },
     "reuse:the-round-trip-check": {
@@ -2858,13 +2858,13 @@
         "ADR-010#d26": "aacbfd1a94c9e9be",
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "ADR-014#d9": "845cfc4647778352",
-        "OD-108": "eb8a054440fdca10",
-        "OD-13": "f538306f02833379",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-43": "d156d2a89618d430",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-13": "ea32db184f66264b",
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-43": "89305e9b2ce3c652",
         "OD-58": "34f2d86fd20c861b",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-87": "819b206301f4b0a5",
+        "OD-84": "ae67f361ef873514",
+        "OD-87": "3a344664b6c7b704",
         "OD-88": "85b9871a8395bebb"
       }
     },
@@ -2877,10 +2877,10 @@
         "ADR-009#d40": "048297ba697101b5",
         "ADR-009#d41": "cd9fbb5c0d35f9e7",
         "ADR-009#d44": "3bd4f57f8fa30ed2",
-        "OD-33": "a5227d94586cf05d",
-        "OD-44": "ad8f665da7851404",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-87": "819b206301f4b0a5"
+        "OD-33": "0fb334f1351ad5ba",
+        "OD-44": "559619025caec3b8",
+        "OD-84": "ae67f361ef873514",
+        "OD-87": "3a344664b6c7b704"
       }
     },
     "reuse:zodiac-roles-mastercopy-and-module-proxy-factory": {
@@ -2928,14 +2928,14 @@
         "INV-009": "423da9cdd15c0594",
         "INV-010": "188a3bf9015fca69",
         "INV-021": "af4dd8932aeae298",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
         "OD-19": "33e32a33e4fe5db6",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-43": "d156d2a89618d430",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-43": "89305e9b2ce3c652",
         "OD-58": "34f2d86fd20c861b",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "OD-73": "0f2a26b393226461",
         "OD-80": "20f31e0406d6c372",
         "OD-83": "abe512c35314873e",
@@ -2969,15 +2969,15 @@
         "INV-003": "ae7570f337217693",
         "INV-004": "4764a8246a1b7439",
         "INV-015": "dd74f9efad6062d9",
-        "OD-20": "b792ae8822128698",
-        "OD-22": "58bf3ea830da1e28",
-        "OD-29": "f0338b92b7e00621",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-39": "e816f44264cf31fd",
+        "OD-20": "576cf3458fdac138",
+        "OD-22": "47184e424ee32daf",
+        "OD-29": "aeeb7c3f322973e2",
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-39": "01288ebae3ba5e44",
         "OD-58": "34f2d86fd20c861b",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-86": "3136a4334e5d2b22",
-        "OD-91": "620f5baff185d11d",
+        "OD-84": "ae67f361ef873514",
+        "OD-86": "4cc162e0100d618e",
+        "OD-91": "f77918424035eef7",
         "doc:docs/research/request-for-solution-2026-10-07.md#assets-and-permissions": "9d02516e530d3092",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f",
         "doc:docs/specs/lip-draft.md#test-cases": "12249b0debf9fc75",
@@ -3016,17 +3016,17 @@
         "INV-037": "d02d3c465796aea1",
         "INV-038": "3d0cc12c5fbf0e2e",
         "INV-039": "6c093d9bc9a59bc8",
-        "OD-08": "ea012ebf5573410b",
+        "OD-08": "51b0e4f718df8a78",
         "OD-105": "89cf2558e4d19cb6",
         "OD-106": "611c0897a15203d3",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
-        "OD-14": "d27d705d87850b3c",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-39": "e816f44264cf31fd",
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-14": "dccdfd827c7c947c",
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-39": "01288ebae3ba5e44",
         "OD-58": "34f2d86fd20c861b",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-85": "680f538fc4bcc3e2",
+        "OD-84": "ae67f361ef873514",
+        "OD-85": "a84de04edfb39d7b",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f"
       }
     },
@@ -3052,9 +3052,9 @@
         "INV-024": "d18b9584555566c0",
         "INV-025": "8638ecfb785ce03e",
         "INV-027": "ce44206393c45e31",
-        "OD-26": "18d1b81eb82801ff",
-        "OD-43": "d156d2a89618d430",
-        "OD-49": "e9e957d9808b5b0f",
+        "OD-26": "d727860872f935ac",
+        "OD-43": "89305e9b2ce3c652",
+        "OD-49": "5258e489baef2bbd",
         "doc:ROADMAP.md#standing-gates": "e73c8d2f9bcb613e",
         "doc:docs/research/request-for-solution-2026-10-07.md#emergency-response": "4f35b36221cb4c79",
         "doc:policy/constellation/artifacts/fork-25946643.json": "901453e4285e672b",
@@ -3105,20 +3105,20 @@
         "INV-033": "04603b5c184d1e7a",
         "INV-034": "437f706b35e40043",
         "INV-035": "d2635b7fbbfe9dc6",
-        "OD-09": "363bde07469e31fc",
-        "OD-100": "f801004088de88e7",
+        "OD-09": "e03c1d844b7686b5",
+        "OD-100": "7e961ab4a4817ef6",
         "OD-102": "9b08fc5cc64ce2b4",
         "OD-103": "5473fa50e24e0ac6",
         "OD-104": "e81480b2297805b8",
         "OD-105": "89cf2558e4d19cb6",
         "OD-117": "60d6b42065704a89",
         "OD-118": "506357a454bed5c0",
-        "OD-49": "e9e957d9808b5b0f",
-        "OD-67": "0c1ed6b62d0fd182",
-        "OD-70": "5a57f4c12fdbce15",
+        "OD-49": "5258e489baef2bbd",
+        "OD-67": "1a0cfc27b5801f7a",
+        "OD-70": "876544ad4d38df3a",
         "OD-73": "0f2a26b393226461",
-        "OD-92": "4e0e6629ce31ffad",
-        "OD-96": "a3dc502692167b5a",
+        "OD-92": "65aaf4debaa4a4ee",
+        "OD-96": "5c2651c7700a84ad",
         "doc:ROADMAP.md#roadmap": "c35d7acd1bc64300",
         "doc:docs/research/request-for-solution-2026-10-07.md#governance-and-easy-track": "c7546b67ba29bb6e",
         "doc:docs/specs/enabling-vote.md#the-vote": "43b7ed550d1af4d1",
@@ -3139,8 +3139,8 @@
         "ADR-005#proposed-direction": "a1e8edc9711fa5b5",
         "ADR-007#d19": "8b9cd103799463a9",
         "INV-010": "188a3bf9015fca69",
-        "OD-33": "a5227d94586cf05d",
-        "OD-35": "a76b8dcdf1f72cc9",
+        "OD-33": "0fb334f1351ad5ba",
+        "OD-35": "590de325e7b1dd47",
         "doc:docs/research/request-for-solution-2026-10-07.md#provider-independence": "4b232e804dded31f",
         "doc:docs/specs/lip-draft.md#problem": "35ad08f05e1ae866",
         "doc:test/Drills.t.sol": "4ecefc19944775c5"
@@ -3166,13 +3166,13 @@
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "ADR-014#d9": "845cfc4647778352",
         "INV-010": "188a3bf9015fca69",
-        "OD-01": "bbc8d000fc3a8650",
-        "OD-108": "eb8a054440fdca10",
-        "OD-13": "f538306f02833379",
+        "OD-01": "8ae0e757610b7d22",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-13": "ea32db184f66264b",
         "OD-54": "753db40a78f1f7f1",
-        "OD-55": "5ca56059ac95fd76",
+        "OD-55": "59db7b75a4802689",
         "OD-83": "abe512c35314873e",
-        "OD-86": "3136a4334e5d2b22",
+        "OD-86": "4cc162e0100d618e",
         "OD-88": "85b9871a8395bebb",
         "doc:docs/research/request-for-solution-2026-10-07.md#monitoring-and-transaction-blocking": "bd1a024b754100e1",
         "doc:docs/specs/lip-draft.md#failure-modes": "25e2d795c97d1722",
@@ -3192,10 +3192,10 @@
         "ADR-009#d44": "3bd4f57f8fa30ed2",
         "ADR-009#proposed-direction": "7a016a3b5b98da56",
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
-        "OD-14": "d27d705d87850b3c",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-85": "680f538fc4bcc3e2",
-        "OD-87": "819b206301f4b0a5",
+        "OD-14": "dccdfd827c7c947c",
+        "OD-84": "ae67f361ef873514",
+        "OD-85": "a84de04edfb39d7b",
+        "OD-87": "3a344664b6c7b704",
         "doc:docs/research/request-for-solution-2026-10-07.md#net-asset-value": "7ac4d4e76fc20c74",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f"
       }
@@ -3219,11 +3219,11 @@
         "INV-029": "c4ffa117ebfad7de",
         "INV-033": "04603b5c184d1e7a",
         "INV-034": "437f706b35e40043",
-        "OD-09": "363bde07469e31fc",
+        "OD-09": "e03c1d844b7686b5",
         "OD-102": "9b08fc5cc64ce2b4",
         "OD-104": "e81480b2297805b8",
-        "OD-45": "0f1bfbb3e7d90f53",
-        "OD-70": "5a57f4c12fdbce15",
+        "OD-45": "c7e9d3bf64ac8f9a",
+        "OD-70": "876544ad4d38df3a",
         "doc:docs/research/request-for-solution-2026-10-07.md#permission-change-paths": "63a4f1586eba63ac",
         "lip:part-6": "ae0c2a1b5bc89dac",
         "runbook:Remove a strategy": "50a14c80c61ba8c8"
@@ -3253,7 +3253,7 @@
         "INV-021": "af4dd8932aeae298",
         "INV-023": "d443eca50e03bf09",
         "INV-034": "437f706b35e40043",
-        "OD-33": "a5227d94586cf05d",
+        "OD-33": "0fb334f1351ad5ba",
         "OD-58": "34f2d86fd20c861b",
         "doc:ROADMAP.md#standing-gates": "e73c8d2f9bcb613e",
         "doc:docs/research/request-for-solution-2026-10-07.md#what-to-send-back": "888f0106140df772"
@@ -3274,14 +3274,14 @@
         "ADR-009#d43": "355697aaad252259",
         "ADR-009#d44": "3bd4f57f8fa30ed2",
         "ADR-009#d47": "8a0d94fc7bd42417",
-        "OD-111": "f002b97c19a2eb08",
-        "OD-29": "f0338b92b7e00621",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-39": "e816f44264cf31fd",
+        "OD-111": "4a7556d925f6ff37",
+        "OD-29": "aeeb7c3f322973e2",
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-39": "01288ebae3ba5e44",
         "OD-58": "34f2d86fd20c861b",
-        "OD-84": "4d43d9ed82ec5d41",
-        "OD-86": "3136a4334e5d2b22",
-        "OD-87": "819b206301f4b0a5"
+        "OD-84": "ae67f361ef873514",
+        "OD-86": "4cc162e0100d618e",
+        "OD-87": "3a344664b6c7b704"
       }
     },
     "scene:changes-by-motion-through-one-factory": {
@@ -3305,9 +3305,9 @@
         "INV-033": "04603b5c184d1e7a",
         "INV-034": "437f706b35e40043",
         "OD-118": "506357a454bed5c0",
-        "OD-36": "d117a7aa5295347b",
-        "OD-38": "3d2c403df79d214f",
-        "OD-45": "0f1bfbb3e7d90f53",
+        "OD-36": "c3a7f0d6c64b0555",
+        "OD-38": "919f7b5a0389709b",
+        "OD-45": "c7e9d3bf64ac8f9a",
         "doc:policy/constellation/constellation/administration.ts": "9d8ef5c48673b731",
         "doc:policy/constellation/constellation/roles/governance/permissions.ts": "88f3096a66cc2545"
       }
@@ -3333,7 +3333,7 @@
         "INV-035": "d2635b7fbbfe9dc6",
         "OD-104": "e81480b2297805b8",
         "OD-58": "34f2d86fd20c861b",
-        "OD-59": "e58f62b588a336f3",
+        "OD-59": "74332b7e95adc457",
         "lip:part-6": "ae0c2a1b5bc89dac"
       }
     },
@@ -3365,7 +3365,7 @@
         "ADR-013#consequences": "8c58b270a45000fa",
         "ADR-013#d5": "a43f2ec04c861566",
         "ADR-014#d1": "1450520ce78d14e4",
-        "OD-96": "a3dc502692167b5a",
+        "OD-96": "5c2651c7700a84ad",
         "doc:ROADMAP.md#roadmap": "c35d7acd1bc64300"
       }
     },
@@ -3386,9 +3386,9 @@
         "INV-038": "3d0cc12c5fbf0e2e",
         "INV-039": "6c093d9bc9a59bc8",
         "OD-106": "611c0897a15203d3",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
-        "OD-89": "1e25c2226788ac5d"
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-89": "478caf7c4c1e7bd1"
       }
     },
     "scene:nobody-touches-the-vault-directly": {
@@ -3416,7 +3416,7 @@
         "INV-022": "6a7703bdf5dc8a25",
         "INV-024": "d18b9584555566c0",
         "OD-103": "5473fa50e24e0ac6",
-        "OD-43": "d156d2a89618d430"
+        "OD-43": "89305e9b2ce3c652"
       }
     },
     "scene:the-operator-the-committee-at-work": {
@@ -3431,9 +3431,9 @@
         "ADR-014#d9": "845cfc4647778352",
         "INV-003": "ae7570f337217693",
         "INV-038": "3d0cc12c5fbf0e2e",
-        "OD-108": "eb8a054440fdca10",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a",
         "OD-80": "20f31e0406d6c372",
         "test:test_D3_operator_cannot_route_around_avatar": "109c8b32ddee05bb"
       }
@@ -3488,7 +3488,7 @@
         "ADR-005#proposed-direction": "a1e8edc9711fa5b5",
         "ADR-014#d1": "1450520ce78d14e4",
         "ADR-014#d8": "5bacc6e82b2fcce0",
-        "OD-108": "eb8a054440fdca10",
+        "OD-108": "2d0dd0d8d75ba160",
         "OD-73": "0f2a26b393226461"
       }
     },
@@ -3561,13 +3561,13 @@
       "content": "ad0548ad29718c06",
       "sources": {
         "ADR-004#d12": "b5b417361e57d9ca",
-        "OD-33": "a5227d94586cf05d"
+        "OD-33": "0fb334f1351ad5ba"
       }
     },
     "term:control-matrix": {
       "content": "997b1cc49b66374e",
       "sources": {
-        "OD-39": "e816f44264cf31fd",
+        "OD-39": "01288ebae3ba5e44",
         "doc:docs/specs/control-matrix.md#the-matrix": "8deabdad6291e48f"
       }
     },
@@ -3576,7 +3576,7 @@
       "sources": {
         "ADR-007#d17": "3626ccb38fdfe107",
         "ADR-007#d26": "15f5deffc9e99ae8",
-        "OD-43": "d156d2a89618d430"
+        "OD-43": "89305e9b2ce3c652"
       }
     },
     "term:default-deny": {
@@ -3591,7 +3591,7 @@
         "ADR-006#d9": "b9adf426765770aa",
         "ADR-007#d41": "5dc92a099be14a8a",
         "OD-103": "5473fa50e24e0ac6",
-        "OD-36": "d117a7aa5295347b"
+        "OD-36": "c3a7f0d6c64b0555"
       }
     },
     "term:drift": {
@@ -3631,7 +3631,7 @@
     "term:ebbo": {
       "content": "ecbd114110eb1787",
       "sources": {
-        "OD-48": "ffa006ea6ee68ee9",
+        "OD-48": "64325b3596a96b60",
         "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price": "67b42419b5da3877"
       }
     },
@@ -3646,7 +3646,7 @@
         "ADR-013#d6": "d219050a086af568",
         "ADR-014#d2": "aad48ca06a391623",
         "OD-106": "611c0897a15203d3",
-        "OD-92": "4e0e6629ce31ffad",
+        "OD-92": "65aaf4debaa4a4ee",
         "doc:docs/specs/enabling-vote.md#the-vote": "43b7ed550d1af4d1"
       }
     },
@@ -3673,11 +3673,11 @@
         "ADR-014#d10": "f093b2ca4ce88427",
         "ADR-014#d4": "8e786d6951eab8d7",
         "INV-021": "af4dd8932aeae298",
-        "OD-107": "faee79b8bb3f601d",
-        "OD-108": "eb8a054440fdca10",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182"
+        "OD-107": "e47187405d48c405",
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a"
       }
     },
     "term:first-loss-shares": {
@@ -3690,11 +3690,11 @@
         "ADR-008#d22": "75b05eafe71007af",
         "ADR-008#d23": "60f3d40d183d68ba",
         "ADR-014#d10": "f093b2ca4ce88427",
-        "OD-108": "eb8a054440fdca10",
-        "OD-21": "d8f19338da3bc1ae",
-        "OD-42": "4009c3d65a9f09a1",
-        "OD-60": "e40055802a83b059",
-        "OD-67": "0c1ed6b62d0fd182"
+        "OD-108": "2d0dd0d8d75ba160",
+        "OD-21": "1806143a1ff3af1e",
+        "OD-42": "7a12b0de40f9981e",
+        "OD-60": "98be3ed0848d05f0",
+        "OD-67": "1a0cfc27b5801f7a"
       }
     },
     "term:fortnightly-snapshot": {
@@ -3702,8 +3702,8 @@
       "sources": {
         "ADR-009#d25": "2b8d2c954b78d941",
         "ADR-009#d31": "c216675302b4383f",
-        "OD-32": "2c42c5be98c2fc52",
-        "OD-56": "255eb47895dd1e89"
+        "OD-32": "a6e015bd0ade2b41",
+        "OD-56": "7df2d8665974b6b7"
       }
     },
     "term:guard": {
@@ -3731,7 +3731,7 @@
         "ADR-014#proposed-direction": "f56bad1f3f64a5f7",
         "OD-106": "611c0897a15203d3",
         "OD-54": "753db40a78f1f7f1",
-        "OD-55": "5ca56059ac95fd76"
+        "OD-55": "59db7b75a4802689"
       }
     },
     "term:limit-order": {
@@ -3740,8 +3740,8 @@
         "ADR-007#d18": "ea5450893f7249dc",
         "ADR-007#d23": "756c753dccc0e2ea",
         "ADR-007#d29": "aa10ba1d2c33358a",
-        "OD-43": "d156d2a89618d430",
-        "OD-61": "a7aa4de25fc5378d"
+        "OD-43": "89305e9b2ce3c652",
+        "OD-61": "cf1688e9bc5eaf4f"
       }
     },
     "term:lip": {
@@ -3765,7 +3765,7 @@
         "ADR-008#d34": "48d4029f6522ca3b",
         "ADR-014#d1": "1450520ce78d14e4",
         "OD-106": "611c0897a15203d3",
-        "OD-89": "1e25c2226788ac5d"
+        "OD-89": "478caf7c4c1e7bd1"
       }
     },
     "term:manifest": {
@@ -3803,7 +3803,7 @@
       "content": "26f018668d3ab7be",
       "sources": {
         "ADR-009#d28": "5fc7cf5a7a65f623",
-        "OD-41": "b377699a4544f042"
+        "OD-41": "a9300569512eb3c3"
       }
     },
     "term:objection-window": {
@@ -3825,7 +3825,7 @@
         "ADR-007#d17": "3626ccb38fdfe107",
         "ADR-007#d28": "f83fb28d920532bc",
         "INV-023": "d443eca50e03bf09",
-        "OD-43": "d156d2a89618d430",
+        "OD-43": "89305e9b2ce3c652",
         "OD-57": "cfe8ab092611151c"
       }
     },
@@ -3842,7 +3842,7 @@
         "ADR-009#d35": "1114729df9e6b058",
         "ADR-009#d36": "b39af82e2e75f8ac",
         "ADR-009#d37": "cf11348122ecd2a4",
-        "OD-62": "e2f2d1a3bef8a0d3"
+        "OD-62": "400e7af0365218b3"
       }
     },
     "term:recovery-order": {
@@ -3854,7 +3854,7 @@
         "ADR-007#d5": "b42f641da2748d1b",
         "ADR-007#proposed-direction": "7030a14d68720ead",
         "INV-014": "0ba49ab0ff8acc75",
-        "OD-26": "18d1b81eb82801ff"
+        "OD-26": "d727860872f935ac"
       }
     },
     "term:rfp": {
@@ -3878,7 +3878,7 @@
         "ADR-005#d6": "8fce86d1230982be",
         "ADR-005#proposed-direction": "a1e8edc9711fa5b5",
         "OD-57": "cfe8ab092611151c",
-        "OD-60": "e40055802a83b059"
+        "OD-60": "98be3ed0848d05f0"
       }
     },
     "term:round-trip-check": {
@@ -3922,7 +3922,7 @@
       "sources": {
         "ADR-007#d1": "6377a47c37197946",
         "ADR-007#d17": "3626ccb38fdfe107",
-        "OD-43": "d156d2a89618d430"
+        "OD-43": "89305e9b2ce3c652"
       }
     },
     "term:susds": {
@@ -3931,7 +3931,7 @@
         "ADR-009#d47": "8a0d94fc7bd42417",
         "ADR-011#d1": "365f58ccded49917",
         "ADR-011#proposed-direction": "87d74436ba4324cc",
-        "OD-111": "f002b97c19a2eb08"
+        "OD-111": "4a7556d925f6ff37"
       }
     },
     "term:switch": {
@@ -3944,14 +3944,14 @@
         "INV-009": "423da9cdd15c0594",
         "OD-104": "e81480b2297805b8",
         "OD-58": "34f2d86fd20c861b",
-        "OD-59": "e58f62b588a336f3"
+        "OD-59": "74332b7e95adc457"
       }
     },
     "term:tmc-6-ratio": {
       "content": "8a8a5333a662083a",
       "sources": {
         "ADR-009#d47": "8a0d94fc7bd42417",
-        "OD-111": "f002b97c19a2eb08",
+        "OD-111": "4a7556d925f6ff37",
         "doc:docs/research/easy-track-first-2026-11-05.md#treasury-rules-that-the-committees-items-touch": "6966fbfadf5aa2f5"
       }
     },
@@ -3970,7 +3970,7 @@
       "sources": {
         "ADR-008#d33": "bf6fa38c802f7618",
         "ADR-008#proposed-direction": "2589bdd14789be04",
-        "OD-89": "1e25c2226788ac5d"
+        "OD-89": "478caf7c4c1e7bd1"
       }
     },
     "term:trusted-caller": {
@@ -4012,7 +4012,7 @@
         "ADR-013#d2": "a517c146175923fd",
         "ADR-013#proposed-direction": "13f1e7f55005c434",
         "INV-033": "04603b5c184d1e7a",
-        "OD-100": "f801004088de88e7"
+        "OD-100": "7e961ab4a4817ef6"
       }
     },
     "term:watch-tower": {

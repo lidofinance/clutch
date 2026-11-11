@@ -31,16 +31,16 @@ Never commit a key or an RPC URL that contains one.
    git worktree add ../clutch-<topic> -b <kind>/<date>-<topic> origin/main
    ```
 
-   Use `decisions`, `docs`, `policy`, `fix` or `research` as the kind.
+   Use `build`, `review`, `decisions`, `docs`, `policy`, `fix` or `research` as the kind.
+   A build branch may also record the decisions that it raises (OD-124).
    Do not run bare `git stash`: worktrees share the stash.
 2. Keep one decision or feature per pull request.
 3. Allocate new OD, ADR and INV numbers from `main` when you open the pull request.
    If another pull request takes a number first, the validator fails; take the next one.
-4. Add a log fragment with `just log Update "What changed, in one line."`.
-5. Run `just regen`, then `just check`. Commit generated files with their source changes.
-6. If you changed `src/`, `script/`, `test/` or `policy/`, run `just test-fork` too.
+4. Run `just regen`, then `just check`. Commit generated files with their source changes.
+5. If you changed `src/`, `script/`, `test/` or `policy/`, run `just test-fork` too.
    CI does not run the fork suite until phase 2 (OD-52).
-7. Open a pull request with the template. A human merges through the merge queue, which repeats the checks on the merged result.
+6. Open a pull request with the template. A human merges through the merge queue, which repeats the checks on the merged result.
 
 ## Verify a page
 
@@ -57,10 +57,9 @@ Team verification raises review status; only EM or the committee accepts an ADR 
 
 Do not edit these files by hand:
 
-- `docs/log.md`
 - `docs/registers/document-status.md`
 - `docs/adr/index.md`
-- The generated blocks: the closed index of `docs/registers/open-decisions.md`, and the open questions of each proposed ADR
+- The generated blocks: the open questions of each proposed ADR
 - `docs/onboarding/clutch-onboarding.html`
 - Policy artifacts in `policy/constellation/artifacts/`
 

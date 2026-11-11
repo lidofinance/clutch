@@ -6,7 +6,6 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 
 - `just check` — every check that CI runs. Run it before every commit; errors block the merge. Without just: `uvx --from rust-just==1.58.0 just check`.
 - `just regen` — rebuild every generated file after a change, and commit them. On a merge conflict in a generated file, take either side and run it again.
-- `just log KIND "TEXT"` — add the change's log entry as a fragment in `docs/log.d/`. Never edit `docs/log.md`.
 - `just test-fork` — the fork suite, with `RPC=<archive RPC>` in `.env`. Never commit a key, or an RPC URL that contains one.
 - `CONTRIBUTING.md` has the workflow; `skills/` has the procedures.
 

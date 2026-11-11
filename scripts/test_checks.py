@@ -28,7 +28,6 @@ def _load(name: str):
     return module
 
 
-LOG = _load("build_log")
 VERIFY = _load("verify_page")
 RED = _load("check_redaction")
 LIC = _load("check_licences")
@@ -51,18 +50,6 @@ def _denylist(words=(), addresses=(), figures=()):
 
 def _kinds(text: str, denylist) -> list[str]:
     return [kind for _, kind in RED.scan_text(text, denylist)]
-
-
-def _fragments(files: dict[str, str]):
-    with tempfile.TemporaryDirectory() as tmp:
-        folder = Path(tmp)
-        for name, body in files.items():
-            (folder / name).write_text(body, encoding="utf-8")
-        LOG.FRAGMENTS = folder
-        try:
-            return LOG.fragments(), None
-        except LOG.LogError as exc:
-            return None, str(exc)
 
 
 def _invariants(table: str, known: set[str]) -> list[str]:
@@ -96,17 +83,6 @@ def _pins(**changes):
     return PINS.compare(BASE, head)
 
 CASES = [
-    # The log.
-    ("a fragment builds its entry", lambda: _fragments({"2026-10-07T101010Z-one.yaml": "date: 2026-10-07\nkind: Update\ntext: One line.\n"})[0][0][1]["text"] == "One line."),
-    ("a fragment name needs its time", lambda: "the name must be" in _fragments({"2026-10-07-one.yaml": "date: 2026-10-07\nkind: Update\ntext: x\n"})[1]),
-    ("a fragment's date matches its name", lambda: "differs from the date in the name" in _fragments({"2026-10-07T101010Z-one.yaml": "date: 2026-10-06\nkind: Update\ntext: x\n"})[1]),
-    ("a fragment's kind is known", lambda: "`kind` must be one of" in _fragments({"2026-10-07T101010Z-one.yaml": "date: 2026-10-07\nkind: Gossip\ntext: x\n"})[1]),
-    ("a fragment holds one line", lambda: "one non-empty line" in _fragments({"2026-10-07T101010Z-one.yaml": "date: 2026-10-07\nkind: Update\ntext: |\n  a\n  b\n"})[1]),
-    ("the log lists the newest date and entry first", lambda: LOG.render([
-        ("2026-10-06T000001Z-a.yaml", {"date": "2026-10-06", "kind": "Update", "text": "old"}),
-        ("2026-10-07T000001Z-b.yaml", {"date": "2026-10-07", "kind": "Update", "text": "early"}),
-        ("2026-10-07T120000Z-c.yaml", {"date": "2026-10-07", "kind": "Decision", "text": "late"}),
-    ]) == "# Log\n\n## 2026-10-07\n\n* **Decision**: late\n* **Update**: early\n\n## 2026-10-06\n\n* **Update**: old\n"),
     # Restricted terms.
     ("a restricted word is found in any case", lambda: _kinds("Ask ZebraCorn about it.", ZEBRA) == ["restricted word"]),
     ("a restricted word is found inside a longer word", lambda: _kinds("deploy zebracornGuard", ZEBRA) == ["restricted word"]),
