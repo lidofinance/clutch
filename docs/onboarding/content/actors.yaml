@@ -549,7 +549,7 @@
     - "Read the modifier's storage. It trusts the deployed Roles code to store what it emits."
     - "Compare a budget's balance after the operator spent it. It notes the spending."
     - "Run against a deployed vault yet: none exists. It runs on the fork rehearsal's vault."
-    - "Run by itself. The drift detector, which would run it on a schedule, is not built."
+    - "Run by itself. The drift detector runs it, and Lido's monitoring does not run that detector yet."
   sources: ["ADR-004#d7", "ADR-004#d13", "INV-016", "doc:ROADMAP.md#roadmap", "ADR-013#proposed-direction",
     "test:test_roundtrip_events_after_the_enabling_vote", "test:test_roundtrip_events_after_an_emergency_revoke",
     "test:test_roundtrip_events_after_the_example_motion"]
@@ -988,7 +988,7 @@
     - "Alert on any change of the first-loss Safe's balance, owners or modules, page on every burn motion and every action of the first-loss role, and alert on a redemption before the guard is set and on an excess above the launch cap that stays."
     - "Page at high severity on every emergency swap."
     - "Follow a new Lido product's exposure against the protocol cap until a motion unlocks it, and record the changes of the screening rules that the vendor reports."
-    - "Run the check of every motion of the universal factory against the merged policy change that its forum post names, and page the emergency Safe on a failure. Alert on a failed enactment, a raise of the motion counter, a restart motion, a budget set to more than twice its last value and few free motion slots. Flag repeated budget motions, and grade emergency actions."
+    - "Run the two detectors of the policy: the chain against the policy that the repository says it holds, and every open motion of the universal factory against the repository's pending motion. Page the emergency Safe on a failure. Alert on a failed enactment, a raise of the motion counter, a restart motion, a budget set to more than twice its last value and few free motion slots. Flag repeated budget motions, and grade emergency actions."
     - "Publish the cap reading of each [[fortnightly snapshot]] to IPFS, and page the emergency Safe on the cap-breach trigger, met in either reading."
     - "Compare Lido's published readings with the policy provider's at each snapshot, and flag a tranche vote that starts while they differ by more than the band."
     - "Alert on a change of the mandate's rules made in the Zodiac UI, and on a transaction of the committee's Safe that waits too long for [the screening vendor]'s approval."

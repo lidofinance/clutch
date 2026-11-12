@@ -76,6 +76,7 @@ links:
 test-fork:
 	RPC=${RPC} forge test -vvv
 	bun policy/constellation/compiler/roundtrip.ts rehearsal --dir .roundtrip
+	bun policy/constellation/compiler/watch.ts rehearsal --dir .roundtrip
 
 # Build a motion from a merged policy change: just motion <base> <head> --epoch 0 --policy-version 0, or --rpc
 motion base head *flags:
@@ -85,14 +86,27 @@ motion base head *flags:
 motion-check base head calldata *flags:
 	bun policy/constellation/compiler/motion.ts check --base {{quote(base)}} --head {{quote(head)}} --calldata {{quote(calldata)}} {{flags}}
 
+# Commit a policy change's motion with it: writes pending/<network>/ from <base> to the working tree's artifact
+motion-pending base *flags:
+	bun policy/constellation/compiler/motion.ts build --pending --base {{quote(base)}} {{flags}}
+
+# The two detectors: the chain against the policy, and every open motion against the pending motion
+watch *flags:
+	bun policy/constellation/compiler/watch.ts check {{flags}}
+
+# Remove the pending motion's files once the chain holds the committed artifact
+motion-settle *flags:
+	bun policy/constellation/compiler/watch.ts settle {{flags}}
+
 # Enact the motion of `just motion` through the live Easy Track on a fork, on the vault with the base policy
 motion-replay:
 	MOTION_FILE=.motion/motion.json POLICY_ARTIFACT=.motion/base.json RPC=${RPC} forge test --match-test test_replay_a_motion_file -vv
 
-# The round-trip check on a fork: record the modifiers' events, rebuild their state and compare it with the policy
+# The round-trip check and the two detectors on a fork: record the modifiers' events, rebuild their state and compare it with the policy
 round-trip:
 	RPC=${RPC} forge test --match-contract RoundTrip
 	bun policy/constellation/compiler/roundtrip.ts rehearsal --dir .roundtrip
+	bun policy/constellation/compiler/watch.ts rehearsal --dir .roundtrip
 
 # The round-trip check of a policy against an events file or a chain: --events <file>, or --rpc --from-block N
 round-trip-check artifact *flags:

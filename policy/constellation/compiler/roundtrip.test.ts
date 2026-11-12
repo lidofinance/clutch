@@ -6,93 +6,26 @@ import { expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { encodeBytes32String, Interface } from "ethers";
+import { encodeBytes32String } from "ethers";
 import type { Artifact } from "./compile";
 import { decodeMotion, exampleMotion } from "./motion";
 import { exampleHead } from "./motion.example";
 import { fetchLogs, readEvents, roundTrip } from "./roundtrip";
 import type { GetLogs, Log } from "./roundtrip";
+import { APPROVE, BLOCK_TIME, emitted, event, EVENTS, launch, lower, MAX_UINT128, OPERATOR, STRANGER, SUSDS, TRANSFER, USDC } from "./synthetic";
 
 const ROOT = path.resolve(import.meta.dir, "..");
 const policy = JSON.parse(readFileSync(path.join(ROOT, "artifacts/rehearsal-26249900.json"), "utf8")) as Artifact;
 
-const CALLS = new Interface([
-  "function scopeTarget(bytes32 roleKey, address targetAddress)",
-  "function revokeTarget(bytes32 roleKey, address targetAddress)",
-  "function allowTarget(bytes32 roleKey, address targetAddress, uint8 options)",
-  "function allowFunction(bytes32 roleKey, address targetAddress, bytes4 selector, uint8 options)",
-  "function revokeFunction(bytes32 roleKey, address targetAddress, bytes4 selector)",
-  "function scopeFunction(bytes32 roleKey, address targetAddress, bytes4 selector, (uint8 parent, uint8 paramType, uint8 operator, bytes compValue)[] conditions, uint8 options)",
-  "function setAllowance(bytes32 key, uint128 balance, uint128 maxRefill, uint128 refill, uint64 period, uint64 timestamp)",
-  "function assignRoles(address module, bytes32[] roleKeys, bool[] memberOf)",
-]);
-const EVENTS = new Interface([
-  "event ScopeTarget(bytes32 roleKey, address targetAddress)",
-  "event RevokeTarget(bytes32 roleKey, address targetAddress)",
-  "event AllowTarget(bytes32 roleKey, address targetAddress, uint8 options)",
-  "event AllowFunction(bytes32 roleKey, address targetAddress, bytes4 selector, uint8 options)",
-  "event RevokeFunction(bytes32 roleKey, address targetAddress, bytes4 selector)",
-  "event ScopeFunction(bytes32 roleKey, address targetAddress, bytes4 selector, (uint8 parent, uint8 paramType, uint8 operator, bytes compValue)[] conditions, uint8 options)",
-  "event SetAllowance(bytes32 allowanceKey, uint128 balance, uint128 maxRefill, uint128 refill, uint64 period, uint64 timestamp)",
-  "event ConsumeAllowance(bytes32 allowanceKey, uint128 consumed, uint128 newBalance)",
-  "event AssignRoles(address module, bytes32[] roleKeys, bool[] memberOf)",
-  "event EnabledModule(address module)",
-  "event RolesModSetup(address indexed initiator, address indexed owner, address indexed avatar, address target)",
-  "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
-  "event Initialized(uint64 version)",
-  "event SetUnwrapAdapter(address to, bytes4 selector, address adapter)",
-  "event SetDefaultRole(address module, bytes32 defaultRoleKey)",
-]);
-const MAX_UINT128 = (1n << 128n) - 1n;
-const BLOCK_TIME = 1_800_000_000n;
-const ZERO = "0x0000000000000000000000000000000000000000";
-const STRANGER = "0x000000000000000000000000000000000000dEaD";
-const SUSDS = "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD";
-const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
-const OPERATOR = encodeBytes32String("operator");
-const APPROVE = "0x095ea7b3";
-const TRANSFER = "0xa9059cbb";
 
-const lower = (value: string) => value.toLowerCase();
 const modifierOf = (ref: string) => policy.modifiers.find((m) => m.ref === ref)!;
 const opMod = modifierOf("operator_modifier").address;
-const event = (address: string, name: string, values: unknown[]): Log => {
-  const { topics, data } = EVENTS.encodeEventLog(name, values);
-  return { address, topics, data };
-};
-const title = (fn: string) => fn[0].toUpperCase() + fn.slice(1);
-
-/** The log that the Roles modifier emits for one administrative call, as its source says. */
-function emitted(to: string, data: string): Log[] {
-  const call = CALLS.parseTransaction({ data })!;
-  const args = [...call.args];
-  if (call.name === "setAllowance") {
-    // the modifier stores no maximum of zero and no timestamp of zero
-    if (args[2] === 0n) args[2] = MAX_UINT128;
-    if (args[5] === 0n) args[5] = BLOCK_TIME;
-  }
-  const logs = [event(to, title(call.name), args)];
-  if (call.name === "assignRoles") logs.unshift(event(to, "EnabledModule", [args[0]]));
-  return logs;
-}
-
-/** Every log of the vault's modifiers after the enabling vote: the setup of each modifier, then the policy's calls. */
-function launch(): Log[] {
-  const logs: Log[] = [];
-  for (const m of policy.modifiers) {
-    logs.push(event(m.address, "OwnershipTransferred", [ZERO, m.owner]));
-    logs.push(event(m.address, "RolesModSetup", [STRANGER, m.owner, m.avatar, m.target]));
-    logs.push(event(m.address, "Initialized", [1]));
-  }
-  policy.calls.to.forEach((to, i) => logs.push(...emitted(to, policy.calls.data[i])));
-  return logs;
-}
-const LAUNCH = launch();
+const LAUNCH = launch(policy);
 const differences = (extra: Log[], drop: (log: Log) => boolean = () => false) => roundTrip(policy, [...LAUNCH.filter((log) => !drop(log)), ...extra]).differences;
 const isEvent = (log: Log, name: string) => log.topics[0] === EVENTS.getEvent(name)!.topicHash;
 
 test("the launch logs rebuild to the committed policy", () => {
-  const logs = launch();
+  const logs = LAUNCH;
   expect(logs.length).toBe(policy.calls.to.length + 14 + 12);
   expect(roundTrip(policy, logs)).toEqual({ differences: [], notes: [] });
   // logs of other contracts do not count
@@ -100,7 +33,7 @@ test("the launch logs rebuild to the committed policy", () => {
 });
 
 test("a modifier without logs is reported", () => {
-  const silent = launch().filter((log) => lower(log.address) !== lower(opMod));
+  const silent = LAUNCH.filter((log) => lower(log.address) !== lower(opMod));
   expect(roundTrip(policy, silent).differences).toEqual(["Clutch operator modifier: the modifier emitted no event"]);
 });
 
@@ -118,7 +51,7 @@ test("a permission that is missing, changed or added is reported", () => {
     "Clutch operator modifier, role operator: approve(address,uint256) on USDC has other conditions or other execution options",
   ]);
   // the same tree with a delegatecall
-  const original = EVENTS.parseLog(launch().find(approve)!)!.args;
+  const original = EVENTS.parseLog(LAUNCH.find(approve)!)!.args;
   expect(differences([event(opMod, "ScopeFunction", [OPERATOR, USDC, APPROVE, original[3], 2])]).length).toBe(1);
   // a function without conditions in place of a tree
   expect(differences([event(opMod, "AllowFunction", [OPERATOR, USDC, APPROVE, 0])]).length).toBe(1);
@@ -172,7 +105,7 @@ test("budgets: the settings are compared, and a spent balance is a note", () => 
   expect(differences([set(base, MAX_UINT128, base, month)]).length).toBe(1);
   expect(differences([set(base + 1n, base, base, month)])).toEqual(["Clutch operator modifier: the budget earn_usd_deposit is 500000001, and the policy says 500000000"]);
 
-  const spent = roundTrip(policy, [...launch(), event(opMod, "ConsumeAllowance", [key, 100_000_000n, 400_000_000n])]);
+  const spent = roundTrip(policy, [...LAUNCH, event(opMod, "ConsumeAllowance", [key, 100_000_000n, 400_000_000n])]);
   expect(spent.differences).toEqual([]);
   expect(spent.notes).toEqual(["Clutch operator modifier: the budget earn_usd_deposit was spent since it was set; 400000000 is left, and its balance is not compared"]);
 
@@ -197,16 +130,16 @@ test("an unwrap adapter, a default role and another owner are reported", () => {
 // turn the launch state into the motion's head policy.
 test("the example motion's events rebuild to its head policy", () => {
   const motion = decodeMotion(JSON.parse(exampleMotion()).calldata);
-  const logs = [...launch(), ...motion.writes.flatMap((w) => emitted(w.to, w.data))];
+  const logs = [...LAUNCH, ...motion.writes.flatMap((w) => emitted(w.to, w.data))];
   expect(roundTrip(exampleHead(policy), logs)).toEqual({ differences: [], notes: [] });
   expect(roundTrip(policy, logs).differences.length).toBeGreaterThan(0);
-  expect(roundTrip(exampleHead(policy), launch()).differences.length).toBeGreaterThan(0);
+  expect(roundTrip(exampleHead(policy), LAUNCH).differences.length).toBeGreaterThan(0);
 });
 
 test("an events file is read line by line, and a line that is no log fails", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "roundtrip-"));
   const file = path.join(dir, "events.ndjson");
-  const logs = launch();
+  const logs = LAUNCH;
   writeFileSync(file, logs.map((log) => JSON.stringify(log)).join("\n") + "\n\n");
   expect(readEvents(file)).toEqual(logs);
   writeFileSync(file, '{"address":"0x00","topics":"none","data":"0x"}\n');

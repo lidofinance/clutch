@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T15:01:43Z
+  at: 2026-11-12T17:27:14Z
 verified: []
 sources:
   - id: s1
@@ -136,6 +136,9 @@ sources:
   - id: s42
     resource: "urn:clutch:interview:2026-11-12-motion-check"
     title: EM's request for the motion command and its check, and EM's answer on OD-136, 2026-11-12; the transcript is not in the repository
+  - id: s43
+    resource: "urn:clutch:interview:2026-11-12-detectors"
+    title: EM's answers on the pending motion and on removals, and EM's request for the two detectors, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -145,6 +148,21 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — OD-137 and OD-138 decided: the pending motion in the repository, and removals that stay votes
+
+The agent built the round-trip check and asked two questions. The first: where does the detector of OD-136 find the two commits of a motion, when a forum post is no data? It suggested that the pull request that changes the policy also commits the motion's file, that CI checks the file, and that the detector matches each created motion with it. The second: may a removal on the safety modifier or on the orders modifier be a motion, when the motion roles there hold no revoke? EM wrote:
+
+> 1. Where the OD-136 detector finds a motion's two commits — do as you suggested
+> 2. Whether removals on the safety and orders modifiers may be motions — removals of modifiers may not be motions, so we are fine
+> 3. Build the OD-136 detector and the drift detector together
+
+Recorded as:
+
+- (OD-137) The repository holds the pending motion. The pull request that changes the policy commits the motion's file and its base policy, and CI checks that the motion turns the base policy into the committed artifact. Monitoring passes an open motion only if its calldata is the pending motion's and the chain holds the base policy ([ADR 013](/adr/013-one-easy-track-factory.md), decision 19). This replaces the agent's reading under OD-136 that the forum post names two commits.
+- (OD-138) A removal on the safety modifier or on the orders modifier is no motion. It stays an Aragon vote, and the motion roles there get no revoke ([ADR 013](/adr/013-one-easy-track-factory.md), decision 4).
+- Four points are the agent's reading. EM's words on the second question name "removals of modifiers"; the agent reads them as the answer to its question, which was about removals on those two modifiers. A motion can still take a token out of the order lists, because it writes the order trees again without the token. The chain is the anchor of the pending motion: a base policy that the chain does not hold fails, whatever the file says. After the enactment, a pull request removes the pending files.
+- The two detectors are one command, `just watch`, which Lido's monitoring runs on a clone of `main`. This repository holds no schedule and sends no page. [s43]
 
 ## 2026-11-12 — OD-136 decided: monitoring runs the check of every motion
 

@@ -77,8 +77,8 @@
   sources: ["ADR-004#d11"]
 
 - term: Drift detector
-  plain: "A planned monitoring rule that alerts on any [[drift]]."
-  sources: ["ADR-004#d13", "ADR-004#d14", "ADR-009#proposed-direction"]
+  plain: "A check that alerts on any [[drift]]: it runs the [[round-trip check]] against the policy that the repository says the chain holds. With it runs the motion detector, which fails every open motion that is not the repository's pending motion. Both are one command, which Lido's monitoring runs."
+  sources: ["ADR-004#d13", "ADR-004#d14", "ADR-009#proposed-direction", "ADR-013#d19", "ADR-013#proposed-direction"]
 
 - term: Drill
   plain: "A timed rehearsal of a runbook on a fork. A runbook counts as reviewed only with a passing drill that starts the action within six hours."

@@ -49,6 +49,7 @@ just test-fork   # pinned mainnet fork; needs an archive RPC in .env
 just motion <base> <head> --epoch 0 --policy-version 0   # a motion from a merged policy change
 just motion-check <base> <head> <calldata>              # fail a motion that writes anything else
 just round-trip                                         # rebuild the modifiers' state from their events on a fork
+just watch --rpc --from-block N                         # the drift detector and the motion detector
 just --list      # all recipes
 ```
 
