@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T14:08:30Z
+  at: 2026-11-12T15:01:43Z
 verified: []
 sources:
   - id: s1
@@ -133,6 +133,9 @@ sources:
   - id: s41
     resource: "urn:clutch:interview:2026-11-12-raw-switch-verify"
     title: EM's instruction to record EM's verification of ADR 003 and ADR 004 after the switch to raw writes, 2026-11-12; the transcript is not in the repository
+  - id: s42
+    resource: "urn:clutch:interview:2026-11-12-motion-check"
+    title: EM's request for the motion command and its check, and EM's answer on OD-136, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -142,6 +145,22 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — OD-136 decided: monitoring runs the check of every motion
+
+After the switch to raw writes, the agent proposed the next work. EM wrote:
+
+> Build the motion command and its checker
+
+The agent built both and opened OD-136: who runs the check of a motion, and what follows a failure. It recommended option A. EM wrote:
+
+> OD-136: A
+
+Recorded as:
+
+- (OD-136) Monitoring runs the check on every motion of the universal factory at its creation, against the two commits that the motion's forum post names. A failure pages the emergency Safe, which raises the counter ([ADR 013](/adr/013-one-easy-track-factory.md), decision 19).
+- Three points are the agent's reading. A motion whose forum post names no two commits fails the check, and so does one whose second commit is not merged. The page goes through the general Lido incident process, as every page does. A reviewer can still run the check by hand.
+- The detector is not built. [s42]
 
 ## 2026-11-12 — ADR 003 and ADR 004 verified after the switch to raw writes
 

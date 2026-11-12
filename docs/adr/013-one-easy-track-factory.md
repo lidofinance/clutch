@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T14:54:04Z
+  at: 2026-11-12T15:01:43Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on versions, the vote-free design, the factory, the restart, a motion's one call, the votes that remain, raw writes and the policy version, 2026-11-01 to 2026-11-12
+    title: Decision log — EM on versions, the vote-free design, the factory, the restart, a motion's one call, the votes that remain, raw writes, the policy version and the check of a motion, 2026-11-01 to 2026-11-12
   - id: s2
     resource: /research/easy-track-first-2026-11-05.md
     title: Research note — Easy Track's script permissions, enactment, cancel and pause; Roles storage; Merkle-root engines; the two-modifier alternative
@@ -54,6 +54,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 16. A motion created after an emergency revoke may enact, and so bring the revoked permission back after its objection window. The policy version counts only the factory's own motions, not the emergency role's revokes; the counter fails the motions that were open when the emergency Safe raised it (OD-114).
 17. Lapsed (OD-134): the factory has no shape, so it needs no companion contract.
 18. The universal factory holds the motion roles. A motion's script makes one call, the factory's `applyMotion`. That call checks the motion again and makes its writes in order, all in the enactment's one transaction. A write that its modifier refuses fails the whole motion (OD-118).
+19. Monitoring runs the check of a motion on every motion of the factory at its creation, against the two commits that the motion's forum post names. A failure pages the emergency Safe, which raises the counter (OD-136).
 
 ## Proposed direction
 
@@ -84,8 +85,8 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **The policy version.** It orders the motions that write permissions or budgets: of two such motions that are open together, the one that enacts second fails, and the committee creates it again. This is coarser than a version for each scope, and such motions are rare. An action, such as a burn or a payout, never waits for another motion.
 - **The `motion` command.** `just motion <base> <head>` takes a policy change between two commits and reads the policy artifact that each commit holds. It builds the writes that turn the first policy into the second: the budgets, then the removals and the additions of each role. It takes the counter and the policy version from the factory or from its flags. It writes the motion's calldata, the list of its writes in words and a draft of the forum post. It refuses a change that no motion role can write, such as a membership or a removal on the safety modifier: that change needs a DAO vote. `just motion-replay` enacts the motion through the live Easy Track on a fork, on the rehearsal's vault with the first policy. The Zodiac UI does not know the factory's format, so it is not the planner.
 - **The check of a motion.** `just motion-check <base> <head> <calldata>` runs a motion's writes on a model of the Roles modifier, from the first policy, and fails unless the outcome is the second policy. It also fails on a write that the motion role's policy would refuse, on an action that the motion's author did not declare, and on a second commit that is not merged. It shares no comparison code with the `motion` command, which runs it on its own output. A revoked target keeps its functions in the modifier's storage, so the check fails a removal that revokes the target alone.
-- **Limits of the two commands.** Both take the chain's policy to be the first artifact. They do not read the modifiers, so they do not see a revoke of the emergency role; the round-trip check, which is not built, closes that gap ([ADR 004](/adr/004-specifications-and-policy-as-data.md) decision 13). The check says nothing about what a declared action does, such as a burn or a relayer approval. The replay runs on the rehearsal's vault until a vault is deployed. Nothing runs the check without a person (OD-136).
-- **Monitoring.** It decodes every motion of the factory from `MotionCreated`, in one calldata format, and compares each permission tree in it with the policy's source. It alerts on a failed enactment, a raise of the counter, a restart motion, a budget set to more than twice its last value, and few free motion slots ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 45).
+- **Limits of the two commands.** Both take the chain's policy to be the first artifact. They do not read the modifiers, so they do not see a revoke of the emergency role; the round-trip check, which is not built, closes that gap ([ADR 004](/adr/004-specifications-and-policy-as-data.md) decision 13). The check says nothing about what a declared action does, such as a burn or a relayer approval. The replay runs on the rehearsal's vault until a vault is deployed.
+- **Monitoring.** It reads every motion of the factory from `MotionCreated` and runs the check of decision 19 on it. The forum post of a motion names the two commits, and a motion without them, or with a second commit that is not merged, fails. A failure is a critical alert that pages the emergency Safe through the general Lido incident process. The detector is not built. Monitoring also alerts on a failed enactment, a raise of the counter, a restart motion, a budget set to more than twice its last value, and few free motion slots ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 45).
 - **Trusted caller.** The factory's constructor fixes the committee's Safe as its trusted caller ([ADR 005](/adr/005-account-graph-and-roles.md) decision 31), so a new committee Safe needs a new factory (decision 4).
 
 ## Options considered
@@ -110,6 +111,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - A new protocol form needs no changed factory and no vote: its motion carries its permissions.
 - Easy Track's executor, which every Easy Track factory of the DAO shares, holds no Clutch role. Another factory reaches the vault only if Aragon Voting registers it for `applyMotion`, which runs the counter and policy-version checks again, though not the trusted-caller check.
 - A vote that replaces the factory deploys the new factory, registers it, and moves every motion role to it. The new factory starts its counter and its policy version at zero, and the old factory's open motions end with its removal from Easy Track.
+- A failed check costs every open motion: the emergency Safe raises the counter, and the committee creates each motion again with a new objection window. A wrong failure has the same cost, so the detector's inputs, the two commits and the merged history, must be right (decision 19).
 - A motion's script shows only its one call. The forum post and monitoring take the writes from the motion's calldata.
 
 ## Confirmation
@@ -129,6 +131,6 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 <!-- generated by scripts/validate_docs.py --write-status; edit the sources, not this block -->
 
-- [OD-136](/registers/open-decisions.md): Who runs the check of a motion, and what follows a failure? The factory checks no write's content (OD-134), and `just motion-check` fails a motion that does not equal a merged policy change. Options: (A) monitoring runs the check on every motion of the factory at its creation, against the two commits that the forum post names, and a failure pages the emergency Safe, which raises the counter; (B) the check is advisory, and a reviewer runs it by hand in the 72 hours; (C) as A, and the screening vendor also refuses the creation of a motion that fails the check, once the guard is set.
+No open decision closes in this record.
 
 <!-- end of generated block -->

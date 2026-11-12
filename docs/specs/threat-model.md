@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T14:54:04Z
+  at: 2026-11-12T15:01:43Z
 verified: []
 sources:
   - id: s1
@@ -40,7 +40,7 @@ Each row names a failure, what triggers it, what limits it and what detects it. 
 | Onboarding motion points at a malicious contract | A motion survives its objection window | A motion built from the policy's source pins receivers and spends a budget key, so its loss is capped by the attached budget; the factory does not enforce this (OD-134) | Published diligence per motion; each tree of the motion compared with the policy's source; position and budget monitoring |
 | A motion widens beyond the policy's forms | A motion grants a call without a receiver pin or without a budget, or sets a large budget, and nobody objects | The objection window; the Easy Track pause; the counter; the emergency Safe's revoke and switch; the guards of each motion role's policy, which keep membership, administrative targets and delegatecall out of reach (OD-134) | Every motion decoded from `MotionCreated`, with each tree compared with the policy's source; an alert on a budget set to more than twice its last value; drift detection on the policies |
 | A motion gives the emergency role more than an exit | A motion writes on the safety modifier | The exit-governance role's policy pins each exit tree whole and refuses any other write (INV-025); the objection window; the Easy Track pause; a DAO vote replaces the safety policy | Drift detection on the safety policy |
-| The reviewers of a motion miss a widening | The objection window is the only bound on where funds go ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11), and a motion's trees are raw data | `just motion` builds each motion from a merged policy change, and `just motion-check` fails a motion that writes anything else; the forum post names the two commits; who runs the check is open (OD-136) | An alert on a motion that fails the check |
+| The reviewers of a motion miss a widening | The objection window is the only bound on where funds go ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11), and a motion's trees are raw data | `just motion` builds each motion from a merged policy change, and `just motion-check` fails a motion that writes anything else; the forum post names the two commits; monitoring runs the check on every motion, and a failure pages the emergency Safe, which raises the counter (OD-136) | A critical alert on a motion that fails the check, or whose forum post names no two commits |
 | A motion exceeds a chain limit | A motion needs more gas than EIP-7825's cap of 16,777,216 | A motion's script of one call (OD-118); at most 64 writes in one motion | The fork tests' gas measures of each kind of motion |
 | Signer sets drift apart | A seat holder leaves the committee or the Emergency Brakes multisig and keeps the emergency seat | Operational reconciliation duty and the seat rule; no on-chain enforcement | Owner-set monitoring on the Safes; an alert on every change of the owners or the threshold of the committee's Safe (OD-109) |
 | Budget drains too fast | A motion sets a very short refill period | `GreaterThan` floor of 30 days on `period` | Budget monitoring |

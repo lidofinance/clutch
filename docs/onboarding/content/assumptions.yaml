@@ -48,10 +48,10 @@
   why: "Motions change the vault without a DAO vote. The factory checks no write's content, so the [[objection window]] is the bound on where funds go."
   breaks: "A motion that nobody objects to can give the operator a transfer to any address or set any budget, and the vault's funds can then leave. A motion can also point the operator at an unaudited contract."
   watched_by: ["test:test_uf_motion_can_widen_without_a_receiver_or_a_budget", "test:test_uf_motion_fails_as_a_whole_on_a_write_that_a_modifier_refuses", "test:test_replay_the_example_motion"]
-  watch_note: "The factory passes INV-032 to INV-035 on a fork against the live Easy Track, and the first test shows the widening that it does not stop. The motion roles' limits are the layer that holds on chain (INV-004, INV-025, INV-040). The `motion` command builds a motion from a merged policy change, and its check fails a motion that writes anything else; a fork test enacts one such motion. Nothing runs the check without a person yet, and the alerts are not built. An external audit is due in phase 3."
+  watch_note: "The factory passes INV-032 to INV-035 on a fork against the live Easy Track, and the first test shows the widening that it does not stop. The motion roles' limits are the layer that holds on chain (INV-004, INV-025, INV-040). The `motion` command builds a motion from a merged policy change, and its check fails a motion that writes anything else; a fork test enacts one such motion. Monitoring runs the check on every motion and pages the emergency Safe on a failure; that detector and the other alerts are not built. An external audit is due in phase 3."
   sources: ["ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#consequences",
     "ADR-013#confirmation", "ADR-013#proposed-direction", "INV-004", "INV-032", "INV-033", "INV-034", "INV-035", "OD-49",
-    "lip:part-4", "OD-134", "OD-135", "OD-136", "INV-025", "INV-040", "OD-118",
+    "lip:part-4", "OD-134", "OD-135", "ADR-013#d19", "INV-025", "INV-040", "OD-118",
     "doc:docs/specs/threat-model.md#failure-modes", "test:test_replay_the_example_motion"]
 
 - id: guard-single-use

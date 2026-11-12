@@ -155,7 +155,7 @@ flows:
         text: "The committee's Safe creates the motion. Its raw writes carry the operator's permissions for the target with their condition trees, the budget of each new spender and the emergency exits. The motion names the [[policy version]] and the [[motion counter]]. The guard, once set, screens this transaction."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
-        check: "INV-034: the factory checks no write's content, so reviewers compare the motion's trees with the policy's source in the 72 hours. `just motion` builds the motion from the merged policy change, and `just motion-check` fails a motion that writes anything else. Who runs the check is open."
+        check: "INV-034: the factory checks no write's content, so reviewers compare the motion's trees with the policy's source in the 72 hours. `just motion` builds the motion from the merged policy change, and `just motion-check` fails a motion that writes anything else. Monitoring runs that check on every motion, and a failure pages the emergency Safe; the detector is not built."
       - who: "LDO holders"
         text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails."
         nodes: [dao, easytrack]
@@ -187,7 +187,7 @@ flows:
       "test:test_D1_substituted_script_rejected_at_enactment", "runbook:Raise the motion counter",
       "test:test_uf_motion_onboards_an_erc4626_lending_vault",
       "test:test_uf_policy_version_orders_permission_writes_and_spares_actions",
-      "test:test_uf_counter_fails_every_open_motion", "test:test_replay_the_example_motion", "OD-136"]
+      "test:test_uf_counter_fails_every_open_motion", "test:test_replay_the_example_motion", "ADR-013#d19"]
 
   - id: budget
     group: governance
@@ -764,7 +764,7 @@ flows:
     time: "Before the 72-hour window ends."
     steps:
       - who: "Monitoring and the forum"
-        text: "The motion-lifecycle alert and the forum disclosure show the motion."
+        text: "The motion-lifecycle alert and the forum disclosure show the motion. Monitoring runs the check of the motion against the merged policy change that the forum post names, and a failure pages the emergency Safe."
         nodes: [monitoring, easytrack, reporting]
       - who: "LDO holders"
         text: "LDO holders object within 72 hours. An objection of 0.5% of LDO stops the motion."
@@ -787,7 +787,7 @@ flows:
         nodes: [emergency-safe, safety-modifier, operator-modifier]
         edges: [em-role, revoke]
     sources: ["ADR-006#d4", "ADR-006#d13", "ADR-006#context", "ADR-005#d23", "ADR-006#d7", "ADR-006#d8",
-      "ADR-006#d14", "ADR-005#d25", "ADR-005#d26", "ADR-005#context", "ADR-013#d10",
+      "ADR-006#d14", "ADR-005#d25", "ADR-005#d26", "ADR-005#context", "ADR-013#d10", "ADR-013#d19",
       "ADR-013#proposed-direction", "INV-033", "test:test_D1_objection_rejection",
       "test:test_D4_the_switch_freezes_queued_motions_until_a_restart_motion", "runbook:Pause Easy Track",
       "runbook:Raise the motion counter", "test:test_uf_counter_fails_every_open_motion"]
