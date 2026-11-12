@@ -12,7 +12,7 @@
  *   bun compiler/launch.ts write [--check]   the committed files that the fork suite enacts
  *
  * A part of a protocol that no motion role can write stays in the policy that the motion starts from, and the
- * command lists it: only a DAO vote gives it.
+ * command lists it: only a DAO vote gives it. Today that is one part, the emergency role's staking of ETH.
  *
  * The retirement of a token is an example policy change: USDS leaves the operator's order lists. No decision
  * retires USDS.

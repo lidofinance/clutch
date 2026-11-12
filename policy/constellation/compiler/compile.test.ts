@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { AbiCoder, id } from "ethers";
 import { Clearance } from "zodiac-roles-sdk";
-import { checkProtected, compileManifest, refuseHosted, render, unguarded } from "./compile";
+import { checkProtected, checkZeroing, compileManifest, refuseHosted, render, unguarded } from "./compile";
 import type { Artifact } from "./compile";
 
 const ROOT = path.resolve(import.meta.dir, "..");
@@ -52,18 +52,20 @@ test("every operator approval spends a budget key or stays below a ceiling", () 
   }
 });
 
-test("the emergency role can zero every approval the operator can give", () => {
-  const spendersOf = (name: string) =>
-    new Set(
-      approvals(name).flatMap(({ f }) =>
-        f.conditions.filter((n) => n.operator === EQUAL_TO && n.compValue !== "0x" + "0".repeat(64)).map((n) => n.compValue),
-      ),
-    );
+// ADR 005, decision 34 (OD-139): the zeroing takes any spender. It is the one form that the exit-governance role
+// writes, so a spender that a motion adds needs no write for the emergency role.
+test("the emergency role can zero every approval the operator can give, for any spender", () => {
+  const PASS = 0;
   const operatorTokens = new Set(approvals("operator").map(({ token }) => token));
-  const emergencyTokens = new Set(approvals("emergency").map(({ token }) => token));
-  for (const token of operatorTokens) expect(emergencyTokens.has(token)).toBe(true);
-  const emergencySpenders = spendersOf("emergency");
-  for (const spender of spendersOf("operator")) expect(emergencySpenders.has(spender)).toBe(true);
+  const emergency = approvals("emergency");
+  expect(new Set(emergency.map(({ token }) => token))).toEqual(operatorTokens);
+  for (const { f } of emergency) {
+    expect(f.conditions.map((n) => [n.parent, n.paramType, n.operator, n.compValue])).toEqual([
+      [0, 5, 5, "0x"],
+      [0, 1, PASS, "0x"],
+      [0, 1, EQUAL_TO, "0x" + "0".repeat(64)],
+    ]);
+  }
 });
 
 // OD-38: the governance role refuses, as the administered target, the Asset
@@ -127,6 +129,43 @@ test("the emergency role holds the switch, pinned to the operator modifier", () 
   for (const r of artifact.modifiers.flatMap((m) => m.roles)) {
     if (r.name !== "emergency" && r.name !== "restart") expect(r.targets.some((t) => t.address === manifest.assetSafe)).toBe(false);
   }
+});
+
+// ADR 005, decision 34: the compiler refuses a policy whose operator can give an approval that the emergency role
+// cannot take away, and an emergency approval in any other form than the zeroing for any spender.
+test("the compiler refuses an operator approval without the emergency role's zeroing, and any other emergency approval", () => {
+  const manifest = artifact.manifest as Record<string, any>;
+  expect(() => checkZeroing(artifact.modifiers, manifest)).not.toThrow();
+  const emergencyOf = (modifiers: Artifact["modifiers"]) => modifiers.flatMap((m) => m.roles).find((r) => r.name === "emergency")!;
+  const approveOf = (modifiers: Artifact["modifiers"]) => {
+    const target = emergencyOf(modifiers).targets.find((t) => t.functions.some((f) => f.selector === APPROVE))!;
+    return { target, fn: target.functions.find((f) => f.selector === APPROVE)! };
+  };
+
+  // the zeroing of one token is missing
+  const missing = structuredClone(artifact.modifiers);
+  const { target } = approveOf(missing);
+  target.functions = target.functions.filter((f) => f.selector !== APPROVE);
+  expect(() => checkZeroing(missing, manifest)).toThrow(`the operator can approve ${target.name}, and the emergency role cannot set that approval to zero`);
+  expect(() => checkProtected(missing, manifest)).toThrow("the emergency role cannot set that approval to zero");
+
+  // an emergency approval that pins a spender, gives an amount, or has no condition
+  const other = "must be the zeroing for any spender, and nothing else";
+  const pinned = structuredClone(artifact.modifiers);
+  approveOf(pinned).fn.conditions[1] = { parent: 0, paramType: 1, operator: EQUAL_TO, compValue: "0x" + "11".repeat(32) };
+  expect(() => checkZeroing(pinned, manifest)).toThrow(other);
+  const amount = structuredClone(artifact.modifiers);
+  approveOf(amount).fn.conditions[2].compValue = "0x" + "0".repeat(63) + "1";
+  expect(() => checkZeroing(amount, manifest)).toThrow(other);
+  const open = structuredClone(artifact.modifiers);
+  approveOf(open).fn.conditions.pop();
+  expect(() => checkZeroing(open, manifest)).toThrow(other);
+  const wild = structuredClone(artifact.modifiers);
+  Object.assign(approveOf(wild).fn, { wildcarded: true, conditions: [] });
+  expect(() => checkZeroing(wild, manifest)).toThrow(other);
+  const send = structuredClone(artifact.modifiers);
+  approveOf(send).fn.executionOptions = 1;
+  expect(() => checkZeroing(send, manifest)).toThrow(other);
 });
 
 test("every approval of the emergency role is zero", () => {

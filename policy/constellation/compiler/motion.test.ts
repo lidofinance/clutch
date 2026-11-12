@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { AbiCoder, encodeBytes32String, Interface } from "ethers";
 import type { Artifact } from "./compile";
+import { checkZeroing } from "./compile";
 import { acceptedByRole, checkMotion, decodeMotion, encodeMotion, EXAMPLE_MOTION, exampleMotion, MAX_WRITES, pinnedKeys, planMotion } from "./motion";
 import type { Write } from "./motion";
 import { derivedKey, EXAMPLE_EARN_USD_BUDGET, EXAMPLE_VAULT, EXAMPLE_WETH_BUDGET, exampleFund, exampleHead, FUND_CAP, FUND_PAYOUT, USDT, WETH } from "./motion.example";
@@ -121,6 +122,16 @@ test("a fund with a fixed payout address is three writes of the insurance-govern
   const refills = exampleFund(base);
   modifierOf(refills, "first_loss_modifier").allowances.find((a) => a.name === "fund_usdt_example")!.refill = "1";
   expect(planMotion(base, refills).needsVote[0]).toContain("the policy of the role insurance-governance refuses this write");
+});
+
+// ADR 005, decision 34: an onboarding that gives the operator an approval of a new token also gives the emergency
+// role its zeroing. The compiler's rule holds for the example's policy, and fails without the zeroing.
+test("the example onboarding keeps the rule that the emergency role can zero every operator approval", () => {
+  expect(() => checkZeroing(head.modifiers, head.manifest as Record<string, any>)).not.toThrow();
+  const without = clone(head);
+  const weth = roleOf(without, "safety_modifier", "emergency").targets.find((t) => lower(t.address) === lower(WETH))!;
+  weth.functions = weth.functions.filter((f) => f.signature !== "approve(address,uint256)");
+  expect(() => checkZeroing(without.modifiers, without.manifest as Record<string, any>)).toThrow("the operator can approve WETH, and the emergency role cannot set that approval to zero");
 });
 
 test("the committed example motion equals a fresh build", () => {

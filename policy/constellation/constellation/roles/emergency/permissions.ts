@@ -10,7 +10,9 @@
 // orders account for recovery orders (ADR 007, decision 19).
 // Changed for Clutch on 2026-11-08: the exits come from the shared builders
 // that the exit-governance role pins (OD-49).
-import { anyOf, call, callWithValue, key, unique } from "../../lib";
+// Changed for Clutch on 2026-11-12: the zeroing of an approval takes any
+// spender, the form that a motion writes (ADR 005, decision 34; OD-139).
+import { call, callWithValue, key, unique } from "../../lib";
 import {
   DAI,
   EARN_ETH,
@@ -26,12 +28,15 @@ import {
 } from "../../addresses";
 import { APPROVALS } from "../operator/permissions";
 import { RECOVERY_SELL } from "../../orders";
-import { queueClaim, queueClaimRequests, toAgent, toAgentOrOrders, vaultRedeem, vaultWithdraw } from "../../exits";
+import { queueClaim, queueClaimRequests, toAgent, toAgentOrOrders, vaultRedeem, vaultWithdraw, zeroApproval } from "../../exits";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
-/** Every spender the operator can approve. The emergency role can set each approval back to zero. */
-const SPENDERS = unique(APPROVALS.map((approval) => approval.spender));
+/**
+ * Every token that the operator can approve. The emergency role can set an approval of each back to zero, for any
+ * spender (ADR 005, decision 34): a zeroing only takes authority away. This is the form that the exit-governance
+ * role writes, so a new spender of one of these tokens needs no write for the emergency role.
+ */
 const APPROVED_TOKENS = unique(APPROVALS.map((approval) => approval.token));
 
 /** Assets the Asset Safe can hold, which the emergency role may return to the Agent. */
@@ -49,7 +54,7 @@ const RETURNABLE = [STETH, WSTETH, WETH, USDC, USDT, DAI, USDS, SUSDS, EARN_USD.
  * or one of its modules that does not only remove authority.
  */
 export default [
-  ...APPROVED_TOKENS.map((token) => call(token, "approve(address,uint256)", anyOf(SPENDERS), 0n)),
+  ...APPROVED_TOKENS.map(zeroApproval),
 
   // Exits and conversions, paid to the Asset Safe.
   vaultRedeem(SUSDS),

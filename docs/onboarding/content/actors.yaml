@@ -437,7 +437,7 @@
   can:
     - "Revoke any operator target or function. One revoke reaches every operator permission on the modifier; on the orders modifier the emergency role holds a revoke of its own."
     - "Use the [[switch]]. The operator, governance and insurance-funding roles stop at once."
-    - "Set any operator spender's approval to zero."
+    - "Set an approval of any token that the operator can approve to zero, for any spender."
     - "Exit positions into the Asset Safe: cancel, claim and redeem on Earn, and redeem sUSDS."
     - "Unwrap wstETH and WETH, and stake ETH."
     - "Transfer the vault's tokens and Earn shares, but only to the Aragon Agent."

@@ -1052,3 +1052,10 @@
     - "2026-11-12 — OD-137 and OD-138 decided: the pending motion in the repository, and removals that stay votes"
   adr: [ADR-013#d4]
   refines: [OD-101]
+- id: OD-139
+  question: "Which form does the emergency role's zeroing of an approval take in the launch policy?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-139 decided: the emergency role's zeroing takes any spender"
+  adr: [ADR-005#d34]
+  refines: [OD-49]
