@@ -537,14 +537,22 @@
   node: policy
   name: Round-trip check
   status: new
-  label: specified
-  what: "A planned check that reads the applied permissions back from the modifier's events on a fork, and compares them with the artifact."
-  controlled_by: "`@lidofinance/defi-tech`, in phase 2."
+  label: built
+  what: "A check that rebuilds what each modifier stores from the events that it emitted, and compares the outcome with the artifact."
+  controlled_by: "`@lidofinance/defi-tech`. Anyone can run it: `just round-trip` on a fork, or `just round-trip-check` against a chain."
   can:
-    - "Catch a compiler or SDK bug before it reaches the chain."
+    - "Catch a compiler or SDK bug: the deployed modifier's real events rebuild to the committed policy, or the check fails."
+    - "Compare each role's members, targets, functions and condition trees, each budget's settings, and each modifier's owner, avatar and target."
+    - "Report a revoke of the emergency role, with the functions that stay stored under the revoked target, and any permission, member, budget, unwrap adapter or default role that the artifact does not hold."
+    - "Tell the `motion` command and its check whether the chain holds the policy that they start from."
   cannot:
-    - "Run yet. A decode of real modifier events must be checked first."
-  sources: ["ADR-004#d7", "ADR-004#d13", "INV-016", "doc:ROADMAP.md#roadmap"]
+    - "Read the modifier's storage. It trusts the deployed Roles code to store what it emits."
+    - "Compare a budget's balance after the operator spent it. It notes the spending."
+    - "Run against a deployed vault yet: none exists. It runs on the fork rehearsal's vault."
+    - "Run by itself. The drift detector, which would run it on a schedule, is not built."
+  sources: ["ADR-004#d7", "ADR-004#d13", "INV-016", "doc:ROADMAP.md#roadmap", "ADR-013#proposed-direction",
+    "test:test_roundtrip_events_after_the_enabling_vote", "test:test_roundtrip_events_after_an_emergency_revoke",
+    "test:test_roundtrip_events_after_the_example_motion"]
 
 - id: zodiac-app
   node: policy

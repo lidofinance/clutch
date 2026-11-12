@@ -214,7 +214,7 @@
   sources: ["ADR-005#d6", "ADR-005#d21", "ADR-005#proposed-direction"]
 
 - term: Round-trip check
-  plain: "A planned check that rebuilds the applied permissions from the modifier's on-chain events on a fork, and compares them with the artifact. The chain then checks the compiler."
+  plain: "A check that rebuilds what each modifier stores from the events that it emitted, and compares the outcome with the artifact: the roles' members, targets, functions and condition trees, and the budgets. The chain then checks the compiler. It also shows a revoke or any other change that the artifact does not hold."
   sources: ["ADR-004#d7", "ADR-004#d13", "INV-016"]
 
 - term: Runbook

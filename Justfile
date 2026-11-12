@@ -75,6 +75,7 @@ links:
 # The fork suite on the pinned mainnet fork; needs RPC (no keys)
 test-fork:
 	RPC=${RPC} forge test -vvv
+	bun policy/constellation/compiler/roundtrip.ts rehearsal --dir .roundtrip
 
 # Build a motion from a merged policy change: just motion <base> <head> --epoch 0 --policy-version 0, or --rpc
 motion base head *flags:
@@ -87,6 +88,15 @@ motion-check base head calldata *flags:
 # Enact the motion of `just motion` through the live Easy Track on a fork, on the vault with the base policy
 motion-replay:
 	MOTION_FILE=.motion/motion.json POLICY_ARTIFACT=.motion/base.json RPC=${RPC} forge test --match-test test_replay_a_motion_file -vv
+
+# The round-trip check on a fork: record the modifiers' events, rebuild their state and compare it with the policy
+round-trip:
+	RPC=${RPC} forge test --match-contract RoundTrip
+	bun policy/constellation/compiler/roundtrip.ts rehearsal --dir .roundtrip
+
+# The round-trip check of a policy against an events file or a chain: --events <file>, or --rpc --from-block N
+round-trip-check artifact *flags:
+	bun policy/constellation/compiler/roundtrip.ts check --artifact {{quote(artifact)}} {{flags}}
 
 # Record a human's own verification of a page, with the hash of its body. Humans only (CONTRIBUTING.md)
 verify page by *flags:

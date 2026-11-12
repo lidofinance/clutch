@@ -453,7 +453,7 @@ function git(args: string[]): string {
 }
 
 /** The artifact of a commit, or of a file. */
-function load(ref: string, network: string): Source {
+export function load(ref: string, network: string): Source {
   let text: string;
   let commit: string | null = null;
   if (existsSync(ref)) {

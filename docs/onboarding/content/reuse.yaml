@@ -149,7 +149,7 @@
 
 - name: The round-trip check
   column: new
-  what: "A check that rebuilds the applied permissions from the modifier's events on a fork and compares them with the artifact."
+  what: "A check that rebuilds what each modifier stores from its events and compares it with the artifact. It is built, and it runs on the fork rehearsal's vault."
   why: "The chain then checks the compiler, not only the other way round."
   owner: "`@lidofinance/defi-tech`"
   sources: ["ADR-004#d7", "ADR-004#d13", "INV-016"]
