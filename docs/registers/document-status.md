@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-12T12:19:12Z
+  at: 2026-11-12T13:00:25Z
 verified: []
 ---
 
@@ -54,6 +54,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/orders-account-fork-tests-2026-11-07.md](/research/orders-account-fork-tests-2026-11-07.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/orders-motion-roles-2026-11-08.md](/research/orders-motion-roles-2026-11-08.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/orders-token-motions-2026-11-08.md](/research/orders-token-motions-2026-11-08.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/raw-factory-prototype-2026-11-12.md](/research/raw-factory-prototype-2026-11-12.md) | Research Note | slop |  | 2026-11-12 | none |
 | [research/recovery-and-withdrawal-queue-2026-10-05.md](/research/recovery-and-withdrawal-queue-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/request-for-solution-2026-10-07.md](/research/request-for-solution-2026-10-07.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |

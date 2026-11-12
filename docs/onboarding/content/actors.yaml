@@ -204,7 +204,7 @@
   name: The universal factory
   status: new
   label: specified
-  what: "One new Easy Track factory that builds every Clutch [[motion]] and holds the roles that motions use. Its Easy Track registration is its address book: one call, its own `applyMotion`. If its shapes prove too complex, it falls back to raw writes that may also widen, with the objection window as the only bound."
+  what: "One new Easy Track factory that builds every Clutch [[motion]] and holds the roles that motions use. Its Easy Track registration is its address book: one call, its own `applyMotion`. EM chose raw writes on 2026-11-12: after the switch, the factory applies raw writes that may also widen, with the objection window as the only bound. Until the switch, the repository's factory is the typed one that this card describes, and a prototype of the raw one stands beside it."
   controlled_by: "Nobody can upgrade it. The committee's Safe is its [[trusted caller]], fixed at deployment. Aragon Voting registers it in Easy Track, and can raise its [[motion counter]] as its owner. A changed factory is a new registration, by vote."
   can:
     - "Check an enacted motion again in `applyMotion`, and then make its writes through its roles: governance and insurance funding on the operator modifier, exit governance and restart on the safety modifier, governance and approvals on the orders modifier, and the first-loss burn and insurance roles on the first-loss modifier."

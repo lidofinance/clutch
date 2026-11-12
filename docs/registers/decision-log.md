@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T12:19:12Z
+  at: 2026-11-12T13:00:25Z
 verified: []
 sources:
   - id: s1
@@ -124,6 +124,9 @@ sources:
   - id: s38
     resource: "urn:clutch:interview:2026-11-12-lend-exit"
     title: EM's answer on OD-133, 2026-11-12; the transcript is not in the repository
+  - id: s39
+    resource: "urn:clutch:interview:2026-11-12-raw-factory"
+    title: EM's request for a factory that accepts wider calldata, and EM's choice of raw writes, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -133,6 +136,27 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — OD-134: the factory takes raw writes
+
+The agent explained what an ERC-4626 shape for Lido Lend's lender vault includes. EM wrote:
+
+> let's rebuild the factory to accept wider calldata, this restriction is too rigid (I mean let's have widening permissions through either raw data, or much weaker), what options we have? current factory is super bloated
+
+The agent reported the typed factory's size, gas and complexity, as [ADR 013](/adr/013-one-easy-track-factory.md) decision 11 asks, and set out five options: A, raw writes; B, raw writes with budget ceilings; C, raw writes with the allowed permission forms pinned in the Roles policy; D, templates as data in the factory; E, the typed shapes of today, in companion contracts. EM wrote:
+
+> let's decide over A and B, what are the pros and cons, second order effects, etc.
+
+The agent compared A and B. It recommended A: the ceilings of B do not change the worst case, because a motion can grant a permission that spends no budget. EM wrote:
+
+> let's do A
+
+Recorded as:
+
+- (OD-134) EM takes the fallback of [ADR 013](/adr/013-one-easy-track-factory.md) decision 11. The universal factory applies raw writes that may also widen. It builds no permission and keeps no ceiling. The objection window is the only bound on where funds go, and the guards of each modifier's own policy stay.
+- The agent built a prototype beside the typed factory and measured it ([research note](/research/raw-factory-prototype-2026-11-12.md)). The switch to it is separate work. Until the switch, the other pages still describe the typed factory, its shapes and its ceilings.
+- One point of the prototype is the agent's reading, and OD-135 holds it in the [register](/registers/open-decisions.md): the factory keeps one policy version for every permission write, not one version for each scope, and a motion that only acts is exempt.
+- The switch ends the ceilings of OD-105, OD-113 and OD-120, the typed shapes and the derived keys of OD-102, and the companion contract of OD-117. [s39]
 
 ## 2026-11-12 — OD-133 decided: no collateral enters, and no fallback exit
 
