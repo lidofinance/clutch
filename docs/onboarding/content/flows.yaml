@@ -155,7 +155,7 @@ flows:
         text: "The committee's Safe creates the motion. Its raw writes carry the operator's permissions for the target with their condition trees, the budget of each new spender and the emergency exits. The motion names the [[policy version]] and the [[motion counter]]. The guard, once set, screens this transaction."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
-        check: "INV-034: the factory checks no write's content, so reviewers compare the motion's trees with the policy's source in the 72 hours. The `motion` command that builds and prints them is not built."
+        check: "INV-034: the factory checks no write's content, so reviewers compare the motion's trees with the policy's source in the 72 hours. `just motion` builds the motion from the merged policy change, and `just motion-check` fails a motion that writes anything else. Who runs the check is open."
       - who: "LDO holders"
         text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails."
         nodes: [dao, easytrack]
@@ -187,7 +187,7 @@ flows:
       "test:test_D1_substituted_script_rejected_at_enactment", "runbook:Raise the motion counter",
       "test:test_uf_motion_onboards_an_erc4626_lending_vault",
       "test:test_uf_policy_version_orders_permission_writes_and_spares_actions",
-      "test:test_uf_counter_fails_every_open_motion"]
+      "test:test_uf_counter_fails_every_open_motion", "test:test_replay_the_example_motion", "OD-136"]
 
   - id: budget
     group: governance
@@ -841,7 +841,7 @@ flows:
         text: "The specifications, the control matrix, the screening rule list and the runbook drafts."
         nodes: [policy, monitoring, screening, orders]
       - who: "Phase 2: build"
-        text: "The round-trip check, the first-loss Safe's roles, the universal factory, the `motion` command and reporting."
+        text: "The round-trip check, the motions that the launch still owes, and reporting. The universal factory, the `motion` command and its check are built."
         nodes: [policy, orders, first-loss, easytrack, reporting, monitoring]
       - who: "Phase 3: assurance"
         text: "An external audit, Lido's review of the guard change, and fork drills that initiate within 6 hours."

@@ -18,6 +18,9 @@ dryrun-artifact.json
 bootstrap-manifest.json
 teardown-manifest.json
 
+# A motion's files from `just motion`: the motion, its base policy and its forum-post draft
+.motion/
+
 # Tooling
 __pycache__/
 .venv/

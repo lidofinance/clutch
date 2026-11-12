@@ -49,7 +49,7 @@ check-docs:
 
 # The policy artifacts equal a fresh compile; the compiler's tests; the type check
 check-policy:
-	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json --check && bun test compiler && ./node_modules/.bin/tsc --noEmit -p .
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json --check && bun compiler/motion.ts example --check && bun test compiler && ./node_modules/.bin/tsc --noEmit -p .
 
 # Every control of the onboarding guide, in headless Chromium
 check-browser:
@@ -76,6 +76,18 @@ links:
 test-fork:
 	RPC=${RPC} forge test -vvv
 
+# Build a motion from a merged policy change: just motion <base> <head> --epoch 0 --policy-version 0, or --rpc
+motion base head *flags:
+	bun policy/constellation/compiler/motion.ts build --base {{quote(base)}} --head {{quote(head)}} --out .motion/motion.json --post .motion/post.md {{flags}}
+
+# Fail unless a motion's calldata turns the policy of <base> into the policy of <head>, and writes nothing else
+motion-check base head calldata *flags:
+	bun policy/constellation/compiler/motion.ts check --base {{quote(base)}} --head {{quote(head)}} --calldata {{quote(calldata)}} {{flags}}
+
+# Enact the motion of `just motion` through the live Easy Track on a fork, on the vault with the base policy
+motion-replay:
+	MOTION_FILE=.motion/motion.json POLICY_ARTIFACT=.motion/base.json RPC=${RPC} forge test --match-test test_replay_a_motion_file -vv
+
 # Record a human's own verification of a page, with the hash of its body. Humans only (CONTRIBUTING.md)
 verify page by *flags:
 	{{py}} scripts/verify_page.py {{quote(page)}} --by {{quote(by)}} {{flags}}
@@ -86,4 +98,4 @@ build:
 
 # Policy (ADR 004): compile the constellation into the committed fork artifact and the enabling-vote rehearsal's artifact
 policy-compile:
-	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json && bun compiler/motion.ts example

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-12T14:54:04Z
 verified: []
 sources:
   - id: s2
@@ -86,7 +86,7 @@ Each Roles modifier refuses every call that its policy does not list. Owners: [A
 
 #### Part 4: Governance — the new contracts **[Implemented in part]**
 
-Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 013](/adr/013-one-easy-track-factory.md), whose proposed direction lists the motions at launch. The prototype builds the factory, and the fork suite builds the budget, onboarding, orders-token, orders-restore, restart, insurance-money, insurance-deposit, first-loss burn and fund motions from raw writes. The `motion` command, which builds a motion from a merged policy change, is not built.
+Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 013](/adr/013-one-easy-track-factory.md), whose proposed direction lists the motions at launch. The prototype builds the factory, and the fork suite builds the budget, onboarding, orders-token, orders-restore, restart, insurance-money, insurance-deposit, first-loss burn and fund motions from raw writes. The `motion` command builds a motion from a merged policy change, and its check fails a motion that writes anything else; the fork suite enacts one such motion.
 
 #### Part 5: Funding and insurance **[Implemented in part]**
 
