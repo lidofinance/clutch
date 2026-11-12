@@ -1031,3 +1031,10 @@
   adr: [ADR-013#d10]
   see: [/research/raw-factory-prototype-2026-11-12.md]
   refines: [OD-100, OD-134]
+- id: OD-136
+  question: "Who runs the check of a motion, and what follows a failure?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-136 decided: monitoring runs the check of every motion"
+  adr: [ADR-013#d19]
+  refines: [OD-134]

@@ -980,7 +980,7 @@
     - "Alert on any change of the first-loss Safe's balance, owners or modules, page on every burn motion and every action of the first-loss role, and alert on a redemption before the guard is set and on an excess above the launch cap that stays."
     - "Page at high severity on every emergency swap."
     - "Follow a new Lido product's exposure against the protocol cap until a motion unlocks it, and record the changes of the screening rules that the vendor reports."
-    - "Decode every motion of the universal factory, compare its permission trees with the policy's source, and alert on a failed enactment, a raise of the motion counter, a restart motion, a budget set to more than twice its last value and few free motion slots. Flag repeated budget motions, and grade emergency actions."
+    - "Run the check of every motion of the universal factory against the merged policy change that its forum post names, and page the emergency Safe on a failure. Alert on a failed enactment, a raise of the motion counter, a restart motion, a budget set to more than twice its last value and few free motion slots. Flag repeated budget motions, and grade emergency actions."
     - "Publish the cap reading of each [[fortnightly snapshot]] to IPFS, and page the emergency Safe on the cap-breach trigger, met in either reading."
     - "Compare Lido's published readings with the policy provider's at each snapshot, and flag a tranche vote that starts while they differ by more than the band."
     - "Alert on a change of the mandate's rules made in the Zodiac UI, and on a transaction of the committee's Safe that waits too long for [the screening vendor]'s approval."
@@ -991,7 +991,7 @@
   sources: ["ADR-009#d1", "ADR-009#d7", "ADR-009#d17", "ADR-009#d21", "ADR-009#d24", "ADR-009#d25",
     "ADR-009#d28", "ADR-006#d11", "ADR-010#d19", "ADR-009#proposed-direction", "ADR-010#d12", "ADR-010#d18",
     "ADR-007#d24", "ADR-007#d26", "ADR-007#d29", "ADR-007#proposed-direction", "ADR-009#d34", "ADR-005#d33",
-    "ADR-013#proposed-direction", "ADR-014#d9", "ADR-014#proposed-direction", "OD-42", "OD-43", "OD-49",
+    "ADR-013#proposed-direction", "ADR-013#d19", "ADR-014#d9", "ADR-014#proposed-direction", "OD-42", "OD-43", "OD-49",
     "OD-60", "OD-67", "ADR-009#d41", "ADR-009#d44", "ADR-009#d45", "ADR-010#d26", "doc:ROADMAP.md#roadmap"]
 
 - id: vendor-monitoring

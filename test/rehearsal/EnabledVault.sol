@@ -242,7 +242,8 @@ abstract contract EnabledVault is RehearsalBase {
     /// @dev The artifact's calls on one or two modifiers, in the artifact's order. A modifier's owner applies
     ///      them, so each Safe's batch takes the calls on its own modifiers.
     function _policyCalls(address first, address second) internal view returns (VoteBuilder.Item[] memory calls) {
-        string memory j = vm.readFile(ARTIFACT);
+        // POLICY_ARTIFACT names another policy to apply: the base policy of a motion's replay (MotionReplay)
+        string memory j = vm.readFile(vm.envOr("POLICY_ARTIFACT", ARTIFACT));
         address[] memory to = vm.parseJsonAddressArray(j, ".calls.to");
         bytes[] memory data = vm.parseJsonBytesArray(j, ".calls.data");
         uint256 n;

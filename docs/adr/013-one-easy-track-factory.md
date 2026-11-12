@@ -8,12 +8,12 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-12T15:01:43Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on versions, the vote-free design, the factory, the restart, a motion's one call, the votes that remain, raw writes and the policy version, 2026-11-01 to 2026-11-12
+    title: Decision log — EM on versions, the vote-free design, the factory, the restart, a motion's one call, the votes that remain, raw writes, the policy version and the check of a motion, 2026-11-01 to 2026-11-12
   - id: s2
     resource: /research/easy-track-first-2026-11-05.md
     title: Research note — Easy Track's script permissions, enactment, cancel and pause; Roles storage; Merkle-root engines; the two-modifier alternative
@@ -54,6 +54,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 16. A motion created after an emergency revoke may enact, and so bring the revoked permission back after its objection window. The policy version counts only the factory's own motions, not the emergency role's revokes; the counter fails the motions that were open when the emergency Safe raised it (OD-114).
 17. Lapsed (OD-134): the factory has no shape, so it needs no companion contract.
 18. The universal factory holds the motion roles. A motion's script makes one call, the factory's `applyMotion`. That call checks the motion again and makes its writes in order, all in the enactment's one transaction. A write that its modifier refuses fails the whole motion (OD-118).
+19. Monitoring runs the check of a motion on every motion of the factory at its creation, against the two commits that the motion's forum post names. A failure pages the emergency Safe, which raises the counter (OD-136).
 
 ## Proposed direction
 
@@ -67,7 +68,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 | Motion | Writes | Fork test |
 |---|---|---|
 | Budget | the governance role's `setAllowance` for one key, with a period of at least 30 days | `test_03_ramp_up`, `test_factory_budget_motion_sets_a_launch_orders_budget` |
-| Protocol onboarding | the operator's permissions for the target, the budget of each new spender under its derived key, and the emergency exits through the `exit-governance` role ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13) | `test_uf_motion_onboards_an_erc4626_lending_vault` |
+| Protocol onboarding | the operator's permissions for the target, the budget of each new spender under its derived key, and the emergency exits through the `exit-governance` role ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13) | `test_uf_motion_onboards_an_erc4626_lending_vault`; `test_replay_the_example_motion` for a motion that the `motion` command built |
 | Lido Lend's lender vault | the onboarding of an ERC-4626 vault: the asset's `approve` to the vault under a derived key; `deposit`, `redeem` and `withdraw` with receiver and owner pinned to the avatar; the emergency role's `redeem`; no fallback exit and no settlement ([ADR 011](/adr/011-launch-scope.md) decision 13). Its address arrives with the motion (OD-49) | `test_uf_motion_onboards_an_erc4626_lending_vault`, against a deployed ERC-4626 vault as a stand-in |
 | Orders account token | the token on both sides of signer and TWAP orders and in what recovery orders sell; its relayer approval; the emergency role's zeroing and transfer; the operator's transfer into the orders account under a derived key, with its return; that budget; and the token's exit on the Asset Safe ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41, 44 and 45) | `test_factory_orders_token_motion` |
 | Orders account restore | the operator's permissions on the orders account, written again, and the named relayer approvals ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 46) | `test_factory_orders_restore_after_an_emergency_stop` |
@@ -82,8 +83,10 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - **The counter.** The emergency Safe raises it with every switch. Aragon Voting can raise it too.
 - **The policy version.** It orders the motions that write permissions or budgets: of two such motions that are open together, the one that enacts second fails, and the committee creates it again. This is coarser than a version for each scope, and such motions are rare. An action, such as a burn or a payout, never waits for another motion.
-- **The `motion` command.** It takes a policy change from a merged commit, reads the counter and the policy version on chain, builds the motion's writes, runs the motion against the live Easy Track on a fork, prints the writes and the permission difference from the modifiers' events, and drafts the forum post. The Zodiac UI does not know the factory's format, so it is not the planner. Not built.
-- **Monitoring.** It decodes every motion of the factory from `MotionCreated`, in one calldata format, and compares each permission tree in it with the policy's source. It alerts on a failed enactment, a raise of the counter, a restart motion, a budget set to more than twice its last value, and few free motion slots ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 45).
+- **The `motion` command.** `just motion <base> <head>` takes a policy change between two commits and reads the policy artifact that each commit holds. It builds the writes that turn the first policy into the second: the budgets, then the removals and the additions of each role. It takes the counter and the policy version from the factory or from its flags. It writes the motion's calldata, the list of its writes in words and a draft of the forum post. It refuses a change that no motion role can write, such as a membership or a removal on the safety modifier: that change needs a DAO vote. `just motion-replay` enacts the motion through the live Easy Track on a fork, on the rehearsal's vault with the first policy. The Zodiac UI does not know the factory's format, so it is not the planner.
+- **The check of a motion.** `just motion-check <base> <head> <calldata>` runs a motion's writes on a model of the Roles modifier, from the first policy, and fails unless the outcome is the second policy. It also fails on a write that the motion role's policy would refuse, on an action that the motion's author did not declare, and on a second commit that is not merged. It shares no comparison code with the `motion` command, which runs it on its own output. A revoked target keeps its functions in the modifier's storage, so the check fails a removal that revokes the target alone.
+- **Limits of the two commands.** Both take the chain's policy to be the first artifact. They do not read the modifiers, so they do not see a revoke of the emergency role; the round-trip check, which is not built, closes that gap ([ADR 004](/adr/004-specifications-and-policy-as-data.md) decision 13). The check says nothing about what a declared action does, such as a burn or a relayer approval. The replay runs on the rehearsal's vault until a vault is deployed.
+- **Monitoring.** It reads every motion of the factory from `MotionCreated` and runs the check of decision 19 on it. The forum post of a motion names the two commits, and a motion without them, or with a second commit that is not merged, fails. A failure is a critical alert that pages the emergency Safe through the general Lido incident process. The detector is not built. Monitoring also alerts on a failed enactment, a raise of the counter, a restart motion, a budget set to more than twice its last value, and few free motion slots ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 45).
 - **Trusted caller.** The factory's constructor fixes the committee's Safe as its trusted caller ([ADR 005](/adr/005-account-graph-and-roles.md) decision 31), so a new committee Safe needs a new factory (decision 4).
 
 ## Options considered
@@ -108,10 +111,12 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - A new protocol form needs no changed factory and no vote: its motion carries its permissions.
 - Easy Track's executor, which every Easy Track factory of the DAO shares, holds no Clutch role. Another factory reaches the vault only if Aragon Voting registers it for `applyMotion`, which runs the counter and policy-version checks again, though not the trusted-caller check.
 - A vote that replaces the factory deploys the new factory, registers it, and moves every motion role to it. The new factory starts its counter and its policy version at zero, and the old factory's open motions end with its removal from Easy Track.
+- A failed check costs every open motion: the emergency Safe raises the counter, and the committee creates each motion again with a new objection window. A wrong failure has the same cost, so the detector's inputs, the two commits and the merged history, must be right (decision 19).
 - A motion's script shows only its one call. The forum post and monitoring take the writes from the motion's calldata.
 
 ## Confirmation
 
+- The `motion` command and its check: the compiler's tests in `policy/constellation/compiler/motion.test.ts`, and `test_replay_the_example_motion`, which enacts a motion that the command built, of 10 writes, through the live Easy Track in 2,243,539 gas; the operator then lends within the new budget, and the emergency role exits. Twelve mutants of the two commands each fail a test.
 - INV-032 to INV-035 in the [invariants](/specs/invariants.md). The factory's fork tests run against the live Easy Track, in `test/UniversalFactory.t.sol`, `test/OrdersAccount.t.sol` and `test/FirstLoss.t.sol`.
 - The factory is 3,371 bytes, under EIP-170's 24,576. One motion that adds a token to the orders account makes 16 writes and enacts in 7,790,415 gas (`test_factory_orders_token_motion`). One that restores the orders account makes 9 writes in 3,622,403 gas (`test_factory_orders_restore_after_an_emergency_stop`). One that onboards an ERC-4626 lending vault makes 9 writes in 2,140,115 gas (`test_uf_motion_onboards_an_erc4626_lending_vault`). All are under EIP-7825's cap.
 

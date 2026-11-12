@@ -76,7 +76,7 @@ owed:
   - "[the screening vendor] says whether it records rule changes and whether it can delay a relaxation."
   - "The mandate's Snapshot text and its forum post change before the Snapshot vote. The Mandate tab marks each change."
   - "Fork tests of the onboarding motion of each launch protocol, with its emergency exit; of Lido Lend's lender vault once it is deployed; and of a settled redemption paid to the Asset Safe."
-  - "The `motion` command, which builds a motion's raw writes from a merged policy change, and the command that checks a motion against that change. The factory takes 3,371 of EIP-170's 24,576 bytes, and every measured motion stays under EIP-7825's cap."
+  - "The round-trip check, which reads the modifiers; until it exists, the `motion` command and its check take the chain's policy to be the committed artifact. The detector that runs the check on every motion is not built."
   - "The [[attested computation]]'s figures, once the mandate is approved: the budgets, the orders budgets, the fixed approval ceilings, and the first tranche's tokens and amounts."
   - "The mandate's drafters owe the holder and the form of the Twyne position."
   - "The enabling vote's Safe batches, published with one command that computes each hash again."

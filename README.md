@@ -46,6 +46,8 @@ just setup       # install dependencies and build contracts
 just check       # CI checks, except the fork suite
 just regen       # rebuild every generated file
 just test-fork   # pinned mainnet fork; needs an archive RPC in .env
+just motion <base> <head> --epoch 0 --policy-version 0   # a motion from a merged policy change
+just motion-check <base> <head> <calldata>              # fail a motion that writes anything else
 just --list      # all recipes
 ```
 
