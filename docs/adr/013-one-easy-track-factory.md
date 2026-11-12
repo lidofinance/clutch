@@ -1,6 +1,6 @@
 ---
 type: Decision
-title: "ADR 013: One Easy Track factory; Aragon votes after launch only for tranches and break-glass actions"
+title: "ADR 013: One Easy Track factory for the vault's permissions; Aragon votes after launch only for tranche votes and break-glass actions"
 description: One universal Easy Track factory carries every Clutch motion as a list of raw writes, holds the motion roles and makes each motion's writes in one call; after the enabling vote, Aragon votes remain only for funding tranches, role holders and break-glass actions.
 tags: [governance, easy-track, factory, raw-writes]
 status: draft
@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:24:23Z
+  at: 2026-11-12T23:13:05Z
 verified: []
 sources:
   - id: s1
@@ -22,7 +22,7 @@ sources:
     title: Research note — the typed factory's size, gas and checks, and the raw factory's measures, 2026-11-12
 ---
 
-# ADR 013: One Easy Track factory; Aragon votes after launch only for tranches and break-glass actions
+# ADR 013: One Easy Track factory for the vault's permissions; Aragon votes after launch only for tranche votes and break-glass actions
 
 ## Context
 
@@ -40,7 +40,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 2. Easy Track motions carry versions, so that two motions cannot overwrite each other's changes (OD-100).
 3. After the enabling vote, no administrative action needs an Aragon vote. An Easy Track motion is the most that an action needs. Removing complexity is the aim: fewer moving parts is the best outcome (OD-101).
 4. These actions stay Aragon votes: each funding tranche ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 1); the replacement of a role holder, such as the committee's Safe in the operator role; an owner action on a vault Safe, such as a module, the Safe version or the owners; a new or changed factory; a removal on the safety modifier or on the orders modifier, whose motion roles hold no revoke; and the unpause of Easy Track, which only Aragon Voting can do (OD-101, OD-125, OD-138).
-5. One universal Easy Track factory carries every Clutch motion (OD-102).
+5. One universal Easy Track factory carries every Clutch motion (OD-102). Funding is no motion of this factory: Lido's own top-up factories pay the Asset Safe ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 13) (OD-140).
 6. The factory's Easy Track registration is its address book: one call, the factory's own `applyMotion`. Nothing else is callable (OD-102, OD-118).
 7. Replaced by decision 11 (OD-134).
 8. The factory cannot be upgraded. A motion grants no delegatecall but the order signer's, and the guards against administrative targets and selectors stay ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decisions 9 and 10) (OD-102, OD-103).

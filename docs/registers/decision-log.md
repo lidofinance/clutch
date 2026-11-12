@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:48:34Z
+  at: 2026-11-12T23:14:58Z
 verified: []
 sources:
   - id: s1
@@ -160,6 +160,9 @@ sources:
   - id: s50
     resource: "urn:clutch:interview:2026-11-12-top-up-factories"
     title: EM's request for top-up factories, with EM's own words in the committee's working-group thread of 2026-11-12; neither is in the repository
+  - id: s51
+    resource: "urn:clutch:interview:2026-11-12-top-up-terms"
+    title: EM's answers on the top-up factories' tokens, registration, limit and gates, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -169,6 +172,25 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — OD-141 to OD-144 decided: the top-ups' tokens, their registration, their limit and their gates; OD-145 opened
+
+The agent opened four decisions on the terms of the top-up factories, each with options and a recommendation. EM wrote:
+
+> OD-141: stETH, DAI, USDC, USDT; can add sUSDS if doesn't require additional instance of the factory, otherwise let's abstain
+> OD-142: enabling vote registers factories, $1M launch tranche is not in the vote, will be follow-up top-up motion after aragon enacted
+> OD-143: three months, [a figure of the unapproved mandate] indicative
+> OD-144: the same gates
+
+Recorded as:
+
+- (OD-141) Two top-up factories: one for stETH, and one for the DAO's stablecoin list, which holds DAI, USDC, USDT and sUSDS. sUSDS is in: the list already allows it, read on chain on 2026-11-12, so it needs no factory of its own ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 15).
+- (OD-142) The enabling vote registers the two top-up factories and pays nothing. The launch tranche, one million dollars, comes by top-up motions after the vote is enacted and the Safe batches ran (decision 14). This replaces decision 2 of that ADR, the first tranche inside the enabling vote (OD-106). EM chose this in place of the agent's recommendation, which registered the factories in a later vote.
+- (OD-143) A registry's period is three months. Its limit for a period is the figure that EM gave as indicative (decision 16). The figure is restricted until the mandate is published, so this log and the repository do not state it.
+- (OD-144) The gates on a tranche vote hold a top-up motion too ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 48; ADR 014, decision 17).
+- Three points are the agent's reading. EM's figure is for both registries together: each registry's limit is at most that figure, and monitoring alerts when a period's top-ups together pass it, because two registries cannot share one limit on chain. The stETH registry counts stETH, so its limit in stETH comes from the attested computation at a pinned price, as the production figures do. Until the screening guard is set, the launch cap of one million dollars holds by a rule: the committee's Safe creates no top-up motion that takes the vault above the cap, monitoring alerts on one, and LDO holders object ([ADR 010](/adr/010-pre-execution-screening.md), decisions 20 to 22).
+- The third reading changes what held the cap. Before, only an Aragon vote moved funds above the cap, and that vote waited for the guard. Now the registries allow a top-up above the cap from the launch on. The agent opened OD-145: whether the registries start with limits that sum to the cap, with one vote after the guard that raises them.
+- Built with the change: the enabling-vote rehearsal registers both factories and pays nothing, and the launch tranche comes by two top-up motions; `test/TopUps.t.sol` covers the two factories, the four stablecoins and the period. [s51]
 
 ## 2026-11-12 — OD-140 decided: top-up factories join the tranche votes; OD-141 to OD-144 opened
 

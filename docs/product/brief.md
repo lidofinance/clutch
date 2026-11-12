@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-12T23:13:05Z
 verified: []
 sources:
   - id: s1
@@ -28,7 +28,7 @@ sources:
 The Treasury Management Committee puts a bounded part of the DAO treasury to work in approved protocols [s2].
 Aragon Voting is the sole owner of the vault's three Safes. Recovered assets go to the Aragon Agent (OD-73) [s2].
 A default-deny policy limits the committee's actions. An emergency Safe can return assets to the Agent.
-Easy Track motions change permissions only through one universal factory, as raw writes that LDO holders can object to for 72 hours [s2]. After the enabling vote, Aragon votes are left only for funding tranches and break-glass actions (OD-101, OD-106).
+Easy Track motions change permissions only through one universal factory, as raw writes that LDO holders can object to for 72 hours [s2]. After the enabling vote, Aragon votes are left only for a funding above the top-up limits and for break-glass actions; top-up motions carry the regular funding (OD-101, OD-106, OD-140).
 
 ## The problem
 

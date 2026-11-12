@@ -5,66 +5,23 @@ import {console2} from "forge-std/Test.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {Mainnet} from "./rehearsal/Mainnet.sol";
 import {VoteBuilder} from "./rehearsal/VoteBuilder.sol";
-import {IEasyTrack, IFinance} from "./rehearsal/RehearsalBase.sol";
+import {IEasyTrack, IFinance, IRecipientsRegistry} from "./rehearsal/RehearsalBase.sol";
 import {EnabledVault} from "./rehearsal/EnabledVault.sol";
 
-/// @dev Lido's deployed factory of allowed-recipients registries and top-up factories. Its caller names the
-///      registry's admin and role holders; the standard builders name the Aragon Agent.
-interface IRecipientsFactory {
-    function deployAllowedRecipientsRegistry(
-        address defaultAdmin,
-        address[] calldata addRecipientHolders,
-        address[] calldata removeRecipientHolders,
-        address[] calldata setLimitParametersHolders,
-        address[] calldata updateSpentAmountHolders,
-        address dateTime
-    ) external returns (address);
-
-    /// @dev The multi-token factory takes a token registry, and the single-token factory a token.
-    function deployTopUpAllowedRecipients(
-        address trustedCaller,
-        address registry,
-        address tokenOrTokenRegistry,
-        address finance,
-        address easyTrack
-    ) external returns (address);
-}
-
-interface IRecipientsRegistry {
-    function addRecipient(address recipient, string calldata title) external;
-    function setLimitParameters(uint256 limit, uint256 periodDurationMonths) external;
-    function renounceRole(bytes32 role, address account) external;
-    function hasRole(bytes32 role, address account) external view returns (bool);
-    function getLimitParameters() external view returns (uint256, uint256);
-    function spendableBalance() external view returns (uint256);
-    function updateSpentAmount(uint256 amount) external;
-}
-
 /// @title TopUps — top-up motions from the treasury to the Asset Safe, with Lido's existing top-up tooling in new
-///        instances, on the vault that the enabling vote sets up (ADR 014, decision 13; OD-140).
-/// @dev A probe of the mechanics, before the decisions on the limits, the periods and the vote that registers the
-///      factories (OD-141 to OD-144). Two registries list the Asset Safe as their only recipient, one for stETH and
-///      one for the DAO's stablecoin list. Aragon Voting is each registry's admin, so a change of a limit passes no
-///      Dual Governance. The committee's Safe is the trusted caller of both top-up factories, and a vote after the
-///      enabling vote registers them in the live Easy Track. Figures marked STANDIN are test values.
+///        instances, on the vault that the enabling vote sets up (ADR 014, decisions 13 to 17).
+/// @dev Two registries list the Asset Safe as their only recipient: one for stETH, and one for the tokens of the
+///      DAO's stablecoin list, which are DAI, USDC, USDT and sUSDS (OD-141). Aragon Voting is each registry's admin,
+///      so a change of a limit passes no Dual Governance. The committee's Safe is the trusted caller of both top-up
+///      factories, and the enabling vote registers them (OD-142). A period is three calendar months (OD-143). The
+///      fixture's launch tranche already spent a part of each limit. Both limits are stand-ins.
 ///      Run: RPC=<archive RPC> forge test --match-contract TopUps -vv
 contract TopUps is EnabledVault {
-    bytes32 internal constant ADD_RECIPIENT_ROLE = keccak256("ADD_RECIPIENT_TO_ALLOWED_LIST_ROLE");
-    bytes32 internal constant SET_PARAMETERS_ROLE = keccak256("SET_PARAMETERS_ROLE");
-
-    /// @dev STANDIN limits of one period, and the period in months. A registry counts every token in 18 decimals.
-    uint256 internal constant STETH_LIMIT = 3_000e18;
-    uint256 internal constant STABLE_LIMIT = 5_000_000e18;
-    uint256 internal constant PERIOD_MONTHS = 3;
     /// @dev The Easy Track executor's ceiling on one payment, in Finance's payment permission (chain reads of
     ///      2026-09-30).
     uint256 internal constant STETH_PER_PAYMENT = 1_000e18;
     uint256 internal constant USDC_PER_PAYMENT = 2_000_000e6;
 
-    address internal stethRegistry;
-    address internal stableRegistry;
-    address internal stethTopUp;
-    address internal stableTopUp;
     address internal stranger = makeAddr("stranger");
 
     function setUp() public {
@@ -73,12 +30,40 @@ contract TopUps is EnabledVault {
         _deployFactory();
     }
 
-    /// @dev The enabling vote, then the vote that registers the two top-up factories.
+    /// @dev The enabling vote registers the two top-up factories, and the launch tranche comes by two motions.
     modifier withTopUps() {
         _enable();
-        _deployTopUps();
-        _registerTopUps();
         _;
+    }
+
+    /// @dev The enabling vote registers both factories with their two calls each, and pays nothing. The launch
+    ///      tranche then comes by two top-up motions, and each registry counts its part.
+    function test_topup_the_enabling_vote_registers_the_factories_and_the_launch_tranche_is_two_motions() public withTopUps {
+        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        assertTrue(et.isEVMScriptFactory(stethTopUp) && et.isEVMScriptFactory(stableTopUp), "both factories are registered");
+        assertEq(
+            et.evmScriptFactoryPermissions(stethTopUp),
+            abi.encodePacked(
+                VoteBuilder.permission(stethRegistry, IRecipientsRegistry.updateSpentAmount.selector),
+                VoteBuilder.permission(Mainnet.FINANCE, IFinance.newImmediatePayment.selector)
+            ),
+            "the stETH factory calls its registry and Finance's payment, and nothing else"
+        );
+        assertEq(
+            et.evmScriptFactoryPermissions(stableTopUp),
+            abi.encodePacked(
+                VoteBuilder.permission(stableRegistry, IRecipientsRegistry.updateSpentAmount.selector),
+                VoteBuilder.permission(Mainnet.FINANCE, IFinance.newImmediatePayment.selector)
+            ),
+            "the stablecoin factory calls its registry and Finance's payment, and nothing else"
+        );
+        (uint256 limit, uint256 months) = IRecipientsRegistry(stableRegistry).getLimitParameters();
+        assertEq(limit, TOPUP_STABLE_LIMIT, "the stablecoin limit");
+        assertEq(months, TOPUP_PERIOD_MONTHS, "a period of three months");
+        (, months) = IRecipientsRegistry(stethRegistry).getLimitParameters();
+        assertEq(months, TOPUP_PERIOD_MONTHS, "a period of three months");
+        assertEq(IRecipientsRegistry(stableRegistry).spendableBalance(), TOPUP_STABLE_LIMIT - 500_000e18, "the launch tranche's USDC counts");
+        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), TOPUP_STETH_LIMIT - TRANCHE_STETH, "the launch tranche's stETH counts");
     }
 
     /// @dev One motion of the committee's Safe pays stETH from the treasury to the Asset Safe after the objection
@@ -86,11 +71,12 @@ contract TopUps is EnabledVault {
     function test_topup_steth_motion_pays_the_asset_safe() public withTopUps {
         uint256 before = IERC20(Mainnet.STETH).balanceOf(address(asset));
         uint256 agent = IERC20(Mainnet.STETH).balanceOf(Mainnet.AGENT);
+        uint256 spendable = IRecipientsRegistry(stethRegistry).spendableBalance();
         uint256 gasUsed = _topUp(stethTopUp, _stethCall(_one(address(asset)), _one(400e18)));
         console2.log("TOPUP stETH, one payment: enactMotion gas", gasUsed);
         assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)) - before, 400e18, 2, "the Asset Safe receives the top-up");
         assertApproxEqAbs(agent - IERC20(Mainnet.STETH).balanceOf(Mainnet.AGENT), 400e18, 2, "the Aragon Agent pays it");
-        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), STETH_LIMIT - 400e18, "the registry counts the top-up");
+        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), spendable - 400e18, "the registry counts the top-up");
     }
 
     /// @dev Only the committee's Safe creates a top-up motion, and only the Asset Safe receives one.
@@ -113,28 +99,28 @@ contract TopUps is EnabledVault {
     }
 
     /// @dev The registry's limit holds for a period: a motion above what is left fails at its creation, and the
-    ///      next period starts with the whole limit again. A period starts on the first day of a calendar month.
+    ///      next period has the whole limit again. A period starts on the first day of a calendar month.
     function test_topup_registry_limit_holds_for_a_period() public withTopUps {
         IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
-        _topUp(stethTopUp, _stethCall(_one(address(asset)), _one(STETH_PER_PAYMENT)));
         uint256 left = IRecipientsRegistry(stethRegistry).spendableBalance();
-        assertEq(left, STETH_LIMIT - STETH_PER_PAYMENT, "what is left in the period");
+        (address[] memory to, uint256[] memory amounts) = _payments(left + 1);
         vm.prank(Mainnet.COMMITTEE_SAFE);
         vm.expectRevert(bytes("SUM_EXCEEDS_SPENDABLE_BALANCE"));
-        et.createMotion(stethTopUp, _stethCall(_two(address(asset)), _two(STETH_PER_PAYMENT, left - STETH_PER_PAYMENT + 1)));
-
-        // after the period's end, a motion for the whole limit passes: the limit is there again
-        vm.warp(block.timestamp + (PERIOD_MONTHS + 1) * 31 days);
-        address[] memory to = new address[](3);
-        uint256[] memory amounts = new uint256[](3);
-        for (uint256 i = 0; i < 3; i++) (to[i], amounts[i]) = (address(asset), STETH_PER_PAYMENT);
-        uint256 before = IERC20(Mainnet.STETH).balanceOf(address(asset));
+        et.createMotion(stethTopUp, _stethCall(to, amounts));
+        (to, amounts) = _payments(left);
         _topUp(stethTopUp, _stethCall(to, amounts));
-        assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)) - before, STETH_LIMIT, 6, "the next period pays the whole limit");
-        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), 0, "and no more");
+        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), 0, "the period's limit is spent");
         vm.prank(Mainnet.COMMITTEE_SAFE);
         vm.expectRevert(bytes("SUM_EXCEEDS_SPENDABLE_BALANCE"));
         et.createMotion(stethTopUp, _stethCall(_one(address(asset)), _one(1)));
+
+        // after the period's end, a motion for the whole limit passes: the limit is there again
+        vm.warp(block.timestamp + (TOPUP_PERIOD_MONTHS + 1) * 31 days);
+        uint256 before = IERC20(Mainnet.STETH).balanceOf(address(asset));
+        (to, amounts) = _payments(TOPUP_STETH_LIMIT);
+        _topUp(stethTopUp, _stethCall(to, amounts));
+        assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)) - before, TOPUP_STETH_LIMIT, 2 * to.length, "the next period pays the whole limit");
+        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), 0, "and no more");
     }
 
     /// @dev The executor's payment permission caps one payment at 1,000 stETH. A motion above the cap in one
@@ -153,24 +139,34 @@ contract TopUps is EnabledVault {
         et.cancelMotion(id);
 
         uint256 before = IERC20(Mainnet.STETH).balanceOf(address(asset));
+        uint256 spendable = IRecipientsRegistry(stethRegistry).spendableBalance();
         address[] memory to = new address[](3);
         uint256[] memory amounts = new uint256[](3);
         for (uint256 i = 0; i < 3; i++) (to[i], amounts[i]) = (address(asset), STETH_PER_PAYMENT);
         uint256 gasUsed = _topUp(stethTopUp, _stethCall(to, amounts));
         console2.log("TOPUP stETH, three payments in one motion: enactMotion gas", gasUsed);
         assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)) - before, 3 * STETH_PER_PAYMENT, 6, "three payments in one motion");
-        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), 0, "the period's limit is spent");
+        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), spendable - 3 * STETH_PER_PAYMENT, "the registry counts the three payments");
     }
 
-    /// @dev The stablecoin factory pays a token of the DAO's stablecoin list, and no other token. The registry
-    ///      counts a stablecoin at 18 decimals. USDS is not on the list.
+    /// @dev The stablecoin factory pays each token of the DAO's stablecoin list: DAI, USDC, USDT and sUSDS (OD-141).
+    ///      The registry counts each at 18 decimals, in one limit. USDS and stETH are not on the list.
     function test_topup_stablecoins_from_the_dao_list() public withTopUps {
         IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        uint256 spendable = IRecipientsRegistry(stableRegistry).spendableBalance();
         uint256 before = IERC20(Mainnet.USDC).balanceOf(address(asset));
         uint256 gasUsed = _topUp(stableTopUp, abi.encode(Mainnet.USDC, _two(address(asset)), _two(USDC_PER_PAYMENT, 1_000_000e6)));
         console2.log("TOPUP USDC, two payments in one motion: enactMotion gas", gasUsed);
         assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)) - before, 3_000_000e6, "the Asset Safe receives the USDC");
-        assertEq(IRecipientsRegistry(stableRegistry).spendableBalance(), STABLE_LIMIT - 3_000_000e18, "USDC counts at 18 decimals");
+
+        address[3] memory tokens = [Mainnet.DAI, Mainnet.USDT, Mainnet.SUSDS];
+        uint256[3] memory amounts = [uint256(1_000_000e18), 1_000_000e6, 500_000e18];
+        for (uint256 i = 0; i < 3; i++) {
+            before = IERC20(tokens[i]).balanceOf(address(asset));
+            _topUp(stableTopUp, abi.encode(tokens[i], _one(address(asset)), _one(amounts[i])));
+            assertEq(IERC20(tokens[i]).balanceOf(address(asset)) - before, amounts[i], "the Asset Safe receives the listed token");
+        }
+        assertEq(IRecipientsRegistry(stableRegistry).spendableBalance(), spendable - 5_500_000e18, "each token counts at 18 decimals, in one limit");
 
         vm.prank(Mainnet.COMMITTEE_SAFE);
         vm.expectRevert(bytes("TOKEN_NOT_ALLOWED"));
@@ -209,76 +205,19 @@ contract TopUps is EnabledVault {
     }
 
     // ---------------------------------------------------------------------
-    // Deployment and registration
+    // Calldata
     // ---------------------------------------------------------------------
 
-    /// @dev The registries and the top-up factories, from Lido's deployed factories. The deployer adds the Asset
-    ///      Safe and sets each limit, then gives up its roles.
-    function _deployTopUps() internal {
-        vm.startPrank(deployer);
-        stethRegistry = _registry(Mainnet.RECIPIENTS_FACTORY_SINGLE, STETH_LIMIT);
-        stableRegistry = _registry(Mainnet.RECIPIENTS_FACTORY_MULTI, STABLE_LIMIT);
-        stethTopUp = IRecipientsFactory(Mainnet.RECIPIENTS_FACTORY_SINGLE).deployTopUpAllowedRecipients(
-            Mainnet.COMMITTEE_SAFE, stethRegistry, Mainnet.STETH, Mainnet.FINANCE, Mainnet.EASY_TRACK
-        );
-        stableTopUp = IRecipientsFactory(Mainnet.RECIPIENTS_FACTORY_MULTI).deployTopUpAllowedRecipients(
-            Mainnet.COMMITTEE_SAFE, stableRegistry, Mainnet.STABLECOIN_LIST, Mainnet.FINANCE, Mainnet.EASY_TRACK
-        );
-        vm.stopPrank();
-    }
-
-    function _registry(address factory, uint256 limit) internal returns (address reg) {
-        address[] memory add = new address[](2);
-        (add[0], add[1]) = (Mainnet.VOTING, deployer);
-        address[] memory remove = new address[](1);
-        remove[0] = Mainnet.VOTING;
-        address[] memory setLimit = new address[](2);
-        (setLimit[0], setLimit[1]) = (Mainnet.VOTING, deployer);
-        address[] memory spend = new address[](2);
-        (spend[0], spend[1]) = (Mainnet.VOTING, Mainnet.ET_EXECUTOR);
-        reg = IRecipientsFactory(factory).deployAllowedRecipientsRegistry(Mainnet.VOTING, add, remove, setLimit, spend, Mainnet.DATE_TIME);
-        IRecipientsRegistry(reg).addRecipient(address(asset), "Clutch Asset Safe");
-        IRecipientsRegistry(reg).setLimitParameters(limit, PERIOD_MONTHS);
-        IRecipientsRegistry(reg).renounceRole(ADD_RECIPIENT_ROLE, deployer);
-        IRecipientsRegistry(reg).renounceRole(SET_PARAMETERS_ROLE, deployer);
-    }
-
-    /// @dev One Aragon vote registers both factories in Easy Track. Each may call its own registry's
-    ///      `updateSpentAmount` and Finance's `newImmediatePayment`, and nothing else.
-    function _registerTopUps() internal {
-        VoteBuilder.Item[] memory items = new VoteBuilder.Item[](2);
-        items[0] = _register(stethTopUp, stethRegistry, "Easy Track: register the stETH top-up factory");
-        items[1] = _register(stableTopUp, stableRegistry, "Easy Track: register the stablecoin top-up factory");
-        (bool ok,,) = _newVote(VoteBuilder.script(items));
-        assertTrue(ok, "the vote that registers the top-up factories starts");
-        _passAndExecute();
-        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
-        assertTrue(et.isEVMScriptFactory(stethTopUp) && et.isEVMScriptFactory(stableTopUp), "both factories are registered");
-    }
-
-    function _register(address factory, address registry, string memory label) internal pure returns (VoteBuilder.Item memory) {
-        bytes memory permissions = abi.encodePacked(
-            VoteBuilder.permission(registry, IRecipientsRegistry.updateSpentAmount.selector),
-            VoteBuilder.permission(Mainnet.FINANCE, IFinance.newImmediatePayment.selector)
-        );
-        return VoteBuilder.Item(Mainnet.EASY_TRACK, abi.encodeCall(IEasyTrack.addEVMScriptFactory, (factory, permissions)), label);
-    }
-
-    // ---------------------------------------------------------------------
-    // A top-up motion
-    // ---------------------------------------------------------------------
-
-    /// @dev The committee's Safe creates the motion, and anyone enacts it after the objection window.
-    function _topUp(address factory, bytes memory cd) internal returns (uint256 gasUsed) {
-        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
-        vm.prank(Mainnet.COMMITTEE_SAFE);
-        uint256 id = et.createMotion(factory, cd);
-        vm.warp(block.timestamp + et.motionDuration() + 1);
-        vm.prank(anyone);
-        uint256 g = gasleft();
-        et.enactMotion(id, cd);
-        gasUsed = g - gasleft();
-        assertLt(gasUsed, TX_GAS_CAP, "under EIP-7825's cap");
+    /// @dev Payments to the Asset Safe that sum to `total`, each at most the executor's ceiling on one payment.
+    function _payments(uint256 total) internal view returns (address[] memory to, uint256[] memory amounts) {
+        uint256 n = (total + STETH_PER_PAYMENT - 1) / STETH_PER_PAYMENT;
+        to = new address[](n);
+        amounts = new uint256[](n);
+        for (uint256 i = 0; i < n; i++) {
+            to[i] = address(asset);
+            amounts[i] = total > STETH_PER_PAYMENT ? STETH_PER_PAYMENT : total;
+            total -= amounts[i];
+        }
     }
 
     function _stethCall(address[] memory to, uint256[] memory amounts) internal pure returns (bytes memory) {

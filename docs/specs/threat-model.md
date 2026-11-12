@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T18:10:17Z
+  at: 2026-11-12T23:13:05Z
 verified: []
 sources:
   - id: s1
@@ -46,7 +46,7 @@ Each row names a failure, what triggers it, what limits it and what detects it. 
 | Budget drains too fast | A motion sets a very short refill period | `GreaterThan` floor of 30 days on `period` | Budget monitoring |
 | Budget reset by repeated motions | Budget motions, each of which resets a balance | The policy version, so two open budget motions cannot both enact; the event rule; the objection window | Every budget motion, whose forum post must name its event; an alert on a budget set to more than twice its last value |
 | Budget raised without a bound | A captured committee sets a large budget, or a budget for a new spender | The objection window; the 30-day floor of the refill period; the emergency Safe's revoke (OD-134) | An alert on a budget set to more than twice its last value, and on every new budget key |
-| Tranche above the headroom | A tranche vote would take the funded value above the mandate size, or the vault above the treasury share | Each tranche is an Aragon vote of about five days; its forum post states the funded value, the headroom and the treasury share; the second tranche waits for the screening guard; the emergency Safe or the committee's Safe can return funds to the Agent | An alert on a tranche vote whose execution would take the vault above the size or the share, while the vote is open; the fortnightly readings |
+| Funding above the headroom, or above the launch cap | A top-up motion or a tranche vote would take the funded value above the mandate size, the vault above the treasury share, or, before the screening guard is set, the vault above the launch cap. A captured committee can pull a registry's limit in each period | A top-up motion waits 72 hours for an objection, and a registry's limit for three months bounds it; a tranche is an Aragon vote of about five days; each forum post states the funded value, the headroom and the treasury share; the committee creates no top-up above the launch cap before the guard is set, and nothing on chain holds that rule (OD-145); only Aragon Voting changes a limit; the emergency Safe or the committee's Safe can return funds to the Agent | An alert on a top-up motion or a tranche vote whose enactment would take the vault above the size, the share or the launch cap, while it is open; the fortnightly readings |
 | Funds returned to the Agent without need | A compromised or mistaken committee sends vault tokens to the Agent | Only the Agent can receive them, so the vault loses liveness, not funds; a tranche vote funds it again (OD-108) | Alert on every transfer to the Agent |
 | Spender pulls without a deposit | A protocol spender is upgraded to steal, or an approval stands too long | Each approval spends its key's budget, so approvals per period cannot exceed it; approvals in the same transaction as the deposit; the emergency role zeroes approvals and can revoke the approve permission | Approval inventory and budget burn monitoring |
 | Exit impossible when it matters | Protocol illiquidity or asynchronous settlement | Receipt-token transfer to the Agent; claim later. A position that a motion onboarded gets its emergency exit from that motion (OD-49) | Position inventory monitoring |

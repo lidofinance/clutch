@@ -48,8 +48,8 @@
 
 - name: Aragon Finance
   column: reused
-  what: "The DAO's payment app. Aragon Voting pays each tranche through it, with its own payment permission."
-  why: "Funding is rare, so a vote that pays through Finance is enough. Clutch adds no funding contract, and changes no permission and no token list."
+  what: "The DAO's payment app. Easy Track's executor pays each top-up through it, and Aragon Voting each tranche, each with its own payment permission."
+  why: "Both funding paths exist already. Clutch changes no payment permission and no token list."
   owner: "Aragon Voting"
   sources: ["ADR-014#d1", "ADR-014#d3", "ADR-014#context", "ADR-014#consequences", "INV-037",
     "doc:docs/research/easy-track-first-2026-11-05.md#finance-payments-by-aragon-voting"]
@@ -173,7 +173,7 @@
 - name: The report generator
   column: new
   what: "A program in the repository that builds each report from the chain at a pinned block."
-  why: "Anyone can re-run a report and get the same numbers. Reports are the evidence for caps and tranche votes."
+  why: "Anyone can re-run a report and get the same numbers. Reports are the evidence for caps, top-up motions and tranche votes."
   owner: "`@lidofinance/defi-tech`; the committee publishes"
   sources: ["ADR-009#d19", "ADR-014#proposed-direction"]
 
