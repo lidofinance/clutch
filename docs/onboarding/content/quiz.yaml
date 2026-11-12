@@ -63,9 +63,8 @@
     - "The Zodiac Roles mastercopy"
     - "The CoW order signer"
   answer: 1
-  why: "The universal Easy Track factory, with the thin companion contracts that it creates, is the only new code, and Lido writes it. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so the external audit covers it as new code, with the factory."
-  sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-007#proposed-direction", "ADR-007#d40",
-    "ADR-013#d17"]
+  why: "The universal Easy Track factory is the only new code, and Lido writes it. Safe, the Roles mastercopy and the CoW order signer are deployed code that Clutch reuses. The order signer has no known audit, so the external audit covers it as new code, with the factory."
+  sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-007#proposed-direction", "ADR-007#d40"]
 
 - id: limit-order-loss
   question: "The operator places a limit order far below the market price. What limits the loss?"

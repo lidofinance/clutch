@@ -73,8 +73,8 @@ export const noneOf =
   });
 
 /**
- * A budget key that the universal factory derives for a new spender: "k:",
- * then the spender, then the token's first ten bytes (ADR 013, decision 9).
+ * A budget key in the derived form, which a motion sets for a new spender:
+ * "k:", then the spender, then the token's first ten bytes (ADR 013, decision 9).
  * Bitmask checks the first two bytes. The roles SDK has no helper for
  * Bitmask, so this writes the raw condition: two bytes of shift, fifteen of
  * mask and fifteen of expected value.
@@ -84,6 +84,19 @@ export const derivedKey = () => ({
   operator: Operator.Bitmask,
   compValue: ("0x" + "0000" + "ffff" + "00".repeat(13) + "6b3a" + "00".repeat(13)) as `0x${string}`,
 });
+
+/**
+ * The derived budget key of `spender` and `token`: "k:", then the spender, then the token's first ten bytes
+ * (ADR 013, decision 9). A permission that names it spends the key that a budget motion
+ * for that token and spender sets.
+ */
+export function derivedKeyOf(token: string, spender: string): `0x${string}` {
+  const hex = (address: string) => {
+    if (!/^0x[0-9a-fA-F]{40}$/.test(address)) throw new Error(`not an address: ${address}`);
+    return address.slice(2).toLowerCase();
+  };
+  return `0x6b3a${hex(spender)}${hex(token).slice(0, 20)}`;
+}
 
 /** A role or allowance key, encoded as the Zodiac app encodes it: the label as bytes32. */
 export function key(label: string): `0x${string}` {

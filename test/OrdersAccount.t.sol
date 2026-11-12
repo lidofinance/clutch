@@ -8,7 +8,6 @@ import {Mainnet} from "./rehearsal/Mainnet.sol";
 import {EnabledVault} from "./rehearsal/EnabledVault.sol";
 import {VoteBuilder} from "./rehearsal/VoteBuilder.sol";
 import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
-import {OrdersShape} from "../src/factory/OrdersShape.sol";
 
 /// @dev CoW Protocol's `GPv2Order.Data`.
 struct Order {
@@ -374,71 +373,26 @@ contract OrdersAccountRehearsal is EnabledVault {
     // The universal factory's orders token (ADR 007, decisions 41, 44 and 45; ADR 013)
     // ---------------------------------------------------------------------
 
-    /// @dev The factory's shape writes each order tree in the compiler's form: for the launch lists, byte for byte
-    ///      the artifact's trees; with a new token, the artifact's trees with one leaf in each list's sorted place.
-    ///      The listing's own writes carry exactly these trees, for the right role, target, function and options.
-    function test_factory_orders_trees_match_the_compiler() public {
-        Trees memory t = _trees();
-        OrdersShape shape = uf.ordersShape();
-        address[] memory operatorTokens = launchOrderTokens();
-        address[] memory recoveryTokens = launchRecoveryTokens();
-        address[] memory buy = new address[](2);
-        (buy[0], buy[1]) = (Mainnet.USDC, Mainnet.USDT);
-        assertEq(abi.encode(shape.signTree(operatorTokens, operatorTokens, address(asset), LIFE)), abi.encode(t.sign), "signer orders");
-        assertEq(abi.encode(shape.twapTree(operatorTokens, operatorTokens, address(asset))), abi.encode(t.twap), "TWAP orders");
-        assertEq(abi.encode(shape.signTree(recoveryTokens, buy, Mainnet.AGENT, RECOVERY_LIFE)), abi.encode(t.recovery), "recovery orders");
-
-        address token = Mainnet.WBTC;
-        address[] memory operatorNext = _listWith(operatorTokens, token);
-        address[] memory recoveryNext = _listWith(recoveryTokens, token);
-        IRoles.ConditionFlat[] memory sign = _withToken(_withToken(t.sign, _child(t.sign, _child(t.sign, 0, 0), 0), token), 5, token);
-        assertEq(abi.encode(shape.signTree(operatorNext, operatorNext, address(asset), LIFE)), abi.encode(sign), "signer orders, new token");
-        IRoles.ConditionFlat[] memory twap = t.twap;
-        for (uint256 shapeIndex = 0; shapeIndex < 2; shapeIndex++) {
-            for (uint256 side = 0; side < 2; side++) {
-                twap = _withToken(twap, _child(twap, _nth(twap, T_ABI_ENCODED, OP_MATCHES, shapeIndex), side), token);
-            }
-        }
-        assertEq(abi.encode(shape.twapTree(operatorNext, operatorNext, address(asset))), abi.encode(twap), "TWAP orders, new token");
-        IRoles.ConditionFlat[] memory recovery = _withToken(t.recovery, _child(t.recovery, _child(t.recovery, 0, 0), 0), token);
-        assertEq(abi.encode(shape.signTree(recoveryNext, buy, Mainnet.AGENT, RECOVERY_LIFE)), abi.encode(recovery), "recovery orders, new token");
-
-        (address[] memory to, bytes[] memory calls) = shape.listWrites(
-            OrdersShape.Context(address(asset), Mainnet.AGENT, address(orders), address(ordersMod), address(safetyMod)),
-            operatorNext,
-            recoveryNext
-        );
-        assertEq(to.length, 3, "three writes");
-        _assertWrite(to[0], calls[0], OPERATOR, Mainnet.ORDER_SIGNER, SIGN_ORDER, OPTION_DELEGATECALL, sign);
-        _assertWrite(to[1], calls[1], OPERATOR, Mainnet.COMPOSABLE_COW, CREATE_WITH_CONTEXT, 0, twap);
-        _assertWrite(to[2], calls[2], EMERGENCY, Mainnet.ORDER_SIGNER, SIGN_ORDER, OPTION_DELEGATECALL, recovery);
-
-        // the motion's writes: the token's own ten, the operator's funding transfer with its target, then the trees
-        (address[] memory motionTo, bytes[] memory motionData) = uf.writesOf(_calldata(_one(_ordersTokenOp(token, 10e8, 0))));
-        assertEq(motionTo.length, 15, "fifteen writes");
-        for (uint256 i = 0; i < 3; i++) {
-            assertEq(motionTo[12 + i], to[i], "the listing's writes come last");
-            assertEq(motionData[12 + i], calls[i], "the listing's writes come last");
-        }
-    }
-
-    /// @dev Decisions 41, 44 and 45 by one motion, through the live Easy Track: the token's relayer approval, its
-    ///      exits, its funding budget and its place in the lists. The enactment fits one transaction under
-    ///      EIP-7825's cap, with cold accounts. After it, the operator funds the orders account within the token's
-    ///      budget and no further, returns the token to the Agent, an operator order in the token settles and pays the Asset Safe, a TWAP order in
-    ///      it is created, and a recovery order sells it and pays the Agent.
+    /// @dev One motion adds a token to the orders account (ADR 007, decisions 41, 44 and 45): its place in the
+    ///      lists, its relayer approval, its exits, the operator's transfer into the orders account under a budget
+    ///      key with its return to the Agent, and that budget. The enactment fits one transaction under EIP-7825's
+    ///      cap, with cold accounts. After it, the operator funds the orders account within the token's budget and
+    ///      no further, returns the token to the Agent, an operator order in the token settles and pays the Asset
+    ///      Safe, a TWAP order in it is created, and a recovery order sells it and pays the Agent.
     function test_factory_orders_token_motion() public enabled {
         address token = Mainnet.WBTC;
-        UniversalFactory.Op[] memory ops = new UniversalFactory.Op[](2);
-        ops[0] = _ordersTokenOp(token, 10e8, 0);
-        ops[1] = _budgetOp(token, address(orders), 1e8, bytes32(0));
-        console2.log("FACTORY orders token: enactMotion gas under the cap", _motionUnderCap(ops));
+        UniversalFactory.Write[] memory onOrders = _tokenWrites(_trees(), token);
+        UniversalFactory.Write[] memory ws = new UniversalFactory.Write[](onOrders.length + 3);
+        for (uint256 i = 0; i < onOrders.length; i++) ws[i] = onOrders[i];
+        // the Asset Safe: the operator's transfer of the token, in the launch tokens' form, under a new key
+        bytes32 key = _key(token, address(orders));
+        IRoles.ConditionFlat[] memory transfer = _withKey(_tree(opMod, OPERATOR, Mainnet.USDC, TRANSFER), key);
+        ws[onOrders.length] = _govern(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, token)));
+        ws[onOrders.length + 1] = _govern(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, token, TRANSFER, transfer, 0)));
+        ws[onOrders.length + 2] = _budgetKey(key, 1e8);
+        uint256 gasUsed = _motion(ws);
+        console2.log("FACTORY orders token: writes, enactMotion gas", ws.length, gasUsed);
         assertEq(IERC20(token).allowance(address(orders), Mainnet.COW_VAULT_RELAYER), type(uint256).max, "the relayer approval");
-        assertEq(
-            uf.versions(uf.ORDERS_SCOPE()),
-            uf.ordersVersion(_listWith(launchOrderTokens(), token), _listWith(launchRecoveryTokens(), token)),
-            "the lists' version"
-        );
 
         // the operator funds the orders account within the token's budget, and no further
         deal(token, address(asset), 4e8);
@@ -471,80 +425,6 @@ contract OrdersAccountRehearsal is EnabledVault {
         assertEq(IERC20(Mainnet.USDC).balanceOf(Mainnet.AGENT) - agentBefore, 59_000e6, "the recovery order pays the Agent");
     }
 
-    /// @dev The operation's checks, each refused when the motion is created: a token that either list holds, such
-    ///      as a launch token; a vault account; two tokens in one motion; ceilings for a token that is already
-    ///      introduced; and lists that are not the current ones. A token that a motion introduced earlier is added
-    ///      with no ceilings, and keeps them.
-    function test_factory_orders_token_refusals() public enabled {
-        _refusedAtCreation(_one(_ordersTokenOp(Mainnet.USDC, 0, 0)), abi.encodeWithSelector(UniversalFactory.AlreadyListed.selector, Mainnet.USDC));
-        _refusedAtCreation(_one(_ordersTokenOp(Mainnet.DAI, 0, 0)), abi.encodeWithSelector(UniversalFactory.AlreadyListed.selector, Mainnet.DAI));
-        address[3] memory vault = [address(orders), address(asset), Mainnet.AGENT];
-        for (uint256 i = 0; i < vault.length; i++) {
-            _refusedAtCreation(_one(_ordersTokenOp(vault[i], 1, 0)), abi.encodeWithSelector(UniversalFactory.ProtectedAddress.selector, vault[i]));
-        }
-        address token = Mainnet.WBTC;
-        UniversalFactory.Op[] memory two = new UniversalFactory.Op[](2);
-        two[0] = _ordersTokenOp(token, 10e8, 0);
-        two[1] = _ordersTokenOp(Mainnet.LINK, 1e24, 0);
-        _refusedAtCreation(two, abi.encodeWithSelector(UniversalFactory.DuplicateScope.selector, uf.ORDERS_SCOPE()));
-        address[] memory shortList = new address[](5);
-        for (uint256 i = 0; i < 5; i++) shortList[i] = launchOrderTokens()[i];
-        _refusedAtCreation(
-            _one(_ordersTokenOp(token, 10e8, 0, shortList, launchRecoveryTokens())),
-            abi.encodeWithSelector(UniversalFactory.StaleVersion.selector, uf.ORDERS_SCOPE())
-        );
-
-        // a token that an earlier motion introduced, with an approval list, is added without ceilings
-        UniversalFactory.Entry[] memory list = new UniversalFactory.Entry[](1);
-        list[0] = UniversalFactory.Entry(makeAddr("a-spender"), bytes32(0), 1e8);
-        _motion(_one(_introduceOp(token, list, 5e8, 1e8)));
-        _refusedAtCreation(
-            _one(_ordersTokenOp(token, 1, 0)), abi.encodeWithSelector(UniversalFactory.CeilingsForIntroducedToken.selector, token)
-        );
-        UniversalFactory.Op[] memory ops = new UniversalFactory.Op[](2);
-        ops[0] = _ordersTokenOp(token, 0, 0);
-        ops[1] = _budgetOp(token, address(orders), 1e8, bytes32(0));
-        _motion(ops);
-        (uint256 budgetCeiling,,) = uf.ceilings(uf.ceilingKey(uf.BUDGET_CEILING(), token));
-        assertEq(budgetCeiling, 5e8, "the introduction's budget ceiling stays");
-        deal(token, address(asset), 1e8);
-        _operator(token, abi.encodeCall(IERC20.transfer, (address(orders), 1e8)), true);
-
-        // the launch lists are no longer the current ones
-        _refusedAtCreation(
-            _one(_ordersTokenOp(Mainnet.LINK, 1e24, 0)), abi.encodeWithSelector(UniversalFactory.StaleVersion.selector, uf.ORDERS_SCOPE())
-        );
-    }
-
-    /// @dev Versions keep two token motions apart: two motions created against the same lists both pass at
-    ///      creation, and the second fails at enactment once the first changed the lists. A motion against the
-    ///      new lists then adds the second token.
-    function test_factory_orders_tokens_one_after_another() public enabled {
-        address first = Mainnet.WBTC;
-        address second = Mainnet.LINK;
-        bytes memory cd1 = _calldata(_one(_ordersTokenOp(first, 10e8, 0)));
-        bytes memory cd2 = _calldata(_one(_ordersTokenOp(second, 1e24, 0)));
-        uint256 id1 = _create(cd1);
-        uint256 id2 = _create(cd2);
-        _afterWindow();
-        _enact(id1, cd1);
-        vm.prank(anyone);
-        (bool ok,) = Mainnet.EASY_TRACK.call(abi.encodeCall(IEasyTrackMotions.enactMotion, (id2, cd2)));
-        assertFalse(ok, "a motion against the old lists fails at enactment");
-
-        address[] memory operatorNext = _listWith(launchOrderTokens(), first);
-        address[] memory recoveryNext = _listWith(launchRecoveryTokens(), first);
-        _motion(_one(_ordersTokenOp(second, 1e24, 0, operatorNext, recoveryNext)));
-        assertEq(
-            uf.versions(uf.ORDERS_SCOPE()),
-            uf.ordersVersion(_listWith(operatorNext, second), _listWith(recoveryNext, second)),
-            "both tokens are listed"
-        );
-        _ordersOk(
-            Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.ORDER_SIGNER, _sign(_order(first, second, address(asset), 1, 1, _in(1 hours)), LIFE, 0), DELEGATECALL
-        );
-    }
-
     /// @dev After the emergency role stops the operator on the orders account and zeroes a relayer approval, one motion
     ///      gives both back: an order then settles, a signer order is cancelled, a TWAP order is created, the operator
     ///      returns a token, and the relayer's approval is the maximum again.
@@ -570,12 +450,21 @@ contract OrdersAccountRehearsal is EnabledVault {
         _refused(OPERATOR, signer, _sign(o, LIFE, 0), DELEGATECALL);
         assertEq(IERC20(Mainnet.USDC).allowance(address(orders), Mainnet.COW_VAULT_RELAYER), 0, "the emergency role zeroed it");
 
-        address[] memory approvals = new address[](1);
-        approvals[0] = Mainnet.USDC;
-        console2.log(
-            "FACTORY orders restore: enactMotion gas under the cap",
-            _motionUnderCap(_one(_ordersRestoreOp(launchOrderTokens(), launchRecoveryTokens(), approvals)))
-        );
+        // one motion writes again what the emergency role revoked, and raises the relayer approval again
+        Trees memory t = _trees();
+        address cow = Mainnet.COMPOSABLE_COW;
+        UniversalFactory.Write[] memory ws = new UniversalFactory.Write[](9);
+        ws[0] = _ordersGovern(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, signer)));
+        ws[1] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, signer, SIGN_ORDER, t.sign, OPTION_DELEGATECALL)));
+        ws[2] = _ordersGovern(abi.encodeCall(IRoles.allowFunction, (OPERATOR, signer, UNSIGN_ORDER, OPTION_DELEGATECALL)));
+        ws[3] = _ordersGovern(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, cow)));
+        ws[4] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, cow, CREATE_WITH_CONTEXT, t.twap, 0)));
+        ws[5] = _ordersGovern(abi.encodeCall(IRoles.allowFunction, (OPERATOR, cow, REMOVE, 0)));
+        ws[6] = _ordersGovern(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, Mainnet.USDC)));
+        ws[7] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.USDC, TRANSFER, t.transfer, 0)));
+        ws[8] = _w(ordersMod, APPROVALS, Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.COW_VAULT_RELAYER, type(uint256).max)));
+        uint256 gasUsed = _motion(ws);
+        console2.log("FACTORY orders restore: writes, enactMotion gas", ws.length, gasUsed);
         assertEq(IERC20(Mainnet.USDC).allowance(address(orders), Mainnet.COW_VAULT_RELAYER), type(uint256).max, "the approval is back");
 
         o = _order(Mainnet.USDC, Mainnet.USDT, address(asset), 1_000e6, 999e6, _in(1 hours));
@@ -594,43 +483,13 @@ contract OrdersAccountRehearsal is EnabledVault {
         _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(asset), 1_000e6)), CALL);
     }
 
-    /// @dev The restore's checks, each refused when the motion is created: lists that are not the current ones, an
-    ///      approval for a token that recovery does not sell, approvals out of order, and a restore in the motion that
-    ///      adds a token.
-    function test_factory_orders_restore_refusals() public enabled {
-        address[] memory operatorTokens = launchOrderTokens();
-        address[] memory recoveryTokens = launchRecoveryTokens();
-        address[] memory none = new address[](0);
-        address[] memory shortList = new address[](5);
-        for (uint256 i = 0; i < 5; i++) shortList[i] = operatorTokens[i];
-        _refusedAtCreation(
-            _one(_ordersRestoreOp(shortList, recoveryTokens, none)),
-            abi.encodeWithSelector(UniversalFactory.StaleVersion.selector, uf.ORDERS_SCOPE())
-        );
-        address[] memory wbtc = new address[](1);
-        wbtc[0] = Mainnet.WBTC;
-        _refusedAtCreation(
-            _one(_ordersRestoreOp(operatorTokens, recoveryTokens, wbtc)),
-            abi.encodeWithSelector(UniversalFactory.NotListed.selector, Mainnet.WBTC)
-        );
-        address[] memory unsorted = new address[](2);
-        (unsorted[0], unsorted[1]) = (Mainnet.USDT, Mainnet.USDC);
-        _refusedAtCreation(
-            _one(_ordersRestoreOp(operatorTokens, recoveryTokens, unsorted)), abi.encodeWithSelector(UniversalFactory.NotCanonical.selector)
-        );
-        UniversalFactory.Op[] memory both = new UniversalFactory.Op[](2);
-        both[0] = _ordersTokenOp(Mainnet.WBTC, 10e8, 0);
-        both[1] = _ordersRestoreOp(operatorTokens, recoveryTokens, none);
-        _refusedAtCreation(both, abi.encodeWithSelector(UniversalFactory.DuplicateScope.selector, uf.ORDERS_SCOPE()));
-    }
-
-    /// @dev A budget motion for a launch order token now sets the token's launch orders budget, which the
-    ///      operator's funding transfer spends; before, the factory derived a key that no permission spends.
+    /// @dev A budget motion sets a launch key of the orders budgets: the operator then funds the orders account
+    ///      within the new budget.
     function test_factory_budget_motion_sets_a_launch_orders_budget() public enabled {
-        assertEq(uf.keyFor(Mainnet.USDC, address(orders)), bytes32("orders_usdc"), "the launch key");
-        _motion(_one(_budgetOp(Mainnet.USDC, address(orders), 20_000e6, uf.budgetVersion(ORDERS_USD6, ORDERS_USD6, ORDERS_USD6, MONTH))));
+        _motion(_one(_budgetKey(bytes32("orders_usdc"), 20_000e6)));
         deal(Mainnet.USDC, address(asset), 20_000e6);
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 15_000e6)), true);
+        _operatorRefused(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 5_000e6 + 1)));
     }
 
     // ---------------------------------------------------------------------
@@ -687,7 +546,7 @@ contract OrdersAccountRehearsal is EnabledVault {
         deal(Mainnet.USDC, address(asset), 60_000e6);
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 10_000e6)), true);
         _operatorRefused(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 1)));
-        bytes32 key = uf.keyFor(Mainnet.USDC, address(orders));
+        bytes32 key = bytes32("orders_usdc");
         (,,, uint128 spent,) = opMod.allowances(key);
         assertEq(spent, 0, "the orders budget is spent");
 
@@ -809,7 +668,7 @@ contract OrdersAccountRehearsal is EnabledVault {
         _governOk(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, token, TRANSFER, t.sweep, 0)));
         _governOk(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, token, APPROVE, t.zero, 0)));
 
-        // another receiver, or a function outside the shapes
+        // another receiver, or a function outside the policy
         IRoles.ConditionFlat[] memory anyone = new IRoles.ConditionFlat[](2);
         anyone[0] = t.relayer[0];
         anyone[1] = IRoles.ConditionFlat(0, T_STATIC, OP_EQUAL_TO, abi.encode(stranger));
@@ -1023,64 +882,6 @@ contract OrdersAccountRehearsal is EnabledVault {
         _refused(GOVERNANCE, address(ordersMod), write, CALL);
     }
 
-    /// @dev The universal factory's orders restore, against the lists that the motion states.
-    function _ordersRestoreOp(address[] memory operatorTokens, address[] memory recoveryTokens, address[] memory approvalTokens)
-        internal
-        view
-        returns (UniversalFactory.Op memory)
-    {
-        return _op(uf.ORDERS_RESTORE(), abi.encode(operatorTokens, recoveryTokens, approvalTokens));
-    }
-
-    /// @dev The universal factory's orders operation against the launch lists.
-    function _ordersTokenOp(address token, uint256 budgetCeiling, uint256 approvalCeiling)
-        internal
-        view
-        returns (UniversalFactory.Op memory)
-    {
-        return _ordersTokenOp(token, budgetCeiling, approvalCeiling, launchOrderTokens(), launchRecoveryTokens());
-    }
-
-    /// @dev The universal factory's orders operation against the lists that the motion states.
-    function _ordersTokenOp(
-        address token,
-        uint256 budgetCeiling,
-        uint256 approvalCeiling,
-        address[] memory operatorTokens,
-        address[] memory recoveryTokens
-    ) internal view returns (UniversalFactory.Op memory) {
-        return _op(uf.ORDERS_TOKEN(), abi.encode(token, budgetCeiling, approvalCeiling, operatorTokens, recoveryTokens));
-    }
-
-    /// @dev A motion that the factory refuses at creation, with `reason`.
-    function _refusedAtCreation(UniversalFactory.Op[] memory ops, bytes memory reason) internal {
-        bytes memory cd = _calldata(ops);
-        vm.prank(Mainnet.COMMITTEE_SAFE);
-        vm.expectRevert(reason);
-        IEasyTrackMotions(Mainnet.EASY_TRACK).createMotion(address(uf), cd);
-    }
-
-    /// @dev Creates a motion, waits out its objection window and enacts it in one transaction under EIP-7825's cap,
-    ///      with the accounts that it touches cold, as a fresh transaction finds them. Returns the gas, intrinsic
-    ///      gas included.
-    function _motionUnderCap(UniversalFactory.Op[] memory ops) internal returns (uint256 used) {
-        bytes memory cd = _calldata(ops);
-        uint256 id = _create(cd);
-        _afterWindow();
-        bytes memory txData = abi.encodeCall(IEasyTrackMotions.enactMotion, (id, cd));
-        (uint256 std, uint256 floor) = VoteBuilder.intrinsicGas(txData);
-        uint256 intrinsic = std > floor ? std : floor;
-        address[] memory touched = new address[](8);
-        (touched[0], touched[1], touched[2], touched[3]) = (Mainnet.EASY_TRACK, address(uf), address(uf.ordersShape()), Mainnet.ET_EXECUTOR);
-        (touched[4], touched[5], touched[6], touched[7]) = (address(opMod), address(safetyMod), address(ordersMod), address(orders));
-        _cold(touched);
-        vm.prank(anyone);
-        uint256 g = gasleft();
-        (bool ok,) = Mainnet.EASY_TRACK.call{gas: TX_GAS_CAP - intrinsic}(txData);
-        used = g - gasleft() + std;
-        assertTrue(ok, "the motion must enact in one transaction under EIP-7825's cap");
-    }
-
     /// @dev A write of the orders modifier's governance role: the call, the role, the target, the function, the
     ///      execution options and the whole tree.
     function _assertWrite(
@@ -1125,41 +926,74 @@ contract OrdersAccountRehearsal is EnabledVault {
         _ordersOk(address(uf), APPROVALS, token, abi.encodeCall(IERC20.approve, (Mainnet.COW_VAULT_RELAYER, amount)), CALL);
     }
 
-    /// @dev The writes of a motion that adds `token` (decision 41), each through the governance role, then the
-    ///      approvals role's approval. Each list gains the token where the SDK sorts it, so every tree stays in the
-    ///      compiler's form; the compiler's tests check that rule against the SDK.
-    function _addToken(Trees memory t, address token) internal {
+    /// @dev A write of the governance role on the orders modifier: a call of the modifier on itself.
+    function _ordersGovern(bytes memory write) internal view returns (UniversalFactory.Write memory) {
+        return _w(ordersMod, GOVERNANCE, address(ordersMod), write);
+    }
+
+    /// @dev The writes of a motion that adds `token` on the orders account and its exit on the Asset Safe (decisions
+    ///      41 and 45): through the orders modifier's governance and approvals roles, and the exit-governance role.
+    ///      Each list gains the token where the SDK sorts it, so every tree stays in the compiler's form; the
+    ///      compiler's tests check that rule against the SDK.
+    function _tokenWrites(Trees memory t, address token) internal view returns (UniversalFactory.Write[] memory ws) {
         address signer = Mainnet.ORDER_SIGNER;
         address cow = Mainnet.COMPOSABLE_COW;
+        ws = new UniversalFactory.Write[](13);
         // the operator's lists: the sell side and the buy side of signer orders and of both TWAP shapes
         IRoles.ConditionFlat[] memory sign = t.sign;
         sign = _withToken(sign, _child(sign, _child(sign, 0, 0), 0), token);
         sign = _withToken(sign, _child(sign, _child(sign, 0, 0), 1), token);
-        _governOk(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, signer, SIGN_ORDER, sign, OPTION_DELEGATECALL)));
+        ws[0] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, signer, SIGN_ORDER, sign, OPTION_DELEGATECALL)));
         IRoles.ConditionFlat[] memory twap = t.twap;
         for (uint256 shape = 0; shape < 2; shape++) {
             for (uint256 side = 0; side < 2; side++) {
                 twap = _withToken(twap, _child(twap, _nth(twap, T_ABI_ENCODED, OP_MATCHES, shape), side), token);
             }
         }
-        _governOk(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, cow, CREATE_WITH_CONTEXT, twap, 0)));
-        _governOk(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, token)));
-        _governOk(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, token, TRANSFER, t.transfer, 0)));
+        ws[1] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, cow, CREATE_WITH_CONTEXT, twap, 0)));
+        ws[2] = _ordersGovern(abi.encodeCall(IRoles.scopeTarget, (OPERATOR, token)));
+        ws[3] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, token, TRANSFER, t.transfer, 0)));
         // the recovery orders' sell side
         IRoles.ConditionFlat[] memory recovery = t.recovery;
         recovery = _withToken(recovery, _child(recovery, _child(recovery, 0, 0), 0), token);
-        _governOk(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, signer, SIGN_ORDER, recovery, OPTION_DELEGATECALL)));
+        ws[4] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, signer, SIGN_ORDER, recovery, OPTION_DELEGATECALL)));
         // the emergency role's zeroing and transfer
-        _governOk(abi.encodeCall(IRoles.scopeTarget, (EMERGENCY, token)));
-        _governOk(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, token, APPROVE, t.zero, 0)));
-        _governOk(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, token, TRANSFER, t.sweep, 0)));
+        ws[5] = _ordersGovern(abi.encodeCall(IRoles.scopeTarget, (EMERGENCY, token)));
+        ws[6] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, token, APPROVE, t.zero, 0)));
+        ws[7] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, token, TRANSFER, t.sweep, 0)));
         // the relayer approval
-        _governOk(abi.encodeCall(IRoles.scopeTarget, (APPROVALS, token)));
-        _governOk(abi.encodeCall(IRoles.scopeFunction, (APPROVALS, token, APPROVE, t.relayer, 0)));
-        _approvalsOk(token, type(uint256).max);
+        ws[8] = _ordersGovern(abi.encodeCall(IRoles.scopeTarget, (APPROVALS, token)));
+        ws[9] = _ordersGovern(abi.encodeCall(IRoles.scopeFunction, (APPROVALS, token, APPROVE, t.relayer, 0)));
+        ws[10] = _w(ordersMod, APPROVALS, token, abi.encodeCall(IERC20.approve, (Mainnet.COW_VAULT_RELAYER, type(uint256).max)));
         // the token's exit on the Asset Safe, through the exit-governance role on the safety modifier (decision 45)
-        _exitOk(abi.encodeCall(IRoles.scopeTarget, (EMERGENCY, token)));
-        _exitOk(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, token, TRANSFER, t.assetExit, 0)));
+        ws[11] = _w(safetyMod, EXIT_GOVERNANCE, address(safetyMod), abi.encodeCall(IRoles.scopeTarget, (EMERGENCY, token)));
+        ws[12] = _w(
+            safetyMod, EXIT_GOVERNANCE, address(safetyMod), abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, token, TRANSFER, t.assetExit, 0))
+        );
+    }
+
+    /// @dev The same writes, run by hand as the universal factory, one by one.
+    function _addToken(Trees memory t, address token) internal {
+        UniversalFactory.Write[] memory ws = _tokenWrites(t, token);
+        for (uint256 i = 0; i < ws.length; i++) {
+            vm.prank(address(uf));
+            (bool ok, bytes memory ret) = ws[i].modifier_.call(
+                abi.encodeCall(IRoles.execTransactionWithRole, (ws[i].to, 0, ws[i].data, CALL, ws[i].role, true))
+            );
+            if (!ok) {
+                assembly {
+                    revert(add(ret, 32), mload(ret))
+                }
+            }
+        }
+    }
+
+    /// @dev A copy of a tree with the key of its budget node replaced.
+    function _withKey(IRoles.ConditionFlat[] memory c, bytes32 key) internal pure returns (IRoles.ConditionFlat[] memory r) {
+        r = new IRoles.ConditionFlat[](c.length);
+        for (uint256 i = 0; i < c.length; i++) {
+            r[i] = c[i].operator_ == 28 ? IRoles.ConditionFlat(c[i].parent, c[i].paramType, 28, abi.encode(key)) : c[i];
+        }
     }
 
     /// @dev A write of the exit-governance role on the safety modifier, as the universal factory makes it.

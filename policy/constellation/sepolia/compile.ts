@@ -90,7 +90,7 @@ export function buildNodes(manifest: Record<string, any>) {
   return nodes;
 }
 
-/** The shared compiler names the orders Safe `ordersAccount`; the stand manifest calls it `ordersSafe`. The stand uses account-specific keys (OD-137). */
+/** The shared compiler names the orders Safe `ordersAccount`; the stand manifest calls it `ordersSafe`. The stand uses account-specific keys (OD-141). */
 export function compileStand(nodes: Parameters<typeof compile>[0], m: Record<string, any>, names: Parameters<typeof compile>[2]) {
   return compile(nodes, { ...m, ordersAccount: m.ordersSafe, roleKeyScheme: "account" }, names);
 }

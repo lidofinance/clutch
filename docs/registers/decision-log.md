@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T11:36:20Z
+  at: 2026-11-12T14:08:30Z
 verified: []
 sources:
   - id: s1
@@ -116,8 +116,26 @@ sources:
     resource: "urn:clutch:interview:2026-11-11-next-steps"
     title: EM's instruction to repair the policy workflow, prepare the acceptance ballot and build the first-loss slice, 2026-11-11; the transcript is not in the repository
   - id: s36
+    resource: "urn:clutch:interview:2026-11-12-insurance"
+    title: EM's answers on OD-129 and OD-130, and EM's request to investigate Lido Lend for OD-131, 2026-11-12; the transcript is not in the repository
+  - id: s37
+    resource: "urn:clutch:interview:2026-11-12-lido-lend"
+    title: EM's answers on OD-131 and OD-132, 2026-11-12; the transcript is not in the repository
+  - id: s38
+    resource: "urn:clutch:interview:2026-11-12-lend-exit"
+    title: EM's answer on OD-133, 2026-11-12; the transcript is not in the repository
+  - id: s39
+    resource: "urn:clutch:interview:2026-11-12-raw-factory"
+    title: EM's request for a factory that accepts wider calldata, and EM's choice of raw writes, 2026-11-12; the transcript is not in the repository
+  - id: s40
+    resource: "urn:clutch:interview:2026-11-12-raw-switch"
+    title: EM's answer on OD-135 and EM's request for the switch to raw writes, 2026-11-12; the transcript is not in the repository
+  - id: s41
+    resource: "urn:clutch:interview:2026-11-12-raw-switch-verify"
+    title: EM's instruction to record EM's verification of ADR 003 and ADR 004 after the switch to raw writes, 2026-11-12; the transcript is not in the repository
+  - id: s42
     resource: "urn:clutch:interview:2026-10-22-sepolia-migration"
-    title: EM's choices for OD-134, OD-135 and OD-137, 2026-10-22; the transcript is not in the repository
+    title: EM's choices for OD-138, OD-139 and OD-141, 2026-10-22; the transcript is not in the repository
 ---
 
 # Decision log
@@ -127,6 +145,93 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — ADR 003 and ADR 004 verified after the switch to raw writes
+
+The switch changed one sentence in each of the accepted ADR 003 and ADR 004, which broke EM's verification of both pages. ADR 003 decision 6 no longer lists the factory's shapes. ADR 004 decision 14 names the motions' permission trees in place of the factory's seeded versions. The agent asked EM to verify the two pages again or to drop the edit. EM wrote:
+
+> 1. do ADR 003 and ADR 004 verification with just verify on my behalf
+
+Recorded as:
+
+- EM verifies ADR 003 and ADR 004 again after the edits of the switch, so they stay accepted. At this instruction, the agent `claude-code/mythos-5.2` recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verifications are EM's. [s41]
+
+## 2026-11-12 — OD-135 decided, and the switch to raw writes
+
+The agent asked EM to decide OD-135 and said that the switch to the raw factory was separate work. EM wrote:
+
+> OD-135: A
+>
+> do the switch, check the whole repo for integrity afterwards and update dangling/outdated references
+
+Recorded as:
+
+- (OD-135) The factory keeps one policy version. A motion that writes on one of the four modifiers states it, and fails if another such motion was enacted after its creation. A motion that only acts, such as a burn, a payout or a restart, states the counter alone ([ADR 013](/adr/013-one-easy-track-factory.md), decision 10).
+- The switch is made. The raw factory is the universal factory, and the typed factory, its orders shape and their tests are gone. [ADR 013](/adr/013-one-easy-track-factory.md) decisions 7, 13, 15 and 17 are one line each, and decisions 9, 10, 11, 14, 16 and 18 carry their current text.
+- OD-134 ends the ceilings of OD-105, OD-113 and OD-120 and the companion contract of OD-117. It replaces OD-102 in part: the one factory, its address book and its motion roles stay, and the typed shapes go.
+- Three points are the agent's reading. The key form of OD-102 stays as a rule of the policy: a budget key of a new spender starts with `k:`, and the motion derives it. A write on any of the four modifiers counts as a permission write, also when it goes through another modifier. A motion carries at most 64 writes.
+- EM's request to update outdated references covers two lines of `AGENTS.md` and one comment in `.github/workflows/policy.yml`, which named the companion contracts, the factory's shapes and its seeded versions.
+- The accepted ADR 003 and ADR 004 each name the typed factory once. Their edit is a separate commit, because it needs EM's verification again. [s40]
+
+## 2026-11-12 — OD-134: the factory takes raw writes
+
+The agent explained what an ERC-4626 shape for Lido Lend's lender vault includes. EM wrote:
+
+> let's rebuild the factory to accept wider calldata, this restriction is too rigid (I mean let's have widening permissions through either raw data, or much weaker), what options we have? current factory is super bloated
+
+The agent reported the typed factory's size, gas and complexity, as [ADR 013](/adr/013-one-easy-track-factory.md) decision 11 asks, and set out five options: A, raw writes; B, raw writes with budget ceilings; C, raw writes with the allowed permission forms pinned in the Roles policy; D, templates as data in the factory; E, the typed shapes of today, in companion contracts. EM wrote:
+
+> let's decide over A and B, what are the pros and cons, second order effects, etc.
+
+The agent compared A and B. It recommended A: the ceilings of B do not change the worst case, because a motion can grant a permission that spends no budget. EM wrote:
+
+> let's do A
+
+Recorded as:
+
+- (OD-134) EM takes the fallback of [ADR 013](/adr/013-one-easy-track-factory.md) decision 11. The universal factory applies raw writes that may also widen. It builds no permission and keeps no ceiling. The objection window is the only bound on where funds go, and the guards of each modifier's own policy stay.
+- The agent built a prototype beside the typed factory and measured it ([research note](/research/raw-factory-prototype-2026-11-12.md)). The switch to it is separate work. Until the switch, the other pages still describe the typed factory, its shapes and its ceilings.
+- One point of the prototype is the agent's reading, and OD-135 holds it in the [register](/registers/open-decisions.md): the factory keeps one policy version for every permission write, not one version for each scope, and a motion that only acts is exempt.
+- The switch ends the ceilings of OD-105, OD-113 and OD-120, the typed shapes and the derived keys of OD-102, and the companion contract of OD-117. [s39]
+
+## 2026-11-12 — OD-133 decided: no collateral enters, and no fallback exit
+
+The agent asked whether USDY may enter the Asset Safe through an exit from Lido Lend's stablecoin market. EM wrote:
+
+> OD-133: USDY can't enter, we wont use fallback exit, so assets we expect are lender's ones: WETH and USDC, and probably, but unlikely USDT
+
+Recorded as:
+
+- (OD-133) USDY cannot enter the Asset Safe, and the vault does not use the fallback exit of Lido Lend's lender vault. A position in Lido Lend returns only the asset that it lent: WETH and USDC, and USDT if a market lends it, which EM holds unlikely ([ADR 011](/adr/011-launch-scope.md), decision 13). This is none of the three options that the agent offered, and it amends EM's answer on OD-132, which kept the fallback exit.
+- Three points are the agent's reading. The lender vault stays the surface, through its ERC-4626 functions only. The lender vault's targeted settlement is out too, because it also pays collateral. The rule holds for every market, the WETH market included, so wstETH does not enter through an exit either.
+- One consequence follows: a position in Lido Lend has no exit while its market has no free liquidity. A withdrawal fails then. [s38]
+
+## 2026-11-12 — OD-131 and OD-132 decided: a fund with a payout address, and Lido Lend's lender vault
+
+The agent reported what the Lido Lend repositories show and asked EM to decide OD-131 and OD-132. EM wrote:
+
+> OD-131: A
+> OD-132: A
+
+Recorded as:
+
+- (OD-131) Option A: the universal factory carries the payout form only. A fund has a fixed payout address, which the Lend team names and which is outside Lido Lend's contracts ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 6). The form of burnable shares has no use while Lido Lend has no share token that a holder can burn. The agent built the form, and five points of the build are its reading. One fund exists for each token. The motion that creates a fund pins its payout address and sets its cap, which never refills. A payout is a later motion, never the creating one. The committee's Safe exits a fund by a transfer pinned to the Asset Safe ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 28). No part of the form names Lido Lend, so the tests use a stand-in address.
+- The agent's recommendation for A carried one question to the Lend team: which address receives a payout, and how it pays the lenders. Nobody has asked it. The agent drafted it for EM. The built form pays by a plain token transfer, so the address must accept one.
+- (OD-132) Option A: the vault lends to Lido Lend through its lender vault, an ERC-4626 token, with the fallback exit, and with the receiver and the owner pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md), decisions 3 and 13). The agent has not built that shape. EM's answer names the option, not a market. The agent's recommendation kept the stablecoin market apart, because its exit can pay USDY, which is not on the launch list. OD-133 holds that question in the [register](/registers/open-decisions.md). [s37]
+
+## 2026-11-12 — OD-129 and OD-130 decided, and Lido Lend investigated for OD-131
+
+The agent asked EM to decide the three open decisions on insurance. EM wrote:
+
+> OD-129: put a budget key on that transfer
+> OD-130: one deposit operation from the first-loss Safe
+> OD-131: investigate lido lend: https://github.com/lidofinance/lend, https://github.com/lidofinance/lend-markets (the repos are public now)
+
+Recorded as:
+
+- (OD-129) Option A: the transfer of insurance money from the Asset Safe to the first-loss Safe spends a budget key ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 11). Two points are the agent's reading. The key is the one that the universal factory derives for the token and the first-loss Safe, so the policy holds no launch key and no launch figure for it. The key starts empty, so a budget operation, in the same motion or in an earlier one, sets it within the token's budget ceiling before any insurance money moves.
+- (OD-130) Option A: one operation of the universal factory deposits insurance money from the first-loss Safe into Lido Earn ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 12). Four points are the agent's reading. The factory holds a new `insurance` role on the first-loss modifier. The role approves only each token's own deposit queue, USDC for earnUSD and wstETH for earnETH, and it deposits with no referral. The new shares stay in the first-loss Safe and follow the first-loss rules. No role claims the shares or cancels a request: anyone can call the queue's claim for the first-loss Safe.
+- (OD-131) EM asked for an investigation of Lido Lend and decided nothing. The agent read both repositories ([research note](/research/lido-lend-insurance-2026-11-12.md)). Neither form of a Lido Lend fund has an entry point in Lido Lend today: the core has no share token, the lender vault has no burn that a holder can call, and no function pays lenders back. The agent rewrote OD-131 with the options that remain, and it opened OD-132 for a second finding: which of Lido Lend's two lender surfaces the vault uses. [s36]
 
 ## 2026-11-11 — the first-loss slice: the operator's return, the first-loss policy and the burn
 
@@ -409,21 +514,21 @@ Recorded as:
 - (OD-100) No Merkle-root policy. Easy Track motions carry versions, so that concurrent motions cannot overwrite each other ([ADR 013](/adr/013-one-easy-track-factory.md), decisions 1 and 2).
 - EM's aim that almost everything runs through Easy Track, without DAO votes, led to OD-101 (the entry of 2026-11-05 above). [s21]
 
-## 2026-10-22 — OD-134, OD-135 and OD-137: the Sepolia role-key migration
+## 2026-10-22 — OD-138, OD-139 and OD-141: the Sepolia role-key migration
 
-EM answered [s36]:
+EM answered [s42]:
 
 > OD-100 B, OD-97 C, OD-98 A. Сделай GPG-коммит и пуш, потом дай команды для публикации и запуска миграции.
 
-EM's answer uses the numbers that `testnet/sepolia` gave these decisions before it merged `main`: OD-97, OD-98 and OD-100 are now OD-134, OD-135 and OD-137.
+EM's answer uses the numbers that `testnet/sepolia` gave these decisions before it merged `main`: OD-97, OD-98 and OD-100 are now OD-138, OD-139 and OD-141.
 
 Recorded as:
 
-- OD-137 B: use `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency` on both networks. Migrate only the existing Sepolia stand after package review and fork tests. Complete the mainnet design updates before its initial deployment. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
-- OD-134 C: the stand owner executes a locally compiled package through test Voting under the package review conditions in [ADR 015](/adr/015-tests-on-sepolia.md#decision).
-- OD-135 A: the stand owner may send public transactions on the existing Sepolia stand through `sepolia.just` and its guards, with the keystore. A second stand needs a new decision. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
+- OD-141 B: use `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency` on both networks. Migrate only the existing Sepolia stand after package review and fork tests. Complete the mainnet design updates before its initial deployment. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
+- OD-138 C: the stand owner executes a locally compiled package through test Voting under the package review conditions in [ADR 015](/adr/015-tests-on-sepolia.md#decision).
+- OD-139 A: the stand owner may send public transactions on the existing Sepolia stand through `sepolia.just` and its guards, with the keystore. A second stand needs a new decision. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
 
-The choices do not close OD-132, OD-133 or OD-136 and do not record verification of the whole ADR. The owner reviews and authorises the exact calls before signing [s36].
+The choices do not close OD-136, OD-137 or OD-140 and do not record verification of the whole ADR. The owner reviews and authorises the exact calls before signing [s36].
 
 ## 2026-10-22 — ADR 001, ADR 003 and ADR 004 verified again
 

@@ -33,7 +33,7 @@ test("first-loss holder cannot burn, approve or transfer shares", () => {
   expect(firstLoss.roles.find((r) => r.name === "first-loss-burn")!.members.map((m: { address: string }) => m.address)).toEqual([manifest.easyTrackExecutor]);
 });
 
-test("OD-137: each account has its own operator and emergency keys", () => {
+test("OD-141: each account has its own operator and emergency keys", () => {
   expect(artifact.modifiers.map((m) => m.roles.map((r) => r.name))).toEqual([
     ["asset-operator", "governance"], ["asset-emergency"],
     ["orders-operator", "orders-emergency"], ["first-loss", "first-loss-burn"],

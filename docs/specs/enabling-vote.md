@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T21:44:30Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
@@ -24,7 +24,7 @@ sources:
     title: ADR 008 — the first-loss Safe, the insurance funds and the mandate size
   - id: s6
     resource: /adr/009-budgets-caps-reporting-and-monitoring.md
-    title: ADR 009 — the budget keys and their ceilings
+    title: ADR 009 — the budget keys and the fixed approval ceilings
   - id: s7
     resource: /adr/010-pre-execution-screening.md
     title: ADR 010 — the launch without the guard, and the guard before the second tranche's vote
@@ -36,7 +36,7 @@ sources:
     title: The enabling vote rehearsed on a mainnet fork, 2026-10-15 and 2026-10-22 — the vote of approved hashes under EIP-7825
   - id: s10
     resource: /adr/013-one-easy-track-factory.md
-    title: ADR 013 — the universal factory, its address book and versions, and the votes that remain after launch
+    title: ADR 013 — the universal factory, its address book, its counter and policy version, and the votes that remain after launch
   - id: s11
     resource: /adr/014-funding-by-tranche-votes.md
     title: ADR 014 — funding by tranche votes, insurance at launch and the flows back to the treasury
@@ -54,10 +54,10 @@ Aragon Voting stores the whole script when a vote starts. With the Safe batches 
 ## Before the vote
 
 - **Snapshots.** The mandate, with its figures and the owed text below. The emergency Safe's fifth signer (OD-58, OD-65) [s1].
-- **Figures.** An attested computation sets every budget, every ceiling, and the first tranche's tokens and amounts [s6][s10][s11].
+- **Figures.** An attested computation sets every budget, every fixed approval ceiling, and the first tranche's tokens and amounts [s6][s10][s11].
 - **Decisions.** Every OD is decided except OD-65, which closes at the fifth signer's Snapshot [s1].
-- **Deployments.** They need no authority. Clutch's script creates the Asset Safe, the orders account and the first-loss Safe with Aragon Voting as their only owner, and the emergency Safe with its signers, all on Safe v1.5.0 (OD-17, OD-126). It deploys the four Roles modifiers as minimal proxies through the Zodiac module proxy factory, and the universal factory with the committee's Safe as its trusted caller. The factory's constructor seeds the versions and the ceilings of the launch policy (OD-80, OD-102) [s2][s10].
-- **Checks.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 behind a Roles modifier, which pass at block 26249900, run again at a recent block ([research note](/research/orders-account-fork-tests-2026-11-07.md)) [s4]. The external audit of the universal factory and the order signer (OD-96). The check of Safe's releases, advisories and bug-bounty records [s7]. The policy compiled for mainnet from the reviewed constellation. The factory's shapes against the mandate's protocols and the committee's named pipeline. The Safe batches, published with one command that computes each hash again. The full rehearsal below, at a recent block [s9][s10].
+- **Deployments.** They need no authority. Clutch's script creates the Asset Safe, the orders account and the first-loss Safe with Aragon Voting as their only owner, and the emergency Safe with its signers, all on Safe v1.5.0 (OD-17, OD-126). It deploys the four Roles modifiers as minimal proxies through the Zodiac module proxy factory, and the universal factory with the committee's Safe as its trusted caller. The factory's constructor fixes that caller, Easy Track's executor, the emergency Safe, Aragon Voting and the four modifiers; it holds no other state than its counter and its policy version (OD-80, OD-102, OD-135) [s2][s10].
+- **Checks.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 behind a Roles modifier, which pass at block 26249900, run again at a recent block ([research note](/research/orders-account-fork-tests-2026-11-07.md)) [s4]. The external audit of the universal factory and the order signer (OD-96). The check of Safe's releases, advisories and bug-bounty records [s7]. The policy compiled for mainnet from the reviewed constellation. The policy's source against the mandate's protocols and the committee's named pipeline. The Safe batches, published with one command that computes each hash again. The full rehearsal below, at a recent block [s9][s10].
 
 ## The mandate's owed text
 
@@ -90,7 +90,7 @@ Aragon Voting runs the Easy Track and payment items itself. It holds Easy Track'
 
 Each Safe's changes form one or more batches. The vote approves the hash of each batch on its Safe, and anyone sends the batch after the vote with that approval as Voting's signature (OD-92). The batches of one Safe run in nonce order [s9].
 
-- **The Asset Safe.** Enable the operator modifier and the safety modifier, and apply the compiled policy on both: every permission, and every budget key of the launch tokens with its ceiling. A spender that joins later gets its key with its motion (ADR 013 decision 9). The operator's permissions include a transfer of each listed token to the Aragon Agent (OD-108). Grant `operator` to the committee's Safe; `governance` and `insurance-funding` on the operator modifier, and `exit-governance` and `restart` on the safety modifier, to the universal factory; and `emergency`, with the switch, to the emergency Safe [s2][s6][s10][s11].
+- **The Asset Safe.** Enable the operator modifier and the safety modifier, and apply the compiled policy on both: every permission, and every budget key of the launch tokens. A spender that joins later gets its key with its motion (ADR 013 decision 9). The operator's permissions include a transfer of each listed token to the Aragon Agent (OD-108). Grant `operator` to the committee's Safe; `governance` and `insurance-funding` on the operator modifier, and `exit-governance` and `restart` on the safety modifier, to the universal factory; and `emergency`, with the switch, to the emergency Safe [s2][s6][s10][s11].
 - **The orders account.** Set CoW's fallback handler, and ComposableCoW as the verifier of CoW's settlement domain. Enable the orders modifier and apply its policy: the operator's orders on the launch lists and its transfers back to the Asset Safe or the Aragon Agent, and the emergency role's recovery orders, transfers and cancels. Grant `operator` to the committee's Safe, `emergency` to the emergency Safe, and the governance and approvals roles to the universal factory (OD-103, OD-118). Approve CoW's vault relayer for every listed token, the recovery tokens included [s4].
 - **The first-loss Safe.** Enable the first-loss modifier and apply its policy. Grant `first-loss` to the committee's Safe, and `first-loss-burn` and the insurance roles to the universal factory (OD-107, OD-118) [s5][s11].
 
@@ -112,11 +112,11 @@ The vote's items run when it executes, about five days after it starts: the fact
 
 ## The full rehearsal
 
-The fork suite rehearses the vote with the universal factory's prototype, the first tranche and a later tranche ([research note](/research/universal-factory-prototype-2026-11-05.md)). Before the vote starts, the full vote is rehearsed at a recent block [s9][s10][s11]:
+The fork suite rehearses the vote with the universal factory, the first tranche and a later tranche (`test/EnablingVoteRehearsal.t.sol`). Before the vote starts, the full vote is rehearsed at a recent block [s9][s10][s11]:
 
-1. **Policy still owed.** The first-loss modifier's insurance roles (OD-129 to OD-131), and the shapes of the launch protocols.
+1. **Policy still owed.** The onboarding motion of Lido Lend's lender vault, against the deployed vault (OD-132, OD-133); the fork suite runs it against a stand-in.
 2. **Deployment.** The script deploys the three Safes, the emergency Safe, the four modifiers and the factory.
 3. **The vote.** The factory's registration, the first tranche, and one approved hash for each Safe batch. The batch builder keeps each batch under the gas and size limits that the rehearsal set.
-4. **The run.** The vote's gas when it starts and when it executes; each batch's gas against EIP-7825 and its size against the transaction pool's limit; the first tranche in the Asset Safe. Then the first motions against the live Easy Track: an onboarding shape; a budget; a ceiling; a token for the orders account, on both sides; an insurance fund, created and given money from the Asset Safe, and a payout to its pinned address; a first-loss redemption paid to the Asset Safe, and the return of an excess above the cap; the operator's return to the Aragon Agent; and the switch, the counter, a restart motion and the restore of the orders account. The run reads Easy Track's free motion slots at the block.
+4. **The run.** The vote's gas when it starts and when it executes; each batch's gas against EIP-7825 and its size against the transaction pool's limit; the first tranche in the Asset Safe. Then the first motions against the live Easy Track: an onboarding; a budget; a token for the orders account, on both sides; an insurance fund, created and given money from the Asset Safe, and a payout to its pinned address; a first-loss redemption paid to the Asset Safe, and the return of an excess above the cap; the operator's return to the Aragon Agent; and the switch, the counter, a restart motion and the restore of the orders account. The run reads Easy Track's free motion slots at the block.
 5. **Chain checks.** INV-032, the factory's registration, and INV-037, no Easy Track registry that lists a vault Safe; and the holders of Easy Track's admin, cancel and unpause roles, from the role events [s12].
 6. **Records.** A research note records the run, and the invariants name the new tests.

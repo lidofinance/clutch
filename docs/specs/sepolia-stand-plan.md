@@ -87,7 +87,7 @@ sources:
     title: CLI regression tests — failed RPC preparation preserves saved payload, context and diff
   - id: s26
     resource: /adr/015-tests-on-sepolia.md
-    title: ADR 015 — proposed Sepolia permissions, role-key migration and mainnet design dependencies, OD-132 to OD-137
+    title: ADR 015 — proposed Sepolia permissions, role-key migration and mainnet design dependencies, OD-136 to OD-141
   - id: s27
     resource: urn:clutch:evidence:2026-10-22:sepolia-resolution-check
     title: Local check — the resolution saved on 2026-10-20 against the current payload; the same 63 calls with the roles in another order; Safe owners and modules match
@@ -299,11 +299,11 @@ The exported payload uses legacy `targets` and empty `annotations` for governanc
 Local readback reconstructs permissions and checks the same 63 configuration calls [s24].
 The pinned SDK's generic `push` does not emit this legacy format [s24].
 Production hosted commands keep the repository-owner workflow from clean merged `main` [s7].
-ADR 015 proposes a separate route for the Sepolia workspace. EM decides it in OD-132 and OD-133 [s26].
+ADR 015 proposes a separate route for the Sepolia workspace. EM decides it in OD-136 and OD-137 [s26].
 
 ### Publish the declaration to the Sepolia workspace
 
-Run these commands only after EM's decisions on OD-132 and OD-133 [s26].
+Run these commands only after EM's decisions on OD-136 and OD-137 [s26].
 Commit and push `testnet/sepolia` first.
 In the local `.env`, set `SEPOLIA_ZODIAC_API_KEY` and `SEPOLIA_ZODIAC_WORKSPACE`, the workspace of the prepared context.
 Set `SEPOLIA_ZODIAC_API_URL` only for another API origin; it must use https.
@@ -329,7 +329,7 @@ The resolution saved on 2026-10-20 in the earlier workspace passes this comparis
 
 After the publication, check the saved draft.
 The governance role keeps `Nor`, no node is marked as modified and the hosted diff is empty.
-Do not press Deploy or Apply in the Zodiac app (OD-134) [s26].
+Do not press Deploy or Apply in the Zodiac app (OD-138) [s26].
 
 - [x] Publish the existing-state declaration and check it in the workspace. On 2026-10-22, Zodiac marks it `Deployed`; the deployment page says `Nothing to deploy`. The three Safe addresses, four modifiers and seven role keys match the prepared declaration. The original governance `Nor` conditions remain. The RPC comparison found zero differences across 82 events at block `11970750` [s30].
 

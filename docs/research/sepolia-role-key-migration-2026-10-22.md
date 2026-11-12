@@ -14,7 +14,7 @@ verified: []
 sources:
   - id: s1
     resource: /adr/015-tests-on-sepolia.md
-    title: OD-137 proposal and acceptance checks
+    title: OD-141 proposal and acceptance checks
   - id: s2
     resource: "https://docs.zodiac.eco/developers/constellations"
     title: Constellation partial updates — omission preserves a role and null clears it
@@ -64,4 +64,4 @@ Payload SHA-256: `1c33e4b11883eb318d97b36ecb0d19ce2985646e7fddda494e70fe1dfa6a24
 
 ## Limits
 
-EM chose OD-137 B, OD-134 C and OD-135 A on 2026-10-22. The owner reviewed and authorised the exact package before signing; preparation and fork tests execute no public transaction [s1][s5]. The owner then executed both batches at blocks `11976805` and `11976806`. The comparison at block `11976825` found zero policy differences, unchanged allowance storage and unchanged Safe configuration apart from the expected nonce increments [s6].
+EM chose OD-141 B, OD-138 C and OD-139 A on 2026-10-22. The owner reviewed and authorised the exact package before signing; preparation and fork tests execute no public transaction [s1][s5]. The owner then executed both batches at blocks `11976805` and `11976806`. The comparison at block `11976825` found zero policy differences, unchanged allowance storage and unchanged Safe configuration apart from the expected nonce increments [s6].

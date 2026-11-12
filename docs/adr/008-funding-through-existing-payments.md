@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T21:44:30Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
@@ -62,7 +62,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 26. Payouts from an insurance fund run as motions (OD-66).
 27. Replaced by ADR 014 decision 4 (OD-107).
 28. The committee's Safe exits an insurance fund through its direct role, with the proceeds paid to the Asset Safe (OD-66, OD-80, OD-108).
-29. The framework fixes a checklist that every fund fills in, in its motion and its forum post: the product, and its share token or payout address; the factory's shape; the fund's cap; the loss trigger and a confirming party independent of the product team; the incident-update deadline; and the end of the terms (OD-66, OD-102).
+29. The framework fixes a checklist that every fund fills in, in its motion and its forum post: the product, and its share token or payout address; the motion's writes; the fund's cap; the loss trigger and a confirming party independent of the product team; the incident-update deadline; and the end of the terms (OD-66, OD-102).
 30. Replaced by ADR 014 decision 7 (OD-107).
 31. Replaced by ADR 014 decision 4 (OD-107).
 32. The mandate size follows the mandate's draft text. The vault holds up to the mandate size in assets. Each funding counts in US dollars at its value when it is funded. The legacy positions that move into the vault count too (OD-89).
@@ -108,13 +108,13 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The enabling-vote rehearsal moved both first-loss share balances from the Growth Committee's Safe by plain transfer ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
 - The first-loss modifier's policy holds the `first-loss` and `first-loss-burn` roles, and the enabling vote's first-loss batch applies it. On a fork with the live Earn vaults, a burn motion burns the first-loss Safe's shares after the objection window (`test_first_loss_burn_by_motion`), nothing burns outside a motion (`test_first_loss_burn_needs_a_motion`), the committee's role requests a redemption and cannot move the shares (`test_first_loss_role_requests_a_redemption`, `test_first_loss_role_cannot_move_the_shares`), and no other role reaches the shares (`test_other_roles_do_not_reach_the_first_loss_shares`).
 - The compiler refuses a first-loss role that transfers or approves the shares, and any role that calls the first-loss Safe or its modifier (`policy/constellation/compiler/compile.test.ts`).
-- Owed: the insurance roles and shapes (OD-129 to OD-131).
+- The exit of a fund pays only the Asset Safe (decision 28; `test_fund_exit_pays_only_the_asset_safe`). [ADR 014](/adr/014-funding-by-tranche-votes.md) holds the confirmation of insurance money, of the Earn deposit and of a fund with a payout address.
 
 ## Reversal conditions
 
 - The Earn vaults block share transfers before the move.
 - The first-loss terms end. A DAO vote then moves the shares to the Asset Safe as ordinary positions.
-- The DAO changes or ends the first-loss authorization. A DAO vote then changes or removes the two first-loss roles and the factory's burn shape.
+- The DAO changes or ends the first-loss authorization. A DAO vote then changes or removes the two first-loss roles and the burn role.
 
 ## Open questions
 

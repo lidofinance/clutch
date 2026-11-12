@@ -8,6 +8,7 @@ import {Mainnet} from "./rehearsal/Mainnet.sol";
 import {VoteBuilder} from "./rehearsal/VoteBuilder.sol";
 import {ITokenManager, IEasyTrack} from "./rehearsal/RehearsalBase.sol";
 import {EnabledVault} from "./rehearsal/EnabledVault.sol";
+import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 
 /// @title EnablingVoteRehearsal — the enabling vote and the first weeks of
 ///        operation, rehearsed end to end on a mainnet fork.
@@ -93,7 +94,7 @@ contract EnablingVoteRehearsal is EnabledVault {
     }
 
     // ---------------------------------------------------------------------
-    // 3. The first weeks: tranches, budgets, a ceiling, the switch, the restart
+    // 3. The first weeks: tranches, budgets, the switch, the counter, the restart
     // ---------------------------------------------------------------------
 
     function test_03_ramp_up() public {
@@ -120,28 +121,17 @@ contract EnablingVoteRehearsal is EnabledVault {
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, earnBudget)), true);
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, 1e6)), false);
 
-        // 3e. A budget motion of the universal factory, within the token's ceiling.
-        bytes32 seeded = uf.budgetVersion(EARN_USD_DEPOSIT, EARN_USD_DEPOSIT, EARN_USD_DEPOSIT, MONTH);
-        _motion(_one(_budgetOp(Mainnet.USDC, Mainnet.EARN_USD_DEPOSIT_QUEUE, 400_000e6, seeded)));
+        // 3e. A budget motion of the universal factory: one write of the governance role sets the key.
+        _motion(_one(_budgetKey(bytes32("earn_usd_deposit"), 400_000e6)));
         (uint128 refill, uint128 maxRefill, uint64 period, uint128 balance,) = opMod.allowances(bytes32("earn_usd_deposit"));
         console2.log("REHEARSAL budget motion: balance after enactment", uint256(balance));
         console2.log("REHEARSAL budget motion: refill, period", uint256(refill), uint256(period));
         assertEq(maxRefill, 400_000e6);
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, 300_000e6)), true);
 
-        // 3f. A ceiling motion: twofold, 15 days after the launch seed, which counts as the first raise (OD-120),
-        //     and no second raise within 15 days (OD-105).
-        bytes32 key = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDC);
-        (, uint64 seededAt,) = uf.ceilings(key);
-        if (block.timestamp < uint256(seededAt) + 15 days) vm.warp(uint256(seededAt) + 15 days);
-        _motion(_one(_ceilingOp(key, BUDGET_CEILING_USDC, 2 * BUDGET_CEILING_USDC)));
-        (uint256 ceiling,,) = uf.ceilings(key);
-        assertEq(ceiling, 2 * BUDGET_CEILING_USDC, "the ceiling rose twofold");
-        bytes memory again = _calldata(_one(_ceilingOp(key, ceiling, ceiling + 1)));
-        vm.prank(Mainnet.COMMITTEE_SAFE);
-        vm.expectRevert();
-        et.createMotion(address(uf), again);
-        console2.log("REHEARSAL ceiling motion: raised twofold; a second raise within 15 days refused");
+        // 3f. A motion that was open when the emergency stop came fails at enactment (ADR 013, decision 5).
+        bytes memory open = _calldata(_one(_budgetKey(bytes32("earn_usd_deposit"), 500_000e6)));
+        uint256 openId = _create(open);
 
         // 3g. The switch, and the counter that it raises.
         _emergencySwitch();
@@ -149,8 +139,13 @@ contract EnablingVoteRehearsal is EnabledVault {
         vm.expectRevert(bytes("GS104"));
         opMod.execTransactionWithRole(Mainnet.USDC, 0, abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, 0)), 0, OPERATOR, true);
 
+        _afterWindow();
+        vm.expectRevert(abi.encodeWithSelector(UniversalFactory.StaleCounter.selector, 0, 1));
+        et.enactMotion(openId, open);
+        console2.log("REHEARSAL the counter: a motion that was open at the switch fails at enactment");
+
         // 3h. A restart motion enables the operator modifier again (ADR 013, decision 12).
-        _motion(_one(_op(uf.RESTART(), "")));
+        _motion(_one(_w(safetyMod, bytes32("restart"), address(asset), abi.encodeWithSignature("enableModule(address)", address(opMod)))));
         assertTrue(asset.isModuleEnabled(address(opMod)), "the restart motion");
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, 0)), true);
     }

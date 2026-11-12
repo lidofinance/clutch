@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T11:25:37Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
@@ -41,13 +41,12 @@ A row holds a value that someone can set or read. A decision without a value liv
 | Easy Track objection period | 72 hours, 259,200 seconds, global | Read [s2] | — |
 | Easy Track objection threshold | 0.5 percent of LDO, 50 basis points | Read [s2] | — |
 | Easy Track motion slots | 20 open motions, shared by every committee; the warning threshold is not set | EM (OD-94, OD-102) [s1]; the detector specification sets the threshold | [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) |
-| Universal factory limits | at most 16 operations in one motion, and at most 32 spenders in one approval list | Proposed: the prototype's constants | [ADR 013](/adr/013-one-easy-track-factory.md) |
-| Ceiling changes | a lowering at any time; a raise to at most twice the value, at most once in 15 days for that ceiling; a launch ceiling's seed and a token's introduction each count as the first raise | EM (OD-105, OD-113, OD-120) [s1] | ADR 013 |
-| Budget keys for new spenders | derived by the shape for each new spender: `k:`, then the spender, then the token's first ten bytes; a launch key is its label as `bytes32`; the policy holds no spare keys | EM (OD-102) [s1]; the key form is the prototype's | ADR 013, ADR 009 |
+| Universal factory limits | at most 64 writes in one motion | Proposed: the factory's constant | [ADR 013](/adr/013-one-easy-track-factory.md) |
+| Budget keys for new spenders | set by the motion for each new spender: `k:`, then the spender, then the token's first ten bytes; the governance role's policy accepts a launch key or a key that starts with `k:`; a launch key is its label as `bytes32`; the policy holds no spare keys | EM (OD-102, OD-134) [s1]; the key form is the prototype's | ADR 013, ADR 009 |
 | Budget per key | not in this repository | Computed by attested computation on 2026-09-22 and again on 2026-10-02 with the literal yield-bearing base; enters when the mandate is approved (OD-56) | ADR 009 |
 | Orders budgets | one budget key per listed token on transfers into the orders account; figures not in this repository | EM (OD-43) [s1]: budgets; one key per token is the agent's proposal; figures by attested computation | [ADR 007](/adr/007-swapping-through-an-orders-account.md), ADR 009 |
 | Budget refill-period floor | 30 days | EM (OD-08) [s1] | ADR 009 |
-| Approval bound | the stETH approval to the wstETH contract, and the DAI and USDS approvals to Sky's DAI–USDS converter, have ceilings that start at one mandate size and change as "Ceiling changes" says; every other approval spends its spender's budget key | EM (OD-08, OD-22, OD-105) [s1] | ADR 007, ADR 009, [ADR 011](/adr/011-launch-scope.md), ADR 013 |
+| Approval bound | the stETH approval to the wstETH contract, and the DAI and USDS approvals to Sky's DAI–USDS converter, have fixed ceilings of one mandate size, which a motion changes by writing the approval's permission again; every other approval spends its spender's budget key | EM (OD-08, OD-22, OD-89, OD-134) [s1] | ADR 007, ADR 009, [ADR 011](/adr/011-launch-scope.md), ADR 013 |
 | DAI–USDS conversion | Sky's DaiUsds `0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`, one to one in both directions | EM (OD-22) [s1]; read [s6] | ADR 011 |
 | Operator's order tokens | stETH, wstETH, WETH, USDC, USDT, USDS | EM (OD-22, OD-46, OD-91) [s1] | ADR 007, ADR 011 |
 | Recovery buy tokens | USDC, or USDT as the second destination | EM (OD-26, OD-43) [s1]; the sell list is an agent proposal in ADR 007 | ADR 007 |

@@ -8,7 +8,9 @@ invariants:
   INV-017: "Retired (OD-106): the vault has no funding registry; INV-037 holds."
   INV-020: "Retired (OD-43): the design has no Stonks instance, converter or price feed."
   INV-028: "Retired (OD-78): INV-040 states the orders modifier's roles."
+  INV-029: "Retired (OD-134): the factory checks no write's content, so it enforces no narrowing."
   INV-030: "Retired (OD-78): the design has no token template."
   INV-031: "Retired (OD-78): the design has no restore template."
+  INV-036: "Retired (OD-134): the factory keeps no ceiling."
 lip: {}
 runbooks: {}

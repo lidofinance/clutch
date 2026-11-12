@@ -970,23 +970,85 @@
     - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
   adr: [ADR-012#d14]
 
+- id: OD-129
+  question: "Does insurance money need a bound on its amount?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-129 and OD-130 decided, and Lido Lend investigated for OD-131"
+  adr: [ADR-014#d11]
+  refines: [OD-107]
+
+- id: OD-130
+  question: "Which operation gives Lido Earn its insurance at launch?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-129 and OD-130 decided, and Lido Lend investigated for OD-131"
+  adr: [ADR-014#d12]
+  refines: [OD-107]
+
+- id: OD-131
+  question: "Which Lido Lend fund does the factory carry?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-131 and OD-132 decided: a fund with a payout address, and Lido Lend's lender vault"
+  adr: [ADR-014#d6]
+  refines: [OD-107]
+
+- id: OD-132
+  question: "Which Lido Lend surface does the vault lend through?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-131 and OD-132 decided: a fund with a payout address, and Lido Lend's lender vault"
+  adr: [ADR-011#d3, ADR-011#d13]
+
+- id: OD-133
+  question: "May USDY enter the Asset Safe through an exit from Lido Lend's stablecoin market?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-133 decided: no collateral enters, and no fallback exit"
+  adr: [ADR-011#d13]
+  refines: [OD-132]
+
 - id: OD-134
+  question: "Does the universal factory keep its typed shapes, or does it apply raw writes that may also widen?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-134: the factory takes raw writes"
+    - "2026-11-12 — OD-135 decided, and the switch to raw writes"
+  adr: [ADR-013#d11, ADR-013#d9, ADR-013#d14]
+  see: [/research/raw-factory-prototype-2026-11-12.md]
+  replaces:
+    - {od: OD-102, part: true}
+    - {od: OD-105}
+    - {od: OD-113}
+    - {od: OD-117}
+    - {od: OD-120}
+- id: OD-135
+  question: "How does the raw factory keep two motions from undoing each other?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-135 decided, and the switch to raw writes"
+  adr: [ADR-013#d10]
+  see: [/research/raw-factory-prototype-2026-11-12.md]
+  refines: [OD-100, OD-134]
+
+- id: OD-138
   question: "May the stand owner execute a transaction that the Zodiac app builds for the Sepolia stand, through Deploy or Apply?"
   closed: 2026-10-22
   log:
-    - "2026-10-22 — OD-134, OD-135 and OD-137: the Sepolia role-key migration"
+    - "2026-10-22 — OD-138, OD-139 and OD-141: the Sepolia role-key migration"
   adr: [ADR-015]
 
-- id: OD-135
+- id: OD-139
   question: "May the stand owner send public Sepolia transactions on the existing stand from testnet/sepolia?"
   closed: 2026-10-22
   log:
-    - "2026-10-22 — OD-134, OD-135 and OD-137: the Sepolia role-key migration"
+    - "2026-10-22 — OD-138, OD-139 and OD-141: the Sepolia role-key migration"
   adr: [ADR-015]
 
-- id: OD-137
+- id: OD-141
   question: "Should Clutch use four account-specific operator and emergency role keys for Sepolia and mainnet?"
   closed: 2026-10-22
   log:
-    - "2026-10-22 — OD-134, OD-135 and OD-137: the Sepolia role-key migration"
+    - "2026-10-22 — OD-138, OD-139 and OD-141: the Sepolia role-key migration"
   adr: [ADR-015]

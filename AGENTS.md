@@ -30,7 +30,7 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 - Tests derive from specs and ADRs, never from the implementation. Recompute expected values independently.
 - A behaviour change updates its spec and invariants in the same commit.
 - Every invariant `INV-NNN` maps to a named test.
-- The universal Easy Track factory and its thin companion contracts are the only new contracts allowed. CoW's order signer has no known audit, so it counts as new code with them (OD-96, OD-102, OD-117). Everything else reuses deployed contracts.
+- The universal Easy Track factory is the only new contract allowed. CoW's order signer has no known audit, so it counts as new code with it (OD-96, OD-102, OD-134). Everything else reuses deployed contracts.
 - A contract's comments cite no ADR, OD, invariant, specification or test; `scripts/check_licences.py` refuses one (OD-123).
 - Source files carry `SPDX-License-Identifier: AGPL-3.0-or-later`. Files derived from Easy Track keep GPL-3.0. Files derived from the policy provider's Zodiac constellation keep LGPL-3.0-only and get `SPDX-License-Identifier: LGPL-3.0-only` when they change (OD-34).
 
@@ -40,7 +40,7 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 - A GitHub account of their own. An agent works through the account of the human who runs it, and the commit carries a `Co-Authored-By` trailer (ADR 012).
 - Any recipe in `mainnet.just`, and the package scripts that call the hosted Zodiac app (`push`, `pull`, `pull-org`, `pull-contracts`). Agents never use the Zodiac API key.
 - Anything under `deployed/`, and any governance action or deployment.
-- Parameters: budgets, approval ceilings, the orders account's token lists and the maximum order life, tranche amounts (OD-106), the factory's shapes and role membership. Agents draft options; the acceptor decides.
+- Parameters: budgets, approval ceilings, the orders account's token lists and the maximum order life, tranche amounts (OD-106) and role membership. Agents draft options; the acceptor decides.
 - Raising a runbook above `slop` without a fork drill record, or a policy change without the verification output.
 - Security assessments, audit opinions, release sign-off and legal opinions.
 - Edits to `LICENSE`, `SECURITY.md`, `AGENTS.md`, `config/actors.yaml` or `.github/` without an explicit human request.
