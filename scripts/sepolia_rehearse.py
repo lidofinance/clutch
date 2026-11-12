@@ -54,6 +54,30 @@ def run(command, name, env):
     print(f"{name}: passed", flush=True)
 
 
+def public_steps(env):
+    """The recipes of the factory migration's public steps, signed by the unlocked sender."""
+    recipe = {**env, "SEPOLIA_RPC": LOCAL, "SEPOLIA_SIGNER": "--unlocked"}
+    stand = json.loads(Path(env["SEPOLIA_MANIFEST"]).read_text())
+    call = lambda to, signature, *args: subprocess.check_output(
+        ["cast", "call", to, signature, *args, "--rpc-url", LOCAL], text=True).split()[0]
+    run(["just", "--justfile", "sepolia.just", "caps-motion"], "caps-motion", recipe)
+    motion = int(call(stand["easyTrack"], "motionsCount()(uint256)")) - 1
+    rpc("evm_increaseTime", [int(call(stand["easyTrack"], "motionDuration()(uint256)"))])
+    rpc("evm_mine", [])
+    run(["just", "--justfile", "sepolia.just", "caps-enact", str(motion)], "caps-enact", recipe)
+    run(["just", "--justfile", "sepolia.just", "retire-burn-factory"], "retire-burn-factory", recipe)
+    first_loss = stand["firstLossSafe"][2:].lower()
+    for token, cap in [("weth", 10**18), ("usdc", 10**9)]:
+        key = "0x6b3a" + first_loss + stand["dependencies"]["tokens"][token]["address"][2:22].lower()
+        balance = subprocess.check_output(["cast", "call", stand["operatorModifier"],
+            "allowances(bytes32)(uint128,uint128,uint64,uint128,uint64)", key, "--rpc-url", LOCAL], text=True).split("\n")[3]
+        if int(balance.split()[0]) != cap:
+            raise RuntimeError(f"caps-enact left the {token} cap at {balance}")
+    if (call(stand["universalFactory"], "policyVersion()(uint256)") != "1"
+            or call(stand["easyTrack"], "evmScriptFactories(address)(bool)", stand["burnFactory"]) != "false"):
+        raise RuntimeError("The public steps left an unexpected policy version or burn factory")
+
+
 def main():
     upstream = os.environ["SEPOLIA_RPC"]
     sender = os.environ["SEPOLIA_SENDER"]
@@ -88,6 +112,7 @@ def main():
         run(["bun", "policy/constellation/sepolia/compile.ts", env["SEPOLIA_MANIFEST"], env["SEPOLIA_ARTIFACT"]], "compile", env)
         run(["forge", "script", "script/sepolia/ApplySepolia.s.sol", *args], "apply", env)
         run(["forge", "script", "script/sepolia/FundSepolia.s.sol", *args], "fund", env)
+        public_steps(env)
         # Keep one local head while Forge reads the deployed state in parallel.
         rpc("anvil_setAutomine", [True])
         run(["forge", "test", "--match-contract", "SepoliaStandTest", "--hardfork", "amsterdam", "-vv"], "drills", env)

@@ -54,6 +54,7 @@ caps-input:
         "[($op,$gov,$op,$(cap weth 1000000000000000000)),($op,$gov,$op,$(cap usdc 1000000000))]"
 
 # The Committee Safe is 1/1 with the sender as owner, so the sender's own call is its signature.
+# SEPOLIA_SIGNER replaces the keystore only on the local rehearsal.
 caps-motion: _guard
     #!/usr/bin/env bash
     set -euo pipefail
@@ -62,17 +63,17 @@ caps-motion: _guard
     signature=0x000000000000000000000000${SEPOLIA_SENDER:2}$(printf '0%.0s' {1..64})01
     cast send $(jq -r .operatorSafe $m) 'execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)' \
         $(jq -r .easyTrack $m) 0 $data 0 0 0 0 0x0000000000000000000000000000000000000000 0x0000000000000000000000000000000000000000 $signature \
-        --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --from "$SEPOLIA_SENDER"
+        --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --from "$SEPOLIA_SENDER"
 
 caps-enact id: _guard
     #!/usr/bin/env bash
     set -euo pipefail
     m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}
     cast send $(jq -r .easyTrack $m) 'enactMotion(uint256,bytes)' {{id}} $(just --justfile sepolia.just caps-input) \
-        --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --from "$SEPOLIA_SENDER"
+        --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --from "$SEPOLIA_SENDER"
 
 retire-burn-factory: _guard
-    m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}; cast send $(jq -r .easyTrack $m) 'removeEVMScriptFactory(address)' $(jq -r .burnFactory $m) --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --from "$SEPOLIA_SENDER"
+    m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}; cast send $(jq -r .easyTrack $m) 'removeEVMScriptFactory(address)' $(jq -r .burnFactory $m) --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --from "$SEPOLIA_SENDER"
 
 compile:
     bun policy/constellation/sepolia/compile.ts cache/sepolia/manifest.json cache/sepolia/policy.json

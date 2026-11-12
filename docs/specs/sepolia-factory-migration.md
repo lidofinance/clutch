@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-12T17:19:22Z
+  at: 2026-11-12T17:43:05Z
 verified: []
 sources:
   - id: s1
@@ -21,7 +21,7 @@ sources:
     title: Sepolia stand deployment plan — the stand's contracts, roles and recipes
   - id: s4
     resource: urn:clutch:evidence:2026-11-12:factory-migration
-    title: Local runs — `factory-migration` at block 11992758 and `rehearse` at block 11954838; logs in `cache/sepolia/factory-migration/` and `cache/sepolia/rehearsal/`
+    title: Local runs — `factory-migration` at blocks 11992758 and 12120386, and `rehearse` at block 11954838; logs in `cache/sepolia/factory-migration/` and `cache/sepolia/rehearsal/`
 ---
 
 # Sepolia stand migration to the universal factory
@@ -55,7 +55,7 @@ just check
 just --justfile sepolia.just check
 ```
 
-- [x] Rehearse a fresh stand on Anvil: deploy, `deploy-factory`, compile, apply, fund and 7 drills. All pass [s4].
+- [x] Rehearse a fresh stand on Anvil: deploy, `deploy-factory`, compile, apply, fund, `caps-motion`, `caps-enact`, `retire-burn-factory` and 7 drills. The run checks the caps, the policy version and the retired burn factory. All pass [s4].
 
 ```sh
 just --justfile sepolia.just rehearse
@@ -67,7 +67,8 @@ just --justfile sepolia.just rehearse
 SEPOLIA_STAND_BLOCK=<latest block> just --justfile sepolia.just factory-migration
 ```
 
-- [ ] Run `factory-migration` again at the latest block, just before the deploy.
+- [x] Run `factory-migration` again at a recent block: 101 of 101 tests pass at block `12120386` [s4].
+- [ ] Run `factory-migration` once more on deploy day.
 
 ## Deploy
 
