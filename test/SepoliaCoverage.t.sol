@@ -9,7 +9,8 @@ import {IERC20} from "../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
 import {MockEasyTrack} from "../src/mocks/MockEasyTrack.sol";
 import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
-import {SepoliaToken, SepoliaShares, SepoliaRedeemQueue, SepoliaEasyTrack, SepoliaFirstLossBurnFactory} from "../src/mocks/SepoliaStand.sol";
+import {SepoliaToken, SepoliaShares, SepoliaRedeemQueue, SepoliaEasyTrack} from "../src/mocks/SepoliaStand.sol";
+import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 import {CoWOrder, IOrderSigner, ICoWFallback, IComposableCoW} from "../script/sepolia/CoWInterfaces.sol";
 import {Call, EVMScriptLib} from "../src/exec/SafeExec.sol";
 
@@ -86,9 +87,14 @@ abstract contract SepoliaCoverageFixture is SepoliaCurrentStandFixture {
         for(uint256 i;i<3;++i) interactions[i]=new IStandSettlement.Interaction[](0);
         vm.prank(solver);settlement.settle(tokens,prices,trades,interactions);
     }
+    function burnInput(address share,uint256 amount) internal view returns(bytes memory) {
+        UniversalFactory uf=UniversalFactory(a("universalFactory"));UniversalFactory.Write[] memory writes=new UniversalFactory.Write[](1);
+        writes[0]=UniversalFactory.Write(address(firstLossRoles),bytes32("first-loss-burn"),share,abi.encodeWithSignature("burn(uint256)",amount));
+        return abi.encode(uf.epoch(),uf.policyVersion(),writes);
+    }
     function motion(address share,uint256 amount) internal returns(uint256 id,bytes memory input) {
-        SepoliaEasyTrack et=SepoliaEasyTrack(a("easyTrack"));id=et.motionsCount();input=abi.encode(share,amount);
-        committeeCall(address(et),abi.encodeCall(et.createMotion,(a("burnFactory"),input)));
+        SepoliaEasyTrack et=SepoliaEasyTrack(a("easyTrack"));id=et.motionsCount();input=burnInput(share,amount);
+        committeeCall(address(et),abi.encodeCall(et.createMotion,(a("universalFactory"),input)));
     }
     function configuration() internal view returns(bytes32 result) {
         address[5] memory safes=[committee,emergency,asset,orders,firstLoss];
@@ -148,11 +154,13 @@ contract SepoliaConfigurationCoverageTest is SepoliaCoverageFixture {
             assertEq(address(queue.asset()),a(i==0?"usdClaimAsset":"ethClaimAsset"));
             assertEq(share.controller(),controller);assertEq(queue.asset().controller(),address(queue));
         }
-        SepoliaFirstLossBurnFactory factory=SepoliaFirstLossBurnFactory(a("burnFactory"));
-        assertEq(factory.trustedCaller(),committee);assertEq(address(factory.modifier_()),address(firstLossRoles));
-        assertEq(factory.usdShare(),a("usdShare"));assertEq(factory.ethShare(),a("ethShare"));
+        UniversalFactory factory=UniversalFactory(a("universalFactory"));
+        assertEq(factory.trustedCaller(),committee);assertEq(factory.executor(),a("easyTrackExecutor"));
+        assertEq(factory.emergencySafe(),emergency);assertEq(factory.voting(),a("voting"));
+        assertEq(factory.operatorModifier(),address(operator));assertEq(factory.safetyModifier(),address(safety));
+        assertEq(factory.ordersModifier(),address(ordersRoles));assertEq(factory.firstLossModifier(),address(firstLossRoles));
         SepoliaEasyTrack et=SepoliaEasyTrack(a("easyTrack"));
-        assertEq(et.voting(),a("voting"));assertTrue(et.evmScriptFactories(address(factory)));
+        assertEq(et.voting(),a("voting"));assertTrue(et.evmScriptFactories(address(factory)));assertFalse(et.evmScriptFactories(a("burnFactory")));
         assertEq(address(et.evmScriptExecutor()),a("easyTrackExecutor"));assertEq(et.ldoToken().balanceOf(controller),1000 ether);
     }
     function test_CFG_approved_hash_nonce_replay_wrong_safe_chain_and_signatures() public {
@@ -173,7 +181,7 @@ contract SepoliaConfigurationCoverageTest is SepoliaCoverageFixture {
         vm.expectRevert();s.execTransaction(address(operator),0,data,0,0,0,0,zero,payable(zero),wrong);
     }
     function actorMatrix(uint256 j) internal {
-        address[6] memory actors=[committee,emergency,controller,address(0xBAD),a("voting"),a("easyTrackExecutor")];
+        address[6] memory actors=[committee,emergency,controller,address(0xBAD),a("voting"),a("universalFactory")];
         bytes32[9] memory keys=[assetOperator,ordersOperator,assetEmergency,ordersEmergency,bytes32("operator"),bytes32("emergency"),bytes32("governance"),bytes32("first-loss-burn"),bytes32("first-loss")];
         IRoles[4] memory mods=[operator,safety,ordersRoles,firstLossRoles];
         for(uint256 i;i<6;++i)for(uint256 k;k<9;++k){
@@ -181,9 +189,9 @@ contract SepoliaConfigurationCoverageTest is SepoliaCoverageFixture {
             uint256 snapshot=vm.snapshotState();deal(token("weth"),asset,10);deal(token("weth"),orders,10);
             address recipient=j==0?orders:j==1?a("agent"):asset;
             address target=token("weth");bytes memory payload=transferData(recipient,1);
-            if(j==0&&keys[k]==bytes32("governance")){target=address(operator);payload=abi.encodeCall(IRoles.revokeFunction,(assetOperator,token("weth"),IERC20.transfer.selector));allowed=actors[i]==a("easyTrackExecutor");}
+            if(j==0&&keys[k]==bytes32("governance")){target=address(operator);payload=abi.encodeCall(IRoles.revokeFunction,(assetOperator,token("weth"),IERC20.transfer.selector));allowed=actors[i]==a("universalFactory");}
             if(j==3&&keys[k]==bytes32("first-loss")){target=a("usdQueue");payload=abi.encodeCall(SepoliaRedeemQueue.redeem,(1));allowed=actors[i]==committee;}
-            if(j==3&&keys[k]==bytes32("first-loss-burn")){target=a("usdShare");payload=abi.encodeWithSignature("burn(uint256)",1);allowed=actors[i]==a("easyTrackExecutor");}
+            if(j==3&&keys[k]==bytes32("first-loss-burn")){target=a("usdShare");payload=abi.encodeWithSignature("burn(uint256)",1);allowed=actors[i]==a("universalFactory");}
             vm.prank(actors[i]);(bool ok,bytes memory ret)=address(mods[j]).call(roleData(target,payload,0,keys[k],true));
             if(allowed){assertTrue(ok);assertTrue(abi.decode(ret,(bool)));}else{assertFalse(ok);assertTrue(bytes4(ret)!=bytes4(keccak256("ModuleTransactionFailed()")),"Must fail before token execution");}
             assertTrue(vm.revertToState(snapshot));
@@ -730,12 +738,15 @@ contract SepoliaFirstLossCoverageTest is SepoliaCoverageFixture {
 
 contract SepoliaBurnCoverageTest is SepoliaCoverageFixture {
     function test_ET_factory_callers_inputs_unknown_factory_and_unauthorized_cancellation() public {
-        SepoliaEasyTrack et=SepoliaEasyTrack(a("easyTrack"));bytes memory valid=abi.encode(a("usdShare"),1 ether);uint256 before=et.motionsCount();
+        SepoliaEasyTrack et=SepoliaEasyTrack(a("easyTrack"));address uf=a("universalFactory");bytes memory valid=burnInput(a("usdShare"),1 ether);uint256 before=et.motionsCount();
         vm.expectRevert("ET: factory not allowed");et.createMotion(address(0xBAD),valid);
-        vm.prank(controller);vm.expectRevert("burn factory: trusted caller");et.createMotion(a("burnFactory"),valid);
-        vm.expectRevert();committeeExecute(address(et),abi.encodeCall(et.createMotion,(a("burnFactory"),abi.encode(token("weth"),1 ether))),0,0);
-        vm.expectRevert();committeeExecute(address(et),abi.encodeCall(et.createMotion,(a("burnFactory"),abi.encode(a("usdShare"),0))),0,0);
-        vm.expectRevert();committeeExecute(address(et),abi.encodeCall(et.createMotion,(a("burnFactory"),hex"00")),0,0);
+        vm.prank(controller);vm.expectRevert(abi.encodeWithSelector(UniversalFactory.NotTrustedCaller.selector,controller));et.createMotion(uf,valid);
+        // The factory checks a motion's shape at creation. The modifier's policy checks what each write does at enactment.
+        UniversalFactory.Write[] memory writes=new UniversalFactory.Write[](0);
+        vm.expectRevert();committeeExecute(address(et),abi.encodeCall(et.createMotion,(uf,abi.encode(uint256(0),uint256(0),writes))),0,0);
+        writes=new UniversalFactory.Write[](1);writes[0]=UniversalFactory.Write(asset,bytes32("first-loss-burn"),a("usdShare"),abi.encodeWithSignature("burn(uint256)",1 ether));
+        vm.expectRevert();committeeExecute(address(et),abi.encodeCall(et.createMotion,(uf,abi.encode(uint256(0),uint256(0),writes))),0,0);
+        vm.expectRevert();committeeExecute(address(et),abi.encodeCall(et.createMotion,(uf,hex"00")),0,0);
         assertEq(et.motionsCount(),before);
         (uint256 id,)=motion(a("usdShare"),1 ether);
         vm.prank(controller);vm.expectRevert("ET: not creator");et.cancelMotion(id);
@@ -749,7 +760,7 @@ contract SepoliaBurnCoverageTest is SepoliaCoverageFixture {
         for(uint256 i;i<2;++i){SepoliaShares share=SepoliaShares(a(i==0?"usdShare":"ethShare"));uint256 supply=share.totalSupply();uint256 b=share.balanceOf(firstLoss);
             (uint256 id,bytes memory input)=motion(address(share),1 ether);uint256 enactAt=et.getMotion(id).startDate+et.motionDuration();
             vm.warp(enactAt-1);vm.expectRevert("ET: objection period not passed");et.enactMotion(id,input);
-            vm.warp(enactAt);vm.expectRevert("ET: unexpected evm script");et.enactMotion(id,abi.encode(address(share),2 ether));
+            bytes memory substituted=burnInput(address(share),2 ether);vm.warp(enactAt);vm.expectRevert("ET: unexpected evm script");et.enactMotion(id,substituted);
             assertEq(uint256(et.getMotion(id).status),uint256(MockEasyTrack.MotionStatus.Pending));assertEq(share.totalSupply(),supply);
             et.enactMotion(id,input);assertEq(share.balanceOf(firstLoss),b-1 ether);assertEq(share.totalSupply(),supply-1 ether);
             vm.expectRevert("ET: motion not pending");et.enactMotion(id,input);
@@ -778,8 +789,8 @@ contract SepoliaBurnCoverageTest is SepoliaCoverageFixture {
         vm.warp(vm.getBlockTimestamp()+et.motionDuration());vm.expectRevert();et.enactMotion(oversized,tooMuch);
         assertEq(uint256(et.getMotion(oversized).status),0);assertEq(share.balanceOf(firstLoss),b);assertEq(share.totalSupply(),supply);
         // Removing the fixture factory prevents new creation, but does not invalidate an existing motion.
-        vm.prank(et.owner());et.removeEVMScriptFactory(a("burnFactory"));assertFalse(et.evmScriptFactories(a("burnFactory")));
-        vm.expectRevert();committeeExecute(address(et),abi.encodeCall(et.createMotion,(a("burnFactory"),input)),0,0);
+        vm.prank(et.owner());et.removeEVMScriptFactory(a("universalFactory"));assertFalse(et.evmScriptFactories(a("universalFactory")));
+        vm.expectRevert();committeeExecute(address(et),abi.encodeCall(et.createMotion,(a("universalFactory"),input)),0,0);
         et.enactMotion(first,input);assertEq(share.balanceOf(firstLoss),0);assertEq(share.totalSupply(),supply-b);
         vm.expectRevert();et.enactMotion(second,secondInput);assertEq(uint256(et.getMotion(second).status),0);
     }
@@ -797,8 +808,10 @@ contract SepoliaBurnCoverageTest is SepoliaCoverageFixture {
         vm.prank(a("easyTrack"));vm.expectRevert();executor.executeEVMScript(hex"00000002");
         vm.prank(a("easyTrack"));vm.expectRevert();executor.executeEVMScript(hex"0000000101");
         vm.prank(a("easyTrack"));executor.executeEVMScript(hex"00000001");
-        bytes memory revoke=roleData(address(operator),abi.encodeCall(IRoles.revokeFunction,(assetOperator,token("weth"),IERC20.transfer.selector)),0,bytes32("governance"),true);
-        bytes memory chunk=abi.encodePacked(bytes20(address(operator)),uint32(revoke.length),revoke);
+        UniversalFactory uf=UniversalFactory(a("universalFactory"));UniversalFactory.Write[] memory writes=new UniversalFactory.Write[](1);
+        writes[0]=UniversalFactory.Write(address(operator),bytes32("governance"),address(operator),abi.encodeCall(IRoles.revokeFunction,(assetOperator,token("weth"),IERC20.transfer.selector)));
+        bytes memory revoke=abi.encodeCall(UniversalFactory.applyMotion,(abi.encode(uf.epoch(),uf.policyVersion(),writes)));
+        bytes memory chunk=abi.encodePacked(bytes20(address(uf)),uint32(revoke.length),revoke);
         bytes memory bad=abi.encodePacked(hex"00000001",chunk,bytes20(address(operator)),uint32(4),bytes4(0xdeadbeef));
         vm.prank(a("easyTrack"));vm.expectRevert();executor.executeEVMScript(bad);
         deal(token("weth"),asset,1);exec(committee,operator,assetOperator,token("weth"),transferData(orders,1),0);
@@ -814,7 +827,7 @@ contract SepoliaGovernanceCoverageTest is SepoliaCoverageFixture {
         tree[1]=IRoles.ConditionFlat(0,1,16,abi.encode(orders));
         tree[2]=IRoles.ConditionFlat(0,1,28,abi.encode(bytes32("orders_weth")));
     }
-    function govern(bytes memory data) internal { exec(a("easyTrackExecutor"),operator,bytes32("governance"),address(operator),data,0); }
+    function govern(bytes memory data) internal { exec(a("universalFactory"),operator,bytes32("governance"),address(operator),data,0); }
     function test_GOV_all_target_function_admin_paths_and_options_roundtrip() public {
         address w=token("weth");deal(w,asset,100);IRoles.ConditionFlat[] memory tree=conditions();
         govern(abi.encodeCall(IRoles.revokeTarget,(assetOperator,w)));denied(committee,operator,assetOperator,w,transferData(orders,1),0);
@@ -832,17 +845,17 @@ contract SepoliaGovernanceCoverageTest is SepoliaCoverageFixture {
     function test_GOV_all_admin_selectors_reject_wrong_keys_and_every_protected_target() public {
         address[9] memory protected_=[asset,orders,firstLoss,committee,emergency,address(operator),address(safety),address(ordersRoles),address(firstLossRoles)];
         bytes32[11] memory keys=[assetOperator,bytes32("operator"),bytes32("emergency"),ordersOperator,assetEmergency,ordersEmergency,bytes32("governance"),bytes32("first-loss"),bytes32("first-loss-burn"),bytes32(0),bytes32("foreign")];
-        IRoles.ConditionFlat[] memory tree=conditions();address executor=a("easyTrackExecutor");address weth=token("weth");bytes32 before=configuration();
+        IRoles.ConditionFlat[] memory tree=conditions();address factory=a("universalFactory");address weth=token("weth");bytes32 before=configuration();
         for(uint256 k;k<keys.length;++k)for(uint256 t;t<10;++t){
             if(k==0&&t==0)continue;
             bytes32 key=keys[k];address target=t==0?weth:protected_[t-1];
             bytes[5] memory calls=[abi.encodeCall(IRoles.scopeTarget,(key,target)),abi.encodeCall(IRoles.revokeTarget,(key,target)),abi.encodeCall(IRoles.allowFunction,(key,target,IERC20.transfer.selector,uint8(0))),abi.encodeCall(IRoles.revokeFunction,(key,target,IERC20.transfer.selector)),abi.encodeCall(IRoles.scopeFunction,(key,target,IERC20.transfer.selector,tree,uint8(0)))];
-            for(uint256 j;j<5;++j)denied(executor,operator,bytes32("governance"),address(operator),calls[j],0);
+            for(uint256 j;j<5;++j)denied(factory,operator,bytes32("governance"),address(operator),calls[j],0);
         }
         assertEq(configuration(),before);
         for(uint8 option=2;option<4;++option){
-            denied(a("easyTrackExecutor"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.allowFunction,(assetOperator,token("weth"),IERC20.transfer.selector,option)),0);
-            denied(a("easyTrackExecutor"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.scopeFunction,(assetOperator,token("weth"),IERC20.transfer.selector,tree,option)),0);
+            denied(a("universalFactory"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.allowFunction,(assetOperator,token("weth"),IERC20.transfer.selector,option)),0);
+            denied(a("universalFactory"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.scopeFunction,(assetOperator,token("weth"),IERC20.transfer.selector,tree,option)),0);
         }
     }
     function test_GOV_existing_delegatecall_can_only_be_downgraded() public {
@@ -852,8 +865,8 @@ contract SepoliaGovernanceCoverageTest is SepoliaCoverageFixture {
             exec(committee,operator,assetOperator,weth,payload,1);
             IRoles.ConditionFlat[] memory tree=new IRoles.ConditionFlat[](2);tree[0]=IRoles.ConditionFlat(0,5,5,"");tree[1]=IRoles.ConditionFlat(0,1,16,abi.encode(orders));
             for(uint8 forbidden=2;forbidden<4;++forbidden){
-                denied(a("easyTrackExecutor"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.allowFunction,(assetOperator,weth,selector,forbidden)),0);
-                denied(a("easyTrackExecutor"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.scopeFunction,(assetOperator,weth,selector,tree,forbidden)),0);
+                denied(a("universalFactory"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.allowFunction,(assetOperator,weth,selector,forbidden)),0);
+                denied(a("universalFactory"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.scopeFunction,(assetOperator,weth,selector,tree,forbidden)),0);
             }
             exec(committee,operator,assetOperator,weth,payload,1);
             if(scoped==0)govern(abi.encodeCall(IRoles.allowFunction,(assetOperator,weth,selector,replacement)));
@@ -863,25 +876,25 @@ contract SepoliaGovernanceCoverageTest is SepoliaCoverageFixture {
         }
     }
     function test_GOV_fallback_and_singleton_routes_fail_at_policy_boundary() public {
-        address[5] memory safes=[asset,orders,firstLoss,committee,emergency];address executor=a("easyTrackExecutor");bytes32 before=configuration();
+        address[5] memory safes=[asset,orders,firstLoss,committee,emergency];address factory=a("universalFactory");bytes32 before=configuration();
         for(uint256 i;i<safes.length;++i){
-            denied(executor,operator,bytes32("governance"),safes[i],abi.encodeWithSignature("setFallbackHandler(address)",controller),0);
+            denied(factory,operator,bytes32("governance"),safes[i],abi.encodeWithSignature("setFallbackHandler(address)",controller),0);
             // Probe the legacy upgrade selector; this does not assert that the current Safe implements it.
-            denied(executor,operator,bytes32("governance"),safes[i],abi.encodeWithSignature("changeMasterCopy(address)",controller),0);
-            denied(executor,operator,bytes32("governance"),safes[i],abi.encodeWithSignature("execTransactionFromModule(address,uint256,bytes,uint8)",controller,0,bytes(""),uint8(1)),0);
+            denied(factory,operator,bytes32("governance"),safes[i],abi.encodeWithSignature("changeMasterCopy(address)",controller),0);
+            denied(factory,operator,bytes32("governance"),safes[i],abi.encodeWithSignature("execTransactionFromModule(address,uint256,bytes,uint8)",controller,0,bytes(""),uint8(1)),0);
         }
         assertEq(configuration(),before);
     }
     function test_GOV_executor_cannot_use_direct_owner_or_module_routes() public {
-        address executor=a("easyTrackExecutor");address voting=a("voting");address agent=a("agent");address[3] memory safes=[asset,orders,firstLoss];bytes32 before=configuration();
+        address factory=a("universalFactory");address voting=a("voting");address agent=a("agent");address[3] memory safes=[asset,orders,firstLoss];bytes32 before=configuration();
         for(uint256 i;i<safes.length;++i){
-            vm.prank(executor);vm.expectRevert("GS031");ISafe(payable(safes[i])).enableModule(executor);
-            vm.prank(executor);vm.expectRevert("GS030");ISafe(payable(safes[i])).approveHash(bytes32(uint256(1)));
-            vm.prank(executor);vm.expectRevert("GS031");ISafe(payable(safes[i])).setGuard(executor);
-            for(uint8 op;op<2;++op){vm.prank(executor);vm.expectRevert("GS104");ICoverageSafe(safes[i]).execTransactionFromModuleReturnData(controller,0,"",op);}
+            vm.prank(factory);vm.expectRevert("GS031");ISafe(payable(safes[i])).enableModule(factory);
+            vm.prank(factory);vm.expectRevert("GS030");ISafe(payable(safes[i])).approveHash(bytes32(uint256(1)));
+            vm.prank(factory);vm.expectRevert("GS031");ISafe(payable(safes[i])).setGuard(factory);
+            for(uint8 op;op<2;++op){vm.prank(factory);vm.expectRevert("GS104");ICoverageSafe(safes[i]).execTransactionFromModuleReturnData(controller,0,"",op);}
         }
-        vm.prank(executor);vm.expectRevert("OWN: not owner");MockAragonAgent(payable(voting)).execute(asset,0,abi.encodeCall(ISafe.enableModule,(executor)));
-        vm.prank(executor);vm.expectRevert("OWN: not owner");MockAragonAgent(payable(agent)).execute(asset,0,abi.encodeCall(ISafe.enableModule,(executor)));
+        vm.prank(factory);vm.expectRevert("OWN: not owner");MockAragonAgent(payable(voting)).execute(asset,0,abi.encodeCall(ISafe.enableModule,(factory)));
+        vm.prank(factory);vm.expectRevert("OWN: not owner");MockAragonAgent(payable(agent)).execute(asset,0,abi.encodeCall(ISafe.enableModule,(factory)));
         assertEq(configuration(),before);
     }
     function test_GOV_allowance_timestamp_classes_and_overflow_recovery() public {
@@ -907,15 +920,15 @@ contract SepoliaGovernanceCoverageTest is SepoliaCoverageFixture {
     function test_GOV_forbidden_administration_and_both_budget_key_updates() public {
         bytes32[] memory keys=new bytes32[](1);keys[0]=assetOperator;bool[] memory values=new bool[](1);values[0]=true;
         bytes[7] memory forbidden=[abi.encodeCall(IRoles.assignRoles,(controller,keys,values)),abi.encodeCall(IRoles.setDefaultRole,(controller,assetOperator)),abi.encodeWithSignature("transferOwnership(address)",controller),abi.encodeWithSignature("setAvatar(address)",controller),abi.encodeWithSignature("setTarget(address)",controller),abi.encodeCall(IRoles.setTransactionUnwrapper,(token("weth"),IERC20.transfer.selector,controller)),abi.encodeCall(IRoles.allowTarget,(assetOperator,token("weth"),uint8(0)))];
-        for(uint256 i;i<7;++i)denied(a("easyTrackExecutor"),operator,bytes32("governance"),address(operator),forbidden[i],0);
+        for(uint256 i;i<7;++i)denied(a("universalFactory"),operator,bytes32("governance"),address(operator),forbidden[i],0);
         address[3] memory safes=[asset,orders,firstLoss];for(uint256 i;i<3;++i){
-            denied(a("easyTrackExecutor"),operator,bytes32("governance"),safes[i],abi.encodeCall(ISafe.enableModule,(controller)),0);
-            denied(a("easyTrackExecutor"),operator,bytes32("governance"),safes[i],abi.encodeCall(ISafe.setGuard,(controller)),0);
+            denied(a("universalFactory"),operator,bytes32("governance"),safes[i],abi.encodeCall(ISafe.enableModule,(controller)),0);
+            denied(a("universalFactory"),operator,bytes32("governance"),safes[i],abi.encodeCall(ISafe.setGuard,(controller)),0);
         }
         for(uint256 i;i<2;++i){bytes32 key=i==0?bytes32("orders_weth"):bytes32("orders_usdc");bytes32 other=allowanceHash(i==0?bytes32("orders_usdc"):bytes32("orders_weth"));
             govern(abi.encodeCall(IRoles.setAllowance,(key,uint128(5),uint128(10),uint128(2),uint64(30 days),uint64(vm.getBlockTimestamp()))));
             (uint128 refill,uint128 maximum,uint64 period,uint128 b,uint64 timestamp)=operator.allowances(key);assertEq(refill,2);assertEq(maximum,10);assertEq(period,30 days);assertEq(b,5);assertEq(timestamp,vm.getBlockTimestamp());assertEq(allowanceHash(i==0?bytes32("orders_usdc"):bytes32("orders_weth")),other);
-            denied(a("easyTrackExecutor"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.setAllowance,(key,1,1,1,uint64(30 days-1),0)),0);
+            denied(a("universalFactory"),operator,bytes32("governance"),address(operator),abi.encodeCall(IRoles.setAllowance,(key,1,1,1,uint64(30 days-1),0)),0);
         }
     }
     function test_GOV_disabled_modifier_cannot_admin_and_only_voting_restores() public {
@@ -923,7 +936,7 @@ contract SepoliaGovernanceCoverageTest is SepoliaCoverageFixture {
         for(uint256 i;i<mods.length&&mods[i]!=address(operator);++i)previous=mods[i];
         exec(emergency,safety,assetEmergency,asset,abi.encodeCall(ISafe.disableModule,(previous,address(operator))),0);
         bytes memory revoke=abi.encodeCall(IRoles.revokeFunction,(assetOperator,token("weth"),IERC20.transfer.selector));
-        vm.prank(a("easyTrackExecutor"));vm.expectRevert("GS104");operator.execTransactionWithRole(address(operator),0,revoke,0,bytes32("governance"),true);
+        vm.prank(a("universalFactory"));vm.expectRevert("GS104");operator.execTransactionWithRole(address(operator),0,revoke,0,bytes32("governance"),true);
         denied(emergency,safety,assetEmergency,asset,abi.encodeCall(ISafe.enableModule,(address(operator))),0);
         vm.prank(controller);vm.expectRevert("GS031");ISafe(payable(asset)).enableModule(address(operator));
         ownerCall(asset,asset,abi.encodeCall(ISafe.enableModule,(address(operator))));govern(revoke);denied(committee,operator,assetOperator,token("weth"),transferData(orders,0),0);
@@ -1001,7 +1014,7 @@ contract SepoliaEmergencyCoverageTest is SepoliaCoverageFixture {
     function test_EM_orders_administration_selector_key_matrix() public { emergencyAdminMatrix(true); }
     function test_EM_combined_filled_order_claims_frozen_governance_and_restart() public {
         CoWOrder.Data memory o=order();o.sellAmount=100;o.buyAmount=50;deal(o.sellToken,orders,1000);deal(o.buyToken,address(settlement),1000);sign(o);settleAmount(o,100,"",false,50);
-        address agent=a("agent");address executor=a("easyTrackExecutor");uint32 stamp=uint32(vm.getBlockTimestamp());
+        address agent=a("agent");address factory=a("universalFactory");uint32 stamp=uint32(vm.getBlockTimestamp());
         uint256[2] memory proceeds;uint256[2] memory supply;uint32[] memory stamps=new uint32[](1);stamps[0]=stamp;
         for(uint256 i;i<2;++i){SepoliaShares share=SepoliaShares(a(i==0?"usdShare":"ethShare"));SepoliaRedeemQueue queue=SepoliaRedeemQueue(a(i==0?"usdQueue":"ethQueue"));
             supply[i]=share.totalSupply();proceeds[i]=queue.asset().balanceOf(agent);
@@ -1014,7 +1027,7 @@ contract SepoliaEmergencyCoverageTest is SepoliaCoverageFixture {
         exec(emergency,safety,assetEmergency,asset,abi.encodeCall(ISafe.disableModule,(previous,address(operator))),0);
         exec(emergency,ordersRoles,ordersEmergency,o.sellToken,abi.encodeCall(IERC20.approve,(d("vaultRelayer"),0)),0);
         // scopeTarget is an allowed governance selector, so the disabled module must block it before it can grant a target.
-        vm.prank(executor);vm.expectRevert("GS104");operator.execTransactionWithRole(address(operator),0,abi.encodeCall(IRoles.scopeTarget,(assetOperator,address(0xBEEF))),0,bytes32("governance"),true);
+        vm.prank(factory);vm.expectRevert("GS104");operator.execTransactionWithRole(address(operator),0,abi.encodeCall(IRoles.scopeTarget,(assetOperator,address(0xBEEF))),0,bytes32("governance"),true);
         ownerCall(asset,asset,abi.encodeCall(ISafe.enableModule,(address(operator))));ownerCall(orders,o.sellToken,abi.encodeCall(IERC20.approve,(d("vaultRelayer"),type(uint256).max)));
         assertEq(configuration(),baseline);reject(committee,operator,assetOperator,address(0xBEEF),hex"deadbeef",0,2);
         vm.expectRevert("GPv2: order filled");settleAmount(o,100,"",false,50);

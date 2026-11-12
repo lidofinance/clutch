@@ -8,5 +8,5 @@
 | [Threat model](threat-model.md) | Failure modes, with their triggers, mitigations and detection |
 | [Enabling vote](enabling-vote.md) | Prerequisites, the mandate's owed text, direct vote contents without Dual Governance, and later governance actions |
 | [Sepolia stand deployment plan](sepolia-stand-plan.md) | Implementation tasks, deployment steps and acceptance checks for Asset, Orders, CoW and First-loss |
-| [Sepolia migration to the universal factory](sepolia-factory-migration.md) | Fork-first tasks that move the existing stand's motion roles to the universal factory |
+| [Sepolia migration to the universal factory](sepolia-factory-migration.md) | Deploy and test plan that moves the stand's motion roles to the universal factory |
 | [LIP draft](lip-draft.md) | The external proposal: a skeleton that points to the owner pages until phase 4 |

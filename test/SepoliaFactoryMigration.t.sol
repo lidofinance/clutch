@@ -9,8 +9,6 @@ import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 import {MockAragonVoting} from "../src/mocks/MockAragonVoting.sol";
 import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 import {SepoliaDepositQueue, SepoliaEasyTrack} from "../src/mocks/SepoliaStand.sol";
-import {SafeExec} from "../src/exec/SafeExec.sol";
-import {DeployFactorySepolia} from "../script/sepolia/DeployFactorySepolia.s.sol";
 
 interface IComposableCoWRemove {
     function remove(bytes32 singleOrderHash) external;
@@ -39,33 +37,15 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
     address internal weth;
 
     function setUp() public override {
-        if (vm.envOr("SEPOLIA_STAND_BLOCK", uint256(0)) == 0 || bytes(vm.envOr("SEPOLIA_ARTIFACT", string(""))).length == 0) {
+        if (vm.envOr("SEPOLIA_STAND_BLOCK", uint256(0)) == 0 || bytes(vm.envOr("SEPOLIA_MIGRATION_ARTIFACT", string(""))).length == 0) {
             vm.skip(true);
             return;
         }
         super.setUp();
         et = SepoliaEasyTrack(a("easyTrack"));
         weth = token("weth");
-        UniversalFactory.Config memory config = new DeployFactorySepolia().config(manifest);
-        // The fixture's pranked top-ups raise the controller's nonce on the fork; deploy from the block's nonce.
-        vm.setNonceUnsafe(controller, uint64(vm.envUint("SEPOLIA_CONTROLLER_NONCE")));
-        vm.startPrank(controller);
-        SepoliaDepositQueue usdDeposits = new SepoliaDepositQueue(IERC20(token("usdc")));
-        ethDeposits = new SepoliaDepositQueue(IERC20(weth));
-        uf = new UniversalFactory(config);
-        assertEq(address(usdDeposits), a("usdDepositQueue"), "runner predicted the USD queue");
-        assertEq(address(ethDeposits), a("ethDepositQueue"), "runner predicted the ETH queue");
-        assertEq(address(uf), a("universalFactory"), "runner predicted the factory");
-        et.addEVMScriptFactory(address(uf));
-        string memory artifact = vm.readFile(vm.envString("SEPOLIA_ARTIFACT"));
-        address[] memory to = vm.parseJsonAddressArray(artifact, ".calls.to");
-        address[] memory avatars = vm.parseJsonAddressArray(artifact, ".calls.avatar");
-        bytes[] memory data = vm.parseJsonBytesArray(artifact, ".calls.data");
-        MockAragonVoting voting = MockAragonVoting(payable(a("voting")));
-        for (uint256 i; i < to.length; ++i) {
-            SafeExec.execAsOwner(voting, ISafe(payable(avatars[i])), to[i], data[i]);
-        }
-        vm.stopPrank();
+        uf = UniversalFactory(a("universalFactory"));
+        ethDeposits = SepoliaDepositQueue(a("ethDepositQueue"));
     }
 
     // --- helpers ---

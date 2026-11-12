@@ -7,9 +7,9 @@ import {IRoles} from "../src/interfaces/IRoles.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
 import {MockAragonVoting} from "../src/mocks/MockAragonVoting.sol";
-import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 import {SepoliaEasyTrack} from "../src/mocks/SepoliaStand.sol";
-import {SafeExec, Call, EVMScriptLib} from "../src/exec/SafeExec.sol";
+import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
+import {SafeExec} from "../src/exec/SafeExec.sol";
 import {CoWOrder, IOrderSigner, ICoWFallback, IComposableCoW} from "../script/sepolia/CoWInterfaces.sol";
 
 // ABI and flags checked against cowprotocol/contracts GPv2Settlement, GPv2Trade and GPv2Signing.
@@ -190,11 +190,9 @@ contract SepoliaCurrentStandTest is SepoliaCurrentStandFixture {
 
     function test_governance_executor_restricts_keys_membership_and_administrative_targets() public {
         address weth = token("weth");
-        address executor = a("easyTrackExecutor");
+        address executor = a("universalFactory");
         bytes memory revoke = abi.encodeCall(IRoles.revokeFunction, (assetOperator, weth, IERC20.transfer.selector));
-        Call[] memory calls = new Call[](1); calls[0] = Call(address(operator), revoke);
-        vm.prank(a("easyTrack"));
-        MockEVMScriptExecutor(executor).executeEVMScript(EVMScriptLib.buildAsGovernance(operator, bytes32("governance"), calls));
+        exec(executor, operator, bytes32("governance"), address(operator), revoke, 0);
         permissionDenied(committee, operator, assetOperator, weth, abi.encodeCall(IERC20.transfer, (orders, 0)), 0, CONDITION_VIOLATION);
         denied(executor, operator, bytes32("governance"), address(operator),
             abi.encodeCall(IRoles.revokeFunction, (bytes32("operator"), weth, IERC20.transfer.selector)), 0);
@@ -213,7 +211,7 @@ contract SepoliaCurrentStandTest is SepoliaCurrentStandFixture {
         denied(executor, operator, bytes32("governance"), address(operator),
             abi.encodeCall(IRoles.setAllowance, (bytes32("foreign"), 1, 1, 1, uint64(30 days), 0)), 0);
         permissionDenied(executor, ordersRoles, bytes32("governance"), address(ordersRoles), revoke, 0,
-            bytes4(keccak256("NotAuthorized(address)")));
+            CONDITION_VIOLATION);
     }
 
     function test_emergency_recovery_zero_approvals_and_voting_restart() public {
@@ -222,8 +220,13 @@ contract SepoliaCurrentStandTest is SepoliaCurrentStandFixture {
         deal(token("usdc"), address(settlement), 1000e6);
         SepoliaEasyTrack et = SepoliaEasyTrack(a("easyTrack"));
         uint256 burnId = et.motionsCount();
-        bytes memory burnInput = abi.encode(a("usdShare"), 1 ether);
-        committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), burnInput)));
+        UniversalFactory uf = UniversalFactory(a("universalFactory"));
+        UniversalFactory.Write[] memory writes = new UniversalFactory.Write[](1);
+        writes[0] = UniversalFactory.Write(
+            address(firstLossRoles), "first-loss-burn", a("usdShare"), abi.encodeWithSignature("burn(uint256)", 1 ether)
+        );
+        bytes memory burnInput = abi.encode(uf.epoch(), uf.policyVersion(), writes);
+        committeeCall(address(et), abi.encodeCall(et.createMotion, (address(uf), burnInput)));
         CoWOrder.Data memory o = order();
         exec(committee, ordersRoles, ordersOperator, d("orderSigner"),
             abi.encodeCall(IOrderSigner.signOrder, (o, uint32(1 hours), 0)), 1);

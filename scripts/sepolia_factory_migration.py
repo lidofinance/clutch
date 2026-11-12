@@ -3,7 +3,8 @@
 """Rehearse the stand's move to the universal factory on a pinned fork. No public transaction.
 
 The runner predicts the addresses that `deploy-factory` gives the two deposit queues and the factory from the
-controller's nonce at the fork block, compiles the policy for them, and runs SepoliaFactoryMigrationTest.
+controller's nonce at the fork block, and compiles the policy for them. The fixture deploys them and applies the
+policy on the fork, and then the migration test and every suite of the current stand run on the moved stand.
 """
 import json
 import os
@@ -12,12 +13,13 @@ import subprocess
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from sepolia_test_current import rpc  # noqa: E402
+from sepolia_test_current import recent_solver, rpc, usdc_approval_state  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "cache/sepolia/factory-migration"
 # The order of DeployFactorySepolia.deploy: the USD queue, the ETH queue, then the factory.
 DEPLOYED = ["usdDepositQueue", "ethDepositQueue", "universalFactory"]
+SUITES = "^Sepolia(FactoryMigration|Stand|CurrentStand|CoWSettlement|.*Coverage)Test$"
 
 
 def main():
@@ -36,10 +38,12 @@ def main():
     manifest, artifact = OUT / "manifest.json", OUT / "policy.json"
     manifest.write_text(json.dumps(stand, indent=2) + "\n")
     subprocess.run(["bun", "policy/constellation/sepolia/compile.ts", str(manifest), str(artifact)], cwd=ROOT, check=True)
-    env = {**os.environ, "SEPOLIA_STAND_BLOCK": str(number), "SEPOLIA_MANIFEST": str(manifest), "SEPOLIA_ARTIFACT": str(artifact),
-           "SEPOLIA_CONTROLLER_NONCE": str(nonce)}
+    solver = "0x" + recent_solver(stand, number)["topics"][1][-40:]
+    env = {**os.environ, "SEPOLIA_STAND_BLOCK": str(number), "SEPOLIA_MANIFEST": str(manifest),
+           "SEPOLIA_MIGRATION_ARTIFACT": str(artifact), "SEPOLIA_TEST_SOLVER": solver,
+           "SEPOLIA_EXPECTED_USDC_ALLOWANCE": usdc_approval_state(stand, number)["expected"]}
     result = subprocess.run(
-        ["forge", "test", "--match-contract", "^SepoliaFactoryMigrationTest$", "--hardfork", "amsterdam", "--threads", "1", "-vv"],
+        ["forge", "test", "--match-contract", SUITES, "--hardfork", "amsterdam", "--threads", "1", "-vv"],
         cwd=ROOT, env=env, capture_output=True, text=True,
     )
     output = (result.stdout + result.stderr).replace(os.environ["SEPOLIA_RPC"], "<RPC>")

@@ -6,8 +6,8 @@ tags: [sepolia, deployment, testing, cow, first-loss]
 status: draft
 review_status: slop
 generated:
-  by: claude-code/sonnet-5.5
-  at: 2026-11-12T12:27:25Z
+  by: claude-code/opus-5.5
+  at: 2026-11-12T17:20:37Z
 verified: []
 sources:
   - id: s1
@@ -144,7 +144,7 @@ just --justfile sepolia.just preflight
 just --justfile sepolia.just rehearse
 ```
 
-`rehearse` starts a disposable Anvil fork on `127.0.0.1:8547`, deploys the stand, compiles and applies its policy, funds test balances, then runs the drills.
+`rehearse` starts a disposable Anvil fork on `127.0.0.1:8547`, deploys the stand and the [universal factory](sepolia-factory-migration.md), compiles and applies its policy, funds test balances, then runs the drills.
 It stops Anvil after the run. It does not sign or send public transactions.
 Its receipts stay under `cache/sepolia/rehearsal/broadcast/`.
 The commands use Amsterdam execution rules [s10].

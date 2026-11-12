@@ -4,7 +4,13 @@ pragma solidity >=0.8.24 <0.9.0;
 import {Test} from "forge-std/Test.sol";
 import {ISafe} from "../../src/interfaces/ISafe.sol";
 import {IRoles} from "../../src/interfaces/IRoles.sol";
-import {SepoliaShares} from "../../src/mocks/SepoliaStand.sol";
+import {IERC20} from "../../src/interfaces/Tokens.sol";
+import {UniversalFactory} from "../../src/factory/UniversalFactory.sol";
+import {MockAragonVoting} from "../../src/mocks/MockAragonVoting.sol";
+import {MockEasyTrack} from "../../src/mocks/MockEasyTrack.sol";
+import {SepoliaShares, SepoliaDepositQueue} from "../../src/mocks/SepoliaStand.sol";
+import {SafeExec} from "../../src/exec/SafeExec.sol";
+import {DeployFactorySepolia} from "../../script/sepolia/DeployFactorySepolia.s.sol";
 import {CoWOrder, IComposableCoW} from "../../script/sepolia/CoWInterfaces.sol";
 
 /// @dev Shared setup reads deployed permissions and supplies test shares only on the local fork.
@@ -67,7 +73,31 @@ abstract contract SepoliaStandFixture is Test {
         safety = IRoles(a("safetyModifier"));
         ordersRoles = IRoles(a("ordersModifier"));
         firstLossRoles = IRoles(a("firstLossModifier"));
+        if (bytes(vm.envOr("SEPOLIA_MIGRATION_ARTIFACT", string(""))).length != 0) migrateToFactory();
         supplyFirstLossShares();
+    }
+
+    /// @dev The move to the universal factory on the fork: what `deploy-factory` deploys, from the controller at
+    ///      the block's nonce, the retired burn factory, then the calls of the artifact that scripts/sepolia_factory_migration.py compiled.
+    function migrateToFactory() internal {
+        UniversalFactory.Config memory config = new DeployFactorySepolia().config(manifest);
+        vm.startPrank(controller);
+        address usdDeposits = address(new SepoliaDepositQueue(IERC20(token("usdc"))));
+        address ethDeposits = address(new SepoliaDepositQueue(IERC20(token("weth"))));
+        address factory = address(new UniversalFactory(config));
+        assertEq(usdDeposits, a("usdDepositQueue"), "runner predicted the USD queue");
+        assertEq(ethDeposits, a("ethDepositQueue"), "runner predicted the ETH queue");
+        assertEq(factory, a("universalFactory"), "runner predicted the factory");
+        MockEasyTrack(a("easyTrack")).addEVMScriptFactory(factory);
+        MockEasyTrack(a("easyTrack")).removeEVMScriptFactory(a("burnFactory"));
+        string memory artifact = vm.readFile(vm.envString("SEPOLIA_MIGRATION_ARTIFACT"));
+        address[] memory to = vm.parseJsonAddressArray(artifact, ".calls.to");
+        address[] memory avatars = vm.parseJsonAddressArray(artifact, ".calls.avatar");
+        bytes[] memory data = vm.parseJsonBytesArray(artifact, ".calls.data");
+        for (uint256 i; i < to.length; ++i) {
+            SafeExec.execAsOwner(MockAragonVoting(payable(a("voting"))), ISafe(payable(avatars[i])), to[i], data[i]);
+        }
+        vm.stopPrank();
     }
 
     function supplyFirstLossShares() internal virtual {

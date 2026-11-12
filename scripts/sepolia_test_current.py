@@ -173,6 +173,19 @@ def usdc_approval_state(stand, number):
                                 "block": position(anchor)[0], "logIndex": position(anchor)[1]}}
 
 
+def recent_solver(stand, number):
+    """Discover an existing solver from canonical Settlement(address) logs, without changing its allowlist."""
+    for end in range(number, max(number - 5000, 0), -1000):
+        logs = rpc("eth_getLogs", [{
+            "address": stand["dependencies"]["contracts"]["settlement"]["address"],
+            "fromBlock": hex(max(end - 999, 0)), "toBlock": hex(end),
+            "topics": ["0x40338ce1a7c49204f0099533b1e9a7ee0a3d261f84974ab7af36105b8c4e9db4"],
+        }])
+        if logs:
+            return logs[-1]
+    raise ValueError("No recent settlement solver found")
+
+
 def stand_inventory(stand, number):
     """Reject an inconsistent stand before running any drill; pin all runtimes."""
     if (stand.get("network") != "sepolia" or stand.get("chainId") != 11155111
@@ -260,19 +273,7 @@ def main():
     payload = ROOT / "cache/sepolia/constellation/payload.json"
     hashes["payload"] = hashlib.sha256(payload.read_bytes()).hexdigest()
     inventory = stand_inventory(stand, number)
-    # Discover an existing solver from canonical Settlement(address) logs, without changing its allowlist.
-    solver_log = None
-    for end in range(number, max(number - 5000, 0), -1000):
-        logs = rpc("eth_getLogs", [{
-            "address": stand["dependencies"]["contracts"]["settlement"]["address"],
-            "fromBlock": hex(max(end - 999, 0)), "toBlock": hex(end),
-            "topics": ["0x40338ce1a7c49204f0099533b1e9a7ee0a3d261f84974ab7af36105b8c4e9db4"],
-        }])
-        if logs:
-            solver_log = logs[-1]
-            break
-    if solver_log is None:
-        raise ValueError("No recent settlement solver found")
+    solver_log = recent_solver(stand, number)
     solver = "0x" + solver_log["topics"][1][-40:]
     usdc_approval = usdc_approval_state(stand, number)
     allowances = funding_allowances(stand, number)

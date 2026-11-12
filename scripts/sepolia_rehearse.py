@@ -84,6 +84,7 @@ def main():
         rpc("anvil_setBalance", [sender, hex(100 * 10**18)])
         args = ["--hardfork", "amsterdam", "--rpc-url", LOCAL, "--sender", sender, "--unlocked", "--broadcast", "--non-interactive", "--slow", "--gas-estimate-multiplier", "200"]
         run(["forge", "script", "script/sepolia/DeploySepolia.s.sol", *args], "deploy", env)
+        run(["forge", "script", "script/sepolia/DeployFactorySepolia.s.sol", *args], "deploy-factory", env)
         run(["bun", "policy/constellation/sepolia/compile.ts", env["SEPOLIA_MANIFEST"], env["SEPOLIA_ARTIFACT"]], "compile", env)
         run(["forge", "script", "script/sepolia/ApplySepolia.s.sol", *args], "apply", env)
         run(["forge", "script", "script/sepolia/FundSepolia.s.sol", *args], "fund", env)
@@ -92,7 +93,7 @@ def main():
         run(["forge", "test", "--match-contract", "SepoliaStandTest", "--hardfork", "amsterdam", "-vv"], "drills", env)
         validate_drills((CACHE / "drills.log").read_text())
         stages = {}
-        for name in ["DeploySepolia", "ApplySepolia", "FundSepolia"]:
+        for name in ["DeploySepolia", "DeployFactorySepolia", "ApplySepolia", "FundSepolia"]:
             records = json.loads((CACHE / f"broadcast/{name}.s.sol/11155111/run-latest.json").read_text())
             receipts = records["receipts"]
             if not inspect_run(records, sender)["complete"]:

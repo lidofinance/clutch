@@ -1,13 +1,13 @@
 ---
 type: Guide
 title: Sepolia stand migration to the universal factory
-description: Tasks that move the existing Sepolia stand from the Easy Track executor's roles to the universal factory, fork first.
-tags: [sepolia, factory, migration, testing]
+description: Deploy and test plan that moves the existing Sepolia stand's motion roles from the Easy Track executor to the universal factory.
+tags: [sepolia, factory, migration, deployment, testing]
 status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-12T16:41:48Z
+  at: 2026-11-12T17:19:22Z
 verified: []
 sources:
   - id: s1
@@ -19,76 +19,144 @@ sources:
   - id: s3
     resource: /specs/sepolia-stand-plan.md
     title: Sepolia stand deployment plan — the stand's contracts, roles and recipes
+  - id: s4
+    resource: urn:clutch:evidence:2026-11-12:factory-migration
+    title: Local runs — `factory-migration` at block 11992758 and `rehearse` at block 11954838; logs in `cache/sepolia/factory-migration/` and `cache/sepolia/rehearsal/`
 ---
 
 # Sepolia stand migration to the universal factory
 
-The universal factory holds every motion role on the vault's four modifiers [s1]. On the Sepolia stand, the Easy Track executor holds the `governance` and `first-loss-burn` roles, and a separate burn factory makes the burn motion [s3]. This page lists the tasks that move the existing stand to the factory. The stand stays: its owner controls Easy Track, the four modifiers and their Safes [s3].
+The universal factory holds every motion role on the four modifiers [s1]. On the stand, the Easy Track executor holds `governance` and `first-loss-burn`, and a separate burn factory makes the burn motion [s3]. This plan moves the existing stand to the universal factory. The stand stays: its controller owns Easy Track, and test Voting owns the Safes [s3].
 
-Only the stand owner sends public Sepolia transactions [s2]. An agent does the fork and local tasks.
+Only the stand owner sends public Sepolia transactions [s2].
 
-## Format
+| Modifier | Roles of the universal factory |
+|---|---|
+| operator | `governance`, `insurance-funding` |
+| safety | `restart`, `exit-governance` |
+| orders | `governance`, `approvals` |
+| first-loss | `first-loss-burn`, `insurance`, `insurance-governance` |
 
-Each task is one line: `- [ ] (priority) number task +area @who key:value`.
+## Pre-Deploy
 
-- `@agent`: an agent can do the task locally or on a fork.
-- `@human`: the task is a public Sepolia transaction or a decision.
-- `dep:N`: the task needs task N first.
+- [x] Scope: the stand takes every motion role of `main`; the executor leaves its two roles; the burn factory retires [s4].
+- [x] Parameter: the insurance-funding caps are 1 WETH and 1000 USDC in 30 days, the same as `orders_weth` and `orders_usdc` [s4].
+- [ ] Freeze the deploy commit on `testnet/sepolia`.
+- [ ] Get Sepolia ETH for about 210 transactions. The local rehearsal used 4 transactions for the factory and 204 for the policy [s4].
+- [ ] Confirm that `cache/sepolia/manifest.json` has no `universalFactory`, `usdDepositQueue` or `ethDepositQueue`.
 
-The stand's manifest is `cache/sepolia/manifest.json`. The current fork block is `11992758`.
+## Environment Setup
 
-## 0. Scope
+- [ ] Check out the deploy commit. Set `SEPOLIA_RPC`, `SEPOLIA_ACCOUNT`, `SEPOLIA_SENDER` and `ETHERSCAN_API_KEY` in `.env` [s3].
+- [x] Run the local checks.
 
-- [x] (A) 0.1 Choose the roles that the stand takes from `main` +scope @human
-  - The stand takes every motion role of `main`, with the universal factory as the member.
-  - operator modifier: `governance`, `insurance-funding`
-  - safety modifier: `restart`, `exit-governance`
-  - orders modifier: `governance`, `approvals`
-  - first-loss modifier: `first-loss-burn`, `insurance`, `insurance-governance`
-- [x] (A) 0.2 Remove the old motion members: the Easy Track executor leaves `governance` and `first-loss-burn` +scope @human
-- [x] (B) 0.3 Retire the burn factory after the universal factory works +scope @human
+```sh
+just check
+just --justfile sepolia.just check
+```
 
-## 1. Fork first
+- [x] Rehearse a fresh stand on Anvil: deploy, `deploy-factory`, compile, apply, fund and 7 drills. All pass [s4].
 
-No public transactions in this stage.
+```sh
+just --justfile sepolia.just rehearse
+```
 
-- [x] (A) 1.1 Write `script/sepolia/DeployFactorySepolia.s.sol`: the universal factory with the stand's addresses +code @agent
-  - `trustedCaller` is the committee, `executor` is `easyTrackExecutor`; also `emergencySafe`, `voting` and the four modifiers.
-  - The same script registers the factory in `SepoliaEasyTrack` and writes `universalFactory` to the manifest. The recipe is `deploy-factory`.
-- [x] (A) 1.2 Change `policy/constellation/sepolia/compile.ts`: the new roles, with `universalFactory` as their member +policy @agent dep:0.1
-- [x] (A) 1.3 Add the revocations to the Apply artifact: `assignRoles(executor, …, false)` and the old scopes +policy @agent dep:1.2
-  - `ApplySepolia` only applies the calls in the artifact. It removes nothing on its own.
-  - The artifact also sets `orders_weth` and `orders_usdc` again, so their balances refill to the cap.
-- [x] (A) 1.4 Add `universalFactory`, `usdDepositQueue` and `ethDepositQueue` to the manifest and to the tests +policy @agent
-- [x] (A) 1.5 Write the fork test `test/SepoliaFactoryMigration.t.sol`: on the stand's block, run 1.1 to 1.3 as the owners +test @agent dep:1.1,1.3
-  - Register the factory in `SepoliaEasyTrack`, then create and enact one motion for each role.
-  - Check the counter, the policy version and a cancel by Voting.
-  - Run it with `SEPOLIA_STAND_BLOCK=<block> just --justfile sepolia.just factory-migration`. The runner predicts the addresses from the controller's nonce at that block.
-  - The insurance-funding caps of 1 WETH and 1000 USDC in 30 days come from a budget motion, as on mainnet; the compiler sets no derived key.
-- [ ] (B) 1.6 Rehearse on anvil with `sepolia.just rehearse` and the new steps +test @agent dep:1.5
+- [x] Rehearse the move on a fork of the existing stand. The runner predicts the new addresses from the controller's nonce, applies the policy on the fork, and runs the migration test and every stand suite. At block `11992758`, 101 of 101 tests pass [s4].
 
-## 2. Tests of the current stand
+```sh
+SEPOLIA_STAND_BLOCK=<latest block> just --justfile sepolia.just factory-migration
+```
 
-`test-current` fails from stage 1 until 3.3: the code describes the stand after the move, and the stand on chain is still before it.
+- [ ] Run `factory-migration` again at the latest block, just before the deploy.
 
-- [ ] (A) 2.1 `SepoliaStandFixture`: replace `easyTrackExecutor` and `burnFactory` with `universalFactory` as the motion member +test @agent dep:1.2
-- [ ] (A) 2.2 `SepoliaCoverage`: run the governance and burn matrices through `applyMotion` +test @agent dep:2.1
-- [ ] (B) 2.3 Add motion cases: `StaleCounter`, `StalePolicyVersion`, `TooManyWrites`, `UnknownModifier`, `NotTrustedCaller` +test @agent
-- [ ] (B) 2.4 Change the test names in `docs/specs/invariants.md` for the new tests +docs @agent dep:2.2
+## Deploy
 
-## 3. Public Sepolia
+Set the guard before each step.
 
-Only the stand owner does this stage.
+```sh
+export CLUTCH_SEPOLIA=1
+```
 
-- [ ] (A) 3.1 Run `sepolia.just deploy-factory`: it deploys the factory with `--verify` and registers it +deploy @human dep:1.5
-- [ ] (A) 3.3 Run `just compile`, check `policy.json`, then run `just apply` +deploy @human dep:3.1
-- [ ] (B) 3.4 Call `removeEVMScriptFactory(burnFactory)` if 0.3 retires the burn factory +deploy @human dep:3.3
-- [ ] (B) 3.5 Send one public motion for each new role and keep the receipts in `cache/sepolia/` +deploy @human dep:3.3
+### 1. Deposit queues and the factory
 
-## 4. After the public run
+`deploy-factory` deploys the USD queue, the ETH queue and the factory, in this order. It registers the factory in the stand's Easy Track and writes the three addresses to the manifest.
 
-- [ ] (A) 4.1 Move `SEPOLIA_STAND_BLOCK` past 3.3 and run `test-current` +test @agent dep:3.3
-- [ ] (B) 4.2 Check the factory's code and immutables in `verify-deployment` +test @agent dep:3.1
-- [ ] (B) 4.3 Resolve the new roles in the Zodiac workspace with `constellation-resolve` and `constellation-publish` +ui @human dep:3.3
-- [ ] (B) 4.4 Change the stand plan, the test plan, the setup checklist and ADR 015 +docs @agent dep:4.1
-- [ ] (C) 4.5 Record the scope decisions of stage 0 in the decision log, with a new OD number from `main` +docs @human dep:0.1
+- [ ] Run
+
+```sh
+just --justfile sepolia.just deploy-factory
+```
+
+- [ ] Record `usdDepositQueue`, `ethDepositQueue` and `universalFactory` from the manifest.
+- [ ] Confirm the Etherscan verification of the three contracts.
+
+### 2. Policy
+
+The artifact gives the roles to the factory and removes the executor from `governance` and `first-loss-burn`. It also sets `orders_weth` and `orders_usdc` again, so their balances refill to the cap.
+
+- [ ] Compile, then read `cache/sepolia/policy.json`: 102 calls; the last two are `assignRoles(executor, …, false)`.
+
+```sh
+just --justfile sepolia.just compile
+```
+
+- [ ] Apply
+
+```sh
+just --justfile sepolia.just apply
+```
+
+### 3. Insurance-funding caps
+
+The compiler sets no derived key. A budget motion sets it, as on mainnet [s1]. `caps-input` prints the motion's input: two `setAllowance` writes of the `governance` role, under the keys `0x6b3a`, the First-loss Safe and the first ten bytes of the token.
+
+- [ ] Create the motion from the Committee Safe, and record its id.
+
+```sh
+just --justfile sepolia.just caps-motion
+```
+
+- [ ] After the motion duration, enact it.
+
+```sh
+just --justfile sepolia.just caps-enact <id>
+```
+
+### 4. Retire the burn factory
+
+- [ ] Run
+
+```sh
+just --justfile sepolia.just retire-burn-factory
+```
+
+## Post-Deploy Checks
+
+- [ ] Run the stand suites on the new state. All must pass. They check the factory's immutables, its registration, the retired burn factory, and each role's members.
+
+```sh
+SEPOLIA_STAND_BLOCK=<block after step 4> just --justfile sepolia.just test-current
+```
+
+- [ ] `policyVersion() == 1` on the factory, and `allowances(key)` on the operator modifier hold the caps of step 3.
+
+### Public motions
+
+- [ ] Send one motion for each new role, as `SepoliaFactoryMigrationTest` does on the fork. Record the transactions in the [test plan](sepolia-test-plan.md#public-sepolia-transaction-sequences).
+
+## Record Deploy Artifacts
+
+- [ ] Copy the new manifest fields to `scripts/fixtures/sepolia-stand-manifest.json`. Remove the synthetic addresses from `verify-test-payload.test.ts`.
+- [ ] Check the factory and the queues in `verify-deployment.ts`. Remove the burn-factory checks and `SepoliaFirstLossBurnFactory`.
+- [ ] Publish the 14 roles to the Zodiac workspace with `constellation-resolve` and `constellation-publish` [s2].
+- [ ] Change the [stand plan](sepolia-stand-plan.md), the [test plan](sepolia-test-plan.md), the [setup checklist](sepolia-setup-checklist.md) and ADR 015 for the new roles.
+- [ ] Record the scope and the caps in the decision log, with a new OD number from `main`.
+
+## Contingency
+
+If a check after step 1 or step 2 fails:
+
+- Do not send step 3.
+- Remove the factory from Easy Track with `removeEVMScriptFactory(universalFactory)`. An open motion can still enact, so raise the counter from the Emergency Safe with `raiseCounter()`.
+- Apply the artifact of the previous commit to give the roles back to the executor.
+- Find the cause, fix it, and run this plan again from Environment Setup.

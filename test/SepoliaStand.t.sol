@@ -7,6 +7,7 @@ import {IRoles} from "../src/interfaces/IRoles.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {MockAragonAgent} from "../src/mocks/MockAragonAgent.sol";
 import {SepoliaShares, SepoliaRedeemQueue, SepoliaEasyTrack} from "../src/mocks/SepoliaStand.sol";
+import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 import {
     CoWOrder,
     ICoWSettlement,
@@ -228,20 +229,25 @@ contract SepoliaStandTest is SepoliaStandFixture {
             SepoliaEasyTrack et = SepoliaEasyTrack(a("easyTrack"));
             uint256 sharesBefore = share.balanceOf(firstLoss);
             uint256 motionId = et.motionsCount();
-            bytes memory input = abi.encode(address(share), 2 ether);
-            committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), input)));
+            UniversalFactory uf = UniversalFactory(a("universalFactory"));
+            UniversalFactory.Write[] memory writes = new UniversalFactory.Write[](1);
+            writes[0] = UniversalFactory.Write(
+                address(firstLossRoles), "first-loss-burn", address(share), abi.encodeWithSignature("burn(uint256)", 2 ether)
+            );
+            bytes memory input = abi.encode(uf.epoch(), uf.policyVersion(), writes);
+            committeeCall(address(et), abi.encodeCall(et.createMotion, (address(uf), input)));
             vm.expectRevert("ET: objection period not passed");
             et.enactMotion(motionId, input);
             vm.warp(vm.getBlockTimestamp() + et.motionDuration());
             et.enactMotion(motionId, input);
             assertEq(share.balanceOf(firstLoss), sharesBefore - 2 ether);
-            committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), input)));
+            committeeCall(address(et), abi.encodeCall(et.createMotion, (address(uf), input)));
             vm.prank(controller);
             et.object(motionId + 1);
             vm.warp(vm.getBlockTimestamp() + et.motionDuration());
             vm.expectRevert("ET: motion not pending");
             et.enactMotion(motionId + 1, input);
-            committeeCall(address(et), abi.encodeCall(et.createMotion, (a("burnFactory"), input)));
+            committeeCall(address(et), abi.encodeCall(et.createMotion, (address(uf), input)));
             uint256[] memory ids = new uint256[](1);
             ids[0] = motionId + 2;
             vm.prank(controller);
