@@ -64,7 +64,7 @@ Do not edit these files by hand:
 After a merge conflict, take either version, run `just regen` and commit the result.
 Reviewers must approve the policy artifact's diff (ADR 004, decision 14).
 After launch, a policy change also commits its motion: run `just motion-pending <base>`, and commit `policy/constellation/pending/` (ADR 013, decision 19).
-After the motion enacts, run `just motion-settle` and commit the removal.
+After the motion enacts, run `just motion-settle`: it records the motion under `policy/constellation/enacted/` and removes the pending files. Commit both.
 
 ## Change the onboarding guide
 

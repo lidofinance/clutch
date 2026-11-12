@@ -23,7 +23,14 @@ contract RoundTrip is EnabledVault {
     /// @dev The committed example motion (policy/constellation/compiler/motion.example.ts).
     string internal constant EXAMPLE = "policy/constellation/artifacts/motion-example-rehearsal-26249900.json";
 
+    bytes32 internal constant APPROVALS = bytes32("approvals");
+
     Vm.Log[] internal recorded;
+    string internal guardFile;
+    uint256 internal accepted;
+    uint256 internal refused;
+    bool internal integrity;
+    address internal stranger = makeAddr("stranger");
 
     function setUp() public {
         _fork();
@@ -89,6 +96,157 @@ contract RoundTrip is EnabledVault {
         _create(vm.parseJsonBytes(vm.readFile(EXAMPLE), ".calldata"));
         _keep();
         _write("watch-revoke-example-open.ndjson");
+    }
+
+    /// @dev Another motion enacts the example motion's writes and one more action, a relayer approval, which no
+    ///      modifier's state holds. The chain then holds the example's head policy, but the pending motion did
+    ///      not enact: the detector must not settle it, and must report the enacted motion.
+    function test_watch_events_after_another_motion_enacts_the_pending_writes() public {
+        _deployAndEnable();
+        (,, UniversalFactory.Write[] memory writes) = uf.decodeEVMScriptCallData(vm.parseJsonBytes(vm.readFile(EXAMPLE), ".calldata"));
+        UniversalFactory.Write[] memory more = new UniversalFactory.Write[](writes.length + 1);
+        for (uint256 i = 0; i < writes.length; i++) more[i] = writes[i];
+        more[writes.length] =
+            _w(ordersMod, APPROVALS, Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.COW_VAULT_RELAYER, type(uint256).max)));
+        bytes memory cd = _calldata(more);
+        uint256 id = _create(cd);
+        _afterWindow();
+        _enact(id, cd);
+        _keep();
+        _write("watch-other-enacted.ndjson");
+    }
+
+    /// @dev What the deployed modifiers say to writes of the motion roles, one by one: the ground truth for the
+    ///      motion check's evaluation of a role's conditions. Each case is a call of a modifier on itself, made
+    ///      as the universal factory, on the state after the enabling vote. The file holds each write with
+    ///      whether the modifier accepted it.
+    function test_guard_cases_for_the_motion_check() public {
+        _deployAndEnable();
+        vm.createDir(DIR, true);
+        guardFile = string.concat(DIR, "/guard-cases.ndjson");
+        vm.writeFile(guardFile, "");
+        bytes4 transfer = IERC20.transfer.selector;
+        bytes4 approve = IERC20.approve.selector;
+        // a well-formed tree that pins nothing: both arguments of transfer or approve pass
+        IRoles.ConditionFlat[] memory any = new IRoles.ConditionFlat[](3);
+        any[0] = IRoles.ConditionFlat(0, 5, 5, "");
+        any[1] = IRoles.ConditionFlat(0, 1, 0, "");
+        any[2] = IRoles.ConditionFlat(0, 1, 0, "");
+        // a tree that the modifier's own integrity check refuses, whatever the role's policy says
+        IRoles.ConditionFlat[] memory malformed = new IRoles.ConditionFlat[](1);
+        malformed[0] = IRoles.ConditionFlat(0, 5, 5, "");
+
+        // the governance role on the operator modifier
+        bytes32 derived = _key(Mainnet.WBTC, stranger);
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.setAllowance, (bytes32("earn_usd_deposit"), 1, 1, 1, 30 days, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.setAllowance, (bytes32("earn_usd_deposit"), 1, 1, 1, 30 days - 1, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.setAllowance, (bytes32("earn_usd_deposit"), 1, 1, 1, 0, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.setAllowance, (bytes32("foreign"), 1, 1, 1, 30 days, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.setAllowance, (derived, 1, 1, 1, 30 days, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.setAllowance, (bytes32(uint256(derived) >> 8), 1, 1, 1, 30 days, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, Mainnet.WBTC)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (EMERGENCY, Mainnet.WBTC)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (GOVERNANCE, Mainnet.WBTC)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(asset))));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(opMod))));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(safetyMod))));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(orders))));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(ordersMod))));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.revokeTarget, (OPERATOR, Mainnet.SUSDS)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.revokeTarget, (EMERGENCY, Mainnet.SUSDS)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.revokeFunction, (OPERATOR, Mainnet.SUSDS, transfer)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.revokeFunction, (OPERATOR, address(asset), transfer)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.WBTC, transfer, any, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.WBTC, transfer, any, 1)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.WBTC, transfer, any, 2)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.WBTC, transfer, any, 3)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, Mainnet.WBTC, transfer, any, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, address(safetyMod), transfer, any, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.allowFunction, (OPERATOR, Mainnet.WBTC, transfer, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.allowFunction, (OPERATOR, Mainnet.WBTC, transfer, 2)));
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.allowFunction, (OPERATOR, address(asset), transfer, 0)));
+        _case(opMod, GOVERNANCE, abi.encodeWithSignature("assignRoles(address,bytes32[],bool[])", stranger, new bytes32[](0), new bool[](0)));
+        _case(opMod, bytes32("insurance-funding"), abi.encodeCall(IRoles.scopeTarget, (OPERATOR, Mainnet.WBTC)));
+
+        // the exit-governance role on the safety modifier: only pinned exits
+        bytes32 exitGovernance = bytes32("exit-governance");
+        IRoles.ConditionFlat[] memory toAgent = _tree(safetyMod, EMERGENCY, Mainnet.EARN_USD_SHARE, transfer);
+        IRoles.ConditionFlat[] memory redeem = _tree(safetyMod, EMERGENCY, Mainnet.SUSDS, bytes4(keccak256("redeem(uint256,address,address)")));
+        IRoles.ConditionFlat[] memory toStranger = new IRoles.ConditionFlat[](2);
+        toStranger[0] = IRoles.ConditionFlat(0, 5, 5, "");
+        toStranger[1] = IRoles.ConditionFlat(0, 1, 16, abi.encode(stranger));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeTarget, (EMERGENCY, Mainnet.WBTC)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, Mainnet.WBTC)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeTarget, (EMERGENCY, address(asset))));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, Mainnet.WBTC, transfer, toAgent, 0)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, Mainnet.WBTC, transfer, toStranger, 0)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, Mainnet.WBTC, transfer, any, 0)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, Mainnet.WBTC, transfer, toAgent, 1)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, Mainnet.WBTC, approve, toAgent, 0)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, Mainnet.WBTC, bytes4(keccak256("redeem(uint256,address,address)")), redeem, 0)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, address(opMod), transfer, toAgent, 0)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.allowFunction, (EMERGENCY, Mainnet.WBTC, bytes4(keccak256("unwrap(uint256)")), 0)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.allowFunction, (EMERGENCY, Mainnet.WBTC, transfer, 0)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.revokeTarget, (EMERGENCY, Mainnet.SUSDS)));
+        _case(safetyMod, exitGovernance, abi.encodeCall(IRoles.setAllowance, (derived, 1, 1, 1, 30 days, 0)));
+        _case(safetyMod, bytes32("restart"), abi.encodeCall(IRoles.scopeTarget, (EMERGENCY, Mainnet.WBTC)));
+
+        // the governance role on the orders modifier
+        IRoles.ConditionFlat[] memory relayer = _tree(ordersMod, APPROVALS, Mainnet.USDC, approve);
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, Mainnet.WBTC)));
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (APPROVALS, Mainnet.WBTC)));
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (GOVERNANCE, Mainnet.WBTC)));
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, address(orders))));
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (APPROVALS, Mainnet.WBTC, approve, relayer, 0)));
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (APPROVALS, Mainnet.WBTC, approve, toStranger, 0)));
+        bytes4 signOrder = bytes4(keccak256("signOrder((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32),uint32,uint256)"));
+        IRoles.ConditionFlat[] memory sign = _tree(ordersMod, OPERATOR, Mainnet.ORDER_SIGNER, signOrder);
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.ORDER_SIGNER, signOrder, sign, 2)));
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.ORDER_SIGNER, signOrder, sign, 0)));
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.WBTC, transfer, any, 2)));
+        _case(ordersMod, GOVERNANCE, abi.encodeCall(IRoles.revokeTarget, (OPERATOR, Mainnet.USDC)));
+
+        // the insurance-governance role on the first-loss modifier
+        bytes32 insurance = bytes32("insurance");
+        bytes32 insuranceGovernance = bytes32("insurance-governance");
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.setAllowance, (derived, 5, 0, 0, 0, 0)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.setAllowance, (derived, 5, 0, 1, 0, 0)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.setAllowance, (derived, 5, 5, 0, 0, 0)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.setAllowance, (bytes32("foreign"), 5, 0, 0, 0, 0)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.scopeTarget, (insurance, Mainnet.USDT)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.scopeTarget, (insurance, Mainnet.EARN_ETH_SHARE)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.scopeTarget, (FIRST_LOSS, Mainnet.USDT)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.scopeFunction, (insurance, Mainnet.USDT, transfer, toStranger, 0)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.scopeFunction, (insurance, Mainnet.USDT, approve, toStranger, 0)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.scopeFunction, (insurance, Mainnet.USDT, transfer, toStranger, 2)));
+        _case(firstLossMod, insuranceGovernance, abi.encodeCall(IRoles.scopeFunction, (insurance, Mainnet.EARN_USD_SHARE, transfer, toStranger, 0)));
+
+        // the limit of the offline evaluation: the role's policy accepts this write, and the modifier refuses the tree
+        integrity = true;
+        _case(opMod, GOVERNANCE, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.WBTC, transfer, malformed, 0)));
+        integrity = false;
+
+        assertGt(accepted, 10, "some writes are accepted");
+        assertGt(refused, 10, "some writes are refused");
+        console2.log("ROUNDTRIP guard cases: accepted, refused", accepted, refused);
+    }
+
+    /// @dev One guard case: the write as the universal factory, with the modifier's answer, on a state that the
+    ///      case does not keep.
+    function _case(IRoles modifier_, bytes32 role, bytes memory data) internal {
+        uint256 snap = vm.snapshotState();
+        vm.prank(address(uf));
+        (bool ok,) = address(modifier_).call(abi.encodeCall(IRoles.execTransactionWithRole, (address(modifier_), 0, data, 0, role, true)));
+        vm.revertToState(snap);
+        if (ok) accepted++;
+        else refused++;
+        vm.writeLine(
+            guardFile,
+            string.concat(
+                '{"modifier":"', vm.toString(address(modifier_)), '","role":"', vm.toString(role), '","to":"', vm.toString(address(modifier_)),
+                '","data":"', vm.toString(data), '","accepted":', ok ? "true" : "false", ',"malformedTree":', integrity ? "true" : "false", "}"
+            )
+        );
     }
 
     /// @dev A write that no policy change holds: a transfer of WETH for the operator, with no condition.

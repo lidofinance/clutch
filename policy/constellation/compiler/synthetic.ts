@@ -29,6 +29,7 @@ export const EVENTS = new Interface([
   "event ConsumeAllowance(bytes32 allowanceKey, uint128 consumed, uint128 newBalance)",
   "event AssignRoles(address module, bytes32[] roleKeys, bool[] memberOf)",
   "event EnabledModule(address module)",
+  "event DisabledModule(address module)",
   "event RolesModSetup(address indexed initiator, address indexed owner, address indexed avatar, address target)",
   "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
   "event Initialized(uint64 version)",

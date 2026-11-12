@@ -542,7 +542,7 @@
   controlled_by: "`@lidofinance/defi-tech`. Anyone can run it: `just round-trip` on a fork, or `just round-trip-check` against a chain."
   can:
     - "Catch a compiler or SDK bug: the deployed modifier's real events rebuild to the committed policy, or the check fails."
-    - "Compare each role's members, targets, functions and condition trees, each budget's settings, and each modifier's owner, avatar and target."
+    - "Compare each role's members, targets, functions and condition trees, each budget's settings, and each modifier's owner, avatar and target. A member that the modifier disabled as a module is a difference."
     - "Report a revoke of the emergency role, with the functions that stay stored under the revoked target, and any permission, member, budget, unwrap adapter or default role that the artifact does not hold."
     - "Tell the `motion` command and its check whether the chain holds the policy that they start from."
   cannot:

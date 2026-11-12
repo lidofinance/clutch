@@ -11,16 +11,20 @@
  *
  * A <ref> is a commit, a tag or a branch, whose committed artifact the command reads, or the path of an artifact
  * file. The two commands share no logic for the comparison: `build` computes a difference, and `check` runs the
- * writes on a model of the Roles modifier and compares the outcome. A change that no motion role can write, such
- * as a membership, needs a DAO vote, and `build` refuses it.
+ * writes on a model of the Roles modifier and compares the outcome. `check` also evaluates the motion role's
+ * condition tree on each write of a modifier on itself, and fails a write that the role's policy refuses. A
+ * change that no motion role can write, such as a membership, needs a DAO vote, and `build` refuses it.
  *
- * Both commands take the chain's state to be the base artifact. They do not read the modifiers.
+ * Both commands take the chain's state to be the base artifact. They do not read the modifiers. `check` does not
+ * evaluate an action, and it does not test that a submitted tree is well-formed: the modifier refuses a malformed
+ * tree. The fork suite replays a pending motion on the deployed Roles code (test/MotionReplay.t.sol).
  */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { AbiCoder, getAddress, Interface, JsonRpcProvider } from "ethers";
+import type { ParamType } from "ethers";
 import { Clearance, rolesAbi } from "zodiac-roles-sdk";
 import type { Artifact } from "./compile";
 import { exampleHead } from "./motion.example";
@@ -121,6 +125,104 @@ function motionRole(policy: Artifact, modifier: Modifier, fn: string, writtenKey
     if (keys === null || keys.includes(lower(writtenKey!))) return role;
   }
   return `no motion role can call ${fn} on the ${modifier.label} under the key of that role`;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Whether a motion role's policy accepts a write
+// ---------------------------------------------------------------------------------------------------------------
+
+/** The Roles operators that the evaluation below knows, as the deployed mastercopy numbers them. */
+const PASS = 0;
+const AND = 1;
+const NOR = 3;
+const GREATER_THAN = 17;
+const LESS_THAN = 18;
+const BITMASK = 21;
+const STATIC = 1;
+const NONE = 0;
+
+/** Or, And and Nor over answers that can be unknown: null means that a part could not be evaluated. */
+const any = (answers: (boolean | null)[]) => (answers.includes(true) ? true : answers.includes(null) ? null : false);
+const all = (answers: (boolean | null)[]) => (answers.includes(false) ? false : answers.includes(null) ? null : true);
+
+/**
+ * Evaluates the condition tree of a grant on a call's arguments, as the Roles modifier does, for the operators
+ * that the motion roles' grants use. Null if the tree has a part that this cannot evaluate.
+ *
+ * A static argument is compared as its 32-byte word. An array or a tuple is compared with EqualTo as its whole
+ * ABI encoding, which is how the policy pins a whole tree. The fork suite checks this evaluation
+ * against the deployed modifier, case by case (test/RoundTrip.t.sol, `just round-trip`).
+ */
+function evaluate(conditions: Cond[], inputs: readonly ParamType[], values: readonly unknown[]): boolean | null {
+  const kids = (index: number) => conditions.flatMap((node, i) => (i !== index && node.parent === index ? [i] : []));
+  const argument = (index: number, type: ParamType, value: unknown): boolean | null => {
+    const node = conditions[index];
+    if (node.paramType === NONE) {
+      const answers = kids(index).map((kid) => argument(kid, type, value));
+      if (node.operator === OR) return any(answers);
+      if (node.operator === AND) return all(answers);
+      if (node.operator === NOR) {
+        const one = any(answers);
+        return one === null ? null : !one;
+      }
+      return null;
+    }
+    if (node.operator === PASS) return true;
+    const encoded = CODER.encode([type], [value]);
+    if (node.paramType === STATIC) {
+      if (encoded.length !== 66) return null;
+      if (node.operator === EQUAL_TO) return lower(encoded) === lower(node.compValue);
+      if (node.operator === GREATER_THAN) return BigInt(encoded) > BigInt(node.compValue);
+      if (node.operator === LESS_THAN) return BigInt(encoded) < BigInt(node.compValue);
+      if (node.operator === BITMASK) {
+        // two bytes of shift, fifteen of mask, fifteen of expected value; the masked bytes start at the shift
+        const comp = node.compValue.slice(2);
+        const shift = parseInt(comp.slice(0, 4), 16);
+        if (shift >= 32) return false;
+        const word = (encoded.slice(2 + 2 * shift) + "0".repeat(64)).slice(0, 30);
+        return (BigInt("0x" + word) & BigInt("0x" + comp.slice(4, 34))) === BigInt("0x" + comp.slice(34, 64));
+      }
+      return null;
+    }
+    // an array, a tuple or bytes: only a pin of the whole value. The artifact holds the pinned value's ABI encoding,
+    // which the modifier hashes when it stores the tree.
+    if (node.operator === EQUAL_TO) return lower(encoded) === lower(node.compValue);
+    return null;
+  };
+  const branch = (index: number): boolean | null => {
+    const node = conditions[index];
+    if (node.paramType !== CALLDATA || node.operator !== MATCHES) return null;
+    const children = kids(index);
+    if (children.length > inputs.length) return null;
+    return all(children.map((kid, i) => argument(kid, inputs[i], values[i])));
+  };
+  if (conditions.length === 0) return null;
+  if (conditions[0].paramType === NONE && conditions[0].operator === OR) return any(kids(0).map(branch));
+  return branch(0);
+}
+
+/**
+ * Whether the policy lets `roleKey` on `modifier` make the plain call `data` on `to`. True or false for a call of
+ * the Roles modifier on itself; null if the call cannot be evaluated here, such as a call of another contract.
+ */
+export function acceptedByRole(policy: Artifact, modifier: Modifier, roleKey: string, to: string, data: string): boolean | null {
+  const role = modifier.roles.find((r) => same(r.key, roleKey));
+  if (!role) return false;
+  const target = role.targets.find((t) => same(t.address, to));
+  if (!target) return false;
+  if (target.clearance === Clearance.Target) return true;
+  const grant = target.functions.find((f) => f.selector === lower(data).slice(0, 10));
+  if (!grant) return false;
+  if (grant.wildcarded) return true;
+  if (!same(to, modifier.address)) return null;
+  let call;
+  try {
+    call = ROLES.parseTransaction({ data });
+  } catch {
+    call = null;
+  }
+  if (!call) return null;
+  return evaluate(grant.conditions, call.fragment.inputs, call.args);
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -366,6 +468,8 @@ export type Verdict = {
   differences: string[];
   /** The writes on a target that is no modifier: the motion's actions. */
   actions: Write[];
+  /** What the check did not evaluate, such as a role's conditions on an action. */
+  notes: string[];
 };
 
 /**
@@ -375,6 +479,7 @@ export type Verdict = {
  */
 export function checkMotion(base: Artifact, head: Artifact, writes: Write[], declared: Write[] = []): Verdict {
   const problems: string[] = [];
+  const notes: string[] = [];
   const actions: Write[] = [];
   const state = stateOf(base);
   const modifiers = new Map(base.modifiers.map((m) => [lower(m.address), m] as const));
@@ -421,6 +526,13 @@ export function checkMotion(base: Artifact, head: Artifact, writes: Write[], dec
       problems.push(`${where}: it names the role ${write.role}, and only the role ${role.name} can make this call`);
       return;
     }
+    // the role's policy on the whole call, as the modifier evaluates it
+    const accepted = acceptedByRole(base, modifier, write.role, write.to, write.data);
+    if (accepted === false) {
+      problems.push(`${where}: the policy of the role ${role.name} refuses this call of ${call.name}`);
+      return;
+    }
+    if (accepted === null) notes.push(`${where}: the conditions of the role ${role.name} on ${call.name} are not evaluated here; the fork replay must show that the modifier accepts the write`);
     const failure = applyCall(state.get(lower(modifier.address))!, write.data);
     if (failure) problems.push(`${where}: ${failure}`);
   });
@@ -435,7 +547,8 @@ export function checkMotion(base: Artifact, head: Artifact, writes: Write[], dec
   if (open.length > 0) problems.push(`${open.length} declared action(s) are not in the motion`);
 
   const diffs = differences(state, stateOf(head), [base, head]);
-  return { ok: problems.length === 0 && diffs.length === 0, problems, differences: diffs, actions };
+  if (actions.length > 0) notes.push(`${actions.length} action(s) are not evaluated: the check does not say whether a modifier accepts them, or what they do`);
+  return { ok: problems.length === 0 && diffs.length === 0, problems, differences: diffs, actions, notes };
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -487,6 +600,28 @@ export function loadPending(network: string, dir = PENDING_DIR): Pending | null 
   if (file.format !== MOTION_FORMAT || typeof file.calldata !== "string") throw new Error(`${motion} is no motion file`);
   const actions = ((file.actions ?? []) as Write[]).map((w) => ({ modifier: getAddress(w.modifier), role: lower(w.role), to: getAddress(w.to), data: lower(w.data) }));
   return { base: JSON.parse(readFileSync(base, "utf8")) as Artifact, calldata: file.calldata, actions };
+}
+
+/**
+ * The record of a network's enacted motions: `enacted/<network>/<motion id>.json`, the motion's file under its
+ * Easy Track id. `watch.ts settle` moves a pending motion's file there once the chain shows its enactment. The
+ * motion detector reports every enacted motion of the factory that the record does not hold.
+ */
+export const ENACTED_DIR = path.join(ROOT, "enacted");
+
+/** The recorded calldata of each enacted motion, by its Easy Track id. */
+export function loadEnacted(network: string, dir = ENACTED_DIR): Map<string, string> {
+  const out = new Map<string, string>();
+  const folder = path.join(dir, network);
+  if (!existsSync(folder)) return out;
+  for (const name of readdirSync(folder).sort()) {
+    const match = /^(\d+)\.json$/.exec(name);
+    if (!match) throw new Error(`${path.join(folder, name)}: a record of an enacted motion is named <motion id>.json`);
+    const file = JSON.parse(readFileSync(path.join(folder, name), "utf8"));
+    if (file.format !== MOTION_FORMAT || typeof file.calldata !== "string") throw new Error(`${path.join(folder, name)} is no motion file`);
+    out.set(match[1], lower(file.calldata));
+  }
+  return out;
 }
 
 /** The example motion's file: from the committed rehearsal artifact to the example change, at a new factory. */
@@ -640,6 +775,7 @@ async function main(argv: string[]): Promise<number> {
     console.log(verdict.ok ? `PASS: the pending motion turns its base policy into the committed artifact of ${network}, and writes nothing else.` : "FAIL");
     for (const line of verdict.problems) console.log(`  problem: ${line}`);
     for (const line of verdict.differences) console.log(`  difference: ${line}`);
+    for (const line of verdict.notes) console.log(`  note: ${line}`);
     return verdict.ok ? 0 : 1;
   }
   if (opts.pending !== undefined) {
@@ -715,7 +851,7 @@ async function main(argv: string[]): Promise<number> {
   console.log(`${motion.writes.length} writes, ${verdict.actions.length} of them actions; counter ${motion.epoch}, policy version ${motion.policyVersion}`);
   if (problems.length === 0 && verdict.differences.length === 0) {
     console.log(`PASS: the motion turns the policy of ${base.ref} into the policy of ${head.ref}, and writes nothing else.`);
-    if (verdict.actions.length > 0) console.log("Its declared actions are not checked: read each one.");
+    for (const line of verdict.notes) console.log(`  note: ${line}`);
     return 0;
   }
   console.log("FAIL");

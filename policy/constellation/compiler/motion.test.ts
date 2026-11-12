@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { AbiCoder, encodeBytes32String, Interface } from "ethers";
 import type { Artifact } from "./compile";
-import { checkMotion, decodeMotion, encodeMotion, EXAMPLE_MOTION, exampleMotion, MAX_WRITES, pinnedKeys, planMotion } from "./motion";
+import { acceptedByRole, checkMotion, decodeMotion, encodeMotion, EXAMPLE_MOTION, exampleMotion, MAX_WRITES, pinnedKeys, planMotion } from "./motion";
 import type { Write } from "./motion";
 import { derivedKey, EXAMPLE_EARN_USD_BUDGET, EXAMPLE_VAULT, EXAMPLE_WETH_BUDGET, exampleHead, WETH } from "./motion.example";
 
@@ -211,6 +211,13 @@ test("the checker refuses a motion that writes more, less or something else than
   delegate[4] = write(opMod, GOVERNANCE, "scopeFunction", [OPERATOR, EXAMPLE_VAULT, DEPOSIT, [node(0, 5, 5), node(0, 1, 0), node(0, 1, 15)], 2]);
   expect(checkMotion(base, head, delegate).ok).toBe(false);
 
+  // a call that may send ETH in place of a plain call: the role's policy accepts it, and the head policy does not hold it
+  const send = clone(good);
+  send[4] = write(opMod, GOVERNANCE, "scopeFunction", [OPERATOR, EXAMPLE_VAULT, DEPOSIT, [node(0, 5, 5), node(0, 1, 0), node(0, 1, 15)], 1]);
+  const sends = checkMotion(base, head, send);
+  expect(sends.problems).toEqual([]);
+  expect(sends.differences).toEqual(["Clutch operator modifier, role operator: deposit(uint256,address) on example ERC-4626 vault has other conditions or other execution options"]);
+
   // a larger budget than the policy's
   const budget = clone(good);
   budget[1] = write(opMod, GOVERNANCE, "setAllowance", [derivedKey(WETH, EXAMPLE_VAULT), 10n ** 30n, 10n ** 30n, 10n ** 30n, MONTH, 0]);
@@ -244,6 +251,116 @@ test("the checker refuses a write that a modifier would refuse, or that the fact
   expect(problems([])[0]).toBe("the motion has no write");
   const many = Array.from({ length: MAX_WRITES + 1 }, () => good[0]);
   expect(problems(many)[0]).toContain(`at most ${MAX_WRITES}`);
+});
+
+// The guards of each motion role (ADR 006, decisions 8 to 10 and 13; ADR 007, decision 44; ADR 009, decision 15;
+// ADR 014, decision 6; INV-004, INV-012, INV-025, INV-040). The check evaluates the role's condition tree on the
+// whole call. The fork suite compares these answers with the deployed modifier's (`just round-trip`).
+test("the check evaluates the motion role's policy on the whole call", () => {
+  const answer = (ref: string, role: string, fn: string, args: unknown[]) => {
+    const modifier = modifierOf(base, ref);
+    return acceptedByRole(base, modifier, key(role), modifier.address, lower(ROLES.encodeFunctionData(fn, args)));
+  };
+  const WBTC = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
+  const any = [node(0, 5, 5), node(0, 1, 0), node(0, 1, 0)];
+  const assetSafe = base.manifest.assetSafe as string;
+  const derived = derivedKey(WBTC, STRANGER);
+  const op = "operator_modifier";
+
+  // a budget: the refill period is at least 30 days, and the key is a launch key or starts with "k:"
+  expect(answer(op, "governance", "setAllowance", [key("earn_usd_deposit"), 1, 1, 1, MONTH, 0])).toBe(true);
+  expect(answer(op, "governance", "setAllowance", [key("earn_usd_deposit"), 1, 1, 1, MONTH - 1, 0])).toBe(false);
+  expect(answer(op, "governance", "setAllowance", [key("earn_usd_deposit"), 1, 1, 1, 0, 0])).toBe(false);
+  expect(answer(op, "governance", "setAllowance", [key("foreign"), 1, 1, 1, MONTH, 0])).toBe(false);
+  expect(answer(op, "governance", "setAllowance", [derived, 1, 1, 1, MONTH, 0])).toBe(true);
+  expect(answer(op, "governance", "setAllowance", ["0x00" + derived.slice(2, 64), 1, 1, 1, MONTH, 0])).toBe(false);
+
+  // a permission: only under the operator's key, never on a vault account or a modifier, never a delegatecall
+  expect(answer(op, "governance", "scopeTarget", [OPERATOR, WBTC])).toBe(true);
+  expect(answer(op, "governance", "scopeTarget", [EMERGENCY, WBTC])).toBe(false);
+  expect(answer(op, "governance", "scopeTarget", [GOVERNANCE, WBTC])).toBe(false);
+  for (const account of [assetSafe, opMod, safetyMod, ordersMod, base.manifest.ordersAccount as string]) {
+    expect(answer(op, "governance", "scopeTarget", [OPERATOR, account])).toBe(false);
+    expect(answer(op, "governance", "scopeFunction", [OPERATOR, account, TRANSFER, any, 0])).toBe(false);
+    expect(answer(op, "governance", "allowFunction", [OPERATOR, account, TRANSFER, 0])).toBe(false);
+  }
+  expect(answer(op, "governance", "scopeFunction", [OPERATOR, WBTC, TRANSFER, any, 0])).toBe(true);
+  expect(answer(op, "governance", "scopeFunction", [OPERATOR, WBTC, TRANSFER, any, 1])).toBe(true);
+  expect(answer(op, "governance", "scopeFunction", [OPERATOR, WBTC, TRANSFER, any, 2])).toBe(false);
+  expect(answer(op, "governance", "scopeFunction", [OPERATOR, WBTC, TRANSFER, any, 3])).toBe(false);
+  expect(answer(op, "governance", "allowFunction", [OPERATOR, WBTC, TRANSFER, 2])).toBe(false);
+  expect(answer(op, "governance", "revokeTarget", [OPERATOR, SUSDS])).toBe(true);
+  expect(answer(op, "governance", "revokeTarget", [EMERGENCY, SUSDS])).toBe(false);
+  // no membership, and no write by a role that holds no such grant
+  expect(answer(op, "governance", "assignRoles", [STRANGER, [OPERATOR], [true]])).toBe(false);
+  expect(answer(op, "insurance-funding", "scopeTarget", [OPERATOR, WBTC])).toBe(false);
+  expect(answer(op, "operator", "scopeTarget", [OPERATOR, WBTC])).toBe(false);
+
+  // exit governance: only the emergency role's exits, each tree pinned whole
+  const sf = "safety_modifier";
+  const toAgent = [node(0, 5, 5), node(0, 1, 16, address32(AGENT))];
+  const toStranger = [node(0, 5, 5), node(0, 1, 16, address32(STRANGER))];
+  expect(answer(sf, "exit-governance", "scopeTarget", [EMERGENCY, WBTC])).toBe(true);
+  expect(answer(sf, "exit-governance", "scopeTarget", [OPERATOR, WBTC])).toBe(false);
+  expect(answer(sf, "exit-governance", "scopeTarget", [EMERGENCY, assetSafe])).toBe(false);
+  expect(answer(sf, "exit-governance", "scopeFunction", [EMERGENCY, WBTC, TRANSFER, toAgent, 0])).toBe(true);
+  expect(answer(sf, "exit-governance", "scopeFunction", [EMERGENCY, WBTC, TRANSFER, toStranger, 0])).toBe(false);
+  expect(answer(sf, "exit-governance", "scopeFunction", [EMERGENCY, WBTC, TRANSFER, any, 0])).toBe(false);
+  expect(answer(sf, "exit-governance", "scopeFunction", [EMERGENCY, WBTC, TRANSFER, toAgent, 1])).toBe(false);
+  expect(answer(sf, "exit-governance", "scopeFunction", [EMERGENCY, WBTC, APPROVE, toAgent, 0])).toBe(false);
+  expect(answer(sf, "exit-governance", "allowFunction", [EMERGENCY, WBTC, TRANSFER, 0])).toBe(false);
+  expect(answer(sf, "exit-governance", "revokeTarget", [EMERGENCY, SUSDS])).toBe(false);
+  expect(answer(sf, "exit-governance", "setAllowance", [derived, 1, 1, 1, MONTH, 0])).toBe(false);
+
+  // the orders modifier: its three keys, never its own key, and the relayer approval pinned whole
+  const relayer = targetOf(base, "orders_modifier", "approvals", "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48").functions[0].conditions.map((n) => [n.parent, n.paramType, n.operator, n.compValue]);
+  expect(answer("orders_modifier", "governance", "scopeTarget", [OPERATOR, WBTC])).toBe(true);
+  expect(answer("orders_modifier", "governance", "scopeTarget", [key("approvals"), WBTC])).toBe(true);
+  expect(answer("orders_modifier", "governance", "scopeTarget", [GOVERNANCE, WBTC])).toBe(false);
+  expect(answer("orders_modifier", "governance", "scopeFunction", [key("approvals"), WBTC, APPROVE, relayer, 0])).toBe(true);
+  expect(answer("orders_modifier", "governance", "scopeFunction", [key("approvals"), WBTC, APPROVE, toStranger, 0])).toBe(false);
+  expect(answer("orders_modifier", "governance", "scopeFunction", [OPERATOR, WBTC, TRANSFER, any, 2])).toBe(false);
+  expect(answer("orders_modifier", "governance", "revokeTarget", [OPERATOR, WBTC])).toBe(false);
+
+  // a fund: a cap that never refills, under a derived key, and never a first-loss share token
+  const fl = "first_loss_modifier";
+  const USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+  const earnEthShare = "0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4";
+  expect(answer(fl, "insurance-governance", "setAllowance", [derived, 5, 0, 0, 0, 0])).toBe(true);
+  expect(answer(fl, "insurance-governance", "setAllowance", [derived, 5, 0, 1, 0, 0])).toBe(false);
+  expect(answer(fl, "insurance-governance", "setAllowance", [derived, 5, 5, 0, 0, 0])).toBe(false);
+  expect(answer(fl, "insurance-governance", "setAllowance", [key("foreign"), 5, 0, 0, 0, 0])).toBe(false);
+  expect(answer(fl, "insurance-governance", "scopeTarget", [key("insurance"), USDT])).toBe(true);
+  expect(answer(fl, "insurance-governance", "scopeTarget", [key("insurance"), earnEthShare])).toBe(false);
+  expect(answer(fl, "insurance-governance", "scopeTarget", [key("first-loss"), USDT])).toBe(false);
+  expect(answer(fl, "insurance-governance", "scopeFunction", [key("insurance"), USDT, TRANSFER, toStranger, 0])).toBe(true);
+  expect(answer(fl, "insurance-governance", "scopeFunction", [key("insurance"), USDT, APPROVE, toStranger, 0])).toBe(false);
+  expect(answer(fl, "insurance-governance", "scopeFunction", [key("insurance"), USDT, TRANSFER, toStranger, 2])).toBe(false);
+
+  // a call of another contract is not evaluated here
+  const erc20 = new Interface(["function approve(address spender, uint256 amount)"]);
+  const orders = modifierOf(base, "orders_modifier");
+  expect(acceptedByRole(base, orders, key("approvals"), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", lower(erc20.encodeFunctionData("approve", [STRANGER, 1])))).toBeNull();
+});
+
+test("a motion with a write that the role's policy refuses fails the check, and the builder does not hide it", () => {
+  // a budget with a refill period of 29 days: the governance role refuses it (ADR 009, decision 15)
+  const short = clone(base);
+  modifierOf(short, "operator_modifier").allowances[0].period = String(MONTH - 24 * 60 * 60);
+  const plan = planMotion(base, short);
+  expect(plan.writes.length).toBe(1);
+  const verdict = checkMotion(base, short, strip(plan.writes));
+  expect(verdict.ok).toBe(false);
+  expect(verdict.problems).toEqual(["write 1: the policy of the role governance refuses this call of setAllowance"]);
+  // an exit for the emergency role that pays a stranger
+  const exit = clone(head);
+  const added = roleOf(exit, "safety_modifier", "emergency").targets.find((t) => lower(t.address) === lower(EXAMPLE_VAULT))!;
+  added.functions.find((f) => f.selector === TRANSFER)!.conditions[1].compValue = address32(STRANGER) as `0x${string}`;
+  const bad = checkMotion(base, exit, strip(planMotion(base, exit).writes));
+  expect(bad.ok).toBe(false);
+  expect(bad.problems).toEqual(["write 10: the policy of the role exit-governance refuses this call of scopeFunction"]);
+  // the example's writes are all evaluated: the check leaves no note
+  expect(checkMotion(base, head, example()).notes).toEqual([]);
 });
 
 test("an action passes only if the motion's author declared it", () => {
