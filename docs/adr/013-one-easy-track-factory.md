@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T12:05:15Z
+  at: 2026-11-12T12:19:12Z
 verified: []
 sources:
   - id: s1
@@ -66,9 +66,8 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 | ERC-20 approval list | token; the current and the next list | the token's complete `approve` list, each new spender's amount spending a key derived for it; zero spends nothing |
 | Introduction | token; its first list; its budget and approval ceilings | the token's first approval list and both of its ceilings (decision 15) |
 | Wrapper | wrapper, underlying | `wrap` and `unwrap`, or `deposit` and `withdraw` on WETH; the output returns to the avatar |
-| ERC-4626 vault | vault, asset | the asset's `approve` to the vault, spending a key derived for the vault; `deposit` with receiver `EqualToAvatar`; `redeem` and `withdraw` with receiver and owner `EqualToAvatar` |
+| ERC-4626 vault | vault, asset | the asset's `approve` to the vault, spending a key derived for the vault; `deposit` with receiver `EqualToAvatar`; `redeem` and `withdraw` with receiver and owner `EqualToAvatar`. Lido Lend's lender vault joins through this shape, with no fallback exit and no settlement ([ADR 011](/adr/011-launch-scope.md) decision 13); its address arrives with the motion (OD-49). Not built |
 | Asynchronous queue vault | vault, asset | the asset's `approve` to the queue, spending a key derived for the queue; the asynchronous deposit request with any owner pinned to the avatar; the redeem request, cancel and claim with receiver and owner pinned to the avatar |
-| Lido Lend's lender vault | vault, asset | the ERC-4626 vault's writes, and the vault's fallback exit with the receiver and the owner pinned to the avatar ([ADR 011](/adr/011-launch-scope.md) decision 13). The vault's address arrives with the motion (OD-49). Not built |
 | Sky's DAI–USDS converter | none | the conversions in both directions, with the receiver pinned to the avatar, and the DAI and USDS approvals to the converter below their ceiling (OD-22) |
 | Orders account token | token; its budget and approval ceilings; the current lists | the operator's transfer into the orders account under a key derived for the token; the token on both sides of signer and TWAP orders and in what recovery orders sell; its relayer approval; the emergency role's zeroing and transfer; the operator's return; and the token's exit on the Asset Safe ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41, 44 and 45) |
 | Orders account restore | the current lists; the tokens whose relayer approval it raises | the operator's permissions for the current lists, and the named relayer approvals ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 46) |

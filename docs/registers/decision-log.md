@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T12:05:15Z
+  at: 2026-11-12T12:19:12Z
 verified: []
 sources:
   - id: s1
@@ -121,6 +121,9 @@ sources:
   - id: s37
     resource: "urn:clutch:interview:2026-11-12-lido-lend"
     title: EM's answers on OD-131 and OD-132, 2026-11-12; the transcript is not in the repository
+  - id: s38
+    resource: "urn:clutch:interview:2026-11-12-lend-exit"
+    title: EM's answer on OD-133, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -130,6 +133,18 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — OD-133 decided: no collateral enters, and no fallback exit
+
+The agent asked whether USDY may enter the Asset Safe through an exit from Lido Lend's stablecoin market. EM wrote:
+
+> OD-133: USDY can't enter, we wont use fallback exit, so assets we expect are lender's ones: WETH and USDC, and probably, but unlikely USDT
+
+Recorded as:
+
+- (OD-133) USDY cannot enter the Asset Safe, and the vault does not use the fallback exit of Lido Lend's lender vault. A position in Lido Lend returns only the asset that it lent: WETH and USDC, and USDT if a market lends it, which EM holds unlikely ([ADR 011](/adr/011-launch-scope.md), decision 13). This is none of the three options that the agent offered, and it amends EM's answer on OD-132, which kept the fallback exit.
+- Three points are the agent's reading. The lender vault stays the surface, through its ERC-4626 functions only. The lender vault's targeted settlement is out too, because it also pays collateral. The rule holds for every market, the WETH market included, so wstETH does not enter through an exit either.
+- One consequence follows: a position in Lido Lend has no exit while its market has no free liquidity. A withdrawal fails then. [s38]
 
 ## 2026-11-12 — OD-131 and OD-132 decided: a fund with a payout address, and Lido Lend's lender vault
 

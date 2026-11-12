@@ -830,10 +830,12 @@
   what: "Lido's lending product, a separate deployment that is a fork of Morpho Blue, with a lender vault for each market. It is not deployed on mainnet yet. The vault onboards it after launch, by one motion, and its insurance is built in at launch."
   controlled_by: "Its own governance."
   can:
-    - "Join the vault through one motion of the universal factory, with its shape for Lido Lend's lender vault, once that vault exists. The motion names the vault, and it also adds the emergency exit."
+    - "Join the vault through one motion of the universal factory, with its ERC-4626 shape, once Lido Lend's lender vault exists. The motion names the vault, and it also adds the emergency exit."
+    - "Return only the asset that the vault lent: WETH and USDC, and USDT if a market lends it."
   cannot:
     - "Leave the protocol cap before it matures and a budget motion with a forum post unlocks it."
     - "Be granted an exit at the enabling vote: its address is not known before it deploys."
+    - "Pay collateral into the Asset Safe. The vault uses neither the fallback exit nor the settlement of Lido Lend's lender vault, so USDY cannot enter, and a position has no exit while its market has no free liquidity."
   numbers: ["the end-to-end test of its shape: owed", "budget key: from the attested computation"]
   sources: ["ADR-011#d3", "ADR-009#d28", "ADR-011#d13", "ADR-006#d13", "ADR-009#d3",
     "ADR-011#proposed-direction", "ADR-013#proposed-direction", "ADR-014#d6",

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T12:05:15Z
+  at: 2026-11-12T12:19:12Z
 verified: []
 sources:
   - id: s2
@@ -86,7 +86,7 @@ Each Roles modifier refuses every call that its policy does not list. Owners: [A
 
 #### Part 4: Governance — the new contracts **[Implemented in part]**
 
-Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 013](/adr/013-one-easy-track-factory.md), whose proposed direction lists the shapes. The prototype builds the factory's core and its approval-list, budget, ceiling, introduction, restore, restart, insurance-money, insurance-deposit, orders, first-loss burn and fund operations; the shape for Lido Lend's lender vault is not built.
+Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 013](/adr/013-one-easy-track-factory.md), whose proposed direction lists the shapes. The prototype builds the factory's core and its approval-list, budget, ceiling, introduction, restore, restart, insurance-money, insurance-deposit, orders, first-loss burn and fund operations; the ERC-4626 shape, through which Lido Lend's lender vault joins, is not built.
 
 #### Part 5: Funding and insurance **[Implemented in part]**
 

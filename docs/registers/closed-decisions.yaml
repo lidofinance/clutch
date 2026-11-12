@@ -1000,3 +1000,11 @@
   log:
     - "2026-11-12 — OD-131 and OD-132 decided: a fund with a payout address, and Lido Lend's lender vault"
   adr: [ADR-011#d3, ADR-011#d13]
+
+- id: OD-133
+  question: "May USDY enter the Asset Safe through an exit from Lido Lend's stablecoin market?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-133 decided: no collateral enters, and no fallback exit"
+  adr: [ADR-011#d13]
+  refines: [OD-132]
