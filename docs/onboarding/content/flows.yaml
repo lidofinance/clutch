@@ -841,7 +841,7 @@ flows:
         text: "The specifications, the control matrix, the screening rule list and the runbook drafts."
         nodes: [policy, monitoring, screening, orders]
       - who: "Phase 2: build"
-        text: "The motions that the launch still owes, and reporting. The universal factory, the `motion` command, its check and the round-trip check are built."
+        text: "Lido Lend's onboarding against the deployed vault, the command for the Safe batches' hashes, and reporting. The universal factory, the `motion` command, its check, the round-trip check, the launch protocols' motions and a token's retirement are built."
         nodes: [policy, orders, first-loss, easytrack, reporting, monitoring]
       - who: "Phase 3: assurance"
         text: "An external audit, Lido's review of the guard change, and fork drills that initiate within 6 hours."

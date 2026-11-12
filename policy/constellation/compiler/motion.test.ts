@@ -75,8 +75,8 @@ test("two equal policies need no write", () => {
 
 // ADR 013, decisions 9 and 11, and ADR 006, decision 13: an onboarding sets the new spender's budget under its
 // derived key, writes the operator's permissions through the governance role, and writes the emergency exits
-// through the exit-governance role.
-test("the example onboarding is these ten writes, in this order", () => {
+// through the exit-governance role, the zeroing of the new approval among them.
+test("the example onboarding is these eleven writes, in this order", () => {
   const budgetKey = derivedKey(WETH, EXAMPLE_VAULT);
   expect(budgetKey).toBe(`0x6b3a${lower(EXAMPLE_VAULT).slice(2)}${lower(WETH).slice(2, 22)}`);
   const earnUsd = String(EXAMPLE_EARN_USD_BUDGET);
@@ -91,6 +91,8 @@ test("the example onboarding is these ten writes, in this order", () => {
     write(opMod, GOVERNANCE, "scopeFunction", [OPERATOR, EXAMPLE_VAULT, DEPOSIT, avatarReceiver, 0]),
     write(opMod, GOVERNANCE, "scopeFunction", [OPERATOR, EXAMPLE_VAULT, WITHDRAW, avatarReceiverAndOwner, 0]),
     write(opMod, GOVERNANCE, "scopeFunction", [OPERATOR, EXAMPLE_VAULT, REDEEM, avatarReceiverAndOwner, 0]),
+    // the new approval's zeroing, for any spender: the emergency role can take the approval away
+    write(safetyMod, EXIT_GOVERNANCE, "scopeFunction", [EMERGENCY, WETH, APPROVE, [node(0, 5, 5), node(0, 1, 0), node(0, 1, 16, AbiCoder.defaultAbiCoder().encode(["uint256"], [0]))], 0]),
     write(safetyMod, EXIT_GOVERNANCE, "scopeTarget", [EMERGENCY, EXAMPLE_VAULT]),
     write(safetyMod, EXIT_GOVERNANCE, "scopeFunction", [EMERGENCY, EXAMPLE_VAULT, REDEEM, avatarReceiverAndOwner, 0]),
     write(safetyMod, EXIT_GOVERNANCE, "scopeFunction", [EMERGENCY, EXAMPLE_VAULT, TRANSFER, [node(0, 5, 5), node(0, 1, 16, address32(AGENT))], 0]),
@@ -124,7 +126,7 @@ test("a fund with a fixed payout address is three writes of the insurance-govern
 test("the committed example motion equals a fresh build", () => {
   expect(readFileSync(EXAMPLE_MOTION, "utf8")).toBe(exampleMotion());
   const file = JSON.parse(exampleMotion());
-  expect(decodeMotion(file.calldata).writes.length).toBe(10);
+  expect(decodeMotion(file.calldata).writes.length).toBe(11);
   expect(file.epoch).toBe("0");
   expect(file.policyVersion).toBe("0");
 });
@@ -219,7 +221,7 @@ test("the checker refuses a motion that writes more, less or something else than
   expect(widened.differences).toEqual(["Clutch operator modifier, role operator: transfer(address,uint256) on WETH has other conditions or other execution options"]);
 
   // one write less: the emergency exit
-  const noExit = checkMotion(base, head, good.slice(0, 9));
+  const noExit = checkMotion(base, head, good.slice(0, 10));
   expect(noExit.ok).toBe(false);
   expect(noExit.differences).toEqual(["Clutch safety modifier, role emergency: transfer(address,uint256) on example ERC-4626 vault is missing"]);
 
@@ -392,7 +394,7 @@ test("a write that the role's policy refuses: the builder says that it needs a v
   const added = roleOf(exit, "safety_modifier", "emergency").targets.find((t) => lower(t.address) === lower(EXAMPLE_VAULT))!;
   added.functions.find((f) => f.selector === TRANSFER)!.conditions[1].compValue = address32(STRANGER) as `0x${string}`;
   const planned = planMotion(base, exit);
-  expect(planned.writes.length).toBe(9);
+  expect(planned.writes.length).toBe(10);
   expect(planned.needsVote.length).toBe(1);
   expect(planned.needsVote[0]).toContain("the policy of the role exit-governance refuses this write");
   const tampered = example();

@@ -8,7 +8,7 @@ import {IERC20} from "../src/interfaces/Tokens.sol";
 import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 import {Mainnet} from "./rehearsal/Mainnet.sol";
 import {IEasyTrack} from "./rehearsal/RehearsalBase.sol";
-import {EnabledVault} from "./rehearsal/EnabledVault.sol";
+import {Recorded} from "./rehearsal/Recorded.sol";
 
 /// @title RoundTrip — the events of the vault's four Roles modifiers and of Easy Track, written out for the
 ///        round-trip check (ADR 004, decision 13; INV-016) and for the two detectors (ADR 013, decision 19).
@@ -18,10 +18,11 @@ import {EnabledVault} from "./rehearsal/EnabledVault.sol";
 ///      which rebuild each modifier's state from its file, compare it with the policy and check each open
 ///      motion. A test alone asserts only that the modifiers emitted events.
 ///      Run: just round-trip
-contract RoundTrip is EnabledVault {
-    string internal constant DIR = ".roundtrip";
+contract RoundTrip is Recorded {
     /// @dev The committed example motion (policy/constellation/compiler/motion.example.ts).
     string internal constant EXAMPLE = "policy/constellation/artifacts/motion-example-rehearsal-26249900.json";
+    /// @dev The committed example retirement of an order token (policy/constellation/compiler/launch.ts).
+    string internal constant RETIREMENT = "policy/constellation/artifacts/motion-retire-example-rehearsal-26249900.json";
 
     bytes32 internal constant APPROVALS = bytes32("approvals");
     /// @dev The example fund's payout address and cap (policy/constellation/compiler/motion.example.ts). Stand-ins:
@@ -29,7 +30,6 @@ contract RoundTrip is EnabledVault {
     address internal constant FUND_PAYOUT = 0x000000000000000000000000000000000000F00D;
     uint128 internal constant FUND_CAP = 30_000e6;
 
-    Vm.Log[] internal recorded;
     string internal guardFile;
     uint256 internal accepted;
     uint256 internal refused;
@@ -55,6 +55,18 @@ contract RoundTrip is EnabledVault {
         _enact(id, cd);
         _keep();
         _write("example-motion.ndjson");
+    }
+
+    /// @dev After the example retirement of an order token (policy/constellation/compiler/launch.ts): the modifiers
+    ///      hold the retirement's head policy.
+    function test_roundtrip_events_after_a_token_is_retired() public {
+        _deployAndEnable();
+        bytes memory cd = vm.parseJsonBytes(vm.readFile(RETIREMENT), ".calldata");
+        uint256 id = _create(cd);
+        _afterWindow();
+        _enact(id, cd);
+        _keep();
+        _write("retire-token.ndjson");
     }
 
     /// @dev After the operator spent a budget and the emergency role revoked a target and a function: the chain
@@ -285,52 +297,5 @@ contract RoundTrip is EnabledVault {
     /// @dev A write that no policy change holds: a transfer of WETH for the operator, with no condition.
     function _widening() internal view returns (UniversalFactory.Write memory) {
         return _govern(abi.encodeCall(IRoles.allowFunction, (OPERATOR, Mainnet.WETH, IERC20.transfer.selector, 0)));
-    }
-
-    /// @dev Deploys the accounts and runs the enabling vote, and keeps the modifiers' logs of both. The fixture
-    ///      measures each batch on a snapshot that it rolls back; those logs are no chain events, so they go.
-    function _deployAndEnable() internal {
-        vm.recordLogs();
-        _deployAccounts();
-        _deployFactory();
-        _keep();
-        _buildBatches();
-        vm.getRecordedLogs();
-        _voteAndRunBatches();
-        _keep();
-    }
-
-    /// @dev Moves the logs that the four modifiers and Easy Track emitted since the last call into `recorded`,
-    ///      in order.
-    function _keep() internal {
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-        for (uint256 i = 0; i < logs.length; i++) {
-            address e = logs[i].emitter;
-            if (
-                e == address(opMod) || e == address(safetyMod) || e == address(ordersMod) || e == address(firstLossMod)
-                    || e == Mainnet.EASY_TRACK
-            ) {
-                recorded.push(logs[i]);
-            }
-        }
-    }
-
-    function _write(string memory name) internal {
-        assertGt(recorded.length, 0, "the modifiers emitted events");
-        vm.createDir(DIR, true);
-        string memory path = string.concat(DIR, "/", name);
-        vm.writeFile(path, "");
-        for (uint256 i = 0; i < recorded.length; i++) {
-            Vm.Log storage log = recorded[i];
-            string memory topics = "";
-            for (uint256 t = 0; t < log.topics.length; t++) {
-                topics = string.concat(topics, t == 0 ? "" : ",", '"', vm.toString(log.topics[t]), '"');
-            }
-            vm.writeLine(
-                path,
-                string.concat('{"address":"', vm.toString(log.emitter), '","topics":[', topics, '],"data":"', vm.toString(log.data), '"}')
-            );
-        }
-        console2.log("ROUNDTRIP logs written", recorded.length, path);
     }
 }

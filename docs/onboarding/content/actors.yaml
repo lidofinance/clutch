@@ -225,7 +225,7 @@
     - "Use its roles outside an enacted motion. Only Easy Track's executor calls `applyMotion` (INV-032)."
     - "Enact a motion if the [[motion counter]] changed since its creation, or a permission motion if the policy version changed (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke."
-  numbers: ["3,371 of EIP-170's 24,576 bytes", "at most 64 writes in one motion", "a motion that adds a token: 16 writes, 7,790,415 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 9 writes, 3,622,403 gas", "a motion that onboards an ERC-4626 vault: 9 writes, 2,140,115 gas", "external audit in phase 3"]
+  numbers: ["3,371 of EIP-170's 24,576 bytes", "at most 64 writes in one motion", "a motion that adds a token: 16 writes, 7,790,415 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 9 writes, 3,622,403 gas", "a motion that onboards an ERC-4626 vault: 10 writes, 2,553,752 gas", "external audit in phase 3"]
   sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d8", "ADR-013#d9",
     "ADR-013#d10", "ADR-013#d11", "ADR-013#d16", "ADR-013#proposed-direction", "ADR-013#consequences",
     "ADR-007#d41", "ADR-006#d9", "ADR-006#d10", "ADR-006#d14", "ADR-011#d13", "OD-09", "OD-70", "OD-134", "OD-135",

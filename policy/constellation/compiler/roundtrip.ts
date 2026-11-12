@@ -24,6 +24,7 @@ import { Clearance, rolesAbi } from "zodiac-roles-sdk";
 import type { Artifact } from "./compile";
 import { load } from "./motion";
 import { exampleFund, exampleHead } from "./motion.example";
+import { LAUNCH_PROTOCOLS, retired } from "./launch";
 
 const ROLES = new Interface(rolesAbi as any);
 /** The deployed mastercopy emits the initializer's event with a uint64, and the SDK's ABI lists it with a uint8. */
@@ -383,6 +384,12 @@ async function main(argv: string[]): Promise<number> {
     ok = print("after the example motion, the modifiers hold its head policy", roundTrip(exampleHead(policy), motion), motion.length) && ok;
     const fund = file("fund-created.ndjson");
     ok = print("after a fund is created with a cap that never refills, the modifiers hold the fund's policy", roundTrip(exampleFund(policy), fund), fund.length) && ok;
+    for (const protocol of LAUNCH_PROTOCOLS) {
+      const logs = file(`launch-${protocol.key}.ndjson`);
+      ok = print(`after the owner takes ${protocol.key} out and its onboarding motion enacts, the modifiers hold the committed policy`, roundTrip(policy, logs), logs.length) && ok;
+    }
+    const retire = file("retire-token.ndjson");
+    ok = print("after the example retirement of an order token, the modifiers hold its head policy", roundTrip(retired(policy), retire), retire.length) && ok;
     const drift = roundTrip(policy, revoke);
     const seen = JSON.stringify([...drift.differences].sort()) === JSON.stringify([...REVOKE_DIFFERENCES].sort());
     console.log(`${seen ? "PASS" : "FAIL"}: after an emergency revoke, the check reports the revoke and nothing else (${revoke.length} logs)`);
