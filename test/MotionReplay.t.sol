@@ -23,7 +23,8 @@ interface IVault4626 {
 ///      Run: RPC=<archive RPC> forge test --match-contract MotionReplay -vv
 ///      A motion of one's own: `just motion <base> <head>`, then `just motion-replay`.
 contract MotionReplay is EnabledVault {
-    /// @dev The committed example motion: the onboarding of an ERC-4626 lending vault, with a larger Earn budget.
+    /// @dev The committed example motion: the onboarding of an ERC-4626 lending vault, with its emergency exits and a
+    ///      larger Earn budget.
     string internal constant EXAMPLE = "policy/constellation/artifacts/motion-example-rehearsal-26249900.json";
     /// @dev The repository's pending motion of the rehearsal's network, and its base policy (ADR 013, decision 19).
     string internal constant PENDING_MOTION = "policy/constellation/pending/rehearsal-26249900/motion.json";
@@ -54,7 +55,7 @@ contract MotionReplay is EnabledVault {
     function test_replay_the_example_motion() public enabled {
         string memory file = vm.readFile(EXAMPLE);
         uint256 writes = _replay(file);
-        assertEq(writes, 10, "the example's ten writes");
+        assertEq(writes, 11, "the example's eleven writes");
         (,,, uint128 earn,) = opMod.allowances(bytes32("earn_usd_deposit"));
         assertEq(earn, EXAMPLE_EARN_USD_BUDGET, "the larger Earn budget");
 
@@ -73,6 +74,13 @@ contract MotionReplay is EnabledVault {
         _operator(EXAMPLE_VAULT, abi.encodeCall(IVault4626.withdraw, (1, address(asset), stranger)), false);
         _operator(Mainnet.WETH, abi.encodeCall(IERC20.approve, (stranger, 1)), false);
         _operator(EXAMPLE_VAULT, abi.encodeCall(IERC20.transfer, (stranger, 1)), false);
+
+        // the emergency role sets the new approval to zero, and gives none
+        _operator(Mainnet.WETH, abi.encodeCall(IERC20.approve, (EXAMPLE_VAULT, 10e18)), true);
+        assertEq(IERC20(Mainnet.WETH).allowance(address(asset), EXAMPLE_VAULT), 10e18, "an approval is left open");
+        _emergency(Mainnet.WETH, abi.encodeCall(IERC20.approve, (EXAMPLE_VAULT, 1)), false);
+        _emergency(Mainnet.WETH, abi.encodeCall(IERC20.approve, (EXAMPLE_VAULT, 0)), true);
+        assertEq(IERC20(Mainnet.WETH).allowance(address(asset), EXAMPLE_VAULT), 0, "the emergency role set it to zero");
 
         // the operator takes a part back; the emergency role exits a part to the Asset Safe and the rest to the Agent
         _operator(EXAMPLE_VAULT, abi.encodeCall(IVault4626.redeem, (shares / 4, address(asset), address(asset))), true);

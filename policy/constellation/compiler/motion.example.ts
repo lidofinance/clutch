@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * An example policy change for the tests of the `motion` command: the onboarding of an ERC-4626 lending vault,
- * with a larger Earn budget. No decision lists this vault or these figures. The committed example motion, which
+ * with its emergency exits and a larger Earn budget. No decision lists this vault or these figures. The committed example motion, which
  * the fork suite enacts through the live Easy Track, is built from this change.
  */
 import { AbiCoder, id } from "ethers";
@@ -51,6 +51,13 @@ export function exampleFund(base: Artifact): Artifact {
   return head;
 }
 
+/** An approval set to zero, for any spender: the only approval that the exit-governance role writes (ADR 006, decision 13). */
+export const ZERO_APPROVAL: { parent: number; paramType: number; operator: number; compValue: `0x${string}` }[] = [
+  { parent: 0, paramType: 5, operator: 5, compValue: "0x" },
+  { parent: 0, paramType: 1, operator: 0, compValue: "0x" },
+  { parent: 0, paramType: 1, operator: 16, compValue: AbiCoder.defaultAbiCoder().encode(["uint256"], [0]) as `0x${string}` },
+];
+
 /** The policy `base` with the example change applied. */
 export function exampleHead(base: Artifact): Artifact {
   const head = JSON.parse(JSON.stringify(base)) as Artifact;
@@ -85,5 +92,10 @@ export function exampleHead(base: Artifact): Artifact {
   const redeem = emergency.targets.find((t) => lower(t.address) === lower(SUSDS))!.functions.find((f) => f.signature === "redeem(uint256,address,address)")!;
   const toAgent = emergency.targets.find((t) => t.name === EARN_USD_SHARE_NAME)!.functions.find((f) => f.signature === "transfer(address,uint256)")!;
   emergency.targets.push({ address: EXAMPLE_VAULT, name: "example ERC-4626 vault", clearance: 2, executionOptions: 0, functions: [clone(redeem), clone(toAgent)] });
+  // the emergency role: the new approval set to zero. The tree is the exit-governance role's pinned form, for any
+  // spender, so it also covers a later spender of WETH
+  emergency.targets
+    .find((t) => lower(t.address) === lower(WETH))!
+    .functions.push({ selector: selector("approve(address,uint256)"), signature: "approve(address,uint256)", executionOptions: 0, wildcarded: false, conditions: ZERO_APPROVAL });
   return head;
 }

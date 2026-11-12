@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-12T19:10:44Z
 verified: []
 sources:
   - id: s1
@@ -112,6 +112,7 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - **Emergency actions.** The `emergency` row of the role table in [ADR 005](/adr/005-account-graph-and-roles.md#proposed-direction) lists them. Recovery orders are signer orders (decision 25).
 - **Stop and restore.** The emergency role's revoke ([ADR 005](/adr/005-account-graph-and-roles.md) decision 25) reaches every operator permission (INV-018). A revoke does not cancel resting orders; cancel them too, because fills never consult the policy. Decision 46 restores the operator.
 - **Re-affirmation.** The 30-day alert (decision 24) and the monthly report (decision 29), which also shows each order's distance to market, do not act on chain. Removing a token or tightening a bound also needs the cancellation of the affected orders.
+- **Retirement.** A motion takes a token out of the operator's lists. It writes the signer and TWAP order trees again without the token, writes the token's transfer on the Asset Safe again with the Aragon Agent as the only receiver, and sets the token's orders budget to zero. It revokes nothing ([ADR 013](/adr/013-one-easy-track-factory.md) decision 4). The token keeps its return from the orders account, its relayer approval, the emergency role's recovery orders and its exit, and the policy's source holds it in `RETIRED_ORDER_TOKENS`. An order that was signed before still fills, so the committee cancels it.
 - **Relayer approvals.** The enabling vote has the orders account approve CoW's vault relayer for the maximum amount of every token that an order sells. A zero approval stops every order in that token until a motion raises it again (decisions 44 and 46); the transfer to the Agent stays available.
 - **Governance.** A motion writes through the orders modifier's governance and approvals roles ([ADR 013](/adr/013-one-easy-track-factory.md) decision 18): the token motion (decisions 41, 44 and 45) and the restore (decision 46). The governance role's policy leaves the content of an order tree, whose token lists change, to the motion ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11). No governance role takes a vault account or its modifier as a target (OD-38; INV-004, INV-040).
 - **Tokens.** Recovery sells stETH, wstETH, WETH, USDC, USDT, DAI, USDS and sUSDS: every launch asset of the Asset Safe except ETH, which is staked first, and Earn shares, which leave through their redeem queues. Recovery buys USDC, with USDT second (decision 5). The enabling vote sets both lists, and motions extend them (decision 41).
@@ -148,6 +149,7 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - Kit tests: staking with the Safe as owner [s7]; a WETH unwrap pays the Safe [s8].
 - Fork tests on the enabling vote's vault: signer and TWAP orders from Safe v1.5.0, each settled through CoW's settlement contract ([research note](/research/orders-account-fork-tests-2026-11-07.md)).
 - Fork tests of the orders roles ([research note](/research/orders-motion-roles-2026-11-08.md)), and of the two orders motions through the live Easy Track (`test/OrdersAccount.t.sol`); their gas is in [ADR 013](/adr/013-one-easy-track-factory.md#confirmation).
+- After a retirement motion, the operator signs no order in the token and sends none to the orders account; an order that was signed before fills, and the operator cancels another; the operator returns the token, and a recovery order sells it (`test_factory_orders_token_retirement`).
 - After a restore motion, an order settles. The restore refuses stale lists, a token outside recovery's list, an unsorted approval list and a token operation in the same motion.
 - Still owed: the order book's acceptance of zero app data, the watch-tower's posting of TWAP parts, the screening vendor's answer on output checks, and the orders budgets from the attested computation.
 
