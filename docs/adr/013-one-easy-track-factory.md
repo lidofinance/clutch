@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T07:42:18Z
+  at: 2026-11-11T21:44:30Z
 verified: []
 sources:
   - id: s1
@@ -59,7 +59,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **Scopes and versions.** A scope is one modifier's role, target and selector, one allowance key, one ceiling, or the orders account's lists. Its version is the hash of its current content, as the factory last wrote it. The factory's constructor seeds the versions and the ceilings of the launch policy, which the enabling vote applies. A failed enactment reverts as a whole; the motion stays open until the committee's Safe or Aragon Voting cancels it [s2].
 - **Narrowing.** A raw write names the scope's current content, which must match its version, and writes a subset of it, or revokes the target or the function.
 - **Roles.** The factory holds one role per kind of write: `governance` and `insurance-funding` on the operator modifier, `exit-governance` and `restart` on the safety modifier, the governance and approvals roles on the orders modifier, and `first-loss-burn` with the insurance roles on the first-loss modifier ([ADR 014](/adr/014-funding-by-tranche-votes.md)).
-- **Shapes at launch.** The agent proposes the list below; a shape that the factory lacks needs a changed factory (decision 4). No shape covers a third-party lending pool such as Aave, which is outside the launch scope. The prototype builds the approval list, the introduction, budgets, ceilings, the revoke, the target restore, the restart, insurance money, the orders token and the orders restore.
+- **Shapes at launch.** The agent proposes the list below; a shape that the factory lacks needs a changed factory (decision 4). No shape covers a third-party lending pool such as Aave, which is outside the launch scope. The prototype builds the approval list, the introduction, budgets, ceilings, the revoke, the target restore, the restart, insurance money, the orders token, the orders restore and the first-loss burn.
 
 | Shape | Motion fields | Writes |
 |---|---|---|
@@ -111,7 +111,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 ## Confirmation
 
 - INV-032 to INV-036 in the [invariants](/specs/invariants.md). The factory's fork tests run against the live Easy Track, in `test/UniversalFactory.t.sol` and `test/OrdersAccount.t.sol`.
-- The factory is 17,295 bytes and its orders shape 12,524, under EIP-170's 24,576. One motion that adds a token enacts in 7,789,536 gas (`test_factory_orders_token_motion`), and one that restores the orders account in 7,102,619 (`test_factory_orders_restore_after_an_emergency_stop`), both under EIP-7825's cap.
+- The factory is 17,961 bytes and its orders shape 12,524, under EIP-170's 24,576. One motion that adds a token enacts in 7,893,034 gas (`test_factory_orders_token_motion`), and one that restores the orders account in 7,102,641 (`test_factory_orders_restore_after_an_emergency_stop`), both under EIP-7825's cap.
 
 ## Reversal conditions
 

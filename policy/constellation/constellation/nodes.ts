@@ -2,6 +2,7 @@
 // Modified for Clutch on 2026-10-06: two Roles modifiers, bound by address,
 // and no Safe node. See PROVENANCE.md.
 // Changed for Clutch on 2026-11-07: the orders modifier (ADR 007, decision 30).
+// Changed for Clutch on 2026-11-11: the first-loss modifier (ADR 008, decision 19).
 /**
  * The two modifiers of ADR 005. Clutch's own script deploys the Safes and the
  * modifiers, because the Safe node cannot set the Safe version, a guard or
@@ -18,3 +19,4 @@ const eth = constellation({
 export const operatorRolesNode = eth.roles["Clutch operator modifier"];
 export const safetyRolesNode = eth.roles["Clutch safety modifier"];
 export const ordersRolesNode = eth.roles["Clutch orders modifier"];
+export const firstLossRolesNode = eth.roles["Clutch first-loss modifier"];

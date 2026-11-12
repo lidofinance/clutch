@@ -197,19 +197,13 @@ contract EnablingVoteRehearsal is EnabledVault {
     // 5. The first-loss Safe: a burn by motion and a redemption request
     // ---------------------------------------------------------------------
 
-    /// @dev The first-loss policy is not built. The owner path grants the
-    ///      two minimal permissions that ADR 008 describes, so the probe can
-    ///      ask whether the share tokens accept them from the first-loss Safe.
+    /// @dev The enabling vote's first-loss batch applies the first-loss policy
+    ///      (ADR 008, decisions 21 and 23). The probe asks whether the share
+    ///      tokens accept its two actions from the first-loss Safe.
     function test_05_first_loss_burn_and_redemption_request() public {
         _enable();
         _moveFirstLossShare(Mainnet.EARN_ETH_SHARE, "earnETH");
         _moveFirstLossShare(Mainnet.EARN_USD_SHARE, "earnUSD");
-        vm.startPrank(address(firstLoss));
-        firstLossMod.scopeTarget(FIRST_LOSS_BURN, Mainnet.EARN_ETH_SHARE);
-        firstLossMod.allowFunction(FIRST_LOSS_BURN, Mainnet.EARN_ETH_SHARE, bytes4(keccak256("burn(uint256)")), 0);
-        firstLossMod.scopeTarget(FIRST_LOSS, EARN_USD_REDEEM_QUEUE);
-        firstLossMod.allowFunction(FIRST_LOSS, EARN_USD_REDEEM_QUEUE, bytes4(keccak256("redeem(uint256)")), 0);
-        vm.stopPrank();
 
         uint256 before = IERC20(Mainnet.EARN_ETH_SHARE).balanceOf(address(firstLoss));
         vm.prank(address(uf));

@@ -225,7 +225,7 @@
     - "Use its roles outside an enacted motion. Only Easy Track's executor calls `applyMotion` (INV-032)."
     - "Enact a motion if a version that it names, or the [[motion counter]], changed since its creation (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke."
-  numbers: ["a ceiling's raise: at most twofold, once in 15 days", "the prototype: 17,295 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 12,524", "a motion that adds a token: 7,789,536 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 7,102,619 gas", "external audit in phase 3"]
+  numbers: ["a ceiling's raise: at most twofold, once in 15 days", "the prototype: 17,961 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 12,524", "a motion that adds a token: 7,893,034 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 7,102,641 gas", "external audit in phase 3"]
   sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d9",
     "ADR-013#d10", "ADR-013#d11", "ADR-013#d13", "ADR-013#proposed-direction", "ADR-013#consequences",
     "ADR-007#d41", "ADR-006#d9", "ADR-006#d10", "ADR-011#d13", "OD-09", "OD-70", "ADR-013#d15", "OD-117",
@@ -354,7 +354,7 @@
     - "Approve a protocol spender. The [[approval]] spends that spender's [[budget key]], or stays under a [[ceiling]]."
     - "Return any listed token to the Aragon Agent, by a transfer pinned to it, with no motion and no vote."
   cannot:
-    - "Transfer a token anywhere else. Its transfers to the orders account are in the policy, each under its token's orders budget; its transfer to the Aragon Agent is specified, not built."
+    - "Transfer a token anywhere else. Its transfers go only to the orders account, each under its token's orders budget, and to the Aragon Agent."
     - "Borrow, or use a venue outside the launch scope."
     - "Administer a modifier or the Safe, or change its own permissions."
     - "Use delegatecall on the Asset Safe. Its one delegatecall, to CoW's order signer, is on the orders account, and the compiler refuses any other."

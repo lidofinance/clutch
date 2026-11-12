@@ -9,6 +9,8 @@
 // after the mandate size (OD-89).
 // Changed for Clutch on 2026-11-07: the operator funds the orders account
 // (ADR 007, decision 18).
+// Changed for Clutch on 2026-11-11: the operator's return to the Aragon Agent
+// (ADR 014, decision 9).
 import { c, call, callWithValue } from "../../lib";
 import {
   DAI,
@@ -76,8 +78,9 @@ export const ORDER_FUNDING: readonly { token: string; budget: string }[] = [
  * What the committee's Safe, as the operator, may do with the Asset Safe. Default deny: anything
  * absent here is refused. Every receiver and owner is pinned to the Asset
  * Safe (`c.avatar`). The operator's only transfers fund the orders account,
- * pinned to it and under its orders budgets, so assets can move into and out
- * of the approved venues and into the orders account, but nowhere else.
+ * pinned to it and under its orders budgets, or return an order token to the
+ * Aragon Agent. So assets can move into and out of the approved venues, into
+ * the orders account and back to the treasury, but nowhere else.
  */
 export default [
   ...APPROVALS.map(({ token, spender, budget, ceiling }) =>
@@ -120,4 +123,8 @@ export default [
   ...ORDER_FUNDING.map(({ token, budget }) =>
     call(token, "transfer(address,uint256)", manifest.ordersAccount, c.withinAllowance(budget)),
   ),
+  // The return to the treasury: a transfer of an order token, of any amount, pinned to the Aragon Agent
+  // (ADR 014, decision 9). The SDK merges it with the funding transfer into one Or, because a second
+  // scope on the same function would replace the first.
+  ...ORDER_FUNDING.map(({ token }) => call(token, "transfer(address,uint256)", manifest.agent)),
 ] satisfies Permissions;

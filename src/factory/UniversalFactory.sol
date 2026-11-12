@@ -21,7 +21,7 @@ import {OrdersShape} from "./OrdersShape.sol";
 ///      target that the emergency role revoked; the restart; insurance money from the Asset Safe
 ///      to the first-loss Safe; a token for the orders account, with its orders, approvals and
 ///      exit, and the restore of the orders account after an emergency stop, whose writes a
-///      stateless companion contract builds. The other
+///      stateless companion contract builds; the burn of first-loss shares. The other
 ///      shapes, and their emergency exits, are not built. Every check here sits behind the
 ///      modifiers' own guards.
 contract UniversalFactory {
@@ -53,13 +53,18 @@ contract UniversalFactory {
     uint8 public constant RESTORE = 8;
     /// @dev Add a token to the orders account: its relayer approval, the emergency role's zeroing
     ///      and transfer, the operator's return, the token's exit on the Asset Safe, the operator's
-    ///      transfer into the orders account under the token's derived budget key, and the token in
+    ///      transfer into the orders account under the token's derived budget key, with its return
+    ///      from the Asset Safe to the Aragon Agent, and the token in
     ///      the orders account's lists, on both sides of signer and TWAP orders and in what recovery
     ///      orders sell. A new token's ceilings come with it.
     uint8 public constant ORDERS_TOKEN = 9;
     /// @dev Give the operator back its authority on the orders account after the emergency role revoked it, for the
     ///      current lists, and raise the relayer approval of the listed tokens that the motion names.
     uint8 public constant ORDERS_RESTORE = 10;
+    /// @dev Burn first-loss shares that the first-loss Safe holds: the holder's own burn of one
+    ///      share token, through the first-loss-burn role. The first-loss modifier's policy names
+    ///      the share tokens, so a burn of any other token fails at enactment.
+    uint8 public constant FIRST_LOSS_BURN = 11;
 
     /// @dev The classes of ceiling, each per token: a budget key's figures, and the fixed cap
     ///      of an approval that spends no key.
@@ -75,6 +80,7 @@ contract UniversalFactory {
     bytes32 internal constant GOVERNANCE = "governance";
     bytes32 internal constant RESTART_ROLE = "restart";
     bytes32 internal constant INSURANCE_FUNDING = "insurance-funding";
+    bytes32 internal constant FIRST_LOSS_BURN_ROLE = "first-loss-burn";
     /// @notice The scope of the orders account's two token lists: the operator's, which serves
     ///         both sides of signer and TWAP orders, and what a recovery order sells.
     bytes32 public constant ORDERS_SCOPE = keccak256("orders lists");
@@ -82,6 +88,7 @@ contract UniversalFactory {
     bytes4 internal constant APPROVE = 0x095ea7b3; // approve(address,uint256)
     bytes4 internal constant TRANSFER = 0xa9059cbb; // transfer(address,uint256)
     bytes4 internal constant ENABLE_MODULE = 0x610b5925; // enableModule(address)
+    bytes4 internal constant BURN = 0x42966c68; // burn(uint256)
 
     /// @dev The prefix of a derived budget key. The governance role's guard on
     ///      `setAllowance` accepts a key with this prefix or a launch key.
@@ -91,6 +98,7 @@ contract UniversalFactory {
     uint8 internal constant T_NONE = 0;
     uint8 internal constant T_STATIC = 1;
     uint8 internal constant T_CALLDATA = 5;
+    uint8 internal constant OP_PASS = 0;
     uint8 internal constant OP_OR = 2;
     uint8 internal constant OP_MATCHES = 5;
     uint8 internal constant OP_EQUAL_TO = 16;
@@ -486,8 +494,8 @@ contract UniversalFactory {
     ///      version checks. The token joins both lists in its sorted place, so a token that either list
     ///      holds is refused. The shape builds the token's own writes on the orders modifier, its exit
     ///      on the safety modifier and the three order trees with the token; the factory writes the
-    ///      operator's transfer into the orders account, under the token's derived key, through the
-    ///      governance role. A budget operation in the same motion fills that key. One motion adds one
+    ///      operator's transfer into the orders account, under the token's derived key, and its
+    ///      return to the Aragon Agent, through the governance role. A budget operation in the same motion fills that key. One motion adds one
     ///      token: a second would write the lists' scope again.
     function _ordersToken(Plan memory p, bytes memory data) internal view {
         (
@@ -507,15 +515,15 @@ contract UniversalFactory {
         (address[] memory to, bytes[] memory calls) = ordersShape.tokenWrites(x, token);
         for (uint256 i = 0; i < to.length; i++) _call(p, to[i], calls[i]);
 
-        // The Asset Safe: the operator's transfer into the orders account, under the derived key. A
-        // token that is already introduced keeps its target as it is, so a revoked target stays
-        // revoked until a restore.
+        // The Asset Safe: the operator's transfer into the orders account, under the derived key,
+        // and its return to the Aragon Agent, in one tree. A token that is already introduced keeps
+        // its target as it is, so a revoked target stays revoked until a restore.
         bool introduced = _introduced(token) || _introducedHere(p, token);
         bytes32 scope = functionScope(token, TRANSFER);
         if (versions[scope] != bytes32(0)) revert StaleVersion(scope);
         bytes32 key = keyFor(token, ordersAccount);
         if (!introduced) _govern(p, abi.encodeCall(IRoles.scopeTarget, (OPERATOR, token)));
-        _govern(p, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, token, TRANSFER, fundingTree(key), 0)));
+        _govern(p, abi.encodeCall(IRoles.scopeFunction, (OPERATOR, token, TRANSFER, transferTree(key), 0)));
         _write(p, scope, keccak256(abi.encode(ordersAccount, key)));
 
         // The three order trees, each with the token in its lists.
@@ -561,13 +569,19 @@ contract UniversalFactory {
         return OrdersShape.Context(assetSafe, agent, ordersAccount, ordersModifier, safetyModifier);
     }
 
-    /// @notice The operator's transfer of a token into the orders account, spending `key`: the
-    ///         tree of every orders budget.
-    function fundingTree(bytes32 key) public view returns (IRoles.ConditionFlat[] memory c) {
-        c = new IRoles.ConditionFlat[](3);
-        c[0] = IRoles.ConditionFlat(0, T_CALLDATA, OP_MATCHES, "");
-        c[1] = IRoles.ConditionFlat(0, T_STATIC, OP_EQUAL_TO, abi.encode(ordersAccount));
-        c[2] = IRoles.ConditionFlat(0, T_STATIC, OP_WITHIN_ALLOWANCE, abi.encode(key));
+    /// @notice The operator's `transfer` tree of an orders token on the Asset Safe, in the roles
+    ///         SDK's canonical form: any amount to the Aragon Agent, which is the return to the
+    ///         treasury, or an amount within `key` to the orders account. A write replaces the
+    ///         whole tree of a function, so both branches sit in one tree.
+    function transferTree(bytes32 key) public view returns (IRoles.ConditionFlat[] memory c) {
+        c = new IRoles.ConditionFlat[](7);
+        c[0] = IRoles.ConditionFlat(0, T_NONE, OP_OR, "");
+        c[1] = IRoles.ConditionFlat(0, T_CALLDATA, OP_MATCHES, "");
+        c[2] = IRoles.ConditionFlat(0, T_CALLDATA, OP_MATCHES, "");
+        c[3] = IRoles.ConditionFlat(1, T_STATIC, OP_EQUAL_TO, abi.encode(agent));
+        c[4] = IRoles.ConditionFlat(1, T_STATIC, OP_PASS, "");
+        c[5] = IRoles.ConditionFlat(2, T_STATIC, OP_EQUAL_TO, abi.encode(ordersAccount));
+        c[6] = IRoles.ConditionFlat(2, T_STATIC, OP_WITHIN_ALLOWANCE, abi.encode(key));
     }
 
     function _revoke(Plan memory p, bytes memory data) internal view {
@@ -635,6 +649,20 @@ contract UniversalFactory {
         );
     }
 
+    /// @dev A first-loss burn: the first-loss Safe burns `amount` of its own shares of one token.
+    ///      The call runs as the first-loss Safe, so it reaches no other holder's shares.
+    function _firstLossBurn(Plan memory p, bytes memory data) internal view {
+        (address share, uint256 amount) = abi.decode(data, (address, uint256));
+        _protected(share);
+        if (amount == 0) revert ZeroAmount();
+        bytes memory burn = abi.encodeWithSelector(BURN, amount);
+        _call(
+            p,
+            firstLossModifier,
+            abi.encodeCall(IRoles.execTransactionWithRole, (share, 0, burn, 0, FIRST_LOSS_BURN_ROLE, true))
+        );
+    }
+
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
@@ -658,6 +686,7 @@ contract UniversalFactory {
             else if (kind == RESTORE) _restore(p, ops[i].data);
             else if (kind == ORDERS_TOKEN) _ordersToken(p, ops[i].data);
             else if (kind == ORDERS_RESTORE) _ordersRestore(p, ops[i].data);
+            else if (kind == FIRST_LOSS_BURN) _firstLossBurn(p, ops[i].data);
             else revert UnknownOperation(kind);
         }
     }

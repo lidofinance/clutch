@@ -37,7 +37,7 @@
   why: "The committee's Safe holds the operator role and the first-loss role, and it creates every motion."
   breaks: "A captured quorum can propose any motion, and LDO holders see each one for 72 hours. A motion can onboard a bad protocol and lose up to its budgets in each period, raise a ceiling at most twofold in 15 days, set any first ceilings for a token that it introduces, or restart the operator after a stop. A burn motion moves the first-loss shares' value to the vault's other depositors. The quorum can also redeem the first-loss shares to the Asset Safe, and return vault tokens to the Aragon Agent, which stops the vault but loses nothing. Two compromised committee keys do not reach the emergency role."
   watched_by: ["test:test_D4_emergency_flow", "test:test_emergency_cannot_give_a_non_zero_approval"]
-  watch_note: "INV-002, INV-021 and INV-038 are pending. The pages on emergency actions, burn motions and first-loss actions, and the alerts on ceiling and restart motions and on transfers to the Agent, are not built."
+  watch_note: "Fork tests cover the operator's return, the burn motion and the first-loss role. INV-021 and INV-038 stay pending for the insurance funds. The pages on emergency actions, burn motions and first-loss actions, and the alerts on ceiling and restart motions and on transfers to the Agent, are not built."
   sources: ["ADR-005#d2", "ADR-005#d24", "ADR-008#d21", "ADR-008#d23", "ADR-008#consequences",
     "ADR-013#consequences", "ADR-014#consequences", "ADR-005#d31", "ADR-010#d24", "INV-002", "INV-014",
     "INV-021", "INV-038", "ADR-013#d15", "doc:docs/specs/threat-model.md#failure-modes", "ADR-013#d13"]
@@ -191,7 +191,7 @@
   why: "EM wants the vault to send funds back rarely. Redemption and fund-exit proceeds pay the Asset Safe, not the Agent."
   breaks: "A captured or careless committee can return any vault token to the Agent at any time. That stops the vault's work but loses nothing."
   watched_by: []
-  watch_note: "INV-038 is pending. The alert on every transfer to the Agent is not built."
+  watch_note: "Fork tests cover the operator's return on the Asset Safe and on the orders account, and the first-loss claim that pays only the Asset Safe. INV-038 stays pending for the exit of an insurance fund. The alert on every transfer to the Agent is not built."
   sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#consequences", "INV-038"]
 
 - id: insurance-one-safe
@@ -200,7 +200,7 @@
   why: "Insurance is built in at launch for earnETH, earnUSD and Lido Lend, and its money comes from the Asset Safe by motion."
   breaks: "A defect in the first-loss modifier reaches every fund at once. A payout from a fund with a fixed payout address leaves the vault, so it is safe only if the creating motion pinned the right address and cap."
   watched_by: []
-  watch_note: "INV-039 is pending. Insurance money moves by motion on a fork, with the factory's prototype and a stand-in for the first-loss Safe. The shapes that create, burn and pay out funds, and the first-loss modifier, are not built."
+  watch_note: "INV-039 is pending. Insurance money moves by motion on a fork, and the first-loss modifier holds the `first-loss` and `first-loss-burn` roles. The shapes that create and pay out funds, and the insurance roles, are not built."
   sources: ["ADR-014#d4", "ADR-014#d6", "ADR-014#d7", "ADR-014#consequences", "ADR-014#confirmation",
     "INV-039"]
 
@@ -239,7 +239,7 @@
   why: "earnETH and earnUSD are launch positions, and the first-loss shares move to the first-loss Safe after the enabling vote."
   breaks: "Curator misbehaviour becomes a financial emergency. A pause, whitelist, lockup or blacklist on the shares is a reversal condition."
   watched_by: ["test:test_D3b_earn_deposit_policy_layer"]
-  watch_note: "Fork tests of the share transfer, the burn motion and the first-loss role are owed. The first-loss balance alert is not built."
+  watch_note: "Fork tests cover the share transfer, the burn motion and the first-loss role. The claim of a settled redemption is not tested. The first-loss balance alert is not built."
   sources: ["ADR-008#d13", "ADR-008#d19", "ADR-008#confirmation", "ADR-008#reversal-conditions",
     "ADR-011#d1", "doc:docs/research/legacy-investments-2026-10-05.md#can-the-shares-move"]
 
