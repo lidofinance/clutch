@@ -53,7 +53,7 @@ abstract contract ClutchFixture is Test {
         address safe; // the Asset Safe; owner of both modifiers
         address voting; // the only owner of the Asset Safe (OD-73); dry-run: MockAragonVoting; production: Aragon Voting
         address agent; // the recovery destination; dry-run: MockAragonAgent; production: the Aragon Agent
-        address operator; // stand-in for the operator Safe
+        address operator; // stand-in for the committee's Safe, which holds the operator role
         address emergency; // stand-in for the emergency Safe
         address governance; // the governance role's member: the mock script executor
         address rolesOperator; // modifier with the operator and governance roles
@@ -189,7 +189,8 @@ abstract contract ClutchFixture is Test {
         assertEq(vm.parseJsonAddress(m, ".safetyModifier"), a.rolesSafety, "manifest: safety modifier");
         assertEq(vm.parseJsonAddress(m, ".operatorSafe"), a.operator, "manifest: operator Safe");
         assertEq(vm.parseJsonAddress(m, ".emergencySafe"), a.emergency, "manifest: emergency Safe");
-        assertEq(vm.parseJsonAddress(m, ".easyTrackExecutor"), a.governance, "manifest: script executor");
+        // The kit has no universal factory: its mock script executor stands in as the motion roles' holder.
+        assertEq(vm.parseJsonAddress(m, ".universalFactory"), a.governance, "manifest: motion roles' holder");
         assertEq(vm.parseJsonAddress(m, ".firstLossSafe"), firstLossSafe, "manifest: first-loss Safe");
         assertEq(vm.parseJsonAddress(m, ".ordersAccount"), ordersAccount, "manifest: orders account");
 

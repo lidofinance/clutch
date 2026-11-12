@@ -23,10 +23,10 @@ The [product brief](product/brief.md) explains the goals and users.
 
 - [Specifications](specs/): invariants, controls, the enabling vote and the LIP draft.
 - [Permission policy](../policy/constellation/PROVENANCE.md): source layout, compiler and committed artifacts.
-- [Registers](registers/): parameters, open decisions, decision history, document status and archived verification requests.
+- [Registers](registers/): parameters, open and closed decisions, the decision log and document status.
 - [Roadmap](../ROADMAP.md): phases and their completion gates.
 
 ## Understand a decision
 
 - [Decision records](adr/): the choices, alternatives and consequences.
-- [Research](research/): dated evidence and reproduction commands, with an archive of superseded notes.
+- [Research](research/): dated evidence and reproduction commands.

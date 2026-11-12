@@ -1,3 +1,0 @@
-date: '2026-11-08'
-kind: Evidence
-text: 'Built the exit-governance role on the safety modifier (ADR 006, decision 13; OD-49): it writes only the emergency role''s exits, under the emergency key, each tree pinned whole. The compiler now keeps each modifier''s keys from motions. Fork tests run a token motion''s writes with its exit on the Asset Safe; the fork suite passes 93 tests.'

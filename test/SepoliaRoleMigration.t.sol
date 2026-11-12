@@ -9,7 +9,7 @@ import {MockAragonVoting} from "../src/mocks/MockAragonVoting.sol";
 import {SafeExec} from "../src/exec/SafeExec.sol";
 import {CoWOrder, ICoWSettlement, IOrderSigner} from "../script/sepolia/CoWInterfaces.sol";
 
-/// @dev OD-122 acceptance on a pinned fork of the existing Sepolia stand. No deployment or public writes.
+/// @dev OD-137 acceptance on a pinned fork of the existing Sepolia stand. No deployment or public writes.
 contract SepoliaRoleMigrationTest is Test {
     string internal manifest;
     string internal packageFile;

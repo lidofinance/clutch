@@ -10,6 +10,9 @@
 // operator role (ADR 005, decision 31).
 // Changed for Clutch on 2026-11-07: the orders account, its modifier and CoW's
 // contracts (ADR 007).
+// Changed for Clutch on 2026-11-08: the universal factory holds the motion
+// roles in place of Easy Track's script executor (ADR 013, decision 18).
+// Changed for Clutch on 2026-11-11: the first-loss modifier (ADR 008).
 import { readFileSync } from "node:fs";
 
 /**
@@ -44,8 +47,12 @@ export type Manifest = {
    * members and one member of neither body.
    */
   emergencySafe: string;
-  /** The Easy Track script executor, which holds the governance, restart and insurance-funding roles. */
-  easyTrackExecutor: string;
+  /**
+   * The universal factory, which holds the motion roles: governance, restart, insurance funding, exit governance,
+   * and the orders modifier's governance and approvals. An enacted motion's one call makes its writes as these
+   * roles (ADR 013, decision 18). The kit, which has no universal factory, names its mock script executor.
+   */
+  universalFactory: string;
   /** The first-loss Safe: the only receiver of insurance money (ADR 014, decision 7). */
   firstLossSafe: string;
   /**
@@ -58,6 +65,12 @@ export type Manifest = {
    * deploys no orders account, so its manifest names none, and the orders policy compiles only where it does.
    */
   ordersModifier?: string;
+  /**
+   * The first-loss Safe's one modifier, with the `first-loss` and `first-loss-burn` roles (ADR 008, decisions 21
+   * and 23). The kit deploys no first-loss Safe, so its manifest names none, and the first-loss policy compiles
+   * only where it does.
+   */
+  firstLossModifier?: string;
 };
 
 /** The addresses that permissions pin: each must be in the manifest. */
@@ -68,7 +81,7 @@ const PINNED = [
   "safetyModifier",
   "operatorSafe",
   "emergencySafe",
-  "easyTrackExecutor",
+  "universalFactory",
   "firstLossSafe",
   "ordersAccount",
 ] as const;
@@ -84,6 +97,9 @@ export function checkManifest(m: Record<string, unknown>) {
   }
   if (m.ordersModifier !== undefined && !isAddress(m.ordersModifier)) {
     throw new Error("the manifest's ordersModifier must be an address");
+  }
+  if (m.firstLossModifier !== undefined && !isAddress(m.firstLossModifier)) {
+    throw new Error("the manifest's firstLossModifier must be an address");
   }
 }
 
@@ -152,10 +168,11 @@ export const NAMES: Record<string, string> = {
   [manifest.safetyModifier]: "safety modifier",
   [manifest.operatorSafe]: "committee's Safe",
   [manifest.emergencySafe]: "emergency Safe",
-  [manifest.easyTrackExecutor]: "Easy Track script executor",
+  [manifest.universalFactory]: "universal factory",
   [manifest.firstLossSafe]: "first-loss Safe",
   [manifest.ordersAccount]: "orders account",
   ...(manifest.ordersModifier ? { [manifest.ordersModifier]: "orders modifier" } : {}),
+  ...(manifest.firstLossModifier ? { [manifest.firstLossModifier]: "first-loss modifier" } : {}),
   [COW_SETTLEMENT]: "CoW settlement",
   [COW_VAULT_RELAYER]: "CoW vault relayer",
   [ORDER_SIGNER]: "CoW order signer",

@@ -48,8 +48,6 @@ jobs:
           path: docs/onboarding/clutch-onboarding.html
           if-no-files-found: error
           retention-days: 14
-      - name: check the log is a fresh build of its fragments
-        run: .venv/bin/python scripts/build_log.py --check
       - name: refuse restricted terms and secrets
         run: .venv/bin/python scripts/check_redaction.py
       - name: check every source file's licence line

@@ -9,11 +9,17 @@
 // Changed for Clutch on 2026-11-08: the orders modifier's governance and
 // approvals roles (ADR 007, decision 41), and the safety modifier's
 // exit-governance role (ADR 006, decision 13).
+// Changed for Clutch on 2026-11-08: the universal factory holds the motion
+// roles (ADR 013, decision 18).
+// Changed for Clutch on 2026-11-11: the first-loss modifier (ADR 008,
+// decisions 19, 21 and 23).
 import { manifest } from "./addresses";
-import { operatorRolesNode, ordersRolesNode, safetyRolesNode } from "./nodes";
+import { firstLossRolesNode, operatorRolesNode, ordersRolesNode, safetyRolesNode } from "./nodes";
 import {
   emergency,
   exitGovernance,
+  firstLoss,
+  firstLossBurn,
   governance,
   insuranceFunding,
   operator,
@@ -76,7 +82,7 @@ export const safety_modifier = safetyRolesNode({
 
 /**
  * The orders modifier: the operator and emergency roles on the orders account (ADR 007, decision 30), and the
- * Easy Track executor's governance and approvals roles (decision 41). The orders account is its owner, avatar and
+ * universal factory's governance and approvals roles (decision 41). The orders account is its owner, avatar and
  * target, so a permitted call executes as the orders account. Only a manifest that names the modifier compiles
  * it: the kit deploys no orders account.
  */
@@ -87,5 +93,21 @@ export const orders_modifier = manifest.ordersModifier
       avatar: manifest.ordersAccount as `0x${string}`,
       target: manifest.ordersAccount as `0x${string}`,
       roles: { operator: ordersOperator, emergency: ordersEmergency, governance: ordersGovernance, approvals: ordersApprovals },
+    })
+  : undefined;
+
+/**
+ * The first-loss modifier: the committee's `first-loss` role, which redeems the DAO's first-loss Earn shares with
+ * the proceeds pinned to the Asset Safe (ADR 008, decision 21), and the universal factory's `first-loss-burn`
+ * role (decision 23). The first-loss Safe is its owner, avatar and target, so a permitted call executes as the
+ * first-loss Safe. Only a manifest that names the modifier compiles it: the kit deploys no first-loss Safe.
+ */
+export const first_loss_modifier = manifest.firstLossModifier
+  ? firstLossRolesNode({
+      address: manifest.firstLossModifier as `0x${string}`,
+      owner: manifest.firstLossSafe as `0x${string}`,
+      avatar: manifest.firstLossSafe as `0x${string}`,
+      target: manifest.firstLossSafe as `0x${string}`,
+      roles: { "first-loss": firstLoss, "first-loss-burn": firstLossBurn },
     })
   : undefined;

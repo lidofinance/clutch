@@ -8,13 +8,13 @@ review_status: slop
 valid_as_of: 2026-10-22
 stale_after: 2026-10-29T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-10T13:02:24Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-12T11:36:20Z
 verified: []
 sources:
   - id: s1
     resource: /adr/015-tests-on-sepolia.md
-    title: OD-122 proposal and acceptance checks
+    title: OD-137 proposal and acceptance checks
   - id: s2
     resource: "https://docs.zodiac.eco/developers/constellations"
     title: Constellation partial updates — omission preserves a role and null clears it
@@ -66,4 +66,4 @@ Payload SHA-256: `1c33e4b11883eb318d97b36ecb0d19ce2985646e7fddda494e70fe1dfa6a24
 
 ## Limits
 
-The public stand has not migrated. Hosted resolution, draft publication and Vaults/Policies persistence for this payload remain unverified. EM chose OD-122 B, OD-119 C and OD-120 A on 2026-10-22. The owner must review and authorise the exact package before signing; preparation and fork tests do not execute public transactions [s1][s5].
+The public stand has not migrated. Hosted resolution, draft publication and Vaults/Policies persistence for this payload remain unverified. EM chose OD-137 B, OD-134 C and OD-135 A on 2026-10-22. The owner must review and authorise the exact package before signing; preparation and fork tests do not execute public transactions [s1][s5].

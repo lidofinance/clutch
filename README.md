@@ -50,7 +50,7 @@ just --list      # all recipes
 ```
 
 Without `just`, use `uvx --from rust-just==1.58.0 just <recipe>`.
-See [Contributing](CONTRIBUTING.md) for log entries and the human-only mainnet workflow.
+See [Contributing](CONTRIBUTING.md) for the workflow and the human-only mainnet steps.
 
 ## Name and licence
 

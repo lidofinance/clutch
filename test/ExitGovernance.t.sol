@@ -16,8 +16,8 @@ interface IERC4626Vault {
 /// @title ExitGovernanceRehearsal — the exit-governance role on the enabling vote's vault (ADR 006, decision 13;
 ///        OD-49; INV-025), and the exit that a token gets when a motion adds it to the order lists (ADR 007,
 ///        decision 45).
-/// @dev Easy Track's executor makes each write, as an enacted motion would. The universal factory's shapes that emit
-///      the writes are not built.
+/// @dev Each write is made as the universal factory, the role's member, makes it in an enacted motion's call. Of the
+///      factory's shapes, only the orders operation emits an exit: a new token's (ADR 007, decision 45).
 ///      Run: RPC=<archive RPC> forge test --match-contract ExitGovernanceRehearsal
 contract ExitGovernanceRehearsal is EnabledVault {
     bytes4 internal constant CONDITION_VIOLATION = 0xd0a9bf58;
@@ -72,7 +72,7 @@ contract ExitGovernanceRehearsal is EnabledVault {
 
     /// @dev INV-025: exit-governance writes the emergency role's exits and nothing else: only under the emergency key,
     ///      only the five pinned trees and the four exits without conditions, only as plain calls, and never on a
-    ///      vault account. It holds no membership setter and no administration, and only the executor holds it.
+    ///      vault account. It holds no membership setter and no administration, and only the universal factory holds it.
     function test_exit_governance_writes_only_exits() public enabled {
         Exits memory e = _exits();
         address token = Mainnet.WBTC;
@@ -138,7 +138,7 @@ contract ExitGovernanceRehearsal is EnabledVault {
             (bool ok,) = address(safetyMod).call(
                 abi.encodeCall(IRoles.execTransactionWithRole, (address(safetyMod), 0, write, CALL, EXIT_GOVERNANCE, true))
             );
-            assertFalse(ok, "only the executor holds the exit-governance role");
+            assertFalse(ok, "only the universal factory holds the exit-governance role");
         }
     }
 
@@ -195,9 +195,9 @@ contract ExitGovernanceRehearsal is EnabledVault {
     // Helpers
     // ---------------------------------------------------------------------
 
-    /// @dev A write of the exit-governance role on the safety modifier, as Easy Track's executor runs it.
+    /// @dev A write of the exit-governance role on the safety modifier, as the universal factory makes it.
     function _exit(bytes memory write) internal returns (bool ok, bytes memory ret) {
-        vm.prank(Mainnet.ET_EXECUTOR);
+        vm.prank(address(uf));
         (ok, ret) = address(safetyMod).call(
             abi.encodeCall(IRoles.execTransactionWithRole, (address(safetyMod), 0, write, CALL, EXIT_GOVERNANCE, true))
         );

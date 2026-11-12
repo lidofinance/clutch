@@ -4,11 +4,11 @@ adrs:
   ADR-012: "It governs how contributors and their agents work in this repository, not how the vault works."
   ADR-015: "It governs tests on the Sepolia stand and its Zodiac workspace, not how the vault works."
 invariants:
-  INV-007: "Retired on 2026-10-05: the design has no role-toggle factory (OD-09)."
-  INV-017: "Retired on 2026-11-05: the vault has no funding registry and no top-up factory (OD-106). INV-037 replaces it."
-  INV-020: "Retired on 2026-10-06: the design has no Stonks instance, converter or price feed (OD-43)."
-  INV-028: "Retired on 2026-10-14 (OD-78). OD-103 brought the orders modifier's governance and approvals roles back, and INV-040 states them."
-  INV-030: "Retired on 2026-10-14: the token template does not ship (OD-78)."
-  INV-031: "Retired on 2026-10-14: the restore template does not ship (OD-78)."
+  INV-007: "Retired (OD-09): the design has no role-toggle factory."
+  INV-017: "Retired (OD-106): the vault has no funding registry; INV-037 holds."
+  INV-020: "Retired (OD-43): the design has no Stonks instance, converter or price feed."
+  INV-028: "Retired (OD-78): INV-040 states the orders modifier's roles."
+  INV-030: "Retired (OD-78): the design has no token template."
+  INV-031: "Retired (OD-78): the design has no restore template."
 lip: {}
 runbooks: {}

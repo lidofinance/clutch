@@ -27,3 +27,4 @@ processes:
 
 agents:
   - claude-code/opus-5.5
+  - claude-code/mythos-5.2

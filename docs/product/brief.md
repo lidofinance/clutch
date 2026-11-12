@@ -14,8 +14,8 @@ sources:
     resource: /registers/decision-log.md
     title: Decision log — EM's repository-setup answers of 2026-09-30, and the confirmed vision reading, 2026-10-05
   - id: s2
-    resource: /specs/lip-draft.md
-    title: LIP draft — Active Treasury Management Vault
+    resource: /adr/index.md
+    title: Decision records — the accounts, roles, universal factory, swaps, funding and screening (ADR 005 to ADR 014)
   - id: s3
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice, September 2026 — review is the bottleneck

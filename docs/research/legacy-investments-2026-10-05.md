@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-10-05
 stale_after: 2027-01-31T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-19T20:46:17Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -58,7 +58,7 @@ sources:
     resource: "https://github.com/lidofinance/docs/blob/fa199bc5e33e4e47d0a6232abec241f1cac69eba/docs/multisigs/committees.md"
     title: Lido multisig documentation at fa199bc — the LOL committee Safe and the Growth Committee
   - id: s16
-    resource: /research/funding-registries-2026-10-02.md
+    resource: "https://github.com/lidofinance/clutch/blob/6d5ebb8cd72732b1e531bb562af8a1c3be3f8a2d/docs/research/funding-registries-2026-10-02.md"
     title: Easy Track funding registries, 2026-10-02 — the twelve top-up registries
 ---
 
@@ -78,7 +78,7 @@ An agent ran every chain read on this page on 2026-10-05. The reads use Ethereum
 
 ## Can the shares move
 
-- Both share tokens are ERC-20 tokens. At the block, neither has a mint, burn or transfer pause, a deposit or transfer whitelist, or a lockup, and the holder is not blacklisted [s9][s10][s11]. A transfer from the holder to the Asset Safe therefore works today.
+- Both share tokens are ERC-20 tokens. At the block, neither has a mint, burn or transfer pause, a deposit or transfer whitelist, or a lockup, and the holder is not blacklisted [s9][s10][s11]. A transfer from the holder to the first-loss Safe therefore works at the block.
 - The vaults' administrators can add a pause, a whitelist, a lockup or a blacklist later [s9].
 - A burn acts on the caller's own shares, or on shares that the caller may spend. The holder therefore executes a first-loss burn [s9].
 

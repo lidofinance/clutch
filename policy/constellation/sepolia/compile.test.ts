@@ -33,7 +33,7 @@ test("first-loss holder cannot burn, approve or transfer shares", () => {
   expect(firstLoss.roles.find((r) => r.name === "first-loss-burn")!.members.map((m: { address: string }) => m.address)).toEqual([manifest.easyTrackExecutor]);
 });
 
-test("OD-122 uses four account-specific keys and preserves the legacy profile", () => {
+test("OD-137 uses four account-specific keys and preserves the legacy profile", () => {
   const migrated = build({ ...manifest, roleKeyScheme: "account" });
   expect(migrated.modifiers.map((m) => m.roles.map((r) => r.name))).toEqual([
     ["asset-operator", "governance"], ["asset-emergency"],

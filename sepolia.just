@@ -52,7 +52,7 @@ constellation-resolve:
 constellation-publish:
     bun policy/constellation/sepolia/publish-constellation.ts apply
 
-# OD-122: preparation and verification are read-only; publication and execution are human-only.
+# OD-137: preparation and verification are read-only; publication and execution are human-only.
 migration-prepare workspace:
     bun policy/constellation/sepolia/prepare-migration.ts prepare {{quote(workspace)}}
 

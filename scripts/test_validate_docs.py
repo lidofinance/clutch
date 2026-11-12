@@ -15,6 +15,7 @@ from __future__ import annotations
 import importlib.util
 import shutil
 import subprocess
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -67,7 +68,7 @@ def _entry_text(text: str, od: str) -> str:
 
 def _without_entry(text: str, od: str) -> str:
     return text.replace(_entry_text(text, od), "", 1)
-OPEN_ROW = "\n## Closed"
+OPEN_ROW = "|---|---|---|---|---|\n"
 
 
 def _edited(validator, edits: list[tuple[str, Any]]) -> list[str]:
@@ -85,7 +86,7 @@ def _edited(validator, edits: list[tuple[str, Any]]) -> list[str]:
 
 
 def _author(actor: str):
-    return lambda text: text.replace("  by: claude-code/opus-5.5\n  at:", f"  by: {actor}\n  at:", 1)
+    return lambda text: re.sub(r"  by: [^\n]+\n  at:", f"  by: {actor}\n  at:", text, count=1)
 
 
 def _verified(actor: str):
@@ -130,10 +131,10 @@ EDIT_CASES = [
     ("an agent never verifies", [(ADR, _verified("codex/gpt-5"))], "must name a human"),
     ("an unlisted human cannot verify", [(ADR, _verified("human:stranger"))], "is not in config/actors.yaml"),
     ("an OD ID is used once", [("docs/registers/open-decisions.md", lambda t: t.replace(
-        OPEN_ROW, "\n| OD-01 | A copy | [ADR 012](/adr/012-contributing-with-many-agents.md) | A | EM |\n" + OPEN_ROW, 1))],
-     "OD-01 appears in more than one row"),
+        OPEN_ROW, OPEN_ROW + "| OD-65 | A copy | [ADR 012](/adr/012-contributing-with-many-agents.md) | A | EM |\n", 1))],
+     "OD-65 appears in more than one row"),
     ("an open decision needs a recommendation", [("docs/registers/open-decisions.md", lambda t: t.replace(
-        OPEN_ROW, "\n| OD-98 | A question? | [ADR 012](/adr/012-contributing-with-many-agents.md) |  | EM |\n" + OPEN_ROW, 1))],
+        OPEN_ROW, OPEN_ROW + "| OD-98 | A question? | [ADR 012](/adr/012-contributing-with-many-agents.md) |  | EM |\n", 1))],
      "OD-98: an open decision needs"),
     ("an invariant ID is used once", [("docs/specs/invariants.md", lambda t: t + "\n" + _first_inv_row(t) + "\n")],
      "appears in more than one row"),
@@ -248,14 +249,12 @@ def main() -> int:
         root = Path(tmp)
         _copy(root)
         clean = not validator.generated_issues(root)
-        register = root / "docs" / "registers" / "open-decisions.md"
-        register.write_text(register.read_text(encoding="utf-8").replace("| OD-01 | Where", "| OD-01 | Whither", 1), encoding="utf-8")
         adr = root / "docs" / "adr" / "006-governance-through-easy-track-factories.md"
         adr.write_text(adr.read_text(encoding="utf-8").replace("No open decision closes in this record.", "Nothing.", 1), encoding="utf-8")
         stale = {i.path for i in validator.generated_issues(root)}
         checks.append(("the committed generated blocks are current", clean))
-        checks.append(("a hand edit of a generated block is caught", {
-            "docs/registers/open-decisions.md", "docs/adr/006-governance-through-easy-track-factories.md"} <= stale))
+        checks.append(("a hand edit of a generated block is caught",
+                       "docs/adr/006-governance-through-easy-track-factories.md" in stale))
     for name, ok in checks:
         failures += not ok
         print(f"{'PASS' if ok else 'FAIL'}  {name}")

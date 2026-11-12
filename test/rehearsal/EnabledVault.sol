@@ -41,6 +41,11 @@ abstract contract EnabledVault is RehearsalBase {
     ///      Safe, MultiSend and calldata overheads come on top, and each
     ///      executed batch is then checked against the cap itself.
     uint256 internal constant BATCH_CALL_GAS_BUDGET = 12_000_000;
+    /// @dev The sum of the packed MultiSend items in one Safe batch: 85 bytes of header and the call's
+    ///      data each. The Safe's `execTransaction` and MultiSend's own wrapping add under a kilobyte,
+    ///      so a batch stays under the transaction pool's limit of 131,072 bytes, which each executed
+    ///      batch is then checked against.
+    uint256 internal constant BATCH_BYTES_BUDGET = 120_000;
 
     // The first tranche, an item of the enabling vote: STANDIN amounts under the
     // launch cap of one million dollars (ADR 014, decision 2; OD-55).
@@ -177,7 +182,8 @@ abstract contract EnabledVault is RehearsalBase {
         console2.log("REHEARSAL Safe batches", batches.length);
     }
 
-    /// @dev Measures the calls of one Safe, each cold, and splits them into batches under the gas budget.
+    /// @dev Measures the calls of one Safe, each cold, and splits them into batches under the gas budget
+    ///      and the size budget.
     function _addSplit(ISafe safe, VoteBuilder.Item[] memory calls, address[] memory modules, string memory name) internal {
         uint256[] memory gasOf = _measure(calls, address(safe), modules);
         vm.pauseGasMetering();
@@ -188,13 +194,17 @@ abstract contract EnabledVault is RehearsalBase {
         string memory label = string.concat(name, ": approve a policy batch");
         uint256 start;
         uint256 sum;
+        uint256 size;
         for (uint256 i = 0; i < calls.length; i++) {
-            if (sum + gasOf[i] > BATCH_CALL_GAS_BUDGET && i > start) {
+            uint256 itemSize = 85 + calls[i].data.length;
+            if ((sum + gasOf[i] > BATCH_CALL_GAS_BUDGET || size + itemSize > BATCH_BYTES_BUDGET) && i > start) {
                 _addBatch(safe, calls, start, i, label);
                 start = i;
                 sum = 0;
+                size = 0;
             }
             sum += gasOf[i];
+            size += itemSize;
         }
         _addBatch(safe, calls, start, calls.length, label);
         vm.resumeGasMetering();
@@ -271,20 +281,13 @@ abstract contract EnabledVault is RehearsalBase {
         }
     }
 
-    /// @dev ADR 008: the first-loss modifier and its two roles. Its policy is not built yet.
+    /// @dev ADR 008: the first-loss modifier with the artifact's policy and its two roles. The burn role's
+    ///      member is the universal factory, which holds every motion role (ADR 013, decision 18).
     function _firstLossCalls() internal view returns (VoteBuilder.Item[] memory c) {
-        c = new VoteBuilder.Item[](3);
+        VoteBuilder.Item[] memory policy = _policyCalls(address(firstLossMod), address(0));
+        c = new VoteBuilder.Item[](1 + policy.length);
         c[0] = VoteBuilder.Item(address(firstLoss), abi.encodeCall(ISafe.enableModule, (address(firstLossMod))), "");
-        c[1] = VoteBuilder.Item(address(firstLossMod), _assign(Mainnet.COMMITTEE_SAFE, FIRST_LOSS), "");
-        c[2] = VoteBuilder.Item(address(firstLossMod), _assign(Mainnet.ET_EXECUTOR, FIRST_LOSS_BURN), "");
-    }
-
-    function _assign(address member, bytes32 key) internal pure returns (bytes memory) {
-        bytes32[] memory keys = new bytes32[](1);
-        keys[0] = key;
-        bool[] memory yes = new bool[](1);
-        yes[0] = true;
-        return abi.encodeCall(IRoles.assignRoles, (member, keys, yes));
+        for (uint256 i = 0; i < policy.length; i++) c[1 + i] = policy[i];
     }
 
     /// @dev The gas of each call on its own, with cold accounts, applied in
@@ -477,6 +480,13 @@ abstract contract EnabledVault is RehearsalBase {
     /// @dev The switch runbook: the emergency Safe disables the operator modifier,
     ///      then raises the factory's counter, so that no queued motion enacts.
     function _emergencySwitch() internal {
+        _disableOperatorModifier();
+        vm.prank(address(emergency));
+        uf.raiseCounter();
+    }
+
+    /// @dev The switch's first step: the emergency Safe disables the operator modifier.
+    function _disableOperatorModifier() internal {
         (address[] memory mods,) = asset.getModulesPaginated(address(0x1), 10);
         address prev = address(0x1);
         for (uint256 i = 0; i < mods.length; i++) {
@@ -488,7 +498,5 @@ abstract contract EnabledVault is RehearsalBase {
             address(asset), 0, abi.encodeCall(ISafe.disableModule, (prev, address(opMod))), 0, EMERGENCY, true
         );
         assertFalse(asset.isModuleEnabled(address(opMod)), "the switch is off");
-        vm.prank(address(emergency));
-        uf.raiseCounter();
     }
 }

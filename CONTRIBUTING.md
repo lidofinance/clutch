@@ -5,10 +5,8 @@
 
 ## Who does what
 
-EM accepts decisions in the interim. The Treasury Management Committee is the permanent acceptor.
-No other body verifies an ADR before acceptance (OD-63).
-
 Humans decide, review, verify and merge. Agents draft text, code and tests.
+EM accepts decisions in the interim; the Treasury Management Committee is the permanent acceptor (OD-63).
 Any agent may author a page. Only humans and teams listed in `config/actors.yaml` can verify pages.
 Agents own no GitHub accounts. They use the contributor's account; the contributor opens and answers for the pull request.
 Each commit carries the agent's `Co-Authored-By` trailer. Pages name their agent authors in `generated.by`.
@@ -31,16 +29,16 @@ Never commit a key or an RPC URL that contains one.
    git worktree add ../clutch-<topic> -b <kind>/<date>-<topic> origin/main
    ```
 
-   Use `decisions`, `docs`, `policy`, `fix` or `research` as the kind.
+   Use `build`, `review`, `decisions`, `docs`, `policy`, `fix` or `research` as the kind.
+   A build branch may also record the decisions that it raises (OD-124).
    Do not run bare `git stash`: worktrees share the stash.
 2. Keep one decision or feature per pull request.
 3. Allocate new OD, ADR and INV numbers from `main` when you open the pull request.
    If another pull request takes a number first, the validator fails; take the next one.
-4. Add a log fragment with `just log Update "What changed, in one line."`.
-5. Run `just regen`, then `just check`. Commit generated files with their source changes.
-6. If you changed `src/`, `script/`, `test/` or `policy/`, run `just test-fork` too.
+4. Run `just regen`, then `just check`. Commit generated files with their source changes.
+5. If you changed `src/`, `script/`, `test/` or `policy/`, run `just test-fork` too.
    CI does not run the fork suite until phase 2 (OD-52).
-7. Open a pull request with the template. A human merges through the merge queue, which repeats the checks on the merged result.
+6. Open a pull request with the template. A human merges through the merge queue, which repeats the checks on the merged result.
 
 ## Verify a page
 
@@ -57,10 +55,9 @@ Team verification raises review status; only EM or the committee accepts an ADR 
 
 Do not edit these files by hand:
 
-- `docs/log.md`
 - `docs/registers/document-status.md`
 - `docs/adr/index.md`
-- The generated blocks: the closed index of `docs/registers/open-decisions.md`, and the open questions of each proposed ADR
+- The generated blocks: the open questions of each proposed ADR
 - `docs/onboarding/clutch-onboarding.html`
 - Policy artifacts in `policy/constellation/artifacts/`
 
@@ -69,17 +66,14 @@ Reviewers must approve the policy artifact's diff (ADR 004, decision 14).
 
 ## Change the onboarding guide
 
-For guide content, source pins, coverage and browser tests, follow [guide maintenance](docs/onboarding/guide.md).
-Text lives in `docs/onboarding/content/`. Cite an ADR decision or heading, such as `ADR-007#d27`; whole-ADR citations fail.
-After a source change, review affected guide items before `just repin <item>`.
-For a `pins.json` conflict, take `main`'s version and use `just stale` to repeat that review.
-The [guide-update procedure](skills/guide-update/SKILL.md) gives the steps.
+Follow [guide maintenance](docs/onboarding/guide.md) and the [guide-update procedure](skills/guide-update/SKILL.md).
+After a source change, review each affected guide item before `just repin <item>`.
 
 ## Decisions
 
 Add a complete row to the [open-decisions register](docs/registers/open-decisions.md):
 question, options, closing page, recommendation and decider. The validator rejects incomplete rows.
-To close a decision, remove its row, add its entry to `docs/registers/closed-decisions.yaml` and run `just regen`. The validator writes the closed index.
+To close a decision, remove its row, add its entry to `docs/registers/closed-decisions.yaml` and run `just regen`.
 
 EM triages open decisions and decides in batched interviews, with one decisions branch at a time.
 The decision log quotes the interview exactly. Do not reconstruct a quote from memory or another source.

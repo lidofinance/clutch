@@ -144,7 +144,8 @@ contract DeployDryRun is Broadcast {
             m,
             '","emergencySafe":"',
             vm.toString(emergencyStandin),
-            '","easyTrackExecutor":"',
+            // the dry run has no universal factory: the mock script executor holds the motion roles
+            '","universalFactory":"',
             vm.toString(address(executor_)),
             '","firstLossSafe":"',
             vm.toString(firstLossStandin),

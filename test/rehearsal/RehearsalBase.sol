@@ -92,6 +92,9 @@ abstract contract RehearsalBase is Test {
     uint256 internal constant BUDGET_CEILING_USDC = 1_000_000e6;
     uint256 internal constant BUDGET_CEILING_USDS = 1_000_000e18;
     uint256 internal constant BUDGET_CEILING_WSTETH = 300e18;
+    uint256 internal constant BUDGET_CEILING_STETH = 300e18;
+    uint256 internal constant BUDGET_CEILING_WETH = 300e18;
+    uint256 internal constant BUDGET_CEILING_USDT = 1_000_000e6;
     // The approval caps of the launch policy: one mandate size, at dry-run scale
     // (policy/constellation/constellation/parameters.ts).
     uint256 internal constant SIZE_STANDIN_STETH = 10e18;
@@ -100,6 +103,10 @@ abstract contract RehearsalBase is Test {
     uint128 internal constant SKY_SAVINGS_USDS = 1_000e18;
     uint128 internal constant EARN_USD_DEPOSIT = 500e6;
     uint128 internal constant EARN_ETH_DEPOSIT_WSTETH = 1e18;
+    // The orders budgets, one per order token (ADR 007, decision 18).
+    uint128 internal constant ORDERS_ETH_TOKEN = 10e18;
+    uint128 internal constant ORDERS_USD6 = 10_000e6;
+    uint128 internal constant ORDERS_USDS = 10_000e18;
     uint64 internal constant MONTH = 30 days;
 
     address internal constant DAI_USDS = 0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A;
@@ -117,6 +124,8 @@ abstract contract RehearsalBase is Test {
     address[] internal emergencySigners;
 
     UniversalFactory internal uf;
+    /// @dev When the factory was deployed: its launch ceilings count that moment as their first raise.
+    uint256 internal deployedAt;
 
     address internal deployer = makeAddr("clutch-deployer");
     address internal anyone = makeAddr("anyone");
@@ -163,8 +172,11 @@ abstract contract RehearsalBase is Test {
 
     /// @dev The universal factory (ADR 013), seeded with what the enabling
     ///      vote's policy writes: the operator's approval lists and budgets,
-    ///      the launch keys, and the ceilings per token. Its trusted caller is
-    ///      the committee's Safe, and only the live executor calls `commit`.
+    ///      the launch keys, the orders account's lists, and the ceilings per
+    ///      token. Its trusted caller is the committee's Safe, and only the
+    ///      live executor calls `applyMotion`. The deployer's first creation
+    ///      makes it, so its address, which the manifest names as the holder
+    ///      of the motion roles (decision 18), does not change with its code.
     function _deployFactory() internal {
         UniversalFactory.Config memory c = UniversalFactory.Config({
             trustedCaller: Mainnet.COMMITTEE_SAFE,
@@ -176,16 +188,22 @@ abstract contract RehearsalBase is Test {
             safetyModifier: address(safetyMod),
             ordersModifier: address(ordersMod),
             firstLossModifier: address(firstLossMod),
-            firstLossSafe: address(firstLoss)
+            firstLossSafe: address(firstLoss),
+            agent: Mainnet.AGENT,
+            ordersAccount: address(orders)
         });
-        UniversalFactory.LaunchKey[] memory keys = new UniversalFactory.LaunchKey[](3);
+        // The launch budget keys: the three protocol keys, and the six orders budgets, whose spender is
+        // the orders account (ADR 007, decision 18).
+        (address[6] memory orderTokens, bytes32[6] memory orderKeys, uint128[6] memory orderBudgets) = _ordersBudgets();
+        UniversalFactory.LaunchKey[] memory keys = new UniversalFactory.LaunchKey[](9);
         keys[0] = UniversalFactory.LaunchKey(Mainnet.USDS, Mainnet.SUSDS, bytes32("sky_savings_usds"));
         keys[1] = UniversalFactory.LaunchKey(Mainnet.USDC, Mainnet.EARN_USD_DEPOSIT_QUEUE, bytes32("earn_usd_deposit"));
         keys[2] = UniversalFactory.LaunchKey(Mainnet.WSTETH, EARN_ETH_DEPOSIT_QUEUE, bytes32("earn_eth_deposit_wsteth"));
+        for (uint256 i = 0; i < 6; i++) keys[3 + i] = UniversalFactory.LaunchKey(orderTokens[i], address(orders), orderKeys[i]);
 
         // The factory's version helpers are pure, so a scratch instance computes the seeds.
         UniversalFactory scratch = new UniversalFactory(c, keys, new UniversalFactory.Seed[](0), new UniversalFactory.CeilingSeed[](0));
-        UniversalFactory.Seed[] memory seeds = new UniversalFactory.Seed[](8);
+        UniversalFactory.Seed[] memory seeds = new UniversalFactory.Seed[](15);
         address[5] memory tokens = [Mainnet.STETH, Mainnet.USDS, Mainnet.DAI, Mainnet.USDC, Mainnet.WSTETH];
         for (uint256 i = 0; i < tokens.length; i++) {
             seeds[i] = UniversalFactory.Seed(
@@ -195,8 +213,11 @@ abstract contract RehearsalBase is Test {
         seeds[5] = _budgetSeed(scratch, bytes32("sky_savings_usds"), SKY_SAVINGS_USDS);
         seeds[6] = _budgetSeed(scratch, bytes32("earn_usd_deposit"), EARN_USD_DEPOSIT);
         seeds[7] = _budgetSeed(scratch, bytes32("earn_eth_deposit_wsteth"), EARN_ETH_DEPOSIT_WSTETH);
+        for (uint256 i = 0; i < 6; i++) seeds[8 + i] = _budgetSeed(scratch, orderKeys[i], orderBudgets[i]);
+        // the orders account's two token lists, as the enabling vote writes them (ADR 007, decisions 15 and 22)
+        seeds[14] = UniversalFactory.Seed(scratch.ORDERS_SCOPE(), scratch.ordersVersion(launchOrderTokens(), launchRecoveryTokens()));
 
-        UniversalFactory.CeilingSeed[] memory caps = new UniversalFactory.CeilingSeed[](6);
+        UniversalFactory.CeilingSeed[] memory caps = new UniversalFactory.CeilingSeed[](9);
         uint8 budget = scratch.BUDGET_CEILING();
         uint8 cap = scratch.APPROVAL_CAP_CEILING();
         caps[0] = UniversalFactory.CeilingSeed(scratch.ceilingKey(budget, Mainnet.USDC), BUDGET_CEILING_USDC);
@@ -205,9 +226,39 @@ abstract contract RehearsalBase is Test {
         caps[3] = UniversalFactory.CeilingSeed(scratch.ceilingKey(cap, Mainnet.STETH), SIZE_STANDIN_STETH);
         caps[4] = UniversalFactory.CeilingSeed(scratch.ceilingKey(cap, Mainnet.DAI), SIZE_STANDIN_USD);
         caps[5] = UniversalFactory.CeilingSeed(scratch.ceilingKey(cap, Mainnet.USDS), SIZE_STANDIN_USD);
+        caps[6] = UniversalFactory.CeilingSeed(scratch.ceilingKey(budget, Mainnet.STETH), BUDGET_CEILING_STETH);
+        caps[7] = UniversalFactory.CeilingSeed(scratch.ceilingKey(budget, Mainnet.WETH), BUDGET_CEILING_WETH);
+        caps[8] = UniversalFactory.CeilingSeed(scratch.ceilingKey(budget, Mainnet.USDT), BUDGET_CEILING_USDT);
 
         vm.prank(deployer);
         uf = new UniversalFactory(c, keys, seeds, caps);
+        deployedAt = block.timestamp;
+        assertEq(address(uf), vm.computeCreateAddress(deployer, 0), "the deployer's first creation");
+    }
+
+    /// @dev The orders budgets of the launch policy (policy/constellation/constellation/allowances).
+    function _ordersBudgets() internal pure returns (address[6] memory tokens, bytes32[6] memory keys, uint128[6] memory perMonth) {
+        tokens = [Mainnet.STETH, Mainnet.WSTETH, Mainnet.WETH, Mainnet.USDC, Mainnet.USDT, Mainnet.USDS];
+        keys = [
+            bytes32("orders_steth"), bytes32("orders_wsteth"), bytes32("orders_weth"),
+            bytes32("orders_usdc"), bytes32("orders_usdt"), bytes32("orders_usds")
+        ];
+        perMonth = [ORDERS_ETH_TOKEN, ORDERS_ETH_TOKEN, ORDERS_ETH_TOKEN, ORDERS_USD6, ORDERS_USD6, ORDERS_USDS];
+    }
+
+    /// @dev The operator's order tokens at launch, sorted as the SDK sorts them (ADR 007, decision 22).
+    function launchOrderTokens() public pure returns (address[] memory t) {
+        t = new address[](6);
+        (t[0], t[1], t[2], t[3], t[4], t[5]) =
+            (Mainnet.WSTETH, Mainnet.USDC, Mainnet.STETH, Mainnet.WETH, Mainnet.USDT, Mainnet.USDS);
+    }
+
+    /// @dev What a recovery order sells at launch, sorted as the SDK sorts them (ADR 007, decision 15).
+    function launchRecoveryTokens() public pure returns (address[] memory t) {
+        t = new address[](8);
+        (t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7]) = (
+            Mainnet.DAI, Mainnet.WSTETH, Mainnet.USDC, Mainnet.SUSDS, Mainnet.STETH, Mainnet.WETH, Mainnet.USDT, Mainnet.USDS
+        );
     }
 
     function _budgetSeed(UniversalFactory f, bytes32 key, uint128 perMonth) internal pure returns (UniversalFactory.Seed memory) {
@@ -247,7 +298,7 @@ abstract contract RehearsalBase is Test {
             string.concat(
                 "The enabling-vote rehearsal on a fork of block ",
                 vm.toString(FORK_BLOCK),
-                " (test/EnablingVoteRehearsal.t.sol): the live Aragon Voting owns the Safes, and the live committee's Safe and Easy Track executor are members. Not a mainnet deployment."
+                " (test/EnablingVoteRehearsal.t.sol): the live Aragon Voting owns the Safes, the live committee's Safe holds the operator role, and the universal factory, which the live Easy Track calls through its executor, holds the motion roles. Not a mainnet deployment."
             )
         );
         vm.serializeAddress(o, "agent", Mainnet.AGENT);
@@ -260,8 +311,9 @@ abstract contract RehearsalBase is Test {
         vm.serializeAddress(o, "modules", mods);
         vm.serializeAddress(o, "operatorSafe", Mainnet.COMMITTEE_SAFE);
         vm.serializeAddress(o, "emergencySafe", address(emergency));
-        vm.serializeAddress(o, "easyTrackExecutor", Mainnet.ET_EXECUTOR);
+        vm.serializeAddress(o, "universalFactory", address(uf));
         vm.serializeAddress(o, "firstLossSafe", address(firstLoss));
+        vm.serializeAddress(o, "firstLossModifier", address(firstLossMod));
         vm.serializeAddress(o, "ordersAccount", address(orders));
         return vm.serializeAddress(o, "ordersModifier", address(ordersMod));
     }
@@ -274,8 +326,9 @@ abstract contract RehearsalBase is Test {
         assertEq(vm.parseJsonAddress(m, ".safetyModifier"), address(safetyMod), "manifest: safety modifier");
         assertEq(vm.parseJsonAddress(m, ".operatorSafe"), Mainnet.COMMITTEE_SAFE, "manifest: committee's Safe");
         assertEq(vm.parseJsonAddress(m, ".emergencySafe"), address(emergency), "manifest: emergency Safe");
-        assertEq(vm.parseJsonAddress(m, ".easyTrackExecutor"), Mainnet.ET_EXECUTOR, "manifest: executor");
+        assertEq(vm.parseJsonAddress(m, ".universalFactory"), address(uf), "manifest: universal factory");
         assertEq(vm.parseJsonAddress(m, ".firstLossSafe"), address(firstLoss), "manifest: first-loss Safe");
+        assertEq(vm.parseJsonAddress(m, ".firstLossModifier"), address(firstLossMod), "manifest: first-loss modifier");
         assertEq(vm.parseJsonAddress(m, ".ordersAccount"), address(orders), "manifest: orders account");
         assertEq(vm.parseJsonAddress(m, ".ordersModifier"), address(ordersMod), "manifest: orders modifier");
     }

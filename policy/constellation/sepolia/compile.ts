@@ -116,7 +116,7 @@ export function build(manifest: Record<string, any>) {
   const artifact = compileStand(nodes, m, names);
   // The shared compiler protects the Asset Safe and the orders account; the stand adds the first-loss Safe.
   for (const [avatar, modules] of [[m.firstLossSafe, [m.firstLossModifier]]] as [string, string[]][]) {
-    checkProtected(artifact.modifiers, { assetSafe: avatar, modules, ordersModifier: m.ordersModifier, ordersAccount: m.ordersSafe });
+    checkProtected(artifact.modifiers, { assetSafe: avatar, modules, ordersModifier: m.ordersModifier, ordersAccount: m.ordersSafe, firstLossSafe: m.firstLossSafe, firstLossModifier: m.firstLossModifier });
   }
   const grants = new Set(["scopeTarget(bytes32,address)", "allowFunction(bytes32,address,bytes4,uint8)", "scopeFunction(bytes32,address,bytes4,(uint8,uint8,uint8,bytes)[],uint8)"].map((fn) => id(fn).slice(0, 10)));
   for (const modifier of artifact.modifiers) for (const r of modifier.roles) for (const target of r.targets) {

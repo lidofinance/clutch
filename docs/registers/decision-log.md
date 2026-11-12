@@ -6,8 +6,8 @@ tags: [decisions, provenance]
 status: stable
 review_status: slop
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-10T13:02:24Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-12T11:36:20Z
 verified: []
 sources:
   - id: s1
@@ -95,8 +95,29 @@ sources:
     resource: "urn:clutch:interview:2026-11-08"
     title: EM's acceptance of INV-040's amendment and the pinned trees, and EM's decision to build the exit-governance role, 2026-11-08; the transcript is not in the repository
   - id: s29
+    resource: "urn:clutch:interview:2026-11-08-od117"
+    title: EM's acceptance of the factory's companion contract, and EM's answer on the two motions for a token, 2026-11-08; the transcript is not in the repository
+  - id: s30
+    resource: "urn:clutch:interview:2026-11-08-od118"
+    title: EM's choice of the factory that makes a motion's writes in one call, 2026-11-08; the transcript is not in the repository
+  - id: s31
+    resource: "urn:clutch:interview:2026-11-10-consolidation"
+    title: EM's request for a hard consolidation, and EM's answers to its eight questions and two cards, 2026-11-10; the transcript is not in the repository
+  - id: s32
+    resource: "urn:clutch:interview:2026-11-11-verify"
+    title: EM's instruction to record EM's verification of ADR 001 to ADR 004, 2026-11-11; the transcript is not in the repository
+  - id: s33
+    resource: "urn:clutch:interview:2026-11-11-occam"
+    title: EM's request for an Occam pass over every layer of the repository, 2026-11-11; the transcript is not in the repository
+  - id: s34
+    resource: "urn:clutch:interview:2026-11-11-occam-verify"
+    title: EM's instructions to record EM's verification of ADR 001 to ADR 004 after the Occam pass, and to list a second recording agent, 2026-11-11; the transcript is not in the repository
+  - id: s35
+    resource: "urn:clutch:interview:2026-11-11-next-steps"
+    title: EM's instruction to repair the policy workflow, prepare the acceptance ballot and build the first-loss slice, 2026-11-11; the transcript is not in the repository
+  - id: s36
     resource: "urn:clutch:interview:2026-10-22-sepolia-migration"
-    title: EM's choices for OD-119, OD-120 and OD-122, 2026-10-22; the transcript is not in the repository
+    title: EM's choices for OD-134, OD-135 and OD-137, 2026-10-22; the transcript is not in the repository
 ---
 
 # Decision log
@@ -106,6 +127,127 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-11 — the first-loss slice: the operator's return, the first-loss policy and the burn
+
+Step 2 of the agent's list in the entry below was the first-loss slice: the operator's return to the Aragon Agent on the Asset Safe, the first-loss modifier's permissions, and the factory's burn and insurance shapes. EM's instruction, "do 1, 4, and 2", is quoted in that entry.
+
+Recorded as:
+
+- The agent built three parts. The operator's `transfer` of an order token on the Asset Safe has two branches in one tree: any amount to the Aragon Agent, or an amount within the token's orders budget to the orders account; the universal factory writes the same tree for a token that a motion adds ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 9). The first-loss modifier holds the `first-loss` role of the committee's Safe, which requests a redemption and claims it to the Asset Safe, and the `first-loss-burn` role of the universal factory ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 21 and 23). The factory has one new operation, the first-loss burn.
+- Three readings are the agent's, and EM has not confirmed them. The return covers the operator's order tokens only: DAI and sUSDS have none, so the operator converts or redeems them first. A burn motion names a share token and an amount, and the first-loss policy names the two Earn shares, so a burn of another token passes its creation and fails at its enactment, as insurance money of an unlisted token does. A redemption request names no receiver, so only the claim is pinned to the Asset Safe.
+- The agent did not build the insurance shapes. It opened OD-129 to OD-131 in the [register](/registers/open-decisions.md) for three points that no decision settles: a bound on insurance money, the operation that gives Lido Earn its insurance, and the forms of a Lido Lend fund before Lido Lend exists. [s35]
+
+## 2026-11-11 — the policy workflow installs bun without a third-party action
+
+The agent reported that the `policy` workflow never starts: each of its 28 push runs on `main` since 2026-10-06 ended in `startup_failure` and created no job. It is the only workflow that uses an action outside `actions/*`, `oven-sh/setup-bun`. The agent proposed four next steps: (1) replace that action with a checksum-pinned download of the same bun version; (2) build the first-loss slice; (3) decide the pull request of the Sepolia stand; (4) prepare a ballot for the acceptance of ADR 005 to ADR 014. EM wrote:
+
+> do 1, 4, and 2
+
+Recorded as:
+
+- (1) `.github/workflows/policy.yml` downloads bun 1.3.0 from its release and checks the archive against the release's SHA-256 before it runs. The workflow uses no action outside `actions/*`. EM asked for this edit of a protected path in writing. The cause, an organisation rule on actions, is the agent's reading; the agent cannot read that rule. The run of the pull request is the test.
+- The agent also added the rehearsal artifact's comparison to the workflow, so that CI makes the same policy checks as `just check-policy`. EM's answer does not name that part.
+- (4) and (2) are separate work: the ballot changes no page of this repository, and the first-loss slice has its own branch. [s35]
+
+## 2026-11-11 — ADR 001 to ADR 004 verified after the Occam pass, and a second recording agent
+
+The Occam pass brought the accepted ADR 001 to ADR 004 to the current-design form, which broke EM's verification of each page. The agent asked EM to verify the four pages again. EM wrote:
+
+> 1. run verification script for ADRs 001-004 on my behalf
+
+The session's agent, `claude-code/mythos-5.2`, was not in the actor list's agents, so it could not record a verification. EM then wrote:
+
+> add claude-code/mythos-5.2 to config/actors.yaml and run just verify on my behalf to bless ADR 001-004
+
+Recorded as:
+
+- `config/actors.yaml` lists `claude-code/mythos-5.2` as an agent that may record a human's verification, next to `claude-code/opus-5.5`. EM asked for this edit of a protected file in writing.
+- EM verifies ADR 001 to ADR 004 again after the edits of the Occam pass, so they stay accepted. At this instruction, the agent recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The session ran as `claude-code/opus-5.5` when it recorded them, so the entries name that agent. The verifications are EM's. [s34]
+
+## 2026-11-11 — the Occam pass: one statement per fact
+
+EM asked for a pass over every layer of the repository:
+
+> learn the repo structure from the ground, start with ADRs, ODs, specs, docs, and other stuff.
+>
+> I need you to run Occam's razor against every layer of artifacts: if something is redundant, repeated, cycled back and forth, too complex or inadequate — cut, squeeze, compress. Your goal is to have the least possible side of the repo without losing the essence and design principals of the stuff that we build. We need this repo to be manageable both by humans and agents — to-the-point, concise, simple wording, neat ideas, lean structure.
+>
+> Do the full path over everything and plan first, don't execute on the go, build evals needed to secure the changes will be made. Then go over the plan one more time and find additional things to correct the plan or evals. Only third pass will be execution of the plan under control of evals.
+
+Recorded as:
+
+- No decision changes and no OD opens: the pass changes the form of the pages, not the design. The agent's rule for it is one owner per fact ([ADR 012](/adr/012-contributing-with-many-agents.md), proposed direction): a page states a fact once, and other pages point to it. A decision that another decision states in full becomes one line, "Stated by …". EM has not accepted the rule or that line's form as text (agent's proposal).
+- The agent compared the result with the commit before the pass, `d60c221`: every decision number, OD, invariant with its tests, and quoted line of this log stays; every figure, address and identifier of the owner pages still has an owner page; the contracts' runtime bytecode is the same. [s33]
+
+## 2026-11-11 — ADR 001 to ADR 004 verified again
+
+EM approved edits of the accepted ADR 001 to ADR 004 in the consolidation (K7). The agent fixed their stale text and asked EM to verify the four pages again. EM wrote:
+
+> run just verify on each ADR page on my behalf
+
+Recorded as:
+
+- EM verifies ADR 001 to ADR 004 again after the edits of 2026-11-11, so they stay accepted. The agent reads "each ADR page" as the four accepted ADRs whose verification the edits broke; the proposed ADR 005 to ADR 014 carry no verification (agent's reading). At this instruction, the agent recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verifications are EM's. [s32]
+
+## 2026-11-10 — OD-119 to OD-128: the consolidation's answers
+
+EM asked for a consolidation of the whole repository:
+
+> before you start first-loss slice let's re-derive everything from ADRs and ODs and find inconsistencies, stale facts, broken semantics. repetitive and redundant artifacts; try hard on minimizing the written artifacts especially when they move in cycles (e.g. we started with X, then tried Y, then rolled back to X, and etc.) — I want to compress and cut complexity, do a hard run on this
+
+The agent audited every ADR, specification and register against the decisions. Of the 263 numbered decisions of ADRs 005 to 014, 67 were replaced and 75 amended, and about 370 passages were stale, contradictory or redundant. It asked eight design questions and proposed seven cards of cuts, K1 to K7.
+
+> Answers on design issues
+> 1. Add one orders-restore operation
+> 2. Count the vote's seed as the first raise
+> 3. The guard goes on before the second tranche's vote starts, and the UI requests approvals from that moment.
+> 4. Tranche-vote gates: make it the proposer's duty, plus an alert.
+> 5. Don't allow ADR references in natspec
+> 6. Allow this
+> 7. Confirm
+> 8. Confirm
+>
+> K6: yes
+> K7: I approve edits for AGENTS.md and the accepted ADRs
+>
+> Go ahead will all of this
+
+Recorded as:
+
+- (OD-119, question 1) One motion restores the orders account after an emergency stop: the operator's targets, its order trees and cancels and each operator token's return, for the current lists, and the relayer approval of the listed tokens that the motion names ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 46). EM chose the agent's recommendation.
+- (OD-120, question 2) A launch ceiling's seed counts as its first raise, so its next raise waits 15 days ([ADR 013](/adr/013-one-easy-track-factory.md), decision 15). EM chose the agent's recommendation.
+- (OD-121, question 3) The guard goes on the committee's Safe, with its bypass mode off, before the second tranche's vote starts, and the Zodiac UI requests the screening vendor's approval from that moment ([ADR 010](/adr/010-pre-execution-screening.md), decisions 22 and 25). EM chose the agent's recommendation.
+- (OD-122, question 4) The gates on a tranche vote are a duty of the vote's proposer, and monitoring alerts on a tranche vote that starts while a gate holds ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 19, 21, 36 and 41). EM chose the agent's recommendation.
+- (OD-123, question 5) A contract's comments cite no ADR, open decision, invariant, specification or test, and a check refuses one ([specification policy](/specs/specification-policy.md)). The agent had recommended allowing stable IDs; EM decided otherwise.
+- (OD-124, question 6) A decision may be recorded on the build branch that raised it ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 4). EM chose the agent's recommendation.
+- (OD-125, question 7) Besides funding tranches and the replacement of a role holder, three actions stay Aragon votes: an owner action on a vault Safe, a new or changed factory, and the unpause of Easy Track ([ADR 013](/adr/013-one-easy-track-factory.md), decision 4). EM confirmed the agent's reading.
+- (OD-126, question 8) The orders account and the first-loss Safe use Safe v1.5.0, as the Asset Safe and the emergency Safe do ([ADR 005](/adr/005-account-graph-and-roles.md), decision 13). EM confirmed.
+- (OD-127, K6) The open-decision register lists open items only, and the activity log goes: git and this decision log keep the history ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 13). EM chose the agent's recommendation.
+- (OD-128, K1 to K5) Pages show the current design only. An ADR keeps every decision number; a replaced decision becomes one line that names what replaced it; an amended decision carries its current text; the history stays in this decision log and in git ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 14). EM approved the cards with "Go ahead will all of this".
+- (K7) EM approved edits of AGENTS.md and of the accepted ADRs 001 to 004. Each edited accepted ADR needs EM's verification again. [s31]
+
+## 2026-11-08 — OD-118: the factory makes a motion's writes in one call
+
+The agent measured EM's idea of a helper that approves hashes, and a simpler form of it. Easy Track's executor copies a motion's script into memory three times for each call that the script makes, so a motion fits when its script makes one call. The agent put two options to EM: A, the universal factory holds the motion roles and makes a motion's writes in the motion's one call; B, a motion approves the hash of its writes, and a helper that holds the roles makes them in a second transaction. It recommended A.
+
+> do A
+
+Recorded as:
+
+- (OD-118) The universal factory holds the motion roles. A motion's script makes one call, the factory's `applyMotion`, which checks the motion again, stores its versions and makes its writes in the enactment's transaction ([ADR 013](/adr/013-one-easy-track-factory.md), decision 18). One motion adds a token to the orders account. EM chose the agent's recommendation. [s30]
+
+## 2026-11-08 — OD-117 and OD-118: the companion contract, and one motion for a token
+
+The agent built the universal factory's operations for a token of the orders account ([research note](/research/orders-token-motions-2026-11-08.md)). It found that the factory and the orders shape together exceed EIP-170, and moved the shape into a companion contract (OD-117). It found that one motion that adds a token fails under EIP-7825's gas cap, and split the token into two motions, its preparation and its listing (OD-118). It asked EM to decide both.
+
+> OD-117: I am okay to have a thin helper as you made
+> OD-118: this one I don't like tbh, feels hackish they way you did it; can we also consider a kind of helper and ET factory to approve particular hashes or smth?
+
+Recorded as:
+
+- (OD-117) The universal factory may carry a shape in a thin companion contract that it creates and only reads ([ADR 013](/adr/013-one-easy-track-factory.md), decision 17). EM accepted the agent's recommendation.
+- (OD-118) EM did not accept two motions for one token, and asked the agent to consider a helper with which the factory approves particular hashes. OD-118 stays open in the [register](/registers/open-decisions.md), with that option and the agent's measured alternative. [s29]
 
 ## 2026-11-08 — OD-103 and OD-49: the orders modifier's pinned grants, and the exit-governance role
 
@@ -267,21 +409,21 @@ Recorded as:
 - (OD-100) No Merkle-root policy. Easy Track motions carry versions, so that concurrent motions cannot overwrite each other ([ADR 013](/adr/013-one-easy-track-factory.md), decisions 1 and 2).
 - EM's aim that almost everything runs through Easy Track, without DAO votes, led to OD-101 (the entry of 2026-11-05 above). [s21]
 
-## 2026-10-22 — OD-119, OD-120 and OD-122: the Sepolia role-key migration
+## 2026-10-22 — OD-134, OD-135 and OD-137: the Sepolia role-key migration
 
-EM answered [s29]:
+EM answered [s36]:
 
 > OD-100 B, OD-97 C, OD-98 A. Сделай GPG-коммит и пуш, потом дай команды для публикации и запуска миграции.
 
-EM's answer uses the numbers that `testnet/sepolia` gave these decisions before it merged `main`: OD-97, OD-98 and OD-100 are now OD-119, OD-120 and OD-122.
+EM's answer uses the numbers that `testnet/sepolia` gave these decisions before it merged `main`: OD-97, OD-98 and OD-100 are now OD-134, OD-135 and OD-137.
 
 Recorded as:
 
-- OD-122 B: use `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency` on both networks. Migrate only the existing Sepolia stand after package review and fork tests. Complete the mainnet design updates before its initial deployment. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
-- OD-119 C: the stand owner executes a locally compiled package through test Voting under the package review conditions in [ADR 015](/adr/015-tests-on-sepolia.md#decision).
-- OD-120 A: the stand owner may send public transactions on the existing Sepolia stand through `sepolia.just` and its guards, with the keystore. A second stand needs a new decision. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
+- OD-137 B: use `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency` on both networks. Migrate only the existing Sepolia stand after package review and fork tests. Complete the mainnet design updates before its initial deployment. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
+- OD-134 C: the stand owner executes a locally compiled package through test Voting under the package review conditions in [ADR 015](/adr/015-tests-on-sepolia.md#decision).
+- OD-135 A: the stand owner may send public transactions on the existing Sepolia stand through `sepolia.just` and its guards, with the keystore. A second stand needs a new decision. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
 
-The choices do not close OD-117, OD-118 or OD-121 and do not record verification of the whole ADR. The owner reviews and authorises the exact calls before signing [s29].
+The choices do not close OD-132, OD-133 or OD-136 and do not record verification of the whole ADR. The owner reviews and authorises the exact calls before signing [s36].
 
 ## 2026-10-22 — ADR 001, ADR 003 and ADR 004 verified again
 
@@ -789,7 +931,7 @@ Recorded as:
 
 > say I want to achieve 80% of result with 20% of complexity and effort in clutch; what can be a list of options to drop or simplify things? research it hard and deep, validate every claim you made against Lido approaches and established trust models
 
-The agent answered with eleven options, A to K, each checked against Lido practice, the ENS endowment and Aave's Finance Steward ([research note](/research/simplification-2026-10-08.md)). EM answered:
+The agent answered with eleven options, A to K, each checked against Lido practice, the ENS endowment and Aave's Finance Steward ([research note](https://github.com/lidofinance/clutch/blob/6d5ebb8cd72732b1e531bb562af8a1c3be3f8a2d/docs/research/simplification-2026-10-08.md)). EM answered:
 
 > - A is not an option, we must not do it basically it's a lot of ops burden — omnibus votes are heavy to run, coordinate, gather quorum and repeat especially out of order when needed
 > - B option sounds possible but still undesirable
@@ -811,7 +953,7 @@ Recorded as:
 - (A) Not taken. The template factories, the exit-governance role and the budget factory stay. A DAO vote for every change costs too much in operations: an omnibus vote is heavy to run and coordinate, needs a quorum, and is hard to repeat out of order ([ADR 006](/adr/006-governance-through-easy-track-factories.md)).
 - (B) Not taken for now. TWAP and stop-loss orders stay ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
 - (B2, D) Not considered. The orders account stays, and the emergency role keeps its recovery orders, the escape hatch ([ADR 007](/adr/007-swapping-through-an-orders-account.md)).
-- (C) The agent tested one modifier per account on a fork and opened OD-57 ([research note](/research/simplification-2026-10-08.md)).
+- (C) The agent tested one modifier per account on a fork and opened OD-57 ([research note](https://github.com/lidofinance/clutch/blob/6d5ebb8cd72732b1e531bb562af8a1c3be3f8a2d/docs/research/simplification-2026-10-08.md)).
 - (E) Opened as OD-56, for discussion ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
 - (F) The withdrawal queue leaves the design: the operator's withdrawal requests and claims, its stETH approval to the queue, and the emergency role's claim. ETH staking, WETH, DAI with Sky's converter, and LDO stay. The records and the policy change follow with the answers to OD-54 to OD-57 ([ADR 007](/adr/007-swapping-through-an-orders-account.md), [ADR 011](/adr/011-launch-scope.md)).
 - (G) Not taken. The display requirements and the requested vendor rules stay: the on-chain code stays either way, and the display carries the user experience ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
@@ -1150,7 +1292,7 @@ The router cannot price WETH, so the agent asked how to support it (Q2b):
 
 > Q2b: 1.
 
-Recorded as: OD-20 is closed. (Q1) The committee's Safe, as the manager of the shared Stonks 2.0 oracle router, adds USDC, USDT, DAI and USDS once the instance list is final. Each is quoted in USD, with a maximum price age equal to Chainlink's heartbeat for its feed. Lido deploys one USD-anchored converter for the vault through the deployed converter factory. The enabling vote starts only if every vault token is configured on the router and in sync. (Q2) The swap instances cover only the tokens that the router can price: stETH, LDO, USDC, USDT, USDS and DAI. wstETH is unwrapped and sUSDS is redeemed before a sale. EM added WETH. (Q2b) WETH goes through stETH: to sell it, the vault unwraps it, stakes the ETH through Lido's `submit` and sells the stETH; to buy it, the vault unstakes stETH through Lido's withdrawal queue and wraps the ETH. The operator and the emergency role may stake ETH, the operator may request and claim withdrawals pinned to the Asset Safe, and the emergency role may unwrap WETH. (Q3) The committee's Safe re-syncs a feed after Chainlink replaces it. Monitoring alerts when a vault token's feed is out of sync, and a runbook covers the re-sync. If a feed is broken during an emergency, the emergency Safe sends assets to the Aragon Agent instead of swapping. The evidence is in the [pricing note](/research/stonks-pricing-2026-10-05.md) ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). [s4]
+Recorded as: OD-20 is closed. (Q1) The committee's Safe, as the manager of the shared Stonks 2.0 oracle router, adds USDC, USDT, DAI and USDS once the instance list is final. Each is quoted in USD, with a maximum price age equal to Chainlink's heartbeat for its feed. Lido deploys one USD-anchored converter for the vault through the deployed converter factory. The enabling vote starts only if every vault token is configured on the router and in sync. (Q2) The swap instances cover only the tokens that the router can price: stETH, LDO, USDC, USDT, USDS and DAI. wstETH is unwrapped and sUSDS is redeemed before a sale. EM added WETH. (Q2b) WETH goes through stETH: to sell it, the vault unwraps it, stakes the ETH through Lido's `submit` and sells the stETH; to buy it, the vault unstakes stETH through Lido's withdrawal queue and wraps the ETH. The operator and the emergency role may stake ETH, the operator may request and claim withdrawals pinned to the Asset Safe, and the emergency role may unwrap WETH. (Q3) The committee's Safe re-syncs a feed after Chainlink replaces it. Monitoring alerts when a vault token's feed is out of sync, and a runbook covers the re-sync. If a feed is broken during an emergency, the emergency Safe sends assets to the Aragon Agent instead of swapping. The evidence is in the [pricing note](https://github.com/lidofinance/clutch/blob/6d5ebb8cd72732b1e531bb562af8a1c3be3f8a2d/docs/research/stonks-pricing-2026-10-05.md) ([ADR 007](/adr/007-swapping-through-an-orders-account.md)). [s4]
 
 ## 2026-10-05 — OD-20 asked
 

@@ -7,8 +7,8 @@ status: draft
 review_status: slop
 decision: proposed
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-10T13:02:24Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-12T11:36:20Z
 verified: []
 sources:
   - id: s1
@@ -61,7 +61,7 @@ sources:
     title: ADR 002 — EM accepts ADRs in the interim; an accepted ADR authorises nothing on chain
   - id: s17
     resource: /registers/decision-log.md
-    title: Decision log — YT registration and EM's decisions on the Sepolia migration, OD-119, OD-120 and OD-122
+    title: Decision log — YT registration and EM's decisions on the Sepolia migration, OD-134, OD-135 and OD-137
   - id: s18
     resource: "https://github.com/lidofinance/clutch/pull/44"
     title: Pull request #44 — the Sepolia stand and deployment workflow, open
@@ -132,36 +132,36 @@ sources:
 
 ## Decision
 
-EM decided on 2026-10-22, closing OD-119, OD-120 and OD-122 [s17]:
+EM decided on 2026-10-22, closing OD-134, OD-135 and OD-137 [s17]:
 
-1. Use four account-specific role keys for Sepolia and mainnet: `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency`. Migrate only the existing Sepolia stand after package review and fork tests. Complete the mainnet design updates before its initial deployment (OD-122 B).
-2. The stand owner executes a locally compiled package through test Voting under the review conditions below. The owner must authorise the exact calls before signing (OD-119 C).
-3. The stand owner may send public transactions on the existing Sepolia stand through `sepolia.just` and its guards, with the keystore. A second stand needs a new decision (OD-120 A).
+1. Use four account-specific role keys for Sepolia and mainnet: `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency`. Migrate only the existing Sepolia stand after package review and fork tests. Complete the mainnet design updates before its initial deployment (OD-137 B).
+2. The stand owner executes a locally compiled package through test Voting under the review conditions below. The owner must authorise the exact calls before signing (OD-134 C).
+3. The stand owner may send public transactions on the existing Sepolia stand through `sepolia.just` and its guards, with the keystore. A second stand needs a new decision (OD-135 A).
 
-OD-117, OD-118 and OD-121 remain open. These choices do not record acceptance or verification of the whole ADR [s17].
+OD-132, OD-133 and OD-136 remain open. These choices do not record acceptance or verification of the whole ADR [s17].
 
 ## Proposed direction
 
-The implementation conditions below are drafted for review. The three decisions above are recorded; OD-117, OD-118 and OD-121 remain proposals.
+The implementation conditions below are drafted for review. The three decisions above are recorded; OD-132, OD-133 and OD-136 remain proposals.
 
-The rows below describe permissions for the Sepolia workspace and chain 11155111. OD-119, OD-120 and OD-122 are decided; the other rows wait for EM's decision. The role-key decision also defines work for the mainnet design. It authorises no mainnet transaction, and ADR 004's production publication rules stay in force [s1][s16].
+The rows below describe permissions for the Sepolia workspace and chain 11155111. OD-134, OD-135 and OD-137 are decided; the other rows wait for EM's decision. The role-key decision also defines work for the mainnet design. It authorises no mainnet transaction, and ADR 004's production publication rules stay in force [s1][s16].
 
 | Permission | Who acts | Conditions | Decision |
 |---|---|---|---|
-| Work from `testnet/sepolia` instead of the merged `main`: hosted calls to the Sepolia workspace and public Sepolia transactions | The stand owner | The commit is on GitHub. The working tree has no local changes. | OD-117 |
-| Hold an API key for the Sepolia workspace in a git-ignored `.env` | The stand owner | Nobody commits the key. No agent and no CI job uses it. If the provider can limit a key to one workspace, the key reaches only the Sepolia workspace. | OD-117 |
-| Run hosted calls through a Sepolia guard, separate from the owner guard | The stand owner | The guard requires `CLUTCH_SEPOLIA_PUSH=1` and the branch `testnet/sepolia`. It refuses CI, local changes, and a workspace that differs from the prepared context. The owner guard stays as it is. | OD-117 |
-| Publish the existing-state declaration to the Sepolia workspace as a draft | The stand owner | A committed script checks the payload hash and a fresh RPC comparison. It calls resolve and compares the resolved specification with the payload: accounts, owners, members and `Nor` conditions. It calls apply once for each API URL, workspace and payload hash, records the attempt exclusively and saves each status and body. Success requires a complete HTTP exchange and a JSON result with nonempty `id` and `url` strings. It uses the same API address as the SDK. | OD-118 |
-| Execute the locally compiled migration package | The stand owner | Review the exact calls and execute them through test Voting. This route does not authorise a package built by Zodiac. | OD-119 C |
-| Send public Sepolia transactions on the existing stand: funding, the CoW and First-loss drills, recovery and the stop of the run | The stand owner, with the keystore | Only through the `sepolia.just` recipes and their guards. A second stand needs a new decision. | OD-120 A |
-| Import the three existing Safes as vaults and enter the address-book entries in the Sepolia workspace | The stand owner | No role or permission is edited in the Zodiac app. The entries come from the checked address list. | OD-121 |
-| Remove the earlier workspace's draft aliases and cancelled proposals | The stand owner | Only where the app permits it. Nothing is executed. | OD-121 |
-| Migrate the four role keys on the existing Sepolia stand | The stand owner, through test Voting | OD-122 B and OD-119 C permit the migration. A reviewed package passes the checks below. The owner authorises its exact calls before signing. No new Safe or modifier is deployed. | OD-122 B; OD-119 C |
+| Work from `testnet/sepolia` instead of the merged `main`: hosted calls to the Sepolia workspace and public Sepolia transactions | The stand owner | The commit is on GitHub. The working tree has no local changes. | OD-132 |
+| Hold an API key for the Sepolia workspace in a git-ignored `.env` | The stand owner | Nobody commits the key. No agent and no CI job uses it. If the provider can limit a key to one workspace, the key reaches only the Sepolia workspace. | OD-132 |
+| Run hosted calls through a Sepolia guard, separate from the owner guard | The stand owner | The guard requires `CLUTCH_SEPOLIA_PUSH=1` and the branch `testnet/sepolia`. It refuses CI, local changes, and a workspace that differs from the prepared context. The owner guard stays as it is. | OD-132 |
+| Publish the existing-state declaration to the Sepolia workspace as a draft | The stand owner | A committed script checks the payload hash and a fresh RPC comparison. It calls resolve and compares the resolved specification with the payload: accounts, owners, members and `Nor` conditions. It calls apply once for each API URL, workspace and payload hash, records the attempt exclusively and saves each status and body. Success requires a complete HTTP exchange and a JSON result with nonempty `id` and `url` strings. It uses the same API address as the SDK. | OD-133 |
+| Execute the locally compiled migration package | The stand owner | Review the exact calls and execute them through test Voting. This route does not authorise a package built by Zodiac. | OD-134 C |
+| Send public Sepolia transactions on the existing stand: funding, the CoW and First-loss drills, recovery and the stop of the run | The stand owner, with the keystore | Only through the `sepolia.just` recipes and their guards. A second stand needs a new decision. | OD-135 A |
+| Import the three existing Safes as vaults and enter the address-book entries in the Sepolia workspace | The stand owner | No role or permission is edited in the Zodiac app. The entries come from the checked address list. | OD-136 |
+| Remove the earlier workspace's draft aliases and cancelled proposals | The stand owner | Only where the app permits it. Nothing is executed. | OD-136 |
+| Migrate the four role keys on the existing Sepolia stand | The stand owner, through test Voting | OD-137 B and OD-134 C permit the migration. A reviewed package passes the checks below. The owner authorises its exact calls before signing. No new Safe or modifier is deployed. | OD-137 B; OD-134 C |
 | Prepare payloads, run read-only RPC comparisons, and write code, tests and documents | Agents | No change: agents never use the key, call the hosted app, sign or send [s3]. | None |
 
 ### Role keys for Sepolia and mainnet
 
-OD-122 B sets the following keys for both networks. The migration package targets only the existing Sepolia addresses [s4]. Mainnet must use the new keys in its initial policy after the design and implementation updates below are accepted and verified.
+OD-137 B sets the following keys for both networks. The migration package targets only the existing Sepolia addresses [s4]. Mainnet must use the new keys in its initial policy after the design and implementation updates below are accepted and verified.
 
 | Safe | Roles modifier | Current key | Proposed key |
 |---|---|---|---|
@@ -185,7 +185,7 @@ The prepared implementation uses two atomic account batches through the existing
 
 ### Mainnet design dependencies
 
-OD-122 B requires these updates before mainnet deployment. The present rules remain in force until their amendments and implementation are complete [s25][s26].
+OD-137 B requires these updates before mainnet deployment. The present rules remain in force until their amendments and implementation are complete [s25][s26].
 
 | Area | Required update |
 |---|---|
@@ -205,16 +205,16 @@ Sepolia fixtures and a single controller do not prove the mainnet governance, si
 - **The SDK's `push` alone.** The API refuses the governance `Nor` conditions in that format [s8].
 - **Replace `Nor` with `And` and `Or` conditions in the policy.** The deployment findings record five on-chain differences for that change [s7].
 - **Agents publish.** AGENTS.md forbids it [s3].
-- **Keep the shared keys.** Not chosen in OD-122. The current policy model blocks the two pairs of different grants from appearing as separate policies [s23][s24].
-- **Use four account-specific keys on both networks.** Chosen in OD-122 B. Migrate the existing Sepolia roles and update the mainnet design before its initial deployment.
-- **Change Sepolia alone.** Not chosen in OD-122. This separates the test and production key schemes and leaves the mainnet policy conflict unresolved.
+- **Keep the shared keys.** Not chosen in OD-137. The current policy model blocks the two pairs of different grants from appearing as separate policies [s23][s24].
+- **Use four account-specific keys on both networks.** Chosen in OD-137 B. Migrate the existing Sepolia roles and update the mainnet design before its initial deployment.
+- **Change Sepolia alone.** Not chosen in OD-137. This separates the test and production key schemes and leaves the mainnet policy conflict unresolved.
 
 ## Consequences
 
 - The production rule of ADR 004 does not change. A second guard exists for Sepolia, and both guards need tests.
 - Hosted acceptance in the Sepolia workspace is evidence for Sepolia only. It does not show that the production workspace accepts the production policy.
 - Code runs from a branch that is not merged. Reviewers see it in pull request #44, but nobody has approved it [s18].
-- A key that reaches every workspace of the account also reaches the production workspace. The key condition of OD-117 decides this risk.
+- A key that reaches every workspace of the account also reaches the production workspace. The key condition of OD-132 decides this risk.
 - The stand keeps one controller. It does not test signer independence [s4].
 - The provider permits tests above the displayed quotas. Record an actual save or publication error for the provider to investigate [s21].
 - A role-key migration changes on-chain role identity and execution arguments. It needs permission migration and tests even when the permitted actions stay the same [s24].
@@ -228,7 +228,7 @@ Sepolia fixtures and a single controller do not prove the mainnet governance, si
 - The local SDK is now 2.10.0, with API types 1.13.0. All three Safes carry `vault: true`; all seven roles carry policy labels. The publication CLI refuses the different grants under the shared `operator` and `emergency` keys before a hosted request. The payload keeps all original keys and the same configuration calls. This metadata update has not been published [s23].
 - On 2026-10-22, the stand owner ran the publisher from commit `dacf262`. The saved resolve and apply responses have HTTP status `200`; the resolved specification matches the payload. Zodiac shows the three existing Safes, four modifiers and seven roles as `Deployed`, with `Nothing to deploy`. The governance view retains the original `Nor` trees, although it labels them `Unsupported Condition`. The RPC comparison found zero policy differences at block `11970750`. The deployment notes record the command and evidence [s22].
 
-EM chose the migration in OD-122 B. A local package now exists. Nine tests in `test/SepoliaRoleMigration.t.sol` pass on the existing stand's pinned fork, including the state between batches. Two local Anvil transactions leave zero RPC differences, with unchanged allowance storage and Safe configuration. The source snapshot is block `11971984`; public execution and workspace registration remain outstanding [s30]. Its acceptance checks are:
+EM chose the migration in OD-137 B. A local package now exists. Nine tests in `test/SepoliaRoleMigration.t.sol` pass on the existing stand's pinned fork, including the state between batches. Two local Anvil transactions leave zero RPC differences, with unchanged allowance storage and Safe configuration. The source snapshot is block `11971984`; public execution and workspace registration remain outstanding [s30]. Its acceptance checks are:
 
 - Fork tests execute allowed calls under each new key and refuse calls under each old key. They cover governance key pins, Asset switch, Orders revoke/recovery and the intermediate states of any split batch. They also refuse added members, extra grants, non-zero emergency approvals and emergency restoration.
 - State comparisons preserve the allowance storage, members, Safe/module configuration and conditions specified above. The reviewed package contains no deployment or allowance-reset calls. Any Zodiac execution package must contain the same calls.
@@ -249,8 +249,8 @@ EM chose the migration in OD-122 B. A local package now exists. Nine tests in `t
 
 <!-- generated by scripts/validate_docs.py --write-status; edit the sources, not this block -->
 
-- [OD-117](/registers/open-decisions.md): May the stand owner make hosted calls to the Sepolia workspace and send public Sepolia transactions from `testnet/sepolia`? A: no; ADR 004 decision 16 stays, so pull request #44 merges first and the owner team pushes from `main`. B: yes, from a commit that is on GitHub with no local changes, through a Sepolia guard separate from the owner guard, with an API key for the Sepolia workspace in a git-ignored `.env`. C: a one-time exception for each publication, recorded in the decision log.
-- [OD-118](/registers/open-decisions.md): How does the existing-state payload reach the Sepolia workspace? A: the SDK's `push`. B: a committed script behind the Sepolia guard: it checks the payload hash and a fresh RPC comparison, calls resolve, compares the resolved specification with the payload, calls apply once and saves each status and body. C: a manual API call.
-- [OD-121](/registers/open-decisions.md): Which records may the stand owner make by hand in the Zodiac app? A: none. B: vault imports of the three existing Safes, the checked address-book entries, and removal of the earlier workspace's draft aliases and cancelled proposals; no role or permission edits in the app. C: any record, policy drafts included.
+- [OD-132](/registers/open-decisions.md): May the stand owner make hosted calls to the Sepolia workspace and send public Sepolia transactions from `testnet/sepolia`? A: no; ADR 004 decision 16 stays, so pull request #44 merges first and the owner team pushes from `main`. B: yes, from a commit that is on GitHub with no local changes, through a Sepolia guard separate from the owner guard, with an API key for the Sepolia workspace in a git-ignored `.env`. C: a one-time exception for each publication, recorded in the decision log.
+- [OD-133](/registers/open-decisions.md): How does the existing-state payload reach the Sepolia workspace? A: the SDK's `push`. B: a committed script behind the Sepolia guard: it checks the payload hash and a fresh RPC comparison, calls resolve, compares the resolved specification with the payload, calls apply once and saves each status and body. C: a manual API call.
+- [OD-136](/registers/open-decisions.md): Which records may the stand owner make by hand in the Zodiac app? A: none. B: vault imports of the three existing Safes, the checked address-book entries, and removal of the earlier workspace's draft aliases and cancelled proposals; no role or permission edits in the app. C: any record, policy drafts included.
 
 <!-- end of generated block -->

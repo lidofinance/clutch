@@ -129,8 +129,11 @@ contract EnablingVoteRehearsal is EnabledVault {
         assertEq(maxRefill, 400_000e6);
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, 300_000e6)), true);
 
-        // 3f. A ceiling motion: twofold now, and no second raise within 15 days (OD-105).
+        // 3f. A ceiling motion: twofold, 15 days after the launch seed, which counts as the first raise (OD-120),
+        //     and no second raise within 15 days (OD-105).
         bytes32 key = uf.ceilingKey(uf.BUDGET_CEILING(), Mainnet.USDC);
+        (, uint64 seededAt,) = uf.ceilings(key);
+        if (block.timestamp < uint256(seededAt) + 15 days) vm.warp(uint256(seededAt) + 15 days);
         _motion(_one(_ceilingOp(key, BUDGET_CEILING_USDC, 2 * BUDGET_CEILING_USDC)));
         (uint256 ceiling,,) = uf.ceilings(key);
         assertEq(ceiling, 2 * BUDGET_CEILING_USDC, "the ceiling rose twofold");
@@ -194,27 +197,21 @@ contract EnablingVoteRehearsal is EnabledVault {
     // 5. The first-loss Safe: a burn by motion and a redemption request
     // ---------------------------------------------------------------------
 
-    /// @dev The first-loss policy is not built. The owner path grants the
-    ///      two minimal permissions that ADR 008 describes, so the probe can
-    ///      ask whether the share tokens accept them from the first-loss Safe.
+    /// @dev The enabling vote's first-loss batch applies the first-loss policy
+    ///      (ADR 008, decisions 21 and 23). The probe asks whether the share
+    ///      tokens accept its two actions from the first-loss Safe.
     function test_05_first_loss_burn_and_redemption_request() public {
         _enable();
         _moveFirstLossShare(Mainnet.EARN_ETH_SHARE, "earnETH");
         _moveFirstLossShare(Mainnet.EARN_USD_SHARE, "earnUSD");
-        vm.startPrank(address(firstLoss));
-        firstLossMod.scopeTarget(FIRST_LOSS_BURN, Mainnet.EARN_ETH_SHARE);
-        firstLossMod.allowFunction(FIRST_LOSS_BURN, Mainnet.EARN_ETH_SHARE, bytes4(keccak256("burn(uint256)")), 0);
-        firstLossMod.scopeTarget(FIRST_LOSS, EARN_USD_REDEEM_QUEUE);
-        firstLossMod.allowFunction(FIRST_LOSS, EARN_USD_REDEEM_QUEUE, bytes4(keccak256("redeem(uint256)")), 0);
-        vm.stopPrank();
 
         uint256 before = IERC20(Mainnet.EARN_ETH_SHARE).balanceOf(address(firstLoss));
-        vm.prank(Mainnet.ET_EXECUTOR);
+        vm.prank(address(uf));
         firstLossMod.execTransactionWithRole(
             Mainnet.EARN_ETH_SHARE, 0, abi.encodeWithSignature("burn(uint256)", 10e18), 0, FIRST_LOSS_BURN, true
         );
-        assertEq(IERC20(Mainnet.EARN_ETH_SHARE).balanceOf(address(firstLoss)), before - 10e18, "the burn by the executor");
-        console2.log("REHEARSAL first-loss burn of 10 earnETH shares by the executor's role: done");
+        assertEq(IERC20(Mainnet.EARN_ETH_SHARE).balanceOf(address(firstLoss)), before - 10e18, "the burn by the factory's role");
+        console2.log("REHEARSAL first-loss burn of 10 earnETH shares by the universal factory's role: done");
 
         // The committee's role asks for a redemption; the queue takes the shares.
         uint256 usdBefore = IERC20(Mainnet.EARN_USD_SHARE).balanceOf(address(firstLoss));

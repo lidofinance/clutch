@@ -8,8 +8,8 @@ review_status: human-reviewed
 decision: accepted
 accepted_by: human:em
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-22T21:39:51Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T16:59:06Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -29,6 +29,16 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-10-22--adr-001-adr-003-and-adr-004-verified-again
     sha256: b4c7ee4d2ae6e9021c14ca736f9c3864059c407a6cf4401579e546ecec6c12af
+  - by: human:em
+    at: 2026-11-11T05:49:57Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-again
+    sha256: 52cfdbfbc42b23ae8d8d23fa7d83c33dfbe067c7c871f975887f76f42767eeab
+  - by: human:em
+    at: 2026-11-11T20:36:04Z
+    recorded_by: claude-code/opus-5.5
+    ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-after-the-occam-pass-and-a-second-recording-agent
+    sha256: c0e9b5cfb4b8c985960edd623f4ac594008bca327e28c5687465a7d71f8120c7
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -64,33 +74,24 @@ sources:
 ## Context
 
 - Decisions, specifications, policy, code, tests and deployment records need one consistent source.
-- The factories will reuse Easy Track's audited GPL-3.0 base contracts [s3].
+- Easy Track's audited base contracts are GPL-3.0 [s3]. The universal factory imports none of them.
 - The dry-run kit has six commits whose messages explain the corrections.
 - The design names an unannounced screening vendor.
 
 ## Decision
 
-EM decided these points on 2026-09-30 [s1]:
+EM decided each decision below; its ODs lead to EM's words in the [decision log](/registers/decision-log.md) [s1].
 
-1. **Scope.** One repository holds the product documents, ADRs, specifications including the LIP, the Easy Track factories, the permission policy, deployment scripts and records, runbooks and the dry-run kit.
-2. **Boundary.** The CTO knowledge base keeps its assessment of the system and the diligence evidence, restricted. This repository is the system of record for the system. The knowledge base is the record of judgement about it.
-3. **Kit migration.** The kit enters with its six commits. Its history must pass the same publication test as its files.
-4. **Visibility.** The repository is private now and public no later than deployment. Nothing enters it that could not be published at deployment. The screening vendor's identity and any unannounced counterparty terms stay out until they are announced.
-5. **Licence.** AGPL-3.0-or-later. Files derived from Easy Track's base contracts keep GPL-3.0 [s3]. GPL-3.0 section 13 permits combining them with AGPL-3.0 code [s2].
-6. **Name.** Clutch. A clutch is the set of eggs brooded together in one nest. The name continues the bird names of Lido governance: GOOSE [s7], EGG, NEST [s8] and Gaggle.
-7. **No token.** Clutch must never become a token symbol. CLUTCH is already the symbol of unrelated tokens, for example on Ethereum [s5] and on Solana [s6].
-
-EM decided on 2026-10-02, closing OD-07 [s1]:
-
-8. **The vendor's name.** The redaction of the screening vendor's identity ends when the mandate is posted on the forum, after the vendor agrees in writing to be named for this use. Commercial terms never enter the repository.
-
-EM decided on 2026-10-06, closing OD-34 [s1]:
-
-9. **The constellation's licence.** Files derived from the policy provider's Zodiac constellation keep LGPL-3.0-only. A derived file gets `SPDX-License-Identifier: LGPL-3.0-only` when it changes. New files use AGPL-3.0-or-later, the policy compiler among them. LGPL-3.0 is GPL-3.0 with added permissions [s9], so the reasoning of decision 5 applies.
-
-EM decided on 2026-10-22, closing OD-95 [s1]:
-
-10. **Publication.** The repository is public. Nothing enters it that could not be published now. This replaces the visibility rule of decision 4; its rule on the screening vendor's identity and unannounced counterparty terms stands.
+1. **Scope.** One repository holds the product documents, ADRs, specifications including the LIP, the universal Easy Track factory, the permission policy, deployment scripts and records, runbooks and the dry-run kit (decision log, 2026-09-30).
+2. **Boundary.** The CTO knowledge base keeps its assessment of the system and the diligence evidence, restricted. This repository is the system of record for the system. The knowledge base is the record of judgement about it (decision log, 2026-09-30).
+3. **Kit migration.** The kit enters with its six commits. Its history must pass the same publication test as its files (decision log, 2026-09-30).
+4. Replaced by decision 10 (OD-95).
+5. **Licence.** AGPL-3.0-or-later. Files derived from Easy Track's base contracts keep GPL-3.0 [s3]. GPL-3.0 section 13 permits combining them with AGPL-3.0 code [s2] (decision log, 2026-09-30).
+6. **Name.** Clutch. A clutch is the set of eggs brooded together in one nest. The name continues the bird names of Lido governance: GOOSE [s7], EGG, NEST [s8] and Gaggle (decision log, 2026-09-30).
+7. **No token.** Clutch must never become a token symbol. CLUTCH is already the symbol of unrelated tokens, for example on Ethereum [s5] and on Solana [s6] (decision log, 2026-09-30).
+8. **The vendor's name.** The redaction of the screening vendor's identity ends when the mandate is posted on the forum, after the vendor agrees in writing to be named for this use. Commercial terms never enter the repository (OD-07).
+9. **The constellation's licence.** Files derived from the policy provider's Zodiac constellation keep LGPL-3.0-only. A derived file gets `SPDX-License-Identifier: LGPL-3.0-only` when it changes. New files use AGPL-3.0-or-later, the policy compiler among them. LGPL-3.0 is GPL-3.0 with added permissions [s9], so the reasoning of decision 5 applies (OD-34).
+10. **Publication.** The repository is public. Nothing enters it that could not be published now. The screening vendor's identity and any unannounced counterparty terms stay out until they are announced (OD-95).
 
 ## Options considered
 
@@ -112,7 +113,7 @@ EM decided on 2026-10-22, closing OD-95 [s1]:
 ## Confirmation
 
 - The visibility setting of `lidofinance/clutch` on GitHub.
-- `grep -rL --include='*.sol' --include='*.py' --include='*.ts' --exclude-dir=node_modules "SPDX-License-Identifier: AGPL-3.0-or-later" src script scripts test policy` lists only files derived from Easy Track or from the provider's constellation. A CI check replaces this command once the factories exist.
+- `scripts/check_licences.py` checks in CI that every source file carries an allowed licence line: AGPL-3.0-or-later, or the licence of the code that it derives from.
 
 ## Reversal conditions
 

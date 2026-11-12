@@ -203,7 +203,7 @@ contract MockEasyTrack {
 
 /// @dev Drill helper: a pass-through EVM script factory. The production
 ///      factories are Lido-owned and validate parameter shapes, so that a
-///      motion cannot make an arbitrary call (ADR 006). This mock accepts a
+///      motion cannot make an arbitrary call. This mock accepts a
 ///      prebuilt CallsScript payload in `callData` and returns it verbatim.
 ///      The simplification is deliberate: the drills test the motion path,
 ///      not a factory.

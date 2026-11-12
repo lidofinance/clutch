@@ -1,3 +1,0 @@
-date: '2026-10-25'
-kind: Evidence
-text: Rerun all mainnet protocol fork suites on the current working tree; 131 passed, none failed and 16 Sepolia or migration cases skipped.

@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-10-06
 stale_after: 2027-01-31T00:00:00Z
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-10-19T20:35:44Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T11:50:32Z
 verified: []
 sources:
   - id: s1
@@ -21,9 +21,6 @@ sources:
   - id: s3
     resource: "https://github.com/cowprotocol/composable-cow/tree/c0435953ac8312a606d66c91554f2bb4d22ec686"
     title: ComposableCoW at c043595 — the README's Safe setup, handlers, audits and mainnet deployments
-  - id: s4
-    resource: "https://github.com/cowprotocol/composable-cow/blob/c0435953ac8312a606d66c91554f2bb4d22ec686/src/types/StopLoss.sol#L47-L102"
-    title: ComposableCoW StopLoss at c043595 — the order data, including the two oracles, and the strike check
   - id: s5
     resource: "https://github.com/cowprotocol/composable-cow/blob/c0435953ac8312a606d66c91554f2bb4d22ec686/src/types/twap/libraries/TWAPOrder.sol#L31-L42"
     title: ComposableCoW TWAP at c043595 — the order data, including the receiver and the minimum per part
@@ -42,9 +39,6 @@ sources:
   - id: s10
     resource: /research/zodiac-constellation-2026-10-06.md
     title: The Zodiac constellation note — the provider's own swap entry, a CoW action with a TODO for bounds
-  - id: s11
-    resource: /adr/007-swapping-through-an-orders-account.md
-    title: ADR 007 — the Stonks 2.0 design that OD-43 replaces, and its consequences under stress
   - id: s12
     resource: "https://github.com/cowprotocol/composable-cow/blob/c0435953ac8312a606d66c91554f2bb4d22ec686/README.md?plain=1#L130-L181"
     title: ComposableCoW README at c043595 — handler compatibility with CoW's poller, mainnet deployments, and the scope of the audits
@@ -76,7 +70,7 @@ sources:
 
 # CoW orders from a dedicated orders account, 2026-10-06
 
-The Treasury Management Committee asked for dollar-cost averaging, standing limit orders, stop-loss orders, and access to 1inch and Uniswap. This note records the facts behind OD-43. It reads the deployed contracts and the public documentation. It ran no fork test.
+The Treasury Management Committee asked for dollar-cost averaging, standing limit orders, stop-loss orders, and access to 1inch and Uniswap. This note records the facts behind OD-43. It reads the deployed contracts and the public documentation. The fork tests are in [the note of 2026-11-07](/research/orders-account-fork-tests-2026-11-07.md).
 
 ## The CoW order signer
 
@@ -91,8 +85,8 @@ The Treasury Management Committee asked for dollar-cost averaging, standing limi
 - ComposableCoW offers TWAP, StopLoss, GoodAfterTime, TradeAboveThreshold and PerpetualStableSwap orders. Ackee audited ComposableCoW and the `ExtensibleFallbackHandler`; Gnosis reviewed it in May and July 2023 and again in August 2024 [s3]. The README adds that several order types came after these reports and are outside their scope; whether the TWAP and StopLoss handlers are in scope is not checked [s12].
 - A Safe that owns conditional orders must set its fallback handler to CoW's `ExtensibleFallbackHandler`, and must name ComposableCoW as the verifier for CoW's settlement domain. Every signature for that domain is then checked by ComposableCoW [s3][s1].
 - A TWAP order's data names the sell and buy tokens, the receiver, the amount per part, the minimum to receive per part, the start, the number of parts and their spacing [s5]. Zodiac's kit pins the tokens and the receiver and leaves the rest open [s1]. A TWAP order with a start of zero takes its start from its creation; the README warns that creating it again with `createWithContext` can move the start [s12].
-- A stop-loss order's data names the tokens, the amounts, the receiver, the expiry, a Chainlink-style oracle for each token, the strike and the maximum oracle age. The order becomes valid when the sell token's price in the buy token falls to the strike or below [s4]. The oracles are order data, so a permission must pin them to real feeds. A rise to a target price is an ordinary limit order instead.
 - ComposableCoW's `create` and `createWithContext` store an order for the calling Safe, and `remove` deletes one [s6].
+- The launch has no stop-loss orders ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 39).
 - Conditional orders reach CoW's order book only through a watch-tower that watches for new orders. CoW runs one [s7]. If it stops, the orders wait; no funds move.
 - A GoodAfterTime order can carry a price checker: a contract that returns the expected output for the order's sell amount. The order is valid only if its buy amount reaches that output less a slippage bound in basis points, and the check runs when the order is validated [s13]. The handler is deployed at `0xdaf33924925e03c9cc3a10d434016d6cfad0add5`, with 4,041 bytes of code at block 26134502 and a verified `GoodAfterTime` source on Blockscout. CoW's README marks it not compatible with its poller, because it takes the buy amount from input that the poller does not pass [s12]. This is the only CoW path found that bounds a price on chain.
 - The deployed Chainlink price checker for such orders is Milkman's expected-out calculator at `0xe23fc134382de3eAF871C249C90bf3Acb846C5ab` [s19]. Its source says that it does not care how old a feed's answer is: it reads `latestAnswer()` [s20]. The feeds that it reads are order data, so a policy would have to pin the checker, every feed and the slippage bound for each pair.
@@ -121,24 +115,20 @@ The Treasury Management Committee asked for dollar-cost averaging, standing limi
 | ComposableCoW | `0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74` | 8,478 bytes | `ComposableCoW` |
 | Fallback handler | `0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5` | 9,419 bytes | `ExtensibleFallbackHandler` |
 | TWAP handler | `0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5` | 4,533 bytes | `TWAP` |
-| StopLoss handler | `0x412c36e5011cd2517016d243a2dfb37f73a242e7` | 4,259 bytes | `StopLoss` |
 | GoodAfterTime handler | `0xdaf33924925e03c9cc3a10d434016d6cfad0add5` | 4,041 bytes | `GoodAfterTime` |
 | Milkman Chainlink calculator | `0xe23fc134382de3eAF871C249C90bf3Acb846C5ab` | 1,890 bytes | `ChainlinkExpectedOutCalculator` |
 
 ## What this means for the design
 
-- The Asset Safe has no fallback handler, by decision 15 of ADR 005. It cannot own conditional orders unless that decision changes. A separate account can carry the fallback handler and hold only tokens in transit.
-- Market and limit orders through the signer need no fallback handler, but they need a delegatecall from the owning Safe. A motion cannot grant a delegatecall (OD-36), so the enabling vote must.
-- The order signer, TWAP and StopLoss paths do not bound the price on chain. A limit order's minimum is its limit, and CoW's solvers compete to fill above it. The bound is the order's own terms, the screening of each operator transaction, the budget on what enters the account, and monitoring of fill prices. GoodAfterTime with a price checker would add an on-chain floor, but it needs an order poster of Lido's own and a checker that ignores stale feeds. EM decided against a floor for now and relies on CoW's rules (OD-48).
-- Stonks 2.0 bounds the price on chain, but its band can stop a recovery order from filling in a real depeg [s11].
+- The Asset Safe has no fallback handler ([ADR 005](/adr/005-account-graph-and-roles.md) decision 15). A separate account carries CoW's fallback handler and holds only tokens in transit ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 17).
+- The order signer and TWAP paths do not bound the price on chain. ADR 007 decision 26 states what takes the place of a floor (OD-48).
 
 ## How to reproduce
 
 ```sh
 for a in 0x23dA9AdE38E4477b23770DeD512fD37b12381FAB 0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74 \
          0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5 0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5 \
-         0x412c36e5011cd2517016d243a2dfb37f73a242e7 0xdaf33924925e03c9cc3a10d434016d6cfad0add5 \
-         0xe23fc134382de3eAF871C249C90bf3Acb846C5ab; do
+         0xdaf33924925e03c9cc3a10d434016d6cfad0add5 0xe23fc134382de3eAF871C249C90bf3Acb846C5ab; do
   cast codesize --rpc-url "$RPC" --block 26134502 "$a"
 done
 curl -s -A "Mozilla/5.0" -H "Referer: https://eth.blockscout.com/" \
@@ -149,8 +139,6 @@ curl -s -A "Mozilla/5.0" -H "Referer: https://eth.blockscout.com/" \
 
 ## Limits
 
-- No fork test ran. Owed before the design is relied on: the signer called by delegatecall from a Safe v1.5.0 through a roles modifier, with the receiver pinned; a TWAP and a stop-loss order created by a Safe v1.5.0 with CoW's fallback handler; and the condition shapes that pin the receiver and the oracles inside ComposableCoW's encoded order data.
-- CoW's fallback handler was built for earlier Safe versions. Its behaviour on Safe v1.5.0 is not checked.
-- The signer's audit status is not established.
+- The fork tests of 2026-11-07 cover the order signer, a TWAP order and CoW's fallback handler on Safe v1.5.0 behind a roles modifier ([research note](/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests)).
 - Whether the screening vendor can check an order's limit price, or a router swap's minimum output, against a market price before execution is a question for the vendor.
 - GoodAfterTime is not checked for the vault: its audit scope, how its orders reach the order book, the deployed price checkers, and which vault tokens they can price.
