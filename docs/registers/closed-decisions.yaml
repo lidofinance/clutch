@@ -1059,3 +1059,11 @@
     - "2026-11-12 — OD-139 decided: the emergency role's zeroing takes any spender"
   adr: [ADR-005#d34]
   refines: [OD-49]
+- id: OD-140
+  question: "Is funding regular, with top-up factories through Easy Track beside the tranche votes?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-140 decided: top-up factories join the tranche votes; OD-141 to OD-144 opened"
+  adr: [ADR-014#d13]
+  replaces:
+    - {od: OD-106, part: true}

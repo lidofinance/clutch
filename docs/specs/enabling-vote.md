@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:02:51Z
+  at: 2026-11-12T22:48:34Z
 verified: []
 sources:
   - id: s1
@@ -64,7 +64,7 @@ Aragon Voting stores the whole script when a vote starts. With the Safe batches 
 The mandate's Snapshot text owes these items (OD-90) [s1]:
 
 - **Products and caps.** Exposure to mature Lido products is unbounded. A new Lido product, Lido Lend first, stays in the protocol cap until it meets the maturity criteria and a motion unlocks it; earnETH and earnUSD are not new (OD-41). The illustrative balance renames its "USD-denominated" heading (OD-03).
-- **Funding.** Tranche votes replace the draft's seed and top-ups through Easy Track. Each tranche is an Aragon vote that names its tokens, sUSDS included. The first tranche, one million dollars, is the launch cap, and the second tranche's vote starts only after the screening guard is set (OD-106, OD-121).
+- **Funding.** The first tranche comes inside the enabling vote. After it, funds come by tranche votes and by top-up motions through Easy Track, as the draft's top-ups did (OD-140); the top-ups' tokens, limits, periods and gates are open (OD-141 to OD-144). Each tranche is an Aragon vote that names its tokens, sUSDS included. The first tranche, one million dollars, is the launch cap, and the second tranche's vote starts only after the screening guard is set (OD-106, OD-121).
 - **Size.** The mandate size and the treasury share, with the share's base, the time of its test, the remedy for a breach that no vault transaction causes, and the eligibility conditions of a replenishment (OD-89).
 - **Reporting.** The late-report rule (OD-14), and each report's TMC-6 ratio for the whole treasury (OD-111). The vault keeps no liquidity buffer, because TMC-6's runway floor already applies to the whole treasury (OD-110).
 - **Legacy and insurance.** The mandate takes over the first-loss terms of the March 2026 Earn allocation: the first-loss Safe holds the shares, and the committee executes the terms on the Earn team's written instruction, every burn as a motion and an exit through one narrow role whose proceeds stay in the vault (OD-21, OD-42, OD-60, OD-67, OD-108). Insurance covers earnETH, earnUSD and Lido Lend at launch, with the money from the Asset Safe by motion (OD-107).

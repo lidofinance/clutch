@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 014: Funding by tranche votes"
-description: Aragon Voting funds the vault in rare tranches through Finance, the first inside the enabling vote; insurance for earnETH, earnUSD and Lido Lend comes from the Asset Safe; only emergency, recovery and the operator's pinned return pay the Aragon Agent.
+description: Aragon Voting funds the vault in tranches through Finance, the first inside the enabling vote, and top-up factories pay it by motion; insurance for earnETH, earnUSD and Lido Lend comes from the Asset Safe; only emergency, recovery and the operator's pinned return pay the Aragon Agent.
 tags: [funding, finance, insurance, governance]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-12T22:48:34Z
 verified: []
 sources:
   - id: s1
@@ -34,7 +34,7 @@ sources:
 
 EM decided each decision below; its ODs lead to EM's words in the [decision log](/registers/decision-log.md) [s1].
 
-1. Funding is not regular. Each funding is an Aragon vote that moves a tranche from the treasury to the vault. EM's sequence is indicative: one million dollars first, then larger tranches (OD-106).
+1. A tranche is an Aragon vote that moves funds from the treasury to the vault. EM's sequence is indicative: one million dollars first, then larger tranches. Decision 13 replaces "Funding is not regular" (OD-106, OD-140).
 2. The first tranche goes inside the enabling vote (OD-106).
 3. The exact token list does not matter: each tranche vote names its tokens (OD-106).
 4. Insurance is built in at launch, for Lido Earn and for Lido Lend (OD-107).
@@ -46,6 +46,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 10. Redemption and fund-exit proceeds go to the Asset Safe, not to the Agent (OD-108).
 11. The transfer of insurance money from the Asset Safe to the first-loss Safe spends a budget key (OD-129).
 12. One motion of the universal factory deposits insurance money from the first-loss Safe into Lido Earn (OD-130).
+13. Funding can be regular. Top-up factories of Lido's existing kind, in new instances, pay the Asset Safe from the treasury by Easy Track motion, beside the tranche votes (OD-140).
 
 ## Proposed direction
 
@@ -53,6 +54,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - **A tranche vote.** One `newImmediatePayment` per token, from Finance to the Asset Safe, with the forum post as the reference. The post states the funded value, the headroom under the mandate size and the vault's share of the DAO's non-LDO treasury. [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 21, 36 and 41 say when the proposer does not start it.
 - **The first tranche.** It runs when the enabling vote executes. The Safe batches run after the vote ([ADR 005](/adr/005-account-graph-and-roles.md) decision 32), so the tokens wait in the Asset Safe, which only Aragon Voting controls, until the operator's permissions apply. It is the launch cap ([ADR 010](/adr/010-pre-execution-screening.md) decision 20).
+- **Top-up motions (decision 13).** A registry lists the Asset Safe as its only recipient and holds a limit for a period. A top-up factory, with the committee's Safe as its trusted caller, creates a motion of one or more payments from Finance to the Asset Safe; after the objection window, anyone enacts it, and the registry counts the amount. Aragon Voting is each registry's admin, so a change of a limit, a period or a recipient is a vote without Dual Governance; Lido's standard builders name the Aragon Agent, so the deployment calls Lido's registry factories directly. The Easy Track executor's payment permission caps one payment at 1,000 stETH or 2,000,000 units of a listed stablecoin [s2], and one motion carries several payments. Still open: the tokens (OD-141), the vote that registers the factories (OD-142), the period and the limit (OD-143), and the gates on a top-up motion (OD-144).
 - **The second tranche.** [ADR 010](/adr/010-pre-execution-screening.md) decisions 22 and 25 set its conditions.
 - **Before the guard.** The March 2026 terms ([ADR 008](/adr/008-funding-through-existing-payments.md) context) let the Earn team instruct a redemption at any time, so a redemption still runs. If its proceeds take the vault above the first tranche, the committee's Safe returns the excess to the Aragon Agent with its pinned transfer.
 - **Insurance by motion** ([ADR 013](/adr/013-one-easy-track-factory.md)):
@@ -66,7 +68,8 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 ## Options considered
 
-- **Funding registries and top-up motions through Easy Track:** not chosen (decision 1). Funding is not regular, and the registries, their factories and the change to the executor's payment permission add parts.
+- **Tranche votes only:** chosen first (OD-106), then replaced (decision 13). The committee expects regular top-ups, and each would cost an Aragon vote.
+- **Top-up registries from Lido's standard builders:** not chosen. A builder names the Aragon Agent as the registry's admin, so each change of a limit would pass Dual Governance.
 - **Funding tokens fixed at launch, with a vote for a new one:** not chosen (decision 3). Voting pays any token.
 - **The first tranche as its own vote after the enabling vote:** not chosen (decision 2). It costs a vote.
 - **Insurance money by tranche votes straight to the first-loss Safe:** not chosen (decision 7).
@@ -79,8 +82,10 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 ## Consequences
 
-- A tranche costs one Aragon vote of about five days.
-- The launch adds no funding contract and changes neither Easy Track's payment permission nor its token list.
+- A tranche costs one Aragon vote of about five days. A top-up costs one motion and its objection window of 72 hours.
+- The top-up path adds a registry and a factory for each kind of token. It changes neither Easy Track's payment permission nor its token list.
+- The committee's Safe can pull up to a registry's limit in each period without a vote. The objection window, the limit and the gates on a top-up motion are the controls. A change of a limit, a period or a recipient stays an Aragon vote.
+- A registry counts token units, so a limit in stETH is no limit in dollars.
 - A payout from a fund with a fixed payout address is the one flow, besides the returns to the Agent, that leaves the vault.
 - The first-loss Safe holds insurance for three products, so a defect in its modifier reaches all of them.
 - A motion can set the insurance budget and move the money in one enactment, so the budget adds no second objection window and no bound of its own. The objection window bounds the amount ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11).
@@ -95,6 +100,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - INV-037 to INV-039 in the [invariants](/specs/invariants.md).
 - The Finance checks of the research note at block 26350608 [s2].
 - A later tranche in another token arrives by its own vote (`test_03_ramp_up`).
+- Top-up motions (decision 13), as a probe on a fork against the live Easy Track and Finance, with stand-in limits (`test/TopUps.t.sol`): one motion pays stETH to the Asset Safe (`test_topup_steth_motion_pays_the_asset_safe`); only the committee's Safe creates one, and only the Asset Safe receives (`test_topup_only_the_committee_creates_and_only_the_asset_safe_receives`); the registry's limit holds for a period, and the next period has it again (`test_topup_registry_limit_holds_for_a_period`); a payment above the executor's ceiling fails at enactment, and one motion carries three payments (`test_topup_one_motion_carries_several_payments`); the stablecoin factory pays a token of the DAO's list and refuses USDS and stETH (`test_topup_stablecoins_from_the_dao_list`); only Aragon Voting changes a limit or a recipient (`test_topup_only_voting_changes_a_limit_or_a_recipient`). Owed: the registries in the enabling-vote rehearsal, once OD-141 to OD-144 close.
 - The operator's return (decision 9): on the Asset Safe, each order token goes to the Aragon Agent in any amount, spends no budget and reaches no other receiver (`test_operator_returns_each_order_token_to_the_agent`, `test_operator_return_spends_no_budget`). A token outside the order lists has no return (`test_operator_return_only_for_order_tokens`). On the orders account, the operator returns a token to the Asset Safe or the Agent (`test_orders_operator_returns_tokens_to_the_asset_safe_or_the_agent`). A token that a motion adds gets its return in the same motion (`test_factory_orders_token_motion`).
 - A first-loss redemption's claim pays only the Asset Safe (decision 10; `test_first_loss_claim_pays_only_the_asset_safe`). The claim of a settled request is not tested: a fork cannot settle a request.
 - Insurance money (decision 11): without a budget, and above it, the move fails at enactment; one motion sets the budget and moves the money (`test_uf_insurance_money_goes_to_the_first_loss_safe`, `test_insurance_funding_pays_only_the_first_loss_safe`).
@@ -104,13 +110,15 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 ## Reversal conditions
 
-- Funding becomes regular, so a motion path for top-ups would remove votes.
+- The committee stops regular funding, so the registries and the top-up factories have no use.
+- A top-up motion enacts against a gate without an objection.
 - A tranche needs a token that Finance cannot pay.
 
 ## Open questions
 
 <!-- generated by scripts/validate_docs.py --write-status; edit the sources, not this block -->
 
-No open decision closes in this record.
+- [OD-141](/registers/open-decisions.md): Which tokens get a top-up factory? Each factory pays one registry's recipients, and a registry counts every token in 18 decimals, so stETH and stablecoins need two registries. (A) Two: one for stETH, and one for the DAO's stablecoin list as it is, which holds DAI, USDC, USDT and sUSDS. (B) stETH only; stablecoins come by tranche vote. (C) A, and USDS too, which needs a vote that adds USDS to the token list and rewrites the executor's payment permission.
+- [OD-143](/registers/open-decisions.md): What are the period and the limit of each registry? A period is 1, 2, 3, 6 or 12 calendar months, and a period's end lets two full limits pass within about 72 hours. A limit counts token units, not dollars. (A) Three months, and a limit that the attested computation sets from what the committee expects to pull in one period, never above one mandate size. (B) One month, as OD-06 once set, with the same rule for the limit. (C) Twelve months, with one mandate size as the limit.
 
 <!-- end of generated block -->

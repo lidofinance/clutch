@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:33:19Z
+  at: 2026-11-12T22:48:34Z
 verified: []
 sources:
   - id: s1
@@ -157,6 +157,9 @@ sources:
   - id: s49
     resource: "urn:clutch:interview:2026-11-12-batch-check-in-ci"
     title: EM's request for the batch check in the fork workflow, 2026-11-12; the transcript is not in the repository
+  - id: s50
+    resource: "urn:clutch:interview:2026-11-12-top-up-factories"
+    title: EM's request for top-up factories, with EM's own words in the committee's working-group thread of 2026-11-12; neither is in the repository
 ---
 
 # Decision log
@@ -166,6 +169,20 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — OD-140 decided: top-up factories join the tranche votes; OD-141 to OD-144 opened
+
+EM reported the design to the committee's working group. A member of the committee answered that funding will be regular: the vault will send funds back to the treasury for the runway, and the committee will then top the vault up in stETH, about every three to four months, and perhaps in stablecoins that earn nothing. EM answered in the thread that Lido's existing top-up factories can carry this in new instances, and that the registration of a stETH top-up factory joins the deployment plan. In the thread, EM also wrote "additive still" and "existing tooling, new instances". EM then wrote to the agent:
+
+> read the thread (inbox/image_2026-11-13_01-33-58.png, inbox/image_2026-11-13_01-34-21.png), verify what I said, also we need to have the top-up ET factories instead of just static tranches as we expected
+
+Recorded as:
+
+- (OD-140) Funding can be regular. Top-up factories of Lido's existing kind, in new instances, pay the Asset Safe from the treasury by Easy Track motion ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 13). This replaces "Funding is not regular" of decision 1 (OD-106), and it is the first reversal condition of that ADR.
+- Four points are the agent's reading. Tranche votes stay, with the first tranche in the enabling vote: EM's "additive still". Aragon Voting is the admin of each new registry, as EM decided under OD-92 before the registries left the design, so a change of a limit passes no Dual Governance; the live builders name the Aragon Agent, so the deployment calls Lido's registry factories directly. The committee's Safe is the trusted caller of each top-up factory, as it is of the universal factory. The Easy Track executor's payment permission and the DAO's stablecoin list do not change.
+- The agent ran a probe on a fork, against the live Easy Track and Finance (`test/TopUps.t.sol`). One motion of the committee's Safe pays stETH or a listed stablecoin to the Asset Safe after the objection window. The executor's permission caps one payment at 1,000 stETH or 2,000,000 units of a stablecoin, and one motion carries several payments, up to the registry's limit for the period. Only the Asset Safe receives, and only Aragon Voting changes a limit or a recipient.
+- The agent opened four decisions on the terms: the tokens (OD-141), the vote that registers the factories, given the launch cap (OD-142), the period and the limit (OD-143), and the gates on a top-up motion (OD-144).
+- Owed with the build, after these four: the enabling-vote rehearsal, the LIP draft, the control matrix, the runbooks and the guide still describe tranche votes as the only funding. [s50]
 
 ## 2026-11-12 — the batch check in the fork workflow
 
