@@ -6,7 +6,7 @@
       "sources": {
         "ADR-003#d14": "fabca046c36189c5",
         "ADR-003#d5": "83f6175e49c88642",
-        "ADR-003#d6": "36bbcb48f200c8ca",
+        "ADR-003#d6": "951b7452fcbdd0d8",
         "ADR-003#d7": "5d8607824c766891",
         "OD-31": "4d2c16853b3feecf",
         "OD-96": "5c2651c7700a84ad",
@@ -59,7 +59,7 @@
       "content": "a93e52a5bc837a83",
       "sources": {
         "ADR-004#d13": "da9b1c4462d4916c",
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "ADR-004#d15": "215205f9bf4a8529",
         "ADR-013#proposed-direction": "fce49ad09c520121",
         "INV-016": "cd9f0a527584b5ab",
@@ -183,7 +183,7 @@
         "ADR-004#d10": "20646b5ca4fda6f3",
         "ADR-004#d11": "9e359e37c37139d9",
         "ADR-004#d12": "e6383f6310e6b6eb",
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "ADR-004#d16": "d193b182263c7a40",
         "OD-103": "97ffb682ff6f44fa",
         "OD-104": "9ebfcaef28a3742d",
@@ -919,7 +919,7 @@
       "sources": {
         "ADR-004#d11": "9e359e37c37139d9",
         "ADR-004#d12": "e6383f6310e6b6eb",
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "ADR-004#d7": "59b574bbc93df2c8",
         "ADR-013#proposed-direction": "fce49ad09c520121",
         "INV-016": "cd9f0a527584b5ab",
@@ -1309,7 +1309,7 @@
         "ADR-004#d10": "20646b5ca4fda6f3",
         "ADR-004#d11": "9e359e37c37139d9",
         "ADR-004#d13": "da9b1c4462d4916c",
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "ADR-004#d16": "d193b182263c7a40",
         "OD-33": "0fb334f1351ad5ba",
         "OD-35": "590de325e7b1dd47"
@@ -1466,7 +1466,7 @@
     "flow:enabling-vote": {
       "content": "cd6a64b2d5b6d06f",
       "sources": {
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#d32": "c96587fa96f8d374",
         "ADR-007#confirmation": "35dc05ba40dabfc0",
@@ -1688,7 +1688,7 @@
         "ADR-004#d11": "9e359e37c37139d9",
         "ADR-004#d12": "e6383f6310e6b6eb",
         "ADR-004#d13": "da9b1c4462d4916c",
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "ADR-004#d16": "d193b182263c7a40",
         "ADR-004#d7": "59b574bbc93df2c8",
         "ADR-013#proposed-direction": "fce49ad09c520121",
@@ -2371,7 +2371,7 @@
       "content": "dc32b432834b856b",
       "sources": {
         "ADR-004#d13": "da9b1c4462d4916c",
-        "ADR-004#d14": "f775094c7b98f1b2"
+        "ADR-004#d14": "c08eee15b2ce433e"
       }
     },
     "reuse:the-four-new-safes": {
@@ -2427,7 +2427,7 @@
       "sources": {
         "ADR-004#d11": "9e359e37c37139d9",
         "ADR-004#d13": "da9b1c4462d4916c",
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "OD-33": "0fb334f1351ad5ba"
       }
     },
@@ -2678,7 +2678,7 @@
     "rfp:governance": {
       "content": "21df491d7f5b44c8",
       "sources": {
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "ADR-005#context": "cd990aec3cedd7de",
         "ADR-005#d28": "3be850a3867549a6",
         "ADR-005#d31": "5b68be533417691b",
@@ -3066,7 +3066,7 @@
       "content": "e978b8fdc0748e2c",
       "sources": {
         "ADR-004#d13": "da9b1c4462d4916c",
-        "ADR-004#d14": "f775094c7b98f1b2"
+        "ADR-004#d14": "c08eee15b2ce433e"
       }
     },
     "term:attested-computation": {
@@ -3168,7 +3168,7 @@
       "content": "39f181ee9c8238f3",
       "sources": {
         "ADR-004#d13": "da9b1c4462d4916c",
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "ADR-009#proposed-direction": "64c3d8242d3de881"
       }
     },
@@ -3209,7 +3209,7 @@
     "term:enabling-vote": {
       "content": "94a1df80918359a9",
       "sources": {
-        "ADR-004#d14": "f775094c7b98f1b2",
+        "ADR-004#d14": "c08eee15b2ce433e",
         "ADR-005#d32": "c96587fa96f8d374",
         "ADR-008#d19": "ab18428eeb49c353",
         "ADR-010#d22": "d31bb218b69e8d0a",
