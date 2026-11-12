@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T14:54:04Z
+  at: 2026-11-12T15:22:31Z
 verified: []
 sources:
   - id: s2
@@ -129,7 +129,7 @@ The [parameters register](/registers/parameters.md) holds each value and its sta
 - **Screening.** The vendor's guard can stop operator activity and motion creation; recovery never depends on it, and the owners can remove it after ten days ([ADR 010](/adr/010-pre-execution-screening.md)).
 - **Stale motions.** A motion that fails at enactment holds one of Easy Track's 20 shared open-motion slots until it is cancelled (OD-94).
 - **Flows out of the vault.** Funds leave only to the Aragon Agent, through emergency and recovery paths and the operator's pinned return, and to an insurance fund's pinned payout address within its cap (OD-107, OD-108).
-- **Encoding and provenance.** Until the round-trip check of phase 2 exists, nothing independent checks the encoding on chain. Before funding, every reused component is verified against a locally compiled tagged release.
+- **Encoding and provenance.** The round-trip check rebuilds each modifier's state from its events on a fork and compares it with the artifact, so the chain checks the compiler's encoding (INV-016). It reads events, not storage, so it trusts the deployed Roles code to store what it emits. Before funding, every reused component is verified against a locally compiled tagged release.
 
 ## Failure Modes
 

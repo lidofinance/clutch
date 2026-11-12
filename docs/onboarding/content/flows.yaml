@@ -819,7 +819,7 @@ flows:
         nodes: [dao, easytrack, operator-modifier, safety-modifier, asset-safe]
         edges: [own, own-op, own-sf, gov-role]
       - who: "Monitoring"
-        text: "Later, the [[round-trip check]] and the [[drift detector]] compare the chain with the artifact."
+        text: "The [[round-trip check]] compares the chain with the artifact after the change, and later the [[drift detector]] does so on a schedule."
         nodes: [policy, monitoring, asset-safe]
         edges: [watch]
         check: "INV-016 is pending."
@@ -841,7 +841,7 @@ flows:
         text: "The specifications, the control matrix, the screening rule list and the runbook drafts."
         nodes: [policy, monitoring, screening, orders]
       - who: "Phase 2: build"
-        text: "The round-trip check, the motions that the launch still owes, and reporting. The universal factory, the `motion` command and its check are built."
+        text: "The motions that the launch still owes, and reporting. The universal factory, the `motion` command, its check and the round-trip check are built."
         nodes: [policy, orders, first-loss, easytrack, reporting, monitoring]
       - who: "Phase 3: assurance"
         text: "An external audit, Lido's review of the guard change, and fork drills that initiate within 6 hours."

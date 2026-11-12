@@ -58,6 +58,11 @@ abstract contract EnabledVault is RehearsalBase {
 
     function _enable() internal {
         _buildBatches();
+        _voteAndRunBatches();
+    }
+
+    /// @dev The enabling vote and the Safe batches, after `_buildBatches` measured them.
+    function _voteAndRunBatches() internal {
         vm.pauseGasMetering();
         VoteBuilder.Item[] memory items = _voteItems(false);
         bytes memory voteScript = VoteBuilder.script(items);

@@ -21,6 +21,9 @@ teardown-manifest.json
 # A motion's files from `just motion`: the motion, its base policy and its forum-post draft
 .motion/
 
+# The modifiers' events that the fork suite writes for the round-trip check
+.roundtrip/
+
 # Tooling
 __pycache__/
 .venv/
