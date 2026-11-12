@@ -841,7 +841,7 @@ flows:
         text: "The specifications, the control matrix, the screening rule list and the runbook drafts."
         nodes: [policy, monitoring, screening, orders]
       - who: "Phase 2: build"
-        text: "Lido Lend's onboarding against the deployed vault, the command for the Safe batches' hashes, and reporting. The universal factory, the `motion` command, its check, the round-trip check, the launch protocols' motions and a token's retirement are built."
+        text: "Lido Lend's onboarding against the deployed vault, and reporting. The universal factory, the `motion` command, its check, the round-trip check, the launch protocols' motions, a token's retirement and the command for the Safe batches' hashes are built."
         nodes: [policy, orders, first-loss, easytrack, reporting, monitoring]
       - who: "Phase 3: assurance"
         text: "An external audit, Lido's review of the guard change, and fork drills that initiate within 6 hours."
@@ -879,7 +879,7 @@ flows:
       - who: "Anyone"
         text: "After the vote executes, anyone sends each Safe batch with Voting's approval of its hash. The batches of one Safe run in nonce order."
         nodes: [asset-safe, orders, first-loss]
-        check: "One command computes each batch's hash again from the published batch, so a reviewer can match it to the vote. The command is owed."
+        check: "`just batches-check` computes each batch's hash again from the published batch, so a reviewer can match it to the vote. It fails on a call that is neither the policy nor the vault's setup."
       - who: "Growth Committee, then the committee's Safe"
         text: "After the batches run, the Growth Committee moves the first-loss shares to the first-loss Safe. The committee's Safe creates motions only after the batches ran."
         nodes: [funding, first-loss, committee, easytrack]

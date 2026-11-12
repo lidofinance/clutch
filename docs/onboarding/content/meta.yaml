@@ -79,7 +79,7 @@ owed:
   - "The round-trip check and the two detectors against a deployed vault; they run on the rehearsal's vault today. Lido's monitoring must run the detectors on a schedule and page on an alert."
   - "The [[attested computation]]'s figures, once the mandate is approved: the budgets, the orders budgets, the fixed approval ceilings, and the first tranche's tokens and amounts."
   - "The mandate's drafters owe the holder and the form of the Twyne position."
-  - "The enabling vote's Safe batches, published with one command that computes each hash again."
+  - "The enabling vote's Safe batches of the deployment, published as a file for the command that computes each hash again."
   - "The mandate's drafters owe the [[treasury share]]'s base, the time of its test, the remedy for a breach that no vault transaction causes, and a further tranche's eligibility conditions."
   - "The production deployment script."
 footer: |-

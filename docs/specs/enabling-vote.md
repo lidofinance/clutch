@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-12T22:02:51Z
 verified: []
 sources:
   - id: s1
@@ -57,7 +57,7 @@ Aragon Voting stores the whole script when a vote starts. With the Safe batches 
 - **Figures.** An attested computation sets every budget, every fixed approval ceiling, and the first tranche's tokens and amounts [s6][s10][s11].
 - **Decisions.** Every OD is decided except OD-65, which closes at the fifth signer's Snapshot [s1].
 - **Deployments.** They need no authority. Clutch's script creates the Asset Safe, the orders account and the first-loss Safe with Aragon Voting as their only owner, and the emergency Safe with its signers, all on Safe v1.5.0 (OD-17, OD-126). It deploys the four Roles modifiers as minimal proxies through the Zodiac module proxy factory, and the universal factory with the committee's Safe as its trusted caller. The factory's constructor fixes that caller, Easy Track's executor, the emergency Safe, Aragon Voting and the four modifiers; it holds no other state than its counter and its policy version (OD-80, OD-102, OD-135) [s2][s10].
-- **Checks.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 behind a Roles modifier, which pass at block 26249900, run again at a recent block ([research note](/research/orders-account-fork-tests-2026-11-07.md)) [s4]. The external audit of the universal factory and the order signer (OD-96). The check of Safe's releases, advisories and bug-bounty records [s7]. The policy compiled for mainnet from the reviewed constellation. The policy's source against the mandate's protocols and the committee's named pipeline. The Safe batches, published with one command that computes each hash again. The full rehearsal below, at a recent block [s9][s10].
+- **Checks.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 behind a Roles modifier, which pass at block 26249900, run again at a recent block ([research note](/research/orders-account-fork-tests-2026-11-07.md)) [s4]. The external audit of the universal factory and the order signer (OD-96). The check of Safe's releases, advisories and bug-bounty records [s7]. The policy compiled for mainnet from the reviewed constellation. The policy's source against the mandate's protocols and the committee's named pipeline. The Safe batches, published as a file with each batch's Safe, nonce and MultiSend data. `just batches-check <file>` computes each batch's hash again, as Safe v1.5.0 does, and fails unless the batches carry the compiled policy and the vault's setup, and nothing else. A reviewer compares each `approveHash` item of the vote with the hashes that the command prints. The full rehearsal below, at a recent block [s9][s10].
 
 ## The mandate's owed text
 

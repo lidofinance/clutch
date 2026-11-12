@@ -189,6 +189,21 @@ contract EnablingVoteRehearsal is EnabledVault {
     }
 
     // ---------------------------------------------------------------------
+    // 4b. The published Safe batches, for the command that computes each hash again
+    // ---------------------------------------------------------------------
+
+    /// @dev The vote approves the hash of each Safe batch (OD-92), so the batches are published before it. This
+    ///      test writes them to `.batches/`, each with the hash that its Safe computes, and then runs the vote and
+    ///      the batches, so the file holds batches that execute. `just test-fork` then runs the command, which
+    ///      computes each hash again and checks each batch's calls against the policy.
+    function test_06_safe_batches_are_written_for_the_hash_command() public {
+        _buildBatches();
+        _writeBatches(".batches", "rehearsal-26249900.json");
+        _voteAndRunBatches();
+        _checkEnabled();
+    }
+
+    // ---------------------------------------------------------------------
     // 5. The first-loss Safe: a burn by motion and a redemption request
     // ---------------------------------------------------------------------
 
