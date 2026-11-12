@@ -98,7 +98,7 @@
   why: "Motions change the vault without a DAO vote. The factory is new code and the most critical contract: its shapes are the bound."
   breaks: "Any motion that survives its objection window can use a flaw in a shape. A sound shape can still point the operator at an unaudited contract; then only the attached budget bounds the loss."
   watched_by: []
-  watch_note: "The factory's prototype passes INV-032 to INV-036 on a fork against the live Easy Track. The other shapes are not built. The motion roles' limits are a second layer (INV-004, INV-025, INV-040). An external audit is due in phase 3."
+  watch_note: "The factory's prototype passes INV-032 to INV-036 on a fork against the live Easy Track. The other shapes are not built. The motion roles' limits are a second layer (INV-004, INV-025, INV-040). An external audit is due in phase 3. EM chose raw writes on 2026-11-12, and the switch to them ends this assumption: the objection window then bounds where funds go."
   sources: ["ADR-013#d7", "ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#consequences",
     "ADR-013#confirmation", "INV-004", "INV-032", "INV-033", "INV-034", "INV-035", "INV-036", "OD-49",
     "lip:part-4", "OD-113", "OD-104", "INV-025", "INV-040", "OD-118", "OD-119"]

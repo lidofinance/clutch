@@ -1008,3 +1008,11 @@
     - "2026-11-12 — OD-133 decided: no collateral enters, and no fallback exit"
   adr: [ADR-011#d13]
   refines: [OD-132]
+
+- id: OD-134
+  question: "Does the universal factory keep its typed shapes, or does it apply raw writes that may also widen?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-134: the factory takes raw writes"
+  adr: [ADR-013#d11]
+  refines: [OD-102]
