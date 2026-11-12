@@ -4,7 +4,9 @@ name: fork
 # pushes to main, and never on a pull request, because it needs the archive RPC
 # key. The key is the repository secret MAINNET_RPC_URL. After the suite, the
 # round-trip check and the two detectors read the logs that the suite wrote
-# (INV-016; ADR 013, decision 19).
+# (INV-016; ADR 013, decision 19), and the batch check computes the hash of
+# each Safe batch that the suite wrote and checks the batch's calls against
+# the policy (OD-92).
 
 on:
   merge_group:  # the merge queue runs the suite on the merged result (ADR 012)
@@ -73,3 +75,5 @@ jobs:
         run: bun policy/constellation/compiler/roundtrip.ts rehearsal --dir .roundtrip
       - name: run the drift detector and the motion detector on the suite's scenarios
         run: bun policy/constellation/compiler/watch.ts rehearsal --dir .roundtrip
+      - name: compute each Safe batch's hash again, and check the batches against the policy
+        run: bun policy/constellation/compiler/batches.ts check --batches .batches/rehearsal-26249900.json
