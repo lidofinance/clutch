@@ -985,3 +985,18 @@
     - "2026-11-12 — OD-129 and OD-130 decided, and Lido Lend investigated for OD-131"
   adr: [ADR-014#d12]
   refines: [OD-107]
+
+- id: OD-131
+  question: "Which Lido Lend fund does the factory carry?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-131 and OD-132 decided: a fund with a payout address, and Lido Lend's lender vault"
+  adr: [ADR-014#d6]
+  refines: [OD-107]
+
+- id: OD-132
+  question: "Which Lido Lend surface does the vault lend through?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-131 and OD-132 decided: a fund with a payout address, and Lido Lend's lender vault"
+  adr: [ADR-011#d3, ADR-011#d13]

@@ -22,7 +22,8 @@ import {OrdersShape} from "./OrdersShape.sol";
 ///      to the first-loss Safe; a token for the orders account, with its orders, approvals and
 ///      exit, and the restore of the orders account after an emergency stop, whose writes a
 ///      stateless companion contract builds; the burn of first-loss shares; the deposit of
-///      insurance money into a deposit queue. The other
+///      insurance money into a deposit queue; a fund with a fixed payout address and its payouts.
+///      The other
 ///      shapes, and their emergency exits, are not built. Every check here sits behind the
 ///      modifiers' own guards.
 contract UniversalFactory {
@@ -73,6 +74,14 @@ contract UniversalFactory {
     ///      The first-loss modifier's policy names each token with its queue, so a deposit of any
     ///      other pair fails at enactment.
     uint8 public constant INSURANCE_DEPOSIT = 12;
+    /// @dev Create a fund with a fixed payout address, for one token: the insurance role's transfer
+    ///      of that token, pinned to the payout address, and the fund's cap as a budget key that
+    ///      never refills. One fund exists per token.
+    uint8 public constant FUND_CREATE = 13;
+    /// @dev Pay out of a fund: a transfer from the first-loss Safe to the fund's payout address.
+    ///      The motion states the fund's terms, which its version checks, and the modifier holds
+    ///      the amount within what is left of the cap.
+    uint8 public constant FUND_PAYOUT = 14;
 
     /// @dev The classes of ceiling, each per token: a budget key's figures, and the fixed cap
     ///      of an approval that spends no key.
@@ -90,6 +99,7 @@ contract UniversalFactory {
     bytes32 internal constant INSURANCE_FUNDING = "insurance-funding";
     bytes32 internal constant FIRST_LOSS_BURN_ROLE = "first-loss-burn";
     bytes32 internal constant INSURANCE_ROLE = "insurance";
+    bytes32 internal constant INSURANCE_GOVERNANCE = "insurance-governance";
     /// @notice The scope of the orders account's two token lists: the operator's, which serves
     ///         both sides of signer and TWAP orders, and what a recovery order sells.
     bytes32 public constant ORDERS_SCOPE = keccak256("orders lists");
@@ -223,6 +233,7 @@ contract UniversalFactory {
     error WriteFailed(address modifier_);
     error NotListed(address token);
     error AmountTooLarge(uint256 amount);
+    error FundExists(address token);
 
     event CounterRaised(uint256 epoch, address by);
     event VersionSet(bytes32 indexed scope, bytes32 version);
@@ -413,6 +424,31 @@ contract UniversalFactory {
             c[1 + n + 2 * i] = IRoles.ConditionFlat(branch, T_STATIC, OP_EQUAL_TO, abi.encode(entries[i].spender));
             c[2 + n + 2 * i] = _amount(branch, entries[i]);
         }
+    }
+
+    /// @notice The scope of the fund of one token.
+    function fundScope(address token) public pure returns (bytes32) {
+        return keccak256(abi.encode("fund", token));
+    }
+
+    /// @notice The version of a fund: its payout address and its cap.
+    function fundVersion(address payout, uint256 cap) public pure returns (bytes32) {
+        return keccak256(abi.encode(payout, cap));
+    }
+
+    /// @notice The budget key that holds a fund's cap: "k:", then the payout address, then the
+    ///         token's first ten bytes.
+    function fundKey(address token, address payout) public pure returns (bytes32) {
+        return bytes32(abi.encodePacked(DERIVED_KEY_PREFIX, payout, bytes10(bytes20(token))));
+    }
+
+    /// @notice The insurance role's `transfer` tree of a fund's token: to the payout address, and
+    ///         within the fund's key.
+    function payoutTree(address payout, bytes32 key) public pure returns (IRoles.ConditionFlat[] memory c) {
+        c = new IRoles.ConditionFlat[](3);
+        c[0] = IRoles.ConditionFlat(0, T_CALLDATA, OP_MATCHES, "");
+        c[1] = IRoles.ConditionFlat(0, T_STATIC, OP_EQUAL_TO, abi.encode(payout));
+        c[2] = IRoles.ConditionFlat(0, T_STATIC, OP_WITHIN_ALLOWANCE, abi.encode(key));
     }
 
     /// @notice The version of the orders account's token lists.
@@ -692,6 +728,47 @@ contract UniversalFactory {
         _call(p, firstLossModifier, abi.encodeCall(IRoles.execTransactionWithRole, (to, 0, data, 0, INSURANCE_ROLE, true)));
     }
 
+    /// @dev The creation of a fund. The payout address and the cap are fixed here: the transfer's
+    ///      tree pins the address, and the cap is the balance of a key that gets no refill. A
+    ///      second fund in the same token is refused, because a write would replace the first
+    ///      fund's tree.
+    function _fundCreate(Plan memory p, bytes memory data) internal view {
+        (address token, address payout, uint256 cap) = abi.decode(data, (address, address, uint256));
+        _protected(token);
+        _protected(payout);
+        if (cap == 0) revert ZeroAmount();
+        if (cap > type(uint128).max) revert AmountTooLarge(cap);
+        bytes32 scope = fundScope(token);
+        if (versions[scope] != bytes32(0)) revert FundExists(token);
+        bytes32 key = fundKey(token, payout);
+        _fundGovern(p, abi.encodeCall(IRoles.scopeTarget, (INSURANCE_ROLE, token)));
+        _fundGovern(p, abi.encodeCall(IRoles.scopeFunction, (INSURANCE_ROLE, token, TRANSFER, payoutTree(payout, key), 0)));
+        _fundGovern(p, abi.encodeCall(IRoles.setAllowance, (key, uint128(cap), 0, 0, 0, 0)));
+        _write(p, scope, fundVersion(payout, cap));
+    }
+
+    /// @dev A payout. The fund must exist with the stated payout address and cap, so a payout
+    ///      never shares a motion with its fund's creation. The first-loss modifier refuses an
+    ///      amount above what is left of the cap, which fails the enactment.
+    function _fundPayout(Plan memory p, bytes memory data) internal view {
+        (address token, address payout, uint256 cap, uint256 amount) =
+            abi.decode(data, (address, address, uint256, uint256));
+        bytes32 scope = fundScope(token);
+        if (versions[scope] == bytes32(0) || versions[scope] != fundVersion(payout, cap)) revert StaleVersion(scope);
+        if (amount == 0) revert ZeroAmount();
+        _insure(p, token, abi.encodeWithSelector(TRANSFER, payout, amount));
+    }
+
+    /// @dev One write of the insurance-governance role: a call of the first-loss modifier on
+    ///      itself, which executes as the first-loss Safe, the modifier's owner.
+    function _fundGovern(Plan memory p, bytes memory write) internal view {
+        _call(
+            p,
+            firstLossModifier,
+            abi.encodeCall(IRoles.execTransactionWithRole, (firstLossModifier, 0, write, 0, INSURANCE_GOVERNANCE, true))
+        );
+    }
+
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
@@ -717,6 +794,8 @@ contract UniversalFactory {
             else if (kind == ORDERS_RESTORE) _ordersRestore(p, ops[i].data);
             else if (kind == FIRST_LOSS_BURN) _firstLossBurn(p, ops[i].data);
             else if (kind == INSURANCE_DEPOSIT) _insuranceDeposit(p, ops[i].data);
+            else if (kind == FUND_CREATE) _fundCreate(p, ops[i].data);
+            else if (kind == FUND_PAYOUT) _fundPayout(p, ops[i].data);
             else revert UnknownOperation(kind);
         }
     }
@@ -739,7 +818,7 @@ contract UniversalFactory {
 
     /// @dev The plan holds room for the most that each operation adds: an orders token makes 15
     ///      calls, an orders restore seven and two for each operator token and one for each approval,
-    ///      and any other operation at most two; each writes at most two versions, sets at
+    ///      a fund's creation three, and any other operation at most two; each writes at most two versions, sets at
     ///      most two ceilings and claims at most four scopes.
     function _plan(Op[] memory ops) internal pure returns (Plan memory p) {
         uint256 n = ops.length;
@@ -752,6 +831,8 @@ contract UniversalFactory {
                 (address[] memory operatorTokens,, address[] memory approvalTokens) =
                     abi.decode(ops[i].data, (address[], address[], address[]));
                 calls += 7 + 2 * operatorTokens.length + approvalTokens.length;
+            } else if (kind == FUND_CREATE) {
+                calls += 3;
             } else {
                 calls += 2;
             }

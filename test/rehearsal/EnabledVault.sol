@@ -412,6 +412,12 @@ abstract contract EnabledVault is RehearsalBase {
         IEasyTrack(Mainnet.EASY_TRACK).enactMotion(id, cd);
     }
 
+    /// @dev The arguments of a call, without its selector.
+    function _args(bytes memory d) internal pure returns (bytes memory args) {
+        args = new bytes(d.length - 4);
+        for (uint256 i = 4; i < d.length; i++) args[i - 4] = d[i];
+    }
+
     /// @dev A motion that passes its creation and fails at enactment as a whole.
     function _enactmentFails(bytes memory cd) internal {
         uint256 id = _create(cd);

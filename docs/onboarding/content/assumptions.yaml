@@ -200,7 +200,7 @@
   why: "Insurance is built in at launch for earnETH, earnUSD and Lido Lend, and its money comes from the Asset Safe by motion."
   breaks: "A defect in the first-loss modifier reaches every fund at once. A payout from a fund with a fixed payout address leaves the vault, so it is safe only if the creating motion pinned the right address and cap."
   watched_by: []
-  watch_note: "INV-039 is pending. On a fork, insurance money moves by motion within its budget key, and a motion deposits it into Lido Earn. A Lido Lend fund, with its creation and its payout, is not built."
+  watch_note: "On a fork, insurance money moves by motion within its budget key, a motion deposits it into Lido Earn, and motions create a fund with a payout address and pay out of it within its cap. INV-039 is tested with a stand-in payout address; the Lend team has not named one."
   sources: ["ADR-014#d4", "ADR-014#d6", "ADR-014#d7", "ADR-014#consequences", "ADR-014#confirmation",
     "INV-039"]
 

@@ -14,7 +14,7 @@ planned:
       "doc:docs/research/orders-motion-roles-2026-11-08.md#what-was-built", "doc:ROADMAP.md#roadmap"]
   - name: Insurance roles
     where: "On the first-loss modifier, held by the universal factory"
-    what: "The insurance role for Lido Earn is built: it approves a deposit queue and deposits into earnETH or earnUSD, with the first-loss Safe as the depositor. The graph above leaves it out, because the kit has no first-loss Safe. Still to build: a Lido Lend fund's creation and payout. All act only by motion."
+    what: "The insurance role for Lido Earn is built: it approves a deposit queue and deposits into earnETH or earnUSD, with the first-loss Safe as the depositor. The graph above leaves it out, because the kit has no first-loss Safe. The insurance-governance role creates a fund with a fixed payout address, and the insurance role pays out of it within the fund's cap. All act only by motion."
     sources: ["ADR-014#d4", "ADR-014#d7", "ADR-014#proposed-direction", "ADR-005#proposed-direction",
       "INV-039"]
   - name: First-loss Safe and its roles

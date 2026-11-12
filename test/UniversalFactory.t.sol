@@ -748,8 +748,4 @@ contract UniversalFactoryRehearsal is EnabledVault {
         for (uint256 i = 0; i < list.length; i++) if (list[i].spender != spender) out[j++] = list[i];
     }
 
-    function _args(bytes memory d) internal pure returns (bytes memory args) {
-        args = new bytes(d.length - 4);
-        for (uint256 i = 4; i < d.length; i++) args[i - 4] = d[i];
-    }
 }

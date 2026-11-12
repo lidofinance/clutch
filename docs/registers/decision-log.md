@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T11:10:32Z
+  at: 2026-11-12T12:05:15Z
 verified: []
 sources:
   - id: s1
@@ -118,6 +118,9 @@ sources:
   - id: s36
     resource: "urn:clutch:interview:2026-11-12-insurance"
     title: EM's answers on OD-129 and OD-130, and EM's request to investigate Lido Lend for OD-131, 2026-11-12; the transcript is not in the repository
+  - id: s37
+    resource: "urn:clutch:interview:2026-11-12-lido-lend"
+    title: EM's answers on OD-131 and OD-132, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -127,6 +130,19 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — OD-131 and OD-132 decided: a fund with a payout address, and Lido Lend's lender vault
+
+The agent reported what the Lido Lend repositories show and asked EM to decide OD-131 and OD-132. EM wrote:
+
+> OD-131: A
+> OD-132: A
+
+Recorded as:
+
+- (OD-131) Option A: the universal factory carries the payout form only. A fund has a fixed payout address, which the Lend team names and which is outside Lido Lend's contracts ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 6). The form of burnable shares has no use while Lido Lend has no share token that a holder can burn. The agent built the form, and five points of the build are its reading. One fund exists for each token. The motion that creates a fund pins its payout address and sets its cap, which never refills. A payout is a later motion, never the creating one. The committee's Safe exits a fund by a transfer pinned to the Asset Safe ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 28). No part of the form names Lido Lend, so the tests use a stand-in address.
+- The agent's recommendation for A carried one question to the Lend team: which address receives a payout, and how it pays the lenders. Nobody has asked it. The agent drafted it for EM. The built form pays by a plain token transfer, so the address must accept one.
+- (OD-132) Option A: the vault lends to Lido Lend through its lender vault, an ERC-4626 token, with the fallback exit, and with the receiver and the owner pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md), decisions 3 and 13). The agent has not built that shape. EM's answer names the option, not a market. The agent's recommendation kept the stablecoin market apart, because its exit can pay USDY, which is not on the launch list. OD-133 holds that question in the [register](/registers/open-decisions.md). [s37]
 
 ## 2026-11-12 — OD-129 and OD-130 decided, and Lido Lend investigated for OD-131
 

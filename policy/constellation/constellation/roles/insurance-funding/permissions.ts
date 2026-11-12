@@ -3,7 +3,7 @@ import { c, call, derivedKeyOf } from "../../lib";
 import { DAI, manifest, STETH, SUSDS, USDC, USDS, USDT, WETH, WSTETH } from "../../addresses";
 
 /** The tokens that the Asset Safe holds and that can become insurance money. */
-const FUNDABLE = [STETH, WSTETH, WETH, USDC, USDT, DAI, USDS, SUSDS];
+export const FUNDABLE = [STETH, WSTETH, WETH, USDC, USDT, DAI, USDS, SUSDS];
 
 /**
  * Insurance money by motion (ADR 014, decisions 7 and 11): a transfer from the

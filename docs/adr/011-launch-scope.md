@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T07:13:23Z
+  at: 2026-11-12T12:05:15Z
 verified: []
 sources:
   - id: s1
@@ -35,7 +35,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 1. The launch list is ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW access, and Lido Lend access, which is compatibility with Morpho Blue (decision log, 2026-09-22; OD-91).
 2. The launch list includes DAI (decision log, 2026-09-22).
-3. The vault launches without Lido Lend, but with the universal factory's Morpho Blue shape and end-to-end tests for it. Lido Lend must be ready on the day it deploys, through a motion (decision log, 2026-09-22; OD-102).
+3. The vault launches without Lido Lend, but with the universal factory's shape for Lido Lend's lender vault and tests for it. Lido Lend must be ready on the day it deploys, through a motion (decision log, 2026-09-22; OD-102, OD-132).
 4. Replaced by decision 11 (OD-43).
 5. Replaced by ADR 014 decision 3 (OD-106).
 6. Replaced by decision 12 (OD-46).
@@ -45,7 +45,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 10. Stated by [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28.
 11. Stated by [ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 17 and 20.
 12. Stated by [ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 22 and 41.
-13. Lido Lend is a separate deployment that is compatible with Morpho Blue, not markets on Morpho Blue's own contract. Its address enters with the universal factory's onboarding motion, and that motion also adds its emergency exit ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13) (OD-49, OD-102).
+13. Lido Lend is a separate deployment that is compatible with Morpho Blue, not markets on Morpho Blue's own contract. The vault lends through Lido Lend's lender vault, an ERC-4626 token, with its fallback exit, and with the receiver and the owner pinned to the Asset Safe. The lender vault's address enters with the universal factory's onboarding motion, and that motion also adds its emergency exit ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13) (OD-49, OD-102, OD-132).
 14. Stated by [ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 13, 22 and 27.
 15. LDO is off the launch list. It is on neither the operator's order lists nor the recovery sell list (OD-91).
 
@@ -63,7 +63,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 | sUSDS | savings position | the universal factory's tokenized-vault shape; the operator redeems it, and recovery can sell it in a CoW order |
 | earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares sit in the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 19); insurance at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
 | Orders account | CoW market, limit and TWAP orders for the operator; recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Lido Lend | lending, after launch | one motion through the universal factory's Morpho Blue shape, once Lido Lend's own contract exists (decision 13); in the protocol cap until it matures ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28); insurance at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
+| Lido Lend | lending, after launch | one motion through the universal factory's lender-vault shape, once Lido Lend's own contracts exist (decision 13); the fallback exit can pay the market's collateral, which is wstETH in the WETH market (OD-133 holds the stablecoin market); in the protocol cap until it matures ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28); insurance at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
 
 A tranche vote can bring ETH, WETH, stETH, wstETH, USDC, USDT, DAI, USDS and sUSDS ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 3), because Aragon Voting pays any token through Finance.
 
@@ -84,17 +84,17 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market; 
 ## Confirmation
 
 - INV-008 and INV-015 in the [invariants](/specs/invariants.md); INV-003 for the converter's receiver.
-- Owed: the universal factory's Morpho Blue shape and its end-to-end test.
+- Owed: the universal factory's lender-vault shape, with the fallback exit, and its test against Lido Lend's contracts.
 
 ## Reversal conditions
 
-- Lido Lend ships with an interface that the universal factory's Morpho Blue shape cannot express.
+- Lido Lend ships with an interface that the universal factory's lender-vault shape cannot express.
 - The mandate changes the asset list.
 
 ## Open questions
 
 <!-- generated by scripts/validate_docs.py --write-status; edit the sources, not this block -->
 
-- [OD-132](/registers/open-decisions.md): Which Lido Lend surface does the vault lend through? The core's `supply` and `withdraw` keep their Morpho Blue signatures, and the planned Morpho Blue shape fits them; a withdrawal fails while the market has no free liquidity. The lender vault is an ERC-4626 token whose fallback exit still works then, and it can pay collateral: wstETH in the WETH market, and USDY, which is not on the launch list, in the stablecoin market ([research note](/research/lido-lend-insurance-2026-11-12.md)). Options: (A) the lender vault, through the factory's ERC-4626 shape with the fallback exit added, receiver and owner pinned to the Asset Safe; (B) the core, through the Morpho Blue shape, with no exit while a market has no free liquidity; (C) both shapes in the factory, and the onboarding motion chooses.
+- [OD-133](/registers/open-decisions.md): May USDY enter the Asset Safe through an exit from Lido Lend's stablecoin market? The lender vault's fallback exit can pay collateral (OD-132), and that market's collateral is USDY, which is not on the launch list ([research note](/research/lido-lend-insurance-2026-11-12.md)). Options: (A) build the lender-vault shape for the WETH market only, whose collateral, wstETH, is a launch token; the stablecoin market waits for this decision; (B) allow the exit: the motion that onboards the stablecoin market also introduces USDY, with its exit to the Aragon Agent and a recovery order that sells it; (C) lend to the stablecoin market through the core, which never pays collateral, and accept that a withdrawal fails while the market has no free liquidity.
 
 <!-- end of generated block -->

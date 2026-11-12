@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T11:10:32Z
+  at: 2026-11-12T12:05:15Z
 verified: []
 sources:
   - id: s1
@@ -108,7 +108,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The enabling-vote rehearsal moved both first-loss share balances from the Growth Committee's Safe by plain transfer ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
 - The first-loss modifier's policy holds the `first-loss` and `first-loss-burn` roles, and the enabling vote's first-loss batch applies it. On a fork with the live Earn vaults, a burn motion burns the first-loss Safe's shares after the objection window (`test_first_loss_burn_by_motion`), nothing burns outside a motion (`test_first_loss_burn_needs_a_motion`), the committee's role requests a redemption and cannot move the shares (`test_first_loss_role_requests_a_redemption`, `test_first_loss_role_cannot_move_the_shares`), and no other role reaches the shares (`test_other_roles_do_not_reach_the_first_loss_shares`).
 - The compiler refuses a first-loss role that transfers or approves the shares, and any role that calls the first-loss Safe or its modifier (`policy/constellation/compiler/compile.test.ts`).
-- Owed: a Lido Lend fund's role and shape (OD-131). [ADR 014](/adr/014-funding-by-tranche-votes.md) holds the confirmation of insurance money and of the Earn deposit.
+- The exit of a fund pays only the Asset Safe (decision 28; `test_fund_exit_pays_only_the_asset_safe`). [ADR 014](/adr/014-funding-by-tranche-votes.md) holds the confirmation of insurance money, of the Earn deposit and of a fund with a payout address.
 
 ## Reversal conditions
 
