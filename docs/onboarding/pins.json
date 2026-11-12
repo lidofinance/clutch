@@ -63,7 +63,7 @@
         "ADR-004#d15": "215205f9bf4a8529",
         "ADR-013#proposed-direction": "444970ea109fd33d",
         "INV-016": "cd9f0a527584b5ab",
-        "doc:.github/workflows/policy.yml": "fd1678da689c8bc4",
+        "doc:.github/workflows/policy.yml": "9cd01009c6eda39e",
         "doc:test/README.md#the-policy-pipeline": "2031d290b1758eb7"
       }
     },
@@ -921,7 +921,7 @@
         "ADR-013#proposed-direction": "444970ea109fd33d",
         "INV-016": "cd9f0a527584b5ab",
         "OD-33": "0fb334f1351ad5ba",
-        "doc:.github/workflows/policy.yml": "fd1678da689c8bc4"
+        "doc:.github/workflows/policy.yml": "9cd01009c6eda39e"
       }
     },
     "assumption:attested-computation": {
@@ -1198,7 +1198,7 @@
       "sources": {
         "ADR-004#d13": "da9b1c4462d4916c",
         "ADR-004#d7": "59b574bbc93df2c8",
-        "doc:.github/workflows/policy.yml": "fd1678da689c8bc4",
+        "doc:.github/workflows/policy.yml": "9cd01009c6eda39e",
         "doc:docs/research/zodiac-constellation-2026-10-06.md#answer": "665ce25023a178c3"
       }
     },
@@ -1707,7 +1707,7 @@
         "INV-016": "cd9f0a527584b5ab",
         "OD-33": "0fb334f1351ad5ba",
         "OD-35": "590de325e7b1dd47",
-        "doc:.github/workflows/policy.yml": "fd1678da689c8bc4",
+        "doc:.github/workflows/policy.yml": "9cd01009c6eda39e",
         "doc:docs/specs/specification-policy.md#the-permission-policy": "1e2fb0d9349bb9c2"
       }
     },

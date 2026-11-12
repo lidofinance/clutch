@@ -6,8 +6,8 @@ tags: [decisions, provenance]
 status: stable
 review_status: slop
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-11T20:36:01Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-11T21:07:14Z
 verified: []
 sources:
   - id: s1
@@ -112,6 +112,9 @@ sources:
   - id: s34
     resource: "urn:clutch:interview:2026-11-11-occam-verify"
     title: EM's instructions to record EM's verification of ADR 001 to ADR 004 after the Occam pass, and to list a second recording agent, 2026-11-11; the transcript is not in the repository
+  - id: s35
+    resource: "urn:clutch:interview:2026-11-11-next-steps"
+    title: EM's instruction to repair the policy workflow, prepare the acceptance ballot and build the first-loss slice, 2026-11-11; the transcript is not in the repository
 ---
 
 # Decision log
@@ -121,6 +124,18 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-11 — the policy workflow installs bun without a third-party action
+
+The agent reported that the `policy` workflow never starts: each of its 28 push runs on `main` since 2026-10-06 ended in `startup_failure` and created no job. It is the only workflow that uses an action outside `actions/*`, `oven-sh/setup-bun`. The agent proposed four next steps: (1) replace that action with a checksum-pinned download of the same bun version; (2) build the first-loss slice; (3) decide the pull request of the Sepolia stand; (4) prepare a ballot for the acceptance of ADR 005 to ADR 014. EM wrote:
+
+> do 1, 4, and 2
+
+Recorded as:
+
+- (1) `.github/workflows/policy.yml` downloads bun 1.3.0 from its release and checks the archive against the release's SHA-256 before it runs. The workflow uses no action outside `actions/*`. EM asked for this edit of a protected path in writing. The cause, an organisation rule on actions, is the agent's reading; the agent cannot read that rule. The run of the pull request is the test.
+- The agent also added the rehearsal artifact's comparison to the workflow, so that CI makes the same policy checks as `just check-policy`. EM's answer does not name that part.
+- (4) and (2) are separate work: the ballot changes no page of this repository, and the first-loss slice has its own branch. [s35]
 
 ## 2026-11-11 — ADR 001 to ADR 004 verified after the Occam pass, and a second recording agent
 
