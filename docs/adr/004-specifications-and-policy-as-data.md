@@ -44,6 +44,11 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-after-the-occam-pass-and-a-second-recording-agent
     sha256: 7f79aab20c346fa82ed45cb735290adb04226cf4af39f17c19442bd63fb9dc08
+  - by: human:em
+    at: 2026-11-12T14:08:31Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-12--adr-003-and-adr-004-verified-after-the-switch-to-raw-writes
+    sha256: a74f433a134f032bc6ad54836936f07b6a831cc4efac62bb2d1339e742128423
 sources:
   - id: s1
     resource: /registers/decision-log.md

@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-12T14:08:30Z
 verified: []
 sources:
   - id: s1
@@ -130,6 +130,9 @@ sources:
   - id: s40
     resource: "urn:clutch:interview:2026-11-12-raw-switch"
     title: EM's answer on OD-135 and EM's request for the switch to raw writes, 2026-11-12; the transcript is not in the repository
+  - id: s41
+    resource: "urn:clutch:interview:2026-11-12-raw-switch-verify"
+    title: EM's instruction to record EM's verification of ADR 003 and ADR 004 after the switch to raw writes, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -139,6 +142,16 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — ADR 003 and ADR 004 verified after the switch to raw writes
+
+The switch changed one sentence in each of the accepted ADR 003 and ADR 004, which broke EM's verification of both pages. ADR 003 decision 6 no longer lists the factory's shapes. ADR 004 decision 14 names the motions' permission trees in place of the factory's seeded versions. The agent asked EM to verify the two pages again or to drop the edit. EM wrote:
+
+> 1. do ADR 003 and ADR 004 verification with just verify on my behalf
+
+Recorded as:
+
+- EM verifies ADR 003 and ADR 004 again after the edits of the switch, so they stay accepted. At this instruction, the agent `claude-code/mythos-5.2` recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verifications are EM's. [s41]
 
 ## 2026-11-12 — OD-135 decided, and the switch to raw writes
 
