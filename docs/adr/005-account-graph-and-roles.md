@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-12T22:02:51Z
 verified: []
 sources:
   - id: s1
@@ -120,7 +120,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 | `insurance-governance` | universal factory | first-loss | create a fund: write the `insurance` role's transfer of the fund's token and set the fund's cap, which never refills, only as an enacted motion ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 6) | write under any key but `insurance`; write anything but a plain transfer; target a vault account or an Earn share token; grant or remove a role |
 | orders `governance` and approvals | universal factory | orders | add a token to the orders account's lists, with delegatecall only to the order signer; restore the operator after an emergency stop; raise an approval of CoW's vault relayer ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41 and 46) | any other delegatecall; touch membership or the emergency role's revoke |
 
-- **The enabling vote's batches (decision 32).** Publish each batch with the vote, with one command that computes its hash again from the batch, the Safe and the Safe's nonce. The batches of one Safe run in nonce order. The builder starts a new batch below 12,000,000 gas and below 128 KiB. Rehearse the vote and the batches at a recent block before the vote starts and again before it executes.
+- **The enabling vote's batches (decision 32).** Publish each batch with the vote. `just batches-check <file>` computes its hash again from the batch, the Safe and the Safe's nonce, and checks the batch's calls: the calls on the Safe's modifiers are the compiled policy's, in its order, and every other call is a setup call that the command knows. The batches of one Safe run in nonce order. The builder starts a new batch below 12,000,000 gas and below 128 KiB. Rehearse the vote and the batches at a recent block before the vote starts and again before it executes.
 
 ## Options considered
 

@@ -24,6 +24,9 @@ teardown-manifest.json
 # The modifiers' events that the fork suite writes for the round-trip check
 .roundtrip/
 
+# The Safe batches that the fork suite writes for the command that computes each hash again
+.batches/
+
 # Tooling
 __pycache__/
 .venv/

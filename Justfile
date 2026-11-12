@@ -77,6 +77,11 @@ test-fork:
 	RPC=${RPC} forge test -vvv
 	bun policy/constellation/compiler/roundtrip.ts rehearsal --dir .roundtrip
 	bun policy/constellation/compiler/watch.ts rehearsal --dir .roundtrip
+	bun policy/constellation/compiler/batches.ts check --batches .batches/rehearsal-26249900.json
+
+# Compute each Safe batch's hash again, and fail unless the batches carry the policy and the vault's setup, and nothing else
+batches-check file *flags:
+	bun policy/constellation/compiler/batches.ts check --batches {{quote(file)}} {{flags}}
 
 # Build a motion from a merged policy change: just motion <base> <head> --epoch 0 --policy-version 0, or --rpc
 motion base head *flags:

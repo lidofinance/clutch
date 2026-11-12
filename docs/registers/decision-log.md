@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T19:10:44Z
+  at: 2026-11-12T22:02:51Z
 verified: []
 sources:
   - id: s1
@@ -161,7 +161,7 @@ Square brackets mark a redaction. Redactions keep the screening vendor's identit
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
 
-## 2026-11-12 — the launch protocols' onboarding motions and a token's retirement, built; OD-139 opened
+## 2026-11-12 — the launch protocols' onboarding motions, a token's retirement and the batch hash command, built; OD-139 opened
 
 The agent listed what could come next. Item 1 was the onboarding motion of each launch protocol. Item 4 was the removal of a token from the order lists and the command that computes each Safe batch's hash again. It also asked EM to confirm two of its readings: that OD-138 keeps a removal on the safety modifier or on the orders modifier as an Aragon vote, and that `MAINNET_RPC_URL` names the repository's secret while the fork suite reads `RPC`. EM wrote:
 
@@ -176,7 +176,7 @@ Recorded as:
 - A motion takes a token out of the operator's order lists. It writes the order trees again without the token, writes the token's transfer on the Asset Safe again with the Aragon Agent as the only receiver, and sets the token's orders budget to zero. It revokes nothing ([ADR 013](/adr/013-one-easy-track-factory.md), decision 4; [ADR 007](/adr/007-swapping-through-an-orders-account.md)).
 - Three points are the agent's choice; EM's words do not name them. A token that leaves the lists keeps its return from the orders account, its return to the Aragon Agent, its relayer approval, the emergency role's recovery orders and its exit; the policy's source holds it in a list of retired tokens. Its orders budget keeps its key, at zero, because the governance role's own policy lists the launch keys and no motion writes that policy. The example onboarding and the fork test of an ERC-4626 vault's onboarding now also write the zeroing of the new approval for the emergency role: without it, the emergency role could not set that approval to zero.
 - The work found two parts of the launch policy that no motion can write: the emergency role's zeroing of an approval in the launch form, which lists the operator's spenders, and its staking of ETH. A new spender that enters through the policy's source changes the emergency role's tree of every approved token, and the exit-governance role writes a zeroing only for any spender. The agent opened OD-139 for the form of the zeroing.
-- The command that computes each Safe batch's hash again follows in its own pull request. [s47]
+- `just batches-check` computes each Safe batch's hash again, as Safe v1.5.0 does, from the published batch, its Safe and its nonce. It also checks what a batch does, which EM's words do not name and the agent added: a hash says nothing unless its calls are the compiled policy and the vault's setup, and nothing else. On the fork, its hashes equal the hashes that the deployed Safes compute ([enabling-vote spec](/specs/enabling-vote.md); [ADR 005](/adr/005-account-graph-and-roles.md), decision 32). The fork suite's workflow does not run the command yet: a change under `.github/` needs EM's request. [s47]
 
 ## 2026-11-12 — the findings of another agent's review, triaged
 

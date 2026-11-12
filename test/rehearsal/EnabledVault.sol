@@ -32,6 +32,7 @@ abstract contract EnabledVault is RehearsalBase {
 
     struct Batch {
         ISafe safe;
+        uint256 nonce;
         bytes data; // multiSend(bytes) calldata
         bytes32 hash;
         uint256 calls;
@@ -236,7 +237,47 @@ abstract contract EnabledVault is RehearsalBase {
         bytes32 hash = safe.getTransactionHash(
             Mainnet.MULTISEND_CALL_ONLY, 0, data, 1, 0, 0, 0, address(0), address(0), nonce
         );
-        batches.push(Batch({safe: safe, data: data, hash: hash, calls: to - from, label: label}));
+        batches.push(Batch({safe: safe, nonce: nonce, data: data, hash: hash, calls: to - from, label: label}));
+    }
+
+    /// @dev Writes the Safe batches as the file that the enabling vote publishes: each batch's Safe, its nonce and
+    ///      its MultiSend data, with the hash that the Safe itself computes. The command
+    ///      `policy/constellation/compiler/batches.ts` computes each hash again from the data and checks the
+    ///      calls against the policy (enabling-vote spec; OD-92).
+    function _writeBatches(string memory dir, string memory name) internal {
+        string memory list = "";
+        for (uint256 i = 0; i < batches.length; i++) {
+            Batch storage b = batches[i];
+            list = string.concat(
+                list,
+                i == 0 ? "" : ",",
+                '{"safe":"',
+                vm.toString(address(b.safe)),
+                '","nonce":',
+                vm.toString(b.nonce),
+                ',"label":"',
+                b.label,
+                '","hash":"',
+                vm.toString(b.hash),
+                '","data":"',
+                vm.toString(b.data),
+                '"}'
+            );
+        }
+        vm.createDir(dir, true);
+        vm.writeFile(
+            string.concat(dir, "/", name),
+            string.concat(
+                '{"format":"clutch.safe-batches/1","network":"rehearsal-26249900","chainId":',
+                vm.toString(block.chainid),
+                ',"multiSend":"',
+                vm.toString(Mainnet.MULTISEND_CALL_ONLY),
+                '","batches":[',
+                list,
+                "]}\n"
+            )
+        );
+        console2.log("REHEARSAL Safe batches written", batches.length);
     }
 
     /// @dev The Asset Safe's batch: both modifiers enabled, then the artifact's calls on them.
