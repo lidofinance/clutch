@@ -420,7 +420,7 @@
         "ADR-013#d3": "d5a79e8c6a3b3ca1",
         "ADR-013#d4": "f19b0375aa88375d",
         "ADR-014#d1": "59026b5de57543a1",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24",
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346",
         "doc:docs/registers/parameters.md#parameters": "a73705ba2c6a68b4"
       }
     },
@@ -490,7 +490,7 @@
         "OD-49": "5258e489baef2bbd",
         "OD-60": "98be3ed0848d05f0",
         "OD-67": "1a0cfc27b5801f7a",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24"
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346"
       }
     },
     "actor:lido-staking": {
@@ -722,7 +722,7 @@
         "ADR-004#d7": "59b574bbc93df2c8",
         "ADR-013#proposed-direction": "e7e3990a68622447",
         "INV-016": "d2b9633a1edb37c3",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24",
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346",
         "test:test_roundtrip_events_after_an_emergency_revoke": "623e17c15a1f2441",
         "test:test_roundtrip_events_after_the_enabling_vote": "71c329b985df8ffc",
         "test:test_roundtrip_events_after_the_example_motion": "882f59eaa48c01e9"
@@ -809,7 +809,7 @@
         "OD-134": "0473d03f95cb9368",
         "OD-135": "f390161f68eab6ee",
         "OD-70": "876544ad4d38df3a",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24",
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346",
         "doc:docs/research/raw-factory-prototype-2026-11-12.md#the-switch-made-on-2026-11-12": "7bf0bcb16c3df40c",
         "lip:part-4": "583e6fb7b78120f4",
         "test:test_factory_orders_restore_after_an_emergency_stop": "0ea66059e7611e24",
@@ -1499,7 +1499,7 @@
         "INV-022": "6a7703bdf5dc8a25",
         "INV-023": "d443eca50e03bf09",
         "INV-032": "d1f172fb126892d3",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24",
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346",
         "doc:docs/research/easy-track-first-2026-11-05.md#easy-track": "8a1e2a0791ae876c",
         "doc:docs/research/enabling-vote-rehearsal-2026-10-15.md#the-vote-that-fits": "d787e84a74b83f64",
         "doc:docs/specs/enabling-vote.md#before-the-vote": "1f5d529b5f4563f8",
@@ -1778,7 +1778,7 @@
         "ADR-007#d40": "dcaee6d1b6a2da5e",
         "OD-106": "f60165e1e725bbdc",
         "OD-54": "9e621cfca3fdf949",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24",
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346",
         "doc:ROADMAP.md#standing-gates": "e73c8d2f9bcb613e"
       }
     },
@@ -2031,7 +2031,7 @@
         "ADR-010#d19": "27c0531c1916b14d",
         "ADR-010#d23": "1bbc9c78e3835632",
         "OD-90": "af580b9b5b6eb1c1",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24",
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346",
         "doc:docs/specs/control-matrix.md#control-matrix": "d5fa29504022c56c"
       }
     },
@@ -2185,7 +2185,7 @@
         "ADR-007#d41": "1aa5564acff936dc",
         "INV-023": "d443eca50e03bf09",
         "INV-040": "8ea36fb87bc8a18b",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24",
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346",
         "doc:docs/research/orders-motion-roles-2026-11-08.md#what-was-built": "b55a3860d83f3375"
       }
     },
@@ -2738,7 +2738,7 @@
         "OD-134": "0473d03f95cb9368",
         "OD-70": "876544ad4d38df3a",
         "OD-73": "9d849bfba1bf1f15",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24",
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346",
         "doc:docs/research/request-for-solution-2026-10-07.md#governance-and-easy-track": "c7546b67ba29bb6e",
         "doc:docs/specs/enabling-vote.md#the-vote": "d0d119c7d76b0831",
         "doc:script/DeployDryRun.s.sol": "8b92d62a82032c54",
@@ -2966,7 +2966,7 @@
         "ADR-013#d5": "ce62589fa1c2bda3",
         "ADR-014#d1": "59026b5de57543a1",
         "OD-96": "5c2651c7700a84ad",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24"
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346"
       }
     },
     "scene:money-in-money-back": {
@@ -3323,7 +3323,7 @@
       "sources": {
         "ADR-009#d3": "13249590a0e655c3",
         "ADR-009#proposed-direction": "64c3d8242d3de881",
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24"
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346"
       }
     },
     "term:mandate-size": {
@@ -3483,7 +3483,7 @@
     "term:snapshot-vote": {
       "content": "9332ee88a0ee2d95",
       "sources": {
-        "doc:ROADMAP.md#roadmap": "691ab35719ef9a24"
+        "doc:ROADMAP.md#roadmap": "20b834d086b97346"
       }
     },
     "term:susds": {
