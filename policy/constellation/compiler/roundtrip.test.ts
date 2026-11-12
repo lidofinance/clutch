@@ -90,6 +90,17 @@ test("a membership that the policy does not list is reported, and so is a missin
   expect(differences([event(opMod, "AssignRoles", [STRANGER, [other], [true]])])).toEqual([
     `Clutch operator modifier, role ${lower(other)}: the role holds 1 member(s), 0 target(s) and 0 function(s), and the policy has no such role`,
   ]);
+  // a member whose module the modifier disabled cannot act, though it is still a member
+  const factory = policy.manifest.universalFactory as string;
+  expect(differences([event(opMod, "DisabledModule", [factory])])).toEqual([
+    "Clutch operator modifier, role governance: universal factory is a member, and the modifier has it disabled as a module, so it cannot act",
+    "Clutch operator modifier, role insurance-funding: universal factory is a member, and the modifier has it disabled as a module, so it cannot act",
+  ]);
+  expect(differences([event(opMod, "DisabledModule", [factory]), event(opMod, "EnabledModule", [factory])])).toEqual([]);
+  // a module that is enabled and holds no role is a note
+  const idle = roundTrip(policy, [...LAUNCH, event(opMod, "EnabledModule", [STRANGER])]);
+  expect(idle.differences).toEqual([]);
+  expect(idle.notes).toEqual([`Clutch operator modifier: ${lower(STRANGER)} is enabled as a module and is no member of a role in the policy`]);
   // a member that was added and removed again leaves no difference
   expect(differences([event(opMod, "AssignRoles", [STRANGER, [OPERATOR], [true]]), event(opMod, "AssignRoles", [STRANGER, [OPERATOR], [false]])])).toEqual([]);
 });

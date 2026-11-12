@@ -41,6 +41,8 @@ export type Rebuilt = {
   avatar: string | null;
   target: string | null;
   members: Map<string, Set<string>>;
+  /** The modules that the modifier has enabled. A member acts only while the modifier has it enabled. */
+  enabled: Set<string>;
   targets: Map<string, Map<string, { clearance: number; executionOptions: number }>>;
   functions: Map<string, Map<string, Fn>>;
   budgets: Map<string, Budget>;
@@ -51,7 +53,7 @@ export type Rebuilt = {
 };
 
 const lower = (value: string) => value.toLowerCase();
-const fresh = (): Rebuilt => ({ events: 0, owner: null, avatar: null, target: null, members: new Map(), targets: new Map(), functions: new Map(), budgets: new Map(), foreign: [], unknown: 0 });
+const fresh = (): Rebuilt => ({ events: 0, owner: null, avatar: null, target: null, members: new Map(), enabled: new Set(), targets: new Map(), functions: new Map(), budgets: new Map(), foreign: [], unknown: 0 });
 const slot = <V>(map: Map<string, V>, key: string, make: () => V): V => {
   if (!map.has(key)) map.set(key, make());
   return map.get(key)!;
@@ -134,6 +136,12 @@ export function rebuild(logs: Log[], modifiers: string[]): Map<string, Rebuilt> 
       case "TargetSet":
         state.target = lower(a[1]);
         break;
+      case "EnabledModule":
+        state.enabled.add(lower(a[0]));
+        break;
+      case "DisabledModule":
+        state.enabled.delete(lower(a[0]));
+        break;
       case "SetUnwrapAdapter":
         state.foreign.push(`an unwrap adapter is set for ${a[1]} on ${a[0]}: ${a[2]}`);
         break;
@@ -141,7 +149,7 @@ export function rebuild(logs: Log[], modifiers: string[]): Map<string, Rebuilt> 
         state.foreign.push(`a default role is set for ${a[0]}: ${a[1]}`);
         break;
       default:
-        // the modifier's own module list, its setup and its executions change no permission
+        // the modifier's setup and its executions change no permission
         break;
     }
   }
@@ -192,6 +200,12 @@ export function compare(policy: Artifact, chain: Map<string, Rebuilt>): Report {
     for (const line of state.foreign) differences.push(`${where}: ${line}`);
     if (state.unknown > 0) notes.push(`${where}: ${state.unknown} log(s) are no event of the Roles modifier`);
 
+    // a module that the modifier has enabled and that holds no role of the policy cannot act through it
+    const listed = new Set<string>(modifier.roles.flatMap((r) => r.members.map((m: { address: string }) => lower(m.address))));
+    for (const module of state.enabled) {
+      if (!listed.has(module)) notes.push(`${where}: ${name(module)} is enabled as a module and is no member of a role in the policy`);
+    }
+
     // budgets
     const wanted = new Map(modifier.allowances.map((a) => [lower(a.key), a] as const));
     for (const [key, want] of wanted) {
@@ -226,7 +240,10 @@ export function compare(policy: Artifact, chain: Map<string, Rebuilt>): Report {
         continue;
       }
       const wantMembers = new Set<string>(want.members.map((m: { address: string }) => lower(m.address)));
-      for (const member of wantMembers) if (!members.has(member)) differences.push(`${role}: ${name(member)} is no member`);
+      for (const member of wantMembers) {
+        if (!members.has(member)) differences.push(`${role}: ${name(member)} is no member`);
+        else if (!state.enabled.has(member)) differences.push(`${role}: ${name(member)} is a member, and the modifier has it disabled as a module, so it cannot act`);
+      }
       for (const member of members) if (!wantMembers.has(member)) differences.push(`${role}: ${name(member)} is a member, and the policy does not list it`);
 
       const stored = (target: string) => [...functions.keys()].filter((id) => id.startsWith(`${target}:`));

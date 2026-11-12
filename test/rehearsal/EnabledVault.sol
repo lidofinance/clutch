@@ -26,6 +26,10 @@ import {
 ///      tranche through Finance, and approves the hash of each Safe batch (OD-92, OD-102,
 ///      OD-106). Figures marked STANDIN are test values, not production figures.
 abstract contract EnabledVault is RehearsalBase {
+    /// @dev The policy that the enabling vote applies, if it is not the committed artifact: the base policy of a
+    ///      motion that a test replays.
+    string internal policyArtifact;
+
     struct Batch {
         ISafe safe;
         bytes data; // multiSend(bytes) calldata
@@ -247,8 +251,8 @@ abstract contract EnabledVault is RehearsalBase {
     /// @dev The artifact's calls on one or two modifiers, in the artifact's order. A modifier's owner applies
     ///      them, so each Safe's batch takes the calls on its own modifiers.
     function _policyCalls(address first, address second) internal view returns (VoteBuilder.Item[] memory calls) {
-        // POLICY_ARTIFACT names another policy to apply: the base policy of a motion's replay (MotionReplay)
-        string memory j = vm.readFile(vm.envOr("POLICY_ARTIFACT", ARTIFACT));
+        // another policy to apply: the base policy of a motion's replay (MotionReplay)
+        string memory j = vm.readFile(bytes(policyArtifact).length > 0 ? policyArtifact : ARTIFACT);
         address[] memory to = vm.parseJsonAddressArray(j, ".calls.to");
         bytes[] memory data = vm.parseJsonBytesArray(j, ".calls.data");
         uint256 n;

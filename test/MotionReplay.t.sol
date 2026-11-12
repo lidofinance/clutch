@@ -25,6 +25,9 @@ interface IVault4626 {
 contract MotionReplay is EnabledVault {
     /// @dev The committed example motion: the onboarding of an ERC-4626 lending vault, with a larger Earn budget.
     string internal constant EXAMPLE = "policy/constellation/artifacts/motion-example-rehearsal-26249900.json";
+    /// @dev The repository's pending motion of the rehearsal's network, and its base policy (ADR 013, decision 19).
+    string internal constant PENDING_MOTION = "policy/constellation/pending/rehearsal-26249900/motion.json";
+    string internal constant PENDING_BASE = "policy/constellation/pending/rehearsal-26249900/base.json";
     /// @dev The example's vault and budgets (policy/constellation/compiler/motion.example.ts). No decision lists them.
     address internal constant EXAMPLE_VAULT = 0x2371e134e3455e0593363cBF89d3b6cf53740618;
     uint256 internal constant EXAMPLE_WETH_BUDGET = 50e18;
@@ -82,10 +85,18 @@ contract MotionReplay is EnabledVault {
         assertEq(IERC20(EXAMPLE_VAULT).balanceOf(Mainnet.AGENT), left, "the Agent holds the remaining shares");
     }
 
-    /// @dev A motion of the `motion` command's own output: `just motion <base> <head>` writes it and the base
-    ///      policy, and `just motion-replay` runs this test on both. Without a motion file the test is skipped.
+    /// @dev The repository's pending motion, or a motion file of `just motion`, on the vault with the motion's
+    ///      base policy. This is the acceptance check of a motion: the deployed modifiers and the factory take
+    ///      every write, in order, or the test fails. The suite replays the pending motion whenever the
+    ///      repository holds one, so CI refuses a pending motion that would fail at its enactment.
+    ///      `just motion-replay` replays `.motion/motion.json`. With neither, the test is skipped.
     function test_replay_a_motion_file() public {
         string memory path = vm.envOr("MOTION_FILE", string(""));
+        policyArtifact = vm.envOr("POLICY_ARTIFACT", string(""));
+        if (bytes(path).length == 0 && vm.exists(PENDING_MOTION)) {
+            path = PENDING_MOTION;
+            policyArtifact = PENDING_BASE;
+        }
         if (bytes(path).length == 0) {
             vm.skip(true);
             return;

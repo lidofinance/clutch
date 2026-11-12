@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T17:45:27Z
+  at: 2026-11-12T18:10:17Z
 verified: []
 sources:
   - id: s1
@@ -142,6 +142,9 @@ sources:
   - id: s44
     resource: "urn:clutch:interview:2026-11-12-fork-ci"
     title: EM's request for the fork suite in CI, with leave to edit .github, 2026-11-12; the transcript is not in the repository
+  - id: s45
+    resource: "urn:clutch:interview:2026-11-12-review-findings"
+    title: EM's request to triage and fix three findings of a second agent's review, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -151,6 +154,22 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — three findings of a second agent's review, fixed
+
+A second agent reviewed the repository at the commit of the two detectors and reported three findings. EM sent them and wrote:
+
+> triage codex findings and fix when applicable:
+
+The agent reproduced each finding and fixed all three.
+
+Recorded as:
+
+- The first finding: the motion detector took the pending motion for enacted whenever the chain held the committed artifact. Another motion could make the pending motion's permission writes and one more action, such as a burn, and the detector then asked for the removal of the pending files and reported nothing. Now the pending motion counts as enacted only if Easy Track enacted a motion with exactly its calldata, and every other enacted motion of the factory stays an alert until the repository records it.
+- This changes one reading of the agent under OD-137. `just motion-settle` no longer only removes the pending files: it moves the motion's file to `enacted/<network>/<motion id>.json`, the repository's record of enacted motions ([ADR 013](/adr/013-one-easy-track-factory.md), "The pending motion").
+- The second finding: the check of a motion did not evaluate the motion role's conditions, so a budget with a refill period of 29 days passed it, though the governance role refuses that write. Now the check evaluates the role's condition tree on each write of a modifier on itself. The fork suite compares the evaluation with the deployed modifiers, and it replays the repository's pending motion, so CI refuses a pending motion that would fail at its enactment.
+- The third finding: the round-trip check did not see a role's member that the modifier had disabled as a module, though a disabled member cannot act. Now it reports such a member (INV-016).
+- One limit stays, and the fork suite holds a case of it: the check does not test that a submitted tree is well-formed, and the modifier refuses a malformed tree. [s45]
 
 ## 2026-11-12 — the fork suite in CI
 

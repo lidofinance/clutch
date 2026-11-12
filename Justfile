@@ -94,7 +94,7 @@ motion-pending base *flags:
 watch *flags:
 	bun policy/constellation/compiler/watch.ts check {{flags}}
 
-# Remove the pending motion's files once the chain holds the committed artifact
+# Record the pending motion as enacted and remove its pending files, once Easy Track enacted it
 motion-settle *flags:
 	bun policy/constellation/compiler/watch.ts settle {{flags}}
 
