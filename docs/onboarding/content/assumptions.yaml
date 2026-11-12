@@ -92,7 +92,7 @@
   why: "The deployed mastercopy is older than the upstream source, and Clutch's compiler is built on the SDK."
   breaks: "A compiler or SDK bug can reach the chain if nobody runs the round-trip check after a change. A change of SDK, plan or licence can block local compilation."
   watched_by: ["doc:.github/workflows/policy.yml", "test:test_roundtrip_events_after_the_enabling_vote"]
-  watch_note: "CI runs the compiler tests and a type-check. The SDK's selectors and event topics match the mastercopy, with one exception: the mastercopy emits `Initialized` with a `uint64`. The round-trip check decodes the deployed modifier's real events on a fork and rebuilds the committed policy from them."
+  watch_note: "CI runs the compiler tests and a type-check. The SDK's selectors and event topics match the mastercopy, with one exception: the mastercopy emits `Initialized` with a `uint64`. The mastercopy stores a budget's maximum refill of zero as the largest value, and a timestamp of zero as the block's time; a fork test reads both from it. The round-trip check decodes the deployed modifier's real events on a fork and rebuilds the committed policy from them."
   sources: ["ADR-004#d7", "ADR-004#d13", "doc:docs/research/zodiac-constellation-2026-10-06.md#answer", "INV-016",
     "test:test_roundtrip_events_after_the_enabling_vote"]
 

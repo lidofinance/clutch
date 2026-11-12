@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T18:10:17Z
+  at: 2026-11-12T18:29:39Z
 verified: []
 sources:
   - id: s1
@@ -145,6 +145,9 @@ sources:
   - id: s45
     resource: "urn:clutch:interview:2026-11-12-review-findings"
     title: EM's request to triage and fix three findings of a second agent's review, 2026-11-12; the transcript is not in the repository
+  - id: s46
+    resource: "urn:clutch:interview:2026-11-12-second-review"
+    title: EM's request to triage and fix the findings of another agent's review, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -154,6 +157,20 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — the findings of another agent's review, triaged
+
+Another agent reviewed the factory, the motion commands, the round-trip check and the detectors at the commit of the two detectors, with its own probes on a fork. It found no defect on a path of funds and reported four findings. EM sent them and wrote:
+
+> triage findings by GLM and fix if needed:
+
+Recorded as:
+
+- The first finding, that the check of a motion did not evaluate a role's conditions on a call's arguments, and both parts of the third, on enacted motions and on a disabled member, were already fixed when the review arrived: they are the three findings of the entry below. The reviewer saw that work before its commit.
+- One part of the first finding was new. The `motion` command planned a write that the motion role's policy refuses, and only its own check then failed. Now the command names such a write among the parts that need a DAO vote.
+- The second finding: the round-trip check reads a maximum refill of the largest value as the policy's zero, and any timestamp as the policy's zero, and nothing on a fork showed that the modifier stores those values. Now a fork test creates a fund with a cap that never refills, reads both values from the deployed modifier, and the round-trip check rebuilds the fund's policy from the events (INV-016).
+- From the fourth finding, two points are fixed. The `motion` command now refuses a scoped target with execution options, which no write can set. The round-trip check now fails on logs that do not hold a modifier's setup, because logs that start after the deployment miss what the modifier emitted before them.
+- One point of the fourth finding stays as it is: two policies that differ only in a budget's timestamp give one budget write. The constellation states no timestamp, so no compiled policy differs in that way. [s46]
 
 ## 2026-11-12 — three findings of a second agent's review, fixed
 

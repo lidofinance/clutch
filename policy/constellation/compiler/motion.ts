@@ -261,7 +261,13 @@ export function planMotion(base: Artifact, head: Artifact): Plan {
         needsVote.push(`${about}: ${role}`);
         return;
       }
-      writes.push({ modifier: after.address, role: role.key, to: after.address, data: lower(ROLES.encodeFunctionData(fn, args)), about: `${after.label}, as ${role.name}: ${about}` });
+      const data = lower(ROLES.encodeFunctionData(fn, args));
+      // a write that the motion role's own policy refuses is no motion's to make
+      if (acceptedByRole(base, before, role.key, after.address, data) === false) {
+        needsVote.push(`${about}: the policy of the role ${role.name} refuses this write`);
+        return;
+      }
+      writes.push({ modifier: after.address, role: role.key, to: after.address, data, about: `${after.label}, as ${role.name}: ${about}` });
     };
 
     // budgets
@@ -306,7 +312,12 @@ export function planMotion(base: Artifact, head: Artifact): Plan {
           }
           continue;
         }
-        if (!was || was.clearance !== Clearance.Function) {
+        if (target.executionOptions !== 0) {
+          // the modifier scopes a target without execution options, so no write gives a scoped target any
+          needsVote.push(`the role ${role.name} on the ${after.label} has ${name(target)} as a scoped target with execution options, which no write can set`);
+          continue;
+        }
+        if (!was || was.clearance !== Clearance.Function || was.executionOptions !== 0) {
           emit("scopeTarget", [role.key, target.address], role.key, `add ${name(target)} to the role ${role.name}`);
         }
         for (const fn of target.functions) {

@@ -9,8 +9,10 @@
  *
  * An events file holds one log on each line, as JSON with `address`, `topics` and `data`, in the order of
  * emission. The fork suite writes such files (test/RoundTrip.t.sol), and `rehearsal` checks them: the enabling
- * vote against the committed artifact, a motion that the `motion` command built against its head policy, and an
- * emergency revoke, which the check must report.
+ * vote against the committed artifact, a motion that the `motion` command built against its head policy, a fund's
+ * creation against the fund's policy, and an emergency revoke, which the check must report.
+ *
+ * The logs must start at the modifiers' deployment: the check fails if a modifier's setup is not among them.
  *
  * The check reads events only. It does not read the modifier's storage, which holds the trees in a packed form,
  * so it trusts the deployed Roles code to store what it emits.
@@ -21,7 +23,7 @@ import { getAddress, Interface, JsonRpcProvider } from "ethers";
 import { Clearance, rolesAbi } from "zodiac-roles-sdk";
 import type { Artifact } from "./compile";
 import { load } from "./motion";
-import { exampleHead } from "./motion.example";
+import { exampleFund, exampleHead } from "./motion.example";
 
 const ROLES = new Interface(rolesAbi as any);
 /** The deployed mastercopy emits the initializer's event with a uint64, and the SDK's ABI lists it with a uint8. */
@@ -37,6 +39,8 @@ type Budget = { balance: bigint; maxRefill: bigint; refill: bigint; period: bigi
 /** What one modifier stores, rebuilt from its events. */
 export type Rebuilt = {
   events: number;
+  /** True if the logs hold the modifier's setup, so that they start at its deployment. */
+  setup: boolean;
   owner: string | null;
   avatar: string | null;
   target: string | null;
@@ -53,7 +57,7 @@ export type Rebuilt = {
 };
 
 const lower = (value: string) => value.toLowerCase();
-const fresh = (): Rebuilt => ({ events: 0, owner: null, avatar: null, target: null, members: new Map(), enabled: new Set(), targets: new Map(), functions: new Map(), budgets: new Map(), foreign: [], unknown: 0 });
+const fresh = (): Rebuilt => ({ events: 0, setup: false, owner: null, avatar: null, target: null, members: new Map(), enabled: new Set(), targets: new Map(), functions: new Map(), budgets: new Map(), foreign: [], unknown: 0 });
 const slot = <V>(map: Map<string, V>, key: string, make: () => V): V => {
   if (!map.has(key)) map.set(key, make());
   return map.get(key)!;
@@ -123,6 +127,7 @@ export function rebuild(logs: Log[], modifiers: string[]): Map<string, Rebuilt> 
         break;
       }
       case "RolesModSetup":
+        state.setup = true;
         state.owner = lower(a[1]);
         state.avatar = lower(a[2]);
         state.target = lower(a[3]);
@@ -193,9 +198,11 @@ export function compare(policy: Artifact, chain: Map<string, Rebuilt>): Report {
       differences.push(`${where}: the modifier emitted no event`);
       continue;
     }
+    // without the setup, the logs miss what the modifier emitted before them, and the rebuilt state is not its state
+    if (!state.setup) differences.push(`${where}: the logs do not hold the modifier's setup, so they do not start at its deployment`);
     for (const field of ["owner", "avatar", "target"] as const) {
-      if (state[field] === null) notes.push(`${where}: its ${field} is not in the events, so it is not compared`);
-      else if (state[field] !== lower(modifier[field])) differences.push(`${where}: its ${field} is ${state[field]}, and the policy says ${modifier[field]}`);
+      if (state[field] === null) continue;
+      if (state[field] !== lower(modifier[field])) differences.push(`${where}: its ${field} is ${state[field]}, and the policy says ${modifier[field]}`);
     }
     for (const line of state.foreign) differences.push(`${where}: ${line}`);
     if (state.unknown > 0) notes.push(`${where}: ${state.unknown} log(s) are no event of the Roles modifier`);
@@ -374,6 +381,8 @@ async function main(argv: string[]): Promise<number> {
     const revoke = file("emergency-revoke.ndjson");
     let ok = print("after the enabling vote, the modifiers hold the committed policy", roundTrip(policy, vote), vote.length);
     ok = print("after the example motion, the modifiers hold its head policy", roundTrip(exampleHead(policy), motion), motion.length) && ok;
+    const fund = file("fund-created.ndjson");
+    ok = print("after a fund is created with a cap that never refills, the modifiers hold the fund's policy", roundTrip(exampleFund(policy), fund), fund.length) && ok;
     const drift = roundTrip(policy, revoke);
     const seen = JSON.stringify([...drift.differences].sort()) === JSON.stringify([...REVOKE_DIFFERENCES].sort());
     console.log(`${seen ? "PASS" : "FAIL"}: after an emergency revoke, the check reports the revoke and nothing else (${revoke.length} logs)`);
