@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T21:44:30Z
+  at: 2026-11-12T12:19:12Z
 verified: []
 sources:
   - id: s1
@@ -59,16 +59,15 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **Scopes and versions.** A scope is one modifier's role, target and selector, one allowance key, one ceiling, or the orders account's lists. Its version is the hash of its current content, as the factory last wrote it. The factory's constructor seeds the versions and the ceilings of the launch policy, which the enabling vote applies. A failed enactment reverts as a whole; the motion stays open until the committee's Safe or Aragon Voting cancels it [s2].
 - **Narrowing.** A raw write names the scope's current content, which must match its version, and writes a subset of it, or revokes the target or the function.
 - **Roles.** The factory holds one role per kind of write: `governance` and `insurance-funding` on the operator modifier, `exit-governance` and `restart` on the safety modifier, the governance and approvals roles on the orders modifier, and `first-loss-burn` with the insurance roles on the first-loss modifier ([ADR 014](/adr/014-funding-by-tranche-votes.md)).
-- **Shapes at launch.** The agent proposes the list below; a shape that the factory lacks needs a changed factory (decision 4). No shape covers a third-party lending pool such as Aave, which is outside the launch scope. The prototype builds the approval list, the introduction, budgets, ceilings, the revoke, the target restore, the restart, insurance money, the orders token, the orders restore and the first-loss burn.
+- **Shapes at launch.** The agent proposes the list below; a shape that the factory lacks needs a changed factory (decision 4). No shape covers a third-party lending pool such as Aave, which is outside the launch scope. The prototype builds the approval list, the introduction, budgets, ceilings, the revoke, the target restore, the restart, insurance money, the orders token, the orders restore, the first-loss burn, the Earn insurance deposit, and a fund's creation and payout.
 
 | Shape | Motion fields | Writes |
 |---|---|---|
 | ERC-20 approval list | token; the current and the next list | the token's complete `approve` list, each new spender's amount spending a key derived for it; zero spends nothing |
 | Introduction | token; its first list; its budget and approval ceilings | the token's first approval list and both of its ceilings (decision 15) |
 | Wrapper | wrapper, underlying | `wrap` and `unwrap`, or `deposit` and `withdraw` on WETH; the output returns to the avatar |
-| ERC-4626 vault | vault, asset | the asset's `approve` to the vault, spending a key derived for the vault; `deposit` with receiver `EqualToAvatar`; `redeem` and `withdraw` with receiver and owner `EqualToAvatar` |
+| ERC-4626 vault | vault, asset | the asset's `approve` to the vault, spending a key derived for the vault; `deposit` with receiver `EqualToAvatar`; `redeem` and `withdraw` with receiver and owner `EqualToAvatar`. Lido Lend's lender vault joins through this shape, with no fallback exit and no settlement ([ADR 011](/adr/011-launch-scope.md) decision 13); its address arrives with the motion (OD-49). Not built |
 | Asynchronous queue vault | vault, asset | the asset's `approve` to the queue, spending a key derived for the queue; the asynchronous deposit request with any owner pinned to the avatar; the redeem request, cancel and claim with receiver and owner pinned to the avatar |
-| Market compatible with Morpho Blue | contract, market parameters | the loan token's `approve` to that contract, spending a key derived for it; `supply` with `onBehalf` pinned to the avatar; `withdraw` with `onBehalf` and `receiver` pinned to the avatar. Lido Lend's address arrives with the motion (OD-49); end-to-end tests against the deployed Morpho Blue prove the shape before Lido Lend exists |
 | Sky's DAI–USDS converter | none | the conversions in both directions, with the receiver pinned to the avatar, and the DAI and USDS approvals to the converter below their ceiling (OD-22) |
 | Orders account token | token; its budget and approval ceilings; the current lists | the operator's transfer into the orders account under a key derived for the token; the token on both sides of signer and TWAP orders and in what recovery orders sell; its relayer approval; the emergency role's zeroing and transfer; the operator's return; and the token's exit on the Asset Safe ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41, 44 and 45) |
 | Orders account restore | the current lists; the tokens whose relayer approval it raises | the operator's permissions for the current lists, and the named relayer approvals ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 46) |
@@ -77,9 +76,11 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 | Revoke | target, selector, expected version | the revoke of one operator function (decision 7) |
 | Target restore | target | the function permissions stored under a revoked target, as they were last written (decision 16) |
 | Restart | none | `enableModule` for the operator modifier, through the `restart` role (decision 12) |
-| Insurance money | token, amount | a transfer from the Asset Safe to the first-loss Safe ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 7) |
+| Insurance money | token, amount | a transfer from the Asset Safe to the first-loss Safe, which spends the key derived for the token and the first-loss Safe ([ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 7 and 11) |
+| Insurance deposit | token, deposit queue, amount | the first-loss Safe's approval of the queue for the exact amount, and its deposit with no referral, through the `insurance` role ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 12) |
 | First-loss burn | share token, amount | `burn` through the `first-loss-burn` role ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23) |
-| Insurance fund | the framework's checklist | the fund's permissions, its deposit, its burn and its payout ([ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 4 to 7) |
+| Fund with a payout address | token, payout address, cap | the `insurance` role's transfer of the token, pinned to the payout address, and the cap as a budget key that never refills, through the `insurance-governance` role; one fund for each token ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 6) |
+| Fund payout | token, payout address, cap, amount | a transfer from the first-loss Safe to the fund's payout address, within what is left of the cap; the fund's version checks the stated address and cap |
 | Claim | protocol, reward contract | the protocol's reward claim with the receiver pinned to the avatar; only if a launch protocol pays rewards (OD-72) |
 - **The counter.** The emergency Safe raises it with every switch. Aragon Voting can raise it too.
 - **Ceilings.** The factory keeps each ceiling with the time of its last raise. A ceiling belongs to a class, budget or approval cap, and to a token; every budget key of a token shares the token's budget ceiling.
@@ -111,7 +112,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 ## Confirmation
 
 - INV-032 to INV-036 in the [invariants](/specs/invariants.md). The factory's fork tests run against the live Easy Track, in `test/UniversalFactory.t.sol` and `test/OrdersAccount.t.sol`.
-- The factory is 17,961 bytes and its orders shape 12,524, under EIP-170's 24,576. One motion that adds a token enacts in 7,893,034 gas (`test_factory_orders_token_motion`), and one that restores the orders account in 7,102,641 (`test_factory_orders_restore_after_an_emergency_stop`), both under EIP-7825's cap.
+- The factory is 20,121 bytes and its orders shape 12,524, under EIP-170's 24,576. One motion that adds a token enacts in 7,893,034 gas (`test_factory_orders_token_motion`), and one that restores the orders account in 7,102,641 (`test_factory_orders_restore_after_an_emergency_stop`), both under EIP-7825's cap.
 
 ## Reversal conditions
 

@@ -14,12 +14,12 @@ planned:
       "doc:docs/research/orders-motion-roles-2026-11-08.md#what-was-built", "doc:ROADMAP.md#roadmap"]
   - name: Insurance roles
     where: "On the first-loss modifier, held by the universal factory"
-    what: "The insurance roles deposit into the insured product with the first-loss Safe as the receiver, burn, and pay a fund's pinned payout address within its cap. All act only by motion."
+    what: "The insurance role for Lido Earn is built: it approves a deposit queue and deposits into earnETH or earnUSD, with the first-loss Safe as the depositor. The graph above leaves it out, because the kit has no first-loss Safe. The insurance-governance role creates a fund with a fixed payout address, and the insurance role pays out of it within the fund's cap. All act only by motion."
     sources: ["ADR-014#d4", "ADR-014#d7", "ADR-014#proposed-direction", "ADR-005#proposed-direction",
       "INV-039"]
   - name: First-loss Safe and its roles
     where: "A Voting-owned Safe with one modifier of its own"
-    what: "The first-loss modifier and its two roles are built. The graph above leaves them out: they are compiled for the rehearsal, because the kit has no first-loss Safe. The first-loss burn role, held by the universal factory, burns the DAO's [[first-loss shares]] only in an enacted motion. The first-loss role, held by the committee's Safe, redeems them to the Asset Safe. No role can transfer or approve them."
+    what: "The first-loss modifier, its first-loss role and its burn role are built. The graph above leaves them out: they are compiled for the rehearsal, because the kit has no first-loss Safe. The first-loss burn role, held by the universal factory, burns the DAO's [[first-loss shares]] only in an enacted motion. The first-loss role, held by the committee's Safe, redeems them to the Asset Safe. No role can transfer or approve them."
     sources: ["ADR-008#d19", "ADR-008#d21", "ADR-008#d22", "ADR-008#d23", "ADR-014#d10", "OD-107", "INV-021"]
 changes:
   - area: Modifiers

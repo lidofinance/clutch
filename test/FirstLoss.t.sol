@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.8.24 <0.9.0;
 
+import {console2} from "forge-std/Test.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {ISafe} from "../src/interfaces/ISafe.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
@@ -11,6 +12,10 @@ import {EnabledVault} from "./rehearsal/EnabledVault.sol";
 
 interface ISupply {
     function totalSupply() external view returns (uint256);
+}
+
+interface IDepositQueue {
+    function requestOf(address account) external view returns (uint256 timestamp, uint256 assets);
 }
 
 /// @title FirstLossRehearsal — the first-loss Safe's policy (ADR 008) on the vault that the
@@ -24,6 +29,10 @@ contract FirstLossRehearsal is EnabledVault {
     bytes4 internal constant NOT_AUTHORIZED = bytes4(keccak256("NotAuthorized(address)"));
     bytes4 internal constant NO_MEMBERSHIP = bytes4(keccak256("NoMembership()"));
     address internal constant EARN_ETH_REDEEM_QUEUE = 0x095bFAca9f1c6F2B063Cd67C6d6bfcd0c3aaB7b4;
+    bytes32 internal constant INSURANCE = bytes32("insurance");
+    bytes32 internal constant GOVERNANCE_OF_FUNDS = bytes32("insurance-governance");
+    /// @dev A stand-in for a fund's payout address, which the Lend team names (OD-131).
+    address internal payout = makeAddr("fund-payout-address");
     bytes32 internal constant FALLBACK_HANDLER_SLOT = 0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5;
     bytes32 internal constant GUARD_SLOT = 0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8;
     bytes32 internal constant MODULE_GUARD_SLOT = 0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947;
@@ -235,8 +244,302 @@ contract FirstLossRehearsal is EnabledVault {
     }
 
     // ---------------------------------------------------------------------
+    // INV-039: the insurance deposit (ADR 014, decisions 11 and 12)
+    // ---------------------------------------------------------------------
+
+    /// @dev One motion sets the insurance budget, moves USDC from the Asset Safe to the first-loss Safe and
+    ///      deposits it into earnUSD's deposit queue. The queue records the request for the first-loss Safe,
+    ///      and no approval stays.
+    function test_insurance_deposit_by_motion() public enabled {
+        uint256 amount = 50_000e6;
+        uint256 assetBefore = IERC20(Mainnet.USDC).balanceOf(address(asset));
+        uint256 firstLossBefore = IERC20(Mainnet.USDC).balanceOf(address(firstLoss));
+        UniversalFactory.Op[] memory ops = new UniversalFactory.Op[](3);
+        ops[0] = _budgetOp(Mainnet.USDC, address(firstLoss), uint128(amount), bytes32(0));
+        ops[1] = _op(uf.FUND(), abi.encode(Mainnet.USDC, amount));
+        ops[2] = _op(uf.INSURANCE_DEPOSIT(), abi.encode(Mainnet.USDC, Mainnet.EARN_USD_DEPOSIT_QUEUE, amount));
+        _motion(ops);
+
+        assertEq(assetBefore - IERC20(Mainnet.USDC).balanceOf(address(asset)), amount, "the Asset Safe pays the insurance money");
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(firstLoss)), firstLossBefore, "the first-loss Safe keeps none of it");
+        assertEq(IERC20(Mainnet.USDC).allowance(address(firstLoss), Mainnet.EARN_USD_DEPOSIT_QUEUE), 0, "no approval stays");
+        (uint256 at, uint256 assets) = IDepositQueue(Mainnet.EARN_USD_DEPOSIT_QUEUE).requestOf(address(firstLoss));
+        console2.log("FIRST-LOSS earnUSD deposit request: timestamp, assets", at, assets);
+        assertEq(assets, amount, "the queue records the first-loss Safe's request");
+        (, uint256 assetSafeRequest) = IDepositQueue(Mainnet.EARN_USD_DEPOSIT_QUEUE).requestOf(address(asset));
+        assertEq(assetSafeRequest, 0, "the Asset Safe has no request");
+
+        // The queue's claim names the account that it pays, and anyone may call it: the shares reach the
+        // first-loss Safe without a role. Before the vault's next report it claims nothing.
+        vm.prank(stranger);
+        (bool ok, bytes memory ret) = Mainnet.EARN_USD_DEPOSIT_QUEUE.call(abi.encodeWithSignature("claim(address)", address(firstLoss)));
+        console2.log("FIRST-LOSS claim by a stranger for the first-loss Safe: accepted (1 = yes), returned bytes", ok ? 1 : 0, ret.length);
+        if (ok && ret.length == 32) console2.log("FIRST-LOSS claim returned", abi.decode(ret, (uint256)));
+        assertTrue(ok, "anyone may call the claim for the first-loss Safe");
+    }
+
+    /// @dev The earnETH queue takes wstETH that the first-loss Safe holds.
+    function test_insurance_deposit_into_earn_eth() public enabled {
+        uint256 amount = 5e18;
+        deal(Mainnet.WSTETH, address(firstLoss), amount);
+        _motion(_one(_op(uf.INSURANCE_DEPOSIT(), abi.encode(Mainnet.WSTETH, EARN_ETH_DEPOSIT_QUEUE, amount))));
+        assertEq(IERC20(Mainnet.WSTETH).balanceOf(address(firstLoss)), 0, "the wstETH went into the queue");
+        assertEq(IERC20(Mainnet.WSTETH).allowance(address(firstLoss), EARN_ETH_DEPOSIT_QUEUE), 0, "no approval stays");
+        (, uint256 assets) = IDepositQueue(EARN_ETH_DEPOSIT_QUEUE).requestOf(address(firstLoss));
+        assertEq(assets, amount, "the queue records the first-loss Safe's request");
+    }
+
+    /// @dev The operation's refusals at creation: nothing, more than the queue's amount type holds, and a vault
+    ///      account as the token or the queue. A token with another vault's queue, and a token outside the
+    ///      policy, fail at enactment as a whole, and the money stays in the first-loss Safe.
+    function test_insurance_deposit_refusals() public enabled {
+        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        address queue = Mainnet.EARN_USD_DEPOSIT_QUEUE;
+        bytes memory zero = _calldata(_one(_op(uf.INSURANCE_DEPOSIT(), abi.encode(Mainnet.USDC, queue, uint256(0)))));
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        vm.expectRevert(UniversalFactory.ZeroAmount.selector);
+        et.createMotion(address(uf), zero);
+
+        uint256 tooLarge = uint256(type(uint224).max) + 1;
+        bytes memory large = _calldata(_one(_op(uf.INSURANCE_DEPOSIT(), abi.encode(Mainnet.USDC, queue, tooLarge))));
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        vm.expectRevert(abi.encodeWithSelector(UniversalFactory.AmountTooLarge.selector, tooLarge));
+        et.createMotion(address(uf), large);
+
+        address[3] memory vault = [address(firstLoss), address(firstLossMod), address(asset)];
+        for (uint256 i = 0; i < vault.length; i++) {
+            bytes memory asToken = _calldata(_one(_op(uf.INSURANCE_DEPOSIT(), abi.encode(vault[i], queue, uint256(1)))));
+            vm.prank(Mainnet.COMMITTEE_SAFE);
+            vm.expectRevert(abi.encodeWithSelector(UniversalFactory.ProtectedAddress.selector, vault[i]));
+            et.createMotion(address(uf), asToken);
+            bytes memory asQueue = _calldata(_one(_op(uf.INSURANCE_DEPOSIT(), abi.encode(Mainnet.USDC, vault[i], uint256(1)))));
+            vm.prank(Mainnet.COMMITTEE_SAFE);
+            vm.expectRevert(abi.encodeWithSelector(UniversalFactory.ProtectedAddress.selector, vault[i]));
+            et.createMotion(address(uf), asQueue);
+        }
+
+        deal(Mainnet.USDC, address(firstLoss), 9e6);
+        deal(Mainnet.USDT, address(firstLoss), 9e6);
+        _enactmentFails(_calldata(_one(_op(uf.INSURANCE_DEPOSIT(), abi.encode(Mainnet.USDC, EARN_ETH_DEPOSIT_QUEUE, uint256(1e6))))));
+        _enactmentFails(_calldata(_one(_op(uf.INSURANCE_DEPOSIT(), abi.encode(Mainnet.USDT, queue, uint256(1e6))))));
+        _enactmentFails(_calldata(_one(_op(uf.INSURANCE_DEPOSIT(), abi.encode(Mainnet.USDC, stranger, uint256(1e6))))));
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(firstLoss)), 9e6, "the USDC stays");
+        assertEq(IERC20(Mainnet.USDT).balanceOf(address(firstLoss)), 9e6, "the USDT stays");
+        assertEq(IERC20(Mainnet.USDC).allowance(address(firstLoss), EARN_ETH_DEPOSIT_QUEUE), 0, "no approval for another queue");
+        assertEq(IERC20(Mainnet.USDC).allowance(address(firstLoss), stranger), 0, "no approval for a stranger");
+    }
+
+    /// @dev The insurance role approves only each token's own deposit queue and deposits only with no referral.
+    ///      It holds no transfer and no call of a share token, and only the factory holds it.
+    function test_insurance_role_holds_only_its_calls() public enabled {
+        address queue = Mainnet.EARN_USD_DEPOSIT_QUEUE;
+        bytes32[] memory noProof = new bytes32[](0);
+        _refused(address(uf), INSURANCE, Mainnet.USDC, abi.encodeCall(IERC20.approve, (stranger, 1)), CONDITION_VIOLATION);
+        _refused(address(uf), INSURANCE, Mainnet.USDC, abi.encodeCall(IERC20.approve, (EARN_ETH_DEPOSIT_QUEUE, 1)), CONDITION_VIOLATION);
+        _refused(address(uf), INSURANCE, Mainnet.USDC, abi.encodeCall(IERC20.transfer, (stranger, 1)), CONDITION_VIOLATION);
+        _refused(address(uf), INSURANCE, Mainnet.USDT, abi.encodeCall(IERC20.approve, (queue, 1)), CONDITION_VIOLATION);
+        _refused(address(uf), INSURANCE, Mainnet.EARN_USD_SHARE, abi.encodeCall(IERC20.approve, (queue, 1)), CONDITION_VIOLATION);
+        _refused(address(uf), INSURANCE, Mainnet.EARN_USD_SHARE, abi.encodeWithSignature("burn(uint256)", 1), CONDITION_VIOLATION);
+        _refused(
+            address(uf), INSURANCE, queue,
+            abi.encodeWithSignature("deposit(uint224,address,bytes32[])", uint224(1e6), stranger, noProof), CONDITION_VIOLATION
+        );
+        _refused(address(uf), INSURANCE, queue, abi.encodeWithSignature("cancelDepositRequest()"), CONDITION_VIOLATION);
+        _refused(Mainnet.COMMITTEE_SAFE, INSURANCE, Mainnet.USDC, abi.encodeCall(IERC20.approve, (queue, 1)), NO_MEMBERSHIP);
+        _refused(stranger, INSURANCE, Mainnet.USDC, abi.encodeCall(IERC20.approve, (queue, 1)), NOT_AUTHORIZED);
+    }
+
+    // ---------------------------------------------------------------------
+    // INV-039: a fund with a fixed payout address (ADR 014, decision 6)
+    // ---------------------------------------------------------------------
+
+    /// @dev One motion creates the fund: it pins the payout address and sets the cap. A later motion pays out,
+    ///      only to that address and only within what is left of the cap, which never refills.
+    function test_fund_create_and_payout_by_motion() public enabled {
+        address token = Mainnet.USDC;
+        uint256 cap = 30_000e6;
+        _insuranceMoney(token, 40_000e6);
+        _motion(_one(_op(uf.FUND_CREATE(), abi.encode(token, payout, cap))));
+        bytes32 key = uf.fundKey(token, payout);
+        assertEq(key, bytes32(abi.encodePacked(bytes2("k:"), payout, bytes10(bytes20(token)))), "the fund's key");
+        assertEq(uf.versions(uf.fundScope(token)), uf.fundVersion(payout, cap), "the fund's version");
+        (uint128 refill,, uint64 period, uint128 left,) = firstLossMod.allowances(key);
+        assertEq(left, cap, "the cap");
+        assertEq(uint256(refill) + period, 0, "no refill and no period: the cap never refills");
+        assertEq(IERC20(token).balanceOf(payout), 0, "the creation pays nothing");
+
+        _motion(_one(_op(uf.FUND_PAYOUT(), abi.encode(token, payout, cap, uint256(10_000e6)))));
+        assertEq(IERC20(token).balanceOf(payout), 10_000e6, "the payout address receives the payout");
+        assertEq(IERC20(token).balanceOf(address(firstLoss)), 30_000e6, "the first-loss Safe pays it");
+        (,,, left,) = firstLossMod.allowances(key);
+        assertEq(left, 20_000e6, "what is left of the cap");
+
+        // above what is left: nothing moves, also after a month, because the cap does not refill
+        _enactmentFails(_calldata(_one(_op(uf.FUND_PAYOUT(), abi.encode(token, payout, cap, uint256(20_000e6 + 1))))));
+        vm.warp(block.timestamp + 40 days);
+        _enactmentFails(_calldata(_one(_op(uf.FUND_PAYOUT(), abi.encode(token, payout, cap, uint256(20_000e6 + 1))))));
+        assertEq(IERC20(token).balanceOf(payout), 10_000e6, "no payout above the cap");
+
+        _motion(_one(_op(uf.FUND_PAYOUT(), abi.encode(token, payout, cap, uint256(20_000e6)))));
+        assertEq(IERC20(token).balanceOf(payout), cap, "the whole cap, and no more");
+        _enactmentFails(_calldata(_one(_op(uf.FUND_PAYOUT(), abi.encode(token, payout, cap, uint256(1))))));
+    }
+
+    /// @dev A payout names the fund's own terms: another address, another cap, a token without a fund and an
+    ///      amount of zero are refused at creation, and a payout cannot share a motion with its fund's creation.
+    function test_fund_payout_refusals() public enabled {
+        address token = Mainnet.USDC;
+        uint256 cap = 30_000e6;
+        _insuranceMoney(token, 40_000e6);
+        bytes32 scope = uf.fundScope(token);
+        bytes memory stale = abi.encodeWithSelector(UniversalFactory.StaleVersion.selector, scope);
+        _refusedAtCreation(_one(_op(uf.FUND_PAYOUT(), abi.encode(token, payout, cap, uint256(1e6)))), stale);
+
+        UniversalFactory.Op[] memory both = new UniversalFactory.Op[](2);
+        both[0] = _op(uf.FUND_CREATE(), abi.encode(token, payout, cap));
+        both[1] = _op(uf.FUND_PAYOUT(), abi.encode(token, payout, cap, uint256(1e6)));
+        _refusedAtCreation(both, stale);
+
+        _motion(_one(_op(uf.FUND_CREATE(), abi.encode(token, payout, cap))));
+        _refusedAtCreation(_one(_op(uf.FUND_PAYOUT(), abi.encode(token, stranger, cap, uint256(1e6)))), stale);
+        _refusedAtCreation(_one(_op(uf.FUND_PAYOUT(), abi.encode(token, payout, cap + 1, uint256(1e6)))), stale);
+        _refusedAtCreation(
+            _one(_op(uf.FUND_PAYOUT(), abi.encode(Mainnet.USDT, payout, cap, uint256(1e6)))),
+            abi.encodeWithSelector(UniversalFactory.StaleVersion.selector, uf.fundScope(Mainnet.USDT))
+        );
+        _refusedAtCreation(
+            _one(_op(uf.FUND_PAYOUT(), abi.encode(token, payout, cap, uint256(0)))),
+            abi.encodeWithSelector(UniversalFactory.ZeroAmount.selector)
+        );
+        assertEq(IERC20(token).balanceOf(payout), 0, "nothing was paid");
+    }
+
+    /// @dev The creation's refusals: a second fund in the same token, a cap of zero or beyond the key's size, and
+    ///      a vault account as the token or the payout address, each at creation. A fund in a first-loss share
+    ///      token passes its creation and fails at enactment, because the governance role refuses the share.
+    function test_fund_create_refusals() public enabled {
+        address token = Mainnet.USDC;
+        _motion(_one(_op(uf.FUND_CREATE(), abi.encode(token, payout, uint256(30_000e6)))));
+        _refusedAtCreation(
+            _one(_op(uf.FUND_CREATE(), abi.encode(token, stranger, uint256(1e6)))),
+            abi.encodeWithSelector(UniversalFactory.FundExists.selector, token)
+        );
+        _refusedAtCreation(
+            _one(_op(uf.FUND_CREATE(), abi.encode(Mainnet.USDT, payout, uint256(0)))),
+            abi.encodeWithSelector(UniversalFactory.ZeroAmount.selector)
+        );
+        uint256 tooLarge = uint256(type(uint128).max) + 1;
+        _refusedAtCreation(
+            _one(_op(uf.FUND_CREATE(), abi.encode(Mainnet.USDT, payout, tooLarge))),
+            abi.encodeWithSelector(UniversalFactory.AmountTooLarge.selector, tooLarge)
+        );
+        address[5] memory vault = [address(firstLoss), address(firstLossMod), address(asset), address(orders), Mainnet.AGENT];
+        for (uint256 i = 0; i < vault.length; i++) {
+            _refusedAtCreation(
+                _one(_op(uf.FUND_CREATE(), abi.encode(vault[i], payout, uint256(1e6)))),
+                abi.encodeWithSelector(UniversalFactory.ProtectedAddress.selector, vault[i])
+            );
+            _refusedAtCreation(
+                _one(_op(uf.FUND_CREATE(), abi.encode(Mainnet.USDT, vault[i], uint256(1e6)))),
+                abi.encodeWithSelector(UniversalFactory.ProtectedAddress.selector, vault[i])
+            );
+        }
+
+        uint256 held = IERC20(Mainnet.EARN_ETH_SHARE).balanceOf(address(firstLoss));
+        _enactmentFails(_calldata(_one(_op(uf.FUND_CREATE(), abi.encode(Mainnet.EARN_ETH_SHARE, payout, held)))));
+        assertEq(uf.versions(uf.fundScope(Mainnet.EARN_ETH_SHARE)), bytes32(0), "no fund of first-loss shares");
+    }
+
+    /// @dev The exit of a fund (ADR 008, decision 28; INV-038): the committee's Safe sends insurance money back
+    ///      to the Asset Safe, and to no other receiver. It cannot send a share token or a token outside the list.
+    function test_fund_exit_pays_only_the_asset_safe() public enabled {
+        deal(Mainnet.USDC, address(firstLoss), 9_000e6);
+        uint256 before = IERC20(Mainnet.USDC).balanceOf(address(asset));
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        firstLossMod.execTransactionWithRole(
+            Mainnet.USDC, 0, abi.encodeCall(IERC20.transfer, (address(asset), 9_000e6)), 0, FIRST_LOSS, true
+        );
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)) - before, 9_000e6, "the Asset Safe receives the exit");
+        deal(Mainnet.USDC, address(firstLoss), 1e6);
+        address[4] memory others = [Mainnet.AGENT, Mainnet.COMMITTEE_SAFE, payout, stranger];
+        for (uint256 i = 0; i < others.length; i++) {
+            _refused(Mainnet.COMMITTEE_SAFE, FIRST_LOSS, Mainnet.USDC, abi.encodeCall(IERC20.transfer, (others[i], 1)), CONDITION_VIOLATION);
+        }
+        _refused(Mainnet.COMMITTEE_SAFE, FIRST_LOSS, Mainnet.EARN_USD_SHARE, abi.encodeCall(IERC20.transfer, (address(asset), 1)), CONDITION_VIOLATION);
+        _refused(Mainnet.COMMITTEE_SAFE, FIRST_LOSS, Mainnet.WBTC, abi.encodeCall(IERC20.transfer, (address(asset), 1)), CONDITION_VIOLATION);
+    }
+
+    /// @dev The insurance-governance role writes only a fund: under the insurance key, a plain transfer, on no
+    ///      vault account and no share token, and a cap that never refills. It holds no membership setter and no
+    ///      other grant, and only the factory holds it.
+    function test_insurance_governance_writes_only_a_fund() public enabled {
+        IRoles.ConditionFlat[] memory tree = uf.payoutTree(payout, uf.fundKey(Mainnet.USDT, payout));
+        bytes4 transfer = IERC20.transfer.selector;
+        address mod = address(firstLossMod);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.scopeFunction, (INSURANCE, Mainnet.USDT, IERC20.approve.selector, tree, 0)), CONDITION_VIOLATION);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.scopeFunction, (FIRST_LOSS, Mainnet.USDT, transfer, tree, 0)), CONDITION_VIOLATION);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.scopeFunction, (FIRST_LOSS_BURN, Mainnet.USDT, transfer, tree, 0)), CONDITION_VIOLATION);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.scopeFunction, (GOVERNANCE_OF_FUNDS, Mainnet.USDT, transfer, tree, 0)), CONDITION_VIOLATION);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.scopeFunction, (INSURANCE, Mainnet.USDT, transfer, tree, 1)), CONDITION_VIOLATION);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.scopeFunction, (INSURANCE, Mainnet.USDT, transfer, tree, 2)), CONDITION_VIOLATION);
+        address[4] memory kept = [Mainnet.EARN_ETH_SHARE, Mainnet.EARN_USD_SHARE, address(firstLoss), address(firstLossMod)];
+        for (uint256 i = 0; i < kept.length; i++) {
+            _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.scopeTarget, (INSURANCE, kept[i])), CONDITION_VIOLATION);
+            _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.scopeFunction, (INSURANCE, kept[i], transfer, tree, 0)), CONDITION_VIOLATION);
+        }
+        bytes32 key = uf.fundKey(Mainnet.USDT, payout);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.setAllowance, (key, 1e6, 1e6, 1, 30 days, 0)), CONDITION_VIOLATION);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.setAllowance, (key, 1e6, 1, 0, 0, 0)), CONDITION_VIOLATION);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.setAllowance, (bytes32("not-derived"), 1e6, 0, 0, 0, 0)), CONDITION_VIOLATION);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.allowTarget, (INSURANCE, Mainnet.USDT, 0)), CONDITION_VIOLATION);
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.allowFunction, (INSURANCE, Mainnet.USDT, transfer, 0)), CONDITION_VIOLATION);
+        bytes32[] memory keys = new bytes32[](1);
+        keys[0] = INSURANCE;
+        bool[] memory yes = new bool[](1);
+        yes[0] = true;
+        _refused(address(uf), GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.assignRoles, (stranger, keys, yes)), CONDITION_VIOLATION);
+        _refused(Mainnet.COMMITTEE_SAFE, GOVERNANCE_OF_FUNDS, mod, abi.encodeCall(IRoles.scopeTarget, (INSURANCE, Mainnet.USDT)), NO_MEMBERSHIP);
+        // before a fund exists, the insurance role holds no transfer
+        deal(Mainnet.USDT, address(firstLoss), 1e6);
+        _refused(address(uf), INSURANCE, Mainnet.USDT, abi.encodeCall(IERC20.transfer, (payout, 1)), CONDITION_VIOLATION);
+    }
+
+    /// @dev The factory writes a fund's transfer tree in the form that the policy compiler writes a pinned,
+    ///      budgeted transfer: the insurance-money transfer of the artifact, with the fund's receiver and key.
+    function test_fund_payout_tree_matches_the_compilers_form() public enabled {
+        string memory j = vm.readFile(ARTIFACT);
+        address[] memory to = vm.parseJsonAddressArray(j, ".calls.to");
+        bytes[] memory data = vm.parseJsonBytesArray(j, ".calls.data");
+        uint256 seen;
+        for (uint256 i = 0; i < to.length; i++) {
+            if (to[i] != address(opMod) || bytes4(data[i]) != IRoles.scopeFunction.selector) continue;
+            (bytes32 roleKey, address token, bytes4 selector, IRoles.ConditionFlat[] memory c,) =
+                abi.decode(_args(data[i]), (bytes32, address, bytes4, IRoles.ConditionFlat[], uint8));
+            if (roleKey != bytes32("insurance-funding") || selector != IERC20.transfer.selector) continue;
+            assertEq(abi.encode(uf.payoutTree(address(firstLoss), uf.fundKey(token, address(firstLoss)))), abi.encode(c), "the same form");
+            seen++;
+        }
+        assertEq(seen, 8, "every insurance-money transfer");
+    }
+
+    // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
+
+    /// @dev Insurance money in the first-loss Safe: one motion sets the budget and moves the money.
+    function _insuranceMoney(address token, uint256 amount) internal {
+        UniversalFactory.Op[] memory ops = new UniversalFactory.Op[](2);
+        ops[0] = _budgetOp(token, address(firstLoss), uint128(amount), bytes32(0));
+        ops[1] = _op(uf.FUND(), abi.encode(token, amount));
+        _motion(ops);
+    }
+
+    function _refusedAtCreation(UniversalFactory.Op[] memory ops, bytes memory reason) internal {
+        bytes memory cd = _calldata(ops);
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        vm.expectRevert(reason);
+        IEasyTrack(Mainnet.EASY_TRACK).createMotion(address(uf), cd);
+    }
 
     function _refused(address member, bytes32 role, address to, bytes memory data, bytes4 reason) internal {
         vm.prank(member);
@@ -244,14 +547,5 @@ contract FirstLossRehearsal is EnabledVault {
             address(firstLossMod).call(abi.encodeCall(IRoles.execTransactionWithRole, (to, 0, data, 0, role, true)));
         assertFalse(ok, "the first-loss modifier must refuse");
         assertEq(bytes4(ret), reason, "the reason of the refusal");
-    }
-
-    /// @dev A motion that passes its creation and fails at enactment as a whole.
-    function _enactmentFails(bytes memory cd) internal {
-        uint256 id = _create(cd);
-        _afterWindow();
-        vm.prank(anyone);
-        (bool ok,) = Mainnet.EASY_TRACK.call(abi.encodeCall(IEasyTrack.enactMotion, (id, cd)));
-        assertFalse(ok, "the enactment fails");
     }
 }

@@ -711,9 +711,27 @@ contract Drills is ClutchFixture {
     ///      Safe to the first-loss Safe and to no other receiver.
     function test_insurance_funding_pays_only_the_first_loss_safe() public {
         deal(a.usdc, address(safe), 10e6);
+        bytes memory fund = abi.encodeCall(IERC20.transfer, (firstLossSafe, 4e6));
+
+        // ADR 014, decision 11: the transfer spends the key derived for the token and the first-loss Safe,
+        // so nothing moves before that budget is set
         vm.prank(address(executor));
-        roles.execTransactionWithRole(a.usdc, 0, abi.encodeCall(IERC20.transfer, (firstLossSafe, 4e6)), 0, INSURANCE_FUNDING, true);
+        (bool early, bytes memory why) =
+            address(roles).call(abi.encodeCall(IRoles.execTransactionWithRole, (a.usdc, 0, fund, 0, INSURANCE_FUNDING, true)));
+        assertFalse(early, "no insurance money without a budget");
+        assertEq(bytes4(why), CONDITION_VIOLATION, "the modifier refuses it");
+        bytes32 key = bytes32(abi.encodePacked(bytes2("k:"), firstLossSafe, bytes10(bytes20(a.usdc))));
+        vm.prank(address(safe));
+        roles.setAllowance(key, 5e6, 5e6, 0, 30 days, 0);
+
+        vm.prank(address(executor));
+        roles.execTransactionWithRole(a.usdc, 0, fund, 0, INSURANCE_FUNDING, true);
         assertEq(IERC20(a.usdc).balanceOf(firstLossSafe), 4e6, "insurance money reached the first-loss Safe");
+        vm.prank(address(executor));
+        (bool above,) = address(roles).call(
+            abi.encodeCall(IRoles.execTransactionWithRole, (a.usdc, 0, abi.encodeCall(IERC20.transfer, (firstLossSafe, 2e6)), 0, INSURANCE_FUNDING, true))
+        );
+        assertFalse(above, "no insurance money above the budget");
         address[2] memory receivers = [address(agent), attacker];
         for (uint256 i = 0; i < receivers.length; i++) {
             vm.prank(address(executor));

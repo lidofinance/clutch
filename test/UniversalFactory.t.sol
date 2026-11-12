@@ -571,11 +571,35 @@ contract UniversalFactoryRehearsal is EnabledVault {
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.EARN_USD_DEPOSIT_QUEUE, 0)), true);
     }
 
+    /// @dev Insurance money spends the budget key that the factory derives for the token and the first-loss
+    ///      Safe. One motion sets the budget and moves the money. Without a budget, and above it, the move
+    ///      fails at enactment as a whole, and a budget above the token's ceiling is refused at creation.
     function test_uf_insurance_money_goes_to_the_first_loss_safe() public enabled {
         uint256 before = IERC20(Mainnet.USDC).balanceOf(address(firstLoss));
-        _motion(_one(_op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(10_000e6)))));
+        bytes32 key = uf.keyFor(Mainnet.USDC, address(firstLoss));
+        assertEq(key, bytes32(abi.encodePacked(bytes2("k:"), address(firstLoss), bytes10(bytes20(Mainnet.USDC)))), "the derived key");
+
+        // no budget yet: nothing moves
+        _enactmentFails(_calldata(_one(_op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(1))))));
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(firstLoss)), before, "no insurance money without a budget");
+
+        UniversalFactory.Op[] memory ops = new UniversalFactory.Op[](2);
+        ops[0] = _budgetOp(Mainnet.USDC, address(firstLoss), 10_000e6, bytes32(0));
+        ops[1] = _op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(10_000e6)));
+        _motion(ops);
         assertEq(IERC20(Mainnet.USDC).balanceOf(address(firstLoss)) - before, 10_000e6, "insurance money");
+        (,,, uint128 left,) = opMod.allowances(key);
+        assertEq(left, 0, "the budget is spent");
+
+        // above the budget: nothing more moves
+        _enactmentFails(_calldata(_one(_op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(1))))));
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(firstLoss)) - before, 10_000e6, "no insurance money above the budget");
+
         _refuse(_op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(0))), abi.encodeWithSelector(UniversalFactory.ZeroAmount.selector));
+        _refuse(
+            _budgetOp(Mainnet.USDC, address(firstLoss), uint128(BUDGET_CEILING_USDC + 1), uf.budgetVersion(10_000e6, 10_000e6, 10_000e6, uint64(MONTH))),
+            abi.encodeWithSelector(UniversalFactory.BudgetAboveCeiling.selector, key, BUDGET_CEILING_USDC)
+        );
     }
 
     // ---------------------------------------------------------------------
@@ -629,7 +653,10 @@ contract UniversalFactoryRehearsal is EnabledVault {
         (, uint64 seededAt,) = uf.ceilings(key);
         vm.warp(uint256(seededAt) + 15 days);
         _measureMotion("ceiling", _one(_ceilingOp(key, BUDGET_CEILING_USDC, 2 * BUDGET_CEILING_USDC)));
-        _measureMotion("insurance money", _one(_op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(1_000e6)))));
+        UniversalFactory.Op[] memory money = new UniversalFactory.Op[](2);
+        money[0] = _budgetOp(Mainnet.USDC, address(firstLoss), 1_000e6, bytes32(0));
+        money[1] = _op(uf.FUND(), abi.encode(Mainnet.USDC, uint256(1_000e6)));
+        _measureMotion("insurance money with its budget", money);
         UniversalFactory.Entry[] memory fresh = new UniversalFactory.Entry[](1);
         fresh[0] = _derived(Mainnet.PYUSD, newVault);
         UniversalFactory.Op[] memory intro = new UniversalFactory.Op[](2);
@@ -721,8 +748,4 @@ contract UniversalFactoryRehearsal is EnabledVault {
         for (uint256 i = 0; i < list.length; i++) if (list[i].spender != spender) out[j++] = list[i];
     }
 
-    function _args(bytes memory d) internal pure returns (bytes memory args) {
-        args = new bytes(d.length - 4);
-        for (uint256 i = 4; i < d.length; i++) args[i - 4] = d[i];
-    }
 }

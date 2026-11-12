@@ -225,7 +225,7 @@
     - "Use its roles outside an enacted motion. Only Easy Track's executor calls `applyMotion` (INV-032)."
     - "Enact a motion if a version that it names, or the [[motion counter]], changed since its creation (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke."
-  numbers: ["a ceiling's raise: at most twofold, once in 15 days", "the prototype: 17,961 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 12,524", "a motion that adds a token: 7,893,034 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 7,102,641 gas", "external audit in phase 3"]
+  numbers: ["a ceiling's raise: at most twofold, once in 15 days", "the prototype: 20,121 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 12,524", "a motion that adds a token: 7,893,034 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 7,102,641 gas", "external audit in phase 3"]
   sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d9",
     "ADR-013#d10", "ADR-013#d11", "ADR-013#d13", "ADR-013#proposed-direction", "ADR-013#consequences",
     "ADR-007#d41", "ADR-006#d9", "ADR-006#d10", "ADR-011#d13", "OD-09", "OD-70", "ADR-013#d15", "OD-117",
@@ -682,7 +682,7 @@
   node: first-loss
   name: First-loss Safe
   status: instance
-  label: specified
+  label: built
   what: "A new Safe that holds the DAO's [[first-loss shares]] and the vault's insurance funds. Its one modifier carries the committee's first-loss role and the universal factory's roles, so the committee executes the first-loss terms without a DAO vote."
   controlled_by: "Aragon Voting, its only owner. It has no guard and no fallback handler."
   can:
@@ -707,7 +707,7 @@
   node: first-loss
   name: The first-loss role
   status: new
-  label: specified
+  label: built
   what: "The committee's narrow role on the first-loss Safe. Under the first-loss terms of the March 2026 Earn allocation, it exits the shares to the Asset Safe, in place of the Growth Committee."
   controlled_by: "Held by the committee's Safe, which acts on the Earn team's written instruction. The DAO can change or remove the role by vote."
   can:
@@ -726,7 +726,7 @@
   node: first-loss
   name: The first-loss burn role
   status: new
-  label: specified
+  label: built
   what: "The role on the first-loss Safe that burns the DAO's [[first-loss shares]]. Only an enacted Easy Track motion uses it, so every burn waits for the [[objection window]]."
   controlled_by: "Held by the universal factory. The committee's Safe creates each burn motion on the factory, on the Earn team's written instruction. The DAO can change or remove the role by vote."
   can:
@@ -744,18 +744,18 @@
   node: first-loss
   name: The insurance funds and their roles
   status: new
-  label: specified
-  what: "Insurance that the vault builds in at launch, for Lido Earn's earnETH and earnUSD only, and for Lido Lend. The first-loss Safe holds every fund. A fund for Lido Lend takes one of two forms: burnable shares, or a fixed payout address."
+  label: built
+  what: "Insurance that the vault builds in at launch, for Lido Earn's earnETH and earnUSD only, and for Lido Lend. The first-loss Safe holds every fund. A fund for Lido Lend has a fixed payout address, which the Lend team names and which is outside Lido Lend's contracts."
   controlled_by: "The insurance roles of the universal factory, so every action is a motion that the committee's Safe creates. One Snapshot sets the framework for all funds first."
   can:
     - "Create a fund by motion, with the framework's checklist: the product, the share token or the payout address, the cap, the loss trigger with an independent confirming party, the incident-update deadline and the end of the terms."
-    - "Take money from the Asset Safe by motion, through the insurance-funding role on the operator modifier, pinned to the first-loss Safe."
+    - "Take money from the Asset Safe by motion, through the insurance-funding role on the operator modifier, pinned to the first-loss Safe and within the budget key of its token."
     - "Deposit into the insured product with the first-loss Safe as the receiver, and burn the fund's shares by motion after a confirmed loss."
     - "Pay a fund's fixed payout address by motion, at most the fund's remaining cap."
   cannot:
     - "Take money from the treasury directly. Insurance money comes from the Asset Safe."
     - "Pay any address but the one that the fund's creating motion pinned."
-    - "Burn the shares of a Lido Lend vault that has no burn. ERC-4626 defines none for the holder, so the burnable form fits only a share token that has one."
+    - "Burn a Lido Lend position. Lido Lend's core has no share token, and its lender vault has no burn that a holder can call, so a Lido Lend fund pays its payout address."
     - "Send an exit's proceeds to the Aragon Agent. They pay the Asset Safe."
   sources: ["ADR-014#d4", "ADR-014#d5", "ADR-014#d6", "ADR-014#d7", "ADR-014#d10",
     "ADR-014#proposed-direction", "ADR-014#consequences", "ADR-008#d25", "ADR-008#d26", "ADR-008#d29",
@@ -827,13 +827,15 @@
   name: Lido Lend
   status: new
   label: planned
-  what: "Lido's lending product, a separate deployment that is compatible with Morpho Blue. It is not deployed yet. The vault onboards it after launch, by one motion, and its insurance is built in at launch."
+  what: "Lido's lending product, a separate deployment that is a fork of Morpho Blue, with a lender vault for each market. It is not deployed on mainnet yet. The vault onboards it after launch, by one motion, and its insurance is built in at launch."
   controlled_by: "Its own governance."
   can:
-    - "Join the vault through one motion of the universal factory, with its shape for a market that is compatible with Morpho Blue, once its own contract exists. The motion names that contract, and it also adds the emergency exit."
+    - "Join the vault through one motion of the universal factory, with its ERC-4626 shape, once Lido Lend's lender vault exists. The motion names the vault, and it also adds the emergency exit."
+    - "Return only the asset that the vault lent: WETH and USDC, and USDT if a market lends it."
   cannot:
     - "Leave the protocol cap before it matures and a budget motion with a forum post unlocks it."
     - "Be granted an exit at the enabling vote: its address is not known before it deploys."
+    - "Pay collateral into the Asset Safe. The vault uses neither the fallback exit nor the settlement of Lido Lend's lender vault, so USDY cannot enter, and a position has no exit while its market has no free liquidity."
   numbers: ["the end-to-end test of its shape: owed", "budget key: from the attested computation"]
   sources: ["ADR-011#d3", "ADR-009#d28", "ADR-011#d13", "ADR-006#d13", "ADR-009#d3",
     "ADR-011#proposed-direction", "ADR-013#proposed-direction", "ADR-014#d6",

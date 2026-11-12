@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T21:45:08Z
+  at: 2026-11-12T12:19:12Z
 verified: []
 sources:
   - id: s1
@@ -115,6 +115,15 @@ sources:
   - id: s35
     resource: "urn:clutch:interview:2026-11-11-next-steps"
     title: EM's instruction to repair the policy workflow, prepare the acceptance ballot and build the first-loss slice, 2026-11-11; the transcript is not in the repository
+  - id: s36
+    resource: "urn:clutch:interview:2026-11-12-insurance"
+    title: EM's answers on OD-129 and OD-130, and EM's request to investigate Lido Lend for OD-131, 2026-11-12; the transcript is not in the repository
+  - id: s37
+    resource: "urn:clutch:interview:2026-11-12-lido-lend"
+    title: EM's answers on OD-131 and OD-132, 2026-11-12; the transcript is not in the repository
+  - id: s38
+    resource: "urn:clutch:interview:2026-11-12-lend-exit"
+    title: EM's answer on OD-133, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -124,6 +133,45 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — OD-133 decided: no collateral enters, and no fallback exit
+
+The agent asked whether USDY may enter the Asset Safe through an exit from Lido Lend's stablecoin market. EM wrote:
+
+> OD-133: USDY can't enter, we wont use fallback exit, so assets we expect are lender's ones: WETH and USDC, and probably, but unlikely USDT
+
+Recorded as:
+
+- (OD-133) USDY cannot enter the Asset Safe, and the vault does not use the fallback exit of Lido Lend's lender vault. A position in Lido Lend returns only the asset that it lent: WETH and USDC, and USDT if a market lends it, which EM holds unlikely ([ADR 011](/adr/011-launch-scope.md), decision 13). This is none of the three options that the agent offered, and it amends EM's answer on OD-132, which kept the fallback exit.
+- Three points are the agent's reading. The lender vault stays the surface, through its ERC-4626 functions only. The lender vault's targeted settlement is out too, because it also pays collateral. The rule holds for every market, the WETH market included, so wstETH does not enter through an exit either.
+- One consequence follows: a position in Lido Lend has no exit while its market has no free liquidity. A withdrawal fails then. [s38]
+
+## 2026-11-12 — OD-131 and OD-132 decided: a fund with a payout address, and Lido Lend's lender vault
+
+The agent reported what the Lido Lend repositories show and asked EM to decide OD-131 and OD-132. EM wrote:
+
+> OD-131: A
+> OD-132: A
+
+Recorded as:
+
+- (OD-131) Option A: the universal factory carries the payout form only. A fund has a fixed payout address, which the Lend team names and which is outside Lido Lend's contracts ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 6). The form of burnable shares has no use while Lido Lend has no share token that a holder can burn. The agent built the form, and five points of the build are its reading. One fund exists for each token. The motion that creates a fund pins its payout address and sets its cap, which never refills. A payout is a later motion, never the creating one. The committee's Safe exits a fund by a transfer pinned to the Asset Safe ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 28). No part of the form names Lido Lend, so the tests use a stand-in address.
+- The agent's recommendation for A carried one question to the Lend team: which address receives a payout, and how it pays the lenders. Nobody has asked it. The agent drafted it for EM. The built form pays by a plain token transfer, so the address must accept one.
+- (OD-132) Option A: the vault lends to Lido Lend through its lender vault, an ERC-4626 token, with the fallback exit, and with the receiver and the owner pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md), decisions 3 and 13). The agent has not built that shape. EM's answer names the option, not a market. The agent's recommendation kept the stablecoin market apart, because its exit can pay USDY, which is not on the launch list. OD-133 holds that question in the [register](/registers/open-decisions.md). [s37]
+
+## 2026-11-12 — OD-129 and OD-130 decided, and Lido Lend investigated for OD-131
+
+The agent asked EM to decide the three open decisions on insurance. EM wrote:
+
+> OD-129: put a budget key on that transfer
+> OD-130: one deposit operation from the first-loss Safe
+> OD-131: investigate lido lend: https://github.com/lidofinance/lend, https://github.com/lidofinance/lend-markets (the repos are public now)
+
+Recorded as:
+
+- (OD-129) Option A: the transfer of insurance money from the Asset Safe to the first-loss Safe spends a budget key ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 11). Two points are the agent's reading. The key is the one that the universal factory derives for the token and the first-loss Safe, so the policy holds no launch key and no launch figure for it. The key starts empty, so a budget operation, in the same motion or in an earlier one, sets it within the token's budget ceiling before any insurance money moves.
+- (OD-130) Option A: one operation of the universal factory deposits insurance money from the first-loss Safe into Lido Earn ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 12). Four points are the agent's reading. The factory holds a new `insurance` role on the first-loss modifier. The role approves only each token's own deposit queue, USDC for earnUSD and wstETH for earnETH, and it deposits with no referral. The new shares stay in the first-loss Safe and follow the first-loss rules. No role claims the shares or cancels a request: anyone can call the queue's claim for the first-loss Safe.
+- (OD-131) EM asked for an investigation of Lido Lend and decided nothing. The agent read both repositories ([research note](/research/lido-lend-insurance-2026-11-12.md)). Neither form of a Lido Lend fund has an entry point in Lido Lend today: the core has no share token, the lender vault has no burn that a holder can call, and no function pays lenders back. The agent rewrote OD-131 with the options that remain, and it opened OD-132 for a second finding: which of Lido Lend's two lender surfaces the vault uses. [s36]
 
 ## 2026-11-11 — the first-loss slice: the operator's return, the first-loss policy and the burn
 

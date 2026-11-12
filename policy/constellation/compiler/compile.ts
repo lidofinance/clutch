@@ -186,6 +186,17 @@ const STOP_ONLY = new Set(["emergency"]);
 /** The only role that may hold a `restart` call. */
 const RESTART_ROLE = "restart";
 
+/**
+ * What the insurance-governance role may call on the first-loss modifier (ADR 014, decision 6): the grants that
+ * create a fund, and the fund's cap. It holds no `allowTarget`, no `allowFunction` and no revoke.
+ */
+const ON_FIRST_LOSS_MODIFIER = new Map([
+  [selector("scopeTarget(bytes32,address)"), "grant"],
+  [selector("scopeFunction(bytes32,address,bytes4,(uint8,uint8,uint8,bytes)[],uint8)"), "grant"],
+  [selector("setAllowance(bytes32,uint128,uint128,uint128,uint64,uint64)"), "budget"],
+]);
+const FIRST_LOSS_GOVERNANCE = "insurance-governance";
+
 /** No role may call the orders account itself: it is administered only by the DAO's own path. */
 const ON_ORDERS_ACCOUNT = new Map<string, string>();
 
@@ -242,7 +253,7 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
       throw new Error(`${m.ref} ${m.address} acts for the first-loss Safe, but the manifest's first-loss modifier is ${firstLossModifier ?? "not named"}`);
     }
   }
-  checkFirstLoss(modifiers, firstLossSafe, firstLossModifier);
+  checkFirstLoss(modifiers, firstLossSafe, firstLossModifier, safe);
   const protectedAccounts = [safe, ...modules, ...(ordersAccount !== null ? [ordersAccount, ordersModifier!] : [])];
   for (const m of modifiers) {
     for (const role of m.roles) {
@@ -257,7 +268,9 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
                 ? ON_ORDERS_ACCOUNT
                 : target.address === ordersModifier
                   ? ON_MODULE
-                  : null;
+                  : target.address === firstLossModifier
+                    ? ON_FIRST_LOSS_MODIFIER
+                    : null;
         if (!allowed) continue;
         const where = `${m.ref}.${role.name} on ${target.name ?? target.address}`;
         if (target.clearance !== Clearance.Function) {
@@ -277,7 +290,12 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
             throw new Error(`${where}: ${name} would let a role that stops restore authority; a motion restarts (ADR 005, decision 26)`);
           }
           if (kind !== "narrow" && fn.wildcarded) throw new Error(`${where}: ${name} needs a condition (OD-38)`);
-          const missing = kind === "grant" ? unguarded(fn.conditions, protectedAccounts) : [];
+          // A grant on the first-loss modifier also refuses the first-loss Safe, its modifier and the share tokens.
+          const guarded =
+            target.address === firstLossModifier
+              ? [...protectedAccounts, firstLossSafe, firstLossModifier, ...firstLossShares(modifiers, firstLossModifier)]
+              : protectedAccounts;
+          const missing = kind === "grant" ? unguarded(fn.conditions, guarded) : [];
           if (missing.length > 0) {
             throw new Error(`${where}: ${name} must refuse ${missing.join(", ")} as the administered target (OD-38)`);
           }
@@ -292,25 +310,54 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
 }
 
 /**
- * The first-loss Safe and its modifier (ADR 008, decisions 19, 21 and 23). No role of any modifier may call
- * either of them: Aragon Voting alone administers them. On the first-loss modifier, a role holds only single
- * functions, each a plain call, and never a transfer or an approval, so no role moves the first-loss shares to
- * another holder or lets a spender take them.
+ * The first-loss Safe and its modifier (ADR 008, decisions 19, 21, 23 and 28; ADR 014, decisions 6 and 12). No
+ * role of any modifier may call the first-loss Safe, and only the insurance-governance role of the first-loss
+ * modifier may call that modifier; `checkProtected` checks what it calls there. On the first-loss modifier, a role
+ * holds only single functions, each a plain call. A share token is a target on which a role holds
+ * `burn(uint256)`: on it, no role holds anything but that burn, so no role moves the first-loss shares to another
+ * holder or lets a spender take them. The only transfer in the compiled policy is the first-loss role's exit of a
+ * fund, pinned to the Asset Safe. An approval must pin its spender, and only the insurance role holds one.
  */
-const MOVES_SHARES = new Set([
-  selector("transfer(address,uint256)"),
-  selector("transferFrom(address,address,uint256)"),
-  selector("approve(address,uint256)"),
-]);
-export function checkFirstLoss(modifiers: Artifact["modifiers"], firstLossSafe: string, firstLossModifier: string | null) {
+const TRANSFER_SELECTOR = selector("transfer(address,uint256)");
+const TRANSFER_FROM_SELECTOR = selector("transferFrom(address,address,uint256)");
+const APPROVE_SELECTOR = selector("approve(address,uint256)");
+const BURN_SELECTOR = selector("burn(uint256)");
+const INSURANCE_ROLE = "insurance";
+const FIRST_LOSS_ROLE = "first-loss";
+/** The share tokens of the first-loss Safe: each target on which a role of the first-loss modifier holds a burn. */
+export function firstLossShares(modifiers: Artifact["modifiers"], firstLossModifier: string | null): string[] {
+  return modifiers
+    .filter((m) => m.address === firstLossModifier)
+    .flatMap((m) => m.roles)
+    .flatMap((r) => r.targets)
+    .filter((t) => t.functions.some((f) => f.selector === selector("burn(uint256)")))
+    .map((t) => t.address);
+}
+
+export function checkFirstLoss(
+  modifiers: Artifact["modifiers"],
+  firstLossSafe: string,
+  firstLossModifier: string | null,
+  assetSafe: string,
+) {
+  const shares = new Set(firstLossShares(modifiers, firstLossModifier));
   for (const m of modifiers) {
     for (const role of m.roles) {
       for (const target of role.targets) {
         const where = `${m.ref}.${role.name} on ${target.name ?? target.address}`;
-        if (target.address === firstLossSafe || target.address === firstLossModifier) {
-          throw new Error(`${where}: no role may call the first-loss Safe or its modifier (ADR 008, decision 19)`);
+        if (target.address === firstLossSafe) {
+          throw new Error(`${where}: no role may call the first-loss Safe (ADR 008, decision 19)`);
+        }
+        if (target.address === firstLossModifier) {
+          if (m.address !== firstLossModifier || role.name !== FIRST_LOSS_GOVERNANCE) {
+            throw new Error(`${where}: only the insurance-governance role may call the first-loss modifier (ADR 014, decision 6)`);
+          }
+          continue;
         }
         if (m.address !== firstLossModifier) continue;
+        if (role.name === FIRST_LOSS_GOVERNANCE) {
+          throw new Error(`${where}: the insurance-governance role calls only the first-loss modifier (ADR 014, decision 6)`);
+        }
         if (target.clearance !== Clearance.Function) {
           throw new Error(`${where}: a role of the first-loss modifier may not call every function of a target (ADR 008, decision 21)`);
         }
@@ -319,8 +366,25 @@ export function checkFirstLoss(modifiers: Artifact["modifiers"], firstLossSafe: 
           if (fn.executionOptions !== 0) {
             throw new Error(`${where}: ${name} must be a plain call, without value or delegatecall (ADR 008, decision 21)`);
           }
-          if (MOVES_SHARES.has(fn.selector)) {
+          if (shares.has(target.address) && fn.selector !== BURN_SELECTOR) {
             throw new Error(`${where}: ${name} would move or lend the first-loss shares (ADR 008, decision 21)`);
+          }
+          if (fn.selector === TRANSFER_FROM_SELECTOR) {
+            throw new Error(`${where}: ${name} would move a token out of the first-loss Safe (ADR 008, decision 21)`);
+          }
+          if (fn.selector === TRANSFER_SELECTOR) {
+            if (role.name !== FIRST_LOSS_ROLE || fn.wildcarded || !pinnedTo(fn.conditions, assetSafe)) {
+              throw new Error(`${where}: ${name} would move a token out of the first-loss Safe; only the first-loss role's exit to the Asset Safe may (ADR 008, decision 28)`);
+            }
+            continue;
+          }
+          if (fn.selector !== APPROVE_SELECTOR) continue;
+          if (role.name !== INSURANCE_ROLE) {
+            throw new Error(`${where}: only the insurance role may approve a spender (ADR 014, decision 12)`);
+          }
+          const spender = fn.wildcarded ? null : fixedValues(fn.conditions, childrenOf(fn.conditions, 0)[0]);
+          if (spender === null || spender.length !== 1) {
+            throw new Error(`${where}: ${name} must pin its spender to one address (ADR 014, decision 12)`);
           }
         }
       }
@@ -363,14 +427,16 @@ export function refuseDelegatecall(
 
 /**
  * The keys that a motion may write under, by the modifier that its grant administers: the operator's on the
- * operator modifier (INV-004), the emergency role's on the safety modifier (INV-025), and the operator's, the
- * emergency role's and the approvals role's on the orders modifier (INV-040). Any other module takes no grant.
+ * operator modifier (INV-004), the emergency role's on the safety modifier (INV-025), the operator's, the
+ * emergency role's and the approvals role's on the orders modifier (INV-040), and the insurance role's on the
+ * first-loss modifier (INV-039). Any other module takes no grant.
  */
 export function writableKeys(manifest: Record<string, any>, modifier: string): string[] {
   const at = (field: string) => typeof manifest[field] === "string" && getAddress(manifest[field]) === getAddress(modifier);
   if (at("operatorModifier")) return [keyOf("operator")];
   if (at("safetyModifier")) return [keyOf("emergency")];
   if (at("ordersModifier")) return ["operator", "emergency", "approvals"].map(keyOf);
+  if (at("firstLossModifier")) return [keyOf("insurance")];
   return [];
 }
 
