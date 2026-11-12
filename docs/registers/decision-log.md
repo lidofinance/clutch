@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:24:23Z
+  at: 2026-11-12T22:33:19Z
 verified: []
 sources:
   - id: s1
@@ -154,6 +154,9 @@ sources:
   - id: s48
     resource: "urn:clutch:interview:2026-11-12-od-139"
     title: EM's decision on the form of the emergency role's zeroing of an approval, 2026-11-12; the transcript is not in the repository
+  - id: s49
+    resource: "urn:clutch:interview:2026-11-12-batch-check-in-ci"
+    title: EM's request for the batch check in the fork workflow, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -163,6 +166,17 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — the batch check in the fork workflow
+
+The agent built the command that computes each Safe batch's hash again and said that the fork workflow did not run it, because a change under `.github/` needs a human's request. EM wrote:
+
+> I merged everything; do CI update for me on my behalf: .github/workflows/fork.yml
+
+Recorded as:
+
+- The fork workflow runs one more step after the suite: the check of the Safe batches that the vote rehearsal wrote. It computes each batch's hash again and fails unless the batches carry the compiled policy and the vault's setup, and nothing else ([enabling-vote spec](/specs/enabling-vote.md); OD-92). The step needs no secret.
+- The agent changed nothing else under `.github/`: the triggers, the permissions and the pinned tools stay as they are. [s49]
 
 ## 2026-11-12 — OD-139 decided: the emergency role's zeroing takes any spender
 
