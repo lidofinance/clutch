@@ -37,7 +37,7 @@ Never commit a key or an RPC URL that contains one.
    If another pull request takes a number first, the validator fails; take the next one.
 4. Run `just regen`, then `just check`. Commit generated files with their source changes.
 5. If you changed `src/`, `script/`, `test/` or `policy/`, run `just test-fork` too.
-   CI does not run the fork suite until phase 2 (OD-52).
+   CI runs the fork suite in the merge queue and on `main`, not on your pull request (OD-52).
 6. Open a pull request with the template. A human merges through the merge queue, which repeats the checks on the merged result.
 
 ## Verify a page

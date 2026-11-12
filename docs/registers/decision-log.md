@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T17:27:14Z
+  at: 2026-11-12T17:45:27Z
 verified: []
 sources:
   - id: s1
@@ -139,6 +139,9 @@ sources:
   - id: s43
     resource: "urn:clutch:interview:2026-11-12-detectors"
     title: EM's answers on the pending motion and on removals, and EM's request for the two detectors, 2026-11-12; the transcript is not in the repository
+  - id: s44
+    resource: "urn:clutch:interview:2026-11-12-fork-ci"
+    title: EM's request for the fork suite in CI, with leave to edit .github, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -148,6 +151,19 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — the fork suite in CI
+
+The agent said that the fork suite, the round-trip check and the detectors ran only on its own machine, and that the workflow for them needed the archive RPC key as a secret and an explicit request, because `.github/` is a protected path. EM wrote:
+
+> Implement run the fork suite in CI, I allow you to change .github contents, use the MAINNET_RPC_URL as the env name
+
+Recorded as:
+
+- EM asks for the fork suite in CI and allows the edit of `.github/`. The workflow `fork` runs the suite in the merge queue and on pushes to `main`, and never on a pull request, as OD-52 says ([ADR 012](/adr/012-contributing-with-many-agents.md), decision 8).
+- The archive RPC key is the repository secret `MAINNET_RPC_URL`.
+- Three points are the agent's reading. EM's "env name" is the name of the secret and of the workflow's variable; the suite's own variable stays `RPC`, and the workflow sets it from the secret. After the suite, the workflow runs the round-trip check and the two detectors on the logs that the suite wrote. The workflow keeps the chain reads of earlier runs in a cache.
+- Two steps are EM's: to set the secret, and to make the job a required check of the merge queue. Until then a failure shows and blocks nothing. [s44]
 
 ## 2026-11-12 — OD-137 and OD-138 decided: the pending motion in the repository, and removals that stay votes
 

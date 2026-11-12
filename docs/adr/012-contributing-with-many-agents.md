@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T07:42:18Z
+  at: 2026-11-12T17:45:27Z
 verified: []
 sources:
   - id: s1
@@ -50,7 +50,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 5. Agents own no GitHub accounts. An agent's work lands through the account of the human who runs it. Each commit carries a `Co-Authored-By` trailer for the agent, and each page names the agent in `generated.by` (decision log, 2026-10-07; OD-23).
 6. A team verifies through a member, with `ref` to the pull request that the member approved. `human:defi-tech` is the first team. A team's verification raises a page's review status and never accepts an ADR: only EM or the committee accepts one (OD-50).
 7. Each verification records `sha256`, the hash of the page's body. `just verify` writes the entry. The validator fails when the body differs from the hash of the latest verification, until a human verifies the page again. Verifications before 2026-10-07 carry no hash (OD-51).
-8. The fork suite stays out of CI until phase 2 of the roadmap. Then it runs in the merge queue and on pushes to `main`, with the archive RPC key as a repository secret, never on a pull request (OD-52).
+8. The fork suite runs in CI in the merge queue and on pushes to `main`, and never on a pull request. Its archive RPC key is the repository secret `MAINNET_RPC_URL` (OD-52).
 9. The request for solution's allocation figures are not restricted. The README opens with a disclosure: everything in the repository is a draft and not ratified, and every number is speculative (OD-53).
 10. A CI workflow publishes the onboarding guide on GitHub Pages from `main`. The page says that it is a hypothetical draft: nothing is deployed or ratified, every number can change, and it is not advice (decision log, 2026-10-07; OD-95).
 11. The onboarding guide carries every check of the triage of 2026-10-12 [s8]. The browser tests check every presentation state and the page without its script. Each item is pinned to the text of its sources, and a reference names a decision or a section of an ADR, not the whole ADR. Every ADR, invariant, LIP part and runbook is cited by the guide or excluded with a reason. CI attaches the built page to each pull request, reports the pin changes, checks the workflows, and checks the guide's outside links each week (decision log, 2026-10-12).
@@ -93,7 +93,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The queue increases merge time to keep `main` green.
 - EM remains the decision bottleneck; batched interviews reduce interruptions.
 - Hashed redaction lists deter casual discovery, not guessing.
-- Until phase 2, broken fork tests need not make CI red.
+- A pull request does not run the fork suite, so a broken fork test shows first in the merge queue or on `main`. The author runs `just test-fork` before the pull request.
 - Local anvil rehearsals may use one public test `PRIVATE_KEY` for one command.
 - The guide's source links work for every reader, because the repository is public (OD-95).
 - A change of design rewrites the decision in place, so the pins of the guide items that cite it go stale and need a review (decision 14).
