@@ -20,6 +20,10 @@ rehearse:
 test-current:
     python3 scripts/sepolia_test_current.py
 
+# The move to the universal factory on a pinned fork; no public transaction.
+factory-migration:
+    python3 scripts/sepolia_factory_migration.py
+
 # Human-only public writes. Foundry prompts for the keystore password.
 _guard:
     @test "${CLUTCH_SEPOLIA:-}" = 1
@@ -30,6 +34,10 @@ deploy: _guard preflight
     @test ! -e cache/sepolia/manifest.json || { echo 'Manifest exists: inspect receipts before resuming a deployment.' >&2; exit 1; }
     python3 scripts/sepolia_receipts.py fresh broadcast/DeploySepolia.s.sol/11155111/run-latest.json
     forge script script/sepolia/DeploySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --broadcast --verify --slow --gas-estimate-multiplier 200
+
+deploy-factory: _guard
+    python3 scripts/sepolia_receipts.py fresh broadcast/DeployFactorySepolia.s.sol/11155111/run-latest.json
+    forge script script/sepolia/DeployFactorySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --broadcast --verify --slow --gas-estimate-multiplier 200
 
 compile:
     bun policy/constellation/sepolia/compile.ts cache/sepolia/manifest.json cache/sepolia/policy.json

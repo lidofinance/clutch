@@ -50,7 +50,7 @@ if (import.meta.main) {
       checkPayload(captured.payload, manifest, report.allowances);
       save("payload.json", captured.payload);
       save("context.json", { workspace: command, manifest, allowances: report.allowances, block: report.block, blockHash: report.blockHash });
-      console.log("Prepared 3 existing Safes and 4 existing Roles modifiers with 7 roles. No deployment nonces or Safe overrides.");
+      console.log("Prepared 3 existing Safes and 4 existing Roles modifiers with 14 roles. No deployment nonces or Safe overrides.");
       console.log("Serialized permissions recompile to the same 63 policy calls; current allowance balances and timestamps are preserved.");
     } else {
       try {

@@ -4,7 +4,10 @@ import { createHash } from "node:crypto";
 import { capturePayload, createNodes } from "./constellation";
 import { key } from "../constellation/lib";
 import { verifyTestPayload } from "./verify-test-payload";
-import manifest from "../../../scripts/fixtures/sepolia-stand-manifest.json";
+import stand from "../../../scripts/fixtures/sepolia-stand-manifest.json";
+
+// The stand gets these three accounts with the universal factory; the fixture predates them.
+const manifest = { ...stand, universalFactory: "0x" + "a1".repeat(20), usdDepositQueue: "0x" + "a2".repeat(20), ethDepositQueue: "0x" + "a3".repeat(20) };
 
 const fundingAllowances = ["orders_weth", "orders_usdc"].map((name) => ({
   modifier: manifest.operatorModifier, key: key(name), balance: "100", timestamp: "1000",
@@ -15,7 +18,7 @@ const raw = Buffer.from(JSON.stringify(payload));
 
 test("serialized declaration recompiles with the pinned funding readback and hashes exact bytes", () => {
   const proof = verifyTestPayload(raw, manifest, snapshot);
-  expect(proof).toEqual({ ...snapshot, payloadSha256: createHash("sha256").update(raw).digest("hex"), compiledCalls: 63 });
+  expect(proof).toEqual({ ...snapshot, payloadSha256: createHash("sha256").update(raw).digest("hex"), compiledCalls: 100 });
   const spaced = Buffer.from(JSON.stringify(payload, null, 2));
   expect(verifyTestPayload(spaced, manifest, snapshot).payloadSha256).not.toBe(proof.payloadSha256);
 });

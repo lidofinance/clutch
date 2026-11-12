@@ -115,6 +115,23 @@ contract SepoliaRedeemQueue {
     }
 }
 
+/// @dev Earn's deposit ABI. The queue keeps the asset and records the request.
+///      This fixture does not settle deposits or mint shares.
+contract SepoliaDepositQueue {
+    IERC20 public immutable asset;
+    mapping(address => uint256) public requested;
+
+    constructor(IERC20 asset_) {
+        asset = asset_;
+    }
+
+    function deposit(uint224 assets, address, bytes32[] calldata) external {
+        require(assets > 0, "fixture: zero deposit");
+        require(asset.transferFrom(msg.sender, address(this), assets), "fixture: transfer");
+        requested[msg.sender] += assets;
+    }
+}
+
 contract SepoliaEasyTrack is MockEasyTrack {
     address public immutable voting;
 

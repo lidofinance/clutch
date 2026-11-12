@@ -7,7 +7,7 @@ import { call, c } from "../constellation/lib";
 import network from "./network.json";
 
 const workspace = "11111111-1111-4111-8111-111111111111";
-const names = ["assetSafe", "ordersSafe", "firstLossSafe", "operatorSafe", "emergencySafe", "operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier", "easyTrackExecutor", "agent", "usdQueue", "ethQueue", "usdShare", "ethShare"];
+const names = ["assetSafe", "ordersSafe", "firstLossSafe", "operatorSafe", "emergencySafe", "operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier", "easyTrackExecutor", "agent", "usdQueue", "ethQueue", "usdShare", "ethShare", "universalFactory", "usdDepositQueue", "ethDepositQueue"];
 const manifest: Record<string, any> = { network: "sepolia", chainId: 11155111, dependencies: network };
 names.forEach((name, i) => manifest[name] = getAddress("0x" + (i + 256).toString(16).padStart(40, "0")));
 manifest.modules = [manifest.operatorModifier, manifest.safetyModifier];
@@ -27,13 +27,16 @@ test("real SDK capture binds only existing accounts and uses the account-specifi
       expect(Object.keys(n).sort()).toEqual(["address", "chain", "label", "ref", "type", "vault"]);
     });
     const roles = payload.specification.filter((n: any) => n.type === "ROLES");
-    expect(roles.map((n: any) => Object.keys(n.roles))).toEqual([["asset-operator", "governance"], ["asset-emergency"], ["orders-operator", "orders-emergency"], ["first-loss", "first-loss-burn"]]);
-    expect(roles.flatMap((n: any) => Object.values(n.roles).map((r: any) => r.policy))).toEqual([
-      "Clutch Sepolia — asset-operator", "Clutch Sepolia — governance", "Clutch Sepolia — asset-emergency",
-      "Clutch Sepolia — orders-operator", "Clutch Sepolia — orders-emergency", "Clutch Sepolia — first-loss", "Clutch Sepolia — first-loss-burn",
+    expect(roles.map((n: any) => Object.keys(n.roles))).toEqual([
+      ["asset-operator", "governance", "insurance-funding"], ["asset-emergency", "restart", "exit-governance"],
+      ["orders-operator", "orders-emergency", "governance", "approvals"], ["first-loss", "first-loss-burn", "insurance", "insurance-governance"],
     ]);
+    expect(roles.flatMap((n: any) => Object.values(n.roles).map((r: any) => r.policy))).toEqual([
+      "asset-operator", "governance", "insurance-funding", "asset-emergency", "restart", "exit-governance",
+      "orders-operator", "orders-emergency", "governance", "approvals", "first-loss", "first-loss-burn", "insurance", "insurance-governance",
+    ].map((name) => `Clutch Sepolia — ${name}`));
     expect(roles.map((n: any) => n.avatar)).toEqual(["$asset_safe", "$asset_safe", "$orders_safe", "$first_loss_safe"]);
-    expect(checkPayload(payload, manifest).calls.to).toHaveLength(63);
+    expect(checkPayload(payload, manifest).calls.to).toHaveLength(100);
   } finally { globalThis.fetch = fetch; }
 });
 
@@ -55,7 +58,7 @@ test("governance export preserves Nor in the legacy format accepted by the captu
   const governance = payload.specification.find((n: any) => n.ref === "operator_modifier").roles.governance;
   expect(governance.permissions).toBeUndefined();
   expect(governance.key).toBe("governance");
-  expect(governance.members).toEqual([manifest.easyTrackExecutor.toLowerCase()]);
+  expect(governance.members).toEqual([manifest.universalFactory.toLowerCase()]);
   expect(governance.annotations).toEqual([]);
   expect(governance.targets).toHaveLength(1);
   expect(governance.targets[0].functions).toHaveLength(6);
@@ -66,7 +69,7 @@ test("governance export preserves Nor in the legacy format accepted by the captu
     expect(refusal.children.map((c: any) => c.compValue).sort()).toEqual(protectedValues);
     expect(refusal.children.every((c: any) => c.operator === 16)).toBe(true);
   }
-  expect(checkPayload(payload, manifest).calls.to).toHaveLength(63);
+  expect(checkPayload(payload, manifest).calls.to).toHaveLength(100);
 });
 
 test("legacy governance readback refuses altered scopes and annotation-based permissions", async () => {
@@ -120,7 +123,7 @@ test("keeps observed allowance balances and timestamps instead of resetting budg
   expect(allowances.orders_weth.key).toBe("orders_weth");
   expect(allowances.orders_weth.balance).toBe("700");
   expect(allowances.orders_weth.timestamp).toBe("1792512000");
-  expect(checkPayload(payload, manifest, runtime).calls.to).toHaveLength(63);
+  expect(checkPayload(payload, manifest, runtime).calls.to).toHaveLength(100);
   expect(() => checkPayload(payload, manifest, runtime.map((a) => ({ ...a, balance: "1" })))).toThrow("differs");
   expect(() => checkPayload(payload, manifest)).toThrow("differs");
   expect(() => createNodes(manifest, workspace, [])).toThrow("Missing allowance");

@@ -12,7 +12,7 @@ import { key } from "../constellation/lib";
 import network from "./network.json";
 
 const workspace = "11111111-1111-4111-8111-111111111111";
-const names = ["assetSafe", "ordersSafe", "firstLossSafe", "operatorSafe", "emergencySafe", "operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier", "easyTrackExecutor", "agent", "usdQueue", "ethQueue", "usdShare", "ethShare", "voting"];
+const names = ["assetSafe", "ordersSafe", "firstLossSafe", "operatorSafe", "emergencySafe", "operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier", "easyTrackExecutor", "agent", "usdQueue", "ethQueue", "usdShare", "ethShare", "voting", "universalFactory", "usdDepositQueue", "ethDepositQueue"];
 const manifest: Record<string, any> = { network: "sepolia", chainId: 11155111, dependencies: network };
 names.forEach((name, i) => manifest[name] = getAddress("0x" + (i + 256).toString(16).padStart(40, "0")));
 manifest.modules = [manifest.operatorModifier, manifest.safetyModifier];

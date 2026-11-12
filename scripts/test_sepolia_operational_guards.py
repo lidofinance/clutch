@@ -34,7 +34,8 @@ class OperationalGuards(unittest.TestCase):
         # Guard refusal precedes payload decoding. Only the manifest must be valid for the chain case.
         names = ['assetSafe', 'ordersSafe', 'firstLossSafe', 'operatorSafe', 'emergencySafe',
                  'operatorModifier', 'safetyModifier', 'ordersModifier', 'firstLossModifier',
-                 'easyTrackExecutor', 'agent', 'usdQueue', 'ethQueue', 'usdShare', 'ethShare', 'voting', 'controller']
+                 'easyTrackExecutor', 'agent', 'usdQueue', 'ethQueue', 'usdShare', 'ethShare', 'voting', 'controller',
+                 'universalFactory', 'usdDepositQueue', 'ethDepositQueue']
         manifest = {'network': 'sepolia', 'chainId': 11155111, 'roleKeyScheme': 'account',
                     'dependencies': json.loads((target / 'sepolia/network.json').read_text())}
         manifest.update({name: '0x' + format(256 + i, '040x') for i, name in enumerate(names)})

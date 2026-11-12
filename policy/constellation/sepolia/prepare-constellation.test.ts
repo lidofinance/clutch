@@ -33,7 +33,7 @@ test.each(["--diff", "11111111-1111-4111-8111-111111111111"])("failed preparatio
     writeFileSync(entry, source);
     const preload = path.join(root, "offline.ts");
     writeFileSync(preload, 'globalThis.fetch = async () => { throw new Error("Offline fixture"); };');
-    const names = ["assetSafe", "ordersSafe", "firstLossSafe", "operatorSafe", "emergencySafe", "operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier", "easyTrackExecutor", "agent", "usdQueue", "ethQueue", "usdShare", "ethShare"];
+    const names = ["assetSafe", "ordersSafe", "firstLossSafe", "operatorSafe", "emergencySafe", "operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier", "easyTrackExecutor", "agent", "usdQueue", "ethQueue", "usdShare", "ethShare", "universalFactory", "usdDepositQueue", "ethDepositQueue"];
     const manifest: Record<string, any> = { network: "sepolia", chainId: 11155111, dependencies: network,
       ...Object.fromEntries(names.map((name, i) => [name, "0x" + (i + 256).toString(16).padStart(40, "0")])),
     };
