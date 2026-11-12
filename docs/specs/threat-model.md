@@ -6,8 +6,8 @@ tags: [specs, security, threat-model]
 status: draft
 review_status: slop
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-11T04:57:34Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-12T11:10:32Z
 verified: []
 sources:
   - id: s1
@@ -50,7 +50,7 @@ Each row names a failure, what triggers it, what limits it and what detects it. 
 | Funds returned to the Agent without need | A compromised or mistaken committee sends vault tokens to the Agent | Only the Agent can receive them, so the vault loses liveness, not funds; a tranche vote funds it again (OD-108) | Alert on every transfer to the Agent |
 | Spender pulls without a deposit | A protocol spender is upgraded to steal, or an approval stands too long | Each approval spends its key's budget, so approvals per period cannot exceed it; approvals in the same transaction as the deposit; the emergency role zeroes approvals and can revoke the approve permission | Approval inventory and budget burn monitoring |
 | Exit impossible when it matters | Protocol illiquidity or asynchronous settlement | Receipt-token transfer to the Agent; claim later. A position that a motion onboarded gets its emergency exit from that motion (OD-49) | Position inventory monitoring |
-| First-loss shares or insurance funds misused | A burn, a payout or a redemption without an instruction | A burn or a payout needs an enacted motion, so LDO holders can block it for 72 hours (OD-67, OD-107); a payout goes only to the address that the creating motion pinned, within the fund's cap; the first-loss role of the committee's Safe can only redeem to the Asset Safe, and it cannot transfer, approve or burn (OD-60, OD-108); before the guard is set, the committee returns any excess above the launch cap to the Aragon Agent; the Earn team's written instruction and the forum post come first | Alert on every action of the first-loss role, on every motion on the first-loss modifier, on a redemption request before the guard is set, and on any change of the first-loss Safe's balance, owners, modules or singleton |
+| First-loss shares or insurance funds misused | A burn, a payout or a redemption without an instruction | A burn or a payout needs an enacted motion, so LDO holders can block it for 72 hours (OD-67, OD-107); insurance money moves only within the budget key of its token, which a budget motion sets within the token's budget ceiling (OD-129); a payout goes only to the address that the creating motion pinned, within the fund's cap; the first-loss role of the committee's Safe can only redeem to the Asset Safe, and it cannot transfer, approve or burn (OD-60, OD-108); before the guard is set, the committee returns any excess above the launch cap to the Aragon Agent; the Earn team's written instruction and the forum post come first | Alert on every action of the first-loss role, on every motion on the first-loss modifier, on a redemption request before the guard is set, and on any change of the first-loss Safe's balance, owners, modules or singleton |
 | An order fills far below the market | An order with a poor limit, or a solver that fills at the limit while the market is better | The order's own limit; CoW's solver competition; screening of operator orders once the guard is set; the orders budgets | Alert on each fill below a market price, and on open orders and tokens left in the orders account |
 | CoW's watch-tower stops | Conditional orders are not posted to the order book | The orders wait and no funds move; the committee can cancel them and place ordinary orders | Alert when a conditional order's part is not posted on time |
 | Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity, new motions and the committee's other duties stop; recovery is unaffected, and the Emergency Brakes multisig keeps its pause of the LDO buyback executor; the owners can remove the guard after ten days (OD-83) [s2] | Approval-latency and vendor-heartbeat monitoring |

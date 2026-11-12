@@ -21,7 +21,8 @@ import {OrdersShape} from "./OrdersShape.sol";
 ///      target that the emergency role revoked; the restart; insurance money from the Asset Safe
 ///      to the first-loss Safe; a token for the orders account, with its orders, approvals and
 ///      exit, and the restore of the orders account after an emergency stop, whose writes a
-///      stateless companion contract builds; the burn of first-loss shares. The other
+///      stateless companion contract builds; the burn of first-loss shares; the deposit of
+///      insurance money into a deposit queue. The other
 ///      shapes, and their emergency exits, are not built. Every check here sits behind the
 ///      modifiers' own guards.
 contract UniversalFactory {
@@ -41,7 +42,9 @@ contract UniversalFactory {
     uint8 public constant CEILING = 4;
     /// @dev Enable the operator modifier again after the switch.
     uint8 public constant RESTART = 5;
-    /// @dev Move a token from the Asset Safe to the first-loss Safe, for insurance.
+    /// @dev Move a token from the Asset Safe to the first-loss Safe, for insurance. The transfer
+    ///      spends the budget key that the factory derives for the token and the first-loss Safe,
+    ///      which a budget operation sets within the token's budget ceiling.
     uint8 public constant FUND = 6;
     /// @dev Introduce a token: its first approval list and both of its ceilings, together.
     ///      A token is introduced once; the enabling vote introduces the launch
@@ -65,6 +68,11 @@ contract UniversalFactory {
     ///      share token, through the first-loss-burn role. The first-loss modifier's policy names
     ///      the share tokens, so a burn of any other token fails at enactment.
     uint8 public constant FIRST_LOSS_BURN = 11;
+    /// @dev Deposit insurance money that the first-loss Safe holds into a deposit queue: an approval
+    ///      of the exact amount, and the deposit of that amount with no referral.
+    ///      The first-loss modifier's policy names each token with its queue, so a deposit of any
+    ///      other pair fails at enactment.
+    uint8 public constant INSURANCE_DEPOSIT = 12;
 
     /// @dev The classes of ceiling, each per token: a budget key's figures, and the fixed cap
     ///      of an approval that spends no key.
@@ -81,6 +89,7 @@ contract UniversalFactory {
     bytes32 internal constant RESTART_ROLE = "restart";
     bytes32 internal constant INSURANCE_FUNDING = "insurance-funding";
     bytes32 internal constant FIRST_LOSS_BURN_ROLE = "first-loss-burn";
+    bytes32 internal constant INSURANCE_ROLE = "insurance";
     /// @notice The scope of the orders account's two token lists: the operator's, which serves
     ///         both sides of signer and TWAP orders, and what a recovery order sells.
     bytes32 public constant ORDERS_SCOPE = keccak256("orders lists");
@@ -89,6 +98,7 @@ contract UniversalFactory {
     bytes4 internal constant TRANSFER = 0xa9059cbb; // transfer(address,uint256)
     bytes4 internal constant ENABLE_MODULE = 0x610b5925; // enableModule(address)
     bytes4 internal constant BURN = 0x42966c68; // burn(uint256)
+    bytes4 internal constant QUEUE_DEPOSIT = bytes4(keccak256("deposit(uint224,address,bytes32[])"));
 
     /// @dev The prefix of a derived budget key. The governance role's guard on
     ///      `setAllowance` accepts a key with this prefix or a launch key.
@@ -212,6 +222,7 @@ contract UniversalFactory {
     error CeilingsForIntroducedToken(address token);
     error WriteFailed(address modifier_);
     error NotListed(address token);
+    error AmountTooLarge(uint256 amount);
 
     event CounterRaised(uint256 epoch, address by);
     event VersionSet(bytes32 indexed scope, bytes32 version);
@@ -663,6 +674,24 @@ contract UniversalFactory {
         );
     }
 
+    /// @dev An insurance deposit: the first-loss Safe approves `queue` for exactly `amount` of
+    ///      `token` and deposits that amount with no referral and no proof, so the deposit uses
+    ///      the whole approval. The queue credits the caller, which is the first-loss Safe.
+    function _insuranceDeposit(Plan memory p, bytes memory data) internal view {
+        (address token, address queue, uint256 amount) = abi.decode(data, (address, address, uint256));
+        _protected(token);
+        _protected(queue);
+        if (amount == 0) revert ZeroAmount();
+        if (amount > type(uint224).max) revert AmountTooLarge(amount);
+        _insure(p, token, abi.encodeWithSelector(APPROVE, queue, amount));
+        _insure(p, queue, abi.encodeWithSelector(QUEUE_DEPOSIT, uint224(amount), address(0), new bytes32[](0)));
+    }
+
+    /// @dev One call of the insurance role: the first-loss modifier runs it as the first-loss Safe.
+    function _insure(Plan memory p, address to, bytes memory data) internal view {
+        _call(p, firstLossModifier, abi.encodeCall(IRoles.execTransactionWithRole, (to, 0, data, 0, INSURANCE_ROLE, true)));
+    }
+
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
@@ -687,6 +716,7 @@ contract UniversalFactory {
             else if (kind == ORDERS_TOKEN) _ordersToken(p, ops[i].data);
             else if (kind == ORDERS_RESTORE) _ordersRestore(p, ops[i].data);
             else if (kind == FIRST_LOSS_BURN) _firstLossBurn(p, ops[i].data);
+            else if (kind == INSURANCE_DEPOSIT) _insuranceDeposit(p, ops[i].data);
             else revert UnknownOperation(kind);
         }
     }

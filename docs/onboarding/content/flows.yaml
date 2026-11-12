@@ -413,7 +413,7 @@ flows:
         text: "From then on, on the Earn team's written instruction, a motion burns the shares, or the committee's Safe redeems them to the Asset Safe. Monitoring alerts on any change of the first-loss Safe's balance."
         nodes: [committee, first-loss, monitoring]
         edges: [first-loss-shares]
-        check: "INV-021. The rehearsal deploys the first-loss Safe and applies its modifier's policy; the insurance roles are not built."
+        check: "INV-021. The rehearsal deploys the first-loss Safe and applies its modifier's policy; a Lido Lend fund's role is not built."
     sources: ["ADR-014#d2", "ADR-014#d10", "ADR-014#proposed-direction", "ADR-010#d20", "ADR-008#d13",
       "ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-008#proposed-direction", "ADR-005#d32", "INV-021",
       "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", "runbook:Fund a tranche"]
@@ -476,10 +476,10 @@ flows:
         nodes: [dao, easytrack]
         edges: [object]
       - who: "Easy Track"
-        text: "The universal factory moves the tokens from the Asset Safe to the first-loss Safe through the insurance-funding role. For a fund of shares, an insurance role then deposits them into the insured product, with the first-loss Safe as the receiver."
+        text: "The universal factory moves the tokens from the Asset Safe to the first-loss Safe through the insurance-funding role, within the budget key of the token. For Lido Earn, the insurance role then deposits them into the vault's queue, with the first-loss Safe as the depositor."
         nodes: [easytrack, operator-modifier, asset-safe, first-loss, protocols]
         edges: [own-op, insure, first-loss-shares]
-        check: "INV-039: insurance money reaches the first-loss Safe only by motion, from the Asset Safe. Tested on a fork with the factory's prototype."
+        check: "INV-039: insurance money reaches the first-loss Safe only by motion, from the Asset Safe, within its budget. On a fork, one motion sets the budget, moves USDC and deposits it into earnUSD's queue."
       - who: "Committee Safe, then Easy Track"
         text: "After a confirmed loss, a burn motion burns the fund's shares, or a payout motion pays the fund's payout address."
         nodes: [committee, easytrack, first-loss, protocols]
@@ -493,7 +493,8 @@ flows:
     sources: ["ADR-014#d4", "ADR-014#d5", "ADR-014#d6", "ADR-014#d7", "ADR-014#d10",
       "ADR-014#proposed-direction", "ADR-008#d25", "ADR-008#d26", "ADR-008#d29",
       "ADR-005#proposed-direction", "ADR-009#proposed-direction", "INV-039",
-      "runbook:Run an insurance motion", "test:test_uf_insurance_money_goes_to_the_first_loss_safe"]
+      "runbook:Run an insurance motion", "test:test_uf_insurance_money_goes_to_the_first_loss_safe",
+      "ADR-014#d11", "ADR-014#d12", "test:test_insurance_deposit_by_motion"]
 
   - id: return-to-agent
     group: funding

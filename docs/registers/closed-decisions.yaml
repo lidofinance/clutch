@@ -969,3 +969,19 @@
   log:
     - "2026-11-10 — OD-119 to OD-128: the consolidation's answers"
   adr: [ADR-012#d14]
+
+- id: OD-129
+  question: "Does insurance money need a bound on its amount?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-129 and OD-130 decided, and Lido Lend investigated for OD-131"
+  adr: [ADR-014#d11]
+  refines: [OD-107]
+
+- id: OD-130
+  question: "Which operation gives Lido Earn its insurance at launch?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-129 and OD-130 decided, and Lido Lend investigated for OD-131"
+  adr: [ADR-014#d12]
+  refines: [OD-107]

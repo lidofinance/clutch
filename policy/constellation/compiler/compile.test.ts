@@ -218,6 +218,20 @@ test("the insurance-funding role transfers only to the first-loss Safe", () => {
   }
 });
 
+// ADR 014, decision 11: insurance money spends the budget key that the factory derives for its token and the
+// first-loss Safe: "k:", then the first-loss Safe, then the token's first ten bytes.
+test("each insurance-money transfer spends the derived key of its token and the first-loss Safe", () => {
+  for (const target of role("insurance-funding").targets) {
+    const c = target.functions[0].conditions;
+    expect(c.length).toBe(3);
+    expect([c[1].parent, c[1].operator]).toEqual([0, EQUAL_TO]);
+    expect([c[2].parent, c[2].operator]).toEqual([0, WITHIN_ALLOWANCE]);
+    const key = "0x6b3a" + manifest.firstLossSafe.slice(2).toLowerCase() + target.address.slice(2, 22).toLowerCase();
+    expect(c[2].compValue.toLowerCase()).toBe(key);
+    expect(target.functions[0].executionOptions).toBe(0);
+  }
+});
+
 // ADR 007: the orders account. The kit's manifest names no orders modifier, so these checks read the committed
 // rehearsal artifact, which CI compares with a fresh compile.
 const REHEARSAL = JSON.parse(
@@ -239,7 +253,7 @@ test("the rehearsal artifact passes the checks, the orders account included", ()
 // ADR 013, decision 18: the universal factory holds every motion role, and no other role. The kit, which has no
 // universal factory, names its mock script executor in the factory's place.
 test("the universal factory holds every motion role, and no other", () => {
-  const MOTION_ROLES = ["governance", "restart", "insurance-funding", "exit-governance", "approvals", "first-loss-burn"];
+  const MOTION_ROLES = ["governance", "restart", "insurance-funding", "exit-governance", "approvals", "first-loss-burn", "insurance"];
   const artifacts: [typeof REHEARSAL, string][] = [
     [artifact as typeof REHEARSAL, (artifact.manifest as Record<string, string>).universalFactory],
     [REHEARSAL, (REHEARSAL.manifest as Record<string, string>).universalFactory],
@@ -699,12 +713,12 @@ const firstLossRole = (name: string) => firstLossOf(REHEARSAL.modifiers).roles.f
 const EARN_SHARES = ["0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4", "0x4Ce1ac8F43E0E5BD7A346A98aF777bF8fbeA1981"];
 const EARN_REDEEM_QUEUES = ["0x095bFAca9f1c6F2B063Cd67C6d6bfcd0c3aaB7b4", "0x9e36A74FE278906a76e7615263e46a83fC40c47F"];
 
-test("the first-loss modifier acts for the first-loss Safe and holds two roles", () => {
+test("the first-loss modifier acts for the first-loss Safe and holds three roles", () => {
   const m = firstLossOf(REHEARSAL.modifiers);
   const manifest = REHEARSAL.manifest as Record<string, string>;
   expect(m.address).toBe(manifest.firstLossModifier);
   expect([m.owner, m.avatar, m.target]).toEqual([manifest.firstLossSafe, manifest.firstLossSafe, manifest.firstLossSafe]);
-  expect(m.roles.map((r) => r.name).sort()).toEqual(["first-loss", "first-loss-burn"]);
+  expect(m.roles.map((r) => r.name).sort()).toEqual(["first-loss", "first-loss-burn", "insurance"]);
 });
 
 test("the first-loss role requests a redemption and claims it to the Asset Safe, and nothing else", () => {
@@ -755,7 +769,7 @@ test("the compiler refuses a first-loss role that transfers or approves the shar
     const bad = withFirstLoss("first-loss-burn", (r) => {
       r.targets[0].functions[0] = { ...r.targets[0].functions[0], signature, selector: id(signature).slice(0, 10) as `0x${string}` };
     });
-    expect(() => checkProtected(bad, REHEARSAL.manifest)).toThrow(/would move or lend the first-loss shares/);
+    expect(() => checkProtected(bad, REHEARSAL.manifest)).toThrow(/would move|only the insurance role may approve a spender/);
   }
 });
 
@@ -822,4 +836,64 @@ test("each operator transfer on the Asset Safe pays the Aragon Agent, or the ord
     }
     expect(seen).toBe(6);
   }
+});
+
+// ---------------------------------------------------------------------------
+// The insurance role (ADR 014, decision 12)
+// ---------------------------------------------------------------------------
+
+const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+const WSTETH_ADDRESS = "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0";
+const EARN_DEPOSITS = [
+  { token: USDC_ADDRESS, queue: "0xC75E7E73B25fEa8bB23EB55CC48BA55067b5be76" },
+  { token: WSTETH_ADDRESS, queue: "0xe39EED9A454C4918F8d0682062777cB251cd513F" },
+];
+const QUEUE_DEPOSIT = "deposit(uint224,address,bytes32[])";
+
+test("the insurance role approves each deposit queue for its token and deposits with no referral, and nothing else", () => {
+  const r = firstLossRole("insurance");
+  expect(r.members.map((m: { address: string }) => m.address)).toEqual([factory]);
+  expect(r.targets.map((t) => t.address).sort()).toEqual(EARN_DEPOSITS.flatMap((d) => [d.token, d.queue]).sort());
+  for (const { token, queue } of EARN_DEPOSITS) {
+    const onToken = r.targets.find((t) => t.address === token)!;
+    expect(onToken.functions.map((f) => [f.signature, f.executionOptions])).toEqual([["approve(address,uint256)", 0]]);
+    const a = onToken.functions[0].conditions as Flat[];
+    expect(a.length).toBe(2);
+    expect([a[1].parent, a[1].operator, a[1].compValue.toLowerCase()]).toEqual([0, EQUAL_TO, pad(queue)]);
+    const onQueue = r.targets.find((t) => t.address === queue)!;
+    expect(onQueue.functions.map((f) => [f.signature, f.executionOptions])).toEqual([[QUEUE_DEPOSIT, 0]]);
+    const d = onQueue.functions[0].conditions as Flat[];
+    const referral = kids(d, 0)[1];
+    expect([d[referral].operator, d[referral].compValue.toLowerCase()]).toEqual([EQUAL_TO, pad("0x0000000000000000000000000000000000000000")]);
+  }
+});
+
+test("the compiler refuses an approval from a first-loss role other than the insurance role", () => {
+  const approve = structuredClone(firstLossRole("insurance").targets.find((t) => t.address === EARN_DEPOSITS[0].token)!);
+  const bad = withFirstLoss("first-loss", (r) => {
+    r.targets.push(approve);
+  });
+  expect(() => checkProtected(bad, REHEARSAL.manifest)).toThrow(/only the insurance role may approve a spender/);
+});
+
+test("the compiler refuses an insurance approval without one pinned spender, and one of a share token", () => {
+  const open = withFirstLoss("insurance", (r) => {
+    const fn = r.targets.find((t) => t.address === EARN_DEPOSITS[0].token)!.functions[0];
+    fn.wildcarded = true;
+    fn.conditions = [];
+  });
+  expect(() => checkProtected(open, REHEARSAL.manifest)).toThrow(/must pin its spender to one address/);
+  const share = withFirstLoss("insurance", (r) => {
+    r.targets.find((t) => t.address === EARN_DEPOSITS[0].token)!.address = EARN_SHARES[0] as `0x${string}`;
+  });
+  expect(() => checkProtected(share, REHEARSAL.manifest)).toThrow(/would move or lend the first-loss shares/);
+});
+
+test("the compiler refuses a transfer from the insurance role", () => {
+  const signature = "transfer(address,uint256)";
+  const bad = withFirstLoss("insurance", (r) => {
+    const fn = r.targets.find((t) => t.address === EARN_DEPOSITS[0].token)!.functions[0];
+    Object.assign(fn, { signature, selector: id(signature).slice(0, 10) });
+  });
+  expect(() => checkProtected(bad, REHEARSAL.manifest)).toThrow(/would move a token out of the first-loss Safe/);
 });

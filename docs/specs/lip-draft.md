@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T21:44:30Z
+  at: 2026-11-12T11:10:32Z
 verified: []
 sources:
   - id: s2
@@ -74,7 +74,7 @@ Funding needs no new contract: Aragon Voting pays each tranche through the Finan
 
 #### Part 1: Account graph **[Implemented in part]**
 
-Owner: [ADR 005](/adr/005-account-graph-and-roles.md). The fork suite deploys every account and applies the policy of each modifier; the first-loss modifier's insurance roles are not built.
+Owner: [ADR 005](/adr/005-account-graph-and-roles.md). The fork suite deploys every account and applies the policy of each modifier; a Lido Lend fund's role on the first-loss modifier is not built.
 
 #### Part 2: Roles and authority **[Implemented in part]**
 
@@ -86,11 +86,11 @@ Each Roles modifier refuses every call that its policy does not list. Owners: [A
 
 #### Part 4: Governance — the new contracts **[Implemented in part]**
 
-Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 013](/adr/013-one-easy-track-factory.md), whose proposed direction lists the shapes. The prototype builds the factory's core and its approval-list, budget, ceiling, introduction, restore, restart, insurance-money, orders and first-loss burn operations; the insurance-fund and Morpho Blue shapes are not built.
+Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 013](/adr/013-one-easy-track-factory.md), whose proposed direction lists the shapes. The prototype builds the factory's core and its approval-list, budget, ceiling, introduction, restore, restart, insurance-money, insurance-deposit, orders and first-loss burn operations; the Lido Lend fund and Morpho Blue shapes are not built.
 
 #### Part 5: Funding and insurance **[Implemented in part]**
 
-Owners: [ADR 014](/adr/014-funding-by-tranche-votes.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the first and a later tranche, moves insurance money, burns first-loss shares by motion and returns order tokens to the Aragon Agent; the fund shapes are not built.
+Owners: [ADR 014](/adr/014-funding-by-tranche-votes.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the first and a later tranche, moves insurance money within its budget, deposits it into Lido Earn, burns first-loss shares by motion and returns order tokens to the Aragon Agent; the fund shapes are not built.
 
 #### Part 6: Emergency response **[Implemented in part]**
 

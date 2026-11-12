@@ -225,7 +225,7 @@
     - "Use its roles outside an enacted motion. Only Easy Track's executor calls `applyMotion` (INV-032)."
     - "Enact a motion if a version that it names, or the [[motion counter]], changed since its creation (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke."
-  numbers: ["a ceiling's raise: at most twofold, once in 15 days", "the prototype: 17,961 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 12,524", "a motion that adds a token: 7,893,034 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 7,102,641 gas", "external audit in phase 3"]
+  numbers: ["a ceiling's raise: at most twofold, once in 15 days", "the prototype: 18,533 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 12,524", "a motion that adds a token: 7,893,034 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 7,102,641 gas", "external audit in phase 3"]
   sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d9",
     "ADR-013#d10", "ADR-013#d11", "ADR-013#d13", "ADR-013#proposed-direction", "ADR-013#consequences",
     "ADR-007#d41", "ADR-006#d9", "ADR-006#d10", "ADR-011#d13", "OD-09", "OD-70", "ADR-013#d15", "OD-117",
@@ -749,7 +749,7 @@
   controlled_by: "The insurance roles of the universal factory, so every action is a motion that the committee's Safe creates. One Snapshot sets the framework for all funds first."
   can:
     - "Create a fund by motion, with the framework's checklist: the product, the share token or the payout address, the cap, the loss trigger with an independent confirming party, the incident-update deadline and the end of the terms."
-    - "Take money from the Asset Safe by motion, through the insurance-funding role on the operator modifier, pinned to the first-loss Safe."
+    - "Take money from the Asset Safe by motion, through the insurance-funding role on the operator modifier, pinned to the first-loss Safe and within the budget key of its token."
     - "Deposit into the insured product with the first-loss Safe as the receiver, and burn the fund's shares by motion after a confirmed loss."
     - "Pay a fund's fixed payout address by motion, at most the fund's remaining cap."
   cannot:

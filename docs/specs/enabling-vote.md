@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T21:44:30Z
+  at: 2026-11-12T11:10:32Z
 verified: []
 sources:
   - id: s1
@@ -114,7 +114,7 @@ The vote's items run when it executes, about five days after it starts: the fact
 
 The fork suite rehearses the vote with the universal factory's prototype, the first tranche and a later tranche ([research note](/research/universal-factory-prototype-2026-11-05.md)). Before the vote starts, the full vote is rehearsed at a recent block [s9][s10][s11]:
 
-1. **Policy still owed.** The first-loss modifier's insurance roles (OD-129 to OD-131), and the shapes of the launch protocols.
+1. **Policy still owed.** A Lido Lend fund's role on the first-loss modifier (OD-131), and the shapes of the launch protocols.
 2. **Deployment.** The script deploys the three Safes, the emergency Safe, the four modifiers and the factory.
 3. **The vote.** The factory's registration, the first tranche, and one approved hash for each Safe batch. The batch builder keeps each batch under the gas and size limits that the rehearsal set.
 4. **The run.** The vote's gas when it starts and when it executes; each batch's gas against EIP-7825 and its size against the transaction pool's limit; the first tranche in the Asset Safe. Then the first motions against the live Easy Track: an onboarding shape; a budget; a ceiling; a token for the orders account, on both sides; an insurance fund, created and given money from the Asset Safe, and a payout to its pinned address; a first-loss redemption paid to the Asset Safe, and the return of an excess above the cap; the operator's return to the Aragon Agent; and the switch, the counter, a restart motion and the restore of the orders account. The run reads Easy Track's free motion slots at the block.

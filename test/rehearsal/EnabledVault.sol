@@ -412,6 +412,15 @@ abstract contract EnabledVault is RehearsalBase {
         IEasyTrack(Mainnet.EASY_TRACK).enactMotion(id, cd);
     }
 
+    /// @dev A motion that passes its creation and fails at enactment as a whole.
+    function _enactmentFails(bytes memory cd) internal {
+        uint256 id = _create(cd);
+        _afterWindow();
+        vm.prank(anyone);
+        (bool ok,) = Mainnet.EASY_TRACK.call(abi.encodeCall(IEasyTrack.enactMotion, (id, cd)));
+        assertFalse(ok, "the enactment fails");
+    }
+
     /// @dev Creates a motion, waits out its objection window and enacts it.
     function _motion(UniversalFactory.Op[] memory ops) internal returns (uint256 id) {
         bytes memory cd = _calldata(ops);

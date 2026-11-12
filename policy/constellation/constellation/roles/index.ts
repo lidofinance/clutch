@@ -21,3 +21,5 @@ export * as exitGovernance from "./exit-governance";
 // Added for Clutch on 2026-11-11: the roles of the first-loss Safe (ADR 008, decisions 21 and 23).
 export * as firstLoss from "./first-loss";
 export * as firstLossBurn from "./first-loss-burn";
+// Added for Clutch on 2026-11-12: the insurance role of the first-loss Safe (ADR 014, decision 12).
+export * as insurance from "./insurance";

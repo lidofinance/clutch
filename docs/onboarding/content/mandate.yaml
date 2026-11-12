@@ -195,7 +195,7 @@ blocks:
       - "On chain: the DAO's first-loss Earn shares sit in a [[first-loss Safe]]. A burn runs only as an Easy Track motion, and one narrow role of the committee's Safe redeems them to the Asset Safe; no role can transfer or approve them."
       - "The committee acts on the Earn team's written instruction, under the March 2026 terms. Below them, a Snapshot exception comes first."
       - "Detection: alerts on any change of the first-loss Safe's balance, owners or modules, and a page on every burn motion and every action of the role."
-    tech: "INV-021 fixes the first-loss Safe's shape and its two roles. The Growth Committee's Safe moves the shares once, after the enabling vote."
+    tech: "INV-021 fixes the first-loss Safe's shape and its roles. The Growth Committee's Safe moves the shares once, after the enabling vote."
     changes:
       - text: "The legacy section takes over the first-loss terms of the March 2026 Earn allocation, with the committee as executor in place of the Growth Committee: a burn as an Easy Track motion, and an exit through one narrow role on a first-loss Safe."
         why: "A burn moves the shares' value to other depositors, so LDO holders get the objection window; an exit keeps the value in the vault, so it stays fast."

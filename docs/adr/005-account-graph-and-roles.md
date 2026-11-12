@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T06:58:05Z
+  at: 2026-11-12T11:10:32Z
 verified: []
 sources:
   - id: s1
@@ -115,8 +115,8 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 | `first-loss` | committee's Safe, four of seven (decision 31), screened once the guard is set ([ADR 010](/adr/010-pre-execution-screening.md) decision 24) | first-loss | request and claim the redemption of the DAO's earnETH and earnUSD shares, with the proceeds pinned to the Asset Safe; on the Earn team's written instruction ([ADR 008](/adr/008-funding-through-existing-payments.md) decisions 21 and 22; [ADR 014](/adr/014-funding-by-tranche-votes.md) decision 10) | burn, transfer or approve the shares; pay anyone but the Asset Safe; act on the Asset Safe or the orders account |
 | `first-loss-burn` | universal factory | first-loss | burn the DAO's earnETH and earnUSD shares, only as an enacted motion that the committee's Safe created ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23) | anything else |
 | `restart` | universal factory | safety | `enableModule` on the Asset Safe, with the operator modifier as its argument, only as an enacted motion ([ADR 013](/adr/013-one-easy-track-factory.md) decision 12) | anything else |
-| `insurance-funding` | universal factory | operator | transfer a listed token from the Asset Safe to the first-loss Safe, only as an enacted motion ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 7) | pay anyone but the first-loss Safe |
-| insurance roles | universal factory | first-loss | create a fund's permissions through a typed shape, deposit into earnETH, earnUSD or a Lido Lend vault with the first-loss Safe as receiver, burn, and pay a fund's pinned payout address within its cap, only as enacted motions ([ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 4 to 7) | pay any other address; transfer or approve the first-loss shares |
+| `insurance-funding` | universal factory | operator | transfer a listed token from the Asset Safe to the first-loss Safe, within the budget key of that token, only as an enacted motion ([ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 7 and 11) | pay anyone but the first-loss Safe |
+| `insurance` | universal factory | first-loss | approve an Earn deposit queue for its token and deposit into earnETH or earnUSD, with the first-loss Safe as the depositor, only as an enacted motion ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 12). Owed: a Lido Lend fund's creation and payout (OD-131) | pay any other address; transfer or approve the first-loss shares |
 | orders `governance` and approvals | universal factory | orders | add a token to the orders account's lists, with delegatecall only to the order signer; restore the operator after an emergency stop; raise an approval of CoW's vault relayer ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41 and 46) | any other delegatecall; touch membership or the emergency role's revoke |
 
 - **The enabling vote's batches (decision 32).** Publish each batch with the vote, with one command that computes its hash again from the batch, the Safe and the Safe's nonce. The batches of one Safe run in nonce order. The builder starts a new batch below 12,000,000 gas and below 128 KiB. Rehearse the vote and the batches at a recent block before the vote starts and again before it executes.

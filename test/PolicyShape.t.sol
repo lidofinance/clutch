@@ -145,16 +145,20 @@ contract PolicyShape is Test {
         }
     }
 
-    /// @dev A scoped transfer whose receiver is pinned to `receiver`.
+    /// @dev A scoped transfer whose receiver is pinned to `receiver`, and whose amount spends the budget key
+    ///      that the universal factory derives for the token and that receiver.
     function _assertPinnedTransfer(bytes4 sel, bytes memory args, address receiver) internal pure {
         if (sel == IRoles.scopeTarget.selector) return;
         assertEq(sel, IRoles.scopeFunction.selector, "insurance-funding: scoped functions only");
-        (,, bytes4 fn, IRoles.ConditionFlat[] memory c,) =
+        (, address token, bytes4 fn, IRoles.ConditionFlat[] memory c,) =
             abi.decode(args, (bytes32, address, bytes4, IRoles.ConditionFlat[], uint8));
         assertEq(fn, TRANSFER, "insurance-funding: transfer only");
-        assertEq(c.length, 2, "insurance-funding: the receiver, pinned");
+        assertEq(c.length, 3, "insurance-funding: the receiver, pinned, and the amount, budgeted");
         assertEq(c[1].operator_, 16, "insurance-funding: EqualTo");
         assertEq(address(uint160(uint256(bytes32(c[1].compValue)))), receiver, "insurance-funding: the first-loss Safe");
+        assertEq(c[2].operator_, 28, "insurance-funding: WithinAllowance");
+        bytes32 derived = bytes32(abi.encodePacked(bytes2("k:"), receiver, bytes10(bytes20(token))));
+        assertEq(bytes32(c[2].compValue), derived, "insurance-funding: the key derived for the token and the first-loss Safe");
     }
 
     /// @dev INV-013 and INV-015: no permission targets Aave, sDAI or the CoW

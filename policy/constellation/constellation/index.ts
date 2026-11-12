@@ -13,6 +13,7 @@
 // roles (ADR 013, decision 18).
 // Changed for Clutch on 2026-11-11: the first-loss modifier (ADR 008,
 // decisions 19, 21 and 23).
+// Changed for Clutch on 2026-11-12: the insurance role (ADR 014, decision 12).
 import { manifest } from "./addresses";
 import { firstLossRolesNode, operatorRolesNode, ordersRolesNode, safetyRolesNode } from "./nodes";
 import {
@@ -21,6 +22,7 @@ import {
   firstLoss,
   firstLossBurn,
   governance,
+  insurance,
   insuranceFunding,
   operator,
   ordersApprovals,
@@ -98,8 +100,9 @@ export const orders_modifier = manifest.ordersModifier
 
 /**
  * The first-loss modifier: the committee's `first-loss` role, which redeems the DAO's first-loss Earn shares with
- * the proceeds pinned to the Asset Safe (ADR 008, decision 21), and the universal factory's `first-loss-burn`
- * role (decision 23). The first-loss Safe is its owner, avatar and target, so a permitted call executes as the
+ * the proceeds pinned to the Asset Safe (ADR 008, decision 21), the universal factory's `first-loss-burn`
+ * role (decision 23), and its `insurance` role, which deposits insurance money into Lido Earn (ADR 014,
+ * decision 12). The first-loss Safe is its owner, avatar and target, so a permitted call executes as the
  * first-loss Safe. Only a manifest that names the modifier compiles it: the kit deploys no first-loss Safe.
  */
 export const first_loss_modifier = manifest.firstLossModifier
@@ -108,6 +111,6 @@ export const first_loss_modifier = manifest.firstLossModifier
       owner: manifest.firstLossSafe as `0x${string}`,
       avatar: manifest.firstLossSafe as `0x${string}`,
       target: manifest.firstLossSafe as `0x${string}`,
-      roles: { "first-loss": firstLoss, "first-loss-burn": firstLossBurn },
+      roles: { "first-loss": firstLoss, "first-loss-burn": firstLossBurn, insurance },
     })
   : undefined;
