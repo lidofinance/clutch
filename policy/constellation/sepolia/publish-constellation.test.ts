@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { afterEach, beforeEach, expect, test } from "bun:test";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { getAddress } from "ethers";
@@ -10,7 +10,6 @@ import { capturePayload, createNodes } from "./constellation";
 import { resolvedDifferences, run, sepoliaRefusals, type Deps, type Git } from "./publish-constellation";
 import { key } from "../constellation/lib";
 import network from "./network.json";
-import { captureMigration, migrationCalls, migrationManifest, migrationTransactions, MIGRATION_BATCH_EXECUTOR, normalizedMigrationPayload, payloadHash } from "./role-migration";
 
 const workspace = "11111111-1111-4111-8111-111111111111";
 const names = ["assetSafe", "ordersSafe", "firstLossSafe", "operatorSafe", "emergencySafe", "operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier", "easyTrackExecutor", "agent", "usdQueue", "ethQueue", "usdShare", "ethShare", "voting"];
@@ -131,27 +130,6 @@ const published = { id: "33333333-3333-4333-8333-333333333333", url: "https://ap
 const records = () => readdirSync(path.join(dir, "hosted")).sort();
 const saved = (prefix: string) => JSON.parse(readFileSync(path.join(dir, "hosted", records().find((f) => f.startsWith(prefix))!), "utf8"));
 
-test("the publication CLI stops conflicting policies before credentials, RPC or a hosted call", () => {
-  const entry = path.join(dir, "policy/constellation/sepolia/publish-constellation.ts");
-  mkdirSync(path.dirname(entry), { recursive: true });
-  symlinkSync(path.resolve(import.meta.dir, "../node_modules"), path.join(dir, "policy/constellation/node_modules"), "dir");
-  const source = readFileSync(path.join(import.meta.dir, "publish-constellation.ts"), "utf8")
-    .replace(/from "(\.[^\"]+)"/g, (_, module: string) => `from ${JSON.stringify(path.resolve(import.meta.dir, module))}`);
-  writeFileSync(entry, source);
-  const output = path.join(dir, "cache/sepolia/constellation");
-  mkdirSync(output, { recursive: true });
-  writeFileSync(path.join(output, "payload.json"), JSON.stringify(payload));
-  const preload = path.join(dir, "offline.ts");
-  writeFileSync(preload, 'globalThis.fetch = async () => { throw new Error("Network forbidden"); };');
-  const result = Bun.spawnSync([process.execPath, "--no-env-file", "--preload", preload, entry, "apply"], { env: {}, stdout: "pipe", stderr: "pipe" });
-  expect(result.exitCode).toBe(1);
-  expect(result.stderr.toString()).toContain("Workspace policies cannot be published");
-  expect(result.stderr.toString()).toContain("operator: policy grants differ");
-  expect(result.stderr.toString()).toContain("emergency: policy grants differ");
-  expect(result.stderr.toString()).not.toContain("Network forbidden");
-  expect(existsSync(path.join(output, "hosted"))).toBe(false);
-});
-
 test("resolve sends the exact payload to the SDK endpoint and saves the response without the key", async () => {
   expect(await run("resolve", deps({ resolve: json({ result: resolvedFrom(payload) }) }))).toBe(0);
   expect(calls).toHaveLength(1);
@@ -173,45 +151,6 @@ test("apply runs only after a matching resolution, once per payload", async () =
   expect(saved("apply-2")).toMatchObject({ status: 200 });
   await expect(run("apply", deps(replies))).rejects.toThrow("already sent");
   expect(calls.filter((c) => c.url.endsWith("/apply"))).toHaveLength(1);
-});
-
-test("migration publication checks the legacy source and resolves the declared new roles and deletions", async () => {
-  const migrationPayload = (await captureMigration(manifest, workspace, allowances)).payload;
-  const pkg = {
-    format: "clutch.sepolia-role-migration/1", workspace, block: 11969893, blockHash: "0x" + "ab".repeat(32),
-    batchExecutor: MIGRATION_BATCH_EXECUTOR, sourceManifest: manifest, manifest: migrationManifest(manifest), allowances,
-    calls: migrationCalls(manifest), transactions: migrationTransactions(manifest),
-    payload: migrationPayload, payloadSha256: payloadHash(migrationPayload),
-  };
-  writeFileSync(path.join(dir, "payload.json"), JSON.stringify(migrationPayload, null, 2) + "\n");
-  writeFileSync(path.join(dir, "context.json"), JSON.stringify({ workspace, manifest, migration: true, payloadSha256: pkg.payloadSha256 }));
-  writeFileSync(path.join(dir, "package.json"), JSON.stringify(pkg));
-  const resolved = resolvedFrom(normalizedMigrationPayload(migrationPayload, manifest, allowances));
-  let checkedSource = false;
-  const dependencies = deps({ resolve: json({ result: resolved }), apply: json(published) }, {
-    snapshot: async (source, migration) => {
-      expect(source).toEqual(manifest);
-      expect(migration.payloadSha256).toBe(pkg.payloadSha256);
-      checkedSource = true;
-      return { block: 11969893, blockHash: pkg.blockHash, allowances };
-    },
-  });
-  expect(await run("apply", dependencies)).toBe(0);
-  expect(checkedSource).toBe(true);
-  expect(JSON.parse(calls[1].init.body)).toEqual(migrationPayload);
-  expect(calls.map((c) => c.url.split("/").pop())).toEqual(["resolve", "apply"]);
-  const corrupted = structuredClone(resolved);
-  const role = corrupted.find((n: any) => n.ref === "operator_modifier").roles.find((r: any) => r.key === key("asset-operator"));
-  role.key = key("operator");
-  calls = [];
-  expect(await run("resolve", deps({ resolve: json({ result: corrupted }) }))).toBe(1);
-  expect(calls).toHaveLength(1);
-  const context = JSON.parse(readFileSync(path.join(dir, "context.json"), "utf8"));
-  context.payloadSha256 = "00".repeat(32);
-  writeFileSync(path.join(dir, "context.json"), JSON.stringify(context));
-  calls = [];
-  await expect(run("apply", dependencies)).rejects.toThrow("context or payload differs");
-  expect(calls).toHaveLength(0);
 });
 
 test("two concurrent applies send one apply", async () => {

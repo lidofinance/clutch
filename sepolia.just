@@ -29,7 +29,7 @@ _guard:
 deploy: _guard preflight
     @test ! -e cache/sepolia/manifest.json || { echo 'Manifest exists: inspect receipts before resuming a deployment.' >&2; exit 1; }
     python3 scripts/sepolia_receipts.py fresh broadcast/DeploySepolia.s.sol/11155111/run-latest.json
-    forge script script/sepolia/DeploySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --broadcast --slow --gas-estimate-multiplier 200
+    forge script script/sepolia/DeploySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --broadcast --verify --slow --gas-estimate-multiplier 200
 
 compile:
     bun policy/constellation/sepolia/compile.ts cache/sepolia/manifest.json cache/sepolia/policy.json
@@ -52,34 +52,6 @@ constellation-resolve:
 constellation-publish:
     bun policy/constellation/sepolia/publish-constellation.ts apply
 
-# OD-137: preparation and verification are read-only; publication and execution are human-only.
-migration-prepare workspace:
-    bun policy/constellation/sepolia/prepare-migration.ts prepare {{quote(workspace)}}
-
-migration-check:
-    bun policy/constellation/sepolia/prepare-migration.ts check
-
-migration-rehearse: migration-check
-    SEPOLIA_MIGRATION_ARTIFACT=cache/sepolia/role-key-migration/package.json forge test --match-contract SepoliaRoleMigrationTest --hardfork amsterdam --threads 1 -vv
-    python3 scripts/sepolia_migration_rehearse.py
-
-migration-resolve:
-    bun policy/constellation/sepolia/publish-constellation.ts resolve --migration
-
-migration-publish:
-    bun policy/constellation/sepolia/publish-constellation.ts apply --migration
-
-migration-apply: _guard migration-check
-    python3 scripts/sepolia_receipts.py fresh broadcast/MigrateRolesSepolia.s.sol/11155111/run-latest.json
-    forge script script/sepolia/MigrateRolesSepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --broadcast --slow --gas-estimate-multiplier 200
-
-migration-resume: _guard
-    python3 scripts/sepolia_receipts.py resume broadcast/MigrateRolesSepolia.s.sol/11155111/run-latest.json
-    forge script script/sepolia/MigrateRolesSepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --resume --broadcast --slow
-
-migration-verify transaction:
-    bun policy/constellation/sepolia/prepare-migration.ts verify {{quote(transaction)}}
-
 apply: _guard
     python3 scripts/sepolia_receipts.py fresh broadcast/ApplySepolia.s.sol/11155111/run-latest.json
     just --justfile sepolia.just compile
@@ -93,7 +65,7 @@ fund: _guard
 # These guards check local records. Foundry checks current nonces; inspect chain state first.
 resume-deploy: _guard
     python3 scripts/sepolia_receipts.py resume broadcast/DeploySepolia.s.sol/11155111/run-latest.json
-    forge script script/sepolia/DeploySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --resume --broadcast --slow
+    forge script script/sepolia/DeploySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --resume --broadcast --slow --verify
 
 resume-apply: _guard
     python3 scripts/sepolia_receipts.py resume broadcast/ApplySepolia.s.sol/11155111/run-latest.json
@@ -105,15 +77,3 @@ resume-fund: _guard
 
 verify-deployment:
     bun policy/constellation/sepolia/verify-deployment.ts
-
-explorer-prepare:
-    python3 scripts/sepolia_prepare_verification.py
-
-explorer-check:
-    bun policy/constellation/sepolia/explorer.ts check
-
-explorer-status:
-    bun policy/constellation/sepolia/explorer.ts status
-
-explorer-submit:
-    bun policy/constellation/sepolia/explorer.ts submit

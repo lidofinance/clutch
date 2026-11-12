@@ -34,7 +34,7 @@ The constellation in `policy/constellation/constellation` follows [ADR 005](../d
 
 ## Known divergence from the design
 
-- **Swaps.** The kit deploys no orders account: its operator funds a plain address that stands in for it. The enabling-vote rehearsal deploys the orders account with its policy, and `OrdersAccount.t.sol` settles its orders through CoW's settlement contract ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The orders modifier's governance and approvals roles are built, and the universal factory's two orders operations add a token and restore the account, one motion each, through the live Easy Track (decisions 41 and 46). `MainnetCowCoverage.t.sol` adds a local Orders Safe for the live Settlement/token matrix through owner presigning. It installs no Clutch Orders policy or order signer. The separate Sepolia stand tests those components for WETH/USDC.
+- **Swaps.** The kit deploys no orders account: its operator funds a plain address that stands in for it. The enabling-vote rehearsal deploys the orders account with its policy, and `OrdersAccount.t.sol` settles its orders through CoW's settlement contract ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The orders modifier's governance and approvals roles are built, and the universal factory's two orders operations add a token and restore the account, one motion each, through the live Easy Track (decisions 41 and 46). The separate Sepolia stand tests the order signer for WETH/USDC.
 - **First-loss Safe.** The kit deploys no first-loss Safe; a plain address stands in for it as the receiver of the insurance-funding role ([ADR 008](../docs/adr/008-funding-through-existing-payments.md), [ADR 014](../docs/adr/014-funding-by-tranche-votes.md)). The enabling-vote rehearsal deploys one, with its modifier. It enters the kit's deployment in phase 2.
 - **Exit-governance role.** The role is built, and `ExitGovernance.t.sol` tests it on the rehearsal ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md) decision 13). The orders token operation writes a token's exit through it; the other shapes that write exits come in phase 2.
 - **Pre-execution screening.** The operator is a plain address, not the committee's Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
@@ -52,10 +52,9 @@ A change to the policy changes the TypeScript and the artifact in the same commi
 
 ## Commands
 
-For the existing Sepolia stand after its role-key migration:
+For the existing Sepolia stand (the [stand plan](../docs/specs/sepolia-stand-plan.md) lists the deploy, apply, fund and Constellation recipes):
 
 ```sh
-just --justfile sepolia.just constellation <workspace-uuid>
 just --justfile sepolia.just test-current
 SEPOLIA_STAND_BLOCK=<recorded-block> just --justfile sepolia.just test-current
 ```
@@ -120,14 +119,6 @@ The dry run's last rehearsal on a local anvil fork, at block 26249900 with Arago
 
 | File | Covers |
 | --- | --- |
-| `MainnetCowCoverage.t.sol` | three cases cover 30 distinct six-token pairs to Asset, 10 stablecoin-destination pairs to Agent and decimals through live Settlement/relayer, with exact balances, independently calculated stETH shares and token-specific unlimited allowance deltas; local Safe, owner presigning, controlled funding/prices and solver impersonation do not establish production Orders policy or role allowlists |
-| `MainnetEarnCoverage.t.sol` | twenty-four real EarnUSD/EarnETH cases: eight deposit and sixteen Asset redemption cases through Oracle/Vault/Queue/Hook, with exact custody/supply/bounded batches, delayed reports, timestamp claims, restrictions, fee conservation/exemption/extremes, dust/zero-net cleanup, USDC blacklist rollback/retry, injected hook faults and Emergency completion; production First-loss policy, controlled fork grants and legacy governance/signing limits remain explicit |
-| `MainnetFirstLossCoverage.t.sol` | twelve real EarnUSD/EarnETH First-loss cases: four redemption and eight burn-motion cases with a separate Safe, Growth share transfers, Oracle/Hook settlement, exact Agent-only claims, deployed Easy Track, exact objection thresholds and historical weights after token transfers, motion lifecycle, exact burn accounting, role/receiver refusals and recovery; local factory registration and handwritten permissions do not verify production policy or signing |
-| `MainnetSavingsCoverage.t.sol` | eight real sUSDS cases for independent share rounding, exact custody/events, approvals and budgets, failures/maxima, one-second pending yield and Emergency stop/exit/restart; legacy roles and mock governance remain limits |
-| `MainnetConverterCoverage.t.sol` | seven real DaiUsds cases for exact token supply/balances and Vat RAD, approval boundaries, rollback, Emergency return/restart, actual USDS deny/rely recovery and five cage refusals; legacy keys and mock governance remain limits |
-| `MainnetWstethCoverage.t.sol` | five real wstETH cases for independently computed share rounding/dust, approval boundaries/zeroing, rollback, both unwrap roles and stop/recovery/restart; legacy roles and mock governance remain explicit limits |
-| `MainnetLidoCoverage.t.sol` | six real Lido v4 submission cases: independent internal-share accounting, boundaries, pause/resume with fork-only ACL prerequisites, stake limit and stop/restart; legacy roles and mocked governance remain explicit limits |
-| `MainnetWethCoverage.t.sol` | five WETH boundary, balance/event, malformed-route and stop/recovery/restart cases on the committed legacy-key mainnet fork profile; production role migration and signer configuration remain separate |
 | `Drills.t.sol` | governance encoding and enactment, the four kinds of permission change and the budget-motion floor, the direct DAO path, operator lifecycle on in-scope venues, the emergency role and its switch, the restart and insurance-funding roles, budgets, adversarial cases, the launch scope, and the Asset Safe's shape |
 | `ReviewProbe.t.sol` | escalation guards, approval bounds, budget keys, budget-motion bounds, and regression tests and probes for defects found in review |
 | `PolicyShape.t.sol` | static checks of the committed artifact: role keys and members, and no out-of-scope target, spender or receiver |

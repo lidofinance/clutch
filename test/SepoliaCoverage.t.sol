@@ -27,6 +27,9 @@ interface ICoverageSigner {
 abstract contract SepoliaCoverageFixture is SepoliaCurrentStandFixture {
     bytes32 internal constant GUARD_SLOT = keccak256("guard_manager.guard.address");
     bytes32 internal constant HANDLER_SLOT = keccak256("fallback_manager.handler.address");
+    // Safe's MultiSendCallOnly 1.5.0 on Sepolia.
+    address internal constant MULTISEND = 0xA83c336B20401Af773B6219BA5027174338D1836;
+    bytes32 internal constant MULTISEND_CODEHASH = 0xcdbdcec38d2f1c7d961b0029ff8416b7e86e9974d6f0e9c9580c7d17fcfb6663;
 
     function balance(address t, address account) internal view returns (uint256) { return IERC20(t).balanceOf(account); }
     function budget(bytes32 key) internal view returns (uint128 b) { (,,, b,) = operator.allowances(key); }
@@ -282,8 +285,7 @@ contract SepoliaFundingCoverageTest is SepoliaCoverageFixture {
         assertEq(allowanceHash(bytes32("orders_weth")),state);assertEq(balance(w,orders),ob);
     }
     function test_FUND_empty_duplicate_reordered_and_failing_batches_are_atomic() public {
-        string memory package=vm.readFile("cache/sepolia/role-key-migration/package.json");address multisend=vm.parseJsonAddress(package,".batchExecutor.address");
-        assertEq(multisend.codehash,vm.parseJsonBytes32(package,".batchExecutor.codeHash"));
+        address multisend=MULTISEND;assertEq(multisend.codehash,MULTISEND_CODEHASH);
         assertTrue(committeeExecute(multisend,abi.encodeWithSignature("multiSend(bytes)",bytes("")),1,0));
         for(uint256 reverse_;reverse_<2;++reverse_){
             uint256 snap=vm.snapshotState();deal(token("weth"),asset,10);uint256 before=balance(token("weth"),orders);uint256 b=budget(bytes32("orders_weth"));
@@ -929,8 +931,7 @@ contract SepoliaGovernanceCoverageTest is SepoliaCoverageFixture {
     function test_GOV_owner_nonowner_and_failed_atomic_batch_preserve_state() public {
         bytes memory data=abi.encodeCall(IRoles.scopeTarget,(assetOperator,address(0xBEEF)));
         vm.prank(committee);vm.expectRevert("OWN: not owner");MockAragonAgent(payable(a("voting"))).execute(asset,0,data);
-        string memory package=vm.readFile("cache/sepolia/role-key-migration/package.json");address multisend=vm.parseJsonAddress(package,".batchExecutor.address");
-        assertEq(multisend.codehash,vm.parseJsonBytes32(package,".batchExecutor.codeHash"));uint256 nonce=ISafe(payable(asset)).nonce();
+        address multisend=MULTISEND;assertEq(multisend.codehash,MULTISEND_CODEHASH);uint256 nonce=ISafe(payable(asset)).nonce();
         bytes memory batch=abi.encodePacked(uint8(0),address(operator),uint256(0),uint256(data.length),data,uint8(0),address(operator),uint256(0),uint256(4),bytes4(0xdeadbeef));
         bytes memory signature=abi.encodePacked(bytes32(uint256(uint160(a("voting")))),bytes32(0),uint8(1));
         bytes memory safeData=abi.encodeCall(ISafe.execTransaction,(multisend,0,abi.encodeWithSignature("multiSend(bytes)",batch),1,0,0,0,address(0),payable(address(0)),signature));

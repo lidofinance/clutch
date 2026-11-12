@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { constellation, push } from "@zodiaceco/sdk";
 import { processPermissions, reconstructPermissions } from "zodiac-roles-sdk";
-import { build, buildNodes, ROLE_MIGRATION } from "./compile";
+import { build, buildNodes } from "./compile";
 import { compileStand as compile } from "./compile";
 import { key } from "../constellation/lib";
 
@@ -19,10 +19,9 @@ function policyNodes(manifest: Record<string, any>, runtime?: RuntimeAllowance[]
 }
 
 /** Bind existing accounts. Safe configuration stays outside this declaration. */
-export function createNodes(manifest: Record<string, any>, workspace: string, runtime?: RuntimeAllowance[], migration = false): Record<string, any> {
+export function createNodes(manifest: Record<string, any>, workspace: string, runtime?: RuntimeAllowance[]): Record<string, any> {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspace)) throw new Error("A Zodiac workspace UUID is required");
   build(manifest);
-  if (migration && manifest.roleKeyScheme !== "account") throw new Error("Migration requires account-specific keys");
   const sep = constellation({ workspace, label: "Clutch Sepolia", chain: 11155111 }, {
     codegen: { users: {}, accounts: { [workspace]: { workspaceId: workspace as `${string}-${string}-${string}-${string}-${string}`, workspaceName: workspace, safes: {}, rolesMods: {}, delays: {} } } },
   });
@@ -36,12 +35,12 @@ export function createNodes(manifest: Record<string, any>, workspace: string, ru
     return [ref, sep.roles[`Clutch Sepolia — ${ref}`]({
       ...binding, address: node.address as `0x${string}`, owner: safe, avatar: safe, target: safe, multisend: [],
       // The API requires each allowance to repeat its record key; the SDK does not add it.
-      ...(!migration && { allowances: Object.fromEntries(Object.entries(allowances).map(([name, allowance]: [string, any]) => [name, { ...allowance, key: name }])) }),
-      roles: { ...Object.fromEntries(Object.entries(node.roles).map(([name, role]: [string, any]) => [name, {
+      allowances: Object.fromEntries(Object.entries(allowances).map(([name, allowance]: [string, any]) => [name, { ...allowance, key: name }])),
+      roles: Object.fromEntries(Object.entries(node.roles).map(([name, role]: [string, any]) => [name, {
         members: role.members as `0x${string}`[],
         policy: `Clutch Sepolia — ${name}`,
         permissions: role.permissions,
-      }])), ...(migration && Object.fromEntries(ROLE_MIGRATION.filter(([modifier]) => modifier === ref).map(([, old]) => [old, null]))) },
+      }])),
     })];
   }));
   return { asset_safe, orders_safe, first_loss_safe, ...roles };
@@ -103,25 +102,4 @@ export function checkPayload(payload: any, manifest: Record<string, any>, runtim
   const wiring = (artifact: typeof candidate) => artifact.modifiers.map(({ ref, address, owner, avatar, target }) => ({ ref, address, owner, avatar, target }));
   if (JSON.stringify(candidate.calls) !== JSON.stringify(expected.calls) || JSON.stringify(wiring(candidate)) !== JSON.stringify(wiring(expected))) throw new Error("Serialized constellation differs from the Sepolia policy");
   return expected;
-}
-
-/** Zodiac requires one policy definition per key and at most one modifier per Safe. */
-export function workspacePolicyIssues(payload: any): string[] {
-  const refs = new Map(payload.specification.map((n: any) => [`$${n.ref}`, n.address]));
-  const seen = new Map<string, { ref: string; avatars: Set<string>; definition: string }>();
-  const issues: string[] = [];
-  for (const node of payload.specification.filter((n: any) => n.type === "ROLES")) for (const [key, role] of Object.entries(node.roles) as [string, any][]) {
-    if (!role?.policy) continue;
-    const avatar = String(refs.get(node.avatar) ?? node.avatar).toLowerCase();
-    const definition = JSON.stringify({ policy: role.policy, description: role.description,
-      members: role.members.map((m: string) => m.toLowerCase()).sort(),
-      targets: role.targets ?? processPermissions(role.permissions).targets,
-    });
-    const previous = seen.get(key);
-    if (previous?.definition !== undefined && previous.definition !== definition) issues.push(`${key}: policy grants differ between ${previous.ref} and ${node.ref}`);
-    if (previous?.avatars.has(avatar)) issues.push(`${key}: two policy modifiers act for the same Safe`);
-    if (previous) previous.avatars.add(avatar);
-    else seen.set(key, { ref: node.ref, avatars: new Set([avatar]), definition });
-  }
-  return issues;
 }

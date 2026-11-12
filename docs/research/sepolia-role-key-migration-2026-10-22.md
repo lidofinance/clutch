@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-10-22
 stale_after: 2026-10-29T00:00:00Z
 generated:
-  by: claude-code/mythos-5.2
-  at: 2026-11-12T11:36:20Z
+  by: claude-code/sonnet-5.5
+  at: 2026-11-12T12:27:25Z
 verified: []
 sources:
   - id: s1
@@ -27,6 +27,9 @@ sources:
   - id: s5
     resource: urn:clutch:evidence:2026-10-22:sepolia-role-key-migration
     title: Prepared package, source RPC comparison, compiler regression and fork checks
+  - id: s6
+    resource: urn:clutch:evidence:2026-10-23:sepolia-role-key-migration
+    title: Owner publication HTTP 200; two canonical successful migration receipts; zero policy differences, unchanged allowances and Safe configuration at block 11976825
 ---
 
 # Sepolia role-key migration
@@ -37,16 +40,11 @@ sources:
 - The prepared declaration has three vault flags, seven policy labels and no policy-key conflicts. It omits allowances. The local package preserves permissions and holders, changes the governance/revoke key references, and clears old memberships, functions and targets [s1][s5].
 - At block `11971984`, the source profile had zero policy differences. Safe owners, nonces, modules, singleton/guard/fallback slots and allowance values were recorded in the package [s5].
 - Two owner transactions contain the 87 configuration calls. Each Safe batch is atomic. A fork test checks the mixed state between the Asset and Orders batches [s5].
-- Mainnet still uses its current keys. The added Sepolia `roleKeyScheme: account` profile is a proposed migration target, and the mainnet design dependencies remain open in ADR 015 [s1][s5].
+- Mainnet still uses its current keys. The Sepolia compiler now always uses the four account keys, and the mainnet design dependencies remain open in ADR 015 [s1][s5].
 
 ## Reads and preparation
 
-```sh
-just --justfile sepolia.just migration-prepare 25091c1a-4f37-48b1-8d35-f287550481a8
-just --justfile sepolia.just migration-check
-just --justfile sepolia.just migration-rehearse
-just --justfile sepolia.just check
-```
+A local preparation tool read the chain state and compiled the package. The repository no longer carries that tool.
 
 The read-only transport permits chain headers, code, storage, logs, calls and transaction/receipt reads. It refuses write methods and suppresses RPC endpoint details on errors. The package is under `cache/sepolia/role-key-migration/`; no credentials or keystore data appear in it [s5].
 
@@ -66,4 +64,4 @@ Payload SHA-256: `1c33e4b11883eb318d97b36ecb0d19ce2985646e7fddda494e70fe1dfa6a24
 
 ## Limits
 
-The public stand has not migrated. Hosted resolution, draft publication and Vaults/Policies persistence for this payload remain unverified. EM chose OD-137 B, OD-134 C and OD-135 A on 2026-10-22. The owner must review and authorise the exact package before signing; preparation and fork tests do not execute public transactions [s1][s5].
+EM chose OD-137 B, OD-134 C and OD-135 A on 2026-10-22. The owner reviewed and authorised the exact package before signing; preparation and fork tests execute no public transaction [s1][s5]. The owner then executed both batches at blocks `11976805` and `11976806`. The comparison at block `11976825` found zero policy differences, unchanged allowance storage and unchanged Safe configuration apart from the expected nonce increments [s6].

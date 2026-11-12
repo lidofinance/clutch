@@ -33,15 +33,9 @@ test("first-loss holder cannot burn, approve or transfer shares", () => {
   expect(firstLoss.roles.find((r) => r.name === "first-loss-burn")!.members.map((m: { address: string }) => m.address)).toEqual([manifest.easyTrackExecutor]);
 });
 
-test("OD-137 uses four account-specific keys and preserves the legacy profile", () => {
-  const migrated = build({ ...manifest, roleKeyScheme: "account" });
-  expect(migrated.modifiers.map((m) => m.roles.map((r) => r.name))).toEqual([
+test("OD-137: each account has its own operator and emergency keys", () => {
+  expect(artifact.modifiers.map((m) => m.roles.map((r) => r.name))).toEqual([
     ["asset-operator", "governance"], ["asset-emergency"],
     ["orders-operator", "orders-emergency"], ["first-loss", "first-loss-burn"],
   ]);
-  expect(artifact.modifiers.map((m) => m.roles.map((r) => r.name))).toEqual([
-    ["operator", "governance"], ["emergency"], ["operator", "emergency"], ["first-loss", "first-loss-burn"],
-  ]);
-  expect(migrated.modifiers.map((m) => m.allowances)).toEqual(artifact.modifiers.map((m) => m.allowances));
-  expect(() => build({ ...manifest, roleKeyScheme: "unknown" })).toThrow("role-key scheme");
 });

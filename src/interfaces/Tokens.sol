@@ -109,12 +109,11 @@ interface ILidoEarnDepositQueue {
 
     function cancelDepositRequest() external;
 
-    /// @dev Mints this account’s own priced deposit; it does not redirect another request.
-    function claim(address account) external;
+    function claim(address receiver) external;
 }
 
 interface ILidoEarnRedeemQueue {
     function redeem(uint256 shareAmount) external;
 
-    function claim(address receiver, uint32[] calldata timestamps) external;
+    function claim(address receiver, uint32[] calldata redeemIds) external;
 }

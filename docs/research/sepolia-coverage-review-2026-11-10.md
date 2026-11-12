@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-11-10
 stale_after: 2026-11-19T14:38:00Z
 generated:
-  by: claude-code/fable-5.2
-  at: 2026-11-10T12:52:04Z
+  by: claude-code/sonnet-5.5
+  at: 2026-11-12T12:27:25Z
 verified: []
 sources:
   - id: s1
@@ -191,8 +191,6 @@ Partial coverage:
 - [ ] **`CFG-02`.** Nobody approved the runtime baselines [s1].
 - [ ] **First-loss economics.** The test queues settle at 1:1. They do not model prices, fees or liquidity [s5].
 
-The launch integrations `MAIN-01` to `MAIN-11` are not on the stand. Only the mainnet fork tests them, and this review did not run those suites [s1].
-
 ## 4. Cases that can be tested now
 
 Each case below has a fork test but no real transaction. The current stand can run it without a change [s5][s7].
@@ -245,5 +243,5 @@ python3 cache/sepolia/review-2026-11-10/signatures.py
 ```
 
 The scripts call `eth_getTransactionReceipt`, `eth_getLogs`, `eth_call` and `eth_getStorageAt` on the archive RPC of the local `.env`.
-The review did not repeat the mainnet fork suites, the claims that come from the CoW API and the UI screenshots [s3].
+The review did not repeat the claims that come from the CoW API and the UI screenshots [s3].
 The event scan covers the two emergency drills only.

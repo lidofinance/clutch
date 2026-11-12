@@ -10,23 +10,11 @@ const UNSIGN = `unsignOrder(${ORDER})`;
 const TWAP_TYPES = ["address", "address", "address", "uint256", "uint256", "uint256", "uint256", "uint256", "uint256", "bytes32"];
 const PERIOD = 30n * 86400n;
 
-export const ROLE_MIGRATION = [
-  ["operator_modifier", "operator", "asset-operator"],
-  ["safety_modifier", "emergency", "asset-emergency"],
-  ["orders_modifier", "operator", "orders-operator"],
-  ["orders_modifier", "emergency", "orders-emergency"],
-] as const;
-
 /** Test-only profile: two swap assets and two synthetic first-loss positions. */
 export function buildNodes(manifest: Record<string, any>) {
   if (manifest.chainId !== 11155111 || manifest.network !== "sepolia" || manifest.dependencies?.chainId !== 11155111) throw new Error("Sepolia manifest required");
   const m = manifest;
-  if (m.roleKeyScheme !== undefined && m.roleKeyScheme !== "account") throw new Error("Unknown Sepolia role-key scheme");
-  const accountKeys = m.roleKeyScheme === "account";
-  const assetOperator = accountKeys ? "asset-operator" : "operator";
-  const ordersOperator = accountKeys ? "orders-operator" : "operator";
-  const assetEmergency = accountKeys ? "asset-emergency" : "emergency";
-  const ordersEmergency = accountKeys ? "orders-emergency" : "emergency";
+  const [assetOperator, ordersOperator, assetEmergency, ordersEmergency] = ["asset-operator", "orders-operator", "asset-emergency", "orders-emergency"];
   const d = (name: string) => m.dependencies.contracts[name].address as string;
   const tokens = [m.dependencies.tokens.weth.address, m.dependencies.tokens.usdc.address] as string[];
   const allSafes = [m.assetSafe, m.ordersSafe, m.firstLossSafe, m.operatorSafe, m.emergencySafe];
@@ -102,9 +90,9 @@ export function buildNodes(manifest: Record<string, any>) {
   return nodes;
 }
 
-/** The shared compiler names the orders Safe `ordersAccount`; the stand manifest calls it `ordersSafe`. */
+/** The shared compiler names the orders Safe `ordersAccount`; the stand manifest calls it `ordersSafe`. The stand uses account-specific keys (OD-137). */
 export function compileStand(nodes: Parameters<typeof compile>[0], m: Record<string, any>, names: Parameters<typeof compile>[2]) {
-  return compile(nodes, { ...m, ordersAccount: m.ordersSafe }, names);
+  return compile(nodes, { ...m, ordersAccount: m.ordersSafe, roleKeyScheme: "account" }, names);
 }
 
 export function build(manifest: Record<string, any>) {

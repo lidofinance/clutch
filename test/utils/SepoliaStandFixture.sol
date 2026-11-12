@@ -53,13 +53,10 @@ abstract contract SepoliaStandFixture is Test {
         }
         require(block.chainid == 11155111, "Sepolia fork required");
         manifest = vm.readFile(vm.envOr("SEPOLIA_MANIFEST", string("cache/sepolia/manifest.json")));
-        bool accountKeys = vm.keyExistsJson(manifest, ".roleKeyScheme")
-            && keccak256(bytes(vm.parseJsonString(manifest, ".roleKeyScheme"))) == keccak256("account");
-        require(pinnedBlock == 0 || accountKeys, "Current stand requires account keys");
-        assetOperator = accountKeys ? bytes32("asset-operator") : bytes32("operator");
-        ordersOperator = accountKeys ? bytes32("orders-operator") : bytes32("operator");
-        assetEmergency = accountKeys ? bytes32("asset-emergency") : bytes32("emergency");
-        ordersEmergency = accountKeys ? bytes32("orders-emergency") : bytes32("emergency");
+        assetOperator = bytes32("asset-operator");
+        ordersOperator = bytes32("orders-operator");
+        assetEmergency = bytes32("asset-emergency");
+        ordersEmergency = bytes32("orders-emergency");
         controller = a("controller");
         committee = a("operatorSafe");
         emergency = a("emergencySafe");

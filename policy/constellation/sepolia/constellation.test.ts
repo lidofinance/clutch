@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { expect, test } from "bun:test";
 import { getAddress } from "ethers";
-import { capturePayload, checkPayload, createNodes, workspacePolicyIssues } from "./constellation";
+import { capturePayload, checkPayload, createNodes } from "./constellation";
 import { constellation as sdkConstellation } from "@zodiaceco/sdk";
 import { call, c } from "../constellation/lib";
 import network from "./network.json";
@@ -12,29 +12,7 @@ const manifest: Record<string, any> = { network: "sepolia", chainId: 11155111, d
 names.forEach((name, i) => manifest[name] = getAddress("0x" + (i + 256).toString(16).padStart(40, "0")));
 manifest.modules = [manifest.operatorModifier, manifest.safetyModifier];
 
-test("all seven policy flags retain the two documented conflicting keys", async () => {
-  const { payload } = await capturePayload(createNodes(manifest, workspace));
-  expect(workspacePolicyIssues(payload)).toEqual([
-    "operator: policy grants differ between operator_modifier and orders_modifier",
-    "emergency: policy grants differ between safety_modifier and orders_modifier",
-  ]);
-});
-
-test("one policy can span Safes only with the same definition and one modifier per Safe", () => {
-  const role = { policy: "Operator", description: "Operations", members: [manifest.operatorSafe], permissions: [] };
-  const a = { type: "ROLES", ref: "a", avatar: manifest.assetSafe, roles: { operator: role } };
-  const b = { ...a, ref: "b", avatar: manifest.ordersSafe, roles: { operator: structuredClone(role) } };
-  const payload = { specification: [a, b] };
-  expect(workspacePolicyIssues(payload)).toEqual([]);
-  for (const change of [{ policy: "Another" }, { description: "Another" }, { members: [] }, { permissions: [{ targetAddress: manifest.agent }] }]) {
-    const copy = structuredClone(payload);
-    Object.assign(copy.specification[1].roles.operator, change);
-    expect(workspacePolicyIssues(copy)).toEqual(["operator: policy grants differ between a and b"]);
-  }
-  expect(workspacePolicyIssues({ specification: [a, b, { ...b, ref: "c", avatar: manifest.assetSafe }] })).toEqual(["operator: two policy modifiers act for the same Safe"]);
-});
-
-test("real SDK capture binds only existing accounts and preserves original role keys", async () => {
+test("real SDK capture binds only existing accounts and uses the account-specific role keys", async () => {
   const fetch = globalThis.fetch;
   globalThis.fetch = (() => { throw new Error("Network forbidden"); }) as unknown as typeof fetch;
   try {
@@ -49,10 +27,10 @@ test("real SDK capture binds only existing accounts and preserves original role 
       expect(Object.keys(n).sort()).toEqual(["address", "chain", "label", "ref", "type", "vault"]);
     });
     const roles = payload.specification.filter((n: any) => n.type === "ROLES");
-    expect(roles.map((n: any) => Object.keys(n.roles))).toEqual([["operator", "governance"], ["emergency"], ["operator", "emergency"], ["first-loss", "first-loss-burn"]]);
+    expect(roles.map((n: any) => Object.keys(n.roles))).toEqual([["asset-operator", "governance"], ["asset-emergency"], ["orders-operator", "orders-emergency"], ["first-loss", "first-loss-burn"]]);
     expect(roles.flatMap((n: any) => Object.values(n.roles).map((r: any) => r.policy))).toEqual([
-      "Clutch Sepolia — operator", "Clutch Sepolia — governance", "Clutch Sepolia — emergency",
-      "Clutch Sepolia — operator", "Clutch Sepolia — emergency", "Clutch Sepolia — first-loss", "Clutch Sepolia — first-loss-burn",
+      "Clutch Sepolia — asset-operator", "Clutch Sepolia — governance", "Clutch Sepolia — asset-emergency",
+      "Clutch Sepolia — orders-operator", "Clutch Sepolia — orders-emergency", "Clutch Sepolia — first-loss", "Clutch Sepolia — first-loss-burn",
     ]);
     expect(roles.map((n: any) => n.avatar)).toEqual(["$asset_safe", "$asset_safe", "$orders_safe", "$first_loss_safe"]);
     expect(checkPayload(payload, manifest).calls.to).toHaveLength(63);
@@ -61,14 +39,14 @@ test("real SDK capture binds only existing accounts and preserves original role 
 
 test("serializer preserves the transfer recipient and allowance instead of dropping callback conditions", async () => {
   const { payload } = await capturePayload(createNodes(manifest, workspace));
-  const transfer = payload.specification.find((n: any) => n.ref === "operator_modifier").roles.operator.permissions[0];
+  const transfer = payload.specification.find((n: any) => n.ref === "operator_modifier").roles["asset-operator"].permissions[0];
   expect(transfer.selector).toBe("0xa9059cbb");
   expect(transfer.condition.paramType).toBe(5);
   expect(transfer.condition.operator).toBe(5);
   expect(transfer.condition.children[0].compValue).toBe("0x" + manifest.ordersSafe.slice(2).toLowerCase().padStart(64, "0"));
   expect(transfer.condition.children[1].operator).toBe(28);
   const corrupted = structuredClone(payload);
-  delete corrupted.specification.find((n: any) => n.ref === "operator_modifier").roles.operator.permissions[0].condition;
+  delete corrupted.specification.find((n: any) => n.ref === "operator_modifier").roles["asset-operator"].permissions[0].condition;
   expect(() => checkPayload(corrupted, manifest)).toThrow("differs");
 });
 
@@ -114,8 +92,8 @@ test("rejects deployment nonces, Safe overrides, unresolved refs and invalid wor
   expect(() => checkPayload(changed((p) => p.specification[3].owner = "$missing"), manifest)).toThrow("Unresolved");
   expect(() => checkPayload(changed((p) => p.specification[3].owner = manifest.operatorSafe), manifest)).toThrow("differs");
   expect(() => checkPayload(changed((p) => p.specification[3].multisend = [manifest.operatorSafe]), manifest)).toThrow("unwrappers");
-  expect(() => checkPayload(changed((p) => delete p.specification[3].roles.operator.policy), manifest)).toThrow("policy label");
-  expect(() => checkPayload(changed((p) => p.specification[3].roles.operator.key = "orders-operator"), manifest)).toThrow("role key");
+  expect(() => checkPayload(changed((p) => delete p.specification[3].roles["asset-operator"].policy), manifest)).toThrow("policy label");
+  expect(() => checkPayload(changed((p) => p.specification[3].roles["asset-operator"].key = "orders-operator"), manifest)).toThrow("role key");
   expect(() => createNodes(manifest, "")).toThrow("UUID");
 });
 

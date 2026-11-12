@@ -8,8 +8,8 @@ review_status: slop
 valid_as_of: 2026-10-22
 stale_after: 2026-10-29T00:00:00Z
 generated:
-  by: codex/gpt-6
-  at: 2026-10-22T19:20:48Z
+  by: claude-code/sonnet-5.5
+  at: 2026-11-12T12:27:25Z
 verified: []
 sources:
   - id: s1
@@ -34,8 +34,8 @@ sources:
     resource: "https://unpkg.com/@zodiaceco/api-types@1.13.0/dist/index.d.mts"
     title: Published API types — resolve returns on-chain Account shapes without vault or policy metadata
   - id: s8
-    resource: /specs/sepolia-deployment-notes.md
-    title: Saved workspace readback — Deployed Constellation with empty Vaults and Policies lists
+    resource: urn:clutch:evidence:2026-10-22:sepolia-constellation-deployed
+    title: Saved workspace readback — Deployed Constellation with empty Vaults and Policies lists, in vaults-empty.* and policies-empty.*
 ---
 
 # Sepolia Constellation UI registration
