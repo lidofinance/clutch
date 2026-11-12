@@ -7,14 +7,16 @@ import {IRoles} from "../src/interfaces/IRoles.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 import {Mainnet} from "./rehearsal/Mainnet.sol";
+import {IEasyTrack} from "./rehearsal/RehearsalBase.sol";
 import {EnabledVault} from "./rehearsal/EnabledVault.sol";
 
-/// @title RoundTrip — the events of the vault's four Roles modifiers, written out for the round-trip check
-///        (ADR 004, decision 13; INV-016).
-/// @dev Each test records every log that a modifier emits, from its deployment on, and writes the logs to a
-///      file under `.roundtrip/`, one JSON log on each line. `just round-trip` runs these tests and then
-///      `policy/constellation/compiler/roundtrip.ts rehearsal`, which rebuilds each modifier's state from its file
-///      and compares it with the policy. A test alone asserts only that the modifiers emitted events.
+/// @title RoundTrip — the events of the vault's four Roles modifiers and of Easy Track, written out for the
+///        round-trip check (ADR 004, decision 13; INV-016) and for the two detectors (ADR 013, decision 19).
+/// @dev Each test records every log that a modifier or Easy Track emits, from the modifiers' deployment on, and
+///      writes the logs to a file under `.roundtrip/`, one JSON log on each line. `just round-trip` runs these
+///      tests and then the `rehearsal` commands of `policy/constellation/compiler/roundtrip.ts` and `watch.ts`,
+///      which rebuild each modifier's state from its file, compare it with the policy and check each open
+///      motion. A test alone asserts only that the modifiers emitted events.
 ///      Run: just round-trip
 contract RoundTrip is EnabledVault {
     string internal constant DIR = ".roundtrip";
@@ -58,6 +60,42 @@ contract RoundTrip is EnabledVault {
         _write("emergency-revoke.ndjson");
     }
 
+    /// @dev The example motion is open: the chain holds the motion's base policy, and the detector must pass the
+    ///      motion. Before it, the committee created another motion and cancelled it, which the detector skips.
+    function test_watch_events_with_the_example_motion_open() public {
+        _deployAndEnable();
+        uint256 other = _create(_calldata(_one(_widening())));
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        IEasyTrack(Mainnet.EASY_TRACK).cancelMotion(other);
+        _create(vm.parseJsonBytes(vm.readFile(EXAMPLE), ".calldata"));
+        _keep();
+        _write("watch-example-open.ndjson");
+    }
+
+    /// @dev A motion that the repository does not hold is open: it gives the operator a transfer of WETH to any
+    ///      address. The detector must fail it.
+    function test_watch_events_with_a_widening_motion_open() public {
+        _deployAndEnable();
+        _create(_calldata(_one(_widening())));
+        _keep();
+        _write("watch-widening-open.ndjson");
+    }
+
+    /// @dev The example motion is open after the emergency role revoked a target: the chain no longer holds the
+    ///      motion's base policy, and the detector must fail the motion and report the drift.
+    function test_watch_events_with_the_example_motion_open_after_a_revoke() public {
+        _deployAndEnable();
+        _emergencyRevokeTarget(Mainnet.SUSDS);
+        _create(vm.parseJsonBytes(vm.readFile(EXAMPLE), ".calldata"));
+        _keep();
+        _write("watch-revoke-example-open.ndjson");
+    }
+
+    /// @dev A write that no policy change holds: a transfer of WETH for the operator, with no condition.
+    function _widening() internal view returns (UniversalFactory.Write memory) {
+        return _govern(abi.encodeCall(IRoles.allowFunction, (OPERATOR, Mainnet.WETH, IERC20.transfer.selector, 0)));
+    }
+
     /// @dev Deploys the accounts and runs the enabling vote, and keeps the modifiers' logs of both. The fixture
     ///      measures each batch on a snapshot that it rolls back; those logs are no chain events, so they go.
     function _deployAndEnable() internal {
@@ -71,12 +109,16 @@ contract RoundTrip is EnabledVault {
         _keep();
     }
 
-    /// @dev Moves the logs that the four modifiers emitted since the last call into `recorded`, in order.
+    /// @dev Moves the logs that the four modifiers and Easy Track emitted since the last call into `recorded`,
+    ///      in order.
     function _keep() internal {
         Vm.Log[] memory logs = vm.getRecordedLogs();
         for (uint256 i = 0; i < logs.length; i++) {
             address e = logs[i].emitter;
-            if (e == address(opMod) || e == address(safetyMod) || e == address(ordersMod) || e == address(firstLossMod)) {
+            if (
+                e == address(opMod) || e == address(safetyMod) || e == address(ordersMod) || e == address(firstLossMod)
+                    || e == Mainnet.EASY_TRACK
+            ) {
                 recorded.push(logs[i]);
             }
         }

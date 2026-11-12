@@ -155,7 +155,7 @@ flows:
         text: "The committee's Safe creates the motion. Its raw writes carry the operator's permissions for the target with their condition trees, the budget of each new spender and the emergency exits. The motion names the [[policy version]] and the [[motion counter]]. The guard, once set, screens this transaction."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
-        check: "INV-034: the factory checks no write's content, so reviewers compare the motion's trees with the policy's source in the 72 hours. `just motion` builds the motion from the merged policy change, and `just motion-check` fails a motion that writes anything else. Monitoring runs that check on every motion, and a failure pages the emergency Safe; the detector is not built."
+        check: "INV-034: the factory checks no write's content, so reviewers compare the motion's trees with the policy's source in the 72 hours. `just motion` builds the motion from the merged policy change, and the pull request that changes the policy commits the motion, and CI checks it. The motion detector fails an open motion that is not that pending motion, and a failure pages the emergency Safe."
       - who: "LDO holders"
         text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails."
         nodes: [dao, easytrack]
@@ -764,7 +764,7 @@ flows:
     time: "Before the 72-hour window ends."
     steps:
       - who: "Monitoring and the forum"
-        text: "The motion-lifecycle alert and the forum disclosure show the motion. Monitoring runs the check of the motion against the merged policy change that the forum post names, and a failure pages the emergency Safe."
+        text: "The motion-lifecycle alert and the forum disclosure show the motion. The motion detector fails a motion that is not the repository's pending motion, and a failure pages the emergency Safe."
         nodes: [monitoring, easytrack, reporting]
       - who: "LDO holders"
         text: "LDO holders object within 72 hours. An objection of 0.5% of LDO stops the motion."
@@ -815,11 +815,11 @@ flows:
         nodes: [policy]
         check: "The workspace is planned (OD-35)."
       - who: "The DAO or a motion"
-        text: "The change reaches the chain only through the enabling vote, a DAO vote or a motion of the universal factory. Clutch's own `motion` command builds each motion from the merged commit."
+        text: "The change reaches the chain only through the enabling vote, a DAO vote or a motion of the universal factory. The pull request that changes the policy also commits its motion, which Clutch's own `motion` command builds and CI checks."
         nodes: [dao, easytrack, operator-modifier, safety-modifier, asset-safe]
         edges: [own, own-op, own-sf, gov-role]
       - who: "Monitoring"
-        text: "The [[round-trip check]] compares the chain with the artifact after the change, and later the [[drift detector]] does so on a schedule."
+        text: "The [[round-trip check]] compares the chain with the artifact after the change, and the [[drift detector]] does so on a schedule."
         nodes: [policy, monitoring, asset-safe]
         edges: [watch]
         check: "INV-016 is pending."

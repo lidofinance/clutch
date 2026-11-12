@@ -469,6 +469,26 @@ function source(ref: string, commit: string | null, text: string): Source {
   return { ref, commit, sha256: createHash("sha256").update(text).digest("hex"), text, policy: JSON.parse(text) as Artifact };
 }
 
+/**
+ * The pending motion of a network (ADR 013, decision 19): `pending/<network>/motion.json`, which `build --pending`
+ * writes, and `base.json`, the policy that the motion starts from. The pull request that changes the policy
+ * commits both, and the pull request after the enactment removes both. While they are there, the chain holds the
+ * base policy, and the committed artifact is the policy after the motion.
+ */
+export const PENDING_DIR = path.join(ROOT, "pending");
+export type Pending = { base: Artifact; calldata: string; actions: Write[] };
+
+export function loadPending(network: string, dir = PENDING_DIR): Pending | null {
+  const base = path.join(dir, network, "base.json");
+  const motion = path.join(dir, network, "motion.json");
+  if (!existsSync(base) && !existsSync(motion)) return null;
+  if (!existsSync(base) || !existsSync(motion)) throw new Error(`${path.join(dir, network)} must hold both base.json and motion.json, or neither`);
+  const file = JSON.parse(readFileSync(motion, "utf8"));
+  if (file.format !== MOTION_FORMAT || typeof file.calldata !== "string") throw new Error(`${motion} is no motion file`);
+  const actions = ((file.actions ?? []) as Write[]).map((w) => ({ modifier: getAddress(w.modifier), role: lower(w.role), to: getAddress(w.to), data: lower(w.data) }));
+  return { base: JSON.parse(readFileSync(base, "utf8")) as Artifact, calldata: file.calldata, actions };
+}
+
 /** The example motion's file: from the committed rehearsal artifact to the example change, at a new factory. */
 export function exampleMotion(): string {
   const base = source(`artifacts/${EXAMPLE_NETWORK}.json`, null, readFileSync(path.join(ROOT, "artifacts", `${EXAMPLE_NETWORK}.json`), "utf8"));
@@ -540,6 +560,7 @@ export function render(base: Source, head: Source, epoch: bigint, policyVersion:
     epoch: String(epoch),
     policyVersion: String(policyVersion),
     writes: all,
+    actions,
     calldata: encodeMotion(epoch, policyVersion, writes),
     budgetCount: head.policy.modifiers.reduce((n, m) => n + m.allowances.length, 0),
     budgets: {
@@ -602,12 +623,31 @@ async function main(argv: string[]): Promise<number> {
   if (command !== "build" && command !== "check") {
     console.error("usage: motion.ts example [--check]");
     console.error("       motion.ts build|check --base <ref> --head <ref> [--network <name>] [--epoch N --policy-version N | --rpc [URL]]");
-    console.error("       build: [--actions file] [--out file] [--post file]    check: --calldata 0x… | --motion file, [--actions file] [--allow-unmerged]");
+    console.error("       build: [--actions file] [--out file] [--post file] [--pending]    check: --calldata 0x… | --motion file | --pending, [--actions file] [--allow-unmerged]");
     return 2;
   }
   const opts = options(rest);
-  if (!opts.base || !opts.head) throw new Error("--base and --head are needed");
   const network = opts.network ?? "rehearsal-26249900";
+  const committed = path.join(ROOT, "artifacts", `${network}.json`);
+  if (opts.pending !== undefined && command === "check") {
+    // the repository's pending motion against its base policy and the committed artifact
+    const pending = loadPending(network);
+    if (!pending) {
+      console.log(`No motion is pending for ${network}.`);
+      return 0;
+    }
+    const verdict = checkMotion(pending.base, load(committed, network).policy, decodeMotion(pending.calldata).writes, pending.actions);
+    console.log(verdict.ok ? `PASS: the pending motion turns its base policy into the committed artifact of ${network}, and writes nothing else.` : "FAIL");
+    for (const line of verdict.problems) console.log(`  problem: ${line}`);
+    for (const line of verdict.differences) console.log(`  difference: ${line}`);
+    return verdict.ok ? 0 : 1;
+  }
+  if (opts.pending !== undefined) {
+    // a pending motion goes from a merged policy to the working tree's artifact, into the repository
+    opts.head ??= committed;
+    opts.out = path.join(PENDING_DIR, network, "motion.json");
+  }
+  if (!opts.base || !opts.head) throw new Error("--base and --head are needed");
   const main = opts.main ?? "origin/main";
   const base = load(opts.base, network);
   const head = load(opts.head, network);
@@ -643,7 +683,7 @@ async function main(argv: string[]): Promise<number> {
     plan.writes.forEach((w, i) => console.log(`${String(i + 1).padStart(2)}. ${w.about}`));
     actions.forEach((a, i) => console.log(`${String(plan.writes.length + i + 1).padStart(2)}. action: ${a.to} through ${a.modifier}, as the role ${a.role}`));
     console.log(`\ncounter ${read.epoch}, policy version ${read.policyVersion}, ${file.writes.length} writes, calldata ${(file.calldata.length - 2) / 2} bytes`);
-    if (!isMerged) console.log(`Warning: ${head.ref} is not in the history of ${main}. Create a motion only from a merged policy change.`);
+    if (!isMerged && opts.pending === undefined) console.log(`Warning: ${head.ref} is not in the history of ${main}. Create a motion only from a merged policy change.`);
     if (opts.out) {
       mkdirSync(path.dirname(path.resolve(opts.out)), { recursive: true });
       writeFileSync(opts.out, text);

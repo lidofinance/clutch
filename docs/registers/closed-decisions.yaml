@@ -1038,3 +1038,17 @@
     - "2026-11-12 — OD-136 decided: monitoring runs the check of every motion"
   adr: [ADR-013#d19]
   refines: [OD-134]
+- id: OD-137
+  question: "Where does the detector of a motion find the policy change that the motion must equal?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-137 and OD-138 decided: the pending motion in the repository, and removals that stay votes"
+  adr: [ADR-013#d19]
+  refines: [OD-136]
+- id: OD-138
+  question: "May a removal on the safety modifier or on the orders modifier be a motion?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-137 and OD-138 decided: the pending motion in the repository, and removals that stay votes"
+  adr: [ADR-013#d4]
+  refines: [OD-101]
