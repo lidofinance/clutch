@@ -24,6 +24,10 @@ contract RoundTrip is EnabledVault {
     string internal constant EXAMPLE = "policy/constellation/artifacts/motion-example-rehearsal-26249900.json";
 
     bytes32 internal constant APPROVALS = bytes32("approvals");
+    /// @dev The example fund's payout address and cap (policy/constellation/compiler/motion.example.ts). Stand-ins:
+    ///      no decision lists them.
+    address internal constant FUND_PAYOUT = 0x000000000000000000000000000000000000F00D;
+    uint128 internal constant FUND_CAP = 30_000e6;
 
     Vm.Log[] internal recorded;
     string internal guardFile;
@@ -65,6 +69,35 @@ contract RoundTrip is EnabledVault {
         );
         _keep();
         _write("emergency-revoke.ndjson");
+    }
+
+    /// @dev A motion creates a fund with a fixed payout address. The fund's cap is a budget with a maximum refill
+    ///      of zero and a timestamp of zero. The deployed modifier stores the largest value and the block's time
+    ///      in their place, and emits what it stores. The round-trip check must rebuild the fund's policy from
+    ///      these events, so its reading of the two values is checked against the modifier here.
+    function test_roundtrip_events_after_a_fund_is_created() public {
+        _deployAndEnable();
+        bytes32 insurance = bytes32("insurance");
+        bytes32 insuranceGovernance = bytes32("insurance-governance");
+        bytes32 key = _key(Mainnet.USDT, FUND_PAYOUT);
+        IRoles.ConditionFlat[] memory payout = new IRoles.ConditionFlat[](3);
+        payout[0] = IRoles.ConditionFlat(0, 5, 5, "");
+        payout[1] = IRoles.ConditionFlat(0, 1, 16, abi.encode(FUND_PAYOUT));
+        payout[2] = IRoles.ConditionFlat(0, 1, 28, abi.encode(key));
+        UniversalFactory.Write[] memory ws = new UniversalFactory.Write[](3);
+        address mod = address(firstLossMod);
+        ws[0] = _w(firstLossMod, insuranceGovernance, mod, abi.encodeCall(IRoles.scopeTarget, (insurance, Mainnet.USDT)));
+        ws[1] = _w(firstLossMod, insuranceGovernance, mod, abi.encodeCall(IRoles.scopeFunction, (insurance, Mainnet.USDT, IERC20.transfer.selector, payout, 0)));
+        ws[2] = _w(firstLossMod, insuranceGovernance, mod, abi.encodeCall(IRoles.setAllowance, (key, FUND_CAP, 0, 0, 0, 0)));
+        _motion(ws);
+
+        (uint128 refill, uint128 maxRefill, uint64 period, uint128 balance, uint64 timestamp) = firstLossMod.allowances(key);
+        assertEq(balance, FUND_CAP, "the cap");
+        assertEq(uint256(refill) + period, 0, "no refill and no period");
+        assertEq(maxRefill, type(uint128).max, "the modifier stores a maximum refill of zero as the largest value");
+        assertEq(timestamp, block.timestamp, "the modifier stores a timestamp of zero as the block's time");
+        _keep();
+        _write("fund-created.ndjson");
     }
 
     /// @dev The example motion is open: the chain holds the motion's base policy, and the detector must pass the

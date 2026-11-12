@@ -25,6 +25,32 @@ export function derivedKey(token: string, spender: string): `0x${string}` {
   return `0x6b3a${lower(spender).slice(2)}${lower(token).slice(2, 22)}`;
 }
 
+/** The example fund's token, payout address and cap. Stand-ins: no decision lists them. */
+export const USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+export const FUND_PAYOUT = "0x000000000000000000000000000000000000F00D";
+export const FUND_CAP = 30_000n * 10n ** 6n;
+
+/**
+ * The policy `base` with a fund that has a fixed payout address (ADR 014, decision 6): the insurance role's
+ * transfer of the token, pinned to the payout address, and the cap as a budget that never refills. Its maximum
+ * refill and its timestamp are zero in the policy; the modifier stores other values in their place.
+ */
+export function exampleFund(base: Artifact): Artifact {
+  const head = JSON.parse(JSON.stringify(base)) as Artifact;
+  const modifier = head.modifiers.find((m) => m.ref === "first_loss_modifier")!;
+  const key = derivedKey(USDT, FUND_PAYOUT);
+  modifier.allowances.push({ name: "fund_usdt_example", key, balance: String(FUND_CAP), maxRefill: "0", refill: "0", period: "0", timestamp: "0" });
+  const payout: { parent: number; paramType: number; operator: number; compValue: `0x${string}` }[] = [
+    { parent: 0, paramType: 5, operator: 5, compValue: "0x" },
+    { parent: 0, paramType: 1, operator: 16, compValue: AbiCoder.defaultAbiCoder().encode(["address"], [FUND_PAYOUT]) as `0x${string}` },
+    { parent: 0, paramType: 1, operator: 28, compValue: key },
+  ];
+  modifier.roles
+    .find((r) => r.name === "insurance")!
+    .targets.push({ address: USDT, name: "USDT", clearance: 2, executionOptions: 0, functions: [{ selector: selector("transfer(address,uint256)"), signature: "transfer(address,uint256)", executionOptions: 0, wildcarded: false, conditions: payout }] });
+  return head;
+}
+
 /** The policy `base` with the example change applied. */
 export function exampleHead(base: Artifact): Artifact {
   const head = JSON.parse(JSON.stringify(base)) as Artifact;

@@ -8,8 +8,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { encodeBytes32String } from "ethers";
 import type { Artifact } from "./compile";
-import { decodeMotion, exampleMotion } from "./motion";
-import { exampleHead } from "./motion.example";
+import { decodeMotion, exampleMotion, planMotion } from "./motion";
+import { exampleFund, exampleHead } from "./motion.example";
 import { fetchLogs, readEvents, roundTrip } from "./roundtrip";
 import type { GetLogs, Log } from "./roundtrip";
 import { APPROVE, BLOCK_TIME, emitted, event, EVENTS, launch, lower, MAX_UINT128, OPERATOR, STRANGER, SUSDS, TRANSFER, USDC } from "./synthetic";
@@ -30,6 +30,13 @@ test("the launch logs rebuild to the committed policy", () => {
   expect(roundTrip(policy, logs)).toEqual({ differences: [], notes: [] });
   // logs of other contracts do not count
   expect(roundTrip(policy, [event(STRANGER, "ScopeTarget", [OPERATOR, STRANGER]), ...logs])).toEqual({ differences: [], notes: [] });
+});
+
+// Logs that start after a modifier's deployment miss what it emitted before them, so the rebuilt state is not
+// the modifier's state: an early membership or grant would be invisible.
+test("logs without a modifier's setup are reported, because they do not start at its deployment", () => {
+  const late = (log: Log) => isEvent(log, "RolesModSetup") && lower(log.address) === lower(opMod);
+  expect(differences([], late)).toEqual(["Clutch operator modifier: the logs do not hold the modifier's setup, so they do not start at its deployment"]);
 });
 
 test("a modifier without logs is reported", () => {
@@ -145,6 +152,22 @@ test("the example motion's events rebuild to its head policy", () => {
   expect(roundTrip(exampleHead(policy), logs)).toEqual({ differences: [], notes: [] });
   expect(roundTrip(policy, logs).differences.length).toBeGreaterThan(0);
   expect(roundTrip(exampleHead(policy), LAUNCH).differences.length).toBeGreaterThan(0);
+});
+
+// The policy states a cap that never refills with a maximum refill of zero and a timestamp of zero. The modifier
+// stores the largest value and the block's time in their place, and the check reads them as the policy's zeros.
+// The fork suite reads both values from the deployed modifier (test_roundtrip_events_after_a_fund_is_created).
+test("a budget that the policy states with zeros matches what the modifier stores for them", () => {
+  const fund = exampleFund(policy);
+  const flMod = modifierOf("first_loss_modifier").address;
+  const writes = planMotion(policy, fund).writes;
+  const logs = [...LAUNCH, ...writes.flatMap((w) => emitted(w.to, w.data))];
+  expect(roundTrip(fund, logs)).toEqual({ differences: [], notes: [] });
+  const cap = lower(fund.modifiers.find((m) => m.ref === "first_loss_modifier")!.allowances[0].key);
+  // a maximum refill that is neither zero nor the largest value is another budget
+  const other = roundTrip(fund, [...logs, event(flMod, "SetAllowance", [cap, 30_000_000_000n, 5n, 0n, 0n, BLOCK_TIME])]);
+  expect(other.differences.length).toBe(1);
+  expect(other.differences[0]).toContain("the budget fund_usdt_example refills 0 every 0 seconds up to 5");
 });
 
 test("an events file is read line by line, and a line that is no log fails", () => {

@@ -8,7 +8,7 @@ import { AbiCoder, encodeBytes32String, Interface } from "ethers";
 import type { Artifact } from "./compile";
 import { acceptedByRole, checkMotion, decodeMotion, encodeMotion, EXAMPLE_MOTION, exampleMotion, MAX_WRITES, pinnedKeys, planMotion } from "./motion";
 import type { Write } from "./motion";
-import { derivedKey, EXAMPLE_EARN_USD_BUDGET, EXAMPLE_VAULT, EXAMPLE_WETH_BUDGET, exampleHead, WETH } from "./motion.example";
+import { derivedKey, EXAMPLE_EARN_USD_BUDGET, EXAMPLE_VAULT, EXAMPLE_WETH_BUDGET, exampleFund, exampleHead, FUND_CAP, FUND_PAYOUT, USDT, WETH } from "./motion.example";
 
 const ROOT = path.resolve(import.meta.dir, "..");
 const base = JSON.parse(readFileSync(path.join(ROOT, "artifacts/rehearsal-26249900.json"), "utf8")) as Artifact;
@@ -101,6 +101,26 @@ test("the example onboarding is these ten writes, in this order", () => {
   expect(checkMotion(base, head, expected)).toMatchObject({ ok: true, problems: [], differences: [], actions: [] });
 });
 
+// ADR 014, decision 6: a fund is the insurance role's transfer, pinned to the payout address, and a cap that never
+// refills, both written by the insurance-governance role.
+test("a fund with a fixed payout address is three writes of the insurance-governance role", () => {
+  const fund = exampleFund(base);
+  const flMod = modifierOf(base, "first_loss_modifier").address;
+  const cap = derivedKey(USDT, FUND_PAYOUT);
+  const plan = planMotion(base, fund);
+  expect(plan.needsVote).toEqual([]);
+  expect(strip(plan.writes)).toEqual([
+    write(flMod, key("insurance-governance"), "setAllowance", [cap, String(FUND_CAP), 0, 0, 0, 0]),
+    write(flMod, key("insurance-governance"), "scopeTarget", [key("insurance"), USDT]),
+    write(flMod, key("insurance-governance"), "scopeFunction", [key("insurance"), USDT, TRANSFER, [node(0, 5, 5), node(0, 1, 16, address32(FUND_PAYOUT)), node(0, 1, 28, cap)], 0]),
+  ]);
+  expect(checkMotion(base, fund, strip(plan.writes))).toMatchObject({ ok: true, problems: [], differences: [], notes: [] });
+  // a cap that refills is no fund: the role's policy refuses it
+  const refills = exampleFund(base);
+  modifierOf(refills, "first_loss_modifier").allowances.find((a) => a.name === "fund_usdt_example")!.refill = "1";
+  expect(planMotion(base, refills).needsVote[0]).toContain("the policy of the role insurance-governance refuses this write");
+});
+
 test("the committed example motion equals a fresh build", () => {
   expect(readFileSync(EXAMPLE_MOTION, "utf8")).toBe(exampleMotion());
   const file = JSON.parse(exampleMotion());
@@ -163,6 +183,8 @@ test("a change that no motion role can write needs a vote", () => {
     "the members of the role operator on the Clutch operator modifier change",
   ]);
   expect(reasons((p) => (targetOf(p, "operator_modifier", "operator", SUSDS).clearance = 1))[0]).toContain("as a whole target");
+  // the modifier scopes a target without execution options, so a scoped target cannot get any
+  expect(reasons((p) => (targetOf(p, "operator_modifier", "operator", SUSDS).executionOptions = 1))[0]).toContain("as a scoped target with execution options");
   // the governance role's own permissions: it never writes under its own key
   expect(reasons((p) => roleOf(p, "operator_modifier", "governance").targets[0].functions.pop())[0]).toContain("no motion role can call revokeFunction");
   // the exit-governance role and the orders modifier's governance role hold no revoke
@@ -343,20 +365,39 @@ test("the check evaluates the motion role's policy on the whole call", () => {
   expect(acceptedByRole(base, orders, key("approvals"), "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", lower(erc20.encodeFunctionData("approve", [STRANGER, 1])))).toBeNull();
 });
 
-test("a motion with a write that the role's policy refuses fails the check, and the builder does not hide it", () => {
+test("a write that the role's policy refuses: the builder says that it needs a vote, and the check fails it", () => {
   // a budget with a refill period of 29 days: the governance role refuses it (ADR 009, decision 15)
   const short = clone(base);
-  modifierOf(short, "operator_modifier").allowances[0].period = String(MONTH - 24 * 60 * 60);
+  const budget = modifierOf(short, "operator_modifier").allowances[0];
+  budget.period = String(MONTH - 24 * 60 * 60);
   const plan = planMotion(base, short);
-  expect(plan.writes.length).toBe(1);
-  const verdict = checkMotion(base, short, strip(plan.writes));
+  expect(plan.writes).toEqual([]);
+  expect(plan.needsVote.length).toBe(1);
+  expect(plan.needsVote[0]).toContain(`set the budget ${budget.name}`);
+  expect(plan.needsVote[0]).toContain("the policy of the role governance refuses this write");
+  // the same write, made by hand: the check fails it
+  const byHand = [write(opMod, GOVERNANCE, "setAllowance", [budget.key, budget.balance, budget.maxRefill, budget.refill, budget.period, 0])];
+  const verdict = checkMotion(base, short, byHand);
   expect(verdict.ok).toBe(false);
   expect(verdict.problems).toEqual(["write 1: the policy of the role governance refuses this call of setAllowance"]);
+
+  // a budget under a key that is no launch key and no derived key
+  const rogue = clone(base);
+  modifierOf(rogue, "operator_modifier").allowances.push({ name: "rogue", key: key("rogue") as `0x${string}`, balance: "1", maxRefill: "1", refill: "1", period: String(MONTH), timestamp: "0" });
+  expect(planMotion(base, rogue).writes).toEqual([]);
+  expect(planMotion(base, rogue).needsVote[0]).toContain("the policy of the role governance refuses this write");
+
   // an exit for the emergency role that pays a stranger
   const exit = clone(head);
   const added = roleOf(exit, "safety_modifier", "emergency").targets.find((t) => lower(t.address) === lower(EXAMPLE_VAULT))!;
   added.functions.find((f) => f.selector === TRANSFER)!.conditions[1].compValue = address32(STRANGER) as `0x${string}`;
-  const bad = checkMotion(base, exit, strip(planMotion(base, exit).writes));
+  const planned = planMotion(base, exit);
+  expect(planned.writes.length).toBe(9);
+  expect(planned.needsVote.length).toBe(1);
+  expect(planned.needsVote[0]).toContain("the policy of the role exit-governance refuses this write");
+  const tampered = example();
+  tampered[9] = write(safetyMod, EXIT_GOVERNANCE, "scopeFunction", [EMERGENCY, EXAMPLE_VAULT, TRANSFER, [node(0, 5, 5), node(0, 1, 16, address32(STRANGER))], 0]);
+  const bad = checkMotion(base, exit, tampered);
   expect(bad.ok).toBe(false);
   expect(bad.problems).toEqual(["write 10: the policy of the role exit-governance refuses this call of scopeFunction"]);
   // the example's writes are all evaluated: the check leaves no note

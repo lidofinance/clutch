@@ -549,6 +549,7 @@
     - "Read the modifier's storage. It trusts the deployed Roles code to store what it emits."
     - "Compare a budget's balance after the operator spent it. It notes the spending."
     - "Run against a deployed vault yet: none exists. It runs on the fork rehearsal's vault."
+    - "Pass on logs that start after a modifier's deployment: it fails when a modifier's setup is missing."
     - "Run by itself. The drift detector runs it, and Lido's monitoring does not run that detector yet."
   sources: ["ADR-004#d7", "ADR-004#d13", "INV-016", "doc:ROADMAP.md#roadmap", "ADR-013#proposed-direction",
     "test:test_roundtrip_events_after_the_enabling_vote", "test:test_roundtrip_events_after_an_emergency_revoke",
