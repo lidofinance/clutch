@@ -39,8 +39,8 @@ contract LaunchOnboarding is Recorded {
         file = vm.readFile(FILE);
     }
 
-    /// @dev Lido staking. The emergency role's staking of ETH and its zeroing of the stETH approval are no
-    ///      motion's to write, so the removal leaves them, and they work throughout.
+    /// @dev Lido staking. The emergency role's staking of ETH is no motion's to write, so the removal leaves it,
+    ///      and it works throughout.
     function test_launch_onboarding_of_lido_staking() public {
         _deployAndEnable();
         vm.deal(address(asset), 10 ether);
@@ -49,9 +49,9 @@ contract LaunchOnboarding is Recorded {
         _opRefused(Mainnet.WSTETH, 0, abi.encodeCall(IWstETH.wrap, (1)));
         _emRefused(Mainnet.WSTETH, 0, abi.encodeCall(IWstETH.unwrap, (1)));
         _em(Mainnet.STETH, 1 ether, abi.encodeCall(IStETH.submit, (address(0))));
-        _em(Mainnet.STETH, 0, abi.encodeCall(IERC20.approve, (Mainnet.WSTETH, 0)));
+        _emRefused(Mainnet.STETH, 0, abi.encodeCall(IERC20.approve, (Mainnet.WSTETH, 0)));
 
-        _onboard("lido", 5);
+        _onboard("lido", 6);
         uint256 before = IERC20(Mainnet.STETH).balanceOf(address(asset));
         _op(Mainnet.STETH, 5 ether, abi.encodeCall(IStETH.submit, (address(0))));
         assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)) - before, 5 ether, 2, "the operator staked 5 ETH");
@@ -66,6 +66,12 @@ contract LaunchOnboarding is Recorded {
         _op(Mainnet.WSTETH, 0, abi.encodeCall(IWstETH.unwrap, (wrapped / 2)));
         _em(Mainnet.WSTETH, 0, abi.encodeCall(IWstETH.unwrap, (wrapped - wrapped / 2)));
         assertEq(IERC20(Mainnet.WSTETH).balanceOf(address(asset)), 0, "the emergency role unwrapped the rest");
+        // the emergency role sets an approval of stETH to zero, for any spender, and gives none
+        _op(Mainnet.STETH, 0, abi.encodeCall(IERC20.approve, (Mainnet.WSTETH, 1 ether)));
+        _emRefused(Mainnet.STETH, 0, abi.encodeCall(IERC20.approve, (Mainnet.WSTETH, 1)));
+        _em(Mainnet.STETH, 0, abi.encodeCall(IERC20.approve, (Mainnet.WSTETH, 0)));
+        assertEq(IERC20(Mainnet.STETH).allowance(address(asset), Mainnet.WSTETH), 0, "the emergency role set the approval to zero");
+        _em(Mainnet.STETH, 0, abi.encodeCall(IERC20.approve, (stranger, 0)));
         _write("launch-lido.ndjson");
     }
 
@@ -99,10 +105,10 @@ contract LaunchOnboarding is Recorded {
         _emRefused(Mainnet.SUSDS, 0, abi.encodeCall(IERC4626.redeem, (1, address(asset), address(asset))));
         (,,, uint128 emptied,) = opMod.allowances(bytes32("sky_savings_usds"));
         assertEq(emptied, 0, "the removal emptied the budget");
-        // the zeroing stays with the emergency role: no motion writes it in the launch form
-        _em(Mainnet.USDS, 0, abi.encodeCall(IERC20.approve, (Mainnet.SUSDS, 0)));
+        _emRefused(Mainnet.USDS, 0, abi.encodeCall(IERC20.approve, (Mainnet.SUSDS, 0)));
+        _emRefused(Mainnet.DAI, 0, abi.encodeCall(IERC20.approve, (DAI_USDS, 0)));
 
-        _onboard("sky", 15);
+        _onboard("sky", 17);
         (,,, uint128 budget,) = opMod.allowances(bytes32("sky_savings_usds"));
         assertEq(budget, SKY_SAVINGS_USDS, "the motion set the budget");
         _op(Mainnet.DAI, 0, abi.encodeCall(IERC20.approve, (DAI_USDS, 1_500e18)));
@@ -120,6 +126,12 @@ contract LaunchOnboarding is Recorded {
         // back into DAI, under the converter's ceiling
         _op(Mainnet.USDS, 0, abi.encodeCall(IERC20.approve, (DAI_USDS, 100e18)));
         _op(DAI_USDS, 0, abi.encodeCall(IDaiUsds.usdsToDai, (address(asset), 100e18)));
+        // the emergency role sets the approvals of DAI and USDS to zero, and gives none
+        _op(Mainnet.USDS, 0, abi.encodeCall(IERC20.approve, (DAI_USDS, 50e18)));
+        _emRefused(Mainnet.USDS, 0, abi.encodeCall(IERC20.approve, (DAI_USDS, 1)));
+        _em(Mainnet.USDS, 0, abi.encodeCall(IERC20.approve, (DAI_USDS, 0)));
+        assertEq(IERC20(Mainnet.USDS).allowance(address(asset), DAI_USDS), 0, "the emergency role set the approval to zero");
+        _em(Mainnet.DAI, 0, abi.encodeCall(IERC20.approve, (DAI_USDS, 0)));
         // the emergency role exits to the Asset Safe, and sends the rest to the Aragon Agent only
         _emRefused(Mainnet.SUSDS, 0, abi.encodeCall(IERC4626.redeem, (1, stranger, address(asset))));
         _em(Mainnet.SUSDS, 0, abi.encodeCall(IERC4626.redeem, (shares / 4, address(asset), address(asset))));
@@ -159,25 +171,31 @@ contract LaunchOnboarding is Recorded {
     {
         bytes32[] memory noProof = new bytes32[](0);
         uint32[] memory noIds = new uint32[](0);
-        bytes memory deposit = abi.encodeCall(ILidoEarnDepositQueue.deposit, (uint224(budget), address(0), noProof));
+        bytes memory deposit = abi.encodeCall(ILidoEarnDepositQueue.deposit, (uint224(budget / 2), address(0), noProof));
         _opRefused(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, 1)));
         _opRefused(depositQueue, 0, deposit);
         _opRefused(redeemQueue, 0, abi.encodeCall(ILidoEarnRedeemQueue.redeem, (1)));
         _emRefused(depositQueue, 0, abi.encodeCall(ILidoEarnDepositQueue.cancelDepositRequest, ()));
         _emRefused(redeemQueue, 0, abi.encodeCall(ILidoEarnRedeemQueue.claim, (address(asset), noIds)));
         _emRefused(share, 0, abi.encodeCall(IERC20.transfer, (Mainnet.AGENT, 1)));
-        // the zeroing stays with the emergency role: no motion writes it in the launch form
-        _em(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, 0)));
+        _emRefused(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, 0)));
 
-        _onboard(key, 17);
+        _onboard(key, 18);
         uint256 held = IERC20(token).balanceOf(address(asset));
         assertGe(held, budget, "the Asset Safe holds the token");
         _opRefused(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, uint256(budget) + 1)));
         _opRefused(token, 0, abi.encodeCall(IERC20.approve, (stranger, 1)));
         _op(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, budget)));
         _opRefused(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, 1)));
+        // the operator deposits half of what it approved, so an approval of the other half stays open
         _op(depositQueue, 0, deposit);
-        assertEq(IERC20(token).balanceOf(address(asset)), held - budget, "the deposit left the Asset Safe");
+        assertEq(IERC20(token).balanceOf(address(asset)), held - budget / 2, "the deposit left the Asset Safe");
+        assertEq(IERC20(token).allowance(address(asset), depositQueue), budget - budget / 2, "an approval is left open");
+        // the emergency role sets the open approval to zero, and gives none
+        _emRefused(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, 1)));
+        _em(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, 0)));
+        assertEq(IERC20(token).allowance(address(asset), depositQueue), 0, "the emergency role set the approval to zero");
+        _em(token, 0, abi.encodeCall(IERC20.approve, (stranger, 0)));
         // every claim pays the Asset Safe
         _opRefused(depositQueue, 0, abi.encodeCall(ILidoEarnDepositQueue.claim, (stranger)));
         _emRefused(depositQueue, 0, abi.encodeCall(ILidoEarnDepositQueue.claim, (stranger)));

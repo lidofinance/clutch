@@ -313,11 +313,18 @@ contract ReviewProbe is ReviewBase {
         (bool ok, bytes memory ret) = _emCall(a.usds, _approve(a.susds, 1));
         assertFalse(ok, "a non-zero approval must be refused");
         assertEq(bytes4(ret), CONDITION_VIOLATION, "the modifier, not the token, must refuse it");
-        (ok, ret) = _emCall(a.usds, _approve(attacker, 0));
-        assertFalse(ok, "a spender outside the operator's list must be refused");
+        (ok, ret) = _emCall(a.usds, _approve(attacker, 1));
+        assertFalse(ok, "a non-zero approval to any spender must be refused");
         assertEq(bytes4(ret), CONDITION_VIOLATION, "the modifier, not the token, must refuse it");
         (ok,) = _emCall(a.usds, _approve(a.susds, 0));
         assertTrue(ok, "zeroing an approved spender must pass");
+        // the zeroing takes any spender: it only takes authority away
+        (ok,) = _emCall(a.usds, _approve(attacker, 0));
+        assertTrue(ok, "zeroing any spender must pass");
+        // a token that the operator cannot approve has no zeroing
+        (ok, ret) = _emCall(a.usdt, _approve(attacker, 0));
+        assertFalse(ok, "a token outside the operator's approvals has no zeroing");
+        assertEq(bytes4(ret), CONDITION_VIOLATION, "the modifier, not the token, must refuse it");
     }
 
     function test_emergency_can_durably_stop_operator_reapproval() public {

@@ -83,7 +83,7 @@ test("each launch protocol is one motion: the operator's permissions, the budget
     const names = writes.map((w) => w.about.split(":")[0]);
     expect(new Set(names)).toEqual(new Set(["Clutch operator modifier, as governance", "Clutch safety modifier, as exit-governance"]));
   }
-  expect(counts).toEqual({ lido: 5, weth: 3, sky: 15, earnUsd: 17, earnEth: 17 });
+  expect(counts).toEqual({ lido: 6, weth: 3, sky: 17, earnUsd: 18, earnEth: 18 });
 });
 
 test("the onboarding of an Earn vault writes the budget, the approval, the two queues, and the share's way to the Agent", () => {
@@ -91,6 +91,7 @@ test("the onboarding of an Earn vault writes the budget, the approval, the two q
   const calls = writes.map((w) => ROLES.parseTransaction({ data: w.data })!.name);
   expect(calls.filter((name) => name === "setAllowance").length).toBe(1);
   expect(calls.filter((name) => name === "scopeTarget").length).toBe(5);
+  expect(writes.some((w) => w.about.endsWith("add approve(address,uint256) on USDC for the role emergency, with 3 condition nodes"))).toBe(true);
   expect(writes.some((w) => w.about.endsWith("add transfer(address,uint256) on earnUSD share for the role emergency, with 2 condition nodes"))).toBe(true);
   // without the protocol, the operator holds no queue and no approval of USDC, and the budget is gone
   const operator = roleOf(base, "operator_modifier", "operator");
@@ -101,17 +102,20 @@ test("the onboarding of an Earn vault writes the budget, the approval, the two q
   expect(roleOf(base, "operator_modifier", "operator").targets.filter((t) => t.name?.startsWith("earnETH")).length).toBe(2);
 });
 
-// What only a vote gives: the exit-governance role writes an approval set to zero only for any spender, and it
-// grants no call with ETH.
-test("no motion writes the emergency role's zeroing in the launch form, or its staking of ETH", () => {
+// What only a vote gives: the exit-governance role grants no call with ETH. The zeroing of an approval takes any
+// spender in the launch policy (ADR 005, decision 34), so a motion writes it.
+test("a motion writes the emergency role's zeroing, and no motion writes its staking of ETH", () => {
   const stays = Object.fromEntries(LAUNCH_PROTOCOLS.map((p) => [p.key, of(p.key).stays.map((s) => words(s.part))]));
   expect(stays).toEqual({
-    lido: ["submit(address) on stETH for the role emergency", "approve(address,uint256) on stETH for the role emergency"],
+    lido: ["submit(address) on stETH for the role emergency"],
     weth: [],
-    sky: ["approve(address,uint256) on DAI for the role emergency", "approve(address,uint256) on USDS for the role emergency"],
-    earnUsd: ["approve(address,uint256) on USDC for the role emergency"],
-    earnEth: ["approve(address,uint256) on wstETH for the role emergency"],
+    sky: [],
+    earnUsd: [],
+    earnEth: [],
   });
+  for (const [key, token] of [["lido", "stETH"], ["sky", "DAI"], ["sky", "USDS"], ["earnUsd", "USDC"], ["earnEth", "wstETH"]]) {
+    expect(of(key).writes.some((w) => w.about === `Clutch safety modifier, as exit-governance: add approve(address,uint256) on ${token} for the role emergency, with 3 condition nodes`)).toBe(true);
+  }
   for (const p of LAUNCH_PROTOCOLS) {
     const { base, stays: list } = of(p.key);
     for (const { part, why } of list) {
@@ -128,8 +132,8 @@ test("the owner's removal revokes each function, each target that keeps none, an
   expect(calls.map((c) => c.name)).toEqual(["revokeFunction", "revokeFunction", "revokeFunction"]);
   const sky = of("sky").removal;
   const names = sky.data.map((data) => ROLES.parseTransaction({ data })!.name);
-  // seven permissions of the operator and three of the emergency role; the two zeroings stay
-  expect(names.filter((n) => n === "revokeFunction").length).toBe(10);
+  // seven permissions of the operator and five of the emergency role
+  expect(names.filter((n) => n === "revokeFunction").length).toBe(12);
   // the converter, DAI and sUSDS for the operator, and sUSDS for the emergency role, keep no function
   expect(names.filter((n) => n === "revokeTarget").length).toBe(4);
   expect(names.filter((n) => n === "setAllowance").length).toBe(1);

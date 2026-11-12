@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:02:51Z
+  at: 2026-11-12T22:24:23Z
 verified: []
 sources:
   - id: s1
@@ -151,6 +151,9 @@ sources:
   - id: s47
     resource: "urn:clutch:interview:2026-11-12-owed-motions"
     title: EM's confirmation of two readings and EM's request for the launch protocols' motions, the token removal and the batch hash command, 2026-11-12; the transcript is not in the repository
+  - id: s48
+    resource: "urn:clutch:interview:2026-11-12-od-139"
+    title: EM's decision on the form of the emergency role's zeroing of an approval, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -160,6 +163,18 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — OD-139 decided: the emergency role's zeroing takes any spender
+
+The agent built the launch protocols' onboarding motions and found that no motion can write the emergency role's zeroing of an approval in the launch form, which listed the operator's spenders. A spender that entered through the policy's source therefore needed a DAO vote. The agent opened OD-139 with two options: (A) the launch policy uses the form for any spender, which is the form that the exit-governance role writes; (B) the policy keeps the list. It recommended A. EM wrote:
+
+> OD-139: A
+
+Recorded as:
+
+- (OD-139) In the launch policy, the emergency role's zeroing of an approval takes any spender, for each token that the operator can approve ([ADR 005](/adr/005-account-graph-and-roles.md), decision 34). A zeroing only takes authority away, and it is the one form that a motion writes (INV-025).
+- What follows from it, built with the change: a spender that the policy's source adds compiles to two writes and nothing that needs a vote; each launch protocol's onboarding motion now writes the protocol's zeroing too; and the emergency role's staking of ETH is the only part of the launch policy that no motion can write ([ADR 013](/adr/013-one-easy-track-factory.md)).
+- One point is the agent's addition; EM's words do not name it. The compiler refuses a policy whose operator can approve a token that the emergency role cannot set to zero, and an approval of the emergency role in any other form (INV-027). [s48]
 
 ## 2026-11-12 — the launch protocols' onboarding motions, a token's retirement and the batch hash command, built; OD-139 opened
 

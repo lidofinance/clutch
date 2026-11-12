@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T19:10:44Z
+  at: 2026-11-12T22:24:23Z
 verified: []
 sources:
   - id: s1
@@ -87,7 +87,7 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market; 
 ## Confirmation
 
 - INV-008 and INV-015 in the [invariants](/specs/invariants.md); INV-003 for the converter's receiver.
-- Each protocol of the launch policy on the Asset Safe has an onboarding motion, built from the committed policy and enacted through the live Easy Track: Lido staking, WETH, Sky, earnUSD and earnETH (`test_launch_onboarding_of_lido_staking`, `test_launch_onboarding_of_weth`, `test_launch_onboarding_of_sky`, `test_launch_onboarding_of_earn_usd`, `test_launch_onboarding_of_earn_eth`). The emergency role's staking of ETH and its zeroing in the launch form come from a vote only (OD-139).
+- Each protocol of the launch policy on the Asset Safe has an onboarding motion, built from the committed policy and enacted through the live Easy Track: Lido staking, WETH, Sky, earnUSD and earnETH (`test_launch_onboarding_of_lido_staking`, `test_launch_onboarding_of_weth`, `test_launch_onboarding_of_sky`, `test_launch_onboarding_of_earn_usd`, `test_launch_onboarding_of_earn_eth`). Only the emergency role's staking of ETH comes from a vote.
 - One motion onboards an ERC-4626 lending vault with the writes of decision 13, and the operator lends and the emergency role exits (`test_uf_motion_onboards_an_erc4626_lending_vault`). The test uses a deployed ERC-4626 vault as a stand-in. Owed: the same test against Lido Lend's lender vault, once it is deployed on mainnet.
 
 ## Reversal conditions
