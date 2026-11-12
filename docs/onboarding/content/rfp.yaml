@@ -15,8 +15,8 @@ properties:
     sources: ["ADR-008#d19", "ADR-007#d17", "ADR-007#d20", "ADR-005#context", "ADR-005#proposed-direction",
       "INV-001", "INV-021", "INV-023"]
   - name: Default-deny permissions
-    how: "Each role reaches only named targets and functions, and every receiver is pinned to the vault. A motion adds a permission only through a typed shape of the universal factory, fixed at audit time. It never grants administration, or a delegatecall other than the order signer's."
-    sources: ["ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7", "ADR-013#d8", INV-003, INV-004,
+    how: "Each role reaches only named targets and functions, and every receiver is pinned to the vault. A motion adds a permission as a raw write of the universal factory, which LDO holders can object to for 72 hours. It never grants administration, or a delegatecall other than the order signer's."
+    sources: ["ADR-005#proposed-direction", "ADR-006#d9", "ADR-006#d10", "ADR-013#d11", "ADR-013#d8", INV-003, INV-004,
       INV-034]
   - name: Rapid risk reduction
     how: "The emergency Safe revokes, exits and returns assets at once, and no guard sits on its path. It can also switch the operator off. Fork drills must show each action started within six hours."
@@ -69,15 +69,15 @@ sections:
     items:
       - asked: "Easy Track manages the operator allowlist: it adds or removes an asset, a protocol target or a function selector, and changes a parameter constraint inside an allowed function."
         verdict: changed
-        clutch: "Motions add and remove through one [[universal factory]], fixed at audit time. A motion widens a permission only through a typed [[shape]], such as a vault, a market or an approval list; a raw write only narrows. A budget motion sets budgets within their ceilings, and a ceiling motion changes a ceiling within its limit. A motion also adds a token to the orders account."
-        why: "A motion that carried its own condition tree could widen authority past what the DAO approved, so every widening fills a shape."
-        sources: ["ADR-006#context", "ADR-013#d2", "ADR-013#d5", "ADR-013#d7", "ADR-013#d10", "ADR-013#d13",
-          "ADR-013#proposed-direction", "ADR-007#d41", "OD-09", "OD-70", "INV-004", "INV-034", "INV-027", "ADR-006#options-considered"]
+        clutch: "Motions add and remove through one [[universal factory]], fixed at audit time. A motion is a list of [[raw write|raw writes]]: permissions with their condition trees, budgets, and actions such as a burn. The factory checks no write's content. The policy of each motion role refuses administration, membership and delegatecall, and the [[objection window]] bounds the rest. A motion also adds a token to the orders account."
+        why: "A factory that built each permission from typed entries took 32,645 bytes of code against 3,371, and each new kind of protocol needed a changed factory and a vote. EM chose raw writes."
+        sources: ["ADR-006#context", "ADR-013#d2", "ADR-013#d5", "ADR-013#d10", "ADR-013#d11",
+          "ADR-013#proposed-direction", "ADR-013#options-considered", "ADR-007#d41", "OD-09", "OD-70", "OD-134", "INV-004", "INV-034", "INV-027", "ADR-006#options-considered"]
       - asked: "Lido contributors design, build, audit, deploy and maintain the Easy Track helper contracts. The provider confirms that its access control exposes the administration functions and works safely with this path."
         verdict: kept
-        clutch: "The universal Easy Track factory, with the thin companion contracts that it creates, is the only new code. Lido builds it in phase 2, and an external audit covers it in phase 3, with CoW's order signer, which has no known audit. The governance role calls six administration functions of the Roles modifier, each one guarded."
+        clutch: "The universal Easy Track factory is the only new code. Lido builds it in phase 2, and an external audit covers it in phase 3, with CoW's order signer, which has no known audit. The governance role calls six administration functions of the Roles modifier, each one guarded."
         sources: ["ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "INV-004", "doc:ROADMAP.md#roadmap",
-          "ADR-007#d40", "ADR-013#d17"]
+          "ADR-007#d40"]
       - asked: "The Aragon Agent stays the only owner of the Asset Safe. Easy Track gets no ownership and no unrestricted execution, and it executes only the permission changes that the Operator Safe proposes in motions."
         verdict: changed
         clutch: "Aragon Voting, not the Aragon Agent, owns the Asset Safe. Easy Track never receives authority over the vault's owner or the Agent. The universal factory holds narrow motion roles and uses them only in an enacted motion's one call; Easy Track's executor holds no role. The committee's Safe, as the factory's [[trusted caller]], creates every motion."
@@ -103,8 +103,8 @@ sections:
       - text: "A restart role on the safety modifier: after the switch, a motion enables the operator modifier again, and the role can do nothing else."
         why: "No emergency body resumes what it stopped, and after the enabling vote no administrative action needs an Aragon vote."
         sources: ["ADR-013#d3", "ADR-013#d12", "INV-035"]
-      - text: "A [[version]] for each scope that a motion writes, and a [[motion counter]] that the emergency Safe raises at every stop."
-        why: "Motions have no order, so two motions on one scope could undo each other. The counter makes every open motion fail at once, so a stale motion cannot undo a revoke."
+      - text: "A [[policy version]] for the motions that write permissions or budgets, and a [[motion counter]] that the emergency Safe raises at every stop."
+        why: "Motions have no order, so two motions could undo each other's writes. The counter makes every open motion fail at once, so a stale motion cannot undo a revoke."
         sources: ["ADR-013#d2", "ADR-013#d10", "ADR-013#context", "INV-033"]
     tech: "The governance role holds `scopeTarget`, `revokeTarget`, `allowFunction`, `revokeFunction`, `scopeFunction` and `setAllowance` on the operator modifier. The first five pin the role key to `operator` and refuse the Asset Safe and its modules as targets; `allowFunction` and `scopeFunction` allow no delegatecall; `setAllowance` takes only the operator's budget keys."
     sources: ["doc:docs/research/request-for-solution-2026-10-07.md#governance-and-easy-track", "ADR-006#d8",
@@ -114,24 +114,25 @@ sections:
     title: Permission-change paths
     items:
       - asked: "Adding or widening a permission and removing one are separate actions. A removal cannot add or widen, and an expansion cannot make an arbitrary call."
-        verdict: kept
-        clutch: "The universal factory's typed shapes widen, and its raw writes only narrow: a narrowing write writes the scope's complete content without the removed entries. No shape can make an arbitrary call. An emergency removal is the emergency role's revoke, which cannot grant anything."
-        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-013#d7", "ADR-013#proposed-direction",
-          "INV-004", "INV-029", "INV-034"]
+        verdict: changed
+        clutch: "One kind of motion carries both: a raw write can add, widen or remove, and the factory does not tell them apart. An expansion cannot reach administration, membership or a delegatecall, but it can grant any plain call on an ordinary target. An emergency removal is the emergency role's revoke, which cannot grant anything."
+        why: "EM chose raw writes over a factory that checks each write's direction. The objection window and the review of each motion against the policy's source carry what that check carried."
+        sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-013#d11", "ADR-013#proposed-direction", "ADR-013#consequences",
+          "INV-004", "INV-034", "OD-134"]
       - asked: "An expansion waits through a three-day objection period."
         verdict: kept
         clutch: "Every motion has a 72-hour [[objection window]]: the timelock for every structural increase of exposure, such as a new target or a higher budget."
         sources: ["ADR-006#d11", "ADR-006#context", "ADR-010#d19"]
       - asked: "A standard removal goes through an Easy Track removal motion, with the same three-day objection period."
         verdict: kept
-        clutch: "A routine removal is a narrowing motion of the universal factory, with the same objection window."
-        sources: ["ADR-006#d14", "ADR-013#d7", "runbook:Remove a strategy", "ADR-006#d7"]
+        clutch: "A routine removal is a motion of the universal factory that revokes the permission, or writes it again without the removed entries, with the same objection window."
+        sources: ["ADR-006#d14", "ADR-013#d11", "runbook:Remove a strategy", "ADR-006#d7"]
       - asked: "For an urgent risk, the emergency authority blocks or revokes within hours, and a durable change follows later."
         verdict: kept
         clutch: "The emergency Safe revokes the operator's targets and functions at once, posts on the forum afterwards, and can switch the operator off. It also raises the motion counter, so no queued motion undoes the revoke. A revoke is durable: only a motion or a DAO vote grants the permission again."
         sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#d25", "ADR-005#d26", "ADR-013#d10",
           "ADR-013#d12", "INV-009", "INV-033", "lip:part-6"]
-    sources: ["doc:docs/research/request-for-solution-2026-10-07.md#permission-change-paths", "ADR-013#d7"]
+    sources: ["doc:docs/research/request-for-solution-2026-10-07.md#permission-change-paths", "ADR-013#d11"]
 
   - id: assets
     title: Assets and permissions
@@ -276,9 +277,9 @@ sections:
       - text: "Returns: funds go back to the Aragon Agent only in an emergency or a recovery. The committee's Safe may also send any vault token to the Agent, with no motion and no vote."
         why: "A return to the treasury loses nothing; at worst the vault stops working. Redemption and fund-exit proceeds stay in the vault."
         sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#consequences", "INV-038"]
-      - text: "Budgets: each approval to a protocol spender spends that spender's [[budget key]], which refills no more often than every 30 days. A motion raises a [[ceiling]] at most twofold, at most once in 15 days."
+      - text: "Budgets: each approval to a protocol spender spends that spender's [[budget key]], which refills no more often than every 30 days. A motion sets a budget, and the objection window bounds its size."
         why: "A spender can pull an approval without any deposit, so the approval is what must be bounded."
-        sources: ["ADR-009#d13", "ADR-009#d15", "ADR-013#d13", "INV-008", "INV-012", "INV-036"]
+        sources: ["ADR-009#d13", "ADR-009#d15", "ADR-013#d11", "INV-008", "INV-012"]
       - text: "Reports: a monthly report that anyone can re-run at a pinned block, and a cap reading every two weeks on IPFS, Lido's next to the policy provider's own."
         why: "Tokenholders hold the committee to the mandate through its reports."
         sources: ["ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", "ADR-009#d40", "ADR-009#d41",

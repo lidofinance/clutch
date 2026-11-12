@@ -384,18 +384,44 @@ abstract contract EnabledVault is RehearsalBase {
     // Motions of the universal factory
     // ---------------------------------------------------------------------
 
-    function _op(uint8 kind, bytes memory data) internal pure returns (UniversalFactory.Op memory) {
-        return UniversalFactory.Op(kind, data);
+    /// @dev One raw write: `role` on `modifier_` calls `to` with `data`.
+    function _w(IRoles modifier_, bytes32 role, address to, bytes memory data)
+        internal
+        pure
+        returns (UniversalFactory.Write memory)
+    {
+        return UniversalFactory.Write(address(modifier_), role, to, data);
     }
 
-    function _one(UniversalFactory.Op memory op) internal pure returns (UniversalFactory.Op[] memory ops) {
-        ops = new UniversalFactory.Op[](1);
-        ops[0] = op;
+    /// @dev A write of the governance role on the operator modifier: a call of the modifier on itself.
+    function _govern(bytes memory write) internal view returns (UniversalFactory.Write memory) {
+        return _w(opMod, GOVERNANCE, address(opMod), write);
     }
 
-    /// @dev A motion's calldata: the counter that the motion saw, and its operations.
-    function _calldata(UniversalFactory.Op[] memory ops) internal view returns (bytes memory) {
-        return abi.encode(uf.epoch(), ops);
+    /// @dev A budget key in the form that the governance role's guard accepts for a new spender: "k:", then the
+    ///      spender, then the token's first ten bytes (ADR 013, decision 9).
+    function _key(address token, address spender) internal pure returns (bytes32) {
+        return bytes32(abi.encodePacked(bytes2("k:"), spender, bytes10(bytes20(token))));
+    }
+
+    /// @dev A budget under `key`: `perMonth` now, and again every 30 days.
+    function _budgetKey(bytes32 key, uint128 perMonth) internal view returns (UniversalFactory.Write memory) {
+        return _govern(abi.encodeCall(IRoles.setAllowance, (key, perMonth, perMonth, perMonth, MONTH, 0)));
+    }
+
+    /// @dev A budget for a new spender of a token, under its derived key.
+    function _budget(address token, address spender, uint128 perMonth) internal view returns (UniversalFactory.Write memory) {
+        return _budgetKey(_key(token, spender), perMonth);
+    }
+
+    function _one(UniversalFactory.Write memory w) internal pure returns (UniversalFactory.Write[] memory ws) {
+        ws = new UniversalFactory.Write[](1);
+        ws[0] = w;
+    }
+
+    /// @dev A motion's calldata: the counter and the policy version that the motion saw, and its writes.
+    function _calldata(UniversalFactory.Write[] memory ws) internal view returns (bytes memory) {
+        return abi.encode(uf.epoch(), uf.policyVersion(), ws);
     }
 
     function _create(bytes memory cd) internal returns (uint256 id) {
@@ -427,43 +453,44 @@ abstract contract EnabledVault is RehearsalBase {
         assertFalse(ok, "the enactment fails");
     }
 
-    /// @dev Creates a motion, waits out its objection window and enacts it.
-    function _motion(UniversalFactory.Op[] memory ops) internal returns (uint256 id) {
-        bytes memory cd = _calldata(ops);
-        id = _create(cd);
+    /// @dev Creates a motion, waits out its objection window and enacts it, under EIP-7825's cap on a
+    ///      transaction's gas. Returns the enactment's gas.
+    function _motion(UniversalFactory.Write[] memory ws) internal returns (uint256 gasUsed) {
+        bytes memory cd = _calldata(ws);
+        uint256 id = _create(cd);
         _afterWindow();
-        _enact(id, cd);
+        vm.prank(anyone);
+        uint256 g = gasleft();
+        IEasyTrack(Mainnet.EASY_TRACK).enactMotion(id, cd);
+        gasUsed = g - gasleft();
+        assertLt(gasUsed, 16_777_216, "under EIP-7825's cap");
     }
 
-    function _approvalsOp(address token, UniversalFactory.Entry[] memory current, UniversalFactory.Entry[] memory next)
+    /// @dev A motion that Easy Track refuses at creation, with `reason`.
+    function _refusedAtCreation(UniversalFactory.Write[] memory ws, bytes memory reason) internal {
+        bytes memory cd = _calldata(ws);
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        vm.expectRevert(reason);
+        IEasyTrack(Mainnet.EASY_TRACK).createMotion(address(uf), cd);
+    }
+
+    /// @dev The tree of one function in the compiled launch policy, for `role` on `modifier_`.
+    function _tree(IRoles modifier_, bytes32 role, address target, bytes4 selector)
         internal
-        view
-        returns (UniversalFactory.Op memory)
+        returns (IRoles.ConditionFlat[] memory)
     {
-        return _op(uf.APPROVALS(), abi.encode(token, current, next));
-    }
-
-    function _budgetOp(address token, address spender, uint128 perMonth, bytes32 expected)
-        internal
-        view
-        returns (UniversalFactory.Op memory)
-    {
-        return _op(uf.BUDGET(), abi.encode(token, spender, perMonth, perMonth, perMonth, MONTH, expected));
-    }
-
-    function _ceilingOp(bytes32 key, uint256 expected, uint256 value) internal view returns (UniversalFactory.Op memory) {
-        return _op(uf.CEILING(), abi.encode(key, expected, value));
-    }
-
-    /// @dev A token's introduction: its first approval list and both of its ceilings
-    ///      (ADR 013, decision 15).
-    function _introduceOp(
-        address token,
-        UniversalFactory.Entry[] memory list,
-        uint256 budgetCeiling,
-        uint256 approvalCeiling
-    ) internal view returns (UniversalFactory.Op memory) {
-        return _op(uf.INTRODUCE(), abi.encode(token, list, budgetCeiling, approvalCeiling));
+        vm.pauseGasMetering();
+        VoteBuilder.Item[] memory calls = _policyCalls(address(modifier_), address(0));
+        for (uint256 i = 0; i < calls.length; i++) {
+            if (bytes4(calls[i].data) != IRoles.scopeFunction.selector) continue;
+            (bytes32 k, address t, bytes4 s, IRoles.ConditionFlat[] memory c,) =
+                abi.decode(_args(calls[i].data), (bytes32, address, bytes4, IRoles.ConditionFlat[], uint8));
+            if (k == role && t == target && s == selector) {
+                vm.resumeGasMetering();
+                return c;
+            }
+        }
+        revert("the artifact lacks the tree");
     }
 
     // ---------------------------------------------------------------------

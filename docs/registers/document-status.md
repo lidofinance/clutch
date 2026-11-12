@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-12T13:00:25Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 ---
 
@@ -25,20 +25,20 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | human-reviewed | accepted | 2026-11-11 | human:em (recorded) |
 | [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-11-11 | human:em (recorded) |
 | [adr/005-account-graph-and-roles.md](/adr/005-account-graph-and-roles.md) | Decision | slop | proposed | 2026-11-12 | none |
-| [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | slop | proposed | 2026-11-11 | none |
-| [adr/007-swapping-through-an-orders-account.md](/adr/007-swapping-through-an-orders-account.md) | Decision | slop | proposed | 2026-11-11 | none |
+| [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | slop | proposed | 2026-11-12 | none |
+| [adr/007-swapping-through-an-orders-account.md](/adr/007-swapping-through-an-orders-account.md) | Decision | slop | proposed | 2026-11-12 | none |
 | [adr/008-funding-through-existing-payments.md](/adr/008-funding-through-existing-payments.md) | Decision | slop | proposed | 2026-11-12 | none |
-| [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-11-11 | none |
+| [adr/009-budgets-caps-reporting-and-monitoring.md](/adr/009-budgets-caps-reporting-and-monitoring.md) | Decision | slop | proposed | 2026-11-12 | none |
 | [adr/010-pre-execution-screening.md](/adr/010-pre-execution-screening.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [adr/011-launch-scope.md](/adr/011-launch-scope.md) | Decision | slop | proposed | 2026-11-12 | none |
 | [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-11-11 | none |
 | [adr/013-one-easy-track-factory.md](/adr/013-one-easy-track-factory.md) | Decision | slop | proposed | 2026-11-12 | none |
 | [adr/014-funding-by-tranche-votes.md](/adr/014-funding-by-tranche-votes.md) | Decision | slop | proposed | 2026-11-12 | none |
 | [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-11-11 | none |
-| [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-05 | none |
+| [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-12 | none |
 | [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-11-12 | none |
 | [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-12 | none |
-| [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-11 | none |
+| [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-12 | none |
 | [research/ai-first-practice-2026-09.md](/research/ai-first-practice-2026-09.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/cfo-feedback-2026-10-13.md](/research/cfo-feedback-2026-10-13.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/chain-reads-2026-09-30.md](/research/chain-reads-2026-09-30.md) | Research Note | slop |  | 2026-11-11 | none |
@@ -52,16 +52,16 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/lido-lend-insurance-2026-11-12.md](/research/lido-lend-insurance-2026-11-12.md) | Research Note | slop |  | 2026-11-12 | none |
 | [research/operator-safe-review-2026-10-15.md](/research/operator-safe-review-2026-10-15.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/orders-account-fork-tests-2026-11-07.md](/research/orders-account-fork-tests-2026-11-07.md) | Research Note | slop |  | 2026-11-11 | none |
-| [research/orders-motion-roles-2026-11-08.md](/research/orders-motion-roles-2026-11-08.md) | Research Note | slop |  | 2026-11-11 | none |
-| [research/orders-token-motions-2026-11-08.md](/research/orders-token-motions-2026-11-08.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/orders-motion-roles-2026-11-08.md](/research/orders-motion-roles-2026-11-08.md) | Research Note | slop |  | 2026-11-12 | none |
+| [research/orders-token-motions-2026-11-08.md](/research/orders-token-motions-2026-11-08.md) | Research Note | slop |  | 2026-11-12 | none |
 | [research/raw-factory-prototype-2026-11-12.md](/research/raw-factory-prototype-2026-11-12.md) | Research Note | slop |  | 2026-11-12 | none |
 | [research/recovery-and-withdrawal-queue-2026-10-05.md](/research/recovery-and-withdrawal-queue-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/request-for-solution-2026-10-07.md](/research/request-for-solution-2026-10-07.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-11-11 | none |
-| [research/universal-factory-prototype-2026-11-05.md](/research/universal-factory-prototype-2026-11-05.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/universal-factory-prototype-2026-11-05.md](/research/universal-factory-prototype-2026-11-05.md) | Research Note | slop |  | 2026-11-12 | none |
 | [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-11-11 | none |
-| [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-11 | none |
+| [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-12 | none |
 | [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-12 | none |
 | [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-12 | none |
 | [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-12 | none |

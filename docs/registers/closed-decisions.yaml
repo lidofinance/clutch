@@ -1014,5 +1014,20 @@
   closed: 2026-11-12
   log:
     - "2026-11-12 — OD-134: the factory takes raw writes"
-  adr: [ADR-013#d11]
-  refines: [OD-102]
+    - "2026-11-12 — OD-135 decided, and the switch to raw writes"
+  adr: [ADR-013#d11, ADR-013#d9, ADR-013#d14]
+  see: [/research/raw-factory-prototype-2026-11-12.md]
+  replaces:
+    - {od: OD-102, part: true}
+    - {od: OD-105}
+    - {od: OD-113}
+    - {od: OD-117}
+    - {od: OD-120}
+- id: OD-135
+  question: "How does the raw factory keep two motions from undoing each other?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-135 decided, and the switch to raw writes"
+  adr: [ADR-013#d10]
+  see: [/research/raw-factory-prototype-2026-11-12.md]
+  refines: [OD-100, OD-134]

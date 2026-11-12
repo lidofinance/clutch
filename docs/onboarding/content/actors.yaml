@@ -169,7 +169,7 @@
     - "Act as the timelock for every structural increase of exposure: a new target or a higher budget waits for the objection window."
   cannot:
     - "Shorten a motion's window."
-    - "Put its motions in order. Two motions on one scope can both pass their checks at creation, so the universal factory keeps a [[version]] for each scope."
+    - "Put its motions in order. Two motions can both pass their checks at creation, so the universal factory keeps a [[policy version]] for the motions that write permissions or budgets."
     - "Expire a motion. A motion stays open until it enacts or is cancelled, so the [[motion counter]] makes a stale motion fail."
     - "Reach the Aragon Agent."
     - "Hold more than 20 open motions at once. Every committee shares the limit, and a stale motion holds a slot until it is cancelled."
@@ -204,39 +204,40 @@
   name: The universal factory
   status: new
   label: specified
-  what: "One new Easy Track factory that builds every Clutch [[motion]] and holds the roles that motions use. Its Easy Track registration is its address book: one call, its own `applyMotion`. EM chose raw writes on 2026-11-12: after the switch, the factory applies raw writes that may also widen, with the objection window as the only bound. Until the switch, the repository's factory is the typed one that this card describes, and a prototype of the raw one stands beside it."
+  what: "One new Easy Track factory that carries every Clutch [[motion]] and holds the roles that motions use. Its Easy Track registration is its address book: one call, its own `applyMotion`. A motion is a list of [[raw write|raw writes]], and the factory checks no write's content: the policy of each motion role decides what passes, and the [[objection window]] is the bound on where funds go."
   controlled_by: "Nobody can upgrade it. The committee's Safe is its [[trusted caller]], fixed at deployment. Aragon Voting registers it in Easy Track, and can raise its [[motion counter]] as its owner. A changed factory is a new registration, by vote."
   can:
-    - "Check an enacted motion again in `applyMotion`, and then make its writes through its roles: governance and insurance funding on the operator modifier, exit governance and restart on the safety modifier, governance and approvals on the orders modifier, and the first-loss burn and insurance roles on the first-loss modifier."
+    - "Check an enacted motion again in `applyMotion`, and then make its writes, in order, through its roles: governance and insurance funding on the operator modifier, exit governance and restart on the safety modifier, governance and approvals on the orders modifier, and the first-loss burn and insurance roles on the first-loss modifier."
     - "Fit a motion that adds a token under EIP-7825's gas cap, as one call: Easy Track's executor copies a script into memory three times for each call that the script makes."
-    - "Show, through `writesOf`, the writes that a motion makes if it is enacted now."
-    - "Widen a permission only through a typed [[shape]]."
-    - "Narrow a permission with a raw write: a revoke, or a complete list that removes entries. A routine removal is such a write."
-    - "Bring back a target that the emergency role revoked as a whole: a restore scopes it again, and the permissions stored under it come back as they were. It writes nothing new."
-    - "Restore the orders account after an emergency stop, in one motion: the operator's targets, order trees, cancels and returns for the current lists, and the relayer approvals that the motion names."
-    - "Derive a new [[budget key]] for each new spender, so the policy holds no spare keys."
-    - "Keep a [[version]] for each scope that a motion writes. It checks the versions at creation and again at enactment, and stores the new versions before it writes."
-    - "Change a [[ceiling]], within the ceiling's limit."
-    - "Carry the other motions: an onboarding, budgets, a token for the orders account, the restart, the first-loss burn and the insurance funds."
+    - "Show a motion's writes: they are the motion's calldata, which `decodeEVMScriptCallData` returns."
+    - "Widen a permission: a motion's write can grant any plain call on an ordinary target, with the condition tree that the motion carries."
+    - "Remove a permission by a revoke, or by a write of the permission without the removed entries. A routine removal is such a motion."
+    - "Bring back a target that the emergency role revoked as a whole: a motion scopes it again, and the permissions stored under it work as before."
+    - "Restore the orders account after an emergency stop, in one motion: the operator's targets, order trees, cancels and returns, and the relayer approvals that the motion names."
+    - "Set a [[budget key]], also a new one for a new spender, under its derived key, so the policy holds no spare keys."
+    - "Keep one [[policy version]]. A motion that writes on a modifier fails if another such motion enacted after its creation, and a motion that only acts is exempt."
+    - "Carry the other motions: an onboarding, a token for the orders account, the restart, the first-loss burn and the insurance funds."
   cannot:
-    - "Grant a delegatecall, except the order signer's on the orders account, or reach an administrative target or function. The governance role's guards stay."
-    - "Take a condition tree that widens a permission. A raw write only narrows (INV-034)."
+    - "Grant a delegatecall, except the order signer's on the orders account, or reach an administrative target or function. The guards of each motion role's policy refuse such a write, and the whole motion fails."
+    - "Check that a widened permission pins its receivers, spends a budget or has an emergency exit. Reviewers check this in the 72 hours (INV-034)."
+    - "Write through any contract but the vault's four modifiers, or carry more than 64 writes in one motion."
     - "Pay from the treasury. Its address book holds no payment call (INV-037)."
     - "Use its roles outside an enacted motion. Only Easy Track's executor calls `applyMotion` (INV-032)."
-    - "Enact a motion if a version that it names, or the [[motion counter]], changed since its creation (INV-033)."
+    - "Enact a motion if the [[motion counter]] changed since its creation, or a permission motion if the policy version changed (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke."
-  numbers: ["a ceiling's raise: at most twofold, once in 15 days", "the prototype: 20,121 of EIP-170's 24,576 bytes, and its orders shape, a thin companion contract, 12,524", "a motion that adds a token: 7,893,034 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 7,102,641 gas", "external audit in phase 3"]
-  sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d9",
-    "ADR-013#d10", "ADR-013#d11", "ADR-013#d13", "ADR-013#proposed-direction", "ADR-013#consequences",
-    "ADR-007#d41", "ADR-006#d9", "ADR-006#d10", "ADR-011#d13", "OD-09", "OD-70", "ADR-013#d15", "OD-117",
+  numbers: ["3,371 of EIP-170's 24,576 bytes", "at most 64 writes in one motion", "a motion that adds a token: 16 writes, 7,790,415 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 9 writes, 3,622,403 gas", "a motion that onboards an ERC-4626 vault: 9 writes, 2,140,115 gas", "external audit in phase 3"]
+  sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d8", "ADR-013#d9",
+    "ADR-013#d10", "ADR-013#d11", "ADR-013#d16", "ADR-013#proposed-direction", "ADR-013#consequences",
+    "ADR-007#d41", "ADR-006#d9", "ADR-006#d10", "ADR-006#d14", "ADR-011#d13", "OD-09", "OD-70", "OD-134", "OD-135",
     "ADR-013#d18", "ADR-013#d12", "ADR-006#d13", "ADR-008#d23", "ADR-014#d7", "INV-035", "INV-040",
-    "test:test_uf_the_factory_holds_the_motion_roles", "test:test_factory_orders_token_motion", "INV-029",
-    "INV-032", "INV-033", "INV-034", "INV-036", "INV-037", "lip:part-4", "doc:ROADMAP.md#roadmap",
-    "doc:docs/research/orders-token-motions-2026-11-08.md#one-contract-does-not-hold-the-shape",
-    "doc:docs/research/universal-factory-prototype-2026-11-05.md#measures-for-the-choice-between-options-a-and-b",
-    "doc:docs/research/universal-factory-prototype-2026-11-05.md#decision-15-built-on-2026-11-06",
-    "doc:docs/research/universal-factory-prototype-2026-11-05.md#the-restore-of-a-revoked-target-built-on-2026-11-06",
-    "test:test_uf_restore_brings_back_a_revoked_target", "OD-119",
+    "test:test_uf_the_factory_holds_the_motion_roles", "test:test_factory_orders_token_motion",
+    "INV-032", "INV-033", "INV-034", "INV-037", "lip:part-4", "doc:ROADMAP.md#roadmap",
+    "doc:docs/research/raw-factory-prototype-2026-11-12.md#the-switch-made-on-2026-11-12",
+    "test:test_uf_motion_can_widen_without_a_receiver_or_a_budget",
+    "test:test_uf_motion_onboards_an_erc4626_lending_vault",
+    "test:test_uf_refuses_another_modifier_and_an_empty_or_oversized_motion",
+    "test:test_uf_policy_version_orders_permission_writes_and_spares_actions",
+    "test:test_uf_restore_motion_brings_back_a_revoked_target", "OD-119",
     "test:test_factory_orders_restore_after_an_emergency_stop", "ADR-013#confirmation"]
 
 # --- Emergency Safe -----------------------------------------------------------------------------
@@ -360,7 +361,7 @@
     - "Use delegatecall on the Asset Safe. Its one delegatecall, to CoW's order signer, is on the orders account, and the compiler refuses any other."
     - "Reach the [[first-loss Safe]]. The committee's Safe acts there through a separate role."
   numbers: ["one role key: `operator`"]
-  sources: ["ADR-005#proposed-direction", "ADR-009#d13", "ADR-009#d14", "ADR-013#d7", "ADR-013#d13",
+  sources: ["ADR-005#proposed-direction", "ADR-009#d13", "ADR-009#d14", "ADR-013#d11",
     "ADR-014#d9", "ADR-014#proposed-direction", "OD-42", "OD-60", "OD-67", "INV-002", "INV-003", "INV-008",
     "INV-018", "INV-038", "test:test_D3_operator_cannot_route_around_avatar", "ADR-005#d31", "OD-43"]
 
@@ -373,20 +374,21 @@
   what: "The permissions that an enacted Easy Track [[motion]] uses on the operator modifier, to change what the operator may do."
   controlled_by: "Held by the universal factory, so only an enacted motion uses it."
   can:
-    - "Write operator permissions for a target that a motion names, under the `operator` key only."
-    - "Set the operator's budgets, with a refill period of at least 30 days. A budget's key is a launch key, or a key that the universal factory derives for a new spender and that starts with `k:`."
-    - "Revoke an operator target or function. The universal factory's narrowing write uses this when a routine removal takes a whole target or function."
+    - "Write operator permissions for a target that a motion names, under the `operator` key only. The condition tree of each permission comes with the motion."
+    - "Set the operator's budgets, with a refill period of at least 30 days. A budget's key is a launch key, or the derived key of a new spender, which starts with `k:`."
+    - "Revoke an operator target or function. A routine removal uses this when it takes a whole target or function."
   cannot:
     - "Grant or remove a role, or touch the emergency role."
     - "Make the Asset Safe or any of its modules an operator target, the safety modifier included. The compiler refuses a policy without this guard."
     - "Grant the operator delegatecall."
-    - "Widen a permission except through a typed [[shape]]. The factory checks this, not the modifier (INV-034)."
+    - "Check what a permission on an ordinary target allows: a motion can grant a call with no receiver pin and no budget. Neither the role nor the factory stops it, so the [[objection window]] must (INV-034)."
   numbers: ["refill period: 30 days or more"]
-  sources: ["ADR-013#d18", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7",
-    "ADR-013#proposed-direction", "ADR-005#proposed-direction", "INV-004", "INV-034",
+  sources: ["ADR-013#d18", "ADR-006#d7", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d9", "ADR-013#d11",
+    "ADR-013#proposed-direction", "ADR-005#proposed-direction", "ADR-006#proposed-direction", "INV-004", "INV-034",
     "test:test_policyadmin_cannot_grant_operator_the_safety_modifier",
-    "test:test_policyadmin_refuses_every_module_of_the_asset_safe", "test:test_uf_raw_writes_only_narrow",
-    "test:test_uf_widening_fills_the_shape"]
+    "test:test_policyadmin_refuses_every_module_of_the_asset_safe",
+    "test:test_uf_motion_fails_as_a_whole_on_a_write_that_a_modifier_refuses",
+    "test:test_uf_motion_can_widen_without_a_receiver_or_a_budget"]
 
 - id: budget-keys
   node: operator-modifier
@@ -394,16 +396,16 @@
   status: new
   label: built
   what: "Refillable quotas on the operator modifier, counted in token units. An [[approval]] to a protocol spends the key of that spender."
-  controlled_by: "The enabling vote sets them first. A budget motion changes a key only after an event, such as a new mandate size or a product unlock. The universal factory derives the key of each new spender."
+  controlled_by: "The enabling vote sets them first. A budget motion changes a key only after an event, such as a new mandate size or a product unlock. A motion sets the key of each new spender, in the derived form."
   can:
     - "Refill each period up to a maximum. Each successful call draws them down."
     - "Stay apart: the key of one asset never pays for another asset."
   cannot:
     - "See value. A key counts token units, so it drifts with price."
-    - "Go above its [[ceiling]]."
+    - "Bound themselves. A motion can set a key to any amount, so the [[objection window]] bounds a budget's size."
   numbers: ["amounts in the repository: dry-run stand-ins", "production figures: from the attested computation, after the mandate is approved"]
   sources: ["ADR-009#d3", "ADR-009#d13", "ADR-009#d31", "ADR-009#proposed-direction",
-    "ADR-009#consequences", "ADR-013#d9", "ADR-013#d13", "INV-011", "INV-012", "INV-036",
+    "ADR-009#consequences", "ADR-013#d9", "ADR-013#d11", "INV-011", "INV-012",
     "test:test_D5_budget_enforcement_and_refill",
     "test:test_budget_keys_of_different_assets_are_independent"]
 
@@ -461,10 +463,11 @@
   can:
     - "Write an exit for the emergency role, each tree pinned whole: redeem, withdraw and claim with the receiver and owner pinned to the Asset Safe; cancel, a redeem queue's redeem and unwrap; a transfer pinned to the Aragon Agent, or to the Agent or the orders account for a token that a recovery order sells; or an approval set to zero."
   cannot:
-    - "Write an entry, a deposit, a non-zero approval or another receiver: the modifier refuses any tree but the pinned exits. Which target gets which exit is the universal factory's shape, which tests and the audit check."
+    - "Write an entry, a deposit, a non-zero approval or another receiver: the modifier refuses any tree but the pinned exits. Which target gets which exit is the motion's choice, which reviewers check in the 72 hours."
     - "Write under any key but the emergency role's, grant Send or delegatecall, touch membership or the switch, set an allowance, or target the Asset Safe or any module of it."
-  sources: ["ADR-006#d13", "ADR-013#d7", "ADR-005#proposed-direction", "ADR-007#d45", "INV-025",
-    "test:test_exit_governance_writes_only_exits", "test:test_exit_governance_gives_a_new_token_its_exit"]
+  sources: ["ADR-006#d13", "ADR-006#proposed-direction", "ADR-013#d11", "ADR-005#proposed-direction", "ADR-007#d45", "INV-025",
+    "test:test_exit_governance_writes_only_exits", "test:test_exit_governance_gives_a_new_token_its_exit",
+    "test:test_uf_motion_onboards_an_erc4626_lending_vault"]
 
 - id: restart-role
   node: safety-modifier
@@ -476,7 +479,7 @@
   can:
     - "Call `enableModule` on the Asset Safe, with the operator modifier as its pinned argument."
   cannot:
-    - "Enable any other module, grant a permission or raise an approval. Other motions bring back what the emergency role revoked, through the factory's shapes."
+    - "Enable any other module, grant a permission or raise an approval. Other motions bring back what the emergency role revoked."
     - "Act before the [[objection window]] ends. The emergency Safe can stop the operator again at any time."
     - "Enact a restart motion from before a new stop: the raised [[motion counter]] makes it fail."
     - "Unpause Easy Track. Only Aragon Voting can."
@@ -558,7 +561,7 @@
   cannot:
     - "Change the policy or the mandate's rules. A change made in the UI is [[drift]]."
     - "Give signers, a vote or a motion a transaction, unless Clutch's compiler makes the same calls from the same commit."
-    - "Build a motion. It does not know the universal factory's format or its versions, so Clutch's own `motion` command builds each motion."
+    - "Build a motion. It does not know the universal factory's format, so Clutch's own `motion` command builds each motion."
     - "Set a Safe's version, guard or fallback handler."
     - "Be used by CI or by an agent. Neither holds the key."
     - "Stop a signer who uses another Safe interface. Its refusal at signing is a gate in its own interface."
@@ -830,16 +833,17 @@
   what: "Lido's lending product, a separate deployment that is a fork of Morpho Blue, with a lender vault for each market. It is not deployed on mainnet yet. The vault onboards it after launch, by one motion, and its insurance is built in at launch."
   controlled_by: "Its own governance."
   can:
-    - "Join the vault through one motion of the universal factory, with its ERC-4626 shape, once Lido Lend's lender vault exists. The motion names the vault, and it also adds the emergency exit."
+    - "Join the vault through one motion of the universal factory, once Lido Lend's lender vault exists. The motion's raw writes name the vault, pin the receiver and the owner to the Asset Safe, set the budget, and add the emergency exits."
     - "Return only the asset that the vault lent: WETH and USDC, and USDT if a market lends it."
   cannot:
     - "Leave the protocol cap before it matures and a budget motion with a forum post unlocks it."
     - "Be granted an exit at the enabling vote: its address is not known before it deploys."
     - "Pay collateral into the Asset Safe. The vault uses neither the fallback exit nor the settlement of Lido Lend's lender vault, so USDY cannot enter, and a position has no exit while its market has no free liquidity."
-  numbers: ["the end-to-end test of its shape: owed", "budget key: from the attested computation"]
+  numbers: ["the onboarding motion: tested on a fork with a deployed ERC-4626 vault as a stand-in", "the test against Lido Lend's own vault: owed", "budget key: from the attested computation"]
   sources: ["ADR-011#d3", "ADR-009#d28", "ADR-011#d13", "ADR-006#d13", "ADR-009#d3",
-    "ADR-011#proposed-direction", "ADR-013#proposed-direction", "ADR-014#d6",
-    "doc:docs/registers/parameters.md#parameters", "ADR-014#d4"]
+    "ADR-011#proposed-direction", "ADR-011#confirmation", "ADR-013#proposed-direction", "ADR-014#d6",
+    "doc:docs/registers/parameters.md#parameters", "ADR-014#d4",
+    "test:test_uf_motion_onboards_an_erc4626_lending_vault"]
 
 # --- Orders account -----------------------------------------------------------------------------
 - id: orders-account
@@ -976,7 +980,7 @@
     - "Alert on any change of the first-loss Safe's balance, owners or modules, page on every burn motion and every action of the first-loss role, and alert on a redemption before the guard is set and on an excess above the launch cap that stays."
     - "Page at high severity on every emergency swap."
     - "Follow a new Lido product's exposure against the protocol cap until a motion unlocks it, and record the changes of the screening rules that the vendor reports."
-    - "Decode every motion of the universal factory, and alert on a failed enactment, a raise of the motion counter, a ceiling motion, a restart motion and few free motion slots. Flag repeated budget motions, and grade emergency actions."
+    - "Decode every motion of the universal factory, compare its permission trees with the policy's source, and alert on a failed enactment, a raise of the motion counter, a restart motion, a budget set to more than twice its last value and few free motion slots. Flag repeated budget motions, and grade emergency actions."
     - "Publish the cap reading of each [[fortnightly snapshot]] to IPFS, and page the emergency Safe on the cap-breach trigger, met in either reading."
     - "Compare Lido's published readings with the policy provider's at each snapshot, and flag a tranche vote that starts while they differ by more than the band."
     - "Alert on a change of the mandate's rules made in the Zodiac UI, and on a transaction of the committee's Safe that waits too long for [the screening vendor]'s approval."

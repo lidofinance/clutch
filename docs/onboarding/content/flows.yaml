@@ -144,7 +144,7 @@ flows:
     group: governance
     title: Onboarding a new protocol by motion
     label: specified
-    summary: "How the committee adds a protocol without a DAO vote: a motion of the universal factory, which builds the permission from a typed [[shape]]."
+    summary: "How the committee adds a protocol without a DAO vote: a motion of the universal factory, which carries the new permissions as [[raw write|raw writes]]."
     trigger: "The committee wants a new target, for example Lido Lend after its launch."
     time: "At least 72 hours, then enactment."
     steps:
@@ -152,27 +152,27 @@ flows:
         text: "The committee posts a disclosure on the forum. It sets up monitoring for the new target and updates the runbooks."
         nodes: [committee, reporting, monitoring]
       - who: "Committee Safe"
-        text: "The committee's Safe creates the motion with a shape and its typed values only, such as a target, an asset and a budget. The motion names the [[version]] of each scope that it writes, and the [[motion counter]]. The guard, once set, screens this transaction."
+        text: "The committee's Safe creates the motion. Its raw writes carry the operator's permissions for the target with their condition trees, the budget of each new spender and the emergency exits. The motion names the [[policy version]] and the [[motion counter]]. The guard, once set, screens this transaction."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
-        check: "INV-034: a motion widens a permission only through a shape."
+        check: "INV-034: the factory checks no write's content, so reviewers compare the motion's trees with the policy's source in the 72 hours. The `motion` command that builds and prints them is not built."
       - who: "LDO holders"
         text: "The motion waits 72 hours. If holders of 0.5% of LDO object, it fails."
         nodes: [dao, easytrack]
         edges: [object]
       - who: "Easy Track"
-        text: "At enactment, Easy Track rebuilds the script through the factory and requires the hash stored at creation, so the factory checks the versions and the counter again."
+        text: "At enactment, Easy Track rebuilds the script through the factory and requires the hash stored at creation, so the factory checks the policy version and the counter again."
         nodes: [easytrack]
-        check: "INV-005, tested on a mock Easy Track. INV-033, tested on a fork with the factory's prototype and the live Easy Track."
+        check: "INV-005, tested on a mock Easy Track. INV-033, tested on a fork with the live Easy Track."
       - who: "Governance role"
-        text: "The motion's one call reaches the factory, which writes the new operator permission through the governance role. The modifier checks this write too."
+        text: "The motion's one call reaches the factory, which makes each write as the governance role. The modifier checks each write against that role's policy; a write that it refuses fails the whole motion."
         nodes: [easytrack, operator-modifier]
         edges: [gov-role]
         check: "INV-004: the Asset Safe and every module of it are refused as targets (OD-38)."
       - who: "Exit-governance role"
-        text: "The same motion gives the emergency role the new target's exits on the safety modifier. In the same call the factory stores the new versions, before it writes."
+        text: "The same motion gives the emergency role the new target's exits on the safety modifier. The enactment raises the policy version."
         nodes: [easytrack, safety-modifier]
-        check: "INV-025: this role writes only the emergency role's exits, each tree pinned whole. The role is built. The orders token operation writes a token's exit; the other shapes are not built (OD-49)."
+        check: "INV-025: this role writes only the emergency role's exits, each tree pinned whole. The role is built. A fork test onboards an ERC-4626 lending vault with its exits in one motion, and the orders token motion writes a token's exit (OD-49)."
       - who: "Operator, and the emergency Safe if needed"
         text: "The operator can use the new permission. The emergency Safe can revoke it at once."
         nodes: [committee, operator-modifier, emergency-safe, safety-modifier]
@@ -182,10 +182,11 @@ flows:
       - "After enactment, the emergency Safe revokes the new operator permission at once. Only a DAO vote replaces a write to the safety modifier."
     sources: ["ADR-006#d2", "ADR-005#d31", "ADR-010#d24", "ADR-006#d4", "ADR-006#d8", "ADR-006#d9",
       "ADR-006#d10", "ADR-006#d11", "ADR-006#d13", "ADR-006#context", "ADR-013#d2", "ADR-013#d5",
-      "ADR-013#d6", "ADR-013#d7", "ADR-013#d9", "ADR-013#d10", "ADR-013#proposed-direction", "ADR-007#d41",
+      "ADR-013#d6", "ADR-013#d9", "ADR-013#d10", "ADR-013#d11", "ADR-013#proposed-direction", "ADR-007#d41",
       "INV-004", "INV-005", "INV-025", "INV-033", "INV-034", "OD-38", "OD-49", "OD-103", "lip:part-4",
       "test:test_D1_substituted_script_rejected_at_enactment", "runbook:Raise the motion counter",
-      "test:test_uf_same_scope_conflict_the_first_enactment_wins",
+      "test:test_uf_motion_onboards_an_erc4626_lending_vault",
+      "test:test_uf_policy_version_orders_permission_writes_and_spares_actions",
       "test:test_uf_counter_fails_every_open_motion"]
 
   - id: budget
@@ -197,7 +198,7 @@ flows:
     time: "72 hours."
     steps:
       - who: "Committee"
-        text: "The attested computation derives the key's new budget, under that key's [[ceiling]]. The forum post names the event."
+        text: "The attested computation derives the key's new budget. The forum post names the event."
         nodes: [committee, asset-safe]
       - who: "Committee Safe"
         text: "The committee's Safe creates a budget motion. One motion can set several keys. The guard, once set, screens it."
@@ -207,47 +208,14 @@ flows:
         text: "After the objection window, the universal factory sets the budget through the governance role. The refill period stays at 30 days or more."
         nodes: [easytrack, operator-modifier, dao]
         edges: [gov-role, object]
-        check: "INV-012: the 30-day floor is tested on the modifier. The factory's prototype also holds each budget within its token's ceiling, at stand-in figures; the real ceilings wait for the attested figures."
+        check: "INV-012: the 30-day floor is tested on the modifier. Nothing on chain bounds the amount: the objection window does."
       - who: "Monitoring"
-        text: "Monitoring flags every budget motion, and checks that its forum post names an event."
+        text: "Monitoring flags every budget motion, checks that its forum post names an event, and alerts on a budget set to more than twice its last value."
         nodes: [monitoring]
     sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d31", "ADR-009#d45", "ADR-009#proposed-direction",
-      "ADR-009#consequences", "ADR-013#d9", "ADR-013#d13", "INV-011", "INV-012", "INV-036", "OD-105",
+      "ADR-009#consequences", "ADR-013#d9", "ADR-013#d11", "INV-011", "INV-012",
       "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period", "OD-54",
-      "test:test_uf_budget_stays_within_its_ceiling"]
-
-  - id: ceiling
-    group: governance
-    title: A ceiling motion
-    label: specified
-    summary: "How a [[ceiling]] changes: a motion lowers it at any time, or raises it at most twofold, at most once in 15 days."
-    trigger: "A budget or an approval needs more room under its ceiling, or the committee wants less."
-    time: "72 hours."
-    steps:
-      - who: "Committee"
-        text: "The committee posts the change on the forum, with its reason."
-        nodes: [committee, reporting]
-      - who: "Committee Safe"
-        text: "The committee's Safe creates a ceiling motion. The guard, once set, screens it."
-        nodes: [committee, screening, easytrack]
-        edges: [motions, screen]
-      - who: "LDO holders"
-        text: "LDO holders can object in the [[objection window]]."
-        nodes: [dao, easytrack]
-        edges: [object]
-      - who: "Universal factory"
-        text: "At creation and again at enactment, the factory refuses a raise above twice the ceiling, and a second raise of that ceiling within 15 days. It keeps the time of each raise."
-        nodes: [easytrack]
-        check: "INV-036, tested on a fork with the factory's prototype, a new token's first ceilings included (OD-113)."
-      - who: "Monitoring"
-        text: "Monitoring alerts on every ceiling motion."
-        nodes: [monitoring, easytrack]
-    escapes:
-      - "An objection or a raise of the motion counter stops the motion, and the ceiling stays as it is."
-    sources: ["ADR-013#d13", "ADR-013#d10", "ADR-013#context", "ADR-013#proposed-direction", "ADR-009#d14",
-      "ADR-011#d8", "INV-036", "OD-113", "ADR-013#d15", "runbook:Change a ceiling",
-      "test:test_uf_ceiling_rises_at_most_twofold_once_in_15_days",
-      "test:test_uf_a_new_token_is_introduced_with_its_ceilings", "test:test_uf_a_token_is_introduced_once"]
+      "test:test_03_ramp_up"]
 
   - id: orders-token
     group: governance
@@ -261,7 +229,7 @@ flows:
         text: "The committee posts a disclosure on the forum, and sets up monitoring for the token."
         nodes: [committee, reporting, monitoring]
       - who: "Committee Safe"
-        text: "The committee's Safe creates the motion, with the shape of the orders account's token lists. The guard, once set, screens it."
+        text: "The committee's Safe creates the motion. Its raw writes carry the order trees with the token in the lists, and the token's budget. The guard, once set, screens it."
         nodes: [committee, screening, easytrack]
         edges: [motions, screen]
       - who: "LDO holders"
@@ -269,7 +237,7 @@ flows:
         nodes: [dao, easytrack]
         edges: [object]
       - who: "Easy Track"
-        text: "In the motion's one call, the universal factory writes the token into the order lists through the orders modifier's governance role, with its emergency transfer, its recovery orders and the operator's return of it to the Aragon Agent. It approves CoW's vault relayer through the approvals role, and writes the token's exit from the Asset Safe through the exit-governance role (ADR 007, decision 45)."
+        text: "In the motion's one call, the universal factory makes the writes: the token goes into the order lists through the orders modifier's governance role, with its emergency transfer, its recovery orders and the operator's return of it to the Aragon Agent. It approves CoW's vault relayer through the approvals role, and writes the token's exit from the Asset Safe through the exit-governance role (ADR 007, decision 45)."
         nodes: [easytrack, orders]
         check: "INV-040: the governance role grants delegatecall only to the order signer and pins whole the trees that do not depend on the token; the approvals role approves only CoW's vault relayer. The motion runs through the live Easy Track, under EIP-7825's gas cap (OD-118)."
       - who: "Operator"
@@ -289,7 +257,7 @@ flows:
     title: A change that only the DAO can make
     label: built
     summary: "The owner path: the DAO can do anything to the vault's Safes. After the enabling vote, an Aragon vote is needed only to fund a tranche, to replace a role holder, or to break glass."
-    trigger: "A role holder to replace, such as a new committee Safe in the operator role; a repair of the safety modifier or another owner action; a shape that the universal factory lacks; or an Easy Track unpause."
+    trigger: "A role holder to replace, such as a new committee Safe in the operator role; a repair of the safety modifier or another owner action; a new or changed factory; or an Easy Track unpause."
     time: "About five days: the Aragon Voting vote."
     steps:
       - who: "LDO holders"
@@ -669,7 +637,7 @@ flows:
         text: "The emergency Safe calls `disableModule` on the Asset Safe, with the operator modifier as the pinned argument. On the orders account it revokes the operator's targets and functions instead, and cancels the operator's open orders, so recovery keeps working there. Then it raises the [[motion counter]]."
         nodes: [emergency-safe, safety-modifier, asset-safe, orders, easytrack]
         edges: [em-role, own-sf]
-        check: "The counter is tested on a fork with the factory's prototype."
+        check: "The counter is tested on a fork with the live Easy Track."
       - who: "Operator modifier"
         text: "The operator, governance and insurance-funding roles stop at once. Every open motion of the factory fails at enactment, because the counter changed."
         nodes: [operator-modifier, committee, easytrack]
@@ -712,12 +680,12 @@ flows:
         text: "After the window, the universal factory's restart role on the safety modifier enables the operator modifier on the Asset Safe."
         nodes: [easytrack, safety-modifier, asset-safe, operator-modifier]
         edges: [own-sf, own-op]
-        check: "INV-035: the restart role may only call `enableModule` with the operator modifier as its argument. Tested on a fork, with the factory's prototype for the motion."
+        check: "INV-035: the restart role may only call `enableModule` with the operator modifier as its argument. Tested on a fork, with the motion through the live Easy Track."
       - who: "Easy Track"
         text: "Other motions bring back what the emergency role revoked, on the Asset Safe and on the orders account, relayer approvals included."
         nodes: [easytrack, operator-modifier, orders]
         edges: [gov-role]
-        check: "A restore motion brings back a revoked target with the permissions stored under it. On the orders account, one motion restores the operator's permissions and the relayer approvals (OD-119). Both are tested on a fork."
+        check: "A restore motion writes a revoked target's scope again, and the permissions stored under it come back. On the orders account, one motion restores the operator's permissions and the relayer approvals (OD-119). Both are tested on a fork."
       - who: "Monitoring"
         text: "Monitoring alerts on every restart motion."
         nodes: [monitoring, emergency-safe]
@@ -729,7 +697,7 @@ flows:
       "ADR-013#consequences", "ADR-005#d26", "ADR-005#proposed-direction", "INV-027", "INV-035",
       "runbook:Restart after a stop", "runbook:Raise the motion counter",
       "test:test_D4_the_restart_role_enables_only_the_operator_modifier",
-      "test:test_uf_restart_motion_after_the_switch", "test:test_uf_restore_brings_back_a_revoked_target",
+      "test:test_uf_restart_motion_after_the_switch", "test:test_uf_restore_motion_brings_back_a_revoked_target",
       "OD-119", "ADR-005#consequences", "ADR-006#context"]
 
   - id: cap-breach
@@ -792,7 +760,7 @@ flows:
     title: An unsafe motion in the queue
     label: specified
     summary: "Four stops before a motion enacts, and one after."
-    trigger: "A motion looks wrong: a bad target, a wrong amount or a missing disclosure."
+    trigger: "A motion looks wrong: a bad target, a permission that pins no receiver or spends no budget, a wrong amount or a missing disclosure."
     time: "Before the 72-hour window ends."
     steps:
       - who: "Monitoring and the forum"
@@ -809,7 +777,7 @@ flows:
         text: "The emergency Safe raises the [[motion counter]]. Every open motion of the factory then fails at enactment. For a vault motion, the emergency Safe can also switch the operator off."
         nodes: [emergency-safe, easytrack, safety-modifier, operator-modifier]
         edges: [em-role, revoke]
-        check: "INV-033 is tested on a fork, with the factory's prototype and the live Easy Track."
+        check: "INV-033 is tested on a fork, with the live Easy Track."
       - who: "Committee Safe"
         text: "The committee's Safe can cancel its own motion before it enacts."
         nodes: [committee, easytrack]
@@ -905,7 +873,7 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, committee, emergency-safe]
       - who: "LDO holders"
-        text: "The vote registers the universal factory and pays the first tranche. Aragon Voting runs these items itself, without Dual Governance. For the vault's Safes, it approves the hash of each Safe batch. The factory's versions of the launch policy come from the compiled artifact."
+        text: "The vote registers the universal factory and pays the first tranche. Aragon Voting runs these items itself, without Dual Governance. For the vault's Safes, it approves the hash of each Safe batch. The factory starts with its counter and its policy version at zero."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
         edges: [own, own-op, own-sf, treasury, tranche]
       - who: "Anyone"

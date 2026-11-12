@@ -10,7 +10,7 @@
 
 - term: Approval
   plain: "Permission for a named contract, the spender, to pull tokens from the Safe. In Clutch, an approval to a protocol spends that spender's [[budget key]], or stays under a [[ceiling]]. An approval of zero is always allowed."
-  sources: ["ADR-009#d13", "ADR-009#d14", "ADR-013#d13", INV-008]
+  sources: ["ADR-009#d13", "ADR-009#d14", INV-008]
 
 - term: Aragon Agent
   plain: "The DAO's treasury contract, which pays each [[tranche vote|tranche]]. Funds come back to it only in an emergency or a recovery. Aragon Voting, not the Agent, owns the vault's Safes."
@@ -40,8 +40,8 @@
   sources: ["ADR-009#d1", "ADR-009#d9", "ADR-009#d33", "ADR-009#proposed-direction"]
 
 - term: Ceiling
-  plain: "The upper bound of a [[budget key]] or an approval. The enabling vote, or the motion that introduces a token, sets a token's first ceilings, and that counts as their first raise. A motion lowers a ceiling at any time, and raises it to at most twice its value, at most once in 15 days: a ceiling that one motion could set to any value would bound nothing."
-  sources: ["ADR-013#d13", "ADR-013#d15", "ADR-009#d14", "INV-036", "runbook:Change a ceiling"]
+  plain: "The fixed upper bound of an approval that has no [[budget key]]: the stETH approval to the wstETH contract, and the DAI and USDS approvals to Sky's converter. Each is one mandate size. A motion changes a ceiling by writing the approval's permission again. A budget key has no ceiling."
+  sources: ["ADR-009#d14", "ADR-011#d8", "ADR-013#d11", "INV-008"]
 
 - term: Compiler
   plain: "Clutch's own TypeScript program on the Zodiac roles SDK. It turns the constellation into the artifact offline, and it refuses entries that only the hosted app can compile."
@@ -226,9 +226,9 @@
   sources: ["ADR-005#d31"]
 
 
-- term: Shape
-  plain: "A typed form of permission that the universal factory writes, such as a tokenized vault, a queue vault or an approval list. A motion gives it typed values only. Each shape pins receivers, owners and beneficiaries to the vault, draws a budget key and writes the emergency exit. A shape is the only way that a motion widens a permission."
-  sources: ["ADR-013#d7", "ADR-013#d9", "ADR-013#proposed-direction", INV-034]
+- term: Raw write
+  plain: "One call in a [[motion]]: it names one of the vault's four modifiers, a role, a target and the call's data. The universal factory makes it as that role and checks nothing in it. The policy of that role on its modifier decides whether the call passes. A raw write can widen a permission, so the [[objection window]] is the bound on where funds go."
+  sources: ["ADR-013#d11", "ADR-013#d18", "ADR-013#consequences", INV-034]
 
 - term: Snapshot vote
   plain: "Lido's off-chain LDO vote. The mandate passes a Snapshot vote before the on-chain enabling vote. It is not the [[fortnightly snapshot]]."
@@ -268,11 +268,11 @@
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
 - term: Universal factory
-  plain: "The one Easy Track factory that builds every Clutch [[motion]] and holds the roles that motions use. Its registration allows one call, its own `applyMotion`, in which it checks a motion again and makes the motion's writes. It widens a permission only through a typed [[shape]], keeps a [[version]] for each scope, and cannot be upgraded."
-  sources: ["ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d8", "ADR-013#d10", "ADR-013#d18", "INV-032"]
+  plain: "The one Easy Track factory that builds every Clutch [[motion]] and holds the roles that motions use. Its registration allows one call, its own `applyMotion`, in which it checks a motion again and makes the motion's writes. A motion is a list of [[raw write|raw writes]]. The factory keeps a [[policy version]] and a [[motion counter]], and it cannot be upgraded."
+  sources: ["ADR-013#d5", "ADR-013#d6", "ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#d18", "INV-032"]
 
-- term: Version
-  plain: "The universal factory's record of a scope's current content. A scope is one modifier's role, target and function, one budget key, or one ceiling. A motion names the versions that it expects. If another motion changed a scope first, the motion fails at enactment, so two motions cannot undo each other."
+- term: Policy version
+  plain: "A number that the universal factory keeps. A motion that writes on one of the vault's four modifiers names the policy version that it saw at creation, and its enactment raises the number. If another such motion enacted first, the motion fails at enactment, so two motions cannot undo each other. A motion that only acts, such as a burn, a payout or a restart, does not name it."
   sources: ["ADR-013#d2", "ADR-013#d10", "ADR-013#proposed-direction", "INV-033"]
 
 - term: Watch-tower

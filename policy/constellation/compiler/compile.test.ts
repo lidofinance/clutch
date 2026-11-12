@@ -189,7 +189,7 @@ test("the compiler refuses a restart that is not pinned to the operator modifier
 });
 
 // ADR 013, decision 9: a budget motion may set a launch key, or a key that
-// the factory derives for a new spender, which starts with "k:".
+// a motion derives for a new spender, which starts with "k:".
 test("a budget motion may set a launch key or a derived key, and no other", () => {
   const BITMASK = 21;
   const OR = 2;
@@ -218,7 +218,7 @@ test("the insurance-funding role transfers only to the first-loss Safe", () => {
   }
 });
 
-// ADR 014, decision 11: insurance money spends the budget key that the factory derives for its token and the
+// ADR 014, decision 11: insurance money spends the derived budget key of its token and the
 // first-loss Safe: "k:", then the first-loss Safe, then the token's first ten bytes.
 test("each insurance-money transfer spends the derived key of its token and the first-loss Safe", () => {
   for (const target of role("insurance-funding").targets) {

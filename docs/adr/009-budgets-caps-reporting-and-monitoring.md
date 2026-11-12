@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T07:27:52Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
@@ -58,7 +58,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 11. The budget is computed again on the literal base (OD-03).
 12. Replaced by decision 28 (OD-41).
 13. An operator approval to a protocol spender spends the budget of the key that the spender serves. An approval of zero is always allowed and spends nothing. Deposit calls spend no budget (OD-08).
-14. The stETH approval to the wstETH contract has no budget key. Its fixed ceiling is one mandate size in stETH, and a motion changes it as [ADR 013](/adr/013-one-easy-track-factory.md) decision 13 allows (OD-08, OD-89, OD-105).
+14. The stETH approval to the wstETH contract has no budget key. Its fixed ceiling is one mandate size in stETH. A motion changes it by writing the approval's permission again (OD-08, OD-89, OD-134).
 15. A budget motion cannot set a refill period below 30 days (OD-08).
 16. Replaced by decision 28 (OD-41).
 17. The `@lidofinance/defi-tech` team writes the specification of the vault's detectors in the Lido on-chain monitoring and makes the important updates to them. The `@lidofinance/lido-valset-vroom` team reviews them, runs the platform, and maintains the engine and the bot (OD-13).
@@ -100,13 +100,13 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **Caps.** The mandate describes measurement, publication and remediation, not transaction reverts. Where the screening vendor can enforce a rule, it refuses an operator transaction that breaches it; emergency activity and price changes still need detective controls.
 - **Prices.** Same-denomination caps use balances. Liquid-staking and yield-bearing caps need on-chain rates; cross-class caps need market oracles.
 - **Budget shape.** The monthly flow equals each key's stock cap. Unbudgeted exits allow defensive exits and re-entry without a tighter flow limit. Lido-product keys allow the whole mandate per month (decision 4). This is a weak amount control, which the LIP must disclose.
-- **Budget events.** Each budget motion's forum post names its event: a new mandate size; the onboarding of a spender with its key; a product's maturity and unlock (decision 28); or the setting of the guard ([ADR 010](/adr/010-pre-execution-screening.md) decision 22). A price change is not an event. A new mandate size changes no funding limit ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 1); a ceiling follows it by motion ([ADR 013](/adr/013-one-easy-track-factory.md) decision 13).
+- **Budget events.** Each budget motion's forum post names its event: a new mandate size; the onboarding of a spender with its key; a product's maturity and unlock (decision 28); or the setting of the guard ([ADR 010](/adr/010-pre-execution-screening.md) decision 22). A price change is not an event. A new mandate size changes no funding limit ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 1); a budget or a fixed approval ceiling follows it by motion.
 - **New Lido products.** The unlock motion raises Lido Lend's key to the own-product bound, and its forum post names the criteria that the product meets (decision 28). earnETH and earnUSD have own-product keys from the start.
 - **The provider's reading.** The requirement list asks the Zodiac UI for its own reading of the vault's three Safes as one whole, with the mandate's rubrics: the first-loss Safe as a rubric outside the caps and the launch cap, and the orders account in the value. It shows the value per account, asset and protocol; each cap against its limit, with headroom; the launch cap until the guard is set; the budget left per key; open orders with their age and limit; pending motions with their deadlines; and the guard's state. It takes a reading at each Snapshot Date and fortnightly snapshot and publishes it (decision 42). Its alerts go to a Lido Slack channel by webhook and do not page; Lido's own monitoring pages (decision 8). It also meets decisions 43 and 44 and [ADR 010](/adr/010-pre-execution-screening.md) decision 25.
 - **The rule data.** One file carries the rules of decision 44, with the mandate size and the treasury share ([ADR 008](/adr/008-funding-through-existing-payments.md) decisions 32 and 33). A check in CI validates it.
 - **Attestation.** The computation ran on 2026-09-22 with pinned inputs and an independent attester, and again on 2026-10-02 with the literal base. Decision 32 needs a fixed yield-bearing figure after the mandate's approval, and no holdings snapshot. The results stay outside this repository until then, because the inputs include unapproved terms.
 - **Approvals.** Each spender branch uses its own key. On the Asset Safe, approve only the deposit amount in the same transaction, so no approval stands. The orders account's approvals to CoW's vault relayer stand ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 41 and 46).
-- **Budgets in the factory.** The universal factory bounds a key's `balance`, `maxRefill` and `refill` by its token's ceiling, and its `period` below by 30 days. Every key of a token shares that token's ceiling.
+- **Budgets by motion.** The governance role's policy bounds a budget's `period` below by 30 days, and its key to a launch key or a derived key ([ADR 013](/adr/013-one-easy-track-factory.md) decision 9). Nothing bounds the amount but the objection window ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11). Monitoring alerts on a budget that a motion sets to more than twice its last value.
 - **Reports.** The IPFS payloads hold balances, positions, exposures, the numerators and denominators of the ratios, and each price's level, source and timestamp. A tranche vote's payment reference can name the report, but no contract checks it.
 - **Size and treasury share.** Each fortnightly reading and each post before a tranche vote state the vault's funded value against the mandate size, and the vault's share of the DAO's non-LDO treasury ([ADR 008](/adr/008-funding-through-existing-payments.md) decisions 32 and 33).
 
@@ -142,7 +142,7 @@ The phase-1 detector specification gives each detector an ID, a watched state, a
 - **Lido's reading as the record and the provider's as a check only:** not chosen (OD-84; decision 41).
 - **The provider pins on its own account, and Lido pins the same identifier:** not chosen (OD-85).
 - **A warning at signing with a typed confirmation:** not chosen (OD-86).
-- **A cap check on chain by the provider:** not possible. The committee's Safe has one guard slot, which the screening guard takes (OD-83), and the only new contracts are the universal factory and its companions ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 1).
+- **A cap check on chain by the provider:** not possible. The committee's Safe has one guard slot, which the screening guard takes (OD-83), and the only new contract is the universal factory ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 1).
 - **Separate rule sets for the two readings:** not chosen (OD-87). One rule set makes the cross-check test data and prices, and review catches a rule error once (decision 44).
 - **Controls without a matrix:** not chosen (OD-39). Rules without a control could stay invisible.
 - **Raise Easy Track's open-motion limit to its maximum of 24:** not chosen (OD-94). Every committee shares the setting.
@@ -158,7 +158,7 @@ The phase-1 detector specification gives each detector an ID, a watched state, a
 - Under the literal base, yield-bearing room exists only next to directly held stablecoins. The illustrative allocation has none, and so no yield-bearing position. A fixed budget can allow deposits beyond the ratio's headroom (decision 32).
 - The committee can enlarge the base before a test by holding more stablecoins. Deposit-time checks and the published history limit this but do not prevent it.
 - sUSDS counts against the yield-bearing cap of the literal base as soon as it arrives.
-- Lido Lend's key starts with a ceiling, and a motion raises it at most twofold in 15 days (OD-105), so the uncapped budget can take several motions.
+- A motion can set any budget, so a key's amount control holds only while LDO holders read the budget motions ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11).
 - Screening makes the vendor part of each checked rule's trust base. Written rules and controlled relaxations are needed ([ADR 010](/adr/010-pre-execution-screening.md) decision 19).
 - The generator needs a second aggregator, Chainlink and pool prices at a pinned block, and the recorded level-5 inputs. Lower-level prices can still be wrong (decision 36).
 - Without the provider's reading, Lido's governs alone (decisions 29 and 41).
@@ -168,7 +168,7 @@ The phase-1 detector specification gives each detector an ID, a watched state, a
 
 ## Confirmation
 
-- INV-008, INV-011 and INV-012 in the [invariants](/specs/invariants.md); INV-036 for the ceilings.
+- INV-008, INV-011 and INV-012 in the [invariants](/specs/invariants.md).
 - Kit test: approvals bounded by a key or a ceiling, and an unlimited approval refused [s5].
 
 ## Reversal conditions

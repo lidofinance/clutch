@@ -45,9 +45,9 @@ changes:
   - area: Governance
     kind: added
     provider: "No role. It assumed that motions act as the Aragon Agent, which Easy Track cannot do."
-    clutch: "A governance role, which the [[universal factory]] uses only in an enacted motion. It writes operator permissions only through the factory's typed [[shape|shapes]], never delegatecall and never on the Asset Safe or its modules. An exit-governance role on the safety modifier writes only the emergency role's exits, each tree pinned whole."
+    clutch: "A governance role, which the [[universal factory]] uses only in an enacted motion. It writes operator permissions and budgets as a motion's [[raw write|raw writes]], never delegatecall and never on the Asset Safe or its modules. An exit-governance role on the safety modifier writes only the emergency role's exits, each tree pinned whole."
     why: "Motions need their own narrow role; two fork probes showed how a wider one reaches the vault."
-    sources: ["ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d7", "ADR-013#proposed-direction",
+    sources: ["ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-013#d11", "ADR-013#proposed-direction",
       "INV-004", "INV-034", "ADR-006#d13", "INV-025"]
   - area: Asset Safe
     kind: changed
@@ -85,7 +85,7 @@ changes:
     provider: "Approvals pin the spender and leave the amount open; deposits spend monthly budgets with placeholder figures."
     clutch: "Each approval spends its spender's [[budget key]], or stays under a [[ceiling]]. Deposits spend nothing. A budget motion cannot set a refill period under 30 days."
     why: "A spender can pull an approval without any deposit, so the approval is what must be bounded."
-    sources: ["ADR-009#d13", "ADR-009#d14", "ADR-009#d15", "ADR-013#d13", "INV-008", "INV-012", "INV-036"]
+    sources: ["ADR-009#d13", "ADR-009#d14", "ADR-009#d15", "INV-008", "INV-012"]
   - area: First-loss shares
     kind: changed
     provider: "Both roles can redeem Earn shares."

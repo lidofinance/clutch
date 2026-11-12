@@ -25,5 +25,5 @@ Each ADR records its decision and review status, and shows the current design on
 | [009](009-budgets-caps-reporting-and-monitoring.md) | Budgets, exposure caps, pricing and monitoring |
 | [010](010-pre-execution-screening.md) | Screening on the committee's Safe, the launch cap and the guard before the second tranche |
 | [011](011-launch-scope.md) | Launch assets, venues and deferred integrations |
-| [013](013-one-easy-track-factory.md) | One Easy Track factory with versions; Aragon votes after launch only for tranches and break-glass actions |
+| [013](013-one-easy-track-factory.md) | One Easy Track factory with raw writes; Aragon votes after launch only for tranches and break-glass actions |
 | [014](014-funding-by-tranche-votes.md) | Funding by tranche votes, insurance at launch, and the flows back to the treasury |

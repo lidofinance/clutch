@@ -7,9 +7,12 @@ status: stable
 review_status: slop
 valid_as_of: 2026-11-08
 stale_after: 2027-02-28T00:00:00Z
+superseded_by:
+  ref: /research/raw-factory-prototype-2026-11-12.md
+  note: "In part: since OD-134, the motion carries the signer and TWAP trees, and no shape of the factory builds them. The roles, their pins and the sorting rule stand."
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T11:50:32Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1

@@ -18,8 +18,7 @@ const NO_DELEGATECALL = c.lt(2);
 
 /**
  * The keys that a budget motion may set: the operator's launch keys, and the
- * keys that the universal factory derives for a new spender, which start with
- * "k:" (ADR 013, decision 9).
+ * derived keys of new spenders, which start with "k:" (ADR 013, decision 9).
  */
 const BUDGET_KEYS = [...Object.values(budgets).map((budget) => key(budget.key)), derivedKey];
 

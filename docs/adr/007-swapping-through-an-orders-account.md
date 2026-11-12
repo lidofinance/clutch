@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T07:14:25Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
@@ -97,7 +97,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 43. An order of the orders account signs no fee. The policy pins the order's own fee field to zero, and the order signer's fee bound stays zero. CoW's order book refuses a signed fee, and CoW charges its fees inside the execution, within the order's limit (OD-116).
 44. The orders modifier's governance role writes, under the approvals key, only the relayer approval. It pins whole each tree that does not depend on the token: the return to the Asset Safe or the Aragon Agent, for the operator and the emergency role; the emergency role's zeroing of the relayer's approval; and the relayer approval. So no motion gives a role another receiver or spender, and only the approvals role raises an approval (OD-103).
 45. The motion that adds a token to the order lists also writes the token's exit on the Asset Safe, through the exit-governance role: a transfer to the Aragon Agent, or to the orders account, where a recovery order sells it (OD-49).
-46. One motion restores the orders account after an emergency stop. The motion states the current lists, and the factory checks them against their version. For the operator, the motion writes again the two targets, the order trees, the two cancels and, for each operator token, the transfer back to the Asset Safe or the Aragon Agent. Through the approvals role, it raises again the relayer approval of each recovery token that it names. It writes no version, and no other operation in the same motion may change the lists (OD-119).
+46. One motion restores the orders account after an emergency stop. For the operator, the motion writes again the two targets, the order trees, the two cancels and, for each operator token, the transfer back to the Asset Safe or the Aragon Agent. Through the approvals role, it raises again the relayer approval of each recovery token that it names. The motion carries the order trees with the current lists, and the factory does not check them (OD-119, OD-134).
 
 ## Proposed direction
 
@@ -113,7 +113,7 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - **Stop and restore.** The emergency role's revoke ([ADR 005](/adr/005-account-graph-and-roles.md) decision 25) reaches every operator permission (INV-018). A revoke does not cancel resting orders; cancel them too, because fills never consult the policy. Decision 46 restores the operator.
 - **Re-affirmation.** The 30-day alert (decision 24) and the monthly report (decision 29), which also shows each order's distance to market, do not act on chain. Removing a token or tightening a bound also needs the cancellation of the affected orders.
 - **Relayer approvals.** The enabling vote has the orders account approve CoW's vault relayer for the maximum amount of every token that an order sells. A zero approval stops every order in that token until a motion raises it again (decisions 44 and 46); the transfer to the Agent stays available.
-- **Governance.** The governance role writes the factory's two orders operations ([ADR 013](/adr/013-one-easy-track-factory.md) decision 18): the token motion (decisions 41, 44 and 45) and the restore (decision 46). No governance role takes a vault account or its modifier as a target (OD-38; INV-004, INV-040).
+- **Governance.** A motion writes through the orders modifier's governance and approvals roles ([ADR 013](/adr/013-one-easy-track-factory.md) decision 18): the token motion (decisions 41, 44 and 45) and the restore (decision 46). The governance role's policy leaves the content of an order tree, whose token lists change, to the motion ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11). No governance role takes a vault account or its modifier as a target (OD-38; INV-004, INV-040).
 - **Tokens.** Recovery sells stETH, wstETH, WETH, USDC, USDT, DAI, USDS and sUSDS: every launch asset of the Asset Safe except ETH, which is staked first, and Earn shares, which leave through their redeem queues. Recovery buys USDC, with USDT second (decision 5). The enabling vote sets both lists, and motions extend them (decision 41).
 - **Routers.** None at launch (decision 20). A later Uniswap or 1inch route runs from the orders account, pays the Asset Safe and needs a market-relative minimum-output check.
 - **Price controls.** Nothing on chain bounds the price. The [threat model](/specs/threat-model.md) lists the controls of operator orders. Emergency orders have neither screening nor budgets; decision 26 states their controls.
@@ -144,10 +144,10 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 
 ## Confirmation
 
-- INV-002, INV-008, INV-013, INV-014, INV-022, INV-023, INV-024, INV-025 and INV-040 in the [invariants](/specs/invariants.md). INV-033, INV-034 and INV-036 name the tests of the factory's two orders operations.
+- INV-002, INV-008, INV-013, INV-014, INV-022, INV-023, INV-024, INV-025 and INV-040 in the [invariants](/specs/invariants.md). INV-034 names the tests of the two orders motions.
 - Kit tests: staking with the Safe as owner [s7]; a WETH unwrap pays the Safe [s8].
 - Fork tests on the enabling vote's vault: signer and TWAP orders from Safe v1.5.0, each settled through CoW's settlement contract ([research note](/research/orders-account-fork-tests-2026-11-07.md)).
-- Fork tests of the orders roles ([research note](/research/orders-motion-roles-2026-11-08.md)), and of the universal factory's orders operations through the live Easy Track ([research note](/research/orders-token-motions-2026-11-08.md)); their gas is in [ADR 013](/adr/013-one-easy-track-factory.md#confirmation).
+- Fork tests of the orders roles ([research note](/research/orders-motion-roles-2026-11-08.md)), and of the two orders motions through the live Easy Track (`test/OrdersAccount.t.sol`); their gas is in [ADR 013](/adr/013-one-easy-track-factory.md#confirmation).
 - After a restore motion, an order settles. The restore refuses stale lists, a token outside recovery's list, an unsorted approval list and a token operation in the same motion.
 - Still owed: the order book's acceptance of zero app data, the watch-tower's posting of TWAP parts, the screening vendor's answer on output checks, and the orders budgets from the attested computation.
 

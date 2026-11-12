@@ -55,7 +55,7 @@ blocks:
         state: design
         sources: ["ADR-007#d41", "ADR-013#d8"]
     sources: ["ADR-011#d1", "ADR-011#d2", "ADR-011#d15", "ADR-006#d2", "ADR-005#d31", "ADR-010#d24",
-      "ADR-006#d11", "ADR-006#context", "ADR-013#d5", "ADR-013#d7", "INV-004", "INV-015", "lip:part-8",
+      "ADR-006#d11", "ADR-006#context", "ADR-013#d5", "ADR-013#d11", "INV-004", "INV-015", "lip:part-8",
       "doc:docs/specs/control-matrix.md#the-matrix", "OD-54"]
 
   - id: caps

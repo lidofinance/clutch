@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:00:25Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
@@ -22,4 +22,3 @@ EM decides every item until the Treasury Management Committee takes over as acce
 | ID | Question | Closes in | Agent recommendation | Decides |
 |---|---|---|---|---|
 | OD-65 | Who holds the emergency Safe's fifth seat? The fifth signer is a member of neither the committee nor the Emergency Brakes multisig (OD-58), and a DAO Snapshot appoints them. | [ADR 005](/adr/005-account-graph-and-roles.md) | EM said on 2026-10-13 "yup, tentatively tho" to a member of the Tech team. Accept that as a criterion, not a name: a Tech-team member on neither body, whose key and seed are generated apart from the Emergency Brakes members' setup, who signs a written statement of independence, keeps on-call duty and takes part in the timed drill. Review the seat at the first rotation, because the only quorum without the committee is then all from the engineering organisation | EM; a DAO Snapshot appoints the signer |
-| OD-135 | How does the raw factory keep two motions from undoing each other (OD-100)? Options: (A) one policy version for every motion that writes on a modifier itself: such a motion fails if another one was enacted after its creation, and a motion that only acts, such as a burn, a payout or a restart, is exempt; this is the prototype ([research note](/research/raw-factory-prototype-2026-11-12.md)); (B) one version for each scope, as the typed factory keeps: two motions on different scopes can both enact, and the factory must read each write's role, target and function, which the agent estimates at about 60 more lines; (C) no version, the counter only. | [ADR 013](/adr/013-one-easy-track-factory.md) | A. Permission motions are rare, and one motion can carry many writes. The cost is that the second of two open permission motions fails and the committee creates it again, with a new objection window | EM |

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T12:05:15Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
@@ -45,7 +45,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 9. Funds return to the Aragon Agent by an operator transfer pinned to the Agent, or by the emergency Safe's transfer. Neither needs a motion, and neither needs a vote. The operator's transfer is a recovery path, and monitoring alerts on every transfer to the Agent (agent's reading) (OD-108).
 10. Redemption and fund-exit proceeds go to the Asset Safe, not to the Agent (OD-108).
 11. The transfer of insurance money from the Asset Safe to the first-loss Safe spends a budget key (OD-129).
-12. One operation of the universal factory deposits insurance money from the first-loss Safe into Lido Earn (OD-130).
+12. One motion of the universal factory deposits insurance money from the first-loss Safe into Lido Earn (OD-130).
 
 ## Proposed direction
 
@@ -55,12 +55,12 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **The first tranche.** It runs when the enabling vote executes. The Safe batches run after the vote ([ADR 005](/adr/005-account-graph-and-roles.md) decision 32), so the tokens wait in the Asset Safe, which only Aragon Voting controls, until the operator's permissions apply. It is the launch cap ([ADR 010](/adr/010-pre-execution-screening.md) decision 20).
 - **The second tranche.** [ADR 010](/adr/010-pre-execution-screening.md) decisions 22 and 25 set its conditions.
 - **Before the guard.** The March 2026 terms ([ADR 008](/adr/008-funding-through-existing-payments.md) context) let the Earn team instruct a redemption at any time, so a redemption still runs. If its proceeds take the vault above the first tranche, the committee's Safe returns the excess to the Aragon Agent with its pinned transfer.
-- **Insurance shapes in the factory** ([ADR 013](/adr/013-one-easy-track-factory.md)):
+- **Insurance by motion** ([ADR 013](/adr/013-one-easy-track-factory.md)):
   - Lido Earn (decision 12): the factory's `insurance` role on the first-loss modifier approves a deposit queue for the exact amount and deposits it with no referral: USDC into earnUSD, or wstETH into earnETH. The queue credits the depositor, which is the first-loss Safe, and anyone can call the queue's claim for it. The new shares follow the first-loss rules: the burn and the redemption of [ADR 008](/adr/008-funding-through-existing-payments.md) decisions 23 and 21. The role holds no transfer, no call of a share token and no cancel of a request.
-  - A fund with a fixed payout address (decision 6): one fund for each token. The motion that creates it gives the factory's `insurance` role a transfer of the token that is pinned to the payout address, and it sets the cap as a budget key that never refills. The factory's `insurance-governance` role on the first-loss modifier makes these writes, only under the `insurance` key, and it refuses the vault's accounts and the two Earn share tokens. A payout is a later motion: it names the fund's address and cap, which the fund's version checks, and the modifier holds the amount within what is left of the cap (INV-039). No contract of Lido Lend turns a payment into a gain for its lenders, so the address is outside Lido Lend ([research note](/research/lido-lend-insurance-2026-11-12.md)).
+  - A fund with a fixed payout address (decision 6). The motion that creates it gives the factory's `insurance` role a transfer of the token that is pinned to the payout address, and it sets the cap as a budget key that never refills. The factory's `insurance-governance` role on the first-loss modifier makes these writes, only under the `insurance` key, and it refuses the vault's accounts and the two Earn share tokens. The cap's key is the derived key of the token and the payout address. A payout is a motion of one transfer, and the modifier holds it to the pinned address and within what is left of the cap (INV-039). One token carries one fund at a time, because a write replaces the token's whole transfer permission. No contract of Lido Lend turns a payment into a gain for its lenders, so the address is outside Lido Lend ([research note](/research/lido-lend-insurance-2026-11-12.md)).
   - The exit of a fund ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 28): the committee's `first-loss` role sends insurance money back by a transfer pinned to the Asset Safe, in each token that can become insurance money.
-  - Money for a fund (decisions 7 and 11): a transfer pinned to the first-loss Safe, through the universal factory's `insurance-funding` role on the operator modifier. The amount spends the key that the factory derives for the token and the first-loss Safe ([ADR 013](/adr/013-one-easy-track-factory.md) decision 9). The key starts empty. A budget operation sets it within the token's budget ceiling, in the same motion or in an earlier one, and the 30-day floor of the refill period applies.
-  - The checklist of [ADR 008](/adr/008-funding-through-existing-payments.md) decision 29 becomes the shape's fields.
+  - Money for a fund (decisions 7 and 11): a transfer pinned to the first-loss Safe, through the universal factory's `insurance-funding` role on the operator modifier. The amount spends the derived key of the token and the first-loss Safe ([ADR 013](/adr/013-one-easy-track-factory.md) decision 9). The key starts empty. A budget write sets it, in the same motion or in an earlier one, and the 30-day floor of the refill period applies.
+  - The checklist of [ADR 008](/adr/008-funding-through-existing-payments.md) decision 29 goes into the motion's forum post.
 - **The operator's return.** A `transfer` to the Aragon Agent, of any amount, on the Asset Safe and on the orders account, for each listed token. On the Asset Safe, the return and the funding transfer to the orders account are two branches of one `transfer` tree per token, because a write replaces the whole tree. The motion that adds a token adds its return too.
 - **Owed mandate text.** The [enabling vote](/specs/enabling-vote.md) lists it, under funding and under legacy and insurance.
 
@@ -70,7 +70,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - **Funding tokens fixed at launch, with a vote for a new one:** not chosen (decision 3). Voting pays any token.
 - **The first tranche as its own vote after the enabling vote:** not chosen (decision 2). It costs a vote.
 - **Insurance money by tranche votes straight to the first-loss Safe:** not chosen (decision 7).
-- **Insurance money without a bound, or with a ceiling of its own class in the factory:** not chosen (decision 11). Without a bound, two motions that nobody objects to could move any amount to the first-loss Safe and then burn it. A budget key uses the budgets and ceilings that the factory has.
+- **Insurance money without a budget key:** not chosen (decision 11). A budget key makes each amount a stated budget that monitoring reads, and the transfer fails above it.
 - **A Lido Lend fund of burnable shares:** not possible today (decision 6). Lido Lend's core has no share token, and its lender vault has no burn that a holder can call.
 - **A loss cover inside Lido Lend, or no Lend fund and a payout by vote:** not chosen (decision 6).
 - **An Earn fund of plain tokens that pays a pinned address:** not chosen (decision 12). The deposit uses the burn and the redemption that the first-loss shares have.
@@ -83,13 +83,12 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The launch adds no funding contract and changes neither Easy Track's payment permission nor its token list.
 - A payout from a fund with a fixed payout address is the one flow, besides the returns to the Agent, that leaves the vault.
 - The first-loss Safe holds insurance for three products, so a defect in its modifier reaches all of them.
-- Insurance money shares its token's budget ceiling with the operator's keys of that token. A token whose budget ceiling is zero carries no insurance money, because a motion cannot raise a ceiling from zero.
-- A motion can set the insurance budget and move the money in one enactment, so the budget adds no second objection window. It bounds the amount to the token's budget ceiling.
+- A motion can set the insurance budget and move the money in one enactment, so the budget adds no second objection window and no bound of its own. The objection window bounds the amount ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11).
 - An insurance deposit waits in the Earn vault's queue until the vault's next report. No role cancels the request.
 - A fund's payout address is outside Lido Lend, so what the lenders get rests on that address's own rules. The fund bounds the amount and the receiver, not the use.
-- One fund exists for each token. A second fund in a token needs a changed factory.
+- One fund exists for each token at a time. A motion that creates a second fund in a token replaces the first fund's payout address.
 - A fund's money is not kept apart from other insurance money in the first-loss Safe. The cap bounds the payouts, and the committee's exit can return the money to the Asset Safe without a motion.
-- A deposit of a token with another vault's queue, or of a token outside the policy, passes its creation and fails at its enactment.
+- A motion that the first-loss modifier's policy refuses, such as a deposit of a token with another vault's queue or a payout to another address, passes its creation and fails at its enactment.
 
 ## Confirmation
 
@@ -98,9 +97,9 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - A later tranche in another token arrives by its own vote (`test_03_ramp_up`).
 - The operator's return (decision 9): on the Asset Safe, each order token goes to the Aragon Agent in any amount, spends no budget and reaches no other receiver (`test_operator_returns_each_order_token_to_the_agent`, `test_operator_return_spends_no_budget`). A token outside the order lists has no return (`test_operator_return_only_for_order_tokens`). On the orders account, the operator returns a token to the Asset Safe or the Agent (`test_orders_operator_returns_tokens_to_the_asset_safe_or_the_agent`). A token that a motion adds gets its return in the same motion (`test_factory_orders_token_motion`).
 - A first-loss redemption's claim pays only the Asset Safe (decision 10; `test_first_loss_claim_pays_only_the_asset_safe`). The claim of a settled request is not tested: a fork cannot settle a request.
-- Insurance money (decision 11): without a budget, and above it, the move fails at enactment; one motion sets the budget and moves the money; a budget above the token's ceiling is refused at creation (`test_uf_insurance_money_goes_to_the_first_loss_safe`, `test_insurance_funding_pays_only_the_first_loss_safe`).
+- Insurance money (decision 11): without a budget, and above it, the move fails at enactment; one motion sets the budget and moves the money (`test_uf_insurance_money_goes_to_the_first_loss_safe`, `test_insurance_funding_pays_only_the_first_loss_safe`).
 - The insurance deposit (decision 12): one motion sets the budget, moves USDC to the first-loss Safe and deposits it into earnUSD's queue, which records the request for the first-loss Safe and keeps no approval (`test_insurance_deposit_by_motion`); the same for wstETH and earnETH (`test_insurance_deposit_into_earn_eth`); the refusals (`test_insurance_deposit_refusals`, `test_insurance_role_holds_only_its_calls`). The claim of the shares after a report is not tested: a fork cannot make the report.
-- A fund (decision 6): its creation pins the payout address and sets a cap that never refills; payouts go only to that address and only within the cap, also after 40 days; a payout names the fund's own terms and never shares a motion with the creation (`test_fund_create_and_payout_by_motion`, `test_fund_payout_refusals`, `test_fund_create_refusals`). The governance role writes nothing but a fund (`test_insurance_governance_writes_only_a_fund`). The exit pays only the Asset Safe (`test_fund_exit_pays_only_the_asset_safe`). The tests use a stand-in payout address.
+- A fund (decision 6): its creation pins the payout address and sets a cap that never refills; payouts go only to that address, only in the fund's token and only within the cap, also after 40 days (`test_fund_create_and_payout_by_motion`, `test_fund_payout_refusals`, `test_fund_create_refusals`). The governance role writes nothing but a fund (`test_insurance_governance_writes_only_a_fund`). The exit pays only the Asset Safe (`test_fund_exit_pays_only_the_asset_safe`). The tests use a stand-in payout address.
 - Owed: the Lend team's answer on the payout address, and how that address pays the lenders.
 
 ## Reversal conditions

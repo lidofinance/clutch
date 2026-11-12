@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T12:19:12Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
@@ -35,12 +35,12 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 1. The launch list is ETH, WETH, stETH, wstETH, earnETH, earnUSD, USDC, USDT, USDS, sUSDS, CoW access, and Lido Lend access, which is compatibility with Morpho Blue (decision log, 2026-09-22; OD-91).
 2. The launch list includes DAI (decision log, 2026-09-22).
-3. The vault launches without Lido Lend, but with the universal factory's shape for Lido Lend's lender vault and tests for it. Lido Lend must be ready on the day it deploys, through a motion (decision log, 2026-09-22; OD-102, OD-132).
+3. The vault launches without Lido Lend, but with a tested motion that onboards an ERC-4626 lender vault. Lido Lend must be ready on the day it deploys, through a motion (decision log, 2026-09-22; OD-102, OD-132, OD-134).
 4. Replaced by decision 11 (OD-43).
 5. Replaced by ADR 014 decision 3 (OD-106).
 6. Replaced by decision 12 (OD-46).
 7. DAI earns through Sky's DAI–USDS converter. The operator may convert DAI to USDS and back, one to one, with the receiver pinned to the Asset Safe (OD-22).
-8. The DAI and USDS approvals to the converter have a fixed ceiling of one mandate size, as the stETH approval to the wstETH contract does, and a motion changes it as [ADR 013](/adr/013-one-easy-track-factory.md) decision 13 allows (OD-22, OD-89, OD-105).
+8. The DAI and USDS approvals to the converter have a fixed ceiling of one mandate size, as the stETH approval to the wstETH contract does, and a motion changes it by writing the approval's permission again (OD-22, OD-89, OD-134).
 9. DAI stays off the operator's order lists, and recovery can sell DAI into USDC or USDT (OD-22, OD-43).
 10. Stated by [ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28.
 11. Stated by [ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 17 and 20.
@@ -60,10 +60,10 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 | USDC, USDT | held | — |
 | DAI | held; converted to USDS and back through Sky's converter, one to one | recovery sells it (decision 9) |
 | USDS | held; receives converted DAI | — |
-| sUSDS | savings position | the universal factory's tokenized-vault shape; the operator redeems it, and recovery can sell it in a CoW order |
+| sUSDS | savings position | an ERC-4626 position of the launch policy; the operator redeems it, and recovery can sell it in a CoW order |
 | earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares sit in the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 19); insurance at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
 | Orders account | CoW market, limit and TWAP orders for the operator; recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Lido Lend | lending, after launch | one motion through the universal factory's ERC-4626 shape for Lido Lend's lender vault, once Lido Lend's own contracts exist (decision 13); a position returns only WETH, USDC or USDT; in the protocol cap until it matures ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28); insurance at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
+| Lido Lend | lending, after launch | one motion of the universal factory that onboards Lido Lend's lender vault, an ERC-4626 vault, once Lido Lend's own contracts exist (decision 13); a position returns only WETH, USDC or USDT; in the protocol cap until it matures ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28); insurance at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
 
 A tranche vote can bring ETH, WETH, stETH, wstETH, USDC, USDT, DAI, USDS and sUSDS ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 3), because Aragon Voting pays any token through Finance.
 
@@ -87,11 +87,11 @@ Out of the launch scope: sDAI, Aave and every other third-party lending market; 
 ## Confirmation
 
 - INV-008 and INV-015 in the [invariants](/specs/invariants.md); INV-003 for the converter's receiver.
-- Owed: the universal factory's ERC-4626 shape, and its test against Lido Lend's lender vault.
+- One motion onboards an ERC-4626 lending vault with the writes of decision 13, and the operator lends and the emergency role exits (`test_uf_motion_onboards_an_erc4626_lending_vault`). The test uses a deployed ERC-4626 vault as a stand-in. Owed: the same test against Lido Lend's lender vault, once it is deployed on mainnet.
 
 ## Reversal conditions
 
-- Lido Lend ships with an interface that the universal factory's ERC-4626 shape cannot express.
+- Lido Lend's lender vault ships with an interface that is not ERC-4626, or that the Roles conditions cannot pin to the Asset Safe.
 - A market of Lido Lend stays without free liquidity for longer than the mandate's emergency window.
 - The mandate changes the asset list.
 
