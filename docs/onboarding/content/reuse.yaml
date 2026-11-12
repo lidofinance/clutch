@@ -134,11 +134,11 @@
 
 - name: The universal factory
   column: new
-  what: "One Easy Track factory for every Clutch [[motion]]. With the thin companion contracts that it creates for its largest shapes, it is the only new code, and the most critical."
+  what: "One Easy Track factory for every Clutch [[motion]]. It makes a motion's [[raw write|raw writes]] and checks none of their content. It is the only new code, and it is small: 3,371 bytes."
   why: "One factory and one calldata format are fewer moving parts to audit and to watch."
   owner: "`@lidofinance/defi-tech`; an external audit in phase 3, with the order signer"
-  sources: ["ADR-006#d1", "ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d7", "ADR-013#d10",
-    "ADR-013#d13", "ADR-013#consequences", "ADR-007#d41", "INV-032", "lip:part-4", "ADR-013#d17"]
+  sources: ["ADR-006#d1", "ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d10", "ADR-013#d11",
+    "ADR-013#consequences", "ADR-013#confirmation", "ADR-007#d41", "INV-032", "lip:part-4"]
 
 - name: The enabling-vote script
   column: new

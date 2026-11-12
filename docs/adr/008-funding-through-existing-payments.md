@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T12:05:15Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
@@ -62,7 +62,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 26. Payouts from an insurance fund run as motions (OD-66).
 27. Replaced by ADR 014 decision 4 (OD-107).
 28. The committee's Safe exits an insurance fund through its direct role, with the proceeds paid to the Asset Safe (OD-66, OD-80, OD-108).
-29. The framework fixes a checklist that every fund fills in, in its motion and its forum post: the product, and its share token or payout address; the factory's shape; the fund's cap; the loss trigger and a confirming party independent of the product team; the incident-update deadline; and the end of the terms (OD-66, OD-102).
+29. The framework fixes a checklist that every fund fills in, in its motion and its forum post: the product, and its share token or payout address; the motion's writes; the fund's cap; the loss trigger and a confirming party independent of the product team; the incident-update deadline; and the end of the terms (OD-66, OD-102).
 30. Replaced by ADR 014 decision 7 (OD-107).
 31. Replaced by ADR 014 decision 4 (OD-107).
 32. The mandate size follows the mandate's draft text. The vault holds up to the mandate size in assets. Each funding counts in US dollars at its value when it is funded. The legacy positions that move into the vault count too (OD-89).
@@ -114,7 +114,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - The Earn vaults block share transfers before the move.
 - The first-loss terms end. A DAO vote then moves the shares to the Asset Safe as ordinary positions.
-- The DAO changes or ends the first-loss authorization. A DAO vote then changes or removes the two first-loss roles and the factory's burn shape.
+- The DAO changes or ends the first-loss authorization. A DAO vote then changes or removes the two first-loss roles and the burn role.
 
 ## Open questions
 

@@ -1,11 +1,11 @@
 # Research
 
-* [The universal factory with raw writes, a prototype, 2026-11-12](raw-factory-prototype-2026-11-12.md) - The report before the switch; 3,337 bytes against 32,645; one motion onboards an ERC-4626 vault.
+* [The universal factory with raw writes, a prototype, 2026-11-12](raw-factory-prototype-2026-11-12.md) - The report before the switch and the switch itself; 3,371 bytes against 32,645; one motion onboards an ERC-4626 vault.
 * [Lido Lend's contracts and an insurance fund for them, 2026-11-12](lido-lend-insurance-2026-11-12.md) - No share token, no holder's burn and no loss cover in Lido Lend; OD-131 and OD-132.
-* [A token for the orders account by motion, 2026-11-08](orders-token-motions-2026-11-08.md) - The factory's orders operation; EIP-170 companion; one call per motion.
+* [A token for the orders account by motion, 2026-11-08](orders-token-motions-2026-11-08.md) - The typed factory's orders operation, since replaced; one call per motion stays.
 * [The orders account's motion roles and the exit-governance role on a fork, 2026-11-08](orders-motion-roles-2026-11-08.md) - Governance, approvals and exit-governance roles; compiler rules; fork tests.
 * [The orders account's policy on a fork, 2026-11-07](orders-account-fork-tests-2026-11-07.md) - Order signer and TWAP from Safe v1.5.0; the signed fee.
-* [The universal factory's prototype on a fork, 2026-11-05](universal-factory-prototype-2026-11-05.md) - The factory's core, introductions and restores; measures on a fork.
+* [The universal factory's prototype on a fork, 2026-11-05](universal-factory-prototype-2026-11-05.md) - The typed factory's core, since replaced; measures on a fork.
 * [One Easy Track factory and funding by tranche votes, 2026-11-05](easy-track-first-2026-11-05.md) - Easy Track permissions and roles; Roles storage; Voting's Finance payments.
 * [The enabling vote rehearsed on a mainnet fork, 2026-10-15](enabling-vote-rehearsal-2026-10-15.md) - Approved hashes under EIP-7825; Easy Track's shared motion limit.
 * [The committee's Safe as the operator, reviewed again, 2026-10-15](operator-safe-review-2026-10-15.md) - The committee Safe's other duties; Lido's practice; the fork probe.

@@ -16,8 +16,7 @@ interface IERC4626Vault {
 /// @title ExitGovernanceRehearsal — the exit-governance role on the enabling vote's vault (ADR 006, decision 13;
 ///        OD-49; INV-025), and the exit that a token gets when a motion adds it to the order lists (ADR 007,
 ///        decision 45).
-/// @dev Each write is made as the universal factory, the role's member, makes it in an enacted motion's call. Of the
-///      factory's shapes, only the orders operation emits an exit: a new token's (ADR 007, decision 45).
+/// @dev Each write is made as the universal factory, the role's member, makes it in an enacted motion's call.
 ///      Run: RPC=<archive RPC> forge test --match-contract ExitGovernanceRehearsal
 contract ExitGovernanceRehearsal is EnabledVault {
     bytes4 internal constant CONDITION_VIOLATION = 0xd0a9bf58;

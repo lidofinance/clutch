@@ -16,9 +16,8 @@ const CALL = 0n;
  * What an enacted Easy Track motion may do, as the governance role on the first-loss modifier (ADR 014, decision
  * 6): create a fund with a fixed payout address. It writes, under the insurance role's key only, a `transfer` of
  * the fund's token, as a plain call, and it sets the fund's cap as a budget key that never refills: the refill and
- * its ceiling are pinned to zero. The key is one that the universal factory derives, for the token and the payout
- * address. The content of the transfer's tree, which pins the payout address and the key, is the universal
- * factory's shape (ADR 013).
+ * its maximum are pinned to zero. The key has the derived form, for the token and the payout address. The
+ * content of the transfer's tree, which pins the payout address and the key, comes with the motion (ADR 013).
  *
  * Every grant refuses the vault's Safes and modifiers and the two Earn share tokens as the administered target, so
  * no motion gives a role a transfer of the first-loss shares. The role holds no membership setter, no

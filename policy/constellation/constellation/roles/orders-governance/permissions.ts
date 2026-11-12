@@ -55,7 +55,7 @@ const RELAYER_TREE = flatTree(relayerApproval(USDC));
  * Every other grant is refused, and so is any grant under the role's own key. The role holds no membership setter,
  * no `allowTarget`, no revoke and no `setAllowance`: membership is a DAO-vote action, a token leaves the lists when a
  * motion writes its orders again without it, and the orders account has no budgets of its own. The content of a
- * signer or TWAP order's tree, whose token lists change, is the universal factory's shape to pin (ADR 013).
+ * signer or TWAP order's tree, whose token lists change, comes with the motion (ADR 013).
  */
 export default [
   call(MODIFIER, SCOPE_TARGET, anyOf([OPERATOR, EMERGENCY, APPROVALS]), NOT_ADMINISTRATION),

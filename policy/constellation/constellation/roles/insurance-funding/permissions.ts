@@ -9,9 +9,9 @@ export const FUNDABLE = [STETH, WSTETH, WETH, USDC, USDT, DAI, USDS, SUSDS];
  * Insurance money by motion (ADR 014, decisions 7 and 11): a transfer from the
  * Asset Safe to the first-loss Safe, which Aragon Voting owns. The receiver is
  * pinned, so the role moves money only between two of the DAO's own Safes. The
- * amount spends the budget key that the universal factory derives for the
- * token and the first-loss Safe. A budget motion sets that key within the
- * token's budget ceiling, and until it does, no insurance money moves.
+ * amount spends the derived budget key of the token and the first-loss
+ * Safe. A budget motion sets that key, and until it does, no insurance
+ * money moves.
  */
 export default FUNDABLE.map((token) =>
   call(

@@ -7,9 +7,12 @@ status: stable
 review_status: slop
 valid_as_of: 2026-11-08
 stale_after: 2027-02-28T00:00:00Z
+superseded_by:
+  ref: /research/raw-factory-prototype-2026-11-12.md
+  note: "In part: since OD-134, a raw motion adds a token and restores the orders account, so the orders operation and its companion contract are gone. The executor's memory cost and the one call per motion stand."
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T11:50:32Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1

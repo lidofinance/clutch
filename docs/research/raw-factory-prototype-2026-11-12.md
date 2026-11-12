@@ -1,7 +1,7 @@
 ---
 type: Research Note
-title: The universal factory with raw writes, a prototype, 2026-11-12
-description: "The report that ADR 013 decision 11 asks for before the switch to raw writes, and the prototype that EM's choice of 2026-11-12 led to: the typed factory's size and gas, the raw factory's size and gas, what one raw motion can onboard, and what the factory no longer checks."
+title: The universal factory with raw writes, the prototype and the switch, 2026-11-12
+description: "The report that ADR 013 decision 11 asked for before the switch to raw writes, and the prototype that EM's choice of 2026-11-12 led to: the typed factory's size and gas, the raw factory's size and gas, what one raw motion can onboard, what the factory no longer checks, and the measures after the switch."
 tags: [factory, easy-track, governance, evidence]
 status: stable
 review_status: slop
@@ -9,12 +9,12 @@ valid_as_of: 2026-11-12
 stale_after: 2027-02-28T00:00:00Z
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:00:25Z
+  at: 2026-11-12T13:38:25Z
 verified: []
 sources:
   - id: s1
     resource: /adr/013-one-easy-track-factory.md
-    title: ADR 013 — decision 11, the fallback to raw writes and the report before it
+    title: ADR 013 — decision 11, raw writes; before the switch it named them as a fallback and asked for this report
   - id: s2
     resource: /registers/decision-log.md
     title: Decision log — EM's request for a wider factory and EM's choice of raw writes, 2026-11-12
@@ -32,9 +32,9 @@ sources:
     title: The typed factory's orders shape at 5b7dd19
 ---
 
-# The universal factory with raw writes, a prototype, 2026-11-12
+# The universal factory with raw writes, the prototype and the switch, 2026-11-12
 
-EM asked for a factory that accepts wider calldata, and then chose raw writes [s2]. [ADR 013](/adr/013-one-easy-track-factory.md) decision 11 asks for a report before that switch [s1]. This note is the report, with the prototype's measures. The prototype stands beside the typed factory. It deletes nothing.
+EM asked for a factory that accepts wider calldata, and then chose raw writes [s2]. [ADR 013](/adr/013-one-easy-track-factory.md) decision 11 then named raw writes as a fallback and asked for a report before the switch [s1]. This note is the report, with the prototype's measures. The prototype stood beside the typed factory and deleted nothing. EM then decided OD-135 and asked for the switch [s2]; the last section records it.
 
 ## The typed factory, measured
 
@@ -83,17 +83,36 @@ Six mutants of the prototype each fail one of the nine tests.
 
 The policy's own guards stay: no vault account as an administered target, no delegatecall except the order signer's, writes only under the allowed role keys, budget keys only in the launch or the derived form, the 30-day floor on a refill period, and the emergency exits and the orders account's fixed permissions pinned whole.
 
-## What the switch will change
+## What the switch changes
 
-The switch replaces the typed factory with the raw one, and it is not in this change.
+The switch replaces the typed factory with the raw one. The list below is the plan that the prototype's change stated.
 
 - **Code.** The typed factory and its orders shape go. The fork tests of the typed operations become tests of raw motions, or go where they test a check that no longer exists.
 - **Tooling.** The `motion` command builds a motion's writes from a merged policy change, and a second command checks that a motion's writes equal that change. These two commands carry what the typed checks carried.
 - **Pages.** ADR 013 decisions 7, 9, 10, 13 and 15, the ceilings of ADR 009 and ADR 011, INV-033, INV-034 and INV-036, the threat model, the LIP draft and the guide.
 - **Monitoring.** An alert on a budget that a motion raises more than twofold can replace the ceiling as a detective control.
 
+## The switch, made on 2026-11-12
+
+- **Code.** `src/factory/UniversalFactory.sol` is the raw factory. The typed factory, its orders shape and the prototype's own test file are gone. The factory's roles come from the enabling vote's batches, as before the prototype.
+- **One rule is wider than the prototype's.** A write whose target is any of the four modifiers counts as a permission write, also when it goes through another modifier. The prototype counted only a write on the write's own modifier.
+- **Tests.** The fork suite builds each motion from raw writes: 108 tests in nine suites pass at block 26249900. The tests of the typed checks are gone: the trees that the factory built, its ceilings, its versions for each scope, and its refusals at creation. A motion that a modifier's policy refuses now passes its creation and fails at its enactment.
+- **Measures after the switch.**
+
+| Measure | Value |
+|---|---|
+| Runtime bytes | 3,371 |
+| Source lines | 157 |
+| A budget motion, enactment gas | 226,683 |
+| Sixteen budgets in one motion, enactment gas | 2,383,476 |
+| A new ERC-4626 vault in one motion | 9 writes, 2,140,115 gas |
+| A token for the orders account in one motion | 16 writes, 7,790,415 gas |
+| The orders account's restore in one motion | 9 writes, 3,622,403 gas |
+
+- **Not built.** The `motion` command and the command that checks a motion's writes against a merged policy change; the alert on a budget that a motion raises more than twofold.
+
 ## Limits of this note
 
-- The prototype's roles come from each modifier's owner in the tests, not from the enabling vote. The switch moves them into the vote.
-- The size and the gas are the prototype's. The switch can change them.
-- No audit has read the prototype.
+- The gas figures are enactments on a fork with cold accounts. A later change of the policy's trees changes them.
+- No audit has read the factory.
+- Twelve mutants of the factory each fail at least one fork test: each gate removed, the counter and the policy version unchecked or not raised, the narrower policy rule of the prototype, and a refused write swallowed. One mutant showed a weak assertion in the rehearsal, which now names the counter's error.

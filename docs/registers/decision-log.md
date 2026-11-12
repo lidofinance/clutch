@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:00:25Z
+  at: 2026-11-12T14:08:30Z
 verified: []
 sources:
   - id: s1
@@ -127,6 +127,12 @@ sources:
   - id: s39
     resource: "urn:clutch:interview:2026-11-12-raw-factory"
     title: EM's request for a factory that accepts wider calldata, and EM's choice of raw writes, 2026-11-12; the transcript is not in the repository
+  - id: s40
+    resource: "urn:clutch:interview:2026-11-12-raw-switch"
+    title: EM's answer on OD-135 and EM's request for the switch to raw writes, 2026-11-12; the transcript is not in the repository
+  - id: s41
+    resource: "urn:clutch:interview:2026-11-12-raw-switch-verify"
+    title: EM's instruction to record EM's verification of ADR 003 and ADR 004 after the switch to raw writes, 2026-11-12; the transcript is not in the repository
 ---
 
 # Decision log
@@ -136,6 +142,33 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-12 — ADR 003 and ADR 004 verified after the switch to raw writes
+
+The switch changed one sentence in each of the accepted ADR 003 and ADR 004, which broke EM's verification of both pages. ADR 003 decision 6 no longer lists the factory's shapes. ADR 004 decision 14 names the motions' permission trees in place of the factory's seeded versions. The agent asked EM to verify the two pages again or to drop the edit. EM wrote:
+
+> 1. do ADR 003 and ADR 004 verification with just verify on my behalf
+
+Recorded as:
+
+- EM verifies ADR 003 and ADR 004 again after the edits of the switch, so they stay accepted. At this instruction, the agent `claude-code/mythos-5.2` recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verifications are EM's. [s41]
+
+## 2026-11-12 — OD-135 decided, and the switch to raw writes
+
+The agent asked EM to decide OD-135 and said that the switch to the raw factory was separate work. EM wrote:
+
+> OD-135: A
+>
+> do the switch, check the whole repo for integrity afterwards and update dangling/outdated references
+
+Recorded as:
+
+- (OD-135) The factory keeps one policy version. A motion that writes on one of the four modifiers states it, and fails if another such motion was enacted after its creation. A motion that only acts, such as a burn, a payout or a restart, states the counter alone ([ADR 013](/adr/013-one-easy-track-factory.md), decision 10).
+- The switch is made. The raw factory is the universal factory, and the typed factory, its orders shape and their tests are gone. [ADR 013](/adr/013-one-easy-track-factory.md) decisions 7, 13, 15 and 17 are one line each, and decisions 9, 10, 11, 14, 16 and 18 carry their current text.
+- OD-134 ends the ceilings of OD-105, OD-113 and OD-120 and the companion contract of OD-117. It replaces OD-102 in part: the one factory, its address book and its motion roles stay, and the typed shapes go.
+- Three points are the agent's reading. The key form of OD-102 stays as a rule of the policy: a budget key of a new spender starts with `k:`, and the motion derives it. A write on any of the four modifiers counts as a permission write, also when it goes through another modifier. A motion carries at most 64 writes.
+- EM's request to update outdated references covers two lines of `AGENTS.md` and one comment in `.github/workflows/policy.yml`, which named the companion contracts, the factory's shapes and its seeded versions.
+- The accepted ADR 003 and ADR 004 each name the typed factory once. Their edit is a separate commit, because it needs EM's verification again. [s40]
 
 ## 2026-11-12 — OD-134: the factory takes raw writes
 

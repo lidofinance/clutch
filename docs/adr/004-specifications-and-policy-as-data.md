@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T16:59:06Z
+  at: 2026-11-12T13:57:30Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -44,6 +44,11 @@ verified:
     recorded_by: claude-code/opus-5.5
     ref: /registers/decision-log.md#2026-11-11--adr-001-to-adr-004-verified-after-the-occam-pass-and-a-second-recording-agent
     sha256: 7f79aab20c346fa82ed45cb735290adb04226cf4af39f17c19442bd63fb9dc08
+  - by: human:em
+    at: 2026-11-12T14:08:31Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-12--adr-003-and-adr-004-verified-after-the-switch-to-raw-writes
+    sha256: a74f433a134f032bc6ad54836936f07b6a831cc4efac62bb2d1339e742128423
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -100,7 +105,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 11. Local tooling replicates and verifies everything that the UI produces. No transaction that the hosted app builds is signed, or enters a vote or a motion, unless Clutch's compiler produces the same calls from the same commit. The policy changes only in the repository; a change made in the UI is drift (OD-33).
 12. The policy source is the Zodiac constellation, written in TypeScript under `policy/`. Decision 7 applies through decision 14: the compiled artifact is the policy's data (OD-33).
 13. Clutch's own compiler is written in TypeScript on the Zodiac roles SDK. It runs offline from a frozen lockfile with pinned versions. It emits one JSON artifact: the ordered modifier calls, the expected condition tree for every role, target and selector, and the allowances. The round-trip check rebuilds the trees from the modifier's events on a fork and compares them with the artifact. The compiler refuses an entry that only the hosted app can compile, such as an action or a DeFi Kit preset, because local tooling cannot verify it (OD-16, OD-33).
-14. The artifact is committed. A policy pull request carries the TypeScript change and the recompiled artifact, and CI fails when they differ. Reviewers approve the artifact. The enabling vote, the universal factory's seeded versions and the drift detector consume the committed artifact (OD-33).
+14. The artifact is committed. A policy pull request carries the TypeScript change and the recompiled artifact, and CI fails when they differ. Reviewers approve the artifact. The enabling vote, the motions' permission trees and the drift detector consume the committed artifact (OD-33).
 15. The Solidity builders go now. The port to the constellation deletes them and rebuilds the fork tests on the artifact. The port does not have to reproduce the builders' trees (OD-33).
 16. The team that owns the repository, `@lidofinance/defi-tech`, owns the Lido Zodiac workspace and its API key. A member of that team pushes from the merged `main`, with the key in a local `.env` that git ignores. The committee gets access to view the workspace. CI holds no key (OD-35, OD-64).
 17. The Emergency Brakes multisig gets no access to view the workspace (OD-64).

@@ -5,8 +5,8 @@
  * then reaches owner-only administration through the avatar. A fork probe did this with the safety modifier
  * (OD-38). So every grant of a governance role refuses, as the administered target, the Asset Safe, every module
  * that the manifest lists, the orders account and its modifier (ADR 007), with Nor, and the compiler checks the
- * guard. This deny-list is necessary and not sufficient: the universal factory's shapes carry the positive rules
- * (ADR 013).
+ * guard. This deny-list is necessary and not sufficient: it does not pin what a motion grants on an ordinary
+ * target, and the objection window bounds that (ADR 013).
  */
 import { noneOf } from "./lib";
 import { EARN_ETH, EARN_USD, manifest } from "./addresses";

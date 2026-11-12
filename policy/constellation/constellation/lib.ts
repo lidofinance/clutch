@@ -73,8 +73,8 @@ export const noneOf =
   });
 
 /**
- * A budget key that the universal factory derives for a new spender: "k:",
- * then the spender, then the token's first ten bytes (ADR 013, decision 9).
+ * A budget key in the derived form, which a motion sets for a new spender:
+ * "k:", then the spender, then the token's first ten bytes (ADR 013, decision 9).
  * Bitmask checks the first two bytes. The roles SDK has no helper for
  * Bitmask, so this writes the raw condition: two bytes of shift, fifteen of
  * mask and fifteen of expected value.
@@ -86,8 +86,8 @@ export const derivedKey = () => ({
 });
 
 /**
- * The budget key that the universal factory derives for `spender` of `token`: "k:", then the spender, then the
- * token's first ten bytes (ADR 013, decision 9). A permission that names it spends the key that a budget motion
+ * The derived budget key of `spender` and `token`: "k:", then the spender, then the token's first ten bytes
+ * (ADR 013, decision 9). A permission that names it spends the key that a budget motion
  * for that token and spender sets.
  */
 export function derivedKeyOf(token: string, spender: string): `0x${string}` {
