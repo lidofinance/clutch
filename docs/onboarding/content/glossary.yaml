@@ -126,6 +126,10 @@
   plain: "A reading of the vault's holdings at a pinned block every two weeks. It drives the published cap reading."
   sources: ["ADR-009#d25", "ADR-009#d31"]
 
+- term: Funding registry
+  plain: "The contract that bounds the top-ups of one top-up factory. It lists the Asset Safe as its only recipient and holds a limit for a period of three months. Only Aragon Voting changes the limit, the period or the recipients."
+  sources: ["ADR-014#d13", "ADR-014#d16", "ADR-014#proposed-direction", "INV-037", "runbook:Change a top-up registry"]
+
 - term: Guard
   plain: "A contract that a Safe asks before each transaction that its owners sign. Here, [the screening vendor]'s guard on the committee's Safe; until it is set, the [[launch cap]] applies. A module guard does the same for module transactions; Clutch uses none."
   sources: ["ADR-010#d3", "ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction"]
@@ -164,7 +168,7 @@
   sources: ["ADR-005#d6"]
 
 - term: Motion
-  plain: "One Easy Track proposal. Its factory's [[trusted caller]] creates it, and it enacts after the [[objection window]]. Easy Track rebuilds and hash-checks its script at enactment. Every Clutch motion comes from the [[universal factory]]."
+  plain: "One Easy Track proposal. Its factory's [[trusted caller]] creates it, and it enacts after the [[objection window]]. Easy Track rebuilds and hash-checks its script at enactment. A Clutch motion comes from the [[universal factory]], or, for a top-up, from a top-up factory."
   sources: ["ADR-005#d31", "ADR-010#d24", "ADR-006#context", "ADR-013#d5", "INV-005"]
 
 - term: Motion counter
@@ -251,7 +255,7 @@
     "doc:docs/research/easy-track-first-2026-11-05.md#treasury-rules-that-the-committees-items-touch"]
 
 - term: Top-up motion
-  plain: "An Easy Track motion that pays the Asset Safe from the DAO treasury, through Aragon Finance. The committee's Safe creates it through one of two top-up factories: one for stETH, and one for DAI, USDC, USDT and sUSDS. A registry holds each factory's limit for three months, and LDO holders can object for 72 hours. The first top-up is one million dollars, the [[launch cap]]."
+  plain: "An Easy Track motion that pays the Asset Safe from the DAO treasury, through Aragon Finance. The committee's Safe creates it through one of two top-up factories: one for stETH, and one for DAI, USDC, USDT and sUSDS. A [[funding registry]] holds each factory's limit for three months, and LDO holders can object for 72 hours. The first top-up is one million dollars, the [[launch cap]]."
   sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d16", "runbook:Top up the vault"]
 
 - term: Treasury share
@@ -268,7 +272,7 @@
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
 - term: Universal factory
-  plain: "The one Easy Track factory that builds every Clutch [[motion]] and holds the roles that motions use. Its registration allows one call, its own `applyMotion`, in which it checks a motion again and makes the motion's writes. A motion is a list of [[raw write|raw writes]]. The factory keeps a [[policy version]] and a [[motion counter]], and it cannot be upgraded."
+  plain: "The one Easy Track factory of Clutch's own code. It builds every Clutch [[motion]] but a [[top-up motion]], and holds the roles that motions use. Its registration allows one call, its own `applyMotion`, in which it checks a motion again and makes the motion's writes. A motion is a list of [[raw write|raw writes]]. The factory keeps a [[policy version]] and a [[motion counter]], and it cannot be upgraded."
   sources: ["ADR-013#d5", "ADR-013#d6", "ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#d18", "INV-032"]
 
 - term: Policy version

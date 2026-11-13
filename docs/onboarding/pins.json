@@ -42,7 +42,7 @@
         "ADR-008#d19": "ab18428eeb49c353",
         "ADR-013#d8": "892caa6feedd6d5c",
         "ADR-013#proposed-direction": "b81c35c1f4cdbee5",
-        "ADR-014#context": "0e54165dbeff3291",
+        "ADR-014#context": "a21355dc7e5ddfc1",
         "ADR-014#d13": "aa14c5649208052f",
         "ADR-014#d15": "58a4827773c9722b",
         "INV-001": "522b561d1b5962a7",
@@ -286,7 +286,7 @@
       }
     },
     "actor:evmscript-executor": {
-      "content": "f8e3ee942f73f101",
+      "content": "53af00e0134b8eb8",
       "sources": {
         "ADR-005#context": "cd990aec3cedd7de",
         "ADR-005#proposed-direction": "041e9c4478f5fe7e",
@@ -315,9 +315,9 @@
       }
     },
     "actor:finance": {
-      "content": "eed383b26ab885d3",
+      "content": "0840366c1a8d892d",
       "sources": {
-        "ADR-014#context": "0e54165dbeff3291",
+        "ADR-014#context": "a21355dc7e5ddfc1",
         "ADR-014#d13": "aa14c5649208052f",
         "ADR-014#d14": "ee7302b4c7d13082",
         "ADR-014#d15": "58a4827773c9722b",
@@ -339,7 +339,7 @@
         "ADR-008#d22": "e35c362047abff7b",
         "ADR-008#d23": "1dd71cffa7d4c5a8",
         "ADR-008#proposed-direction": "1d0a5ea8d6501113",
-        "ADR-014#consequences": "368df3db754a7f8e",
+        "ADR-014#consequences": "1c8db110c1b574f2",
         "ADR-014#d10": "02bbd685fc5d5dd4",
         "ADR-014#d4": "f7208e50292a81b5",
         "ADR-014#d7": "5e6c66e8cadd2c76",
@@ -350,6 +350,21 @@
         "runbook:Exit the first-loss shares": "08e3502680f83556",
         "runbook:Move the legacy Earn shares": "6b3aa872aea11037",
         "runbook:Run an insurance motion": "d4affc4825822dec"
+      }
+    },
+    "actor:funding-registries": {
+      "content": "b1c7cc1c34cf5f39",
+      "sources": {
+        "ADR-014#consequences": "1c8db110c1b574f2",
+        "ADR-014#d13": "aa14c5649208052f",
+        "ADR-014#d16": "64eb8e4b6ffcc867",
+        "ADR-014#proposed-direction": "ab56e1d981da2d10",
+        "INV-037": "182a0630e3ac0c22",
+        "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts": "f25c682cd1cd62e4",
+        "runbook:Change a top-up registry": "9860e4dc41b2b754",
+        "test:test_topup_only_voting_changes_a_limit_or_a_recipient": "92b176e376248ba4",
+        "test:test_topup_registry_limit_holds_for_a_period": "9f0170f19297d20a",
+        "test:test_topup_stablecoins_from_the_dao_list": "7eca19af97134c59"
       }
     },
     "actor:growth-committee": {
@@ -383,7 +398,7 @@
         "ADR-008#d25": "598d3b471c45b08c",
         "ADR-008#d26": "0e33f467a9e52517",
         "ADR-008#d29": "16e0e33d2a03af43",
-        "ADR-014#consequences": "368df3db754a7f8e",
+        "ADR-014#consequences": "1c8db110c1b574f2",
         "ADR-014#d10": "02bbd685fc5d5dd4",
         "ADR-014#d4": "f7208e50292a81b5",
         "ADR-014#d5": "7dd9573bb67cc0be",
@@ -774,8 +789,27 @@
         "test:test_D3_dai_usds_conversion_pays_the_asset_safe": "ac5a1bef4480bc77"
       }
     },
+    "actor:top-up-factories": {
+      "content": "c15a528915c22163",
+      "sources": {
+        "ADR-010#d21": "6052ca0007037387",
+        "ADR-014#d13": "aa14c5649208052f",
+        "ADR-014#d14": "ee7302b4c7d13082",
+        "ADR-014#d15": "58a4827773c9722b",
+        "ADR-014#d18": "c06cb320d428ac28",
+        "ADR-014#proposed-direction": "ab56e1d981da2d10",
+        "INV-037": "182a0630e3ac0c22",
+        "OD-145": "64c4ce1cb6cde52b",
+        "doc:docs/research/funding-registries-2026-10-02.md#re-read-on-2026-11-13": "9ffea37fe4c025e6",
+        "runbook:Top up the vault": "1e01a0780c011db9",
+        "test:test_topup_one_motion_carries_several_payments": "1264ad6d35df9acf",
+        "test:test_topup_only_the_committee_creates_and_only_the_asset_safe_receives": "4b3abef141e5b1da",
+        "test:test_topup_stablecoins_from_the_dao_list": "7eca19af97134c59",
+        "test:test_topup_the_enabling_vote_registers_the_factories_and_the_first_top_up_is_two_motions": "9ba29cfba213454e"
+      }
+    },
     "actor:universal-factory": {
-      "content": "d165afdaacb67297",
+      "content": "d1b56abfa3b7ab2d",
       "sources": {
         "ADR-006#d10": "f5c9f6652fb5a913",
         "ADR-006#d13": "7587c1b114b49ec7",
@@ -1097,7 +1131,7 @@
       "content": "386ce3f7e4342db2",
       "sources": {
         "ADR-014#confirmation": "aa59b9ac685ff444",
-        "ADR-014#consequences": "368df3db754a7f8e",
+        "ADR-014#consequences": "1c8db110c1b574f2",
         "ADR-014#d4": "f7208e50292a81b5",
         "ADR-014#d6": "e257c721a3c2c159",
         "ADR-014#d7": "5e6c66e8cadd2c76",
@@ -1204,7 +1238,7 @@
     "assumption:returns-rare": {
       "content": "5febea1dfd0cc62c",
       "sources": {
-        "ADR-014#consequences": "368df3db754a7f8e",
+        "ADR-014#consequences": "1c8db110c1b574f2",
         "ADR-014#d10": "02bbd685fc5d5dd4",
         "ADR-014#d8": "6c47e2aacec162d9",
         "ADR-014#d9": "9637c50ff2278102",
@@ -1260,7 +1294,7 @@
         "ADR-010#d24": "a933a29498c7fe8b",
         "ADR-013#consequences": "3ec1664201cbedbb",
         "ADR-013#d11": "11f7d51637b6c3bb",
-        "ADR-014#consequences": "368df3db754a7f8e",
+        "ADR-014#consequences": "1c8db110c1b574f2",
         "INV-002": "d7f677977439b999",
         "INV-014": "0ba49ab0ff8acc75",
         "INV-021": "e8484c692bc2aec0",
@@ -1284,7 +1318,7 @@
       "content": "673353abac089e7c",
       "sources": {
         "ADR-005#d28": "3be850a3867549a6",
-        "ADR-014#consequences": "368df3db754a7f8e",
+        "ADR-014#consequences": "1c8db110c1b574f2",
         "ADR-014#d13": "aa14c5649208052f",
         "ADR-014#d14": "ee7302b4c7d13082",
         "ADR-014#d16": "64eb8e4b6ffcc867",
@@ -1764,7 +1798,7 @@
       "sources": {
         "ADR-007#proposed-direction": "d8735dac9fb51715",
         "ADR-013#d4": "4a581177926056d0",
-        "ADR-014#consequences": "368df3db754a7f8e",
+        "ADR-014#consequences": "1c8db110c1b574f2",
         "ADR-014#d10": "02bbd685fc5d5dd4",
         "ADR-014#d8": "6c47e2aacec162d9",
         "ADR-014#d9": "9637c50ff2278102",
@@ -1891,7 +1925,7 @@
       }
     },
     "flow:top-up": {
-      "content": "441e5a59087255ad",
+      "content": "8fe26c82fe67effb",
       "sources": {
         "ADR-008#d32": "b656b86862415ff4",
         "ADR-008#d33": "0cc5a87aeb33eb78",
@@ -1903,7 +1937,7 @@
         "ADR-009#d42": "5c019c31e204b02e",
         "ADR-009#d48": "6f42293314986f4e",
         "ADR-010#d22": "899847bb14aa5f87",
-        "ADR-014#context": "0e54165dbeff3291",
+        "ADR-014#context": "a21355dc7e5ddfc1",
         "ADR-014#d13": "aa14c5649208052f",
         "ADR-014#d14": "ee7302b4c7d13082",
         "ADR-014#d15": "58a4827773c9722b",
@@ -2300,8 +2334,8 @@
     "reuse:aragon-finance": {
       "content": "74d87d93b2a66251",
       "sources": {
-        "ADR-014#consequences": "368df3db754a7f8e",
-        "ADR-014#context": "0e54165dbeff3291",
+        "ADR-014#consequences": "1c8db110c1b574f2",
+        "ADR-014#context": "a21355dc7e5ddfc1",
         "ADR-014#d13": "aa14c5649208052f",
         "ADR-014#d15": "58a4827773c9722b",
         "INV-037": "182a0630e3ac0c22",
@@ -2332,6 +2366,17 @@
         "ADR-009#d17": "8bff4a8c3ed2ee7f",
         "ADR-009#d7": "741baa8a0cc823ff",
         "ADR-010#d12": "758a52337acb6d84"
+      }
+    },
+    "reuse:lido-s-top-up-factories-and-funding-registries": {
+      "content": "b653f8c0cad18697",
+      "sources": {
+        "ADR-014#d13": "aa14c5649208052f",
+        "ADR-014#d15": "58a4827773c9722b",
+        "ADR-014#d16": "64eb8e4b6ffcc867",
+        "ADR-014#options-considered": "98fe58e4de98408f",
+        "ADR-014#proposed-direction": "ab56e1d981da2d10",
+        "INV-037": "182a0630e3ac0c22"
       }
     },
     "reuse:runbooks-and-drills": {
@@ -2507,7 +2552,7 @@
       }
     },
     "reuse:the-universal-factory": {
-      "content": "c6870097fb6a6b3b",
+      "content": "fd1ecd7d9edea06d",
       "sources": {
         "ADR-006#d1": "a171608079507cd0",
         "ADR-007#d41": "1aa5564acff936dc",
@@ -2649,7 +2694,7 @@
         "ADR-009#d41": "2955ccaede843307",
         "ADR-009#d42": "5c019c31e204b02e",
         "ADR-013#d11": "11f7d51637b6c3bb",
-        "ADR-014#consequences": "368df3db754a7f8e",
+        "ADR-014#consequences": "1c8db110c1b574f2",
         "ADR-014#d10": "02bbd685fc5d5dd4",
         "ADR-014#d13": "aa14c5649208052f",
         "ADR-014#d14": "ee7302b4c7d13082",
@@ -2967,7 +3012,7 @@
       }
     },
     "scene:little-new-code-and-where-it-stands": {
-      "content": "36da998b05cc7e3b",
+      "content": "bad3c73f60010135",
       "sources": {
         "ADR-004#d12": "e6383f6310e6b6eb",
         "ADR-004#d13": "da9b1c4462d4916c",
@@ -3292,6 +3337,16 @@
         "ADR-009#d31": "440c8d8316f62e84"
       }
     },
+    "term:funding-registry": {
+      "content": "fa5b275daed5c683",
+      "sources": {
+        "ADR-014#d13": "aa14c5649208052f",
+        "ADR-014#d16": "64eb8e4b6ffcc867",
+        "ADR-014#proposed-direction": "ab56e1d981da2d10",
+        "INV-037": "182a0630e3ac0c22",
+        "runbook:Change a top-up registry": "9860e4dc41b2b754"
+      }
+    },
     "term:guard": {
       "content": "8268a7bb1cd77a60",
       "sources": {
@@ -3361,7 +3416,7 @@
       }
     },
     "term:motion": {
-      "content": "0f4b0dd4b71065ca",
+      "content": "9e65dbf67b6cdee7",
       "sources": {
         "ADR-005#d31": "5b68be533417691b",
         "ADR-006#context": "976d158652125705",
@@ -3525,7 +3580,7 @@
       }
     },
     "term:top-up-motion": {
-      "content": "724a16527c8e0a16",
+      "content": "229f79ffe85cf583",
       "sources": {
         "ADR-014#d13": "aa14c5649208052f",
         "ADR-014#d14": "ee7302b4c7d13082",
@@ -3559,7 +3614,7 @@
       }
     },
     "term:universal-factory": {
-      "content": "a7a3d6ca7bd15641",
+      "content": "2ac60f0a469220af",
       "sources": {
         "ADR-013#d10": "0cdd66d3492e3e8a",
         "ADR-013#d11": "11f7d51637b6c3bb",

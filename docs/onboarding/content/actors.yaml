@@ -123,12 +123,12 @@
   status: existing
   label: existing
   what: "The DAO's payment app. Each funding of the vault is a payment of Finance, from the Aragon Agent, to the Asset Safe, by a [[top-up motion]] through Easy Track."
-  controlled_by: "Aragon Voting holds its payment permission, with no parameters."
+  controlled_by: "Easy Track's executor holds a payment permission with a ceiling on each payment, which a top-up motion uses. Aragon Voting holds one with no parameters, and manages both."
   can:
     - "Pay the Asset Safe in stETH, DAI, USDC, USDT or sUSDS: one `newImmediatePayment` for each payment of a top-up motion, within the executor's ceiling on one payment."
-    - "Pay without Dual Governance: each payment is Aragon Voting's own vote item."
+    - "Pay without Dual Governance: Easy Track's executor makes each payment of an enacted top-up motion."
   cannot:
-    - "Pay the vault by an Easy Track motion (INV-037)."
+    - "Pay any vault account but the Asset Safe by a top-up motion: each funding registry lists the Asset Safe alone (INV-037)."
     - "Pay more of a token than the Aragon Agent holds. That payment reverts."
   addresses:
     - {name: "Aragon Finance", address: "0xB9E5CBB9CA5b0d659238807E84D0176930753d86"}
@@ -136,6 +136,56 @@
   sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#context", "ADR-014#proposed-direction",
     "INV-037", "runbook:Top up the vault", "lip:part-5",
     "doc:docs/research/easy-track-first-2026-11-05.md#finance-payments-by-aragon-voting"]
+
+- id: top-up-factories
+  node: funding
+  name: The top-up factories
+  status: instance
+  label: built
+  what: "Two new instances of Lido's top-up factory. One pays stETH. One pays a token of the DAO's stablecoin list: DAI, USDC, USDT or sUSDS. Each builds a [[top-up motion]], whose script pays the Asset Safe through Aragon Finance and counts the amount in its [[funding registry]]."
+  controlled_by: "Nobody can change a factory: its [[trusted caller]], its registry and its token are fixed at deployment. The committee's Safe is the trusted caller of both. Aragon Voting registers each in Easy Track in the [[enabling vote]], with two calls and no other: its registry's count and Finance's payment."
+  can:
+    - "Build a top-up motion of one or more payments to the Asset Safe. One motion carries several payments, each within the executor's ceiling on one payment."
+    - "Pay the first top-up, one million dollars, after the enabling vote and the Safe batches."
+    - "Refuse a motion at its creation, and again at its enactment, if it passes what is left of the registry's limit for the period."
+  cannot:
+    - "Take a motion from anyone but the committee's Safe."
+    - "Pay an address that its registry does not list. Each registry lists the Asset Safe alone (INV-037)."
+    - "Pay a token outside its own: the stETH factory pays stETH, and the stablecoin factory refuses USDS and stETH."
+    - "Hold the launch cap before the guard is set. The registries' limits are above the cap, so a rule, an alert and the objection hold it (OD-145)."
+  numbers: ["one payment: at most 1,000 stETH or 2,000,000 units of a stablecoin", "objection window: 72 h"]
+  addresses:
+    - {name: "Lido's factory of single-token top-up factories and registries", address: "0x83E976758B7AB1bb676A4fEA073Fa0E2A807642B"}
+    - {name: "Lido's factory of multi-token top-up factories and registries", address: "0xEe60C6ebC91237d334230b12263E26EE3b480ec4"}
+    - {name: "The DAO's stablecoin list", address: "0x4AC40c34f8992bb1e5E856A448792158022551ca"}
+  sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d18", "ADR-014#proposed-direction", "ADR-010#d21", "OD-145",
+    "INV-037", "runbook:Top up the vault", "doc:docs/research/funding-registries-2026-10-02.md#re-read-on-2026-11-13",
+    "test:test_topup_the_enabling_vote_registers_the_factories_and_the_first_top_up_is_two_motions",
+    "test:test_topup_only_the_committee_creates_and_only_the_asset_safe_receives",
+    "test:test_topup_one_motion_carries_several_payments", "test:test_topup_stablecoins_from_the_dao_list"]
+
+- id: funding-registries
+  node: funding
+  name: The funding registries
+  status: instance
+  label: built
+  what: "Two new instances of Lido's registry of allowed recipients, one behind each top-up factory. Each lists the Asset Safe as its only recipient and holds a limit for a period of three months. This is the [[funding registry]] of a [[top-up motion]]."
+  controlled_by: "Aragon Voting is each registry's admin and the only holder of its limit and recipient roles, so a change is an Aragon vote without [[Dual Governance]]. The deployer adds the Asset Safe and sets the first limit, then gives up its roles."
+  can:
+    - "Count each top-up against the limit of the period, at the motion's creation and again at its enactment."
+    - "Start each period of three calendar months with the whole limit again."
+    - "Count the four stablecoins in one limit, each at par."
+  cannot:
+    - "Hold a limit in dollars. A registry counts token units, so the stETH registry's limit is an amount of stETH."
+    - "Share one limit with the other registry. Monitoring adds the two."
+    - "Stop two full limits within about 72 hours around the end of a period: one motion enacted before the end, and one created in the last 72 hours and enacted after it."
+    - "Hold the mandate size or the treasury share. LDO holders do, when they object to a top-up motion."
+    - "Take a new limit or a new recipient from the committee's Safe, the Aragon Agent or the deployer."
+  numbers: ["period: 3 calendar months", "limit: from the attested computation, after the mandate is approved"]
+  sources: ["ADR-014#d13", "ADR-014#d16", "ADR-014#proposed-direction", "ADR-014#consequences", "INV-037",
+    "runbook:Change a top-up registry", "doc:docs/research/funding-registries-2026-10-02.md#how-a-registry-counts",
+    "test:test_topup_registry_limit_holds_for_a_period", "test:test_topup_only_voting_changes_a_limit_or_a_recipient",
+    "test:test_topup_stablecoins_from_the_dao_list"]
 
 - id: growth-committee
   node: funding
@@ -190,10 +240,11 @@
   controlled_by: "Easy Track. Only an enacted motion makes it act."
   can:
     - "Make an enacted Clutch motion's one call: the universal factory's `applyMotion`."
+    - "Make the payments of an enacted [[top-up motion]]: Finance's `newImmediatePayment` to the Asset Safe, and the registry's count of the amount."
   cannot:
     - "Write a Clutch permission itself (INV-032)."
     - "Run scripts as the Aragon Agent. It holds neither `RUN_SCRIPT_ROLE` nor `EXECUTE_ROLE`."
-    - "Pay the vault from the treasury (INV-037)."
+    - "Pay the vault outside an enacted top-up motion, or above its ceiling on one payment: 1,000 stETH or 2,000,000 units of a listed stablecoin (INV-037)."
   address: "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977"
   sources: ["ADR-005#context", "ADR-005#proposed-direction", "ADR-006#d8", "ADR-013#d18",
     "ADR-013#proposed-direction", "ADR-013#consequences", "INV-032", "INV-037",
@@ -205,7 +256,7 @@
   name: The universal factory
   status: new
   label: specified
-  what: "One new Easy Track factory that carries every Clutch [[motion]] and holds the roles that motions use. Its Easy Track registration is its address book: one call, its own `applyMotion`. A motion is a list of [[raw write|raw writes]], and the factory checks no write's content: the policy of each motion role decides what passes, and the [[objection window]] is the bound on where funds go."
+  what: "One new Easy Track factory that carries every Clutch [[motion]] but a top-up, and holds the roles that motions use. Its Easy Track registration is its address book: one call, its own `applyMotion`. A motion is a list of [[raw write|raw writes]], and the factory checks no write's content: the policy of each motion role decides what passes, and the [[objection window]] is the bound on where funds go."
   controlled_by: "Nobody can upgrade it. The committee's Safe is its [[trusted caller]], fixed at deployment. Aragon Voting registers it in Easy Track, and can raise its [[motion counter]] as its owner. A changed factory is a new registration, by vote."
   can:
     - "Check an enacted motion again in `applyMotion`, and then make its writes, in order, through its roles: governance and insurance funding on the operator modifier, exit governance and restart on the safety modifier, governance and approvals on the orders modifier, and the first-loss burn and insurance roles on the first-loss modifier."
@@ -226,7 +277,7 @@
     - "Use its roles outside an enacted motion. Only Easy Track's executor calls `applyMotion` (INV-032)."
     - "Enact a motion if the [[motion counter]] changed since its creation, or a permission motion if the policy version changed (INV-033)."
     - "Remove a permission at once. An emergency removal is the emergency Safe's revoke."
-  numbers: ["3, 371 of EIP-170's 24, 576 bytes", "at most 64 writes in one motion", "a motion that adds a token: 16 writes, 7, 790, 415 of EIP-7825's 16, 777, 216 gas", "a motion that restores the orders account: 9 writes, 3, 622, 403 gas", "a motion that onboards an ERC-4626 vault: 10 writes, 2, 553, 752 gas", "external audit in phase 3"]
+  numbers: ["3,371 of EIP-170's 24,576 bytes", "at most 64 writes in one motion", "a motion that adds a token: 16 writes, 7,790,415 of EIP-7825's 16,777,216 gas", "a motion that restores the orders account: 9 writes, 3,622,403 gas", "a motion that onboards an ERC-4626 vault: 10 writes, 2,553,752 gas", "external audit in phase 3"]
   sources: ["ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d8", "ADR-013#d9",
     "ADR-013#d10", "ADR-013#d11", "ADR-013#d16", "ADR-013#proposed-direction", "ADR-013#consequences",
     "ADR-007#d41", "ADR-006#d9", "ADR-006#d10", "ADR-006#d14", "ADR-011#d13", "OD-09", "OD-70", "OD-134", "OD-135",
