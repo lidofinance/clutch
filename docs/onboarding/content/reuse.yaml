@@ -48,11 +48,18 @@
 
 - name: Aragon Finance
   column: reused
-  what: "The DAO's payment app. Aragon Voting pays each tranche through it, with its own payment permission."
-  why: "Funding is rare, so a vote that pays through Finance is enough. Clutch adds no funding contract, and changes no permission and no token list."
+  what: "The DAO's payment app. Easy Track's executor pays each top-up through it, with its own payment permission."
+  why: "The payment path exists already. Clutch changes no payment permission and no token list."
   owner: "Aragon Voting"
-  sources: ["ADR-014#d1", "ADR-014#d3", "ADR-014#context", "ADR-014#consequences", "INV-037",
+  sources: ["ADR-014#d13", "ADR-014#d15", "ADR-014#context", "ADR-014#consequences", "INV-037",
     "doc:docs/research/easy-track-first-2026-11-05.md#finance-payments-by-aragon-voting"]
+
+- name: Lido's top-up factories and funding registries
+  column: instance
+  what: "Two new instances of Lido's top-up factory, and of its registry of allowed recipients: one pair for stETH, and one for the DAO's stablecoin list. Lido's deployed factory contracts make them."
+  why: "The committee expects regular top-ups. Lido's other committees already use this code, so the top-ups add no code to audit. Aragon Voting is each registry's admin, so a change of a limit passes no Dual Governance."
+  owner: "Aragon Voting, as each registry's admin; the committee's Safe, as each factory's trusted caller"
+  sources: ["ADR-014#d13", "ADR-014#d15", "ADR-014#d16", "ADR-014#proposed-direction", "ADR-014#options-considered", "INV-037"]
 
 - name: CoW Protocol, its order signer and ComposableCoW
   column: reused
@@ -134,7 +141,7 @@
 
 - name: The universal factory
   column: new
-  what: "One Easy Track factory for every Clutch [[motion]]. It makes a motion's [[raw write|raw writes]] and checks none of their content. It is the only new code, and it is small: 3,371 bytes."
+  what: "One Easy Track factory for every Clutch [[motion]] but a top-up. It makes a motion's [[raw write|raw writes]] and checks none of their content. It is the only new code, and it is small: 3,371 bytes."
   why: "One factory and one calldata format are fewer moving parts to audit and to watch."
   owner: "`@lidofinance/defi-tech`; an external audit in phase 3, with the order signer"
   sources: ["ADR-006#d1", "ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d10", "ADR-013#d11",
@@ -149,7 +156,7 @@
 
 - name: The round-trip check
   column: new
-  what: "A check that rebuilds the applied permissions from the modifier's events on a fork and compares them with the artifact."
+  what: "A check that rebuilds what each modifier stores from its events and compares it with the artifact. It is built, and it runs on the fork rehearsal's vault."
   why: "The chain then checks the compiler, not only the other way round."
   owner: "`@lidofinance/defi-tech`"
   sources: ["ADR-004#d7", "ADR-004#d13", "INV-016"]
@@ -173,7 +180,7 @@
 - name: The report generator
   column: new
   what: "A program in the repository that builds each report from the chain at a pinned block."
-  why: "Anyone can re-run a report and get the same numbers. Reports are the evidence for caps and tranche votes."
+  why: "Anyone can re-run a report and get the same numbers. Reports are the evidence for caps, top-up motions."
   owner: "`@lidofinance/defi-tech`; the committee publishes"
   sources: ["ADR-009#d19", "ADR-014#proposed-direction"]
 

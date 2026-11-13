@@ -148,6 +148,8 @@ contract OrdersAccountRehearsal is EnabledVault {
     uint256 internal constant PRESIGN = 3 << 5;
     uint32 internal constant LIFE = 90 days;
     uint32 internal constant RECOVERY_LIFE = 1 days;
+    /// @dev The committed example retirement of an order token (policy/constellation/compiler/launch.ts).
+    string internal constant RETIREMENT = "policy/constellation/artifacts/motion-retire-example-rehearsal-26249900.json";
 
     /// @dev The orders modifier's role for relayer approvals (ADR 007, decision 41).
     bytes32 internal constant APPROVALS = bytes32("approvals");
@@ -490,6 +492,75 @@ contract OrdersAccountRehearsal is EnabledVault {
         deal(Mainnet.USDC, address(asset), 20_000e6);
         _operator(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 15_000e6)), true);
         _operatorRefused(Mainnet.USDC, abi.encodeCall(IERC20.transfer, (address(orders), 5_000e6 + 1)));
+    }
+
+    // ---------------------------------------------------------------------
+    // A token leaves the order lists by a motion (ADR 013, decision 4)
+    // ---------------------------------------------------------------------
+
+    /// @dev The committed example retirement (policy/constellation/compiler/launch.ts): one motion of four writes
+    ///      takes USDS out of the operator's order lists, and revokes nothing. After it, the operator signs no
+    ///      order in USDS on either side and sends none to the orders account. An order that was signed before
+    ///      still fills, because a fill does not consult the policy, and the operator can cancel it. The operator
+    ///      still returns USDS, and the emergency role's recovery order still sells it.
+    function test_factory_orders_token_retirement() public enabled {
+        address token = Mainnet.USDS;
+        address signer = Mainnet.ORDER_SIGNER;
+        // before: two orders in USDS are signed, and the orders account holds the USDS behind them
+        _fund(token, 4_000e18);
+        Order memory kept = _order(token, Mainnet.USDC, address(asset), 1_000e18, 990e6, _in(30 days));
+        Order memory open = _order(token, Mainnet.USDC, address(asset), 2_000e18, 1_980e6, _in(30 days));
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, signer, _sign(kept, LIFE, 0), DELEGATECALL);
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, signer, _sign(open, LIFE, 0), DELEGATECALL);
+
+        bytes memory cd = vm.parseJsonBytes(vm.readFile(RETIREMENT), ".calldata");
+        (,, UniversalFactory.Write[] memory ws) = uf.decodeEVMScriptCallData(cd);
+        assertEq(ws.length, 4, "the retirement's four writes");
+        uint256 id = _create(cd);
+        _afterWindow();
+        vm.prank(anyone);
+        uint256 g = gasleft();
+        IEasyTrackMotions(Mainnet.EASY_TRACK).enactMotion(id, cd);
+        uint256 gasUsed = g - gasleft();
+        assertLt(gasUsed, TX_GAS_CAP, "under EIP-7825's cap");
+        console2.log("FACTORY orders token retirement: writes, calldata bytes, enactMotion gas", ws.length, cd.length, gasUsed);
+
+        // the operator signs no order in USDS, on either side, and creates no TWAP order in it
+        _refused(OPERATOR, signer, _sign(_order(token, Mainnet.USDC, address(asset), 1e18, 1, _in(1 hours)), LIFE, 0), DELEGATECALL);
+        _refused(OPERATOR, signer, _sign(_order(Mainnet.USDC, token, address(asset), 1e6, 1, _in(1 hours)), LIFE, 0), DELEGATECALL);
+        _refused(OPERATOR, Mainnet.COMPOSABLE_COW, _create(_twap(token, Mainnet.USDC, address(asset), 12, 7 days)), CALL);
+        _refused(OPERATOR, Mainnet.COMPOSABLE_COW, _create(_twap(Mainnet.USDC, token, address(asset), 12, 7 days)), CALL);
+        // the other tokens stay on the lists
+        _ordersOk(
+            Mainnet.COMMITTEE_SAFE, OPERATOR, signer, _sign(_order(Mainnet.USDC, Mainnet.USDT, address(asset), 1e6, 1, _in(1 hours)), LIFE, 0), DELEGATECALL
+        );
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.COMPOSABLE_COW, _create(_twap(Mainnet.USDC, Mainnet.USDT, address(asset), 12, 7 days)), CALL);
+
+        // the operator sends no USDS to the orders account, and the token's budget is zero
+        deal(token, address(asset), 5_000e18);
+        _operatorRefused(token, abi.encodeCall(IERC20.transfer, (address(orders), 1)));
+        (uint128 refill,,, uint128 balance,) = opMod.allowances(bytes32("orders_usds"));
+        assertEq(uint256(refill) + balance, 0, "the orders budget of USDS is zero");
+
+        // an order that was signed before the retirement still fills, and the operator cancels the other
+        uint256 before = IERC20(Mainnet.USDC).balanceOf(address(asset));
+        _settle(kept, PRESIGN, abi.encodePacked(address(orders)));
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)) - before, 990e6, "the earlier order filled after the retirement");
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, signer, abi.encodeCall(IOrderSigner.unsignOrder, (open)), DELEGATECALL);
+        assertEq(settlement.preSignature(_uid(open)), 0, "the operator cancelled the open order");
+
+        // the operator returns what the orders account holds, and sends USDS from the Asset Safe to the Agent only
+        uint256 left = IERC20(token).balanceOf(address(orders));
+        assertEq(left, 3_000e18, "the unsold USDS");
+        _refused(OPERATOR, token, abi.encodeCall(IERC20.transfer, (stranger, 1)), CALL);
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, token, abi.encodeCall(IERC20.transfer, (address(asset), left)), CALL);
+        uint256 agent = IERC20(token).balanceOf(Mainnet.AGENT);
+        _operator(token, abi.encodeCall(IERC20.transfer, (Mainnet.AGENT, 8_000e18)), true);
+        assertEq(IERC20(token).balanceOf(Mainnet.AGENT) - agent, 8_000e18, "the Agent receives the return");
+        _operatorRefused(token, abi.encodeCall(IERC20.transfer, (stranger, 1)));
+
+        // recovery still sells USDS: the emergency role's permissions did not change
+        _recover(token, 1_000e18, 990e6);
     }
 
     // ---------------------------------------------------------------------

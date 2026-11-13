@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-12T22:24:23Z
 verified: []
 sources:
   - id: s1
@@ -64,7 +64,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - **The guards.** Modifier conditions keep the governance role from changing membership or emergency powers, granting administrative targets, using foreign budget keys or setting refill periods below 30 days [s6] (INV-004, INV-012). The guards do not stop a motion that grants a call on an ordinary target, such as a token transfer to any address; the objection window controls that risk ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11).
 - **Exit governance** writes through `scopeTarget`, `scopeFunction` and `allowFunction` (OD-49), within the limits of INV-025.
-- **Exits.** An exit adds no entry, deposit or non-zero approval, because the exit-governance role's policy pins each exit tree whole (INV-025). Which target gets which exit is the motion's choice. The motion's forum post states it, and reviewers check it during the objection window.
+- **Exits.** An exit adds no entry, deposit or non-zero approval, because the exit-governance role's policy pins each exit tree whole (INV-025). An onboarding motion that gives the operator an approval of a new token also writes that token's zeroing, for any spender; the launch policy holds the zeroing of each launch token in the same form ([ADR 005](/adr/005-account-graph-and-roles.md) decision 34), and the compiler refuses a policy without it. Which target gets which exit is the motion's choice. The motion's forum post states it, and reviewers check it during the objection window.
 
 ## Options considered
 

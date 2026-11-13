@@ -43,6 +43,7 @@ contract UniversalFactoryRehearsal is EnabledVault {
 
     uint8 internal constant T_STATIC = 1;
     uint8 internal constant T_CALLDATA = 5;
+    uint8 internal constant OP_PASS = 0;
     uint8 internal constant OP_MATCHES = 5;
     uint8 internal constant OP_EQUAL_TO = 16;
     uint8 internal constant OP_WITHIN_ALLOWANCE = 28;
@@ -215,7 +216,8 @@ contract UniversalFactoryRehearsal is EnabledVault {
 
     /// @dev One motion onboards an ERC-4626 lending vault that the launch policy does not know, with no code
     ///      for its kind in the factory: the operator's approval under a budget key, its deposit, redeem and
-    ///      withdraw with the receiver and the owner pinned to the Asset Safe, and the emergency role's exits.
+    ///      withdraw with the receiver and the owner pinned to the Asset Safe, and the emergency role's exits,
+    ///      the zeroing of the new approval among them.
     ///      Then the operator lends within the budget and no further, and the emergency role exits.
     function test_uf_motion_onboards_an_erc4626_lending_vault() public enabled {
         deal(Mainnet.WETH, address(asset), 100e18);
@@ -238,6 +240,16 @@ contract UniversalFactoryRehearsal is EnabledVault {
         _operator(NEW_VAULT, abi.encodeCall(IVault4626.withdraw, (1, address(asset), stranger)), false);
         _operator(Mainnet.WETH, abi.encodeCall(IERC20.approve, (stranger, 1)), false);
         _operator(NEW_VAULT, abi.encodeCall(IERC20.transfer, (stranger, 1)), false);
+
+        // the emergency role sets the new approval to zero, and gives none; the owner refills the spent budget
+        // first, so that an approval is open
+        vm.prank(address(asset));
+        opMod.setAllowance(_key(Mainnet.WETH, NEW_VAULT), 10e18, 10e18, 10e18, 30 days, 0);
+        _operator(Mainnet.WETH, abi.encodeCall(IERC20.approve, (NEW_VAULT, 10e18)), true);
+        _emergencyRefused(Mainnet.WETH, abi.encodeCall(IERC20.approve, (NEW_VAULT, 1)));
+        vm.prank(address(emergency));
+        safetyMod.execTransactionWithRole(Mainnet.WETH, 0, abi.encodeCall(IERC20.approve, (NEW_VAULT, 0)), 0, EMERGENCY, true);
+        assertEq(IERC20(Mainnet.WETH).allowance(address(asset), NEW_VAULT), 0, "the emergency role set the approval to zero");
 
         // the operator takes a part back; the emergency role exits the rest to the Asset Safe
         _operator(NEW_VAULT, abi.encodeCall(IVault4626.redeem, (shares / 4, address(asset), address(asset))), true);
@@ -389,7 +401,7 @@ contract UniversalFactoryRehearsal is EnabledVault {
     // Helpers: the writes
     // ---------------------------------------------------------------------
 
-    /// @dev The onboarding of NEW_VAULT, as nine writes. The trees are the ones that the policy compiler writes
+    /// @dev The onboarding of NEW_VAULT, as ten writes. The trees are the ones that the policy compiler writes
     ///      for the launch policy's own ERC-4626 venue, sUSDS, whose trees name no address but the avatar.
     function _onboarding(uint128 budget) internal returns (UniversalFactory.Write[] memory w) {
         bytes32 key = _key(Mainnet.WETH, NEW_VAULT);
@@ -399,7 +411,12 @@ contract UniversalFactoryRehearsal is EnabledVault {
         approve[2] = IRoles.ConditionFlat(0, T_STATIC, OP_WITHIN_ALLOWANCE, abi.encode(key));
         IRoles.ConditionFlat[] memory exit = _emergencyTree(Mainnet.SUSDS, REDEEM);
         IRoles.ConditionFlat[] memory toAgent = _emergencyTree(Mainnet.EARN_USD_SHARE, TRANSFER);
-        w = new UniversalFactory.Write[](9);
+        // an approval set to zero, for any spender: the exit-governance role's pinned form
+        IRoles.ConditionFlat[] memory zero = new IRoles.ConditionFlat[](3);
+        zero[0] = IRoles.ConditionFlat(0, T_CALLDATA, OP_MATCHES, "");
+        zero[1] = IRoles.ConditionFlat(0, T_STATIC, OP_PASS, "");
+        zero[2] = IRoles.ConditionFlat(0, T_STATIC, OP_EQUAL_TO, abi.encode(uint256(0)));
+        w = new UniversalFactory.Write[](10);
         // the operator modifier, as the governance role
         w[0] = _govern(abi.encodeCall(IRoles.setAllowance, (key, budget, budget, budget, 30 days, 0)));
         w[1] = _govern(abi.encodeCall(IRoles.scopeFunction, (OPERATOR, Mainnet.WETH, APPROVE, approve, 0)));
@@ -411,6 +428,7 @@ contract UniversalFactoryRehearsal is EnabledVault {
         w[6] = _exitWrite(abi.encodeCall(IRoles.scopeTarget, (EMERGENCY, NEW_VAULT)));
         w[7] = _exitWrite(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, NEW_VAULT, REDEEM, exit, 0)));
         w[8] = _exitWrite(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, NEW_VAULT, TRANSFER, toAgent, 0)));
+        w[9] = _exitWrite(abi.encodeCall(IRoles.scopeFunction, (EMERGENCY, Mainnet.WETH, APPROVE, zero, 0)));
     }
 
     function _exitWrite(bytes memory write) internal view returns (UniversalFactory.Write memory) {

@@ -9,7 +9,7 @@ intro: >-
 planned:
   - name: Orders account's token motion
     where: "The universal factory, through the orders modifier's governance and approvals roles"
-    what: "The orders account's four roles and the motion that adds a token are built. The graph above leaves them out: they are compiled for the rehearsal, because the kit has no orders account. Still to build: the removal of a token from the order lists."
+    what: "The orders account's four roles and the motion that adds a token are built. The graph above leaves them out: they are compiled for the rehearsal, because the kit has no orders account. A motion also takes a token out of the order lists: it writes the order trees again without the token, and the token keeps its return and its relayer approval."
     sources: ["ADR-005#d21", "ADR-005#d25", "ADR-007#d41", "INV-023", "INV-040",
       "doc:docs/research/orders-motion-roles-2026-11-08.md#what-was-built", "doc:ROADMAP.md#roadmap"]
   - name: Insurance roles

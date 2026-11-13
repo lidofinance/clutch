@@ -1031,24 +1031,106 @@
   adr: [ADR-013#d10]
   see: [/research/raw-factory-prototype-2026-11-12.md]
   refines: [OD-100, OD-134]
-
+- id: OD-136
+  question: "Who runs the check of a motion, and what follows a failure?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-136 decided: monitoring runs the check of every motion"
+  adr: [ADR-013#d19]
+  refines: [OD-134]
+- id: OD-137
+  question: "Where does the detector of a motion find the policy change that the motion must equal?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-137 and OD-138 decided: the pending motion in the repository, and removals that stay votes"
+  adr: [ADR-013#d19]
+  refines: [OD-136]
 - id: OD-138
+  question: "May a removal on the safety modifier or on the orders modifier be a motion?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-137 and OD-138 decided: the pending motion in the repository, and removals that stay votes"
+  adr: [ADR-013#d4]
+  refines: [OD-101]
+- id: OD-139
+  question: "Which form does the emergency role's zeroing of an approval take in the launch policy?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-139 decided: the emergency role's zeroing takes any spender"
+  adr: [ADR-005#d34]
+  refines: [OD-49]
+- id: OD-140
+  question: "Is funding regular, with top-up factories through Easy Track beside the tranche votes?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-140 decided: top-up factories join the tranche votes; OD-141 to OD-144 opened"
+  adr: [ADR-014#d13]
+  replaces:
+    - {od: OD-106, part: true}
+- id: OD-141
+  question: "Which tokens get a top-up factory?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-141 to OD-144 decided: the top-ups' tokens, their registration, their limit and their gates; OD-145 opened"
+  adr: [ADR-014#d15]
+  refines: [OD-140]
+- id: OD-142
+  question: "Which vote registers the top-up factories, and how does the launch tranche arrive?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-141 to OD-144 decided: the top-ups' tokens, their registration, their limit and their gates; OD-145 opened"
+  adr: [ADR-014#d14, ADR-010#d21, ADR-010#d22]
+  replaces:
+    - {od: OD-106, part: true}
+  refines: [OD-140, OD-121]
+- id: OD-143
+  question: "What are the period and the limit of each top-up registry?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-141 to OD-144 decided: the top-ups' tokens, their registration, their limit and their gates; OD-145 opened"
+  adr: [ADR-014#d16]
+  refines: [OD-140]
+- id: OD-144
+  question: "Which gates hold a top-up motion?"
+  closed: 2026-11-12
+  log:
+    - "2026-11-12 — OD-141 to OD-144 decided: the top-ups' tokens, their registration, their limit and their gates; OD-145 opened"
+  adr: [ADR-009#d48, ADR-014#d17]
+  refines: [OD-122, OD-140]
+- id: OD-145
+  question: "How does the launch cap hold before the screening guard is set, when the top-up factories exist from the enabling vote?"
+  closed: 2026-11-13
+  log:
+    - "2026-11-13 — OD-145 decided: a rule holds the launch cap; OD-146 decided: no tranche votes"
+  adr: [ADR-010#d21]
+  refines: [OD-142, OD-54]
+- id: OD-146
+  question: "Does the design keep tranche votes beside the top-up motions?"
+  closed: 2026-11-13
+  log:
+    - "2026-11-13 — OD-145 decided: a rule holds the launch cap; OD-146 decided: no tranche votes"
+  adr: [ADR-014#d18]
+  replaces:
+    - {od: OD-106}
+  refines: [OD-140]
+
+- id: OD-149
   question: "May the stand owner execute a transaction that the Zodiac app builds for the Sepolia stand, through Deploy or Apply?"
   closed: 2026-10-22
   log:
-    - "2026-10-22 — OD-138, OD-139 and OD-141: the Sepolia role-key migration"
+    - "2026-10-22 — OD-149, OD-150 and OD-152: the Sepolia role-key migration"
   adr: [ADR-015]
 
-- id: OD-139
+- id: OD-150
   question: "May the stand owner send public Sepolia transactions on the existing stand from testnet/sepolia?"
   closed: 2026-10-22
   log:
-    - "2026-10-22 — OD-138, OD-139 and OD-141: the Sepolia role-key migration"
+    - "2026-10-22 — OD-149, OD-150 and OD-152: the Sepolia role-key migration"
   adr: [ADR-015]
 
-- id: OD-141
+- id: OD-152
   question: "Should Clutch use four account-specific operator and emergency role keys for Sepolia and mainnet?"
   closed: 2026-10-22
   log:
-    - "2026-10-22 — OD-138, OD-139 and OD-141: the Sepolia role-key migration"
+    - "2026-10-22 — OD-149, OD-150 and OD-152: the Sepolia role-key migration"
   adr: [ADR-015]

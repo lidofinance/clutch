@@ -4,7 +4,7 @@
 
 Clutch is the Lido Active Treasury system. The Treasury Management Committee operates a DAO-owned Safe through a default-deny permission policy.
 The DAO keeps custody. An emergency Safe can return assets to the Aragon Agent.
-Easy Track motions change permissions only through one universal factory, as raw writes that LDO holders can object to for 72 hours. Funding moves in rare tranches, each by an Aragon vote.
+Easy Track motions change permissions only through one universal factory, as raw writes that LDO holders can object to for 72 hours. Funding moves by Easy Track top-up motions, within a limit for each three months.
 
 This repository is the single system of record for the product documents, decisions, specifications, policy, contracts, tests, scripts, runbooks and deployment records.
 
@@ -46,6 +46,10 @@ just setup       # install dependencies and build contracts
 just check       # CI checks, except the fork suite
 just regen       # rebuild every generated file
 just test-fork   # pinned mainnet fork; needs an archive RPC in .env
+just motion <base> <head> --epoch 0 --policy-version 0   # a motion from a merged policy change
+just motion-check <base> <head> <calldata>              # fail a motion that writes anything else
+just round-trip                                         # rebuild the modifiers' state from their events on a fork
+just watch --rpc --from-block N                         # the drift detector and the motion detector
 just --list      # all recipes
 ```
 

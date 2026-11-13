@@ -254,6 +254,7 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
     }
   }
   checkFirstLoss(modifiers, firstLossSafe, firstLossModifier, safe);
+  checkZeroing(modifiers, manifest);
   const protectedAccounts = [safe, ...modules, ...(ordersAccount !== null ? [ordersAccount, ordersModifier!] : [])];
   for (const m of modifiers) {
     for (const role of m.roles) {
@@ -305,6 +306,39 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
           }
         }
       }
+    }
+  }
+}
+
+/**
+ * The emergency role's zeroing of an approval (ADR 005, decision 34; OD-139). Every approval of the emergency role
+ * on the safety modifier is the same tree: any spender, and the amount zero. And for every token on which the
+ * operator holds an approval, the emergency role holds that zeroing, so that it can take each approval away. A
+ * policy change that gives the operator an approval of a new token without the zeroing does not compile.
+ */
+export function checkZeroing(modifiers: Artifact["modifiers"], manifest: Record<string, any>) {
+  const APPROVE = selector("approve(address,uint256)");
+  const roleOn = (modifier: string, name: string) => modifiers.find((m) => m.address === getAddress(modifier))?.roles.find((r) => r.name === name);
+  const approvals = (role: ReturnType<typeof roleOn>) =>
+    (role?.targets ?? []).flatMap((target) => target.functions.filter((fn) => fn.selector === APPROVE).map((fn) => ({ target, fn })));
+  const zero = zeroPadValue("0x", 32);
+  const zeroing = (c: { parent: number; paramType: number; operator: number; compValue: string }[]) =>
+    c.length === 3 &&
+    c.every((n) => n.parent === 0) &&
+    c[0].paramType === 5 && c[0].operator === MATCHES &&
+    c[1].paramType === 1 && c[1].operator === 0 &&
+    c[2].paramType === 1 && c[2].operator === EQUAL_TO && c[2].compValue === zero;
+  const account = manifest.roleKeyScheme === "account";
+  const emergency = approvals(roleOn(manifest.safetyModifier, account ? "asset-emergency" : "emergency"));
+  for (const { target, fn } of emergency) {
+    if (fn.wildcarded || fn.executionOptions !== 0 || !zeroing(fn.conditions)) {
+      throw new Error(`the emergency role's approval on ${target.name ?? target.address} must be the zeroing for any spender, and nothing else (ADR 005, decision 34)`);
+    }
+  }
+  const zeroed = new Set(emergency.map(({ target }) => target.address));
+  for (const { target } of approvals(roleOn(manifest.operatorModifier, account ? "asset-operator" : "operator"))) {
+    if (!zeroed.has(target.address)) {
+      throw new Error(`the operator can approve ${target.name ?? target.address}, and the emergency role cannot set that approval to zero (ADR 005, decision 34)`);
     }
   }
 }
@@ -430,7 +464,7 @@ export function refuseDelegatecall(
  * operator modifier (INV-004), the emergency role's on the safety modifier (INV-025), the operator's, the
  * emergency role's and the approvals role's on the orders modifier (INV-040), and the insurance role's on the
  * first-loss modifier (INV-039). Any other module takes no grant.
- * A manifest with `roleKeyScheme: account` uses the account-specific keys of OD-141 in place of `operator` and
+ * A manifest with `roleKeyScheme: account` uses the account-specific keys of OD-152 in place of `operator` and
  * `emergency`.
  */
 export function writableKeys(manifest: Record<string, any>, modifier: string): string[] {

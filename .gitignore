@@ -18,6 +18,15 @@ dryrun-artifact.json
 bootstrap-manifest.json
 teardown-manifest.json
 
+# A motion's files from `just motion`: the motion, its base policy and its forum-post draft
+.motion/
+
+# The modifiers' events that the fork suite writes for the round-trip check
+.roundtrip/
+
+# The Safe batches that the fork suite writes for the command that computes each hash again
+.batches/
+
 # Tooling
 __pycache__/
 .venv/

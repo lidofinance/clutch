@@ -8,7 +8,8 @@ solc_version = "0.8.24"
 optimizer = true
 via_ir = true
 optimizer_runs = 200
-# Read: the policy manifests and artifacts (ADR 004), and the dry run's local artifact.
+# Read: the policy manifests and artifacts (ADR 004), the dry run's local artifact, a motion's local files and the
+# repository's pending motion.
 fs_permissions = [
     { access = "write", path = "./" },
     { access = "read", path = "./policy/constellation/manifests" },
@@ -16,6 +17,8 @@ fs_permissions = [
     { access = "read", path = "./dryrun-artifact.json" },
     { access = "read", path = "./policy/constellation/sepolia" },
     { access = "read-write", path = "./cache/sepolia" },
+    { access = "read", path = "./.motion" },
+    { access = "read", path = "./policy/constellation/pending" },
 ]
 
 [profile.default.fuzz]

@@ -37,7 +37,7 @@ Never commit a key or an RPC URL that contains one.
    If another pull request takes a number first, the validator fails; take the next one.
 4. Run `just regen`, then `just check`. Commit generated files with their source changes.
 5. If you changed `src/`, `script/`, `test/` or `policy/`, run `just test-fork` too.
-   CI does not run the fork suite until phase 2 (OD-52).
+   CI runs the fork suite in the merge queue and on `main`, not on your pull request (OD-52).
 6. Open a pull request with the template. A human merges through the merge queue, which repeats the checks on the merged result.
 
 ## Verify a page
@@ -63,6 +63,8 @@ Do not edit these files by hand:
 
 After a merge conflict, take either version, run `just regen` and commit the result.
 Reviewers must approve the policy artifact's diff (ADR 004, decision 14).
+After launch, a policy change also commits its motion: run `just motion-pending <base>`, and commit `policy/constellation/pending/` (ADR 013, decision 19).
+After the motion enacts, run `just motion-settle`: it records the motion under `policy/constellation/enacted/` and removes the pending files. Commit both.
 
 ## Change the onboarding guide
 

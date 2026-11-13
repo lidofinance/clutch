@@ -7,9 +7,9 @@ description: The Lido DAO owns the Asset Safe; it also owns the orders account a
   shows without an arrow. The Asset Safe owns two Roles modifiers. The committee's Safe holds the operator role, and the
   universal factory the governance role, on the operator modifier. The emergency Safe holds the emergency role on the safety modifier, the switch included. Two of
   its five signers come from the committee and two from the Emergency Brakes multisig, which can pause Easy Track. One
-  universal factory builds every Clutch motion and holds every role that a motion uses, on all four modifiers. The map
+  universal factory builds every Clutch motion but a top-up and holds every role that a motion uses, on all four modifiers. The map
   draws no arrow for the factory's other roles, for the roles on the orders account's modifier, or for the committee's
-  first-loss role. Each funding is an Aragon vote that pays a tranche through Finance to the Asset Safe. Once the
+  first-loss role. Funding comes through Finance to the Asset Safe, by a top-up motion of one of two top-up factories. Once the
   screening guard is set, it approves each transaction of the committee's Safe. The Asset Safe uses approved protocols,
   swaps through CoW orders from the orders account, and pays insurance money to the first-loss Safe by motion.
   Monitoring watches the vault and pages the emergency Safe. Reporting publishes from the vault's snapshots.
@@ -29,8 +29,8 @@ nodes:
 - id: dao
   label: Lido DAO
   sub: LDO vote · Voting owns the vault
-  summary: The final authority. Aragon Voting is the only owner of the Asset Safe, and it funds the vault by tranche
-    votes. The Aragon Agent, the treasury, gets funds back only in an emergency or a recovery.
+  summary: The final authority. Aragon Voting is the only owner of the Asset Safe, and it alone changes a top-up
+    registry's limit. The Aragon Agent, the treasury, gets funds back only in an emergency or a recovery.
   domain: gov
   kind: body
   status: existing
@@ -40,9 +40,9 @@ nodes:
   h: 84
 - id: funding
   label: Funding path
-  sub: Finance · tranche votes
-  summary: Moves money from the DAO treasury to the Asset Safe. Each funding is an Aragon vote that pays a tranche
-    through Aragon Finance. Funding is rare.
+  sub: Finance · two top-up factories
+  summary: Moves money from the DAO treasury to the Asset Safe. A top-up motion of the committee's Safe pays it
+    through Aragon Finance. Two top-up factories build the motions, and two funding registries hold the limits for each three months.
   domain: gov
   kind: contract
   status: existing
@@ -54,7 +54,7 @@ nodes:
   label: Easy Track
   sub: universal factory · 72 h
   summary: Lido's optimistic governance. A motion enacts unless LDO holders object within 72 hours. One universal factory
-    builds every Clutch motion and holds the roles that motions use.
+    builds every Clutch motion but a top-up and holds the roles that motions use. Two top-up factories fund the vault.
   domain: gov
   kind: contract
   status: mixed
@@ -78,7 +78,7 @@ nodes:
 - id: screening
   label: Screening guard
   sub: '[the screening vendor]'
-  summary: A transaction guard on the committee's Safe. It refuses any transaction that the vendor has not approved once. It is set after the launch, before the second tranche's vote lifts the launch cap.
+  summary: A transaction guard on the committee's Safe. It refuses any transaction that the vendor has not approved once. It is set after the launch, before a funding above the launch cap.
   domain: ext
   kind: service
   status: instance
@@ -256,7 +256,7 @@ edges:
   to: easytrack
   kind: governs
   short: ''
-  label: 'The committee''s Safe is the universal factory''s trusted caller: it creates every Clutch motion.'
+  label: 'The committee''s Safe is the trusted caller of the universal factory and of the two top-up factories: it creates every Clutch motion.'
 - id: object
   from: dao
   to: easytrack
@@ -285,7 +285,7 @@ edges:
   to: committee
   kind: screens
   short: approves each transaction
-  label: Once it is set, before the second tranche's vote, the vendor's guard on the committee's Safe refuses a transaction that the vendor has not approved, once and exactly.
+  label: Once it is set, before a funding above the launch cap, the vendor's guard on the committee's Safe refuses a transaction that the vendor has not approved, once and exactly.
   label_at:
   - 170
   - 330
@@ -331,14 +331,14 @@ edges:
   to: funding
   kind: governs
   short: votes
-  label: Each tranche is an Aragon vote. Aragon Voting pays it through Aragon Finance, from the treasury that the Aragon
+  label: A top-up is an Easy Track motion. It pays through Aragon Finance, from the treasury that the Aragon
     Agent holds, without Dual Governance.
-- id: tranche
+- id: top-up
   from: funding
   to: asset-safe
   kind: governs
-  short: tranches
-  label: A tranche pays the Asset Safe only. The first tranche, one million dollars, is part of the enabling vote.
+  short: top-ups
+  label: A top-up pays the Asset Safe only. The first top-up is one million dollars.
   via:
   - - 1160
     - 84

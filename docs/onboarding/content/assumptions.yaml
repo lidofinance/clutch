@@ -23,13 +23,13 @@
 - id: dao-sound
   assumption: "The DAO stays sound and able to act."
   kind: trust
-  why: "The DAO is the final authority. Only its vote funds a tranche, replaces a role holder or breaks glass."
-  breaks: "The vault gets no new tranche, a captured committee keeps the operator role, a defect in the safety modifier or the factory stays, or Easy Track stays paused. Every DAO action takes about five days."
+  why: "The DAO is the final authority. Only its vote changes the top-up limits, replaces a role holder or breaks glass."
+  breaks: "The top-up limits stay as they are, a captured committee keeps the operator role, a defect in the safety modifier or the factory stays, or Easy Track stays paused. Every DAO action takes about five days."
   watched_by: ["test:test_D2_direct_DAO_path"]
   watch_note: "The test runs on a mock owner. The DAO runbooks are listed but not written."
   sources: ["ADR-005#proposed-direction", "ADR-013#d3", "ADR-013#d4", "ADR-013#proposed-direction",
-    "ADR-014#d1", "lip:part-6", "doc:docs/runbooks/index.md#runbooks", "ADR-005#d28",
-    "runbook:Fund a tranche", "runbook:Move the operator role to another Safe"]
+    "ADR-014#d13", "lip:part-6", "doc:docs/runbooks/index.md#runbooks", "ADR-005#d28",
+    "runbook:Top up the vault", "runbook:Change a top-up registry", "runbook:Move the operator role to another Safe"]
 
 - id: signers-good-faith
   assumption: "The committee's signers act in good faith."
@@ -47,12 +47,13 @@
   kind: trust
   why: "Motions change the vault without a DAO vote. The factory checks no write's content, so the [[objection window]] is the bound on where funds go."
   breaks: "A motion that nobody objects to can give the operator a transfer to any address or set any budget, and the vault's funds can then leave. A motion can also point the operator at an unaudited contract."
-  watched_by: ["test:test_uf_motion_can_widen_without_a_receiver_or_a_budget", "test:test_uf_motion_fails_as_a_whole_on_a_write_that_a_modifier_refuses"]
-  watch_note: "The factory passes INV-032 to INV-035 on a fork against the live Easy Track, and the first test shows the widening that it does not stop. The motion roles' limits are the layer that holds on chain (INV-004, INV-025, INV-040). The `motion` command, the check of a motion against the policy's source and the alerts are not built. An external audit is due in phase 3."
+  watched_by: ["test:test_uf_motion_can_widen_without_a_receiver_or_a_budget", "test:test_uf_motion_fails_as_a_whole_on_a_write_that_a_modifier_refuses", "test:test_replay_the_example_motion", "test:test_watch_events_with_a_widening_motion_open"]
+  watch_note: "The factory passes INV-032 to INV-035 on a fork against the live Easy Track, and the first test shows the widening that it does not stop. The motion roles' limits are the layer that holds on chain (INV-004, INV-025, INV-040). The `motion` command builds a motion from a merged policy change, and its check fails a motion that writes anything else; a fork test enacts one such motion. The motion detector passes an open motion only if it is the repository's pending motion and the chain holds its base policy; fork tests run it on the live Easy Track's logs. Lido's monitoring does not run it yet, and the other alerts are not built. An external audit is due in phase 3."
   sources: ["ADR-013#d8", "ADR-013#d10", "ADR-013#d11", "ADR-013#consequences",
     "ADR-013#confirmation", "ADR-013#proposed-direction", "INV-004", "INV-032", "INV-033", "INV-034", "INV-035", "OD-49",
-    "lip:part-4", "OD-134", "OD-135", "INV-025", "INV-040", "OD-118",
-    "doc:docs/specs/threat-model.md#failure-modes"]
+    "lip:part-4", "OD-134", "OD-135", "ADR-013#d19", "INV-025", "INV-040", "OD-118",
+    "doc:docs/specs/threat-model.md#failure-modes", "test:test_replay_the_example_motion",
+    "test:test_watch_events_with_a_widening_motion_open", "OD-137"]
 
 - id: guard-single-use
   assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
@@ -60,19 +61,19 @@
   why: "Above the [[launch cap]], on-chain blocking before execution is a hard requirement. Once set, the [[guard]] screens every transaction of the committee's Safe."
   breaks: "One standing approval of the modifier's execution function would approve all vault activity. One approved stray delegatecall can replace the code of the committee's Safe and drop the guard, and a module on that Safe would skip it. An outage stops the operator and new motions for up to ten days."
   watched_by: []
-  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector supports Safe v1.3.0 and must add this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before the second tranche's vote (OD-54)."
+  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector supports Safe v1.3.0 and must add this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before a funding above the launch cap (OD-54)."
   sources: ["ADR-010#d20", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d12", "ADR-010#d17",
     "ADR-010#d22", "ADR-010#proposed-direction", "INV-010", "OD-54",
     "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard", "ADR-010#context"]
 
 - id: launch-cap
-  assumption: "Until the guard is live, the vault holds no more than its first tranche of one million dollars, the launch cap."
+  assumption: "Until the guard is live, the vault holds no more than its first top-up of one million dollars, the launch cap."
   kind: operational
-  why: "EM allowed a launch without the screening guard under the [[launch cap]]. The cap holds by the first tranche's size."
-  breaks: "Until the second tranche, no operator transaction and no motion creation is screened. A first-loss redemption can take the vault above the cap."
+  why: "EM allowed a launch without the screening guard under the [[launch cap]]. The cap holds by a rule: the committee creates no top-up above it before the guard is set (OD-145)."
+  breaks: "Until the guard is set, no operator transaction and no motion creation is screened, and a top-up motion above the cap enacts if nobody objects. A first-loss redemption can take the vault above the cap."
   watched_by: []
   watch_note: "The alerts on a redemption before the guard is set, on an excess that stays, and on a vault value above the cap, are not built."
-  sources: ["ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-014#d2",
+  sources: ["ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "OD-145", "ADR-010#proposed-direction", "ADR-014#d14",
     "ADR-014#proposed-direction", "doc:docs/specs/control-matrix.md#the-matrix"]
 
 - id: artifact-is-policy
@@ -80,18 +81,20 @@
   kind: design
   why: "Reviewers approve the artifact. The enabling vote, the motions of the universal factory and the drift detector consume it. Nothing is signed that the compiler did not produce from the same commit."
   breaks: "A transaction built in the hosted Zodiac app, or a change made in its UI, becomes unreviewed drift. The tests, the vote and the detector can then disagree."
-  watched_by: ["doc:.github/workflows/policy.yml"]
-  watch_note: "CI fails when the artifact differs from a fresh compile. The round-trip check (INV-016), the drift detector and the `motion` command are not built."
-  sources: ["ADR-004#d7", "ADR-004#d11", "ADR-004#d12", "ADR-004#d14", "ADR-013#proposed-direction", OD-33, INV-016]
+  watched_by: ["doc:.github/workflows/policy.yml", "test:test_roundtrip_events_after_the_enabling_vote"]
+  watch_note: "CI fails when the artifact differs from a fresh compile. The round-trip check rebuilds the modifiers' state from their events and compares it with the artifact (INV-016); it runs on the rehearsal's vault, and a fork test shows that it reports an emergency revoke. The drift detector runs it against the policy that the repository says the chain holds; Lido's monitoring does not run it yet."
+  sources: ["ADR-004#d7", "ADR-004#d11", "ADR-004#d12", "ADR-004#d14", "ADR-013#proposed-direction", OD-33, INV-016,
+    "test:test_roundtrip_events_after_the_enabling_vote", "test:test_roundtrip_events_after_an_emergency_revoke"]
 
 - id: roles-and-sdk
   assumption: "The locked Roles mastercopy and the pinned roles SDK encode and check conditions the way the compiler and the tests expect."
   kind: trust
   why: "The deployed mastercopy is older than the upstream source, and Clutch's compiler is built on the SDK."
-  breaks: "Until the round-trip check exists, a compiler or SDK bug can reach the chain unseen. A change of SDK, plan or licence can block local compilation."
-  watched_by: ["doc:.github/workflows/policy.yml"]
-  watch_note: "CI runs the compiler tests and a type-check. The SDK's selectors and event topics match the mastercopy. A decode of real events is not checked yet."
-  sources: ["ADR-004#d7", "ADR-004#d13", "doc:docs/research/zodiac-constellation-2026-10-06.md#answer"]
+  breaks: "A compiler or SDK bug can reach the chain if nobody runs the round-trip check after a change. A change of SDK, plan or licence can block local compilation."
+  watched_by: ["doc:.github/workflows/policy.yml", "test:test_roundtrip_events_after_the_enabling_vote"]
+  watch_note: "CI runs the compiler tests and a type-check. The SDK's selectors and event topics match the mastercopy, with one exception: the mastercopy emits `Initialized` with a `uint64`. The mastercopy stores a budget's maximum refill of zero as the largest value, and a timestamp of zero as the block's time; a fork test reads both from it. The round-trip check decodes the deployed modifier's real events on a fork and rebuilds the committed policy from them."
+  sources: ["ADR-004#d7", "ADR-004#d13", "doc:docs/research/zodiac-constellation-2026-10-06.md#answer", "INV-016",
+    "test:test_roundtrip_events_after_the_enabling_vote"]
 
 - id: safe-v150-sound
   assumption: "Safe v1.5.0 has no defect on the paths that the vault uses."
@@ -177,14 +180,14 @@
   sources: ["ADR-007#proposed-direction",
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
-- id: tranche-votes
-  assumption: "Funding stays rare, so an Aragon vote for each tranche is an acceptable cost."
+- id: top-ups
+  assumption: "Funding is regular, so top-up motions carry all of it, within each registry's limit."
   kind: operational
-  why: "EM expects funding not to be regular. A tranche vote takes about five days, without Dual Governance, and it needs no funding contract."
-  breaks: "If funding becomes regular, the votes become a burden. A motion path for top-ups would then remove votes: a reversal condition of ADR 014."
+  why: "The committee expects a top-up about every three to four months. A top-up motion takes 72 hours and uses Lido's existing top-up factories in new instances."
+  breaks: "A captured committee can pull a registry's limit in each period if nobody objects. Before the guard is set, nothing on chain keeps a top-up under the launch cap (OD-145)."
   watched_by: []
-  watch_note: "INV-037 is a chain check before the enabling vote."
-  sources: ["ADR-014#d1", "ADR-014#consequences", "ADR-014#reversal-conditions", "INV-037", "ADR-005#d28"]
+  watch_note: "Fork tests cover the two factories, their registries and the first top-up. The chain check of the registries' roles before the enabling vote, and the alerts on a top-up motion, are owed."
+  sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d16", "OD-145", "ADR-014#consequences", "INV-037", "ADR-005#d28"]
 
 - id: returns-rare
   assumption: "Funds go back to the Aragon Agent only in an emergency or a recovery."
@@ -247,8 +250,8 @@
 - id: monthly-report
   assumption: "The committee publishes each monthly report within seven days, from a generator that anyone can re-run."
   kind: operational
-  why: "Reports are the evidence for caps and tranche votes."
-  breaks: "Tranche votes wait. A report that cannot be reproduced is a reversal condition. Reports have no on-chain anchor."
+  why: "Reports are the evidence for caps, top-up motions."
+  breaks: "Top-up motions wait. A report that cannot be reproduced is a reversal condition. Reports have no on-chain anchor."
   watched_by: []
   watch_note: "The report generator and the day-8 flag are phase 2 work."
   sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#reversal-conditions",
@@ -266,8 +269,8 @@
 - id: prices-sound
   assumption: "The price waterfall gives every asset a fair price, and the committee's valuation policy sets a sound band and level-5 share."
   kind: trust
-  why: "Caps and tranche votes rest on the reported value. A single price source can be wrong, not only missing."
-  breaks: "A wrong price supports a tranche that the vault does not need, or hides a breach. A committee estimate prices the committee's own positions."
+  why: "Caps, top-up motions rest on the reported value. A single price source can be wrong, not only missing."
+  breaks: "A wrong price supports a funding that the vault does not need, or hides a breach. A committee estimate prices the committee's own positions."
   watched_by: []
   watch_note: "The report generator is phase 2 work. The band and the level-5 share are not set."
   sources: ["ADR-009#d35", "ADR-009#d36", "ADR-009#d37", "ADR-014#proposed-direction",

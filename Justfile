@@ -49,7 +49,7 @@ check-docs:
 
 # The policy artifacts equal a fresh compile; the compiler's tests; the type check
 check-policy:
-	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json --check && bun test compiler && ./node_modules/.bin/tsc --noEmit -p .
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json --check && bun compiler/motion.ts example --check && bun compiler/launch.ts write --check && bun test compiler && ./node_modules/.bin/tsc --noEmit -p .
 
 # Every control of the onboarding guide, in headless Chromium
 check-browser:
@@ -64,7 +64,7 @@ check-workflows:
 stale:
 	{{py}} scripts/build_onboarding.py --stale
 
-# After a review, pin guide items again: just repin actor:asset-safe flow:tranche
+# After a review, pin guide items again: just repin actor:asset-safe flow:top-up
 repin +items:
 	{{py}} scripts/build_onboarding.py --repin {{items}}
 
@@ -75,6 +75,51 @@ links:
 # The fork suite on the pinned mainnet fork; needs RPC (no keys)
 test-fork:
 	RPC=${RPC} forge test -vvv
+	bun policy/constellation/compiler/roundtrip.ts rehearsal --dir .roundtrip
+	bun policy/constellation/compiler/watch.ts rehearsal --dir .roundtrip
+	bun policy/constellation/compiler/batches.ts check --batches .batches/rehearsal-26249900.json
+
+# Compute each Safe batch's hash again, and fail unless the batches carry the policy and the vault's setup, and nothing else
+batches-check file *flags:
+	bun policy/constellation/compiler/batches.ts check --batches {{quote(file)}} {{flags}}
+
+# Build a motion from a merged policy change: just motion <base> <head> --epoch 0 --policy-version 0, or --rpc
+motion base head *flags:
+	bun policy/constellation/compiler/motion.ts build --base {{quote(base)}} --head {{quote(head)}} --out .motion/motion.json --post .motion/post.md {{flags}}
+
+# The onboarding motion of each launch protocol, and what no motion can write
+launch-motions:
+	bun policy/constellation/compiler/launch.ts list
+
+# Fail unless a motion's calldata turns the policy of <base> into the policy of <head>, and writes nothing else
+motion-check base head calldata *flags:
+	bun policy/constellation/compiler/motion.ts check --base {{quote(base)}} --head {{quote(head)}} --calldata {{quote(calldata)}} {{flags}}
+
+# Commit a policy change's motion with it: writes pending/<network>/ from <base> to the working tree's artifact
+motion-pending base *flags:
+	bun policy/constellation/compiler/motion.ts build --pending --base {{quote(base)}} {{flags}}
+
+# The two detectors: the chain against the policy, and every open motion against the pending motion
+watch *flags:
+	bun policy/constellation/compiler/watch.ts check {{flags}}
+
+# Record the pending motion as enacted and remove its pending files, once Easy Track enacted it
+motion-settle *flags:
+	bun policy/constellation/compiler/watch.ts settle {{flags}}
+
+# Enact the motion of `just motion` through the live Easy Track on a fork, on the vault with the base policy
+motion-replay:
+	MOTION_FILE=.motion/motion.json POLICY_ARTIFACT=.motion/base.json RPC=${RPC} forge test --match-test test_replay_a_motion_file -vv
+
+# The round-trip check and the two detectors on a fork: record the modifiers' events, rebuild their state and compare it with the policy
+round-trip:
+	RPC=${RPC} forge test --match-contract 'RoundTrip|LaunchOnboarding'
+	bun policy/constellation/compiler/roundtrip.ts rehearsal --dir .roundtrip
+	bun policy/constellation/compiler/watch.ts rehearsal --dir .roundtrip
+
+# The round-trip check of a policy against an events file or a chain: --events <file>, or --rpc --from-block N
+round-trip-check artifact *flags:
+	bun policy/constellation/compiler/roundtrip.ts check --artifact {{quote(artifact)}} {{flags}}
 
 # Record a human's own verification of a page, with the hash of its body. Humans only (CONTRIBUTING.md)
 verify page by *flags:
@@ -86,4 +131,4 @@ build:
 
 # Policy (ADR 004): compile the constellation into the committed fork artifact and the enabling-vote rehearsal's artifact
 policy-compile:
-	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json
+	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json && bun compiler/motion.ts example && bun compiler/launch.ts write

@@ -11,6 +11,8 @@
 // (ADR 007, decision 18).
 // Changed for Clutch on 2026-11-11: the operator's return to the Aragon Agent
 // (ADR 014, decision 9).
+// Changed for Clutch on 2026-11-12: a token that left the order lists keeps
+// its return to the Aragon Agent (ADR 013, decision 4).
 import { c, call, callWithValue } from "../../lib";
 import {
   DAI,
@@ -37,6 +39,7 @@ import {
   orders_wsteth,
   sky_savings_usds,
 } from "../../allowances";
+import { RETIRED_ORDER_TOKENS } from "../../orders";
 import { SIZE_STANDIN_STETH, SIZE_STANDIN_USD } from "../../parameters";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -126,5 +129,8 @@ export default [
   // The return to the treasury: a transfer of an order token, of any amount, pinned to the Aragon Agent
   // (ADR 014, decision 9). The SDK merges it with the funding transfer into one Or, because a second
   // scope on the same function would replace the first.
-  ...ORDER_FUNDING.map(({ token }) => call(token, "transfer(address,uint256)", manifest.agent)),
+  // A token that left the order lists keeps this return and loses its funding transfer (ADR 013, decision 4).
+  ...[...ORDER_FUNDING.map(({ token }) => token), ...RETIRED_ORDER_TOKENS].map((token) =>
+    call(token, "transfer(address,uint256)", manifest.agent),
+  ),
 ] satisfies Permissions;

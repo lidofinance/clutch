@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T11:24:01Z
+  at: 2026-11-12T15:22:31Z
 verified: []
 sources:
   - id: s1
@@ -51,7 +51,7 @@ A runbook can rise above `slop` only with a passing fork `drill` record: the tim
 Each role, target and selector needs one complete tree: a write replaces its slot.
 CI rejects an artifact that differs from a fresh compile, and reviewers approve the artifact [s1].
 A change after launch is a motion of the universal factory ([ADR 013](/adr/013-one-easy-track-factory.md)); local tooling verifies its writes before signing.
-A round-trip check compares the modifier's conditions on a fork with the artifact.
+The round-trip check rebuilds each modifier's state from its events on a fork and compares it with the artifact (`just round-trip`; INV-016).
 Behaviour tests check each role's allowed and refused actions independently of the encoding.
 A policy change can rise above `slop` only with verification output [s3].
 

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-13T07:06:18Z
 verified: []
 sources:
   - id: s2
@@ -40,7 +40,7 @@ sources:
 
 The Treasury Management Committee can use a bounded part of the DAO treasury in approved DeFi protocols. The DAO keeps ownership; neither the committee nor a service provider can take the assets.
 On-chain permissions limit the committee's actions. An emergency Safe can return assets and disable the operator; only an Easy Track motion restarts it (OD-104).
-One Easy Track factory carries every Clutch motion (OD-102). Aragon votes fund the vault in rare tranches (OD-106). After the enabling vote, no administrative action needs an Aragon vote (OD-101).
+One Easy Track factory carries every Clutch motion (OD-102). Top-up motions through two of Lido's top-up factories fund the vault, within a limit for each three months (OD-140, OD-146). After the enabling vote, no administrative action needs an Aragon vote (OD-101).
 
 ## Motivation
 
@@ -66,7 +66,7 @@ Separate **custody**, **authority** and **change control** into three layers tha
 - Authority: Zodiac Roles modifiers enabled as modules on those Safes, with each Safe as its modifiers' owner.
 - Change control: Easy Track motions through one universal factory. A motion is a list of raw writes that the factory makes as its motion roles. The policy of each motion role and the 72-hour objection window bound a motion (OD-102, OD-134).
 
-Funding needs no new contract: Aragon Voting pays each tranche through the Finance application (OD-106).
+Funding needs no new code: two new instances of Lido's top-up factory and registry pay the Asset Safe through the Finance application (OD-140, OD-146).
 
 ## Specification
 
@@ -86,11 +86,11 @@ Each Roles modifier refuses every call that its policy does not list. Owners: [A
 
 #### Part 4: Governance — the new contracts **[Implemented in part]**
 
-Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 013](/adr/013-one-easy-track-factory.md), whose proposed direction lists the motions at launch. The prototype builds the factory, and the fork suite builds the budget, onboarding, orders-token, orders-restore, restart, insurance-money, insurance-deposit, first-loss burn and fund motions from raw writes. The `motion` command, which builds a motion from a merged policy change, is not built.
+Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 013](/adr/013-one-easy-track-factory.md), whose proposed direction lists the motions at launch. The prototype builds the factory, and the fork suite builds the budget, onboarding, orders-token, orders-restore, restart, insurance-money, insurance-deposit, first-loss burn and fund motions from raw writes. The `motion` command builds a motion from a merged policy change, and its check fails a motion that writes anything else; the fork suite enacts one such motion.
 
 #### Part 5: Funding and insurance **[Implemented in part]**
 
-Owners: [ADR 014](/adr/014-funding-by-tranche-votes.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the first and a later tranche, moves insurance money within its budget, deposits it into Lido Earn, creates a fund with a payout address and pays out of it, burns first-loss shares by motion and returns order tokens to the Aragon Agent.
+Owners: [ADR 014](/adr/014-funding-by-top-up-motions.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the first top-up and a later top-up by top-up motions, moves insurance money within its budget, deposits it into Lido Earn, creates a fund with a payout address and pays out of it, burns first-loss shares by motion and returns order tokens to the Aragon Agent.
 
 #### Part 6: Emergency response **[Implemented in part]**
 
@@ -129,7 +129,7 @@ The [parameters register](/registers/parameters.md) holds each value and its sta
 - **Screening.** The vendor's guard can stop operator activity and motion creation; recovery never depends on it, and the owners can remove it after ten days ([ADR 010](/adr/010-pre-execution-screening.md)).
 - **Stale motions.** A motion that fails at enactment holds one of Easy Track's 20 shared open-motion slots until it is cancelled (OD-94).
 - **Flows out of the vault.** Funds leave only to the Aragon Agent, through emergency and recovery paths and the operator's pinned return, and to an insurance fund's pinned payout address within its cap (OD-107, OD-108).
-- **Encoding and provenance.** Until the round-trip check of phase 2 exists, nothing independent checks the encoding on chain. Before funding, every reused component is verified against a locally compiled tagged release.
+- **Encoding and provenance.** The round-trip check rebuilds each modifier's state from its events on a fork and compares it with the artifact, so the chain checks the compiler's encoding (INV-016). It reads events, not storage, so it trusts the deployed Roles code to store what it emits. Before funding, every reused component is verified against a locally compiled tagged release.
 
 ## Failure Modes
 
@@ -142,7 +142,7 @@ The [open-decisions register](/registers/open-decisions.md) tracks every open it
 1. **The emergency Safe's fifth signer.** A Snapshot appoints a member of neither the committee nor the Emergency Brakes multisig (OD-58); who holds the seat is open (OD-65).
 2. **The mandate's owed text.** The [enabling vote](/specs/enabling-vote.md) lists it (OD-90).
 3. **Twyne.** Its holder and form must be shown before it counts ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 17).
-4. **The vendor's confirmations.** The vendor confirms in writing that it accepts the exclusion of standing approvals, before the second tranche's vote, and that it agrees to be named, before the mandate is posted ([ADR 010](/adr/010-pre-execution-screening.md) decision 9; [ADR 001](/adr/001-repository-scope-visibility-licence-name.md) decision 8).
+4. **The vendor's confirmations.** The vendor confirms in writing that it accepts the exclusion of standing approvals, before a top-up above the launch cap, and that it agrees to be named, before the mandate is posted ([ADR 010](/adr/010-pre-execution-screening.md) decision 9; [ADR 001](/adr/001-repository-scope-visibility-licence-name.md) decision 8).
 
 ## Links
 
