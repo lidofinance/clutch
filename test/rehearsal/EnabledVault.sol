@@ -24,7 +24,7 @@ import {
 ///        Aragon Voting, Easy Track, Finance and treasury on a mainnet fork, and the motion
 ///        helpers of the universal factory.
 /// @dev The vote registers the universal factory with its address book and the two top-up
-///      factories, pays nothing, and approves the hash of each Safe batch. The launch tranche
+///      factories, pays nothing, and approves the hash of each Safe batch. The first top-up
 ///      then comes by two top-up motions (OD-92, OD-102, OD-142). Figures marked STANDIN are test values, not production figures.
 abstract contract EnabledVault is RehearsalBase {
     /// @dev The policy that the enabling vote applies, if it is not the committed artifact: the base policy of a
@@ -53,10 +53,10 @@ abstract contract EnabledVault is RehearsalBase {
     ///      batch is then checked against.
     uint256 internal constant BATCH_BYTES_BUDGET = 120_000;
 
-    // The launch tranche: two top-up motions after the enabling vote and its batches (OD-142). STANDIN amounts under the
+    // The first top-up: two top-up motions after the enabling vote and its batches (OD-142). STANDIN amounts under the
     // launch cap of one million dollars (ADR 014, decision 2; OD-55).
-    uint256 internal constant TRANCHE_USDC = 500_000e6;
-    uint256 internal constant TRANCHE_STETH = 100e18;
+    uint256 internal constant FIRST_TOPUP_USDC = 500_000e6;
+    uint256 internal constant FIRST_TOPUP_STETH = 100e18;
 
     // ---------------------------------------------------------------------
     // The enabling vote
@@ -93,14 +93,14 @@ abstract contract EnabledVault is RehearsalBase {
 
         for (uint256 i = 0; i < batches.length; i++) _runBatch(batches[i]);
 
-        // The launch tranche: the committee's Safe creates two top-up motions after the batches ran, and anyone
+        // The first top-up: the committee's Safe creates two top-up motions after the batches ran, and anyone
         // enacts them after the objection window.
         uint256 launchGas = _topUps(
-            stableTopUp, abi.encode(Mainnet.USDC, _recipient(), _amount(TRANCHE_USDC)), stethTopUp, abi.encode(_recipient(), _amount(TRANCHE_STETH))
+            stableTopUp, abi.encode(Mainnet.USDC, _recipient(), _amount(FIRST_TOPUP_USDC)), stethTopUp, abi.encode(_recipient(), _amount(FIRST_TOPUP_STETH))
         );
-        console2.log("REHEARSAL launch tranche: enactMotion gas of the two top-up motions", launchGas);
-        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)) - usdcBefore, TRANCHE_USDC, "the launch tranche in USDC");
-        assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)), TRANCHE_STETH, 2, "the launch tranche in stETH");
+        console2.log("REHEARSAL first top-up: enactMotion gas of the two top-up motions", launchGas);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)) - usdcBefore, FIRST_TOPUP_USDC, "the first top-up in USDC");
+        assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)), FIRST_TOPUP_STETH, 2, "the first top-up in stETH");
     }
 
     /// @dev A top-up motion: the committee's Safe creates it, and anyone enacts it after the objection window.

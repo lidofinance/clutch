@@ -135,7 +135,7 @@
   sources: ["doc:docs/specs/specification-policy.md#invariants"]
 
 - term: Launch cap
-  plain: "A cap of one million dollars on the Asset Safe and the orders account while the screening [[guard]] is not live. The launch tranche is the cap. Until the guard is set, the committee creates no [[top-up motion]] above it; nothing on chain holds this rule (OD-145). If a first-loss redemption takes the vault above it, the committee's Safe returns the excess to the Aragon Agent. A funding above the cap starts only once the guard is set with its bypass mode off."
+  plain: "A cap of one million dollars on the Asset Safe and the orders account while the screening [[guard]] is not live. The first top-up is the cap. Until the guard is set, the committee creates no [[top-up motion]] above it; nothing on chain holds this rule (OD-145). If a first-loss redemption takes the vault above it, the committee's Safe returns the excess to the Aragon Agent. A funding above the cap starts only once the guard is set with its bypass mode off."
   sources: ["ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "OD-145", "ADR-014#d14", "ADR-014#proposed-direction"]
 
 - term: Limit order
@@ -251,7 +251,7 @@
     "doc:docs/research/easy-track-first-2026-11-05.md#treasury-rules-that-the-committees-items-touch"]
 
 - term: Top-up motion
-  plain: "An Easy Track motion that pays the Asset Safe from the DAO treasury, through Aragon Finance. The committee's Safe creates it through one of two top-up factories: one for stETH, and one for DAI, USDC, USDT and sUSDS. A registry holds each factory's limit for three months, and LDO holders can object for 72 hours. The launch tranche is the first top-up."
+  plain: "An Easy Track motion that pays the Asset Safe from the DAO treasury, through Aragon Finance. The committee's Safe creates it through one of two top-up factories: one for stETH, and one for DAI, USDC, USDT and sUSDS. A registry holds each factory's limit for three months, and LDO holders can object for 72 hours. The first top-up is one million dollars, the [[launch cap]]."
   sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d16", "runbook:Top up the vault"]
 
 - term: Treasury share

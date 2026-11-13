@@ -107,7 +107,7 @@ blocks:
       - "Detection: the forum post of each top-up motion states the funded value, the headroom under the mandate size and the treasury share; monitoring flags one that would take the vault above either."
     tech: "INV-037: only the two top-up factories move treasury funds to the vault. Nothing on chain holds the mandate size or the treasury share; LDO holders do, when they object to a top-up motion."
     changes:
-      - text: "The funding section keeps the top-ups through Easy Track. The launch tranche and later top-ups come by motion, within a limit for each three months. The text names no tranche vote."
+      - text: "The funding section keeps the top-ups through Easy Track. The first top-up and the later ones come by motion, within a limit for each three months."
         why: "The committee expects regular top-ups, so a vote for each would cost too much. The top-up factories are Lido's existing code in new instances."
         state: owed
         sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#proposed-direction", "doc:docs/specs/enabling-vote.md#the-mandates-owed-text"]

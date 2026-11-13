@@ -621,7 +621,7 @@
   cannot:
     - "Merge, deploy, or touch `deployed/`."
     - "Mark a page reviewed, or record a body's verification."
-    - "Set a parameter: budgets, ceilings, the orders account's token lists and order life, tranche amounts, allowlists or role membership."
+    - "Set a parameter: budgets, ceilings, the orders account's token lists and order life, the top-up registries' limits, allowlists or role membership."
     - "Use the Zodiac key."
   sources: ["ADR-003#d5", "ADR-003#d6", "ADR-003#d7", "ADR-003#d14", "OD-31", "OD-96",
     "doc:AGENTS.md#out-of-scope-for-agents"]

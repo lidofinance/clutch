@@ -362,14 +362,14 @@ flows:
     group: funding
     title: Launch funding and the first-loss shares
     label: specified
-    summary: "How the vault gets its first assets: the launch tranche, one million dollars, by top-up motions after the enabling vote, and then the DAO's [[first-loss shares]]."
+    summary: "How the vault gets its first assets: the first top-up, one million dollars, by top-up motions after the enabling vote, and then the DAO's [[first-loss shares]]."
     trigger: "The enabling vote executes."
     steps:
       - who: "Aragon Voting and Aragon Finance"
-        text: "After the Safe batches ran, the committee's Safe creates the launch tranche's top-up motions. After 72 hours without an objection, anyone enacts them, and Finance pays the Asset Safe."
+        text: "After the Safe batches ran, the committee's Safe creates the motions of the first top-up. After 72 hours without an objection, anyone enacts them, and Finance pays the Asset Safe."
         nodes: [dao, funding, asset-safe]
         edges: [treasury, top-up]
-        check: "The launch tranche is the [[launch cap]]."
+        check: "The first top-up is the [[launch cap]]."
       - who: "Anyone"
         text: "Anyone sends the Safe batches, which apply the policy and grant the roles."
         nodes: [asset-safe, operator-modifier, safety-modifier, orders, first-loss]
@@ -858,7 +858,7 @@ flows:
     group: deployment
     title: The enabling vote
     label: specified
-    summary: "One DAO vote, the [[enabling vote]], turns the system on. The launch tranche follows by top-up motions."
+    summary: "One DAO vote, the [[enabling vote]], turns the system on. The first top-up follows by top-up motions."
     trigger: "The mandate is approved and phase 3 is done."
     steps:
       - who: "Lido"

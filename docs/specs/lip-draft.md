@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-13T07:06:18Z
 verified: []
 sources:
   - id: s2
@@ -90,7 +90,7 @@ Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 
 
 #### Part 5: Funding and insurance **[Implemented in part]**
 
-Owners: [ADR 014](/adr/014-funding-by-top-up-motions.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the launch tranche and a later top-up by top-up motions, moves insurance money within its budget, deposits it into Lido Earn, creates a fund with a payout address and pays out of it, burns first-loss shares by motion and returns order tokens to the Aragon Agent.
+Owners: [ADR 014](/adr/014-funding-by-top-up-motions.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the first top-up and a later top-up by top-up motions, moves insurance money within its budget, deposits it into Lido Earn, creates a fund with a payout address and pays out of it, burns first-loss shares by motion and returns order tokens to the Aragon Agent.
 
 #### Part 6: Emergency response **[Implemented in part]**
 

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-13T07:06:18Z
 verified: []
 sources:
   - id: s1
@@ -34,7 +34,7 @@ sources:
 
 EM decided each decision below; its ODs lead to EM's words in the [decision log](/registers/decision-log.md) [s1].
 
-1. Lapsed (OD-106): tranche votes do not use Easy Track's payment permission.
+1. Lapsed (OD-106).
 2. Stated by [ADR 011](/adr/011-launch-scope.md) decision 2.
 3. Lapsed (OD-106): the vault has no funding registry.
 4. Replaced by ADR 014 decision 1 (OD-106).

@@ -67,7 +67,7 @@
     "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard", "ADR-010#context"]
 
 - id: launch-cap
-  assumption: "Until the guard is live, the vault holds no more than its launch tranche of one million dollars, the launch cap."
+  assumption: "Until the guard is live, the vault holds no more than its first top-up of one million dollars, the launch cap."
   kind: operational
   why: "EM allowed a launch without the screening guard under the [[launch cap]]. The cap holds by a rule: the committee creates no top-up above it before the guard is set (OD-145)."
   breaks: "Until the guard is set, no operator transaction and no motion creation is screened, and a top-up motion above the cap enacts if nobody objects. A first-loss redemption can take the vault above the cap."
@@ -186,7 +186,7 @@
   why: "The committee expects a top-up about every three to four months. A top-up motion takes 72 hours and uses Lido's existing top-up factories in new instances."
   breaks: "A captured committee can pull a registry's limit in each period if nobody objects. Before the guard is set, nothing on chain keeps a top-up under the launch cap (OD-145)."
   watched_by: []
-  watch_note: "Fork tests cover the two factories, their registries and the launch tranche. The chain check of the registries' roles before the enabling vote, and the alerts on a top-up motion, are owed."
+  watch_note: "Fork tests cover the two factories, their registries and the first top-up. The chain check of the registries' roles before the enabling vote, and the alerts on a top-up motion, are owed."
   sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d16", "OD-145", "ADR-014#consequences", "INV-037", "ADR-005#d28"]
 
 - id: returns-rare

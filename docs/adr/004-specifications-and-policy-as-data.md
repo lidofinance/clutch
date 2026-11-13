@@ -49,6 +49,11 @@ verified:
     recorded_by: claude-code/mythos-5.2
     ref: /registers/decision-log.md#2026-11-12--adr-003-and-adr-004-verified-after-the-switch-to-raw-writes
     sha256: a74f433a134f032bc6ad54836936f07b6a831cc4efac62bb2d1339e742128423
+  - by: human:em
+    at: 2026-11-13T07:06:26Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-13--adr-003-and-adr-004-verified-after-the-switch-to-top-up-motions
+    sha256: 2e2f9184adf838551563c3a2eacfa2ca769ee29539c04b52143b53cf0a6adaaf
 sources:
   - id: s1
     resource: /registers/decision-log.md

@@ -16,7 +16,7 @@ import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 ///      Aragon Finance and treasury take part. Only the Clutch accounts and
 ///      the universal factory are new; the two top-up factories are new
 ///      instances of Lido's own code. The vote registers the three factories and
-///      pays nothing, and the launch tranche comes by top-up motions (OD-102,
+///      pays nothing, and the first top-up comes by two motions (OD-102,
 ///      OD-142; enabling-vote spec). Lines that start with "REHEARSAL" are the
 ///      measurements that the research notes report.
 ///      Run: RPC=<archive RPC> forge test --match-contract EnablingVoteRehearsal -vv
@@ -83,12 +83,12 @@ contract EnablingVoteRehearsal is EnabledVault {
     }
 
     // ---------------------------------------------------------------------
-    // 2. The vote that fits: the three factories, then hash approvals; the launch tranche by motion
+    // 2. The vote that fits: the three factories, then hash approvals; the first top-up by motion
     // ---------------------------------------------------------------------
 
     /// @dev The vote registers the universal factory with its address book and
     ///      the two top-up factories, and pays nothing. After the batches, the
-    ///      launch tranche reaches the Asset Safe by two top-up motions (checked
+    ///      first top-up reaches the Asset Safe by two top-up motions (checked
     ///      in `_enable`).
     function test_02_enabling_vote_end_to_end() public {
         _enable();
@@ -160,7 +160,7 @@ contract EnablingVoteRehearsal is EnabledVault {
 
     /// @dev The Roles layer allows the deposits (Drills D3b); this asks
     ///      whether the live queues accept them from a new Safe. The first
-    ///      tranche holds the USDC and the stETH.
+    ///      top-up holds the USDC and the stETH.
     function test_04_earn_deposits_from_the_asset_safe() public {
         _enable();
         // Budgets wide enough for the probe, set by the owner path (Voting via the Asset Safe)

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-13T07:06:18Z
 verified: []
 sources:
   - id: s1
@@ -64,7 +64,7 @@ A row holds a value that someone can set or read. A decision without a value liv
 | Top-up registries' period | three calendar months | EM (OD-143) [s1] | ADR 014 |
 | Top-up registries' limit for a period | EM's indicative figure, restricted until the mandate is published, for both registries together; the stETH registry's limit in stETH and the production figures come from the attested computation | EM (OD-143) [s1]; the split between the registries is the agent's reading | ADR 014 |
 | The Easy Track executor's ceiling on one payment | 1,000 stETH; 2,000,000 of DAI, USDC, USDT or sUSDS; one motion carries several payments | Read on chain, unchanged by Clutch | ADR 014 |
-| Launch tranche | one million dollars, by top-up motions after the enabling vote | EM (OD-106, OD-142) [s1]; the tokens and amounts come from the attested computation | ADR 014, ADR 010 |
+| First top-up | one million dollars, by top-up motions after the enabling vote | EM (OD-106, OD-142) [s1]; the tokens and amounts come from the attested computation | ADR 014, ADR 010 |
 | Band between the two readings | not set; the committee's valuation policy sets it | EM (OD-84, OD-122) [s1] | ADR 009 |
 | Late-report flag | day 8 after month-end | EM (OD-14, OD-122) [s1] | ADR 009 |
 | Wait for the screening vendor's approval before an alert | not set; the detector specification sets it | EM (OD-88) [s1] | ADR 010 |

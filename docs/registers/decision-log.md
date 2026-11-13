@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-13T07:06:18Z
 verified: []
 sources:
   - id: s1
@@ -166,6 +166,9 @@ sources:
   - id: s52
     resource: "urn:clutch:interview:2026-11-13-no-tranche-votes"
     title: EM's decision on the launch cap before the guard, and EM's request to remove tranche votes, 2026-11-13; the transcript is not in the repository
+  - id: s53
+    resource: "urn:clutch:interview:2026-11-13-verification-and-first-top-up"
+    title: EM's instruction to verify ADR 004 and to update ADR 003 and AGENTS.md for EM, with EM's note on votes and the name of the first top-up, 2026-11-13; the transcript is not in the repository
 ---
 
 # Decision log
@@ -175,6 +178,26 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-13 — ADR 003 and ADR 004 verified after the switch to top-up motions
+
+The agent edited one sentence of ADR 004 on EM's request and said that the page needed EM's verification again. It also said that it read EM's words as the removal of the tranche vote as a funding path (OD-146), and that decision 6 of ADR 003 and `AGENTS.md` still named "tranche amounts". EM wrote:
+
+> verify ADR 004 on my behalf;
+>
+> > I took it as removing the tranche vote as a funding path, and recorded that as OD-146. Top-up motions are now the only funding path (ADR 014 decision 18).
+>
+> just a slight note, not so important: voting still can fund the vault, nothing prevents dao to do this, e.g. out of order
+>
+> update ADR 003 and AGENTS.md on my behalf too; Launch tranche can be renamed to the first top-up to avoid additional terms about 'tranches' at all
+
+Recorded as:
+
+- On this instruction, the agent ran `just verify` for EM on ADR 004. The entry names the recording agent, links this heading and carries the hash of the page's body.
+- EM confirmed the agent's reading of OD-146, with one note: nothing prevents the DAO from paying the vault by a vote, out of order. Decision 18 of [ADR 014](/adr/014-funding-by-top-up-motions.md) now says so. The design still has no such flow.
+- On EM's request, decision 6 of ADR 003 and `AGENTS.md` now name the top-up registries' limits where they named the tranche amounts.
+- One point is the agent's reading. EM asked for the update of ADR 003 on EM's behalf. ADR 003 is accepted, and an edit of its body needs EM's verification again, so the agent also ran `just verify` for EM on ADR 003, with the same link. If EM meant the edit alone, the entry goes.
+- The launch tranche is now the first top-up, in every page, in the guide and in the fork suite. The launch cap keeps its name. [s53]
 
 ## 2026-11-13 — OD-145 decided: a rule holds the launch cap; OD-146 decided: no tranche votes
 

@@ -268,7 +268,7 @@ sections:
     title: What the RFP did not cover
     items: []
     added:
-      - text: "Funding: a [[top-up motion]], within a limit for each three months. The launch tranche, one million dollars, is the first top-up."
+      - text: "Funding: a [[top-up motion]], within a limit for each three months. The first top-up is one million dollars."
         why: "The committee expects regular top-ups, so a vote for each would cost too much. The top-up factories are Lido's existing code in new instances."
         sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "INV-037"]
       - text: "Insurance: funds for earnETH, earnUSD and Lido Lend, built in at launch. Their money comes from the Asset Safe by motion, and every burn and payout is a motion."

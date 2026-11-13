@@ -25,7 +25,7 @@
     "INV-003", "INV-038", "test:test_D3_operator_cannot_route_around_avatar", "ADR-005#d31"]
 
 - title: Every operator transaction is screened
-  text: "[the screening vendor]'s [[guard]] sits on the committee's Safe. It refuses any transaction that the vendor has not approved, once and exactly, the committee's other duties included.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nThe vault launches without the guard, on one tranche of one million dollars, which is its [[launch cap]]. A funding above the cap starts only once the guard is live."
+  text: "[the screening vendor]'s [[guard]] sits on the committee's Safe. It refuses any transaction that the vendor has not approved, once and exactly, the committee's other duties included.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nThe vault launches without the guard, on a first top-up of one million dollars, which is its [[launch cap]]. A funding above the cap starts only once the guard is live."
   tech: "The vendor's key approves each exact transaction on chain, before it runs; a transaction without an approval reverts. The owners can remove the guard only through a 10-day timelock. Its bypass mode stays off: turning it on needs the vendor's approval and a 10-day timelock (INV-010)."
   nodes: [screening, committee]
   edges: [screen]
@@ -55,7 +55,7 @@
     "ADR-007#d41", "ADR-007#proposed-direction", "INV-013", "INV-014", "INV-022", "INV-024"]
 
 - title: "Money in, money back"
-  text: "Funding comes from the DAO treasury by [[top-up motion|top-up motions]]: the committee's Safe creates one, LDO holders can object for 72 hours, and Aragon Finance pays the Asset Safe, within a limit for each three months. The launch tranche, one million dollars, is the first top-up. A change of a limit is an Aragon vote. The vault holds up to the [[mandate size]].\n\nMoney goes back to the treasury only in an emergency or a recovery: by the emergency Safe's transfers and recovery orders, or by the committee's transfer pinned to the Agent. Monitoring alerts on each one. Insurance money moves from the Asset Safe to the first-loss Safe, by motion."
+  text: "Funding comes from the DAO treasury by [[top-up motion|top-up motions]]: the committee's Safe creates one, LDO holders can object for 72 hours, and Aragon Finance pays the Asset Safe, within a limit for each three months. The first top-up is one million dollars. A change of a limit is an Aragon vote. The vault holds up to the [[mandate size]].\n\nMoney goes back to the treasury only in an emergency or a recovery: by the emergency Safe's transfers and recovery orders, or by the committee's transfer pinned to the Agent. Monitoring alerts on each one. Insurance money moves from the Asset Safe to the first-loss Safe, by motion."
   tech: "A top-up motion holds one `newImmediatePayment` from Finance to the Asset Safe for each payment, and the executor's permission caps one payment. Two registries list the Asset Safe as their only recipient, and Aragon Voting is their admin, so no Dual Governance proposal is on the path of a limit change. The universal factory's address book holds no payment call (INV-037). Every redemption, claim and exit of a fund pays the Asset Safe (INV-038)."
   nodes: [dao, funding, asset-safe, first-loss]
   edges: [treasury, top-up, own, insure]

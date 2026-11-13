@@ -338,7 +338,7 @@ edges:
   to: asset-safe
   kind: governs
   short: top-ups
-  label: A top-up pays the Asset Safe only. The launch tranche, one million dollars, is the first top-up.
+  label: A top-up pays the Asset Safe only. The first top-up is one million dollars.
   via:
   - - 1160
     - 84

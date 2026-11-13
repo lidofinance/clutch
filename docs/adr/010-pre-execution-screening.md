@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-13T07:06:18Z
 verified: []
 sources:
   - id: s1
@@ -91,7 +91,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 17. The vendor is asked to refuse every delegatecall from the committee's Safe except to Safe's MultiSendCallOnly v1.3.0. This is a request, not a gate (OD-17, OD-80).
 18. Lido's monitoring alerts on any change of the singleton of the Asset Safe, the committee's Safe and the emergency Safe (OD-17, OD-80).
 19. The screening vendor's rules for the vault are a written list in this repository, in the [control matrix](/specs/control-matrix.md). A relaxation of a rule is a change under control: the forum gets a notice (decision 23), and the vendor's own delay applies if it has one ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 26) (OD-39, OD-45, OD-64).
-20. The vault may launch without the screening guard, under a cap of one million dollars on the Asset Safe and the orders account. The launch tranche is the cap. Above the cap, on-chain blocking is a hard requirement (OD-54, OD-55, OD-106, OD-142).
+20. The vault may launch without the screening guard, under a cap of one million dollars on the Asset Safe and the orders account. The first top-up is the cap. Above the cap, on-chain blocking is a hard requirement (OD-54, OD-55, OD-106, OD-142).
 21. Until the guard is set, the launch cap holds by a rule: the committee's Safe creates no top-up motion that takes the vault above the cap. Monitoring alerts on such a motion, and when the vault's value goes above the cap before the guard is set. LDO holders can object. Nothing on chain holds the cap, because the registries' limits are above it (OD-54, OD-142, OD-145).
 22. The guard goes on the committee's Safe, with its bypass mode off, before a top-up above the cap starts. The guard is checked when that motion starts and watched until it is enacted (OD-54, OD-83, OD-121, OD-142).
 23. A relaxation of a screening rule gets a notice on the forum only (OD-64).

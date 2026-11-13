@@ -77,7 +77,7 @@ owed:
   - "The mandate's Snapshot text and its forum post change before the Snapshot vote. The Mandate tab marks each change."
   - "Fork tests of the onboarding motion of Lido Lend's lender vault once it is deployed, and of a settled redemption paid to the Asset Safe."
   - "The round-trip check and the two detectors against a deployed vault; they run on the rehearsal's vault today. Lido's monitoring must run the detectors on a schedule and page on an alert."
-  - "The [[attested computation]]'s figures, once the mandate is approved: the budgets, the orders budgets, the fixed approval ceilings, each top-up registry's limit, and the launch tranche's tokens and amounts."
+  - "The [[attested computation]]'s figures, once the mandate is approved: the budgets, the orders budgets, the fixed approval ceilings, each top-up registry's limit, and the first top-up's tokens and amounts."
   - "The mandate's drafters owe the holder and the form of the Twyne position."
   - "The enabling vote's Safe batches of the deployment, published as a file for the command that computes each hash again."
   - "The mandate's drafters owe the [[treasury share]]'s base, the time of its test, the remedy for a breach that no vault transaction causes, and a further funding's eligibility conditions."
