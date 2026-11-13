@@ -51,7 +51,7 @@ if (import.meta.main) {
       save("payload.json", captured.payload);
       save("context.json", { workspace: command, manifest, allowances: report.allowances, block: report.block, blockHash: report.blockHash });
       console.log("Prepared 3 existing Safes and 4 existing Roles modifiers with 14 roles. No deployment nonces or Safe overrides.");
-      console.log("Serialized permissions recompile to the same 63 policy calls; current allowance balances and timestamps are preserved.");
+      console.log("Serialized permissions recompile to the same policy calls; current allowance balances and timestamps are preserved.");
     } else {
       try {
         const payload = JSON.parse(readFileSync(path.join(OUTPUT, "payload.json"), "utf8"));

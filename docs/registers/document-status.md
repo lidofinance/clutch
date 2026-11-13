@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-13T07:48:30Z
+  at: 2026-11-13T16:30:00Z
 verified: []
 ---
 
@@ -71,7 +71,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-13 | none |
 | [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-13 | none |
 | [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-13 | none |
-| [specs/sepolia-factory-migration.md](/specs/sepolia-factory-migration.md) | Guide | slop |  | 2026-11-12 | none |
+| [specs/sepolia-factory-migration.md](/specs/sepolia-factory-migration.md) | Guide | slop |  | 2026-11-13 | none |
 | [specs/sepolia-setup-checklist.md](/specs/sepolia-setup-checklist.md) | Guide | slop |  | 2026-11-12 | none |
 | [specs/sepolia-stand-plan.md](/specs/sepolia-stand-plan.md) | Guide | slop |  | 2026-11-12 | none |
 | [specs/sepolia-test-plan.md](/specs/sepolia-test-plan.md) | Guide | slop |  | 2026-11-12 | none |

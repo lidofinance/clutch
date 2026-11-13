@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { readFileSync, writeFileSync } from "node:fs";
-import { getAddress, id, Interface, ZeroAddress, ZeroHash } from "ethers";
+import { getAddress, id, ZeroAddress, ZeroHash } from "ethers";
 import { compile, checkProtected, unguarded } from "../compiler/compile";
 import { anyOf, c, call, derivedKey, derivedKeyOf, flatTree, key, noneOf } from "../constellation/lib";
 
@@ -162,16 +162,14 @@ export function build(manifest: Record<string, any>) {
       if (grants.has(fn.selector) && unguarded(fn.conditions, protectedAccounts).length) throw new Error("Governance leaves protected accounts unguarded");
     }
   }
-  // Before the universal factory, the Easy Track executor held the motion roles. On a fresh stand these calls change nothing.
-  const roles = new Interface(["function assignRoles(address,bytes32[],bool[])"]);
-  const calls = { to: [...artifact.calls.to], data: [...artifact.calls.data], fn: [...artifact.calls.fn] };
-  for (const [modifier, roleKey] of [[m.operatorModifier, "governance"], [m.firstLossModifier, "first-loss-burn"]]) {
-    calls.to.push(getAddress(modifier));
-    calls.data.push(roles.encodeFunctionData("assignRoles", [m.easyTrackExecutor, [key(roleKey)], [false]]));
-    calls.fn.push("assignRoles");
+  // A budget motion sets the insurance-funding caps under derived keys, so the artifact expects them without a call.
+  const operator = artifact.modifiers.find((mod) => mod.ref === "operator_modifier")!;
+  for (const [name, cap] of [["weth", 10n ** 18n], ["usdc", 1000n * 10n ** 6n]] as const) {
+    const amount = String(cap);
+    operator.allowances.push({ name: `insurance_${name}`, key: derivedKeyOf(m.dependencies.tokens[name].address, m.firstLossSafe), balance: amount, maxRefill: amount, refill: amount, period: String(PERIOD), timestamp: "0" });
   }
   const avatars = new Map(artifact.modifiers.map((mod) => [mod.address, mod.avatar]));
-  return { ...artifact, testOnly: true, calls: { ...calls, avatar: calls.to.map((to) => avatars.get(to)!) } };
+  return { ...artifact, testOnly: true, calls: { ...artifact.calls, avatar: artifact.calls.to.map((to) => avatars.get(to)!) } };
 }
 
 if (import.meta.main) {

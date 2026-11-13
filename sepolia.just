@@ -75,6 +75,24 @@ caps-enact id: _guard
 retire-burn-factory: _guard
     m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}; cast send $(jq -r .easyTrack $m) 'removeEVMScriptFactory(address)' $(jq -r .burnFactory $m) --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --from "$SEPOLIA_SENDER"
 
+# assignRoles enabled the Easy Track executor as a module, and removing its roles left it enabled.
+# Disables it on the two modifiers where it held a role, through ApplySepolia with a two-call artifact.
+retire-executor-module: _guard
+    #!/usr/bin/env bash
+    set -euo pipefail
+    m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}; out=cache/sepolia/retire-executor-module.json
+    export FOUNDRY_BROADCAST=${FOUNDRY_BROADCAST:-broadcast/retire-executor-module}
+    python3 scripts/sepolia_receipts.py fresh $FOUNDRY_BROADCAST/ApplySepolia.s.sol/11155111/run-latest.json
+    executor=$(jq -r .easyTrackExecutor $m | tr A-F a-f)
+    disable() { local prev=0x0000000000000000000000000000000000000001
+        for a in $(cast call $1 'getModulesPaginated(address,uint256)(address[],address)' $prev 10 --rpc-url "$SEPOLIA_RPC" | head -1 | tr -d '[] ' | tr , ' '); do
+            [ "$(echo $a | tr A-F a-f)" = "$executor" ] && { cast calldata 'disableModule(address,address)' $prev $executor; return; }; prev=$a; done
+        echo "Executor is not a module of $1" >&2; exit 1; }
+    op=$(disable $(jq -r .operatorModifier $m)); fl=$(disable $(jq -r .firstLossModifier $m))
+    jq --arg op $op --arg fl $fl \
+        '{manifest: {chainId, controller, voting}, calls: {to: [.operatorModifier, .firstLossModifier], avatar: [.assetSafe, .firstLossSafe], data: [$op, $fl]}}' $m > $out
+    SEPOLIA_ARTIFACT=$out forge script script/sepolia/ApplySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --sender "$SEPOLIA_SENDER" --broadcast --slow --gas-estimate-multiplier 200
+
 compile:
     bun policy/constellation/sepolia/compile.ts cache/sepolia/manifest.json cache/sepolia/policy.json
 

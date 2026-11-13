@@ -76,6 +76,20 @@ def public_steps(env):
     if (call(stand["universalFactory"], "policyVersion()(uint256)") != "1"
             or call(stand["easyTrack"], "evmScriptFactories(address)(bool)", stand["burnFactory"]) != "false"):
         raise RuntimeError("The public steps left an unexpected policy version or burn factory")
+    run(["bun", "-e", DIFF], "diff", recipe)
+
+
+# The chain against the artifact, every role, module and allowance, as `constellation` compares the public stand.
+DIFF = """
+import { readFileSync } from "node:fs";
+import { build } from "./policy/constellation/sepolia/compile";
+import { diffPolicy } from "./policy/constellation/sepolia/diff";
+import { readOnlyRpc } from "./policy/constellation/sepolia/prepare-constellation";
+const manifest = JSON.parse(readFileSync(process.env.SEPOLIA_MANIFEST!, "utf8"));
+const report = await diffPolicy(readOnlyRpc(process.env.SEPOLIA_RPC!), manifest, build(manifest));
+for (const difference of report.differences) console.log(difference.path);
+if (!report.matches) process.exit(1);
+"""
 
 
 def main():

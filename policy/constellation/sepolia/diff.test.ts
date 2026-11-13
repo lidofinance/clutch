@@ -23,10 +23,10 @@ function fixture() {
   };
   const conditions = [{ parent: 0, paramType: 5, operator: 5, compValue: "0x" }, { parent: 0, paramType: 1, operator: 16, compValue: H(123) }];
   const specs = [
-    { address: A(20), avatar: manifest.assetSafe, roles: [["operator", K(1), manifest.operatorSafe], ["governance", K(2), A(30)]] },
-    { address: A(21), avatar: manifest.assetSafe, roles: [["emergency", K(3), manifest.emergencySafe]] },
-    { address: A(22), avatar: manifest.ordersSafe, roles: [["operator", K(1), manifest.operatorSafe], ["emergency", K(3), manifest.emergencySafe]] },
-    { address: A(23), avatar: manifest.firstLossSafe, roles: [["first-loss", K(4), manifest.operatorSafe], ["first-loss-burn", K(5), A(30)]] },
+    { address: A(20), avatar: manifest.assetSafe, roles: [["operator", K(1), manifest.operatorSafe], ["governance", K(2), A(30)], ["insurance-funding", K(6), A(30)]] },
+    { address: A(21), avatar: manifest.assetSafe, roles: [["emergency", K(3), manifest.emergencySafe], ["restart", K(7), A(30)], ["exit-governance", K(8), A(30)]] },
+    { address: A(22), avatar: manifest.ordersSafe, roles: [["operator", K(1), manifest.operatorSafe], ["emergency", K(3), manifest.emergencySafe], ["governance", K(2), A(30)], ["approvals", K(9), A(30)]] },
+    { address: A(23), avatar: manifest.firstLossSafe, roles: [["first-loss", K(4), manifest.operatorSafe], ["first-loss-burn", K(5), A(30)], ["insurance", K(10), A(30)], ["insurance-governance", K(11), A(30)]] },
   ];
   const modifiers = specs.map((spec, i) => ({
     ref: `modifier${i}`, address: spec.address, owner: spec.avatar, avatar: spec.avatar, target: spec.avatar,
@@ -129,7 +129,7 @@ function fixture() {
   return { manifest, artifact, modifiers, rpc, calls, logs, emit, lists, owners, safeOwners, thresholds, storage, defaults, adapters, control, setAllowance: (value: bigint[]) => allowance = value };
 }
 
-test("seven roles and four modifiers match; timestamp zero is initialization, not drift", async () => {
+test("14 roles and four modifiers match; timestamp zero is initialization, not drift", async () => {
   const f = fixture(); const report = await diffPolicy(f.rpc, f.manifest, f.artifact);
   expect(report.matches).toBe(true); expect(report.differences).toEqual([]);
   expect(report.block).toBe(PIN); expect(report.blockHash).toBe(H(PIN)); expect(report.fromBlock).toBe(100);

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { expect, test } from "bun:test";
-import { decodeBytes32String, getAddress, id, Interface } from "ethers";
+import { decodeBytes32String, getAddress, id } from "ethers";
 import { build } from "./compile";
 import network from "./network.json";
 import { unguarded } from "../compiler/compile";
@@ -32,17 +32,24 @@ test("first-loss holder cannot burn, approve or transfer shares", () => {
   expect(holder.targets.map((t) => t.address).sort()).toEqual([manifest.usdQueue, manifest.ethQueue].sort());
 });
 
-test("the universal factory holds every motion role, and the Easy Track executor loses its old ones", () => {
+test("the universal factory holds every motion role, and no call names the Easy Track executor", () => {
   const motionRoles = ["governance", "insurance-funding", "restart", "exit-governance", "approvals", "first-loss-burn", "insurance", "insurance-governance"];
   const held = artifact.modifiers.flatMap((m) => m.roles.filter((r) => motionRoles.includes(r.name)).map((r) => [m.ref, r.name, r.members.map((x: { address: string }) => x.address)]));
   expect(held).toHaveLength(9);
   for (const [, , members] of held) expect(members).toEqual([manifest.universalFactory]);
-  const roles = new Interface(["function assignRoles(address,bytes32[],bool[])"]);
-  const retired = artifact.calls.data.slice(-2).map((data, i) => [artifact.calls.to.at(i - 2), ...roles.decodeFunctionData("assignRoles", data)]);
-  expect(retired.map(([to, member, keys, values]) => [to, member, keys.map(decodeBytes32String), [...values]])).toEqual([
-    [manifest.operatorModifier, manifest.easyTrackExecutor, ["governance"], [false]],
-    [manifest.firstLossModifier, manifest.easyTrackExecutor, ["first-loss-burn"], [false]],
+  // assignRoles enables its module even when it removes a role.
+  expect(artifact.calls.data.some((data) => data.toLowerCase().includes(manifest.easyTrackExecutor.slice(2).toLowerCase()))).toBe(false);
+});
+
+test("the artifact expects the insurance-funding caps of the budget motion, and sets no derived key", () => {
+  const derived = (token: string) => ("0x6b3a" + manifest.firstLossSafe.slice(2) + token.slice(2, 22)).toLowerCase();
+  const operator = artifact.modifiers.find((m) => m.ref === "operator_modifier")!;
+  expect(operator.allowances.filter((a) => a.key.startsWith("0x6b3a")).map((a) => [a.key, a.refill, a.maxRefill, a.period])).toEqual([
+    [derived(network.tokens.weth.address), "1000000000000000000", "1000000000000000000", "2592000"],
+    [derived(network.tokens.usdc.address), "1000000000", "1000000000", "2592000"],
   ]);
+  const setAllowance = artifact.calls.data.filter((_, i) => artifact.calls.fn[i] === "setAllowance").map((data) => decodeBytes32String("0x" + data.slice(10, 74)));
+  expect(setAllowance).toEqual(["orders_weth", "orders_usdc"]);
 });
 
 test("OD-152: each account has its own operator and emergency keys", () => {

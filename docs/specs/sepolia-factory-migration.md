@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-12T17:43:05Z
+  at: 2026-11-13T16:30:00Z
 verified: []
 sources:
   - id: s1
@@ -26,7 +26,7 @@ sources:
 
 # Sepolia stand migration to the universal factory
 
-The universal factory holds every motion role on the four modifiers [s1]. On the stand, the Easy Track executor holds `governance` and `first-loss-burn`, and a separate burn factory makes the burn motion [s3]. This plan moves the existing stand to the universal factory. The stand stays: its controller owns Easy Track, and test Voting owns the Safes [s3].
+The universal factory holds every motion role on the four modifiers [s1]. On the stand, the Easy Track executor holds `governance` and `first-loss-burn`, and a separate burn factory makes the burn motion [s3]. `assignRoles` enables its module, also when it removes a role. The executor therefore stays an enabled module after it loses its roles, until the Safe disables it. This plan moves the existing stand to the universal factory. The stand stays: its controller owns Easy Track, and test Voting owns the Safes [s3].
 
 Only the stand owner sends public Sepolia transactions [s2].
 
@@ -55,7 +55,7 @@ just check
 just --justfile sepolia.just check
 ```
 
-- [x] Rehearse a fresh stand on Anvil: deploy, `deploy-factory`, compile, apply, fund, `caps-motion`, `caps-enact`, `retire-burn-factory` and 7 drills. The run checks the caps, the policy version and the retired burn factory. All pass [s4].
+- [x] Rehearse a fresh stand on Anvil: deploy, `deploy-factory`, compile, apply, fund, `caps-motion`, `caps-enact`, `retire-burn-factory`, the comparison of the chain with the artifact, and 7 drills. The run checks the caps, the policy version and the retired burn factory. All pass [s4].
 
 ```sh
 just --justfile sepolia.just rehearse
@@ -93,9 +93,9 @@ just --justfile sepolia.just deploy-factory
 
 ### 2. Policy
 
-The artifact gives the roles to the factory and removes the executor from `governance` and `first-loss-burn`. It also sets `orders_weth` and `orders_usdc` again, so their balances refill to the cap.
+The artifact gives the roles to the factory. It also sets `orders_weth` and `orders_usdc` again, so their balances refill to the cap. The executor was removed from `governance` and `first-loss-burn` on 2026-11-13 by an earlier artifact; the artifact does not name the executor, because `assignRoles` would enable it again.
 
-- [ ] Compile, then read `cache/sepolia/policy.json`: 102 calls; the last two are `assignRoles(executor, …, false)`.
+- [ ] Compile, then read `cache/sepolia/policy.json`: 100 calls, and no call names the executor.
 
 ```sh
 just --justfile sepolia.just compile
@@ -131,7 +131,23 @@ just --justfile sepolia.just caps-enact <id>
 just --justfile sepolia.just retire-burn-factory
 ```
 
+### 5. Disable the executor module
+
+`retire-executor-module` disables the executor on the operator and first-loss modifiers. It reads the previous module from the chain, and sends two calls through test Voting.
+
+- [ ] Run
+
+```sh
+just --justfile sepolia.just retire-executor-module
+```
+
 ## Post-Deploy Checks
+
+- [ ] Compare the chain with the artifact: every role, module and allowance. The result must show 0 differences.
+
+```sh
+just --justfile sepolia.just constellation <workspace UUID>
+```
 
 - [ ] Run the stand suites on the new state. All must pass. They check the factory's immutables, its registration, the retired burn factory, and each role's members.
 
@@ -139,7 +155,7 @@ just --justfile sepolia.just retire-burn-factory
 SEPOLIA_STAND_BLOCK=<block after step 4> just --justfile sepolia.just test-current
 ```
 
-- [ ] `policyVersion() == 1` on the factory, and `allowances(key)` on the operator modifier hold the caps of step 3.
+- [ ] `policyVersion() == 1` on the factory, and `allowances(key)` on the operator modifier hold the caps of step 3. The artifact expects these two caps without a call.
 
 ### Public motions
 

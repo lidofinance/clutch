@@ -93,7 +93,7 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
   const masterCode = await read("eth_getCode", [mastercopy.address, tag]);
   if (keccak256(masterCode) !== mastercopy.codeHash) throw new Error("Pinned Roles mastercopy runtime differs");
   const modifiers = artifact.modifiers;
-  if (modifiers.length !== 4 || modifiers.reduce((count, modifier) => count + modifier.roles.length, 0) !== 7) throw new Error("Expected four Sepolia modifiers and seven roles");
+  if (modifiers.length !== 4 || modifiers.reduce((count, modifier) => count + modifier.roles.length, 0) !== 14) throw new Error("Expected four Sepolia modifiers and 14 roles");
   if (new Set(modifiers.map((modifier) => lower(modifier.address))).size !== modifiers.length) throw new Error("Duplicate modifier in artifact");
   let eventCount = 0;
   for (const modifier of modifiers) {
@@ -254,7 +254,7 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
   return {
     scope: "current-sepolia-policy", chainId: 11155111, block, blockHash: snapshot.hash, fromBlock,
     matches: differences.length === 0, differences, allowances,
-    history: { modifiers: modifiers.length, rolesExpected: 7, events: eventCount, maxBlocksPerRequest: LOG_RANGE },
+    history: { modifiers: modifiers.length, rolesExpected: 14, events: eventCount, maxBlocksPerRequest: LOG_RANGE },
     limitations: [
       "Permission mappings are reconstructed from canonical RPC logs; completeness beyond creation/getter cross-checks relies on the RPC log service.",
       "Stored function entries are compared even under revoked targets; fully empty revoked roles are omitted.",
