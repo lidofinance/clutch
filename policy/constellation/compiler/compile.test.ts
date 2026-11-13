@@ -181,10 +181,13 @@ test("every approval of the emergency role is zero", () => {
 });
 
 test("the compiler refuses a grant or a budget for the emergency role", () => {
-  for (const signature of [GRANTS[0], "setAllowance(bytes32,uint128,uint128,uint128,uint64,uint64)"]) {
+  for (const roleName of ["emergency", "asset-emergency", "orders-emergency"]) for (const signature of [GRANTS[0], "setAllowance(bytes32,uint128,uint128,uint128,uint64,uint64)"]) {
     const modifiers = structuredClone(artifact.modifiers);
     const governance = modifiers.flatMap((m) => m.roles).find((r) => r.name === "governance")!;
-    const emergency = modifiers.flatMap((m) => m.roles).find((r) => r.name === "emergency")!;
+    const safety = modifiers.find((m) => m.roles.some((r) => r.name === "emergency"))!;
+    // An account-specific name gets a copy of the emergency role, so the zeroing check still finds the original.
+    let emergency = safety.roles.find((r) => r.name === "emergency")!;
+    if (roleName !== "emergency") safety.roles.push(emergency = { ...structuredClone(emergency), name: roleName });
     const lent = governance.targets[0].functions.find((f) => f.signature === signature)!;
     emergency.targets.find((t) => t.address === manifest.operatorModifier)!.functions.push(structuredClone(lent));
     const name = signature.replace(/[()[\]]/g, "\\$&");

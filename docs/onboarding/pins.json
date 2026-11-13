@@ -253,7 +253,7 @@
         "ADR-002#d1": "9631421d6ccc0b88",
         "ADR-002#d7": "fa61ca9ec86277fe",
         "OD-63": "472ba631b85e1195",
-        "doc:docs/registers/open-decisions.md#open-decisions": "a74b5f33f33aa94d"
+        "doc:docs/registers/open-decisions.md#open-decisions": "2811c7ef1e3f5645"
       }
     },
     "actor:emergency-safe": {
@@ -2675,7 +2675,7 @@
         "OD-39": "01288ebae3ba5e44",
         "doc:docs/research/request-for-solution-2026-10-07.md#assets-and-permissions": "9d02516e530d3092",
         "doc:docs/specs/control-matrix.md#the-matrix": "8f61df43c972fbbd",
-        "doc:policy/constellation/artifacts/fork-25946643.json": "d47d94585e69d03a",
+        "doc:policy/constellation/artifacts/fork-25946643.json": "b2852389c54c0757",
         "test:test_operator_holds_only_the_operator_key": "c1a5ff5192534c06"
       }
     },
@@ -2741,7 +2741,7 @@
         "OD-49": "5258e489baef2bbd",
         "doc:ROADMAP.md#standing-gates": "e73c8d2f9bcb613e",
         "doc:docs/research/request-for-solution-2026-10-07.md#emergency-response": "4f35b36221cb4c79",
-        "doc:policy/constellation/artifacts/fork-25946643.json": "d47d94585e69d03a",
+        "doc:policy/constellation/artifacts/fork-25946643.json": "b2852389c54c0757",
         "lip:part-6": "763fb3be7f064020",
         "runbook:Return assets to the Agent": "a1894957a74686e5",
         "runbook:Switch the operator off": "e83c08dffb5f074b"
@@ -3449,7 +3449,7 @@
     "term:open-decision": {
       "content": "c96ba21de127cccb",
       "sources": {
-        "doc:docs/registers/open-decisions.md#open-decisions": "a74b5f33f33aa94d"
+        "doc:docs/registers/open-decisions.md#open-decisions": "2811c7ef1e3f5645"
       }
     },
     "term:orders-account": {

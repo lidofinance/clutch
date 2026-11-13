@@ -172,6 +172,9 @@ sources:
   - id: s54
     resource: "urn:clutch:interview:2026-11-13-guide-cards"
     title: EM's request to close the guide's gap on the top-up factories and the funding registries, 2026-11-13; the transcript is not in the repository
+  - id: s55
+    resource: "urn:clutch:interview:2026-10-22-sepolia-migration"
+    title: EM's choices for OD-149, OD-150 and OD-152, 2026-10-22; the transcript is not in the repository
 ---
 
 # Decision log
@@ -744,6 +747,22 @@ Recorded as:
 
 - (OD-100) No Merkle-root policy. Easy Track motions carry versions, so that concurrent motions cannot overwrite each other ([ADR 013](/adr/013-one-easy-track-factory.md), decisions 1 and 2).
 - EM's aim that almost everything runs through Easy Track, without DAO votes, led to OD-101 (the entry of 2026-11-05 above). [s21]
+
+## 2026-10-22 — OD-149, OD-150 and OD-152: the Sepolia role-key migration
+
+EM answered [s55]:
+
+> OD-100 B, OD-97 C, OD-98 A. Сделай GPG-коммит и пуш, потом дай команды для публикации и запуска миграции.
+
+EM's answer uses the numbers that `testnet/sepolia` gave these decisions before it merged `main`: OD-97, OD-98 and OD-100 are now OD-149, OD-150 and OD-152.
+
+Recorded as:
+
+- OD-152 B: use `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency` on both networks. Migrate only the existing Sepolia stand after package review and fork tests. Complete the mainnet design updates before its initial deployment. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
+- OD-149 C: the stand owner executes a locally compiled package through test Voting under the package review conditions in [ADR 015](/adr/015-tests-on-sepolia.md#decision).
+- OD-150 A: the stand owner may send public transactions on the existing Sepolia stand through `sepolia.just` and its guards, with the keystore. A second stand needs a new decision. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
+
+The choices do not close OD-147, OD-148 or OD-151 and do not record verification of the whole ADR. The owner reviews and authorises the exact calls before signing [s36].
 
 ## 2026-10-22 — ADR 001, ADR 003 and ADR 004 verified again
 

@@ -3,14 +3,14 @@
   "network": "rehearsal-26249900",
   "policy": {
     "ref": "artifacts/rehearsal-26249900.json",
-    "sha256": "41ceb9ed1f9fa6213e51df11c16374dd8cf1b0476aa4f2df49966f2bf24786a3"
+    "sha256": "4fdfaf15aaec862862abfccb53c6c605cfdcfee17cf56983bf87bc6de459e8cb"
   },
   "epoch": "0",
   "policyVersion": "0",
   "protocols": {
     "lido": {
       "name": "Lido staking: stake ETH, and wrap and unwrap stETH",
-      "baseSha256": "f0355eac17c0e81d6cf9dd7737745a3c013213657a2bf9fdac03574cc8c85d2c",
+      "baseSha256": "e383cec33e695600322ccd7da3040d56d99315fc5630804426ceb9e8e434f927",
       "stays": [
         {
           "part": "submit(address) on stETH for the role emergency",
@@ -47,7 +47,7 @@
     },
     "weth": {
       "name": "WETH: wrap and unwrap ETH",
-      "baseSha256": "b8ca2fe9045858af00b1bd1e1d538f9c405751ed0769049bd8fc0da7e0574838",
+      "baseSha256": "a341f97741a69703d9d8840b54770cb34c6ef2ea6eea69589550c9b6a1420aa0",
       "stays": [],
       "removal": {
         "to": [
@@ -70,7 +70,7 @@
     },
     "sky": {
       "name": "Sky: the DAI–USDS converter and sUSDS savings",
-      "baseSha256": "8c1eba8ae71fcb74ed7ecfbf68507271b9cde482cfc556c2b4578db91a57332a",
+      "baseSha256": "a30f3b20efd560fc4202fcf370c0e1a7c85d6a16f262ff39b49b30177fdca4ea",
       "stays": [],
       "removal": {
         "to": [
@@ -135,7 +135,7 @@
     },
     "earnUsd": {
       "name": "Lido earnUSD: deposit USDC and redeem",
-      "baseSha256": "4bb72997c4f66f06f21f599f6ab90028f184e704a99f1025cadd0230704ca1ea",
+      "baseSha256": "11f4c903c58df20f9e82799b0509c8d7e0c03ec65d2c9247e0608168285f4657",
       "stays": [],
       "removal": {
         "to": [
@@ -203,7 +203,7 @@
     },
     "earnEth": {
       "name": "Lido earnETH: deposit wstETH and redeem",
-      "baseSha256": "7f87fcc13bc4d852eae97da941082c02acff2e74b825756ecf828e9832f3d85a",
+      "baseSha256": "23bfbf4d2ed7a7ad4fbd59346b14a0631758cb35d74ae2b9f57d47767a193f04",
       "stays": [],
       "removal": {
         "to": [

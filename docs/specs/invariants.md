@@ -13,6 +13,12 @@ sources:
   - id: s1
     resource: /adr/index.md
     title: Decision records that set each invariant
+  - id: s2
+    resource: /adr/015-tests-on-sepolia.md#mainnet-design-dependencies
+    title: OD-152 proposal — account-specific role keys, migration checks and mainnet dependencies
+  - id: s3
+    resource: urn:clutch:evidence:2026-10-25:sepolia-safe-config-drift
+    title: Safe configuration drift reproduced on a pinned fork, verifier corrected and 44 regression cases passed
 ---
 
 # Invariants
@@ -20,6 +26,12 @@ sources:
 Each invariant comes from the ADR that sets it [s1] and names the tests that check it: Solidity tests in `test/` and the compiler's tests. CI checks that every named test exists and that every Draft invariant names a test (`scripts/check_invariants.py`).
 
 State "Draft" means the ADR is proposed. State "Retired" means a decision removed what the invariant protected. State "Pending" means the invariant depends on an open decision or on work that is not built. "Violated" would mean that the policy breaks the invariant; no invariant is in that state.
+
+OD-152 B sets four account-specific role keys for the Sepolia stand and the mainnet design [s2]. The mainnet rows stay in force pending the required implementation. The paragraph below maps the new key references to named tests. Revise the mainnet policy and INV-018, INV-025 and INV-027 together before mainnet deployment. Preserve INV-004's governance restrictions and INV-009's emergency stop [s2].
+
+On the Sepolia stand, INV-018 uses `asset-operator` on Asset and `orders-operator` on Orders. The compiler applies the grant-key rule of INV-004, INV-025 and INV-040 to these account keys: a motion may write under `asset-operator` on the operator modifier, `asset-emergency` on the safety modifier, and `orders-operator`, `orders-emergency` and `approvals` on the orders modifier [s2]. `test_role_keys_reject_old_wrong_account_and_non_member` in `test/SepoliaCurrentStand.t.sol` checks the account-key mapping and shows that old keys and wrong accounts fail. `test_governance_executor_restricts_keys_membership_and_administrative_targets` checks INV-004's restrictions under the new keys. `test_emergency_recovery_zero_approvals_and_voting_restart` checks INV-009 and INV-027 on the current stand: the switch stops the Asset operator, the emergency role cannot enable it again, and `orders-emergency` revokes and recovers. INV-025's exit-governance role remains a mainnet design dependency; Sepolia has no such role [s2].
+
+The Sepolia stand also checks the owner and threshold portions of INV-001 and INV-023. The named regression groups `Safe assetSafe configuration drift is reported` and `Safe ordersSafe configuration drift is reported` detect owner, threshold and both guard-slot changes. Equivalent groups cover the three other Safes. Production signer composition in INV-026, singleton/fallback monitoring and alert delivery remain unverified by these checks [s3].
 
 | ID | Invariant | Set by | State | Kit test |
 |---|---|---|---|---|

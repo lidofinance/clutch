@@ -15,6 +15,8 @@ fs_permissions = [
     { access = "read", path = "./policy/constellation/manifests" },
     { access = "read", path = "./policy/constellation/artifacts" },
     { access = "read", path = "./dryrun-artifact.json" },
+    { access = "read", path = "./policy/constellation/sepolia" },
+    { access = "read-write", path = "./cache/sepolia" },
     { access = "read", path = "./.motion" },
     { access = "read", path = "./policy/constellation/pending" },
 ]

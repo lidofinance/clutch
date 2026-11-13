@@ -1,0 +1,88 @@
+{
+  "chainId": 11155111,
+  "observedBlock": 11954838,
+  "contracts": {
+    "safe15": {
+      "address": "0xFf51A5898e281Db6DfC7855790607438dF2ca44b",
+      "codeBytes": 21451,
+      "codeHash": "0xdda019cbd7c867a533a2a86e5c53434fdc50b13122b5a5ddb4a8df61b31c20f2"
+    },
+    "safe13": {
+      "address": "0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+      "codeBytes": 22958,
+      "codeHash": "0xbba688fbdb21ad2bb58bc320638b43d94e7d100f6f3ebaab0a4e4de6304b1c2e"
+    },
+    "safeProxyFactory": {
+      "address": "0x14F2982D601c9458F93bd70B218933A6f8165e7b",
+      "codeBytes": 3321,
+      "codeHash": "0x967dae4cda22b0c9ef7f31b010bdc1ceb0af9904b0c3dc060b5302e4c18a4529"
+    },
+    "moduleProxyFactory": {
+      "address": "0x000000000000aDdB49795b0f9bA5BC298cDda236",
+      "codeBytes": 2046,
+      "codeHash": "0x01623cbcf010a1c326230f1b2d5f48a66b440232ee49096102bc84967dc5f21e"
+    },
+    "roles": {
+      "address": "0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5",
+      "codeBytes": 24409,
+      "codeHash": "0x471d8b3b419f1eb955230c0326c8812176df49bf3c7b414a563fda5a3c6c10b6"
+    },
+    "settlement": {
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "codeBytes": 16165,
+      "codeHash": "0x9fbace363dc778e25fecb202c12981d916faea80c9aab8167aeeedcaed84df53"
+    },
+    "vaultRelayer": {
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "codeBytes": 4590,
+      "codeHash": "0x500097799c1379a3728ed70b17de4132de2c07f6937b041c361deaade22b6a5e"
+    },
+    "fallbackHandler": {
+      "address": "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5",
+      "codeBytes": 9419,
+      "codeHash": "0x9224645d719465e57e9cc0ba42a6549359a056ca40c01abeef3aff3c0ba52796"
+    },
+    "composableCow": {
+      "address": "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74",
+      "codeBytes": 8478,
+      "codeHash": "0x2fa47c849c7e8da43dc92f56db509bcbb75c8838a10f658dde3f6505942cf1b7"
+    },
+    "twap": {
+      "address": "0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5",
+      "codeBytes": 4533,
+      "codeHash": "0xfdbe93e53b8ec78c2a17e1efd3adf2003bc233c49e84c623d981d4203fa4a270"
+    },
+    "timestampFactory": {
+      "address": "0x52eD56Da04309Aca4c3FECC595298d80C2f16BAc",
+      "codeBytes": 244,
+      "codeHash": "0x6ab8af15f7660e32b2176892955f6a44cde224be2792b4ecd14df790727e8a4d"
+    },
+    "orderSigner": {
+      "address": "0x23dA9AdE38E4477b23770DeD512fD37b12381FAB",
+      "codeBytes": 1810,
+      "codeHash": "0xb4a56280d8f36ec8e9b783ec552cf1456790d38bc0a0ac71a8875ec528fc0efd"
+    },
+    "weth": {
+      "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      "codeBytes": 3124,
+      "codeHash": "0xc864e10689f2da18833652a3b075d43106e87f0f90d95ee64f6f0b33bc026083"
+    }
+  },
+  "tokens": {
+    "weth": {
+      "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      "decimals": 18
+    },
+    "usdc": {
+      "address": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "decimals": 6
+    }
+  },
+  "sources": {
+    "safe": "https://github.com/safe-global/safe-deployments/tree/main/src/assets",
+    "cow": "https://github.com/cowprotocol/composable-cow#deployments",
+    "core": "https://docs.cow.fi/cow-protocol/reference/contracts/core",
+    "weth": "https://github.com/Uniswap/default-token-list/blob/main/src/tokens/sepolia.json",
+    "usdc": "https://developers.circle.com/stablecoins/usdc-contract-addresses"
+  }
+}

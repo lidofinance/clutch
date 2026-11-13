@@ -1,0 +1,814 @@
+{
+  "sourceRevision": "12324c1d95e5e4499c28fb2a841de6e77f5a1aaf",
+  "cases": [
+    {
+      "name": "partial",
+      "transactionHash": "0x227e8c6fd9eda88f0dac28222d59cbf03ff20054d9b4e6ace9b7ff3ea4304753",
+      "block": 11987697,
+      "blockHash": "0xce3b3edb50ed77b3361b3afa740ff879f110827e6f0d88ab0cb4d24e70880e98",
+      "settlement": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+      "order": {
+        "sellToken": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+        "buyToken": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+        "receiver": "0x464f188165bcbe8f7fb3776c10e7b185963922ae",
+        "sellAmount": "100000000",
+        "buyAmount": "2479075912170930",
+        "validTo": 1792894287,
+        "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "kind": "sell",
+        "partiallyFillable": true,
+        "sellTokenBalance": "erc20",
+        "buyTokenBalance": "erc20",
+        "feeAmount": "0"
+      },
+      "trade": {
+        "owner": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+        "sellToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "buyToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "sellAmount": 50000000,
+        "buyAmount": 1255677006260144,
+        "feeAmount": 0,
+        "uid": "0x11d6246ee428f172842a9c1117592a0bf16d9a4f71359f41c13b2e896417922a84d6fff030e0899a7fbfe505e2dea199d7842cf06add654f"
+      },
+      "fees": [
+        {
+          "policy": {
+            "priceImprovement": {
+              "factor": 0.5,
+              "maxVolumeFactor": 0.0098,
+              "quote": {
+                "sellAmount": "100000000",
+                "buyAmount": "2559311073294506",
+                "fee": "1941332"
+              }
+            }
+          },
+          "amount": "1115017673974",
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14"
+        },
+        {
+          "policy": {
+            "volume": {
+              "factor": 0.0002
+            }
+          },
+          "amount": "251185638379",
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14"
+        }
+      ],
+      "tokens": [
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+      ],
+      "prices": [
+        1257043169334425,
+        49115445,
+        1255677006260144,
+        50000000
+      ],
+      "tradeIndices": [
+        2,
+        3
+      ],
+      "transfers": [
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 50000000
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "amount": 50000000
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 1279682154294261
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x464f188165bcbe8f7fb3776c10e7b185963922ae",
+          "amount": 1255677006260144
+        }
+      ],
+      "blockSettlementBalances": {
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": [
+          12376751107519962735,
+          12376775112667996852
+        ],
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": [
+          1267443941973,
+          1267443941973
+        ]
+      },
+      "blockLedgerDeltas": {
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 24005148034117,
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 0
+      },
+      "otherTransactionsLedgerDeltas": {
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 0,
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 0
+      },
+      "apiSellAmountBeforeFees": 50000000
+    },
+    {
+      "name": "buy",
+      "transactionHash": "0x68865292541bb369ae0a1f0aef566f5fb5d3ed64e0ca3e1b84117ef82b2c0edc",
+      "block": 11987811,
+      "blockHash": "0xb38ad1a32baff2f33e8be3c33533f75e1eb04389cd14dbf24efc50bc2e710116",
+      "settlement": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+      "order": {
+        "sellToken": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+        "buyToken": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+        "receiver": "0x464f188165bcbe8f7fb3776c10e7b185963922ae",
+        "sellAmount": "43390199",
+        "buyAmount": "1000000000000000",
+        "validTo": 1792895699,
+        "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "kind": "buy",
+        "partiallyFillable": false,
+        "sellTokenBalance": "erc20",
+        "buyTokenBalance": "erc20",
+        "feeAmount": "0"
+      },
+      "trade": {
+        "owner": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+        "sellToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "buyToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "sellAmount": 40355515,
+        "buyAmount": 1000000000000000,
+        "feeAmount": 0,
+        "uid": "0x0792f4525db4b4e0c6a76b6c10ea3a2338f692100bdab98ec7d30107ff87def184d6fff030e0899a7fbfe505e2dea199d7842cf06add6ad3"
+      },
+      "fees": [
+        {
+          "policy": {
+            "priceImprovement": {
+              "factor": 0.5,
+              "maxVolumeFactor": 0.0098,
+              "quote": {
+                "sellAmount": "39071340",
+                "buyAmount": "1000000000000000",
+                "fee": "4310182"
+              }
+            }
+          },
+          "amount": "391567",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        },
+        {
+          "policy": {
+            "volume": {
+              "factor": 0.0002
+            }
+          },
+          "amount": "8069",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        }
+      ],
+      "tokens": [
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+      ],
+      "prices": [
+        1000000000000000,
+        39071340,
+        1000000000000000,
+        40355515
+      ],
+      "tradeIndices": [
+        2,
+        3
+      ],
+      "transfers": [
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 40355515
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "amount": 39071340
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 1000000018325818
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x464f188165bcbe8f7fb3776c10e7b185963922ae",
+          "amount": 1000000000000000
+        }
+      ],
+      "blockSettlementBalances": {
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": [
+          12376775112667996852,
+          12376775112686322670
+        ],
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": [
+          1267443941973,
+          1267445226148
+        ]
+      },
+      "blockLedgerDeltas": {
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 18325818,
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 1284175
+      },
+      "otherTransactionsLedgerDeltas": {
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 0,
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 0
+      },
+      "apiSellAmountBeforeFees": 40355515
+    },
+    {
+      "name": "settlement-2",
+      "transactionHash": "0x75df586f42d7a43dc91b9ef7452aa716a1b89bdd6d1a7d64b67447f60b9751c2",
+      "block": 11987366,
+      "blockHash": "0x335f0b97e671e24dd527afc1aeb9226a586caa8943b710001e498191c0e97fbb",
+      "settlement": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+      "order": {
+        "sellToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "buyToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "receiver": "0x464f188165BCbE8f7FB3776C10E7B185963922ae",
+        "sellAmount": "399335355",
+        "buyAmount": "10000751891345334",
+        "validTo": 1792890314,
+        "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "feeAmount": "0",
+        "kind": "sell",
+        "partiallyFillable": false
+      },
+      "trade": {
+        "owner": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+        "sellToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "buyToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "sellAmount": 399335355,
+        "buyAmount": 10075739790126343,
+        "feeAmount": 0,
+        "uid": "0xff02aa06755e2aaf1b8597aa0b8b30882604a71bcbc3b22345be5befcfc1db8984d6fff030e0899a7fbfe505e2dea199d7842cf06add55ca"
+      },
+      "fees": [
+        {
+          "policy": {
+            "priceImprovement": {
+              "factor": 0.5,
+              "maxVolumeFactor": 0.0098,
+              "quote": {
+                "sellAmount": "399335355",
+                "buyAmount": "10175393839816163",
+                "fee": "6775345"
+              }
+            }
+          },
+          "amount": "75002873880056",
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14"
+        },
+        {
+          "policy": {
+            "volume": {
+              "factor": 0.0002
+            }
+          },
+          "amount": "2015551068238",
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14"
+        }
+      ],
+      "tokens": [
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+      ],
+      "prices": [
+        10152758128310369,
+        398447012,
+        10075739790126343,
+        399335355
+      ],
+      "tradeIndices": [
+        2,
+        3
+      ],
+      "transfers": [
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 399335355
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "amount": 399335355
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 10175393839816163
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x464f188165bcbe8f7fb3776c10e7b185963922ae",
+          "amount": 10075739790126343
+        }
+      ],
+      "blockSettlementBalances": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": [
+          1267443941973,
+          1267443941973
+        ],
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": [
+          12376651453470272915,
+          12376751107519962735
+        ]
+      },
+      "blockLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 0,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 99654049689820
+      },
+      "otherTransactionsLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 0,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 0
+      },
+      "apiSellAmountBeforeFees": 399335355
+    },
+    {
+      "name": "settlement-3",
+      "transactionHash": "0x1fb3284c9e2a31a8620264a1e74684ae3fb46063da86b43f1c3c69f43bca548e",
+      "block": 11987284,
+      "blockHash": "0xfec47a14cca128036740ae91943b665a631376dda37878dbe6ff79679cc27521",
+      "settlement": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+      "order": {
+        "sellToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "buyToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "receiver": "0x23fD73dBaA3A5EcE6d388f8f7C0022a869826061",
+        "sellAmount": "5000000000000000",
+        "buyAmount": "192509564",
+        "validTo": 1792889342,
+        "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "feeAmount": "0",
+        "kind": "sell",
+        "partiallyFillable": false
+      },
+      "trade": {
+        "owner": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+        "sellToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "buyToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "sellAmount": 5000000000000000,
+        "buyAmount": 193237414,
+        "feeAmount": 0,
+        "uid": "0xa6e21cb9081d80ed87dfd181f0b5c759fe331606b8384cbc34f04acb26380bac84d6fff030e0899a7fbfe505e2dea199d7842cf06add51fe"
+      },
+      "fees": [
+        {
+          "policy": {
+            "priceImprovement": {
+              "factor": 0.5,
+              "maxVolumeFactor": 0.0098,
+              "quote": {
+                "sellAmount": "5000000000000000",
+                "buyAmount": "194886473",
+                "fee": "59993900000000"
+              }
+            }
+          },
+          "amount": "727995",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        },
+        {
+          "policy": {
+            "volume": {
+              "factor": 0.0002
+            }
+          },
+          "amount": "38655",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        }
+      ],
+      "tokens": [
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+      ],
+      "prices": [
+        4977360900000000,
+        194004062,
+        193237414,
+        5000000000000000
+      ],
+      "tradeIndices": [
+        2,
+        3
+      ],
+      "transfers": [
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 5000000000000000
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "amount": 4999999985867229
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 194886473
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x23fd73dbaa3a5ece6d388f8f7c0022a869826061",
+          "amount": 193237414
+        }
+      ],
+      "blockSettlementBalances": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": [
+          1267442292914,
+          1267443941973
+        ],
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": [
+          12376651453456140144,
+          12376651453470272915
+        ]
+      },
+      "blockLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 1649059,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 14132771
+      },
+      "otherTransactionsLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 0,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 0
+      },
+      "apiSellAmountBeforeFees": 5000000000000000
+    },
+    {
+      "name": "settlement-4",
+      "transactionHash": "0xf980f0f35a1b1a0198d6f1cc2514048ce92f220a37c400526e943d99dca045b9",
+      "block": 11987250,
+      "blockHash": "0xe8b0ea7b36d48398041c6ce96f3a49beec77951f5381e41986c79a8b909e1f2e",
+      "settlement": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+      "order": {
+        "sellToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "buyToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "receiver": "0x464f188165BCbE8f7FB3776C10E7B185963922ae",
+        "sellAmount": "5000000000000000",
+        "buyAmount": "193228036",
+        "validTo": 1792888914,
+        "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "feeAmount": "0",
+        "kind": "sell",
+        "partiallyFillable": false
+      },
+      "trade": {
+        "owner": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+        "sellToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "buyToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "sellAmount": 5000000000000000,
+        "buyAmount": 193554742,
+        "feeAmount": 0,
+        "uid": "0xedf5a9814c4e6c309b66b547299e630041ec001c5b4500e596b7a9a6c6bf466284d6fff030e0899a7fbfe505e2dea199d7842cf06add5052"
+      },
+      "fees": [
+        {
+          "policy": {
+            "priceImprovement": {
+              "factor": 0.5,
+              "maxVolumeFactor": 0.0098,
+              "quote": {
+                "sellAmount": "5000000000000000",
+                "buyAmount": "194802257",
+                "fee": "39413500000000"
+              }
+            }
+          },
+          "amount": "326770",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        },
+        {
+          "policy": {
+            "volume": {
+              "factor": 0.0002
+            }
+          },
+          "amount": "38718",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        }
+      ],
+      "tokens": [
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+      ],
+      "prices": [
+        4977360900000000,
+        193920227,
+        193554742,
+        5000000000000000
+      ],
+      "tradeIndices": [
+        2,
+        3
+      ],
+      "transfers": [
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 5000000000000000
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "amount": 4999999997649115
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 194802257
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x464f188165bcbe8f7fb3776c10e7b185963922ae",
+          "amount": 193554742
+        }
+      ],
+      "blockSettlementBalances": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": [
+          1267441045399,
+          1267442292914
+        ],
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": [
+          12376651453453789259,
+          12376651453456140144
+        ]
+      },
+      "blockLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 1247515,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 2350885
+      },
+      "otherTransactionsLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 0,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 0
+      },
+      "apiSellAmountBeforeFees": 5000000000000000
+    },
+    {
+      "name": "settlement-5",
+      "transactionHash": "0x58aa3328d61db7c0b28fb4754e518415e8891319a42686453dbc9a051b82e013",
+      "block": 11986680,
+      "blockHash": "0xf964d184df53017e01dedd5b7854789c12671111f177efac71901d70ea5fc5bd",
+      "settlement": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+      "order": {
+        "sellToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "buyToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "receiver": "0x464f188165BCbE8f7FB3776C10E7B185963922ae",
+        "sellAmount": "5000000000000000",
+        "buyAmount": "1",
+        "validTo": 1792880795,
+        "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "feeAmount": "0",
+        "kind": "sell",
+        "partiallyFillable": false
+      },
+      "trade": {
+        "owner": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+        "sellToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "buyToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "sellAmount": 5000000000000000,
+        "buyAmount": 193294323,
+        "feeAmount": 0,
+        "uid": "0x4184be176c443dcb14cb97deec1b913d0b95f990d426167a67b62f209c40c8cb84d6fff030e0899a7fbfe505e2dea199d7842cf06add309b"
+      },
+      "fees": [
+        {
+          "policy": {
+            "priceImprovement": {
+              "factor": 0.5,
+              "maxVolumeFactor": 0.0098,
+              "quote": {
+                "sellAmount": "5000000000000000",
+                "buyAmount": "194751648",
+                "fee": "50205500000000"
+              }
+            }
+          },
+          "amount": "536861",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        },
+        {
+          "policy": {
+            "volume": {
+              "factor": 0.0002
+            }
+          },
+          "amount": "38666",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        }
+      ],
+      "tokens": [
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+      ],
+      "prices": [
+        4977360900000000,
+        193869847,
+        193294323,
+        5000000000000000
+      ],
+      "tradeIndices": [
+        2,
+        3
+      ],
+      "transfers": [
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 5000000000000000
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "amount": 4999999987394188
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 194751648
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x464f188165bcbe8f7fb3776c10e7b185963922ae",
+          "amount": 193294323
+        }
+      ],
+      "blockSettlementBalances": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": [
+          1267439588074,
+          1267441045399
+        ],
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": [
+          12376651453441183447,
+          12376651453453789259
+        ]
+      },
+      "blockLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 1457325,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 12605812
+      },
+      "otherTransactionsLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 0,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 0
+      },
+      "apiSellAmountBeforeFees": 5000000000000000
+    },
+    {
+      "name": "settlement-6",
+      "transactionHash": "0xbb54da9c6ecb83deafbc3f829ca130f26defb0858c8571d308b8cfa1beb62788",
+      "block": 11986630,
+      "blockHash": "0x7ea8502eb5072cd49d4365a20f35352979420db00d44110ef9f5218657465677",
+      "settlement": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+      "order": {
+        "sellToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "buyToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "receiver": "0x464f188165BCbE8f7FB3776C10E7B185963922ae",
+        "sellAmount": "5000000000000000",
+        "buyAmount": "1",
+        "validTo": 1792880195,
+        "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "feeAmount": "0",
+        "kind": "sell",
+        "partiallyFillable": false
+      },
+      "trade": {
+        "owner": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+        "sellToken": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "buyToken": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "sellAmount": 5000000000000000,
+        "buyAmount": 192611792,
+        "feeAmount": 0,
+        "uid": "0x9d2487f02a97dce8d3b7ca8fa10f0678d202afd6b10d0a44f45aa159339d04f484d6fff030e0899a7fbfe505e2dea199d7842cf06add2e43"
+      },
+      "fees": [
+        {
+          "policy": {
+            "priceImprovement": {
+              "factor": 0.5,
+              "maxVolumeFactor": 0.0098,
+              "quote": {
+                "sellAmount": "5000000000000000",
+                "buyAmount": "194255583",
+                "fee": "59997500000000"
+              }
+            }
+          },
+          "amount": "725708",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        },
+        {
+          "policy": {
+            "volume": {
+              "factor": 0.0002
+            }
+          },
+          "amount": "38530",
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+        }
+      ],
+      "tokens": [
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+      ],
+      "prices": [
+        4977360900000000,
+        193376028,
+        192611792,
+        5000000000000000
+      ],
+      "tradeIndices": [
+        2,
+        3
+      ],
+      "transfers": [
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x84d6fff030e0899a7fbfe505e2dea199d7842cf0",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 5000000000000000
+        },
+        {
+          "token": "0xfff9976782d46cc05630d1f6ebab18b2324d6b14",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "amount": 4999999983319697
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x72e46e15ef83c896de44b1874b4af7ddab5b4f74",
+          "to": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "amount": 194255583
+        },
+        {
+          "token": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+          "from": "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+          "to": "0x464f188165bcbe8f7fb3776c10e7b185963922ae",
+          "amount": 192611792
+        }
+      ],
+      "blockSettlementBalances": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": [
+          1267437944283,
+          1267439588074
+        ],
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": [
+          12376651453424503144,
+          12376651453441183447
+        ]
+      },
+      "blockLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 1643791,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 16680303
+      },
+      "otherTransactionsLedgerDeltas": {
+        "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 0,
+        "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 0
+      },
+      "apiSellAmountBeforeFees": 5000000000000000
+    }
+  ]
+}

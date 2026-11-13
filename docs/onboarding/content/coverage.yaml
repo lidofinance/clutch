@@ -2,6 +2,7 @@
 # the guide or listed here with the reason why the guide leaves it out. A cited item must not be listed.
 adrs:
   ADR-012: "It governs how contributors and their agents work in this repository, not how the vault works."
+  ADR-015: "It governs tests on the Sepolia stand and its Zodiac workspace, not how the vault works."
 invariants:
   INV-007: "Retired (OD-09): the design has no role-toggle factory."
   INV-017: "Retired (OD-106): INV-037 holds the rules of the funding registries (OD-140)."

@@ -13,6 +13,7 @@ Each ADR records its decision and review status, and shows the current design on
 | [003](003-agent-operating-model.md) | Agent instructions, procedures and limits |
 | [004](004-specifications-and-policy-as-data.md) | Specifications, policy artifacts and verification |
 | [012](012-contributing-with-many-agents.md) | Contribution workflow, CI and source pins |
+| [013](015-tests-on-sepolia.md) | Sepolia tests, the Zodiac workspace and role-key migration, with mainnet design dependencies |
 
 ## System design
 

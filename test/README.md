@@ -34,7 +34,7 @@ The constellation in `policy/constellation/constellation` follows [ADR 005](../d
 
 ## Known divergence from the design
 
-- **Swaps.** The kit deploys no orders account: its operator funds a plain address that stands in for it. The enabling-vote rehearsal deploys the orders account with its policy, and `OrdersAccount.t.sol` settles its orders through CoW's settlement contract ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The orders modifier's governance and approvals roles are built, and two raw motions add a token and restore the account, one motion each, through the live Easy Track (decisions 41 and 46).
+- **Swaps.** The kit deploys no orders account: its operator funds a plain address that stands in for it. The enabling-vote rehearsal deploys the orders account with its policy, and `OrdersAccount.t.sol` settles its orders through CoW's settlement contract ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The orders modifier's governance and approvals roles are built, and two raw motions add a token and restore the account, one motion each, through the live Easy Track (decisions 41 and 46). The separate Sepolia stand tests the order signer for WETH/USDC.
 - **First-loss Safe.** The kit deploys no first-loss Safe; a plain address stands in for it as the receiver of the insurance-funding role ([ADR 008](../docs/adr/008-funding-through-existing-payments.md), [ADR 014](../docs/adr/014-funding-by-top-up-motions.md)). The enabling-vote rehearsal deploys one, with its modifier. It enters the kit's deployment in phase 2.
 - **Exit-governance role.** The role is built, and `ExitGovernance.t.sol` tests it on the rehearsal ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md) decision 13). The orders token motion writes a token's exit through it, and the onboarding motion of an ERC-4626 lending vault writes that vault's exits.
 - **Pre-execution screening.** The operator is a plain address, not the committee's Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
@@ -51,6 +51,48 @@ The constellation in `policy/constellation/constellation` follows [ADR 005](../d
 A change to the policy changes the TypeScript and the artifact in the same commit. Reviewers approve the artifact (ADR 004, decision 14).
 
 ## Commands
+
+For the existing Sepolia stand (the [stand plan](../docs/specs/sepolia-stand-plan.md) lists the deploy, apply, fund and Constellation recipes):
+
+```sh
+just --justfile sepolia.just test-current
+SEPOLIA_STAND_BLOCK=<recorded-block> just --justfile sepolia.just test-current
+```
+
+The command reads `SEPOLIA_RPC` from the ignored `.env` and uses the existing
+`cache/sepolia/manifest.json` with account-specific role keys. It runs the shared
+stand, current-role and CoW settlement suites on a pinned fork. It sends no public
+transaction and does not reapply the policy. Test balances, solver impersonation
+and time changes stay in Forge. The runner requires the complete named test set
+with no failures or skips. Logs and the block/hash report stay under
+`cache/sepolia/current-stand/`. See the [test plan](../docs/specs/sepolia-test-plan.md)
+for the cases and transaction sequences. See the [test results](../docs/research/sepolia-test-results.md)
+for recorded outcomes, findings and coverage limits.
+
+For a captured CoW sell quote, prepare the feeAmount=0 order fields with:
+
+```sh
+python3 scripts/sepolia_cow_order.py < quote.json > order.json
+just --justfile sepolia.just check
+```
+
+The sell helper adds the quote fee to sellAmount and preserves the minimum buy and receiver. The signed zero fee field does not remove protocol fees. Buy quotes require their own conversion.
+
+The runner requires a saved local `cache/sepolia/constellation/payload.json`. It recompiles that declaration with both funding allowance balances/timestamps read at the fork block. It records the exact payload hash and refuses stale or changed inputs before reporting success. Refresh the local declaration after funding changes. A historical replay requires the matching archived payload, manifest and source revision. This does not check hosted workspace state.
+
+Before Forge starts, the current-stand runner validates the manifest network, named addresses, aliases, deployment block and code presence. It pins each runtime hash and checks the 13 declared dependency hashes. Observed code without a declared expectation remains separate from approved runtime verification.
+
+The current-stand runner derives Circle USDC's consumed relayer allowance from max Approval and subsequent direct settle Trade logs. It supplies SEPOLIA_EXPECTED_USDC_ALLOWANCE to the fixture and refuses unsupported event history. WETH retains its max approval. The USDC funding test uses the current remainder and the declared refill policy.
+
+Operational guard tests execute the actual resolve CLI in a disposable repository with a real local Git origin. A preload blocks hosted transport. The tests cover branch, dirty/unpushed state, opt-in, CI, workspace/manifest mismatch and wrong chain, plus the actual public recipe env guard. They use only synthetic credentials and do not exercise live publication or wallet signing.
+
+Workflow receipt-guard tests use a captured public four-call funding run to cover all 16 receipt subsets. Incomplete local records still require chain reconciliation before resume. The fixture excludes RPC URLs and signing material.
+
+Protocol-fee tests reconcile all seven public fills against captured policy rates, custom/uniform prices, Transfer logs and full-block buffer balances. They cover improvement-bound SELL and cap-bound BUY priceImprovement fees. Weekly fee payout and unobserved policy/rounding boundaries remain separate.
+
+The policy diff tests also check owners, threshold and both guard slots across all five Safes. Local fork mutations reproduce the old false matches and verify exact drift paths after correction. These checks use the reduced Sepolia signer profile and do not test production screening or alert delivery.
+
+The mainnet fork commands remain:
 
 ```sh
 RPC=<archive mainnet RPC> forge test     # the whole suite on the pinned fork
@@ -83,6 +125,7 @@ The dry run's last rehearsal on a local anvil fork, at block 26249900 with Arago
 | `utils/Fixture.sol` | the shared deployment at the manifest's addresses, with the artifact applied |
 | `utils/MotionCalls.sol` | the admin calls that the governance drills put in a motion; test inputs, not the policy |
 | `Bootstrap.t.sol` | the funding script |
+| `SepoliaCoverage.t.sol` | current-stand role and failure matrices, governance and emergency key/target cross-products, combined queue/order/governance restart, alternate stop orderings and pending-burn cancellation in the separate `SepoliaStopOrderingCoverageTest` suite, delegatecall downgrade, allowance timestamp overflow/recovery, typed-order domains, all 104 minimum/daily/weekly TWAP part identities, cancellation isolation, conditional entrypoint and StopLoss-payload refusals in `SepoliaConditionalEntryCoverageTest`, nonzero-remainder partial fee/price rounding in `SepoliaSettlementRoundingCoverageTest`, overfill rollback, approvals and synthetic First-loss failures |
 | `EnablingVoteRehearsal.t.sol` | the enabling vote on a fork of block 26249900, with the live Aragon Voting, Finance and Easy Track: a vote that carries the policy cannot start; the vote that registers the universal factory and the two top-up factories, pays nothing and approves the Safe batches; the first top-up by two motions after the batches; a later top-up in DAI, which the operator converts into USDS, a budget motion, the switch, the counter and a restart motion; Earn deposits; the first-loss burn and redemption request; the manifest; and the Safe batches, written to `.batches/` with the hash that each Safe computes, for `just batches-check`, which computes each hash again and checks each batch's calls against the policy (OD-92); the fork workflow runs that check after the suite |
 | `UniversalFactory.t.sol` | the universal factory against the live Easy Track: its address book of one call, the motion roles that it holds, its gates, the counter and the policy version, one motion that onboards an ERC-4626 lending vault, the modifiers' guards on a raw motion, a widening that the factory does not stop, the restart, insurance money and its measures |
 | `OrdersAccount.t.sol` | the orders account's policy on the rehearsal's vault, with CoW's deployed contracts: signer and TWAP orders settled through CoW's settlement contract, their refusals and life limits, the emergency role's cancels, sweeps and recovery orders, the revoke that keeps recovery, the funding from the Asset Safe, the operator's return to the Aragon Agent, the universal factory's governance and approvals roles on the orders modifier, a token's motion writes run by hand, and three raw motions through the live Easy Track: one for a token, the committed retirement of a token, and the restore after an emergency stop |
