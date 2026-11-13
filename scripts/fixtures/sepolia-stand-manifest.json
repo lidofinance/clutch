@@ -117,5 +117,8 @@
       "usdc": "https://developers.circle.com/stablecoins/usdc-contract-addresses"
     }
   },
-  "roleKeyScheme": "account"
+  "roleKeyScheme": "account",
+  "usdDepositQueue": "0x29f21a3132aF2F4Ed7Ec65d7f621a12562a5d617",
+  "ethDepositQueue": "0x7796bC1bd8A828D05557Bae0AdD3F0626C71217e",
+  "universalFactory": "0x07F2B0ede13A13c808D4ae0Aa0977748630c564F"
 }

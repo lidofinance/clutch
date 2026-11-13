@@ -18,10 +18,8 @@ interface IWETH {
     function withdraw(uint256 amount) external;
 }
 
-/// @dev The migration of the existing stand to the universal factory, on a fork of the stand. The test deploys
-///      what `deploy-factory` deploys, from the controller, and applies the artifact that the runner compiled for
-///      those addresses. Run it with scripts/sepolia_factory_migration.py.
-contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
+/// @dev One universal-factory motion for each motion role of the stand, on a fork of the stand.
+contract SepoliaMotionCoverageTest is SepoliaStandFixture {
     bytes32 internal constant GOVERNANCE = "governance";
     bytes32 internal constant INSURANCE_FUNDING = "insurance-funding";
     bytes32 internal constant RESTART = "restart";
@@ -37,7 +35,7 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
     address internal weth;
 
     function setUp() public override {
-        if (vm.envOr("SEPOLIA_STAND_BLOCK", uint256(0)) == 0 || bytes(vm.envOr("SEPOLIA_MIGRATION_ARTIFACT", string(""))).length == 0) {
+        if (vm.envOr("SEPOLIA_STAND_BLOCK", uint256(0)) == 0) {
             vm.skip(true);
             return;
         }
@@ -102,7 +100,7 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
 
     // --- the old motion path ---
 
-    function test_MIG_executor_loses_governance_and_burn_roles() public {
+    function test_MOT_executor_holds_no_motion_role() public {
         address executor = a("easyTrackExecutor");
         bytes memory revoke = abi.encodeCall(IRoles.revokeFunction, (assetOperator, weth, IERC20.transfer.selector));
         vm.prank(executor);
@@ -121,8 +119,9 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
 
     // --- one motion for each role ---
 
-    function test_MIG_budget_motion_sets_insurance_cap_and_funding_spends_it() public {
+    function test_MOT_budget_motion_sets_insurance_cap_and_funding_spends_it() public {
         bytes32 wethKey = derivedKeyOf(weth, firstLoss);
+        uint256 version = uf.policyVersion();
         enact(
             one(
                 write(
@@ -133,7 +132,7 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
                 )
             )
         );
-        assertEq(uf.policyVersion(), 1);
+        assertEq(uf.policyVersion(), version + 1);
         (,,, uint128 balance,) = operator.allowances(wethKey);
         assertEq(balance, 1 ether);
         deal(weth, asset, 2 ether);
@@ -142,14 +141,14 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
             one(write(operator, INSURANCE_FUNDING, weth, abi.encodeCall(IERC20.transfer, (firstLoss, 1 ether))));
         enact(fund);
         assertEq(IERC20(weth).balanceOf(firstLoss), before + 1 ether);
-        assertEq(uf.policyVersion(), 1, "a transfer is no policy write");
+        assertEq(uf.policyVersion(), version + 1, "a transfer is no policy write");
         fund[0].data = abi.encodeCall(IERC20.transfer, (firstLoss, 1));
         enactRefused(fund);
         fund[0].data = abi.encodeCall(IERC20.transfer, (committee, 0));
         enactRefused(fund);
     }
 
-    function test_MIG_budget_motion_refuses_a_short_period() public {
+    function test_MOT_budget_motion_refuses_a_short_period() public {
         enactRefused(
             one(
                 write(
@@ -164,7 +163,7 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
         );
     }
 
-    function test_MIG_restart_motion_enables_operator_after_a_stop() public {
+    function test_MOT_restart_motion_enables_operator_after_a_stop() public {
         stopOperator();
         assertFalse(ISafe(payable(asset)).isModuleEnabled(address(operator)));
         enact(one(write(safety, RESTART, asset, abi.encodeCall(ISafe.enableModule, (address(operator))))));
@@ -172,7 +171,7 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
         enactRefused(one(write(safety, RESTART, asset, abi.encodeCall(ISafe.enableModule, (address(0xBEEF))))));
     }
 
-    function test_MIG_exit_governance_motion_gives_emergency_one_plain_exit() public {
+    function test_MOT_exit_governance_motion_gives_emergency_one_plain_exit() public {
         deal(weth, asset, 1 ether);
         bytes memory unwrap = abi.encodeCall(IWETH.withdraw, (1));
         denied(emergency, safety, assetEmergency, weth, unwrap, 0);
@@ -199,7 +198,7 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
         );
     }
 
-    function test_MIG_orders_governance_motion_restores_a_revoked_cancel() public {
+    function test_MOT_orders_governance_motion_restores_a_revoked_cancel() public {
         address cow = d("composableCow");
         bytes memory remove = abi.encodeCall(IComposableCoWRemove.remove, (bytes32(0)));
         exec(committee, ordersRoles, ordersOperator, cow, remove, 0);
@@ -225,14 +224,14 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
         exec(committee, ordersRoles, ordersOperator, cow, remove, 0);
     }
 
-    function test_MIG_approvals_motion_sets_the_relayer_approval() public {
+    function test_MOT_approvals_motion_sets_the_relayer_approval() public {
         address relayer = d("vaultRelayer");
         enact(one(write(ordersRoles, APPROVALS, weth, abi.encodeCall(IERC20.approve, (relayer, 5)))));
         assertEq(IERC20(weth).allowance(orders, relayer), 5);
         enactRefused(one(write(ordersRoles, APPROVALS, weth, abi.encodeCall(IERC20.approve, (committee, 5)))));
     }
 
-    function test_MIG_burn_motion_burns_first_loss_shares() public {
+    function test_MOT_burn_motion_burns_first_loss_shares() public {
         IERC20 share = IERC20(a("usdShare"));
         uint256 before = share.balanceOf(firstLoss);
         enact(one(write(firstLossRoles, BURN, address(share), abi.encodeWithSignature("burn(uint256)", 1 ether))));
@@ -240,8 +239,9 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
         enactRefused(one(write(firstLossRoles, BURN, address(share), abi.encodeCall(IERC20.transfer, (asset, 1)))));
     }
 
-    function test_MIG_insurance_motion_deposits_into_the_queue() public {
+    function test_MOT_insurance_motion_deposits_into_the_queue() public {
         deal(weth, firstLoss, 1 ether);
+        uint256 before = ethDeposits.requested(firstLoss);
         UniversalFactory.Write[] memory writes = new UniversalFactory.Write[](2);
         writes[0] = write(firstLossRoles, INSURANCE, weth, abi.encodeCall(IERC20.approve, (address(ethDeposits), 1 ether)));
         writes[1] = write(
@@ -251,13 +251,13 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
             abi.encodeCall(SepoliaDepositQueue.deposit, (uint224(1 ether), address(0), new bytes32[](0)))
         );
         enact(writes);
-        assertEq(ethDeposits.requested(firstLoss), 1 ether);
+        assertEq(ethDeposits.requested(firstLoss), before + 1 ether);
         deal(weth, firstLoss, 1 ether);
         writes[1].data = abi.encodeCall(SepoliaDepositQueue.deposit, (uint224(1 ether), committee, new bytes32[](0)));
         enactRefused(writes);
     }
 
-    function test_MIG_insurance_governance_motion_sets_a_cap_without_refill() public {
+    function test_MOT_insurance_governance_motion_sets_a_cap_without_refill() public {
         bytes32 fundKey = derivedKeyOf(weth, committee);
         enact(
             one(
@@ -296,14 +296,15 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
 
     // --- the factory's own checks on the stand ---
 
-    function test_MIG_emergency_counter_raise_fails_an_open_motion() public {
+    function test_MOT_emergency_counter_raise_fails_an_open_motion() public {
         (uint256 id, bytes memory input) = create(one(write(safety, RESTART, asset, abi.encodeCall(ISafe.enableModule, (address(operator))))));
+        uint256 epoch = uf.epoch();
         emergencyCall(address(uf), abi.encodeCall(UniversalFactory.raiseCounter, ()));
-        vm.expectRevert(abi.encodeWithSelector(UniversalFactory.StaleCounter.selector, 0, 1));
+        vm.expectRevert(abi.encodeWithSelector(UniversalFactory.StaleCounter.selector, epoch, epoch + 1));
         et.enactMotion(id, input);
     }
 
-    function test_MIG_policy_version_fails_the_second_of_two_policy_motions() public {
+    function test_MOT_policy_version_fails_the_second_of_two_policy_motions() public {
         UniversalFactory.Write[] memory writes = one(
             write(
                 operator,
@@ -312,14 +313,15 @@ contract SepoliaFactoryMigrationTest is SepoliaStandFixture {
                 abi.encodeCall(IRoles.setAllowance, (derivedKeyOf(weth, firstLoss), 1, 1, 1, uint64(30 days), 0))
             )
         );
+        uint256 version = uf.policyVersion();
         (uint256 first, bytes memory input) = create(writes);
         (uint256 second,) = create(writes);
         et.enactMotion(first, input);
-        vm.expectRevert(abi.encodeWithSelector(UniversalFactory.StalePolicyVersion.selector, 0, 1));
+        vm.expectRevert(abi.encodeWithSelector(UniversalFactory.StalePolicyVersion.selector, version, version + 1));
         et.enactMotion(second, input);
     }
 
-    function test_MIG_only_the_committee_creates_and_voting_cancels() public {
+    function test_MOT_only_the_committee_creates_and_voting_cancels() public {
         bytes memory input = abi.encode(
             uint256(0),
             uint256(0),

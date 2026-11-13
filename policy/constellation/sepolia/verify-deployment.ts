@@ -135,8 +135,10 @@ export async function verifyDeployment(rpc: Rpc, manifest: Manifest, broadcast: 
   const storage = async (to: string, slot: string) => await rpc("eth_getStorageAt", [to, slot, block]) as string;
   const record = (name: string, actual: unknown, expected: unknown) => check(report, name, actual, expected);
   const codes = new Map<string, string>();
+  // `deploy-factory` creates these after the initial deployment; the stand suites check them.
+  const later = ["universalFactory", "usdDepositQueue", "ethDepositQueue"];
   for (const [name, value] of Object.entries(manifest)) {
-    if (name === "controller" || typeof value !== "string" || !/^0x[0-9a-fA-F]{40}$/.test(value)) continue;
+    if (name === "controller" || later.includes(name) || typeof value !== "string" || !/^0x[0-9a-fA-F]{40}$/.test(value)) continue;
     const code = await rpc("eth_getCode", [value, block]) as string;
     codes.set(name, code);
     record(`${name}.codePresent`, /^0x(?:[0-9a-fA-F]{2})+$/.test(code), true);

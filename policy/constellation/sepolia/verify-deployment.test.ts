@@ -100,10 +100,11 @@ test("a nonce gap or a substituted transaction input fails", async () => {
   expect(report.checks.filter((item) => !item.ok).map((item) => item.name)).toEqual(["tx1.nonce", "tx1.inputHash"]);
 });
 
-test("initial deployment reads use the last receipt block, not the simulation block or latest state", async () => {
+test("initial deployment reads use the last receipt block, not the simulation block or latest state, and skip the later factory accounts", async () => {
   const manifest: Manifest = { ...expected, deployBlock: 11955106, dependencies: network };
   const names = ["voting", "agent", "operatorSafe", "emergencySafe", "assetSafe", "ordersSafe", "firstLossSafe", "operatorModifier", "safetyModifier", "ordersModifier", "firstLossModifier", "easyTrack", "easyTrackExecutor", "objectionToken", "burnFactory", "usdShare", "ethShare", "usdQueue", "ethQueue", "usdClaimAsset", "ethClaimAsset"];
   names.forEach((name, i) => manifest[name] = "0x" + (i + 256).toString(16).padStart(40, "0"));
+  for (const name of ["universalFactory", "usdDepositQueue", "ethDepositQueue"]) manifest[name] = "0x" + "a1".repeat(20);
   const { rpc, calls } = replay();
   const report = await verifyDeployment(rpc, manifest, captured);
   expect(report.scope).toBe("initial-deployment");

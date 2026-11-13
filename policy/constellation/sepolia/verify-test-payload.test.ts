@@ -4,10 +4,7 @@ import { createHash } from "node:crypto";
 import { capturePayload, createNodes } from "./constellation";
 import { key } from "../constellation/lib";
 import { verifyTestPayload } from "./verify-test-payload";
-import stand from "../../../scripts/fixtures/sepolia-stand-manifest.json";
-
-// The stand gets these three accounts with the universal factory; the fixture predates them.
-const manifest = { ...stand, universalFactory: "0x" + "a1".repeat(20), usdDepositQueue: "0x" + "a2".repeat(20), ethDepositQueue: "0x" + "a3".repeat(20) };
+import manifest from "../../../scripts/fixtures/sepolia-stand-manifest.json";
 
 const fundingAllowances = ["orders_weth", "orders_usdc"].map((name) => ({
   modifier: manifest.operatorModifier, key: key(name), balance: "100", timestamp: "1000",

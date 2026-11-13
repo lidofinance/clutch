@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/sonnet-5.5
-  at: 2026-11-12T12:27:25Z
+  at: 2026-11-13T17:00:00Z
 verified: []
 sources:
   - id: s1
@@ -64,6 +64,7 @@ The test families below cover the current-stand suite. The [runner](../../script
 | TWAP | Two settled parts; daily/weekly schedules, interval edges, typed fields/proofs, replay, remove/recreate, cached signatures and forbidden handlers | [Stand](../../test/SepoliaStand.t.sol): `test_twap_two_parts_*`; [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_twap_settles_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_TWAP_*` [s3] |
 | First-loss redemption | Both stand shares: request, synthetic settlement, claim to Agent, partial/multiple timestamps, duplicate/empty/double claim and forbidden routes | [Stand](../../test/SepoliaStand.t.sol): `test_first_loss_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_FL_*` [s3] |
 | Burn motions | Trusted caller/factory, both stand shares, exact window, objection threshold, cancellation, removed factory, failed execution and supply accounting | [Stand](../../test/SepoliaStand.t.sol): `test_burn_motion_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_ET_*` [s3] |
+| Motion roles | One universal-factory motion for each motion role, with its refusals; counter raise, policy version, Committee-only creation and Voting cancellation | [MotionCoverage](../../test/SepoliaMotionCoverage.t.sol): `test_MOT_*` [s3] |
 | Governance | Target/function changes, key/target restrictions, CALL/delegatecall, allowance bounds/timestamps, atomic batches and stale owner restoration | [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_governance_executor_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_GOV_*` [s3] |
 | Emergency | Asset switch; Orders revocations; cancel orders/TWAP; recovery to Agent; sweeps and zero approvals; repeated stops and Voting restart | [Stand](../../test/SepoliaStand.t.sol): `test_emergency_stops_*`; [CurrentStand](../../test/SepoliaCurrentStand.t.sol): `test_emergency_recovery_*`; [Coverage](../../test/SepoliaCoverage.t.sol): `test_EM_*` [s3] |
 | Configuration drift | Owner/threshold/module/guard changes must produce a diff | [diff tests](../../policy/constellation/sepolia/diff.test.ts) [s3] |

@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-12T17:20:37Z
+  at: 2026-11-13T17:00:00Z
 verified: []
 sources:
   - id: s1
@@ -118,6 +118,9 @@ sources:
   - id: s36
     resource: urn:clutch:evidence:2026-10-25:sepolia-safe-config-drift
     title: Safe configuration drift reproduced on a pinned fork, verifier corrected and 44 regression cases passed
+  - id: s37
+    resource: /specs/sepolia-factory-migration.md
+    title: Sepolia stand migration to the universal factory — public steps and checks of 2026-11-13
 ---
 
 # Sepolia stand deployment
@@ -191,6 +194,7 @@ Enter the keystore password in the terminal. The script creates all five Safes; 
 | First-loss | 1.5.0 | Test Voting | First-loss modifier |
 
 The script also creates a separate test Agent, mock Easy Track, its executor, two share tokens, redemption queues and a typed burn factory.
+`deploy-factory` adds two deposit queues and the universal factory. Since 2026-11-13, the universal factory holds the nine motion roles, and the burn factory is retired [s37].
 The sender controls the test governance contracts. This setup does not test signer independence [s9].
 
 - [x] Public deployment: `39/39` receipts have status `1`, blocks `11955109–11955147`; no Safe execution failed [s13].
@@ -255,7 +259,7 @@ just --justfile sepolia.just constellation-inspect
 `constellation` reads the current policy through RPC and writes a local SDK payload.
 It binds the three existing vault Safes and four Roles modifiers by address.
 Committee and Emergency remain literal member addresses.
-The role keys are `asset-operator`, `orders-operator`, `asset-emergency`, `orders-emergency`, `governance`, `first-loss` and `first-loss-burn` on their modifiers.
+The 14 role keys are `asset-operator`, `governance` and `insurance-funding` on the operator modifier; `asset-emergency`, `restart` and `exit-governance` on the safety modifier; `orders-operator`, `orders-emergency`, `governance` and `approvals` on the orders modifier; and `first-loss`, `first-loss-burn`, `insurance` and `insurance-governance` on the first-loss modifier [s37].
 The payload declares no deployment nonce or Safe configuration override [s18].
 
 | File | Content |

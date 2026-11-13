@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/sonnet-5.5
-  at: 2026-11-12T12:27:25Z
+  at: 2026-11-13T17:00:00Z
 verified: []
 sources:
   - id: s1
@@ -172,6 +172,9 @@ sources:
   - id: s54
     resource: /research/sepolia-test-results.md
     title: Recorded Sepolia results and diagnostics
+  - id: s55
+    resource: /specs/sepolia-factory-migration.md
+    title: Sepolia stand migration to the universal factory — public steps and checks of 2026-11-13
 ---
 
 # Sepolia setup coverage checklist
@@ -349,6 +352,8 @@ These are permission and lifecycle checks on synthetic queues, not Earn economic
 | FL-08 | A failed claim or burn leaves shares, supply, queue requests and claimable amounts in the expected unchanged state | F: both shares retain motion, supply, request, claimable and balance state after oversized burn or illiquid claim failure; restoring liquidity permits exactly one claim [s30] |
 
 ## G. Burn factory, Easy Track and executor
+
+On 2026-11-13, the universal factory replaced the burn factory and the executor's roles. The rows below record the burn factory's evidence. `SepoliaMotionCoverageTest` makes one motion for each role of the universal factory [s55].
 
 Basis: trusted caller, objection window, script hash and burn-only executor role [s2][s4].
 

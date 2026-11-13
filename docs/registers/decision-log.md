@@ -185,6 +185,21 @@ Square brackets mark a redaction. Redactions keep the screening vendor's identit
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
 
+## 2026-11-13 — YT's choices for the Sepolia stand's move to the universal factory
+
+The agent asked YT, the stand owner, how to move the existing Sepolia stand to the universal factory. YT answered the agent's questions on 2026-11-12:
+
+> А что поменялось? надо все нужные проставить а старые убрать
+
+("What changed? Set every role that is needed and remove the old ones.") YT also chose three of the agent's options: retire the burn factory; insurance-funding caps of 1 WETH and 1000 USDC, as `orders_weth` and `orders_usdc`; and a new deposit-queue mock.
+
+Recorded as:
+
+- The stand takes every motion role of `main`. The universal factory holds the nine motion roles on the four modifiers. The Easy Track executor holds no role and is no module of a modifier. The burn factory is retired. The [migration plan](/specs/sepolia-factory-migration.md) records the public steps of 2026-11-13 and their checks.
+- A budget motion set the insurance-funding caps: 1 WETH and 1000 USDC in 30 days, under the derived keys of the First-loss Safe. The stand's tokens have no value.
+- These are test-stand choices of the stand owner, who sends the stand's public transactions (OD-150). They open no decision, and EM has not decided them. Mainnet parameters stay EM's.
+- The agent found one defect of its own after the policy step. `assignRoles` enables its module, also when it removes a role, so the executor stayed an enabled module. A fifth step disabled it, and the comparison of the chain with the artifact now runs in the local rehearsal.
+
 ## 2026-11-13 — the guide's cards for the top-up factories and the funding registries
 
 EM asked whether the guide states the top-up flows. The agent answered that it does, and that the two top-up factories and their registries had no card of their own and were not on the reuse list. EM wrote:

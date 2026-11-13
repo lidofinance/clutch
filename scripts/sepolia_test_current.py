@@ -96,6 +96,19 @@ COVERAGE_DRILLS = {
     "test_EM_switch_wrong_predecessor_module_and_full_stop_only_admin_matrix",
     "test_EM_recovery_order_field_boundaries_and_token_directions",
     "test_EM_two_stop_restart_cycles_new_settlement_and_closed_uid_replay",
+    "test_MOT_executor_holds_no_motion_role",
+    "test_MOT_budget_motion_sets_insurance_cap_and_funding_spends_it",
+    "test_MOT_budget_motion_refuses_a_short_period",
+    "test_MOT_restart_motion_enables_operator_after_a_stop",
+    "test_MOT_exit_governance_motion_gives_emergency_one_plain_exit",
+    "test_MOT_orders_governance_motion_restores_a_revoked_cancel",
+    "test_MOT_approvals_motion_sets_the_relayer_approval",
+    "test_MOT_burn_motion_burns_first_loss_shares",
+    "test_MOT_insurance_motion_deposits_into_the_queue",
+    "test_MOT_insurance_governance_motion_sets_a_cap_without_refill",
+    "test_MOT_emergency_counter_raise_fails_an_open_motion",
+    "test_MOT_policy_version_fails_the_second_of_two_policy_motions",
+    "test_MOT_only_the_committee_creates_and_voting_cancels",
 }
 CURRENT_DRILLS |= COVERAGE_DRILLS
 
@@ -304,7 +317,7 @@ def main():
     (CACHE / "drills.log").write_text(output)
     print(output, end="")
     result.check_returncode()
-    validate_drills(output, CURRENT_DRILLS, suites=15)
+    validate_drills(output, CURRENT_DRILLS, suites=16)
     assert_input_hashes(hashes, manifest, payload)
     if rpc("eth_getBlockByNumber", [hex(number), False])["hash"] != block["hash"]:
         raise ValueError("Fork block changed during the run")

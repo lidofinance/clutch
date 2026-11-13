@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/sonnet-5.5
-  at: 2026-11-12T12:27:25Z
+  at: 2026-11-13T17:00:00Z
 verified: []
 sources:
   - id: s1
@@ -104,6 +104,9 @@ sources:
   - id: s31
     resource: urn:clutch:evidence:2026-10-23:sepolia-workspace-registration
     title: Three old vault records removed after four saved policy bindings were detached; new Constellation Deployed with Nothing to deploy, three Vaults and seven Policies
+  - id: s32
+    resource: /specs/sepolia-factory-migration.md
+    title: Sepolia stand migration to the universal factory — public steps and checks of 2026-11-13
 ---
 
 # ADR 015: Tests on Sepolia
@@ -114,7 +117,7 @@ sources:
 - The owner guard enforces decision 16. It refuses a hosted call without `CLUTCH_OWNER_PUSH=1`, in CI, outside `main` and with local changes [s2].
 - Agents never use the Zodiac API key and never deploy [s3].
 - A Sepolia test stand exists on the `testnet/sepolia` branch. Pull request #44 carries it and is not merged [s17].
-- The stand has three vault Safes, four Roles modifiers and seven roles. One controller owns the 1/1 Committee and Emergency Safes and controls the test governance contracts. The stand plan lists the funding, the CoW and First-loss drills and the stop of the run as open steps [s4].
+- The stand has three vault Safes, four Roles modifiers and 14 roles. The universal factory holds the nine motion roles [s32]. One controller owns the 1/1 Committee and Emergency Safes and controls the test governance contracts. The stand plan lists the funding, the CoW and First-loss drills and the stop of the run as open steps [s4].
 - `sepolia.just` keeps public Sepolia transactions for a human. Its guard requires `CLUTCH_SEPOLIA=1` and refuses CI and a raw private key. Foundry asks for the keystore password [s5].
 - On 2026-10-20, the stand owner published a draft to an earlier workspace under an explicit exception for a review branch [s6]. The owner guard did not run [s4].
 - The hosted API refused the five governance `Nor` conditions in the SDK's `permissions` format with HTTP 400. In the earlier workspace, the resolver accepted the same roles in the legacy `targets` format with HTTP 200 [s7].

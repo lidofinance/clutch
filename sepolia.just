@@ -20,10 +20,6 @@ rehearse:
 test-current:
     python3 scripts/sepolia_test_current.py
 
-# The move to the universal factory on a pinned fork; no public transaction.
-factory-migration:
-    python3 scripts/sepolia_factory_migration.py
-
 # Human-only public writes. Foundry prompts for the keystore password.
 _guard:
     @test "${CLUTCH_SEPOLIA:-}" = 1
