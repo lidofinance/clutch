@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T07:06:18Z
+  at: 2026-11-13T07:48:30Z
 verified: []
 sources:
   - id: s1
@@ -169,6 +169,9 @@ sources:
   - id: s53
     resource: "urn:clutch:interview:2026-11-13-verification-and-first-top-up"
     title: EM's instruction to verify ADR 004 and to update ADR 003 and AGENTS.md for EM, with EM's note on votes and the name of the first top-up, 2026-11-13; the transcript is not in the repository
+  - id: s54
+    resource: "urn:clutch:interview:2026-11-13-guide-cards"
+    title: EM's request to close the guide's gap on the top-up factories and the funding registries, 2026-11-13; the transcript is not in the repository
 ---
 
 # Decision log
@@ -178,6 +181,18 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-13 — the guide's cards for the top-up factories and the funding registries
+
+EM asked whether the guide states the top-up flows. The agent answered that it does, and that the two top-up factories and their registries had no card of their own and were not on the reuse list. EM wrote:
+
+> close the gap above, and provide me with the draft to reply to a working-group thread
+
+Recorded as:
+
+- The guide has a card for the top-up factories and a card for the funding registries, a glossary term for a funding registry, and an entry on the reuse list.
+- The agent found three defects of its own in the guide while it did this, and corrected them. The cards of Aragon Finance and of Easy Track's script executor still said that no Easy Track motion pays the vault. Five items still said that the universal factory builds every Clutch motion. One line of figures had spaces inside its numbers, from a clean-up of lists in the change of 2026-11-13.
+- The research note on funding registries of 2026-10-02 is back in the folder. It left when votes replaced the registries (OD-106, OD-128), and the registries are in the design again (OD-140). It now also records Lido's two registry factories, from Lido's list of deployed contracts, and a re-read of the stablecoin list. ADR 014 cites it for how a registry counts, and for the two full limits that can pass around the end of a period. [s54]
 
 ## 2026-11-13 — ADR 003 and ADR 004 verified after the switch to top-up motions
 

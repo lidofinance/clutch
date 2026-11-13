@@ -20,6 +20,7 @@
 * [DAI and the DAI–USDS converter, 2026-10-05](dai-usds-conversion-2026-10-05.md) - The treasury's DAI, the converter and token upgradeability.
 * [Legacy investments, 2026-10-05](legacy-investments-2026-10-05.md) - First-loss Earn shares, their holder and transferability; the Twyne search.
 * [Safe v1.5.0 and the screening guard, 2026-10-02](safe-v150-guard-compatibility-2026-10-02.md) - Guard compatibility on three Safe versions; the restricted fork test.
+* [Easy Track funding registries, 2026-10-02](funding-registries-2026-10-02.md) - How a registry counts, its periods, the live registries, and the registry factories; re-read on 2026-11-13 for the vault's two registries.
 * [Chain reads for the design ADRs, 2026-09-30](chain-reads-2026-09-30.md) - Pinned on-chain reads behind the design ADRs, with commands.
 * [AI-first repository practice, September 2026](ai-first-practice-2026-09.md) - Evidence behind ADRs 002 and 003.
 

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T07:06:18Z
+  at: 2026-11-13T07:44:55Z
 verified: []
 sources:
   - id: s1
@@ -17,6 +17,9 @@ sources:
   - id: s2
     resource: /research/easy-track-first-2026-11-05.md
     title: Research note — Finance payments by Aragon Voting, and the executor's payment permission
+  - id: s3
+    resource: /research/funding-registries-2026-10-02.md
+    title: Research note — how a funding registry counts, its calendar periods, and Lido's registry factories
   - id: s4
     resource: "urn:clutch:restricted:mandate-draft-v0.1"
     title: Mandate draft v0.1 — seeding and top-ups through Easy Track; outside the repository until the mandate is published
@@ -29,6 +32,8 @@ sources:
 - Aragon Voting holds Finance's payment permission without parameters. A payment that Voting sends as a call succeeds in any token, from the Aragon Agent, and no Dual Governance proposal is on the path [s2].
 - The Easy Track executor's payment permission limits the token and the amount of each payment, and allows no USDS [s2].
 - The mandate's draft text funds the vault through Easy Track: a seed, then top-ups [s4].
+- A funding registry holds a limit for a period of 1, 2, 3, 6 or 12 calendar months. A top-up factory checks a motion against what is left at its creation, and the motion spends it at its enactment. Around a period's end, two full limits can pass within about 72 hours. A motion may name one recipient more than once, and each entry is one payment [s3].
+- Lido's two registry factories take the registry's admin from their caller; the standard builders name the Aragon Agent [s3].
 
 ## Decision
 
@@ -97,6 +102,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The committee's Safe can pull up to a registry's limit in each period without a vote. The objection window, the limit and the gates on a top-up motion are the controls.
 - Before the screening guard is set, nothing on chain keeps a top-up under the launch cap: the registries' limits are above it. A rule, an alert and the objection hold the cap ([ADR 010](/adr/010-pre-execution-screening.md) decision 21; OD-145). A change of a limit, a period or a recipient stays an Aragon vote.
 - A registry counts token units, so a limit in stETH is no limit in dollars.
+- Around the end of a period, two full limits can pass within about 72 hours: one motion enacted before the end, and one created in the last 72 hours and enacted after it [s3].
 - A payout from a fund with a fixed payout address is the one flow, besides the returns to the Agent, that leaves the vault.
 - The first-loss Safe holds insurance for three products, so a defect in its modifier reaches all of them.
 - A motion can set the insurance budget and move the money in one enactment, so the budget adds no second objection window and no bound of its own. The objection window bounds the amount ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11).

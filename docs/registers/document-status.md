@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-13T07:06:18Z
+  at: 2026-11-13T07:48:30Z
 verified: []
 ---
 
@@ -47,6 +47,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/dai-usds-conversion-2026-10-05.md](/research/dai-usds-conversion-2026-10-05.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/easy-track-first-2026-11-05.md](/research/easy-track-first-2026-11-05.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/enabling-vote-rehearsal-2026-10-15.md](/research/enabling-vote-rehearsal-2026-10-15.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/funding-registries-2026-10-02.md](/research/funding-registries-2026-10-02.md) | Research Note | slop |  | 2026-11-13 | none |
 | [research/guide-invariants-2026-10-12.md](/research/guide-invariants-2026-10-12.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/legacy-investments-2026-10-05.md](/research/legacy-investments-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/lido-lend-insurance-2026-11-12.md](/research/lido-lend-insurance-2026-11-12.md) | Research Note | slop |  | 2026-11-13 | none |

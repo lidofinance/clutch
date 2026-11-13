@@ -85,7 +85,7 @@
     "OD-58", "OD-84", "OD-86", "OD-87"]
 
 - title: Little new code, and where it stands
-  text: "Clutch reuses code that already runs: Safe, Zodiac Roles, Easy Track, Aragon Finance, CoW's order contracts and Lido's monitoring. It adds one Easy Track factory, the permission policy with its compiler, the vault's detectors and a report generator.\n\nToday the design is in phase 0. Nothing is deployed, no audit is done and no runbook is written. The **Built or reused** and **Status** tabs show each part."
+  text: "Clutch reuses code that already runs: Safe, Zodiac Roles, Easy Track, Aragon Finance, CoW's order contracts and Lido's monitoring. It adds one Easy Track factory of its own, two new instances of Lido's top-up factory, the permission policy with its compiler, the vault's detectors and a report generator.\n\nToday the design is in phase 0. Nothing is deployed, no audit is done and no runbook is written. The **Built or reused** and **Status** tabs show each part."
   tech: "The universal factory is the most critical new contract, and the compiler is in TypeScript. CoW's order signer counts as new code too, because it has no known audit (OD-96). The reused Safe is v1.5.0, and the reused Roles mastercopy is locked."
   nodes: [policy, easytrack, reporting, monitoring]
   flows: [policy-change, roadmap, enabling-vote]

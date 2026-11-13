@@ -54,6 +54,13 @@
   sources: ["ADR-014#d13", "ADR-014#d15", "ADR-014#context", "ADR-014#consequences", "INV-037",
     "doc:docs/research/easy-track-first-2026-11-05.md#finance-payments-by-aragon-voting"]
 
+- name: Lido's top-up factories and funding registries
+  column: instance
+  what: "Two new instances of Lido's top-up factory, and of its registry of allowed recipients: one pair for stETH, and one for the DAO's stablecoin list. Lido's deployed factory contracts make them."
+  why: "The committee expects regular top-ups. Lido's other committees already use this code, so the top-ups add no code to audit. Aragon Voting is each registry's admin, so a change of a limit passes no Dual Governance."
+  owner: "Aragon Voting, as each registry's admin; the committee's Safe, as each factory's trusted caller"
+  sources: ["ADR-014#d13", "ADR-014#d15", "ADR-014#d16", "ADR-014#proposed-direction", "ADR-014#options-considered", "INV-037"]
+
 - name: CoW Protocol, its order signer and ComposableCoW
   column: reused
   what: "The exchange that settles every vault order; the deployed order signer for market and limit orders; ComposableCoW, its TWAP handler and CoW's fallback handler for TWAP orders."
@@ -134,7 +141,7 @@
 
 - name: The universal factory
   column: new
-  what: "One Easy Track factory for every Clutch [[motion]]. It makes a motion's [[raw write|raw writes]] and checks none of their content. It is the only new code, and it is small: 3,371 bytes."
+  what: "One Easy Track factory for every Clutch [[motion]] but a top-up. It makes a motion's [[raw write|raw writes]] and checks none of their content. It is the only new code, and it is small: 3,371 bytes."
   why: "One factory and one calldata format are fewer moving parts to audit and to watch."
   owner: "`@lidofinance/defi-tech`; an external audit in phase 3, with the order signer"
   sources: ["ADR-006#d1", "ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d10", "ADR-013#d11",

@@ -341,7 +341,7 @@ flows:
         text: "When the vote executes, Aragon Finance pays the Asset Safe from the Aragon Agent: one payment for each token."
         nodes: [dao, funding, asset-safe]
         edges: [treasury, top-up]
-        check: "INV-037: only the two top-up factories and Aragon Voting move treasury funds to the vault. Owed: a chain check of the registries' roles before the enabling vote."
+        check: "INV-037: in the design, only the two top-up factories move treasury funds to the vault. Owed: a chain check of the registries' roles before the enabling vote."
       - who: "The committee's Safe, above the launch cap"
         text: "A top-up that takes the vault above the [[launch cap]] starts only after the guard is set on the committee's Safe with its bypass mode off, and the check runs until the motion is enacted. Before that, the committee creates no top-up above the cap. Nothing on chain holds this rule: the registries' limits are above the cap (OD-145)."
         nodes: [dao, screening, committee]
