@@ -29,8 +29,8 @@ nodes:
 - id: dao
   label: Lido DAO
   sub: LDO vote · Voting owns the vault
-  summary: The final authority. Aragon Voting is the only owner of the Asset Safe, and it can fund the vault by a tranche
-    vote. The Aragon Agent, the treasury, gets funds back only in an emergency or a recovery.
+  summary: The final authority. Aragon Voting is the only owner of the Asset Safe, and it alone changes a top-up
+    registry's limit. The Aragon Agent, the treasury, gets funds back only in an emergency or a recovery.
   domain: gov
   kind: body
   status: existing
@@ -40,9 +40,9 @@ nodes:
   h: 84
 - id: funding
   label: Funding path
-  sub: Finance · top-ups and tranches
+  sub: Finance · top-ups
   summary: Moves money from the DAO treasury to the Asset Safe. A top-up motion of the committee's Safe pays it
-    through Aragon Finance, within a limit for each three months, and an Aragon vote pays a tranche above it.
+    through Aragon Finance, within a limit for each three months.
   domain: gov
   kind: contract
   status: existing
@@ -331,14 +331,14 @@ edges:
   to: funding
   kind: governs
   short: votes
-  label: A top-up is an Easy Track motion, and a tranche is an Aragon vote. Each pays through Aragon Finance, from the
-    treasury that the Aragon Agent holds, without Dual Governance.
-- id: tranche
+  label: A top-up is an Easy Track motion. It pays through Aragon Finance, from the treasury that the Aragon
+    Agent holds, without Dual Governance.
+- id: top-up
   from: funding
   to: asset-safe
   kind: governs
   short: top-ups
-  label: A top-up or a tranche pays the Asset Safe only. The launch tranche, one million dollars, is the first top-up.
+  label: A top-up pays the Asset Safe only. The launch tranche, one million dollars, is the first top-up.
   via:
   - - 1160
     - 84

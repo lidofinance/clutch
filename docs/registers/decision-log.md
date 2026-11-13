@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T23:14:58Z
+  at: 2026-11-13T06:47:18Z
 verified: []
 sources:
   - id: s1
@@ -163,6 +163,9 @@ sources:
   - id: s51
     resource: "urn:clutch:interview:2026-11-12-top-up-terms"
     title: EM's answers on the top-up factories' tokens, registration, limit and gates, 2026-11-12; the transcript is not in the repository
+  - id: s52
+    resource: "urn:clutch:interview:2026-11-13-no-tranche-votes"
+    title: EM's decision on the launch cap before the guard, and EM's request to remove tranche votes, 2026-11-13; the transcript is not in the repository
 ---
 
 # Decision log
@@ -172,6 +175,22 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-13 — OD-145 decided: a rule holds the launch cap; OD-146 decided: no tranche votes
+
+The agent built the top-up factories into the rehearsal and opened OD-145: how the launch cap holds before the screening guard is set, by a rule (A) or by registries that start with limits that sum to the cap (B). It recommended B. It also said that ADR 004, which EM verified, still named the second tranche's vote in one sentence. EM wrote:
+
+> OD-145: A
+>
+> edit ADR 004 to get rid of tranche votes, also in other places too
+
+Recorded as:
+
+- (OD-145) Until the screening guard is set, a rule holds the launch cap: the committee's Safe creates no top-up motion that takes the vault above the cap, monitoring alerts on one, and LDO holders can object. Nothing on chain holds the cap ([ADR 010](/adr/010-pre-execution-screening.md), decision 21). EM chose this in place of the agent's recommendation.
+- (OD-146) The design has no tranche vote. Top-up motions are the only funding path ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 18). This replaces decisions 1 and 3 of that ADR (OD-106), and the agent's reading of "additive still" under OD-140.
+- Two points are the agent's reading. EM's words name an edit; the agent reads them as the removal of the funding path, and not only of the words. A funding above a registry's limit then needs an Aragon vote that changes the limit, and USDS reaches the vault as DAI, through Sky's converter. Aragon Voting still holds Finance's payment permission, so the DAO can pay any address by a vote; the design has no such flow.
+- The agent edited one sentence of ADR 004 on this request: the fork drill of the guard now comes before a top-up above the launch cap. The page needs EM's verification again, and the agent recorded none.
+- Not changed: decision 6 of ADR 003 and `AGENTS.md` name "tranche amounts", which are the amounts of the launch tranche and of a top-up, and no vote. The file of ADR 014 has a new name. [s52]
 
 ## 2026-11-12 — OD-141 to OD-144 decided: the top-ups' tokens, their registration, their limit and their gates; OD-145 opened
 
@@ -184,7 +203,7 @@ The agent opened four decisions on the terms of the top-up factories, each with 
 
 Recorded as:
 
-- (OD-141) Two top-up factories: one for stETH, and one for the DAO's stablecoin list, which holds DAI, USDC, USDT and sUSDS. sUSDS is in: the list already allows it, read on chain on 2026-11-12, so it needs no factory of its own ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 15).
+- (OD-141) Two top-up factories: one for stETH, and one for the DAO's stablecoin list, which holds DAI, USDC, USDT and sUSDS. sUSDS is in: the list already allows it, read on chain on 2026-11-12, so it needs no factory of its own ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 15).
 - (OD-142) The enabling vote registers the two top-up factories and pays nothing. The launch tranche, one million dollars, comes by top-up motions after the vote is enacted and the Safe batches ran (decision 14). This replaces decision 2 of that ADR, the first tranche inside the enabling vote (OD-106). EM chose this in place of the agent's recommendation, which registered the factories in a later vote.
 - (OD-143) A registry's period is three months. Its limit for a period is the figure that EM gave as indicative (decision 16). The figure is restricted until the mandate is published, so this log and the repository do not state it.
 - (OD-144) The gates on a tranche vote hold a top-up motion too ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decision 48; ADR 014, decision 17).
@@ -200,7 +219,7 @@ EM reported the design to the committee's working group. A member of the committ
 
 Recorded as:
 
-- (OD-140) Funding can be regular. Top-up factories of Lido's existing kind, in new instances, pay the Asset Safe from the treasury by Easy Track motion ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 13). This replaces "Funding is not regular" of decision 1 (OD-106), and it is the first reversal condition of that ADR.
+- (OD-140) Funding can be regular. Top-up factories of Lido's existing kind, in new instances, pay the Asset Safe from the treasury by Easy Track motion ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 13). This replaces "Funding is not regular" of decision 1 (OD-106), and it is the first reversal condition of that ADR.
 - Four points are the agent's reading. Tranche votes stay, with the first tranche in the enabling vote: EM's "additive still". Aragon Voting is the admin of each new registry, as EM decided under OD-92 before the registries left the design, so a change of a limit passes no Dual Governance; the live builders name the Aragon Agent, so the deployment calls Lido's registry factories directly. The committee's Safe is the trusted caller of each top-up factory, as it is of the universal factory. The Easy Track executor's payment permission and the DAO's stablecoin list do not change.
 - The agent ran a probe on a fork, against the live Easy Track and Finance (`test/TopUps.t.sol`). One motion of the committee's Safe pays stETH or a listed stablecoin to the Asset Safe after the objection window. The executor's permission caps one payment at 1,000 stETH or 2,000,000 units of a stablecoin, and one motion carries several payments, up to the registry's limit for the period. Only the Asset Safe receives, and only Aragon Voting changes a limit or a recipient.
 - The agent opened four decisions on the terms: the tokens (OD-141), the vote that registers the factories, given the launch cap (OD-142), the period and the limit (OD-143), and the gates on a top-up motion (OD-144).
@@ -389,7 +408,7 @@ The agent reported what the Lido Lend repositories show and asked EM to decide O
 
 Recorded as:
 
-- (OD-131) Option A: the universal factory carries the payout form only. A fund has a fixed payout address, which the Lend team names and which is outside Lido Lend's contracts ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 6). The form of burnable shares has no use while Lido Lend has no share token that a holder can burn. The agent built the form, and five points of the build are its reading. One fund exists for each token. The motion that creates a fund pins its payout address and sets its cap, which never refills. A payout is a later motion, never the creating one. The committee's Safe exits a fund by a transfer pinned to the Asset Safe ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 28). No part of the form names Lido Lend, so the tests use a stand-in address.
+- (OD-131) Option A: the universal factory carries the payout form only. A fund has a fixed payout address, which the Lend team names and which is outside Lido Lend's contracts ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 6). The form of burnable shares has no use while Lido Lend has no share token that a holder can burn. The agent built the form, and five points of the build are its reading. One fund exists for each token. The motion that creates a fund pins its payout address and sets its cap, which never refills. A payout is a later motion, never the creating one. The committee's Safe exits a fund by a transfer pinned to the Asset Safe ([ADR 008](/adr/008-funding-through-existing-payments.md), decision 28). No part of the form names Lido Lend, so the tests use a stand-in address.
 - The agent's recommendation for A carried one question to the Lend team: which address receives a payout, and how it pays the lenders. Nobody has asked it. The agent drafted it for EM. The built form pays by a plain token transfer, so the address must accept one.
 - (OD-132) Option A: the vault lends to Lido Lend through its lender vault, an ERC-4626 token, with the fallback exit, and with the receiver and the owner pinned to the Asset Safe ([ADR 011](/adr/011-launch-scope.md), decisions 3 and 13). The agent has not built that shape. EM's answer names the option, not a market. The agent's recommendation kept the stablecoin market apart, because its exit can pay USDY, which is not on the launch list. OD-133 holds that question in the [register](/registers/open-decisions.md). [s37]
 
@@ -403,8 +422,8 @@ The agent asked EM to decide the three open decisions on insurance. EM wrote:
 
 Recorded as:
 
-- (OD-129) Option A: the transfer of insurance money from the Asset Safe to the first-loss Safe spends a budget key ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 11). Two points are the agent's reading. The key is the one that the universal factory derives for the token and the first-loss Safe, so the policy holds no launch key and no launch figure for it. The key starts empty, so a budget operation, in the same motion or in an earlier one, sets it within the token's budget ceiling before any insurance money moves.
-- (OD-130) Option A: one operation of the universal factory deposits insurance money from the first-loss Safe into Lido Earn ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 12). Four points are the agent's reading. The factory holds a new `insurance` role on the first-loss modifier. The role approves only each token's own deposit queue, USDC for earnUSD and wstETH for earnETH, and it deposits with no referral. The new shares stay in the first-loss Safe and follow the first-loss rules. No role claims the shares or cancels a request: anyone can call the queue's claim for the first-loss Safe.
+- (OD-129) Option A: the transfer of insurance money from the Asset Safe to the first-loss Safe spends a budget key ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 11). Two points are the agent's reading. The key is the one that the universal factory derives for the token and the first-loss Safe, so the policy holds no launch key and no launch figure for it. The key starts empty, so a budget operation, in the same motion or in an earlier one, sets it within the token's budget ceiling before any insurance money moves.
+- (OD-130) Option A: one operation of the universal factory deposits insurance money from the first-loss Safe into Lido Earn ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 12). Four points are the agent's reading. The factory holds a new `insurance` role on the first-loss modifier. The role approves only each token's own deposit queue, USDC for earnUSD and wstETH for earnETH, and it deposits with no referral. The new shares stay in the first-loss Safe and follow the first-loss rules. No role claims the shares or cancels a request: anyone can call the queue's claim for the first-loss Safe.
 - (OD-131) EM asked for an investigation of Lido Lend and decided nothing. The agent read both repositories ([research note](/research/lido-lend-insurance-2026-11-12.md)). Neither form of a Lido Lend fund has an entry point in Lido Lend today: the core has no share token, the lender vault has no burn that a holder can call, and no function pays lenders back. The agent rewrote OD-131 with the options that remain, and it opened OD-132 for a second finding: which of Lido Lend's two lender surfaces the vault uses. [s36]
 
 ## 2026-11-11 — the first-loss slice: the operator's return, the first-loss policy and the burn
@@ -413,7 +432,7 @@ Step 2 of the agent's list in the entry below was the first-loss slice: the oper
 
 Recorded as:
 
-- The agent built three parts. The operator's `transfer` of an order token on the Asset Safe has two branches in one tree: any amount to the Aragon Agent, or an amount within the token's orders budget to the orders account; the universal factory writes the same tree for a token that a motion adds ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 9). The first-loss modifier holds the `first-loss` role of the committee's Safe, which requests a redemption and claims it to the Asset Safe, and the `first-loss-burn` role of the universal factory ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 21 and 23). The factory has one new operation, the first-loss burn.
+- The agent built three parts. The operator's `transfer` of an order token on the Asset Safe has two branches in one tree: any amount to the Aragon Agent, or an amount within the token's orders budget to the orders account; the universal factory writes the same tree for a token that a motion adds ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 9). The first-loss modifier holds the `first-loss` role of the committee's Safe, which requests a redemption and claims it to the Asset Safe, and the `first-loss-burn` role of the universal factory ([ADR 008](/adr/008-funding-through-existing-payments.md), decisions 21 and 23). The factory has one new operation, the first-loss burn.
 - Three readings are the agent's, and EM has not confirmed them. The return covers the operator's order tokens only: DAI and sUSDS have none, so the operator converts or redeems them first. A burn motion names a share token and an amount, and the first-loss policy names the two Earn shares, so a burn of another token passes its creation and fails at its enactment, as insurance money of an unlisted token does. A redemption request names no receiver, so only the claim is pinned to the Asset Safe.
 - The agent did not build the insurance shapes. It opened OD-129 to OD-131 in the [register](/registers/open-decisions.md) for three points that no decision settles: a bound on insurance money, the operation that gives Lido Earn its insurance, and the forms of a Lido Lend fund before Lido Lend exists. [s35]
 
@@ -601,10 +620,10 @@ The agent asked five questions after EM's answers of round two (the entry below)
 Recorded as:
 
 - (1, OD-105) A motion lowers a ceiling at any time. It raises a ceiling to at most twice its value, at most once in 15 days for that ceiling ([ADR 013](/adr/013-one-easy-track-factory.md), decision 13). The agent reads "Would consider doubling once per 15 days" as the period.
-- (2, OD-107) For Lido Earn, only earnETH and earnUSD are covered. A fund for Lido Lend takes either form: burnable shares, or a fixed payout address, the two templates of OD-66 ([ADR 014](/adr/014-funding-by-tranche-votes.md), decisions 5 and 6). The agent reads "either" as both forms ready at launch, and one form for each fund.
-- (3, OD-107) Insurance money comes from the Asset Safe by motion ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 7).
-- (4, OD-108) Redemption and fund-exit proceeds go to the Asset Safe, not to the Aragon Agent ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 10).
-- (5, OD-106) The first tranche goes inside the enabling vote ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 2). [s23]
+- (2, OD-107) For Lido Earn, only earnETH and earnUSD are covered. A fund for Lido Lend takes either form: burnable shares, or a fixed payout address, the two templates of OD-66 ([ADR 014](/adr/014-funding-by-top-up-motions.md), decisions 5 and 6). The agent reads "either" as both forms ready at launch, and one form for each fund.
+- (3, OD-107) Insurance money comes from the Asset Safe by motion ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 7).
+- (4, OD-108) Redemption and fund-exit proceeds go to the Asset Safe, not to the Aragon Agent ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 10).
+- (5, OD-106) The first tranche goes inside the enabling vote ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 2). [s23]
 
 ## 2026-11-05 — OD-101, OD-103 and OD-105 to OD-112, round two: tranche votes, insurance at launch, the flows back to the treasury and the committee's items
 
@@ -630,11 +649,11 @@ The agent asked ten questions with its plan for EM's ballot (the entry below). Q
 Recorded as:
 
 - (1, OD-105) Ceilings change by motion. The agent proposed a limit on raises, which round three settled ([ADR 013](/adr/013-one-easy-track-factory.md), decision 13).
-- (2, OD-107) Insurance is built in at launch, for Lido Earn and for Lido Lend ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 4). This reverses OD-78 for insurance.
+- (2, OD-107) Insurance is built in at launch, for Lido Earn and for Lido Lend ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 4). This reverses OD-78 for insurance.
 - (3, OD-103) A motion adds a token on the buy side of swaps too ([ADR 007](/adr/007-swapping-through-an-orders-account.md), decision 41). The CFO's preference, a fixed list of plain tokens on the buy side that changes only by vote, is not adopted.
 - (4, OD-101) The replacement of a role holder stays an Aragon vote ([ADR 013](/adr/013-one-easy-track-factory.md), decision 4).
-- (5, OD-106) The funding tokens need no vote. Funding is not regular: each funding is an Aragon vote that moves a tranche from the treasury to the vault, one million dollars first, then larger tranches. The figures are indicative, and the exact token list does not matter ([ADR 014](/adr/014-funding-by-tranche-votes.md), decisions 1 and 3). The funding registries, the top-up factories and the four USDS items go, and so do the effects of the ballot's answers 4 and 5 (the entry below). The agent checked the flows back to the treasury: emergency transfers and recovery orders pay the Agent, and so did the first-loss redemption and the exit from an insurance fund. It also checked that Aragon Voting pays through Finance, in any token and without Dual Governance ([research note](/research/easy-track-first-2026-11-05.md)). Round three moved the proceeds to the Asset Safe.
-- (6, OD-108) Funds return to the Aragon Agent by an operator transfer pinned to the Agent, or by the emergency Safe's transfer, with no motion and no vote ([ADR 014](/adr/014-funding-by-tranche-votes.md), decision 9).
+- (5, OD-106) The funding tokens need no vote. Funding is not regular: each funding is an Aragon vote that moves a tranche from the treasury to the vault, one million dollars first, then larger tranches. The figures are indicative, and the exact token list does not matter ([ADR 014](/adr/014-funding-by-top-up-motions.md), decisions 1 and 3). The funding registries, the top-up factories and the four USDS items go, and so do the effects of the ballot's answers 4 and 5 (the entry below). The agent checked the flows back to the treasury: emergency transfers and recovery orders pay the Agent, and so did the first-loss redemption and the exit from an insurance fund. It also checked that Aragon Voting pays through Finance, in any token and without Dual Governance ([research note](/research/easy-track-first-2026-11-05.md)). Round three moved the proceeds to the Asset Safe.
+- (6, OD-108) Funds return to the Aragon Agent by an operator transfer pinned to the Agent, or by the emergency Safe's transfer, with no motion and no vote ([ADR 014](/adr/014-funding-by-top-up-motions.md), decision 9).
 - (7, OD-109, OD-110 and OD-111) A change of the committee's members needs no Snapshot each time; an alert and a runbook cover it ([ADR 005](/adr/005-account-graph-and-roles.md), decision 33). The vault keeps no buffer, and each report shows the TMC-6 ratio for the whole treasury ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md), decisions 46 and 47).
 - (8) EM had nothing to decide. The agent restated the rule: the prototype builds option A, and the agent reports its numbers before any switch to option B ([ADR 013](/adr/013-one-easy-track-factory.md), decision 11).
 - (9) The agent explained that the planner is the tool that writes a motion's calls from a change of the policy. Its recommendation, Clutch's own `motion` command, is in the proposed direction of [ADR 013](/adr/013-one-easy-track-factory.md).

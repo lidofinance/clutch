@@ -13,9 +13,9 @@
   sources: ["ADR-009#d13", "ADR-009#d14", INV-008]
 
 - term: Aragon Agent
-  plain: "The DAO's treasury contract, which pays each [[top-up motion|top-up]] and each [[tranche vote|tranche]]. Funds come back to it only in an emergency or a recovery. Aragon Voting, not the Agent, owns the vault's Safes."
+  plain: "The DAO's treasury contract, which pays each [[top-up motion|top-up]]. Funds come back to it only in an emergency or a recovery. Aragon Voting, not the Agent, owns the vault's Safes."
   sources: ["ADR-008#d19", "ADR-007#d17", "ADR-007#d20", "ADR-005#d28", "ADR-005#proposed-direction",
-    "ADR-014#d1", "ADR-014#d8"]
+    "ADR-014#d13", "ADR-014#d8"]
 
 - term: Artifact
   plain: "The committed JSON file that reviewers approve. It holds the modifier calls in order, the expected condition tree for every role, target and function, and the budget keys."
@@ -152,8 +152,8 @@
   sources: ["ADR-009#d3", "ADR-009#proposed-direction", "doc:ROADMAP.md#roadmap"]
 
 - term: Mandate size
-  plain: "The upper bound of the vault's funding. The vault holds up to it in assets: each funding counts in US dollars at its value when it is funded, and the legacy positions count too. No top-up or tranche refills the vault to it by right, and a larger size needs a separate DAO approval."
-  sources: ["ADR-008#d32", "ADR-008#d34", "ADR-014#d1"]
+  plain: "The upper bound of the vault's funding. The vault holds up to it in assets: each funding counts in US dollars at its value when it is funded, and the legacy positions count too. No top-up refills the vault to it by right, and a larger size needs a separate DAO approval."
+  sources: ["ADR-008#d32", "ADR-008#d34", "ADR-014#d13"]
 
 - term: Manifest
   plain: "The file of deployment addresses that the compiler compiles against. The committed one describes the fork-test deployment, not mainnet."
@@ -253,10 +253,6 @@
 - term: Top-up motion
   plain: "An Easy Track motion that pays the Asset Safe from the DAO treasury, through Aragon Finance. The committee's Safe creates it through one of two top-up factories: one for stETH, and one for DAI, USDC, USDT and sUSDS. A registry holds each factory's limit for three months, and LDO holders can object for 72 hours. The launch tranche is the first top-up."
   sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d16", "runbook:Top up the vault"]
-
-- term: Tranche vote
-  plain: "An Aragon vote that moves a tranche of funds from the DAO treasury to the Asset Safe, through Aragon Finance: for an amount above a top-up registry's limit, or in a token that no top-up factory pays. Each vote names its tokens."
-  sources: ["ADR-014#d1", "ADR-014#d3", "ADR-014#proposed-direction", "runbook:Fund a tranche by vote"]
 
 - term: Treasury share
   plain: "The largest part of the DAO's non-LDO treasury that the vault may hold. The mandate sets it."

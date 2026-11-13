@@ -9,7 +9,7 @@ valid_as_of: 2026-11-12
 stale_after: 2027-02-28T00:00:00Z
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T11:07:54Z
+  at: 2026-11-13T06:47:18Z
 verified: []
 sources:
   - id: s1
@@ -46,7 +46,7 @@ sources:
     resource: "https://github.com/lidofinance/lend-markets/blob/23416c43c4038ea3c00a13d6203949c8f88905cc/docs/specs/roles.md#L45"
     title: Lido Lend Markets at 23416c4 — the Aragon Agent is the first admin of every proxy
   - id: s12
-    resource: /adr/014-funding-by-tranche-votes.md
+    resource: /adr/014-funding-by-top-up-motions.md
     title: ADR 014 — insurance at launch for Lido Earn and Lido Lend, and the two forms of a Lido Lend fund
   - id: s13
     resource: /registers/decision-log.md
@@ -59,7 +59,7 @@ EM asked the agent to investigate the two public Lido Lend repositories for OD-1
 
 ## Answer
 
-Neither form of a Lido Lend fund of [ADR 014](/adr/014-funding-by-tranche-votes.md) decision 6 has an entry point in Lido Lend today [s12].
+Neither form of a Lido Lend fund of [ADR 014](/adr/014-funding-by-top-up-motions.md) decision 6 has an entry point in Lido Lend today [s12].
 
 - **Burnable shares.** The core keeps a lender's supply as a number in its own storage, as Morpho Blue does. It has no share token [s1][s2]. The lender vault is an ERC-4626 token, and it has no burn that a holder can call [s5].
 - **A fixed payout address.** No function of the core adds loan assets to a market without new supply shares [s2]. A transfer to the lender vault, and a supply to the core in the vault's name, do not change the vault's share price [s4]. So no Lend contract turns a payment into a gain for lenders.

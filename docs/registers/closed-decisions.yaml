@@ -1097,3 +1097,19 @@
     - "2026-11-12 — OD-141 to OD-144 decided: the top-ups' tokens, their registration, their limit and their gates; OD-145 opened"
   adr: [ADR-009#d48, ADR-014#d17]
   refines: [OD-122, OD-140]
+- id: OD-145
+  question: "How does the launch cap hold before the screening guard is set, when the top-up factories exist from the enabling vote?"
+  closed: 2026-11-13
+  log:
+    - "2026-11-13 — OD-145 decided: a rule holds the launch cap; OD-146 decided: no tranche votes"
+  adr: [ADR-010#d21]
+  refines: [OD-142, OD-54]
+- id: OD-146
+  question: "Does the design keep tranche votes beside the top-up motions?"
+  closed: 2026-11-13
+  log:
+    - "2026-11-13 — OD-145 decided: a rule holds the launch cap; OD-146 decided: no tranche votes"
+  adr: [ADR-014#d18]
+  replaces:
+    - {od: OD-106}
+  refines: [OD-140]

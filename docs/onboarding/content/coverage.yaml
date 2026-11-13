@@ -4,7 +4,7 @@ adrs:
   ADR-012: "It governs how contributors and their agents work in this repository, not how the vault works."
 invariants:
   INV-007: "Retired (OD-09): the design has no role-toggle factory."
-  INV-017: "Retired (OD-106): the vault has no funding registry; INV-037 holds."
+  INV-017: "Retired (OD-106): INV-037 holds the rules of the funding registries (OD-140)."
   INV-020: "Retired (OD-43): the design has no Stonks instance, converter or price feed."
   INV-028: "Retired (OD-78): INV-040 states the orders modifier's roles."
   INV-029: "Retired (OD-134): the factory checks no write's content, so it enforces no narrowing."

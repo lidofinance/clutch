@@ -55,12 +55,12 @@
     "ADR-007#d41", "ADR-007#proposed-direction", "INV-013", "INV-014", "INV-022", "INV-024"]
 
 - title: "Money in, money back"
-  text: "Funding comes from the DAO treasury by [[top-up motion|top-up motions]]: the committee's Safe creates one, LDO holders can object for 72 hours, and Aragon Finance pays the Asset Safe, within a limit for each three months. The launch tranche, one million dollars, is the first top-up. Above a limit, an Aragon vote pays a tranche. The vault holds up to the [[mandate size]].\n\nMoney goes back to the treasury only in an emergency or a recovery: by the emergency Safe's transfers and recovery orders, or by the committee's transfer pinned to the Agent. Monitoring alerts on each one. Insurance money moves from the Asset Safe to the first-loss Safe, by motion."
-  tech: "A top-up motion holds one `newImmediatePayment` from Finance to the Asset Safe for each payment, and the executor's permission caps one payment. Two registries list the Asset Safe as their only recipient, and Aragon Voting is their admin, so no Dual Governance proposal is on the path of a limit change. A tranche vote pays the same way, by Aragon Voting itself. The universal factory's address book holds no payment call (INV-037). Every redemption, claim and exit of a fund pays the Asset Safe (INV-038)."
+  text: "Funding comes from the DAO treasury by [[top-up motion|top-up motions]]: the committee's Safe creates one, LDO holders can object for 72 hours, and Aragon Finance pays the Asset Safe, within a limit for each three months. The launch tranche, one million dollars, is the first top-up. A change of a limit is an Aragon vote. The vault holds up to the [[mandate size]].\n\nMoney goes back to the treasury only in an emergency or a recovery: by the emergency Safe's transfers and recovery orders, or by the committee's transfer pinned to the Agent. Monitoring alerts on each one. Insurance money moves from the Asset Safe to the first-loss Safe, by motion."
+  tech: "A top-up motion holds one `newImmediatePayment` from Finance to the Asset Safe for each payment, and the executor's permission caps one payment. Two registries list the Asset Safe as their only recipient, and Aragon Voting is their admin, so no Dual Governance proposal is on the path of a limit change. The universal factory's address book holds no payment call (INV-037). Every redemption, claim and exit of a fund pays the Asset Safe (INV-038)."
   nodes: [dao, funding, asset-safe, first-loss]
-  edges: [treasury, tranche, own, insure]
-  flows: [tranche, seed, return-to-agent, insurance]
-  sources: ["ADR-014#d1", "ADR-014#d14", "ADR-014#d3", "ADR-014#d7", "ADR-014#d8", "ADR-014#d9",
+  edges: [treasury, top-up, own, insure]
+  flows: [top-up, seed, return-to-agent, insurance]
+  sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d7", "ADR-014#d8", "ADR-014#d9",
     "ADR-014#d10", "ADR-014#proposed-direction", "ADR-008#d32", "ADR-008#d34", "INV-037", "INV-038",
     "INV-039"]
 
@@ -89,5 +89,5 @@
   tech: "The universal factory is the most critical new contract, and the compiler is in TypeScript. CoW's order signer counts as new code too, because it has no known audit (OD-96). The reused Safe is v1.5.0, and the reused Roles mastercopy is locked."
   nodes: [policy, easytrack, reporting, monitoring]
   flows: [policy-change, roadmap, enabling-vote]
-  sources: ["ADR-007#d40", OD-96, "ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-014#d1", "ADR-004#d12",
+  sources: ["ADR-007#d40", OD-96, "ADR-006#d1", "ADR-013#d5", "ADR-013#consequences", "ADR-014#d13", "ADR-004#d12",
     "ADR-004#d13", "doc:ROADMAP.md#roadmap"]

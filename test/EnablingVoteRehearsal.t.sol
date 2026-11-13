@@ -96,7 +96,7 @@ contract EnablingVoteRehearsal is EnabledVault {
     }
 
     // ---------------------------------------------------------------------
-    // 3. The first weeks: tranches, budgets, the switch, the counter, the restart
+    // 3. The first weeks: a top-up, budgets, the switch, the counter, the restart
     // ---------------------------------------------------------------------
 
     function test_03_ramp_up() public {
@@ -111,11 +111,13 @@ contract EnablingVoteRehearsal is EnabledVault {
         console2.log("REHEARSAL motion slots: limit", et.motionsCountLimit());
         console2.log("REHEARSAL motion slots: open at the fork block", et.getMotions().length);
 
-        // 3c. A later tranche in another token, by its own vote (ADR 014, decision 3).
-        //     The Agent holds no USDS at the fork block, so the fork gives it some.
-        deal(Mainnet.USDS, Mainnet.AGENT, 100_000e18);
-        _trancheVote(Mainnet.USDS, 50_000e18); // STANDIN
-        assertEq(IERC20(Mainnet.USDS).balanceOf(address(asset)), 50_000e18, "a later tranche in USDS");
+        // 3c. A later top-up in another token, by its own motion (ADR 014, decisions 13 and 15). USDS is on no
+        //     top-up list, so the vault gets it as DAI, which the operator converts through Sky's converter.
+        _topUp(stableTopUp, abi.encode(Mainnet.DAI, _recipient(), _amount(5_000e18))); // STANDIN
+        assertEq(IERC20(Mainnet.DAI).balanceOf(address(asset)), 5_000e18, "a later top-up in DAI");
+        _operator(Mainnet.DAI, abi.encodeCall(IERC20.approve, (DAI_USDS, 5_000e18)), true);
+        _operator(DAI_USDS, abi.encodeWithSignature("daiToUsds(address,uint256)", address(asset), 5_000e18), true);
+        assertEq(IERC20(Mainnet.USDS).balanceOf(address(asset)), 5_000e18, "the DAI became USDS, one to one");
 
         // 3d. Budgets set the pace: an approval spends the key (OD-08).
         (,,, uint128 earnBudget,) = opMod.allowances(bytes32("earn_usd_deposit"));

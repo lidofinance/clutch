@@ -235,7 +235,7 @@ sections:
     items:
       - asked: "The NAV shows the total in USD, the valuation time and the freshness of the data, by asset, protocol, strategy and position. The answer says whether NAV is the provider's product, a partner's or custom work."
         verdict: changed
-        clutch: "Two readings. Lido's report generator reads the vault at a pinned block, with each price's source and timestamp. The policy provider makes its own in the Zodiac UI, with the same rules, and shows the value per account, asset and protocol. Neither reads the other's data, both go to IPFS, and both count: a breach in either triggers the [[switch]], and no tranche vote starts while they differ by more than a band."
+        clutch: "Two readings. Lido's report generator reads the vault at a pinned block, with each price's source and timestamp. The policy provider makes its own in the Zodiac UI, with the same rules, and shows the value per account, asset and protocol. Neither reads the other's data, both go to IPFS, and both count: a breach in either triggers the [[switch]], and no top-up motion starts while they differ by more than a band."
         why: "Two independent readings check each other, and anyone can re-run Lido's at a pinned block."
         sources: ["ADR-009#d19", "ADR-009#d40", "ADR-009#d41", "ADR-009#d42", "ADR-009#d44",
           "ADR-009#proposed-direction", "ADR-009#d35", "ADR-009#d36", "ADR-014#proposed-direction"]
@@ -268,9 +268,9 @@ sections:
     title: What the RFP did not cover
     items: []
     added:
-      - text: "Funding: a [[top-up motion]] within a limit for each three months, and a [[tranche vote]] above it. The launch tranche, one million dollars, is the first top-up."
+      - text: "Funding: a [[top-up motion]], within a limit for each three months. The launch tranche, one million dollars, is the first top-up."
         why: "The committee expects regular top-ups, so a vote for each would cost too much. The top-up factories are Lido's existing code in new instances."
-        sources: ["ADR-014#d1", "ADR-014#d14", "ADR-014#d3", "INV-037"]
+        sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "INV-037"]
       - text: "Insurance: funds for earnETH, earnUSD and Lido Lend, built in at launch. Their money comes from the Asset Safe by motion, and every burn and payout is a motion."
         why: "EM wants insurance for Lido Earn and Lido Lend ready at launch, and LDO holders can object to each flow of its money."
         sources: ["ADR-014#d4", "ADR-014#d5", "ADR-014#d6", "ADR-014#d7", "ADR-008#d26", "INV-039"]
@@ -287,4 +287,4 @@ sections:
       - text: "A [[control matrix]] that gives every rule of the mandate a control on each layer that can carry it, with an owner."
         why: "Much of the mandate cannot be enforced on chain."
         sources: ["ADR-009#d26", "doc:docs/specs/control-matrix.md#the-matrix"]
-    sources: ["ADR-014#d1", "ADR-009#d13", "ADR-009#d19", "ADR-009#d26"]
+    sources: ["ADR-014#d13", "ADR-009#d13", "ADR-009#d19", "ADR-009#d26"]

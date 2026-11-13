@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T23:13:05Z
+  at: 2026-11-13T06:47:18Z
 verified: []
 sources:
   - id: s2
@@ -40,7 +40,7 @@ sources:
 
 The Treasury Management Committee can use a bounded part of the DAO treasury in approved DeFi protocols. The DAO keeps ownership; neither the committee nor a service provider can take the assets.
 On-chain permissions limit the committee's actions. An emergency Safe can return assets and disable the operator; only an Easy Track motion restarts it (OD-104).
-One Easy Track factory carries every Clutch motion (OD-102). Top-up motions through two of Lido's top-up factories fund the vault, within a limit for each three months, and an Aragon vote funds it above that (OD-106, OD-140). After the enabling vote, no administrative action needs an Aragon vote (OD-101).
+One Easy Track factory carries every Clutch motion (OD-102). Top-up motions through two of Lido's top-up factories fund the vault, within a limit for each three months (OD-140, OD-146). After the enabling vote, no administrative action needs an Aragon vote (OD-101).
 
 ## Motivation
 
@@ -66,7 +66,7 @@ Separate **custody**, **authority** and **change control** into three layers tha
 - Authority: Zodiac Roles modifiers enabled as modules on those Safes, with each Safe as its modifiers' owner.
 - Change control: Easy Track motions through one universal factory. A motion is a list of raw writes that the factory makes as its motion roles. The policy of each motion role and the 72-hour objection window bound a motion (OD-102, OD-134).
 
-Funding needs no new code: two new instances of Lido's top-up factory and registry pay the Asset Safe through the Finance application, and Aragon Voting can pay a tranche directly (OD-106, OD-140).
+Funding needs no new code: two new instances of Lido's top-up factory and registry pay the Asset Safe through the Finance application (OD-140, OD-146).
 
 ## Specification
 
@@ -90,7 +90,7 @@ Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 
 
 #### Part 5: Funding and insurance **[Implemented in part]**
 
-Owners: [ADR 014](/adr/014-funding-by-tranche-votes.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the launch tranche by top-up motions and a later tranche by vote, moves insurance money within its budget, deposits it into Lido Earn, creates a fund with a payout address and pays out of it, burns first-loss shares by motion and returns order tokens to the Aragon Agent.
+Owners: [ADR 014](/adr/014-funding-by-top-up-motions.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the launch tranche and a later top-up by top-up motions, moves insurance money within its budget, deposits it into Lido Earn, creates a fund with a payout address and pays out of it, burns first-loss shares by motion and returns order tokens to the Aragon Agent.
 
 #### Part 6: Emergency response **[Implemented in part]**
 
@@ -142,7 +142,7 @@ The [open-decisions register](/registers/open-decisions.md) tracks every open it
 1. **The emergency Safe's fifth signer.** A Snapshot appoints a member of neither the committee nor the Emergency Brakes multisig (OD-58); who holds the seat is open (OD-65).
 2. **The mandate's owed text.** The [enabling vote](/specs/enabling-vote.md) lists it (OD-90).
 3. **Twyne.** Its holder and form must be shown before it counts ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 17).
-4. **The vendor's confirmations.** The vendor confirms in writing that it accepts the exclusion of standing approvals, before a funding above the launch cap, and that it agrees to be named, before the mandate is posted ([ADR 010](/adr/010-pre-execution-screening.md) decision 9; [ADR 001](/adr/001-repository-scope-visibility-licence-name.md) decision 8).
+4. **The vendor's confirmations.** The vendor confirms in writing that it accepts the exclusion of standing approvals, before a top-up above the launch cap, and that it agrees to be named, before the mandate is posted ([ADR 010](/adr/010-pre-execution-screening.md) decision 9; [ADR 001](/adr/001-repository-scope-visibility-licence-name.md) decision 8).
 
 ## Links
 

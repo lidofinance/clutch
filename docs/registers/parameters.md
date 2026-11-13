@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T23:14:58Z
+  at: 2026-11-13T06:47:18Z
 verified: []
 sources:
   - id: s1
@@ -54,13 +54,13 @@ A row holds a value that someone can set or read. A decision without a value liv
 | Launch cap without the guard | one million dollars on the Asset Safe and the orders account, at the report's price rule; the first-loss Safe is outside | EM (OD-54, OD-55, OD-83, OD-106, OD-121) [s1] | [ADR 010](/adr/010-pre-execution-screening.md) |
 | Mandate size | not in this repository; each funding counts in US dollars at its value when funded, and the legacy positions count too | EM (OD-89) [s1] | [ADR 008](/adr/008-funding-through-existing-payments.md) |
 | Treasury share | not in this repository | EM (OD-89) [s1]; open: the mandate owes the share's base, the time of its test and the remedy for a breach that no vault transaction causes | ADR 008 |
-| Funded value | the first-loss shares at their value on the day of the transfer, plus each top-up and each tranche at its value on the day it is paid, by the report's price rule | Proposed, following OD-89, OD-98 and OD-106 | ADR 008, ADR 009 |
+| Funded value | the first-loss shares at their value on the day of the transfer, plus each top-up at its value on the day it is paid, by the report's price rule | Proposed, following OD-89, OD-98 and OD-106 | ADR 008, ADR 009 |
 | Legacy Earn first-loss shares | the earnETH and earnUSD shares that the Growth Committee Safe `0xf6F0732c1e9971497342C295141566E6F1A31e96` holds, 1,362.84 and 1,998,416.46 at block 26126791 | EM (OD-21, OD-42) [s1]; read [s5] | ADR 008 |
 | Escalation of a worsening cap breach | a published cap breach that is still there after the committee's rebalancing window of two working days and is larger at the next fortnightly snapshot | EM (OD-29, OD-32, OD-58, OD-84) [s1] | ADR 009 |
 | Price source and staleness limit | the five-level waterfall of ADR 009 decision 35; a price older than 24 hours counts as missing | EM (OD-14, OD-62) [s1] | ADR 009 |
 | Price band of level 2 | not set; the committee's valuation policy sets it | EM (OD-62) [s1] | ADR 009 |
-| Level-5 share that holds a top-up motion or a tranche vote | not set; the committee's valuation policy sets it | EM (OD-62, OD-122, OD-144) [s1] | ADR 009 |
-| Top-up tokens | stETH through one factory; DAI, USDC, USDT and sUSDS through the factory of the DAO's stablecoin list | EM (OD-141) [s1] | [ADR 014](/adr/014-funding-by-tranche-votes.md) |
+| Level-5 share that holds a top-up motion | not set; the committee's valuation policy sets it | EM (OD-62, OD-122, OD-144) [s1] | ADR 009 |
+| Top-up tokens | stETH through one factory; DAI, USDC, USDT and sUSDS through the factory of the DAO's stablecoin list | EM (OD-141) [s1] | [ADR 014](/adr/014-funding-by-top-up-motions.md) |
 | Top-up registries' period | three calendar months | EM (OD-143) [s1] | ADR 014 |
 | Top-up registries' limit for a period | EM's indicative figure, restricted until the mandate is published, for both registries together; the stETH registry's limit in stETH and the production figures come from the attested computation | EM (OD-143) [s1]; the split between the registries is the agent's reading | ADR 014 |
 | The Easy Track executor's ceiling on one payment | 1,000 stETH; 2,000,000 of DAI, USDC, USDT or sUSDS; one motion carries several payments | Read on chain, unchanged by Clutch | ADR 014 |

@@ -49,7 +49,7 @@ blocks:
       - text: "LDO leaves the launch list, the operator's order lists and the recovery sell list."
         why: "LDO would enter the vault only through a buy order or a vote, and a buy order reads as an LDO buyback. EM removed it on 2026-10-22."
         state: design
-        sources: ["ADR-011#d15", "ADR-011#d1", "ADR-007#d22", "ADR-014#d3"]
+        sources: ["ADR-011#d15", "ADR-011#d1", "ADR-007#d22", "ADR-014#d15"]
       - text: "A new token joins the operator's order lists by one motion, on the sell side and the buy side."
         why: "A vote of about five days for each new token is heavy. The motion can grant only one delegatecall, to CoW's order signer."
         state: design
@@ -103,27 +103,27 @@ blocks:
     title: Funding
     says: "The vault holds up to the mandate size in assets. Each funding counts in US dollars at its value when it is funded, and the legacy positions count too. The vault never holds more than a set share of the DAO's non-LDO treasury. More funding needs a separate DAO approval, and a replenishment needs published eligibility conditions. After an objection, a further pull needs a Snapshot vote."
     kept:
-      - "On chain: treasury funds reach the vault only through Finance, by a [[top-up motion]] of the committee's Safe within a registry's limit for three months, or by a [[tranche vote]] that LDO holders pass. Each registry lists the Asset Safe as its only recipient."
-      - "Detection: the forum post of each top-up motion and each tranche vote states the funded value, the headroom under the mandate size and the treasury share; monitoring flags one that would take the vault above either."
-    tech: "INV-037: only the two top-up factories and Aragon Voting move treasury funds to the vault. Nothing on chain holds the mandate size or the treasury share; LDO holders do, when they object to a top-up motion or vote on a tranche."
+      - "On chain: treasury funds reach the vault only through Finance, by a [[top-up motion]] of the committee's Safe within a registry's limit for three months. Each registry lists the Asset Safe as its only recipient."
+      - "Detection: the forum post of each top-up motion states the funded value, the headroom under the mandate size and the treasury share; monitoring flags one that would take the vault above either."
+    tech: "INV-037: only the two top-up factories move treasury funds to the vault. Nothing on chain holds the mandate size or the treasury share; LDO holders do, when they object to a top-up motion."
     changes:
-      - text: "The funding section keeps the top-ups through Easy Track. The launch tranche and later top-ups come by motion, within a limit for each three months, and a tranche vote funds the vault above it."
+      - text: "The funding section keeps the top-ups through Easy Track. The launch tranche and later top-ups come by motion, within a limit for each three months. The text names no tranche vote."
         why: "The committee expects regular top-ups, so a vote for each would cost too much. The top-up factories are Lido's existing code in new instances."
         state: owed
-        sources: ["ADR-014#d1", "ADR-014#d14", "ADR-014#d3", "ADR-014#proposed-direction", "doc:docs/specs/enabling-vote.md#the-mandates-owed-text"]
+        sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#proposed-direction", "doc:docs/specs/enabling-vote.md#the-mandates-owed-text"]
       - text: "Until the screening guard is live, the [[launch cap]] of one million dollars applies. A funding above it starts only after the guard is set."
         why: "EM allowed a launch without the guard under this cap."
         state: owed
         sources: ["ADR-010#d20", "ADR-010#d22", "ADR-014#d14", "ADR-014#proposed-direction"]
       - text: "The size section states the treasury share's base, the time of its test, and the remedy for a breach that no vault transaction causes. The funding section publishes the eligibility conditions of a further funding."
-        why: "The treasury's own spending or a price move can breach the share with no vault transaction, and a top-up or a tranche needs conditions to meet."
+        why: "The treasury's own spending or a price move can breach the share with no vault transaction, and a top-up needs conditions to meet."
         state: owed
         sources: ["ADR-008#d33", "ADR-008#d34"]
-      - text: "Monitoring keeps the funded value: the first-loss shares at their value on the day of the transfer, and each top-up and each tranche at its value on the day it is paid, by the report's price rule."
+      - text: "Monitoring keeps the funded value: the first-loss shares at their value on the day of the transfer, and each top-up at its value on the day it is paid, by the report's price rule."
         why: "The mandate counts each funding at its value when funded, so later prices do not move the vault against its size."
         state: proposed
         sources: ["ADR-008#d32", "ADR-008#d37", "ADR-014#proposed-direction"]
-    sources: ["ADR-008#d32", "ADR-008#d33", "ADR-008#d34", "ADR-014#d1", "ADR-014#d14", "ADR-014#d3",
+    sources: ["ADR-008#d32", "ADR-008#d33", "ADR-008#d34", "ADR-014#d13", "ADR-014#d14", "ADR-014#d15",
       "ADR-014#proposed-direction", "ADR-009#proposed-direction", "OD-54", "INV-037",
       "runbook:Top up the vault", "doc:docs/specs/control-matrix.md#the-matrix"]
 
@@ -169,7 +169,7 @@ blocks:
     says: "The committee publishes a monthly report within seven calendar days after month-end, a post before each top-up, and an incident report."
     kept:
       - "A report generator in this repository that anyone can run again at a pinned block."
-      - "No top-up motion and no tranche vote starts while the monthly report is late; monitoring flags the late report on day 8 and alerts on one that starts."
+      - "No top-up motion starts while the monthly report is late; monitoring flags the late report on day 8 and alerts on one that starts."
       - "Each monthly report shows the TMC-6 ratio for the whole treasury."
       - "Monitoring publishes the cap reading of each fortnightly snapshot to IPFS."
       - "Each monthly report lists every open order with its limit, its age and the idle balance behind it."
@@ -181,7 +181,7 @@ blocks:
         state: design
         sources: ["ADR-009#d23", "ADR-009#d35", "ADR-009#d37"]
       - text: "The reporting section states the late-report rule."
-        why: "The report is the evidence for every top-up motion and every tranche vote."
+        why: "The report is the evidence for every top-up motion."
         state: owed
         sources: ["ADR-009#d21", "ADR-009#d23", "ADR-014#proposed-direction"]
     sources: ["ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#d25", "ADR-009#d35", "ADR-009#d36",

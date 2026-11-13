@@ -143,16 +143,6 @@ abstract contract EnabledVault is RehearsalBase {
         r[0] = a;
     }
 
-    /// @dev A later tranche: one Aragon vote with one Finance payment (ADR 014, decision 1).
-    function _trancheVote(address token, uint256 amount) internal {
-        VoteBuilder.Item[] memory items = new VoteBuilder.Item[](1);
-        items[0] = _payment(token, amount, "Clutch tranche (rehearsal)");
-        if (proposer == address(0)) _proposer();
-        (bool ok,,) = _newVote(VoteBuilder.script(items));
-        assertTrue(ok, "a tranche vote starts");
-        _passAndExecute();
-    }
-
     function _passAndExecute() internal returns (uint256 used) {
         IVoting voting = IVoting(Mainnet.VOTING);
         uint256 id = voting.votesLength() - 1;
@@ -206,14 +196,6 @@ abstract contract EnabledVault is RehearsalBase {
             VoteBuilder.permission(Mainnet.FINANCE, IFinance.newImmediatePayment.selector)
         );
         return VoteBuilder.Item(Mainnet.EASY_TRACK, abi.encodeCall(IEasyTrack.addEVMScriptFactory, (factory, permissions)), label);
-    }
-
-    function _payment(address token, uint256 amount, string memory ref) internal view returns (VoteBuilder.Item memory) {
-        return VoteBuilder.Item(
-            Mainnet.FINANCE,
-            abi.encodeCall(IFinance.newImmediatePayment, (token, address(asset), amount, ref)),
-            "Finance: pay a tranche to the Asset Safe"
-        );
     }
 
     function _checkEnabled() internal view {

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:38:25Z
+  at: 2026-11-13T06:47:18Z
 verified: []
 sources:
   - id: s1
@@ -76,11 +76,11 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 The rest of this section is agent-drafted. EM has not accepted it as text.
 
-- **First-loss custody.** A Safe v1.5.0 ([ADR 005](/adr/005-account-graph-and-roles.md) decision 13). Plain transfers bring the first-loss shares (decision 13), and a motion brings insurance money ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 7).
+- **First-loss custody.** A Safe v1.5.0 ([ADR 005](/adr/005-account-graph-and-roles.md) decision 13). Plain transfers bring the first-loss shares (decision 13), and a motion brings insurance money ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 7).
 - **First-loss burn.** The motion names an amount and the earnETH or earnUSD share (decision 23; [ADR 013](/adr/013-one-easy-track-factory.md#proposed-direction)).
 - **First-loss exit.** The committee's `first-loss` role calls `redeem` and `claim` on the Earn vault's queue (decision 21).
 - **Instructions and reporting.** Publish the Earn team's instruction and the curator's confirmation with the motion (decision 22). Below the terms, get a Snapshot exception first, as for Kelp. The first-loss amount is the received shares less the burns; reports show it as a sub-allocation. The [threat model](/specs/threat-model.md) lists the alerts.
-- **Insurance funds.** Each fund fills in the checklist of decision 29. [ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 5 and 6 state what a fund covers.
+- **Insurance funds.** Each fund fills in the checklist of decision 29. [ADR 014](/adr/014-funding-by-top-up-motions.md) decisions 5 and 6 state what a fund covers.
 
 ## Options considered
 
@@ -108,7 +108,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The enabling-vote rehearsal moved both first-loss share balances from the Growth Committee's Safe by plain transfer ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
 - The first-loss modifier's policy holds the `first-loss` and `first-loss-burn` roles, and the enabling vote's first-loss batch applies it. On a fork with the live Earn vaults, a burn motion burns the first-loss Safe's shares after the objection window (`test_first_loss_burn_by_motion`), nothing burns outside a motion (`test_first_loss_burn_needs_a_motion`), the committee's role requests a redemption and cannot move the shares (`test_first_loss_role_requests_a_redemption`, `test_first_loss_role_cannot_move_the_shares`), and no other role reaches the shares (`test_other_roles_do_not_reach_the_first_loss_shares`).
 - The compiler refuses a first-loss role that transfers or approves the shares, and any role that calls the first-loss Safe or its modifier (`policy/constellation/compiler/compile.test.ts`).
-- The exit of a fund pays only the Asset Safe (decision 28; `test_fund_exit_pays_only_the_asset_safe`). [ADR 014](/adr/014-funding-by-tranche-votes.md) holds the confirmation of insurance money, of the Earn deposit and of a fund with a payout address.
+- The exit of a fund pays only the Asset Safe (decision 28; `test_fund_exit_pays_only_the_asset_safe`). [ADR 014](/adr/014-funding-by-top-up-motions.md) holds the confirmation of insurance money, of the Earn deposit and of a fund with a payout address.
 
 ## Reversal conditions
 
