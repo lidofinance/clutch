@@ -49,6 +49,38 @@ interface IEasyTrack {
     function evmScriptFactoryPermissions(address factory) external view returns (bytes memory);
 }
 
+/// @dev Lido's deployed factory of allowed-recipients registries and top-up factories. Its caller names the
+///      registry's admin and role holders; the standard builders name the Aragon Agent.
+interface IRecipientsFactory {
+    function deployAllowedRecipientsRegistry(
+        address defaultAdmin,
+        address[] calldata addRecipientHolders,
+        address[] calldata removeRecipientHolders,
+        address[] calldata setLimitParametersHolders,
+        address[] calldata updateSpentAmountHolders,
+        address dateTime
+    ) external returns (address);
+
+    /// @dev The multi-token factory takes a token registry, and the single-token factory a token.
+    function deployTopUpAllowedRecipients(
+        address trustedCaller,
+        address registry,
+        address tokenOrTokenRegistry,
+        address finance,
+        address easyTrack
+    ) external returns (address);
+}
+
+interface IRecipientsRegistry {
+    function addRecipient(address recipient, string calldata title) external;
+    function setLimitParameters(uint256 limit, uint256 periodDurationMonths) external;
+    function renounceRole(bytes32 role, address account) external;
+    function hasRole(bytes32 role, address account) external view returns (bool);
+    function getLimitParameters() external view returns (uint256, uint256);
+    function spendableBalance() external view returns (uint256);
+    function updateSpentAmount(uint256 amount) external;
+}
+
 interface ISafeAdmin {
     function setFallbackHandler(address handler) external;
 }
@@ -117,6 +149,23 @@ abstract contract RehearsalBase is Test {
 
     UniversalFactory internal uf;
 
+    // The top-up path (ADR 014, decisions 13 to 16): two registries with the Asset Safe as their only recipient,
+    // and a top-up factory for each, with the committee's Safe as its trusted caller.
+    address internal stethRegistry;
+    address internal stableRegistry;
+    address internal stethTopUp;
+    address internal stableTopUp;
+    bytes32 internal constant ADD_RECIPIENT_ROLE = keccak256("ADD_RECIPIENT_TO_ALLOWED_LIST_ROLE");
+    bytes32 internal constant SET_PARAMETERS_ROLE = keccak256("SET_PARAMETERS_ROLE");
+    /// @dev A registry's period, in calendar months (OD-143).
+    uint256 internal constant TOPUP_PERIOD_MONTHS = 3;
+    /// @dev STANDIN: the stablecoin registry's limit for a period, in units of a stablecoin at par. A registry
+    ///      counts every token in 18 decimals. The production figure comes from the attested computation.
+    uint256 internal constant TOPUP_STABLE_LIMIT = 8_000_000e18;
+    /// @dev STANDIN: the stETH registry's limit for a period, in stETH. The production units come from the
+    ///      attested computation, at a pinned price.
+    uint256 internal constant TOPUP_STETH_LIMIT = 5_000e18;
+
     address internal deployer = makeAddr("clutch-deployer");
     address internal anyone = makeAddr("anyone");
 
@@ -177,6 +226,40 @@ abstract contract RehearsalBase is Test {
         vm.prank(deployer);
         uf = new UniversalFactory(c);
         assertEq(address(uf), vm.computeCreateAddress(deployer, 0), "the deployer's first creation");
+        _deployTopUps();
+    }
+
+    /// @dev The two funding registries and their top-up factories, from Lido's deployed factories, with Aragon
+    ///      Voting as each registry's admin: the standard builders name the Aragon Agent, and a change of a limit
+    ///      would then pass Dual Governance. The deployer adds the Asset Safe and sets each limit, then gives up
+    ///      its roles. The stablecoin factory pays the tokens of the DAO's stablecoin list (OD-141).
+    function _deployTopUps() internal {
+        vm.startPrank(deployer);
+        stethRegistry = _registry(Mainnet.RECIPIENTS_FACTORY_SINGLE, TOPUP_STETH_LIMIT);
+        stableRegistry = _registry(Mainnet.RECIPIENTS_FACTORY_MULTI, TOPUP_STABLE_LIMIT);
+        stethTopUp = IRecipientsFactory(Mainnet.RECIPIENTS_FACTORY_SINGLE).deployTopUpAllowedRecipients(
+            Mainnet.COMMITTEE_SAFE, stethRegistry, Mainnet.STETH, Mainnet.FINANCE, Mainnet.EASY_TRACK
+        );
+        stableTopUp = IRecipientsFactory(Mainnet.RECIPIENTS_FACTORY_MULTI).deployTopUpAllowedRecipients(
+            Mainnet.COMMITTEE_SAFE, stableRegistry, Mainnet.STABLECOIN_LIST, Mainnet.FINANCE, Mainnet.EASY_TRACK
+        );
+        vm.stopPrank();
+    }
+
+    function _registry(address factory, uint256 limit) internal returns (address reg) {
+        address[] memory add = new address[](2);
+        (add[0], add[1]) = (Mainnet.VOTING, deployer);
+        address[] memory remove = new address[](1);
+        remove[0] = Mainnet.VOTING;
+        address[] memory setLimit = new address[](2);
+        (setLimit[0], setLimit[1]) = (Mainnet.VOTING, deployer);
+        address[] memory spend = new address[](2);
+        (spend[0], spend[1]) = (Mainnet.VOTING, Mainnet.ET_EXECUTOR);
+        reg = IRecipientsFactory(factory).deployAllowedRecipientsRegistry(Mainnet.VOTING, add, remove, setLimit, spend, Mainnet.DATE_TIME);
+        IRecipientsRegistry(reg).addRecipient(address(asset), "Clutch Asset Safe");
+        IRecipientsRegistry(reg).setLimitParameters(limit, TOPUP_PERIOD_MONTHS);
+        IRecipientsRegistry(reg).renounceRole(ADD_RECIPIENT_ROLE, deployer);
+        IRecipientsRegistry(reg).renounceRole(SET_PARAMETERS_ROLE, deployer);
     }
 
     /// @dev The operator's order tokens at launch, sorted as the SDK sorts them (ADR 007, decision 22).

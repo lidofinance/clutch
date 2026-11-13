@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:57:30Z
+  at: 2026-11-13T07:06:18Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -44,6 +44,11 @@ verified:
     recorded_by: claude-code/mythos-5.2
     ref: /registers/decision-log.md#2026-11-12--adr-003-and-adr-004-verified-after-the-switch-to-raw-writes
     sha256: 11585c3c0e341d0e3f2ed8331ba57575dc16bcad8174529c2250be062d5645a4
+  - by: human:em
+    at: 2026-11-13T07:06:26Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-13--adr-003-and-adr-004-verified-after-the-switch-to-top-up-motions
+    sha256: e80b38307b018b5c6764108e3a398eaffe5804c2cd445459713799426d8e64d1
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -71,7 +76,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 3. An agent drafts the first `AGENTS.md`. EM prunes it by hand (decision log, 2026-09-30).
 4. Repeatable procedures are Agent Skills under `skills/`. The ADR-drafting skill is shared with Gaggle. Three skills are specific to Clutch: the permission-change verification procedure, the fork drill runner and a policy diff (decision log, 2026-09-30).
 5. Agents may branch, draft, write code and tests, and open pull requests (decision log, 2026-09-30).
-6. Agents never merge, never touch `deployed/` and never mark a page reviewed. Agents never change budgets, ceilings, the orders account's token lists, tranche amounts or role membership (OD-43, OD-106).
+6. Agents never merge, never touch `deployed/` and never mark a page reviewed. Agents never change budgets, ceilings, the orders account's token lists, the top-up registries' limits or role membership (OD-43, OD-106, OD-140).
 7. The licence, the security policy, `AGENTS.md`, the actor list and the CI files change only on an explicit human request. CODEOWNERS with required human review covers `AGENTS.md`, `skills/`, the CI files and the permission policy (decision log, 2026-09-30).
 8. The fork tests need an archive RPC. Keys never enter the repository or its logs (decision log, 2026-09-30).
 9. The `@lidofinance/defi-tech` team owns the repository. `@lidofinance/review-gh-workflows` owns `/.github/`. No new team is created (OD-10).

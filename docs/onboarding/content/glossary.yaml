@@ -13,9 +13,9 @@
   sources: ["ADR-009#d13", "ADR-009#d14", INV-008]
 
 - term: Aragon Agent
-  plain: "The DAO's treasury contract, which pays each [[tranche vote|tranche]]. Funds come back to it only in an emergency or a recovery. Aragon Voting, not the Agent, owns the vault's Safes."
+  plain: "The DAO's treasury contract, which pays each [[top-up motion|top-up]]. Funds come back to it only in an emergency or a recovery. Aragon Voting, not the Agent, owns the vault's Safes."
   sources: ["ADR-008#d19", "ADR-007#d17", "ADR-007#d20", "ADR-005#d28", "ADR-005#proposed-direction",
-    "ADR-014#d1", "ADR-014#d8"]
+    "ADR-014#d13", "ADR-014#d8"]
 
 - term: Artifact
   plain: "The committed JSON file that reviewers approve. It holds the modifier calls in order, the expected condition tree for every role, target and function, and the budget keys."
@@ -101,9 +101,9 @@
   sources: ["ADR-005#d24", "ADR-005#d25", "ADR-005#d26"]
 
 - term: Enabling vote
-  plain: "The DAO vote that turns the system on. It registers the [[universal factory]], pays the first tranche, one million dollars, to the Asset Safe, and approves the hash of each Safe batch. Anyone sends the batches after the vote: they apply the policy compiled for mainnet, grant the roles, and set up the orders account and the first-loss Safe."
+  plain: "The DAO vote that turns the system on. It registers the [[universal factory]] and the two top-up factories, pays nothing, and approves the hash of each Safe batch. Anyone sends the batches after the vote: they apply the policy compiled for mainnet, grant the roles, and set up the orders account and the first-loss Safe."
   sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-008#d19", "ADR-013#d6",
-    "ADR-014#d2", "doc:docs/specs/enabling-vote.md#the-vote", "ADR-005#d32"]
+    "ADR-014#d14", "doc:docs/specs/enabling-vote.md#the-vote", "ADR-005#d32"]
 
 - term: Fail closed
   plain: "When a check cannot run, the action stops. The screening guard fails closed: with no approval, the operator's transaction reverts."
@@ -135,8 +135,8 @@
   sources: ["doc:docs/specs/specification-policy.md#invariants"]
 
 - term: Launch cap
-  plain: "A cap of one million dollars on the Asset Safe and the orders account while the screening [[guard]] is not live. The first tranche is the cap, so its size holds the cap. If a first-loss redemption takes the vault above it, the committee's Safe returns the excess to the Aragon Agent. The second tranche's vote lifts the cap, and starts only once the guard is set with its bypass mode off."
-  sources: ["ADR-010#d20", "ADR-010#d22", "ADR-014#d2", "ADR-014#proposed-direction"]
+  plain: "A cap of one million dollars on the Asset Safe and the orders account while the screening [[guard]] is not live. The first top-up is the cap. Until the guard is set, the committee creates no [[top-up motion]] above it; nothing on chain holds this rule (OD-145). If a first-loss redemption takes the vault above it, the committee's Safe returns the excess to the Aragon Agent. A funding above the cap starts only once the guard is set with its bypass mode off."
+  sources: ["ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "OD-145", "ADR-014#d14", "ADR-014#proposed-direction"]
 
 - term: Limit order
   plain: "A CoW order that sells only at a set price or better. It can stand for up to 90 days, like every operator order. A sale when a price rises to a target is a limit order."
@@ -152,8 +152,8 @@
   sources: ["ADR-009#d3", "ADR-009#proposed-direction", "doc:ROADMAP.md#roadmap"]
 
 - term: Mandate size
-  plain: "The upper bound of the vault's funding. The vault holds up to it in assets: each funding counts in US dollars at its value when it is funded, and the legacy positions count too. No tranche refills the vault to it by right, and a larger size needs a separate DAO approval."
-  sources: ["ADR-008#d32", "ADR-008#d34", "ADR-014#d1"]
+  plain: "The upper bound of the vault's funding. The vault holds up to it in assets: each funding counts in US dollars at its value when it is funded, and the legacy positions count too. No top-up refills the vault to it by right, and a larger size needs a separate DAO approval."
+  sources: ["ADR-008#d32", "ADR-008#d34", "ADR-014#d13"]
 
 - term: Manifest
   plain: "The file of deployment addresses that the compiler compiles against. The committed one describes the fork-test deployment, not mainnet."
@@ -250,9 +250,9 @@
   sources: ["ADR-009#d47",
     "doc:docs/research/easy-track-first-2026-11-05.md#treasury-rules-that-the-committees-items-touch"]
 
-- term: Tranche vote
-  plain: "An Aragon vote that moves a tranche of funds from the DAO treasury to the Asset Safe, through Aragon Finance. Funding is rare. The first tranche, one million dollars, is part of the enabling vote, and later tranches are larger. Each vote names its tokens."
-  sources: ["ADR-014#d1", "ADR-014#d2", "ADR-014#d3", "runbook:Fund a tranche"]
+- term: Top-up motion
+  plain: "An Easy Track motion that pays the Asset Safe from the DAO treasury, through Aragon Finance. The committee's Safe creates it through one of two top-up factories: one for stETH, and one for DAI, USDC, USDT and sUSDS. A registry holds each factory's limit for three months, and LDO holders can object for 72 hours. The first top-up is one million dollars, the [[launch cap]]."
+  sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d16", "runbook:Top up the vault"]
 
 - term: Treasury share
   plain: "The largest part of the DAO's non-LDO treasury that the vault may hold. The mandate sets it."

@@ -1,13 +1,13 @@
 ---
 type: Specification
 title: The enabling vote
-description: Prerequisites and the mandate's owed text, direct Aragon Voting items without Dual Governance, the first tranche, post-vote actions, the few changes that still need a vote, and the full rehearsal still owed.
+description: Prerequisites and the mandate's owed text, direct Aragon Voting items without Dual Governance, the first top-up by top-up motion, post-vote actions, the few changes that still need a vote, and the full rehearsal still owed.
 tags: [governance, enabling-vote, deployment, specs]
 status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:02:51Z
+  at: 2026-11-13T07:06:18Z
 verified: []
 sources:
   - id: s1
@@ -27,7 +27,7 @@ sources:
     title: ADR 009 — the budget keys and the fixed approval ceilings
   - id: s7
     resource: /adr/010-pre-execution-screening.md
-    title: ADR 010 — the launch without the guard, and the guard before the second tranche's vote
+    title: ADR 010 — the launch without the guard, and the guard before a top-up above the launch cap
   - id: s8
     resource: /research/easy-track-first-2026-11-05.md
     title: One Easy Track factory and funding by tranche votes, 2026-11-05 — Easy Track's admin role and the Aragon Agent's roles, read on chain on 2026-10-14
@@ -38,8 +38,8 @@ sources:
     resource: /adr/013-one-easy-track-factory.md
     title: ADR 013 — the universal factory, its address book, its counter and policy version, and the votes that remain after launch
   - id: s11
-    resource: /adr/014-funding-by-tranche-votes.md
-    title: ADR 014 — funding by tranche votes, insurance at launch and the flows back to the treasury
+    resource: /adr/014-funding-by-top-up-motions.md
+    title: ADR 014 — funding by top-up motions, insurance at launch and the flows back to the treasury
   - id: s12
     resource: /research/easy-track-first-2026-11-05.md
     title: One Easy Track factory and funding by tranche votes, 2026-11-05 — Easy Track's roles, Finance payments by Aragon Voting, and the committee's principles on new members
@@ -47,16 +47,16 @@ sources:
 
 # The enabling vote
 
-Clutch launches with one Aragon vote, the enabling vote [s8]. After it, no administrative action needs an Aragon vote. Only funding tranches and a few break-glass and Lido-wide actions stay votes (OD-101, OD-125) [s10].
+Clutch launches with one Aragon vote, the enabling vote [s8]. After it, no administrative action needs an Aragon vote, and top-up motions carry the funding (OD-140). Only a few break-glass and Lido-wide actions stay votes, and a change of a top-up registry's limit is one of them (OD-101, OD-125, OD-146) [s10][s11].
 
 Aragon Voting stores the whole script when a vote starts. With the Safe batches inside, that transaction would need more gas than EIP-7825 lets one transaction use, so the vote approves the hash of each batch instead (OD-92) [s9].
 
 ## Before the vote
 
 - **Snapshots.** The mandate, with its figures and the owed text below. The emergency Safe's fifth signer (OD-58, OD-65) [s1].
-- **Figures.** An attested computation sets every budget, every fixed approval ceiling, and the first tranche's tokens and amounts [s6][s10][s11].
+- **Figures.** An attested computation sets every budget, every fixed approval ceiling, each top-up registry's limit, and the first top-up's tokens and amounts [s6][s10][s11].
 - **Decisions.** Every OD is decided except OD-65, which closes at the fifth signer's Snapshot [s1].
-- **Deployments.** They need no authority. Clutch's script creates the Asset Safe, the orders account and the first-loss Safe with Aragon Voting as their only owner, and the emergency Safe with its signers, all on Safe v1.5.0 (OD-17, OD-126). It deploys the four Roles modifiers as minimal proxies through the Zodiac module proxy factory, and the universal factory with the committee's Safe as its trusted caller. The factory's constructor fixes that caller, Easy Track's executor, the emergency Safe, Aragon Voting and the four modifiers; it holds no other state than its counter and its policy version (OD-80, OD-102, OD-135) [s2][s10].
+- **Deployments.** They need no authority. Clutch's script creates the Asset Safe, the orders account and the first-loss Safe with Aragon Voting as their only owner, and the emergency Safe with its signers, all on Safe v1.5.0 (OD-17, OD-126). It deploys the four Roles modifiers as minimal proxies through the Zodiac module proxy factory, and the universal factory with the committee's Safe as its trusted caller. Through Lido's deployed registry factories, it deploys the two funding registries, with Aragon Voting as their admin and the Asset Safe as their only recipient, and their two top-up factories, with the committee's Safe as trusted caller. It sets each registry's limit and its period of three months, and gives up its roles (OD-140 to OD-143). The factory's constructor fixes that caller, Easy Track's executor, the emergency Safe, Aragon Voting and the four modifiers; it holds no other state than its counter and its policy version (OD-80, OD-102, OD-135) [s2][s10].
 - **Checks.** The fork tests of the order signer and of CoW's fallback handler on Safe v1.5.0 behind a Roles modifier, which pass at block 26249900, run again at a recent block ([research note](/research/orders-account-fork-tests-2026-11-07.md)) [s4]. The external audit of the universal factory and the order signer (OD-96). The check of Safe's releases, advisories and bug-bounty records [s7]. The policy compiled for mainnet from the reviewed constellation. The policy's source against the mandate's protocols and the committee's named pipeline. The Safe batches, published as a file with each batch's Safe, nonce and MultiSend data. `just batches-check <file>` computes each batch's hash again, as Safe v1.5.0 does, and fails unless the batches carry the compiled policy and the vault's setup, and nothing else. A reviewer compares each `approveHash` item of the vote with the hashes that the command prints. The full rehearsal below, at a recent block [s9][s10].
 
 ## The mandate's owed text
@@ -64,7 +64,7 @@ Aragon Voting stores the whole script when a vote starts. With the Safe batches 
 The mandate's Snapshot text owes these items (OD-90) [s1]:
 
 - **Products and caps.** Exposure to mature Lido products is unbounded. A new Lido product, Lido Lend first, stays in the protocol cap until it meets the maturity criteria and a motion unlocks it; earnETH and earnUSD are not new (OD-41). The illustrative balance renames its "USD-denominated" heading (OD-03).
-- **Funding.** Tranche votes replace the draft's seed and top-ups through Easy Track. Each tranche is an Aragon vote that names its tokens, sUSDS included. The first tranche, one million dollars, is the launch cap, and the second tranche's vote starts only after the screening guard is set (OD-106, OD-121).
+- **Funding.** Top-up motions through Easy Track fund the vault, as the draft's top-ups did: the committee's Safe creates one, within a registry's limit for three months, and LDO holders can object for 72 hours (OD-140, OD-143). The first top-up, one million dollars, comes by top-up motions after the enabling vote, and it is the launch cap. A top-up above the cap starts only after the screening guard is set. A funding above a limit needs a vote that changes the limit (OD-121, OD-142, OD-146).
 - **Size.** The mandate size and the treasury share, with the share's base, the time of its test, the remedy for a breach that no vault transaction causes, and the eligibility conditions of a replenishment (OD-89).
 - **Reporting.** The late-report rule (OD-14), and each report's TMC-6 ratio for the whole treasury (OD-111). The vault keeps no liquidity buffer, because TMC-6's runway floor already applies to the whole treasury (OD-110).
 - **Legacy and insurance.** The mandate takes over the first-loss terms of the March 2026 Earn allocation: the first-loss Safe holds the shares, and the committee executes the terms on the Earn team's written instruction, every burn as a motion and an exit through one narrow role whose proceeds stay in the vault (OD-21, OD-42, OD-60, OD-67, OD-108). Insurance covers earnETH, earnUSD and Lido Lend at launch, with the money from the Asset Safe by motion (OD-107).
@@ -80,11 +80,12 @@ Aragon Voting runs the Easy Track and payment items itself. It holds Easy Track'
 
 ### Easy Track
 
-- Register the universal factory in Easy Track. Its permissions are its address book: one call, the factory's own `applyMotion` (OD-102, OD-118) [s10]. It is the only Clutch factory.
+- Register the universal factory in Easy Track. Its permissions are its address book: one call, the factory's own `applyMotion` (OD-102, OD-118) [s10]. It is the only factory of Clutch's own code.
+- Register the two top-up factories, which are Lido's own code in new instances: one for stETH, and one for the DAO's stablecoin list, which holds DAI, USDC, USDT and sUSDS. Each may call its registry's `updateSpentAmount` and Finance's `newImmediatePayment`, and nothing else (OD-141, OD-142) [s11].
 
-### The first tranche
+### The first top-up
 
-- One `newImmediatePayment` from Finance to the Asset Safe for each token, for one million dollars in total, with the forum post as the reference (OD-106). This tranche is the launch cap of [ADR 010](/adr/010-pre-execution-screening.md) decision 20 [s7][s11].
+- The vote pays nothing. After the vote is enacted and the Safe batches ran, the committee's Safe creates the motions of the first top-up, for one million dollars in total, and anyone enacts them after the objection window (OD-142). The first top-up is the launch cap of [ADR 010](/adr/010-pre-execution-screening.md) decision 20 [s7][s11].
 
 ### The vault's Safes
 
@@ -96,27 +97,28 @@ Each Safe's changes form one or more batches. The vote approves the hash of each
 
 ### Order
 
-The vote's items run when it executes, about five days after it starts: the factory's registration and the first tranche. The tranche waits in the Asset Safe, which only Aragon Voting controls until the batches run. Then anyone sends the Safe batches, in each Safe's nonce order. The committee's Safe creates motions only after the batches ran. Monitoring warns when few of Easy Track's shared open-motion slots are free (OD-94) [s9].
+The vote's items run when it executes, about five days after it starts: the registration of the three factories. Then anyone sends the Safe batches, in each Safe's nonce order. The committee's Safe creates motions only after the batches ran: first the motions of the first top-up, which pay the Asset Safe 72 hours later. Monitoring warns when few of Easy Track's shared open-motion slots are free (OD-94) [s9].
 
 ## After the vote, without another vote
 
 - Anyone sends the Safe batches that the vote approved (OD-92) [s9].
+- The committee's Safe creates the motions of the first top-up (OD-142) [s11].
 - The Growth Committee's Safe moves the first-loss shares to the first-loss Safe [s5].
 - Lido Lend joins by an onboarding motion of the universal factory, and an insurance fund for it by another motion (OD-102, OD-107) [s10][s11].
-- The owners of the committee's Safe set the screening guard on it before the second tranche's vote starts, and the Zodiac UI requests the vendor's approval from that moment (OD-83, OD-121) [s7].
+- The owners of the committee's Safe set the screening guard on it before a top-up above the launch cap starts, and the Zodiac UI requests the vendor's approval from that moment (OD-83, OD-121) [s7].
 - Each Safe's own owners rotate its signers. A change of the committee's members needs no Snapshot each time (OD-109). A Snapshot fills the fifth seat of the emergency Safe [s2].
 
 ## What still needs a vote after launch
 
-[ADR 013](/adr/013-one-easy-track-factory.md) decision 4 lists the actions that stay Aragon votes: each tranche after the first, the replacement of a role holder, an owner action on a vault Safe, a new or changed factory, and an Easy Track unpause (OD-101, OD-125) [s10]. Each is a direct Voting item of about five days, without Dual Governance, because Aragon Voting owns the vault's Safes and pays through Finance (OD-73) [s1][s12]. Motions of the universal factory cover the rest. The emergency Safe and the committee's Safe return funds to the Aragon Agent without a motion (OD-108) [s11].
+[ADR 013](/adr/013-one-easy-track-factory.md) decision 4 lists the actions that stay Aragon votes: a change of a top-up registry's limit, period or recipients, the replacement of a role holder, an owner action on a vault Safe, a new or changed factory, and an Easy Track unpause (OD-101, OD-125) [s10]. Each is a direct Voting item of about five days, without Dual Governance, because Aragon Voting owns the vault's Safes and pays through Finance (OD-73) [s1][s12]. Motions of the universal factory cover the rest. The emergency Safe and the committee's Safe return funds to the Aragon Agent without a motion (OD-108) [s11].
 
 ## The full rehearsal
 
-The fork suite rehearses the vote with the universal factory, the first tranche and a later tranche (`test/EnablingVoteRehearsal.t.sol`). Before the vote starts, the full vote is rehearsed at a recent block [s9][s10][s11]:
+The fork suite rehearses the vote with the universal factory and the two top-up factories, the first top-up and a later top-up (`test/EnablingVoteRehearsal.t.sol`, `test/TopUps.t.sol`). Before the vote starts, the full vote is rehearsed at a recent block [s9][s10][s11]:
 
 1. **Policy still owed.** The onboarding motion of Lido Lend's lender vault, against the deployed vault (OD-132, OD-133); the fork suite runs it against a stand-in.
 2. **Deployment.** The script deploys the three Safes, the emergency Safe, the four modifiers and the factory.
-3. **The vote.** The factory's registration, the first tranche, and one approved hash for each Safe batch. The batch builder keeps each batch under the gas and size limits that the rehearsal set.
-4. **The run.** The vote's gas when it starts and when it executes; each batch's gas against EIP-7825 and its size against the transaction pool's limit; the first tranche in the Asset Safe. Then the first motions against the live Easy Track: an onboarding; a budget; a token for the orders account, on both sides; an insurance fund, created and given money from the Asset Safe, and a payout to its pinned address; a first-loss redemption paid to the Asset Safe, and the return of an excess above the cap; the operator's return to the Aragon Agent; and the switch, the counter, a restart motion and the restore of the orders account. The run reads Easy Track's free motion slots at the block.
+3. **The vote.** The registration of the three factories, and one approved hash for each Safe batch. The batch builder keeps each batch under the gas and size limits that the rehearsal set.
+4. **The run.** The vote's gas when it starts and when it executes; each batch's gas against EIP-7825 and its size against the transaction pool's limit. Then the first motions against the live Easy Track: the motions of the first top-up, and the first top-up in the Asset Safe; an onboarding; a budget; a token for the orders account, on both sides; an insurance fund, created and given money from the Asset Safe, and a payout to its pinned address; a first-loss redemption paid to the Asset Safe, and the return of an excess above the cap; the operator's return to the Aragon Agent; and the switch, the counter, a restart motion and the restore of the orders account. The run reads Easy Track's free motion slots at the block.
 5. **Chain checks.** INV-032, the factory's registration, and INV-037, no Easy Track registry that lists a vault Safe; and the holders of Easy Track's admin, cancel and unpause roles, from the role events [s12].
 6. **Records.** A research note records the run, and the invariants name the new tests.

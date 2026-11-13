@@ -9,7 +9,7 @@ valid_as_of: 2026-10-13
 stale_after: 2026-12-31T00:00:00Z
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T11:50:32Z
+  at: 2026-11-13T06:47:18Z
 verified: []
 sources:
   - id: s1
@@ -187,4 +187,4 @@ On 2026-10-13 the CFO asked whether the vault can manage insurance funds for oth
 | A Morpho Blue market, the base of Lido Lend | a liquidation that leaves bad debt lowers the market's supply assets, so every lender of that market takes the loss [s25] | none, unless the product gives a payout address, for example a reserve that covers bad debt |
 | A product on another chain | its shares are on that chain | none: the first-loss Safe is on Ethereum |
 
-So burnable shares serve the Lido Earn family. Any other product needs a fixed payout address that its own design defines ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 6).
+So burnable shares serve the Lido Earn family. Any other product needs a fixed payout address that its own design defines ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 6).

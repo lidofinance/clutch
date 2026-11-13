@@ -14,9 +14,10 @@ import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 ///        operation, rehearsed end to end on a mainnet fork.
 /// @dev The live Aragon Voting, token manager, Easy Track, script executor,
 ///      Aragon Finance and treasury take part. Only the Clutch accounts and
-///      the universal factory are new. The vote registers the factory and pays
-///      the first tranche (OD-102, OD-106; enabling-vote spec, "Rebuilding the
-///      rehearsal", step 1). Lines that start with "REHEARSAL" are the
+///      the universal factory are new; the two top-up factories are new
+///      instances of Lido's own code. The vote registers the three factories and
+///      pays nothing, and the first top-up comes by two motions (OD-102,
+///      OD-142; enabling-vote spec). Lines that start with "REHEARSAL" are the
 ///      measurements that the research notes report.
 ///      Run: RPC=<archive RPC> forge test --match-contract EnablingVoteRehearsal -vv
 contract EnablingVoteRehearsal is EnabledVault {
@@ -82,19 +83,20 @@ contract EnablingVoteRehearsal is EnabledVault {
     }
 
     // ---------------------------------------------------------------------
-    // 2. The vote that fits: the factory, the first tranche, then hash approvals
+    // 2. The vote that fits: the three factories, then hash approvals; the first top-up by motion
     // ---------------------------------------------------------------------
 
     /// @dev The vote registers the universal factory with its address book and
-    ///      pays the first tranche, which reaches the Asset Safe when the vote
-    ///      executes, before the batches (checked in `_enable`).
+    ///      the two top-up factories, and pays nothing. After the batches, the
+    ///      first top-up reaches the Asset Safe by two top-up motions (checked
+    ///      in `_enable`).
     function test_02_enabling_vote_end_to_end() public {
         _enable();
         _checkEnabled();
     }
 
     // ---------------------------------------------------------------------
-    // 3. The first weeks: tranches, budgets, the switch, the counter, the restart
+    // 3. The first weeks: a top-up, budgets, the switch, the counter, the restart
     // ---------------------------------------------------------------------
 
     function test_03_ramp_up() public {
@@ -109,11 +111,13 @@ contract EnablingVoteRehearsal is EnabledVault {
         console2.log("REHEARSAL motion slots: limit", et.motionsCountLimit());
         console2.log("REHEARSAL motion slots: open at the fork block", et.getMotions().length);
 
-        // 3c. A later tranche in another token, by its own vote (ADR 014, decision 3).
-        //     The Agent holds no USDS at the fork block, so the fork gives it some.
-        deal(Mainnet.USDS, Mainnet.AGENT, 100_000e18);
-        _trancheVote(Mainnet.USDS, 50_000e18); // STANDIN
-        assertEq(IERC20(Mainnet.USDS).balanceOf(address(asset)), 50_000e18, "a later tranche in USDS");
+        // 3c. A later top-up in another token, by its own motion (ADR 014, decisions 13 and 15). USDS is on no
+        //     top-up list, so the vault gets it as DAI, which the operator converts through Sky's converter.
+        _topUp(stableTopUp, abi.encode(Mainnet.DAI, _recipient(), _amount(5_000e18))); // STANDIN
+        assertEq(IERC20(Mainnet.DAI).balanceOf(address(asset)), 5_000e18, "a later top-up in DAI");
+        _operator(Mainnet.DAI, abi.encodeCall(IERC20.approve, (DAI_USDS, 5_000e18)), true);
+        _operator(DAI_USDS, abi.encodeWithSignature("daiToUsds(address,uint256)", address(asset), 5_000e18), true);
+        assertEq(IERC20(Mainnet.USDS).balanceOf(address(asset)), 5_000e18, "the DAI became USDS, one to one");
 
         // 3d. Budgets set the pace: an approval spends the key (OD-08).
         (,,, uint128 earnBudget,) = opMod.allowances(bytes32("earn_usd_deposit"));
@@ -156,7 +160,7 @@ contract EnablingVoteRehearsal is EnabledVault {
 
     /// @dev The Roles layer allows the deposits (Drills D3b); this asks
     ///      whether the live queues accept them from a new Safe. The first
-    ///      tranche holds the USDC and the stETH.
+    ///      top-up holds the USDC and the stETH.
     function test_04_earn_deposits_from_the_asset_safe() public {
         _enable();
         // Budgets wide enough for the probe, set by the owner path (Voting via the Asset Safe)

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:24:23Z
+  at: 2026-11-13T06:47:18Z
 verified: []
 sources:
   - id: s1
@@ -61,11 +61,11 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 | DAI | held; converted to USDS and back through Sky's converter, one to one | recovery sells it (decision 9) |
 | USDS | held; receives converted DAI | — |
 | sUSDS | savings position | an ERC-4626 position of the launch policy; the operator redeems it, and recovery can sell it in a CoW order |
-| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares sit in the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 19); insurance at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
+| earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares sit in the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 19); insurance at launch ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 4) |
 | Orders account | CoW market, limit and TWAP orders for the operator; recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Lido Lend | lending, after launch | one motion of the universal factory that onboards Lido Lend's lender vault, an ERC-4626 vault, once Lido Lend's own contracts exist (decision 13); a position returns only WETH, USDC or USDT; in the protocol cap until it matures ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28); insurance at launch ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 4) |
+| Lido Lend | lending, after launch | one motion of the universal factory that onboards Lido Lend's lender vault, an ERC-4626 vault, once Lido Lend's own contracts exist (decision 13); a position returns only WETH, USDC or USDT; in the protocol cap until it matures ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28); insurance at launch ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 4) |
 
-A tranche vote can bring ETH, WETH, stETH, wstETH, USDC, USDT, DAI, USDS and sUSDS ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 3), because Aragon Voting pays any token through Finance.
+A top-up motion brings stETH, DAI, USDC, USDT or sUSDS. ETH, WETH, wstETH and USDS come from these inside the vault: by staking, wrapping and Sky's converter ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 3), because Aragon Voting pays any token through Finance.
 
 Out of the launch scope: sDAI, Aave and every other third-party lending market; Lido's withdrawal queue, and router swaps on Uniswap and 1inch ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 27 and 20); and LDO (decision 15).
 

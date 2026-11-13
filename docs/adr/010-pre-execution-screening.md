@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: "ADR 010: Pre-execution screening"
-description: Transaction screening on the committee's Safe, the vendor's controls, outage behaviour, the launch cap, and the guard before the second tranche's vote.
+description: Transaction screening on the committee's Safe, the vendor's controls, outage behaviour, the launch cap, and the guard before any top-up above the cap.
 tags: [screening, guard, safe, security]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T07:27:52Z
+  at: 2026-11-13T07:06:18Z
 verified: []
 sources:
   - id: s1
@@ -91,9 +91,9 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 17. The vendor is asked to refuse every delegatecall from the committee's Safe except to Safe's MultiSendCallOnly v1.3.0. This is a request, not a gate (OD-17, OD-80).
 18. Lido's monitoring alerts on any change of the singleton of the Asset Safe, the committee's Safe and the emergency Safe (OD-17, OD-80).
 19. The screening vendor's rules for the vault are a written list in this repository, in the [control matrix](/specs/control-matrix.md). A relaxation of a rule is a change under control: the forum gets a notice (decision 23), and the vendor's own delay applies if it has one ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 26) (OD-39, OD-45, OD-64).
-20. The vault may launch without the screening guard, under a cap of one million dollars on the Asset Safe and the orders account. The first tranche is the cap. Above the cap, on-chain blocking is a hard requirement (OD-54, OD-55, OD-106).
-21. The cap holds by the first tranche's size. Monitoring alerts when the vault's value goes above the cap before the guard is set (OD-54, OD-106).
-22. The guard goes on the committee's Safe, with its bypass mode off, before the second tranche's vote starts. The guard is checked when that vote starts and watched until the vote executes. The second tranche's vote is the only way above the cap (OD-54, OD-83, OD-106, OD-121).
+20. The vault may launch without the screening guard, under a cap of one million dollars on the Asset Safe and the orders account. The first top-up is the cap. Above the cap, on-chain blocking is a hard requirement (OD-54, OD-55, OD-106, OD-142).
+21. Until the guard is set, the launch cap holds by a rule: the committee's Safe creates no top-up motion that takes the vault above the cap. Monitoring alerts on such a motion, and when the vault's value goes above the cap before the guard is set. LDO holders can object. Nothing on chain holds the cap, because the registries' limits are above it (OD-54, OD-142, OD-145).
+22. The guard goes on the committee's Safe, with its bypass mode off, before a top-up above the cap starts. The guard is checked when that motion starts and watched until it is enacted (OD-54, OD-83, OD-121, OD-142).
 23. A relaxation of a screening rule gets a notice on the forum only (OD-64).
 24. The guard is set on the committee's Safe (decision 22). It screens every transaction of that Safe, the committee's other duties included, and a vendor outage stops them too (OD-83, OD-121).
 25. From the moment the guard is set, the Zodiac UI's signing flow sends each transaction of the committee's Safe that it builds to the screening vendor for its single-use approval, and shows the approval state (OD-88, OD-121).
@@ -118,7 +118,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - Until the guard is set, the permissions, four-of-seven signing, monitoring, the emergency revoke and the switch protect the funds within the cap.
 - The cap counts the value of the Asset Safe and the orders account at the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 35 and 36). It leaves out the first-loss Safe, which those roles cannot reach.
 - The cap limits treasury funding. An excess from a price move needs reporting, not action.
-- Before the second tranche's vote starts, set decision 10's guard, turn bypass off, put decision 9's agreement in place and start the monitoring of decision 12. Check the address, the bypass and the absence of standing approvals; the vote's forum post links the check (decision 22).
+- Before a top-up above the launch cap starts, set decision 10's guard, turn bypass off, put decision 9's agreement in place and start the monitoring of decision 12. Check the address, the bypass and the absence of standing approvals; the vote's forum post links the check (decision 22).
 
 ## Options considered
 
@@ -162,4 +162,4 @@ No open decision closes in this record.
 
 <!-- end of generated block -->
 
-Owed: the vendor's answers on the requested rules and on rule-change records and delays, before the second tranche's vote.
+Owed: the vendor's answers on the requested rules and on rule-change records and delays, before a top-up above the launch cap.

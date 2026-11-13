@@ -16,15 +16,16 @@ import {
     IEasyTrack,
     ISafeAdmin,
     IExtensibleFallbackHandler,
-    ISettlement
+    ISettlement,
+    IRecipientsRegistry
 } from "./RehearsalBase.sol";
 
 /// @title EnabledVault — the enabling vote of the enabling-vote spec, run against the live
 ///        Aragon Voting, Easy Track, Finance and treasury on a mainnet fork, and the motion
 ///        helpers of the universal factory.
-/// @dev The vote registers the universal factory with its address book, pays the first
-///      tranche through Finance, and approves the hash of each Safe batch (OD-92, OD-102,
-///      OD-106). Figures marked STANDIN are test values, not production figures.
+/// @dev The vote registers the universal factory with its address book and the two top-up
+///      factories, pays nothing, and approves the hash of each Safe batch. The first top-up
+///      then comes by two top-up motions (OD-92, OD-102, OD-142). Figures marked STANDIN are test values, not production figures.
 abstract contract EnabledVault is RehearsalBase {
     /// @dev The policy that the enabling vote applies, if it is not the committed artifact: the base policy of a
     ///      motion that a test replays.
@@ -52,10 +53,10 @@ abstract contract EnabledVault is RehearsalBase {
     ///      batch is then checked against.
     uint256 internal constant BATCH_BYTES_BUDGET = 120_000;
 
-    // The first tranche, an item of the enabling vote: STANDIN amounts under the
+    // The first top-up: two top-up motions after the enabling vote and its batches (OD-142). STANDIN amounts under the
     // launch cap of one million dollars (ADR 014, decision 2; OD-55).
-    uint256 internal constant TRANCHE_USDC = 500_000e6;
-    uint256 internal constant TRANCHE_STETH = 100e18;
+    uint256 internal constant FIRST_TOPUP_USDC = 500_000e6;
+    uint256 internal constant FIRST_TOPUP_STETH = 100e18;
 
     // ---------------------------------------------------------------------
     // The enabling vote
@@ -85,22 +86,61 @@ abstract contract EnabledVault is RehearsalBase {
         uint256 used = _passAndExecute();
         console2.log("REHEARSAL vote: executeVote gas", used);
 
-        // The first tranche reaches the Asset Safe when the vote executes, before the batches.
-        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)) - usdcBefore, TRANCHE_USDC, "the first tranche in USDC");
-        assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)), TRANCHE_STETH, 2, "the first tranche in stETH");
+        // The vote pays nothing: it registers the factories and approves the batches' hashes (OD-142).
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)), usdcBefore, "the vote pays no USDC");
+        assertEq(IERC20(Mainnet.STETH).balanceOf(address(asset)), 0, "the vote pays no stETH");
         assertFalse(asset.isModuleEnabled(address(opMod)), "no permission applies before the batches");
 
         for (uint256 i = 0; i < batches.length; i++) _runBatch(batches[i]);
+
+        // The first top-up: the committee's Safe creates two top-up motions after the batches ran, and anyone
+        // enacts them after the objection window.
+        uint256 launchGas = _topUps(
+            stableTopUp, abi.encode(Mainnet.USDC, _recipient(), _amount(FIRST_TOPUP_USDC)), stethTopUp, abi.encode(_recipient(), _amount(FIRST_TOPUP_STETH))
+        );
+        console2.log("REHEARSAL first top-up: enactMotion gas of the two top-up motions", launchGas);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)) - usdcBefore, FIRST_TOPUP_USDC, "the first top-up in USDC");
+        assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)), FIRST_TOPUP_STETH, 2, "the first top-up in stETH");
     }
 
-    /// @dev A later tranche: one Aragon vote with one Finance payment (ADR 014, decision 1).
-    function _trancheVote(address token, uint256 amount) internal {
-        VoteBuilder.Item[] memory items = new VoteBuilder.Item[](1);
-        items[0] = _payment(token, amount, "Clutch tranche (rehearsal)");
-        if (proposer == address(0)) _proposer();
-        (bool ok,,) = _newVote(VoteBuilder.script(items));
-        assertTrue(ok, "a tranche vote starts");
-        _passAndExecute();
+    /// @dev A top-up motion: the committee's Safe creates it, and anyone enacts it after the objection window.
+    ///      Returns the enactment's gas.
+    function _topUp(address factory, bytes memory cd) internal returns (uint256 gasUsed) {
+        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        vm.prank(Mainnet.COMMITTEE_SAFE);
+        uint256 id = et.createMotion(factory, cd);
+        vm.warp(block.timestamp + et.motionDuration() + 1);
+        vm.prank(anyone);
+        uint256 g = gasleft();
+        et.enactMotion(id, cd);
+        gasUsed = g - gasleft();
+        assertLt(gasUsed, TX_GAS_CAP, "under EIP-7825's cap");
+    }
+
+    /// @dev Two top-up motions that are open together, and enacted after one objection window.
+    function _topUps(address first, bytes memory firstCd, address second, bytes memory secondCd) internal returns (uint256 gasUsed) {
+        IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
+        vm.startPrank(Mainnet.COMMITTEE_SAFE);
+        uint256 a = et.createMotion(first, firstCd);
+        uint256 b = et.createMotion(second, secondCd);
+        vm.stopPrank();
+        vm.warp(block.timestamp + et.motionDuration() + 1);
+        vm.startPrank(anyone);
+        uint256 g = gasleft();
+        et.enactMotion(a, firstCd);
+        et.enactMotion(b, secondCd);
+        gasUsed = g - gasleft();
+        vm.stopPrank();
+    }
+
+    function _recipient() internal view returns (address[] memory r) {
+        r = new address[](1);
+        r[0] = address(asset);
+    }
+
+    function _amount(uint256 a) internal pure returns (uint256[] memory r) {
+        r = new uint256[](1);
+        r[0] = a;
     }
 
     function _passAndExecute() internal returns (uint256 used) {
@@ -120,8 +160,8 @@ abstract contract EnabledVault is RehearsalBase {
         assertTrue(done, "executeVote must fit in one transaction");
     }
 
-    /// @dev The factory's registration, the first tranche, then one approved hash
-    ///      per Safe batch; `direct` carries the batches themselves instead.
+    /// @dev The registration of the universal factory and of the two top-up factories, then one approved hash
+    ///      per Safe batch; `direct` carries the batches themselves instead. The vote pays nothing (OD-142).
     function _voteItems(bool direct) internal view returns (VoteBuilder.Item[] memory items) {
         uint256 first = 3;
         items = new VoteBuilder.Item[](first + batches.length);
@@ -130,8 +170,8 @@ abstract contract EnabledVault is RehearsalBase {
             abi.encodeCall(IEasyTrack.addEVMScriptFactory, (address(uf), uf.addressBook())),
             "Easy Track: register the universal factory with its address book"
         );
-        items[1] = _payment(Mainnet.USDC, TRANCHE_USDC, "Clutch tranche 1 (rehearsal)");
-        items[2] = _payment(Mainnet.STETH, TRANCHE_STETH, "Clutch tranche 1 (rehearsal)");
+        items[1] = _registerTopUp(stethTopUp, stethRegistry, "Easy Track: register the stETH top-up factory");
+        items[2] = _registerTopUp(stableTopUp, stableRegistry, "Easy Track: register the stablecoin top-up factory");
         bytes memory votingSig = abi.encodePacked(bytes32(uint256(uint160(Mainnet.VOTING))), bytes32(0), uint8(1));
         for (uint256 i = 0; i < batches.length; i++) {
             Batch storage b = batches[i];
@@ -148,12 +188,14 @@ abstract contract EnabledVault is RehearsalBase {
         }
     }
 
-    function _payment(address token, uint256 amount, string memory ref) internal view returns (VoteBuilder.Item memory) {
-        return VoteBuilder.Item(
-            Mainnet.FINANCE,
-            abi.encodeCall(IFinance.newImmediatePayment, (token, address(asset), amount, ref)),
-            "Finance: pay a tranche to the Asset Safe"
+    /// @dev A top-up factory may call its own registry's `updateSpentAmount` and Finance's `newImmediatePayment`,
+    ///      and nothing else.
+    function _registerTopUp(address factory, address registry, string memory label) internal pure returns (VoteBuilder.Item memory) {
+        bytes memory permissions = abi.encodePacked(
+            VoteBuilder.permission(registry, IRecipientsRegistry.updateSpentAmount.selector),
+            VoteBuilder.permission(Mainnet.FINANCE, IFinance.newImmediatePayment.selector)
         );
+        return VoteBuilder.Item(Mainnet.EASY_TRACK, abi.encodeCall(IEasyTrack.addEVMScriptFactory, (factory, permissions)), label);
     }
 
     function _checkEnabled() internal view {
@@ -163,6 +205,7 @@ abstract contract EnabledVault is RehearsalBase {
         IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
         assertTrue(et.isEVMScriptFactory(address(uf)), "the universal factory");
         assertEq(et.evmScriptFactoryPermissions(address(uf)), uf.addressBook(), "its permissions are its address book");
+        assertTrue(et.isEVMScriptFactory(stethTopUp) && et.isEVMScriptFactory(stableTopUp), "the two top-up factories");
         bytes32 domain = ISettlement(Mainnet.COW_SETTLEMENT).domainSeparator();
         assertEq(
             IExtensibleFallbackHandler(Mainnet.COW_FALLBACK_HANDLER).domainVerifiers(address(orders), domain),

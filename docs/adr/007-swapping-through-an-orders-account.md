@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T19:10:44Z
+  at: 2026-11-13T06:47:18Z
 verified: []
 sources:
   - id: s1
@@ -108,7 +108,7 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - **Operator orders.**
   - Delegatecall the order signer with listed tokens, the Asset Safe as receiver and plain ERC-20 balances (decisions 29, 42 and 43). The signer refuses a `validTo` beyond `validDuration`; `unsignOrder` cancels.
   - Use only ComposableCoW's TWAP handler, with the same tokens and receiver. `createWithContext`, a start of zero and CoW's current-timestamp value factory make the creation the start. Permit at most 90 parts at most a day apart, or at most 12 parts at most 7 days apart (decision 29). `remove` cancels.
-  - Transfer any listed token back to the Asset Safe, or to the Aragon Agent ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 9).
+  - Transfer any listed token back to the Asset Safe, or to the Aragon Agent ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 9).
 - **Emergency actions.** The `emergency` row of the role table in [ADR 005](/adr/005-account-graph-and-roles.md#proposed-direction) lists them. Recovery orders are signer orders (decision 25).
 - **Stop and restore.** The emergency role's revoke ([ADR 005](/adr/005-account-graph-and-roles.md) decision 25) reaches every operator permission (INV-018). A revoke does not cancel resting orders; cancel them too, because fills never consult the policy. Decision 46 restores the operator.
 - **Re-affirmation.** The 30-day alert (decision 24) and the monthly report (decision 29), which also shows each order's distance to market, do not act on chain. Removing a token or tightening a bound also needs the cancellation of the affected orders.

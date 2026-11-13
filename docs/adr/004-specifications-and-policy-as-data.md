@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T13:57:30Z
+  at: 2026-11-13T06:47:18Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -49,6 +49,11 @@ verified:
     recorded_by: claude-code/mythos-5.2
     ref: /registers/decision-log.md#2026-11-12--adr-003-and-adr-004-verified-after-the-switch-to-raw-writes
     sha256: a74f433a134f032bc6ad54836936f07b6a831cc4efac62bb2d1339e742128423
+  - by: human:em
+    at: 2026-11-13T07:06:26Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-13--adr-003-and-adr-004-verified-after-the-switch-to-top-up-motions
+    sha256: 2e2f9184adf838551563c3a2eacfa2ca769ee29539c04b52143b53cf0a6adaaf
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -132,7 +137,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 - The UI's chain diff is a view. ADR 009's detector remains the source of drift alerts against the same artifact.
 - Clutch needs a Lido Zodiac workspace and API key, held by the repository-owner team (decision 16). The key stays outside the repository, CI and votes. Agents must not use it.
 - The hosted app may require a provider plan. Unannounced terms stay outside the repository.
-- Once ADR 010's screening guard is set, it checks each transaction of the committee's Safe, those that the UI builds included (OD-83, OD-88). A fork drill before the second tranche's vote must prove this.
+- Once ADR 010's screening guard is set, it checks each transaction of the committee's Safe, those that the UI builds included (OD-83, OD-88). A fork drill before a top-up above the launch cap must prove this.
 - Constellation-derived files keep LGPL-3.0-only ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md), decision 9).
 - SDK event signatures match the mastercopy [s8]. Verify real-event decoding before relying on the round-trip check.
 - The port, the compiler and the artifact format exist (decision 15). The round-trip check comes in phase 2.

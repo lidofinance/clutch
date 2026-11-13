@@ -1,14 +1,14 @@
 ---
 type: Decision
-title: "ADR 013: One Easy Track factory; Aragon votes after launch only for tranches and break-glass actions"
-description: One universal Easy Track factory carries every Clutch motion as a list of raw writes, holds the motion roles and makes each motion's writes in one call; after the enabling vote, Aragon votes remain only for funding tranches, role holders and break-glass actions.
+title: "ADR 013: One Easy Track factory for the vault's permissions; Aragon votes after launch only for break-glass actions"
+description: One universal Easy Track factory carries every Clutch motion as a list of raw writes, holds the motion roles and makes each motion's writes in one call; after the enabling vote, Aragon votes remain only for role holders, a top-up registry's limits and break-glass actions.
 tags: [governance, easy-track, factory, raw-writes]
 status: draft
 review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:24:23Z
+  at: 2026-11-13T06:47:18Z
 verified: []
 sources:
   - id: s1
@@ -22,7 +22,7 @@ sources:
     title: Research note — the typed factory's size, gas and checks, and the raw factory's measures, 2026-11-12
 ---
 
-# ADR 013: One Easy Track factory; Aragon votes after launch only for tranches and break-glass actions
+# ADR 013: One Easy Track factory for the vault's permissions; Aragon votes after launch only for break-glass actions
 
 ## Context
 
@@ -39,8 +39,8 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 1. Clutch uses no Merkle-root policy. The Roles modifiers keep their permission trees (OD-100).
 2. Easy Track motions carry versions, so that two motions cannot overwrite each other's changes (OD-100).
 3. After the enabling vote, no administrative action needs an Aragon vote. An Easy Track motion is the most that an action needs. Removing complexity is the aim: fewer moving parts is the best outcome (OD-101).
-4. These actions stay Aragon votes: each funding tranche ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 1); the replacement of a role holder, such as the committee's Safe in the operator role; an owner action on a vault Safe, such as a module, the Safe version or the owners; a new or changed factory; a removal on the safety modifier or on the orders modifier, whose motion roles hold no revoke; and the unpause of Easy Track, which only Aragon Voting can do (OD-101, OD-125, OD-138).
-5. One universal Easy Track factory carries every Clutch motion (OD-102).
+4. These actions stay Aragon votes: a change of a top-up registry's limit, period or recipients ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 13); the replacement of a role holder, such as the committee's Safe in the operator role; an owner action on a vault Safe, such as a module, the Safe version or the owners; a new or changed factory; a removal on the safety modifier or on the orders modifier, whose motion roles hold no revoke; and the unpause of Easy Track, which only Aragon Voting can do (OD-101, OD-125, OD-138, OD-146).
+5. One universal Easy Track factory carries every Clutch motion (OD-102). Funding is no motion of this factory: Lido's own top-up factories pay the Asset Safe ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 13) (OD-140).
 6. The factory's Easy Track registration is its address book: one call, the factory's own `applyMotion`. Nothing else is callable (OD-102, OD-118).
 7. Replaced by decision 11 (OD-134).
 8. The factory cannot be upgraded. A motion grants no delegatecall but the order signer's, and the guards against administrative targets and selectors stay ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decisions 9 and 10) (OD-102, OD-103).
@@ -62,7 +62,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 
 - **A motion's calldata.** It holds the counter and the policy version that the motion read, and the list of writes, at most 64. `decodeEVMScriptCallData` returns them as they are, so a reviewer reads the writes from the motion itself. A failed enactment reverts as a whole; the motion stays open until the committee's Safe or Aragon Voting cancels it [s2].
 - **The factory's checks.** The creator is the committee's Safe. The counter is current. The motion has at least one write and at most 64. Each write names one of the four modifiers. If a write's target is one of the four modifiers, the policy version is current. The factory checks nothing else.
-- **Roles.** The factory holds one role per kind of write: `governance` and `insurance-funding` on the operator modifier, `exit-governance` and `restart` on the safety modifier, the governance and approvals roles on the orders modifier, and `first-loss-burn` with the insurance roles on the first-loss modifier ([ADR 014](/adr/014-funding-by-tranche-votes.md)). Each role's policy holds the guards that stay ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decisions 8 to 10; INV-004, INV-021, INV-025, INV-035, INV-039, INV-040).
+- **Roles.** The factory holds one role per kind of write: `governance` and `insurance-funding` on the operator modifier, `exit-governance` and `restart` on the safety modifier, the governance and approvals roles on the orders modifier, and `first-loss-burn` with the insurance roles on the first-loss modifier ([ADR 014](/adr/014-funding-by-top-up-motions.md)). Each role's policy holds the guards that stay ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decisions 8 to 10; INV-004, INV-021, INV-025, INV-035, INV-039, INV-040).
 - **Motions at launch.** The table lists the motions that the fork suite builds from raw writes. It is no limit: a motion can carry any write that its role's policy accepts, so a new protocol needs no changed factory. Each permission tree arrives in the motion, and the policy's source in this repository is where it comes from (the `motion` command below).
 
 | Motion | Writes | Fork test |
@@ -77,10 +77,10 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 | Removal | a revoke of a target or a function, or a permission written again without the removed entries ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 14) | `test_D1_change_type_2_target` and `test_D1_change_type_3_selector`, on the kit's mock Easy Track |
 | Restore | `scopeTarget` for a target that the emergency role revoked; the function permissions that the modifier stored under it work again (decision 16) | `test_uf_restore_motion_brings_back_a_revoked_target` |
 | Restart | `enableModule` for the operator modifier, through the `restart` role (decision 12) | `test_uf_restart_motion_after_the_switch` |
-| Insurance money | a transfer from the Asset Safe to the first-loss Safe, which spends the key derived for the token and the first-loss Safe ([ADR 014](/adr/014-funding-by-tranche-votes.md) decisions 7 and 11) | `test_uf_insurance_money_goes_to_the_first_loss_safe` |
-| Insurance deposit | the first-loss Safe's approval of an Earn deposit queue for the exact amount, and its deposit, through the `insurance` role ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 12) | `test_insurance_deposit_by_motion` |
+| Insurance money | a transfer from the Asset Safe to the first-loss Safe, which spends the key derived for the token and the first-loss Safe ([ADR 014](/adr/014-funding-by-top-up-motions.md) decisions 7 and 11) | `test_uf_insurance_money_goes_to_the_first_loss_safe` |
+| Insurance deposit | the first-loss Safe's approval of an Earn deposit queue for the exact amount, and its deposit, through the `insurance` role ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 12) | `test_insurance_deposit_by_motion` |
 | First-loss burn | `burn` through the `first-loss-burn` role ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 23) | `test_first_loss_burn_by_motion` |
-| Fund with a payout address | the `insurance` role's transfer of the token, pinned to the payout address, and the cap as a budget key that never refills, through the `insurance-governance` role ([ADR 014](/adr/014-funding-by-tranche-votes.md) decision 6) | `test_fund_create_and_payout_by_motion` |
+| Fund with a payout address | the `insurance` role's transfer of the token, pinned to the payout address, and the cap as a budget key that never refills, through the `insurance-governance` role ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 6) | `test_fund_create_and_payout_by_motion` |
 | Fund payout | a transfer from the first-loss Safe to the fund's payout address, within what is left of the cap | `test_fund_create_and_payout_by_motion` |
 
 - **The counter.** The emergency Safe raises it with every switch. Aragon Voting can raise it too.

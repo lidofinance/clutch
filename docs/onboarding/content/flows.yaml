@@ -9,7 +9,7 @@ groups:
     summary: "A permission changes by a [[motion]] of the [[universal factory]], after the [[objection window]]. After the enabling vote, no administrative action needs an Aragon vote. A screening rule changes by review and a forum notice."
   - id: funding
     title: Funding, insurance and returns
-    summary: "Money comes from the DAO treasury in rare tranches, each an Aragon vote. Insurance money moves from the Asset Safe by motion. Money goes back to the treasury only in an emergency or a recovery."
+    summary: "Money comes from the DAO treasury by [[top-up motion|top-up motions]], within a limit for each three months. Insurance money moves from the Asset Safe by motion. Money goes back to the treasury only in an emergency or a recovery."
   - id: reporting
     title: Reporting and monitoring
     summary: "Caps are detective. Monitoring and reports measure the vault, publish the numbers and start the fix. No contract reverts on a cap."
@@ -256,7 +256,7 @@ flows:
     group: governance
     title: A change that only the DAO can make
     label: built
-    summary: "The owner path: the DAO can do anything to the vault's Safes. After the enabling vote, an Aragon vote is needed only to fund a tranche, to replace a role holder, or to break glass."
+    summary: "The owner path: the DAO can do anything to the vault's Safes. After the enabling vote, an Aragon vote is needed only to change the top-up limits, to replace a role holder, or to break glass."
     trigger: "A role holder to replace, such as a new committee Safe in the operator role; a repair of the safety modifier or another owner action; a new or changed factory; or an Easy Track unpause."
     time: "About five days: the Aragon Voting vote."
     steps:
@@ -322,54 +322,54 @@ flows:
       "doc:docs/specs/control-matrix.md#the-screening-vendors-rules"]
 
   # --- Funding ------------------------------------------------------------------------------------
-  - id: tranche
+  - id: top-up
     group: funding
-    title: A tranche vote
+    title: A top-up motion
     label: specified
-    summary: "How money moves from the DAO treasury to the vault: a rare [[tranche vote]], which pays the Asset Safe through Aragon Finance."
+    summary: "How money moves from the DAO treasury to the vault: a [[top-up motion]] of the committee's Safe, within a registry's limit for three months. It pays the Asset Safe through Aragon Finance."
     trigger: "The vault needs more funds and has headroom under the mandate size, and the mandate's published eligibility conditions are met."
     time: "About five days: the Aragon Voting vote."
     steps:
       - who: "Committee"
-        text: "The committee posts the tranche on the forum: the funded value, the headroom under the mandate size, and the vault's share of the DAO's non-LDO treasury. The post links both readings' latest reports."
+        text: "The committee posts the funding on the forum: the funded value, the headroom under the mandate size, and the vault's share of the DAO's non-LDO treasury. The post links both readings' latest reports."
         nodes: [committee, reporting]
-        check: "The proposer starts no tranche vote while the monthly report is late, while the committee's estimate prices more than the set share of the vault (OD-62), or while Lido's reading and the policy provider's differ by more than the band (OD-84); monitoring alerts on a vote that starts (OD-122)."
+        check: "The committee's Safe creates no top-up motion while the monthly report is late, while the committee's estimate prices more than the set share of the vault (OD-62), or while Lido's reading and the policy provider's differ by more than the band (OD-84); monitoring alerts on one that starts (OD-122, OD-144)."
       - who: "LDO holders"
-        text: "LDO holders vote on the tranche in Aragon Voting. The vote names its tokens."
+        text: "The committee's Safe creates the motion through a top-up factory, and LDO holders can object for 72 hours. One motion carries several payments, each within the executor's ceiling."
         nodes: [dao]
       - who: "Aragon Voting and Aragon Finance"
         text: "When the vote executes, Aragon Finance pays the Asset Safe from the Aragon Agent: one payment for each token."
         nodes: [dao, funding, asset-safe]
-        edges: [treasury, tranche]
-        check: "INV-037: only Aragon Voting moves treasury funds to the vault. Pending: a chain check before the enabling vote."
-      - who: "Aragon Voting, for the second tranche"
-        text: "The second tranche's vote also lifts the [[launch cap]]. It starts only after the guard is set on the committee's Safe with its bypass mode off, and the check runs until the vote executes."
+        edges: [treasury, top-up]
+        check: "INV-037: only the two top-up factories and Aragon Voting move treasury funds to the vault. Owed: a chain check of the registries' roles before the enabling vote."
+      - who: "The committee's Safe, above the launch cap"
+        text: "A top-up that takes the vault above the [[launch cap]] starts only after the guard is set on the committee's Safe with its bypass mode off, and the check runs until the motion is enacted. Before that, the committee creates no top-up above the cap. Nothing on chain holds this rule: the registries' limits are above the cap (OD-145)."
         nodes: [dao, screening, committee]
         edges: [screen]
       - who: "Reporting"
-        text: "Reports count each tranche in US dollars at its value when it is funded."
+        text: "Reports count each top-up in US dollars at its value when it is funded."
         nodes: [reporting, asset-safe]
         edges: [report]
     escapes:
-      - "LDO holders vote against the tranche: nothing moves."
+      - "LDO holders object to the top-up motion: nothing moves."
       - "No motion can pull funds from the treasury, so the vault works with the funds that it has."
-    sources: ["ADR-014#d1", "ADR-014#d2", "ADR-014#d3", "ADR-014#context", "ADR-014#proposed-direction",
+    sources: ["ADR-014#d13", "ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d16", "ADR-014#d17", "ADR-009#d48", "OD-144", "OD-145", "ADR-014#d15", "ADR-014#context", "ADR-014#proposed-direction",
       "ADR-008#d32", "ADR-008#d33", "ADR-008#d34", "ADR-009#d19", "ADR-009#d21", "ADR-009#d36",
-      "ADR-009#d41", "ADR-009#d42", "ADR-010#d22", "OD-62", "OD-84", "INV-037", "runbook:Fund a tranche",
+      "ADR-009#d41", "ADR-009#d42", "ADR-010#d22", "OD-62", "OD-84", "INV-037", "runbook:Top up the vault",
       "lip:part-5", "OD-122"]
 
   - id: seed
     group: funding
     title: Launch funding and the first-loss shares
     label: specified
-    summary: "How the vault gets its first assets: the first tranche, one million dollars, in the enabling vote, and then the DAO's [[first-loss shares]]."
+    summary: "How the vault gets its first assets: the first top-up, one million dollars, by top-up motions after the enabling vote, and then the DAO's [[first-loss shares]]."
     trigger: "The enabling vote executes."
     steps:
       - who: "Aragon Voting and Aragon Finance"
-        text: "The vote's tranche item pays the first tranche to the Asset Safe through Finance. The tokens wait there, under Aragon Voting's control alone, until the Safe batches run."
+        text: "After the Safe batches ran, the committee's Safe creates the motions of the first top-up. After 72 hours without an objection, anyone enacts them, and Finance pays the Asset Safe."
         nodes: [dao, funding, asset-safe]
-        edges: [treasury, tranche]
-        check: "The first tranche is the [[launch cap]]."
+        edges: [treasury, top-up]
+        check: "The first top-up is the [[launch cap]]."
       - who: "Anyone"
         text: "Anyone sends the Safe batches, which apply the policy and grant the roles."
         nodes: [asset-safe, operator-modifier, safety-modifier, orders, first-loss]
@@ -382,9 +382,9 @@ flows:
         nodes: [committee, first-loss, monitoring]
         edges: [first-loss-shares]
         check: "INV-021. The rehearsal deploys the first-loss Safe and applies its modifier's policy."
-    sources: ["ADR-014#d2", "ADR-014#d10", "ADR-014#proposed-direction", "ADR-010#d20", "ADR-008#d13",
+    sources: ["ADR-014#d14", "ADR-014#d10", "ADR-014#proposed-direction", "ADR-010#d20", "ADR-008#d13",
       "ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-008#proposed-direction", "ADR-005#d32", "INV-021",
-      "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", "runbook:Fund a tranche"]
+      "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", "runbook:Top up the vault"]
 
   - id: first-loss-burn
     group: funding
@@ -537,7 +537,7 @@ flows:
         text: "The forum post cites the report's IPFS identifier, and the policy provider's report next to it."
         nodes: [reporting]
       - who: "Monitoring"
-        text: "Monitoring flags a late report on day 8, and the committee explains the delay on the forum. While the report is late, the proposer starts no tranche vote."
+        text: "Monitoring flags a late report on day 8, and the committee explains the delay on the forum. While the report is late, no top-up motion starts."
         nodes: [monitoring, funding]
     sources: ["ADR-009#d2", "ADR-009#d19", "ADR-009#d21", "ADR-009#d22", "ADR-009#d35", "ADR-009#d36",
       "ADR-009#d42", "ADR-009#d47", "ADR-007#d29", "ADR-014#proposed-direction", "lip:part-9"]
@@ -850,15 +850,15 @@ flows:
         text: "The mandate's Snapshot vote, the LIP, deployment without the guard, and the enabling vote."
         nodes: [dao, asset-safe, first-loss, funding]
       - who: "Phase 5: operation"
-        text: "Monthly reports, fortnightly cap readings, budget motions after events, drills, and later tranches by vote."
+        text: "Monthly reports, fortnightly cap readings, budget motions after events, drills, and top-ups by motion."
         nodes: [committee, reporting, monitoring]
-    sources: ["ADR-007#d40", "doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates", "OD-54", "OD-106"]
+    sources: ["ADR-007#d40", "doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates", "OD-54", "OD-140", "OD-146"]
 
   - id: enabling-vote
     group: deployment
     title: The enabling vote
     label: specified
-    summary: "One DAO vote, the [[enabling vote]], turns the system on and pays the first tranche."
+    summary: "One DAO vote, the [[enabling vote]], turns the system on. The first top-up follows by top-up motions."
     trigger: "The mandate is approved and phase 3 is done."
     steps:
       - who: "Lido"
@@ -873,9 +873,9 @@ flows:
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, committee, emergency-safe]
       - who: "LDO holders"
-        text: "The vote registers the universal factory and pays the first tranche. Aragon Voting runs these items itself, without Dual Governance. For the vault's Safes, it approves the hash of each Safe batch. The factory starts with its counter and its policy version at zero."
+        text: "The vote registers the universal factory and the two top-up factories, and pays nothing. Aragon Voting runs these items itself, without Dual Governance. For the vault's Safes, it approves the hash of each Safe batch. The factory starts with its counter and its policy version at zero."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
-        edges: [own, own-op, own-sf, treasury, tranche]
+        edges: [own, own-op, own-sf, treasury, top-up]
       - who: "Anyone"
         text: "After the vote executes, anyone sends each Safe batch with Voting's approval of its hash. The batches of one Safe run in nonce order."
         nodes: [asset-safe, orders, first-loss]
@@ -886,7 +886,7 @@ flows:
         edges: [motions]
     sources: ["ADR-004#d14", "ADR-007#proposed-direction", "ADR-007#confirmation", "ADR-008#d13",
       "ADR-008#d19", "ADR-008#d21", "ADR-008#proposed-direction", "ADR-010#d16", "ADR-010#d20",
-      "ADR-010#d22", "ADR-013#d6", "ADR-013#proposed-direction", "ADR-014#d1", "ADR-014#d2",
+      "ADR-010#d22", "ADR-013#d6", "ADR-013#proposed-direction", "ADR-014#d13", "ADR-014#d14",
       "ADR-014#proposed-direction", "INV-022", "INV-023", "INV-032", "doc:ROADMAP.md#roadmap",
       "doc:docs/specs/enabling-vote.md#the-vote", "doc:docs/specs/enabling-vote.md#before-the-vote",
       "doc:docs/research/easy-track-first-2026-11-05.md#easy-track", "ADR-005#d28", "ADR-005#d32",
