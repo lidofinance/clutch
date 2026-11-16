@@ -61,7 +61,7 @@ just check
 just --justfile sepolia.just check
 ```
 
-- [x] Rehearse a fresh stand on Anvil: deploy, `deploy-factory`, compile, apply, fund, the caps motion, `retire-burn-factory`, the comparison of the chain with the artifact, and 7 drills. The run checks the caps, the policy version and the retired burn factory. All pass [s4].
+- [x] Rehearse a fresh stand on Anvil: deploy, `deploy-factory`, compile, apply, fund, the caps motion, `retire-burn-factory`, the comparison of the chain with the artifact, and 7 drills. Then it sends the other public motions of the table below, with `emergency-stop` before `restart`, and compares the chain again. The run checks the caps, the policy version, the retired burn factory and the operator module. All pass [s4].
 
 ```sh
 just --justfile sepolia.just rehearse
@@ -188,14 +188,14 @@ just --justfile sepolia.just enact <id>
 just --justfile sepolia.just emergency-stop
 ```
 
-- [x] Compare the chain with the artifact again: 0 differences at block `12147931`. After the motions, `policyVersion()` is `4`, the First-loss Safe holds 1 USD share less, and the ETH deposit queue holds 0.005 WETH [s6].
-- [x] Run the stand suites again: 16 suites, 101 of 101 tests at block `12147931`. The motion `insurance-funding` left 0.0073 WETH on the Asset Safe, so `test_FUND_first_transfer_logs_nonces_and_unchanged_configuration` gives the Asset Safe 0.01 WETH on the fork when it holds less [s6].
+- [x] Compare the chain with the artifact again: 0 differences. The comparison reads the latest block. It ran just after block `12147931`, and again at block `12148104`. The stand's contracts logged no event between the two blocks. After the motions, `policyVersion()` is `4`, the First-loss Safe holds 1 USD share less, and the ETH deposit queue holds 0.005 WETH [s6].
+- [x] Run the stand suites again: 16 suites, 101 of 101 tests at block `12147931`. The motion `insurance-funding` left 0.0073 WETH on the Asset Safe, so `test_FUND_first_transfer_logs_nonces_and_unchanged_configuration` gives the Asset Safe 0.01 WETH on the fork when it holds less. No stand suite checks the public stand's balance now: read it before a public transfer [s6].
 
 ## Record Deploy Artifacts
 
 - [x] Copy the new manifest fields to `scripts/fixtures/sepolia-stand-manifest.json`. Remove the synthetic addresses from `verify-test-payload.test.ts`.
 - [x] `verify-deployment.ts` checks the initial deployment at its last block. It skips the factory and the queues, which came later; the stand suites check them. Its burn-factory checks stay, because the initial deployment registered the burn factory.
-- [ ] Publish the 14 roles to the Zodiac workspace with `constellation-resolve` and `constellation-publish` [s2].
+- [ ] Publish the 14 roles to the Zodiac workspace with `constellation-resolve` and `constellation-publish` [s2]. The workspace names each allowance, so the declaration has no `insurance_weth` and `insurance_usdc`: a derived key has no name. The payload check accepts these two keys on the chain, and refuses any other allowance that the declaration does not name. Read the resolve output before publish. If it plans a change to a derived key, stop.
 - [x] Change the [stand plan](sepolia-stand-plan.md), the [test plan](sepolia-test-plan.md), the [setup checklist](sepolia-setup-checklist.md) and ADR 015 for the new roles.
 - [x] Record the stand owner's choices of scope and caps in the decision log.
 

@@ -60,11 +60,7 @@ def public_steps(env):
     stand = json.loads(Path(env["SEPOLIA_MANIFEST"]).read_text())
     call = lambda to, signature, *args: subprocess.check_output(
         ["cast", "call", to, signature, *args, "--rpc-url", LOCAL], text=True).split()[0]
-    run(["just", "--justfile", "sepolia.just", "motion", "caps"], "caps-motion", recipe)
-    motion = int(call(stand["easyTrack"], "motionsCount()(uint256)")) - 1
-    rpc("evm_increaseTime", [int(call(stand["easyTrack"], "motionDuration()(uint256)"))])
-    rpc("evm_mine", [])
-    run(["just", "--justfile", "sepolia.just", "enact", str(motion)], "caps-enact", recipe)
+    motion_and_enact("caps", recipe, call, stand)
     run(["just", "--justfile", "sepolia.just", "retire-burn-factory"], "retire-burn-factory", recipe)
     first_loss = stand["firstLossSafe"][2:].lower()
     for token, cap in [("weth", 10**18), ("usdc", 10**9)]:
@@ -77,6 +73,32 @@ def public_steps(env):
             or call(stand["easyTrack"], "evmScriptFactories(address)(bool)", stand["burnFactory"]) != "false"):
         raise RuntimeError("The public steps left an unexpected policy version or burn factory")
     run(["bun", "-e", DIFF], "diff", recipe)
+
+
+def motion_and_enact(name, recipe, call, stand):
+    run(["just", "--justfile", "sepolia.just", "motion", name], f"motion-{name}", recipe)
+    motion = int(call(stand["easyTrack"], "motionsCount()(uint256)")) - 1
+    rpc("evm_increaseTime", [int(call(stand["easyTrack"], "motionDuration()(uint256)"))])
+    rpc("evm_mine", [])
+    run(["just", "--justfile", "sepolia.just", "enact", str(motion)], f"enact-{name}", recipe)
+
+
+def public_motions(env):
+    """One motion for each other motion role, as the stand owner sent them; the operator stops before `restart`."""
+    recipe = {**env, "SEPOLIA_RPC": LOCAL, "SEPOLIA_SIGNER": "--unlocked", "SEPOLIA_MOTIONS": str(CACHE / "motions")}
+    stand = json.loads(Path(env["SEPOLIA_MANIFEST"]).read_text())
+    call = lambda to, signature, *args: subprocess.check_output(
+        ["cast", "call", to, signature, *args, "--rpc-url", LOCAL], text=True).split()[0]
+    for name in ["insurance-funding", "insurance", "first-loss-burn", "approvals", "orders-governance", "exit-governance", "insurance-governance"]:
+        motion_and_enact(name, recipe, call, stand)
+    run(["just", "--justfile", "sepolia.just", "emergency-stop"], "emergency-stop", recipe)
+    if call(stand["assetSafe"], "isModuleEnabled(address)(bool)", stand["operatorModifier"]) != "false":
+        raise RuntimeError("emergency-stop left the operator modifier enabled")
+    motion_and_enact("restart", recipe, call, stand)
+    if (call(stand["assetSafe"], "isModuleEnabled(address)(bool)", stand["operatorModifier"]) != "true"
+            or call(stand["universalFactory"], "policyVersion()(uint256)") != "4"):
+        raise RuntimeError("The public motions left an unexpected operator module or policy version")
+    run(["bun", "-e", DIFF], "diff-motions", recipe)
 
 
 # The chain against the artifact, every role, module and allowance, as `constellation` compares the public stand.
@@ -131,6 +153,7 @@ def main():
         rpc("anvil_setAutomine", [True])
         run(["forge", "test", "--match-contract", "SepoliaStandTest", "--hardfork", "amsterdam", "-vv"], "drills", env)
         validate_drills((CACHE / "drills.log").read_text())
+        public_motions(env)
         stages = {}
         for name in ["DeploySepolia", "DeployFactorySepolia", "ApplySepolia", "FundSepolia"]:
             records = json.loads((CACHE / f"broadcast/{name}.s.sol/11155111/run-latest.json").read_text())

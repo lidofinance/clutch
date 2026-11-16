@@ -101,5 +101,16 @@ export function checkPayload(payload: any, manifest: Record<string, any>, runtim
   const expected = compile(policyNodes(manifest, runtime), manifest, {});
   const wiring = (artifact: typeof candidate) => artifact.modifiers.map(({ ref, address, owner, avatar, target }) => ({ ref, address, owner, avatar, target }));
   if (JSON.stringify(candidate.calls) !== JSON.stringify(expected.calls) || JSON.stringify(wiring(candidate)) !== JSON.stringify(wiring(expected))) throw new Error("Serialized constellation differs from the Sepolia policy");
+  // A workspace names each allowance, so it cannot declare a derived key. A motion sets those keys; any other
+  // allowance on the chain must be in the declaration.
+  if (runtime) {
+    const id = (modifier: string, allowanceKey: string) => `${modifier.toLowerCase()}:${allowanceKey.toLowerCase()}`;
+    const known = new Set([
+      ...Object.values(nodes).flatMap((node: any) => Object.keys(node.allowances ?? {}).map((name) => id(node.address, key(name)))),
+      ...build(manifest).modifiers.flatMap((mod) => mod.allowances.filter((a) => a.key.startsWith("0x6b3a")).map((a) => id(mod.address, a.key))),
+    ]);
+    const undeclared = runtime.filter((a) => !known.has(id(a.modifier, a.key)));
+    if (undeclared.length) throw new Error(`Allowance on the chain without a declaration: ${undeclared.map((a) => a.key).join(", ")}`);
+  }
   return expected;
 }

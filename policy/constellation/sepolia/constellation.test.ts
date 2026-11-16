@@ -128,3 +128,18 @@ test("keeps observed allowance balances and timestamps instead of resetting budg
   expect(() => checkPayload(payload, manifest)).toThrow("differs");
   expect(() => createNodes(manifest, workspace, [])).toThrow("Missing allowance");
 });
+
+test("accepts the derived insurance caps undeclared and refuses any other undeclared allowance", async () => {
+  const named = ["orders_weth", "orders_usdc"].map((name) => ({
+    modifier: manifest.operatorModifier, key: "0x" + Buffer.from(name).toString("hex").padEnd(64, "0"), balance: "1", timestamp: "0",
+  }));
+  // The derived key: "k:", the First-loss Safe, then the first ten bytes of the token.
+  const derived = (token: string) => "0x6b3a" + manifest.firstLossSafe.slice(2).toLowerCase() + token.slice(2, 22).toLowerCase();
+  const caps = [network.tokens.weth.address, network.tokens.usdc.address].map((token) => ({ modifier: manifest.operatorModifier, key: derived(token), balance: "1", timestamp: "0" }));
+  const { payload } = await capturePayload(createNodes(manifest, workspace, named));
+  expect(Object.keys(payload.specification.find((n: any) => n.ref === "operator_modifier").allowances)).toEqual(["orders_weth", "orders_usdc"]);
+  expect(checkPayload(payload, manifest, [...named, ...caps]).calls.to).toHaveLength(100);
+  const stray = { ...caps[0], key: derived(network.tokens.weth.address).slice(0, -2) + "ff" };
+  expect(() => checkPayload(payload, manifest, [...named, ...caps, stray])).toThrow("without a declaration");
+  expect(() => checkPayload(payload, manifest, [...named, { ...caps[0], modifier: manifest.firstLossModifier }])).toThrow("without a declaration");
+});

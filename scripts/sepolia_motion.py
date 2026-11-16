@@ -18,11 +18,12 @@ FUNDING = str(5 * 10**15)
 
 
 def cast(*args):
-    return subprocess.check_output(["cast", *args], text=True).strip()
+    # Cast reads the RPC from the environment, so a failed call prints no URL and no key.
+    return subprocess.check_output(["cast", *args], text=True, env={**os.environ, "ETH_RPC_URL": RPC}).strip()
 
 
 def call(to, signature, *args):
-    return cast("call", to, signature, *args, "--rpc-url", RPC).split()[0]
+    return cast("call", to, signature, *args).split()[0]
 
 
 def writes(name, m):
@@ -31,7 +32,7 @@ def writes(name, m):
     key = lambda token: "0x6b3a" + fl + token.lower()[2:22]
     cap = lambda token, amount: cast("calldata", "setAllowance(bytes32,uint128,uint128,uint128,uint64,uint64)", key(token), amount, amount, amount, "2592000", "0")
     scope = lambda role: cast("calldata", "scopeTarget(bytes32,address)", cast("format-bytes32-string", role), weth)
-    return {
+    motions = {
         "caps": [(op, "governance", op, cap(weth, str(10**18))), (op, "governance", op, cap(usdc, str(10**9)))],
         "insurance-funding": [(op, "insurance-funding", weth, cast("calldata", "transfer(address,uint256)", m["firstLossSafe"], FUNDING))],
         "insurance": [
@@ -44,7 +45,10 @@ def writes(name, m):
         "exit-governance": [(m["safetyModifier"], "exit-governance", m["safetyModifier"], scope("asset-emergency"))],
         "insurance-governance": [(m["firstLossModifier"], "insurance-governance", m["firstLossModifier"], scope("insurance"))],
         "restart": [(m["safetyModifier"], "restart", m["assetSafe"], cast("calldata", "enableModule(address)", op))],
-    }[name]
+    }
+    if name not in motions:
+        raise SystemExit(f"Unknown motion {name!r}; expected one of: {', '.join(motions)}")
+    return motions[name]
 
 
 def main():
@@ -57,7 +61,7 @@ def main():
                    call(uf, "epoch()(uint256)"), call(uf, "policyVersion()(uint256)"), f"[{items}]"))
     elif command == "stop":
         # The Emergency Safe's asset-emergency role disables the operator modifier on the Asset Safe.
-        modules = cast("call", m["assetSafe"], "getModulesPaginated(address,uint256)(address[],address)", SENTINEL, "10", "--rpc-url", RPC).splitlines()[0].strip("[]").split(", ")
+        modules = cast("call", m["assetSafe"], "getModulesPaginated(address,uint256)(address[],address)", SENTINEL, "100").splitlines()[0].strip("[]").split(", ")
         previous = SENTINEL
         for module in modules:
             if module.lower() == m["operatorModifier"].lower():

@@ -9,6 +9,7 @@ check:
     PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_protocol_fees.py
     PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_cow_order.py
     PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_workflow.py
+    PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_motion.py
     cd policy/constellation && bun test sepolia
     cd policy/constellation && ./node_modules/.bin/tsc --noEmit --module esnext --moduleResolution bundler --target esnext --resolveJsonModule --esModuleInterop --skipLibCheck --strict sepolia/*.ts
 
@@ -86,7 +87,7 @@ retire-executor-module: _guard
     python3 scripts/sepolia_receipts.py fresh $FOUNDRY_BROADCAST/ApplySepolia.s.sol/11155111/run-latest.json
     executor=$(jq -r .easyTrackExecutor $m | tr A-F a-f)
     disable() { local prev=0x0000000000000000000000000000000000000001
-        for a in $(cast call $1 'getModulesPaginated(address,uint256)(address[],address)' $prev 10 --rpc-url "$SEPOLIA_RPC" | head -1 | tr -d '[] ' | tr , ' '); do
+        for a in $(cast call $1 'getModulesPaginated(address,uint256)(address[],address)' $prev 100 --rpc-url "$SEPOLIA_RPC" | head -1 | tr -d '[] ' | tr , ' '); do
             [ "$(echo $a | tr A-F a-f)" = "$executor" ] && { cast calldata 'disableModule(address,address)' $prev $executor; return; }; prev=$a; done
         echo "Executor is not a module of $1" >&2; exit 1; }
     op=$(disable $(jq -r .operatorModifier $m)); fl=$(disable $(jq -r .firstLossModifier $m))
