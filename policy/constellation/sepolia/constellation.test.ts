@@ -33,8 +33,11 @@ test("real SDK capture binds only existing accounts and uses the account-specifi
     ]);
     expect(roles.flatMap((n: any) => Object.values(n.roles).map((r: any) => r.policy))).toEqual([
       "asset-operator", "governance", "insurance-funding", "asset-emergency", "restart", "exit-governance",
-      "orders-operator", "orders-emergency", "governance", "approvals", "first-loss", "first-loss-burn", "insurance", "insurance-governance",
+      "orders-operator", "orders-emergency", "orders-governance", "approvals", "first-loss", "first-loss-burn", "insurance", "insurance-governance",
     ].map((name) => `Clutch Sepolia — ${name}`));
+    // The workspace keeps one policy per label (HTTP 400 for a shared governance label, 2026-11-16).
+    const labels = roles.flatMap((n: any) => Object.values(n.roles).map((r: any) => r.policy));
+    expect(new Set(labels).size).toBe(labels.length);
     expect(roles.map((n: any) => n.avatar)).toEqual(["$asset_safe", "$asset_safe", "$orders_safe", "$first_loss_safe"]);
     expect(checkPayload(payload, manifest).calls.to).toHaveLength(100);
   } finally { globalThis.fetch = fetch; }
