@@ -7,7 +7,7 @@ import { diffPolicy } from "./diff";
 
 const ROOT = path.resolve(import.meta.dir, "../../..");
 const OUTPUT = path.join(ROOT, "cache/sepolia/constellation");
-const READS = new Set(["eth_chainId", "eth_blockNumber", "eth_getBlockByNumber", "eth_getCode", "eth_getLogs", "eth_getStorageAt", "eth_getBalance", "eth_call"]);
+const READS = new Set(["eth_chainId", "eth_blockNumber", "eth_getBlockByNumber", "eth_getCode", "eth_getLogs", "eth_getStorageAt", "eth_call"]);
 
 export function readOnlyRpc(endpoint: string) {
   let sequence = 0;

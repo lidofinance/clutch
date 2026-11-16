@@ -89,6 +89,11 @@ export function checkPayload(payload: any, manifest: Record<string, any>, runtim
     return value;
   }
   if (payload.chain !== 11155111 || payload.specification.some((node: any) => node.chain !== 11155111 || !node.address || "nonce" in node)) throw new Error("Only existing Sepolia accounts may be bound");
+  const binding = (ref: string, type: string, address: string) => `${ref}:${type}:${String(address).toLowerCase()}`;
+  const accounts = [["asset_safe", "SAFE", manifest.assetSafe], ["orders_safe", "SAFE", manifest.ordersSafe], ["first_loss_safe", "SAFE", manifest.firstLossSafe],
+    ["operator_modifier", "ROLES", manifest.operatorModifier], ["safety_modifier", "ROLES", manifest.safetyModifier],
+    ["orders_modifier", "ROLES", manifest.ordersModifier], ["first_loss_modifier", "ROLES", manifest.firstLossModifier]].map(([ref, type, address]) => binding(ref, type, address)).sort();
+  if (JSON.stringify(payload.specification.map((node: any) => binding(node.ref, node.type, node.address)).sort()) !== JSON.stringify(accounts)) throw new Error("The payload must bind exactly the stand's seven accounts");
   for (const node of payload.specification.filter((item: any) => item.type === "SAFE")) {
     if (Object.keys(node).some((field) => !["ref", "type", "label", "chain", "address", "vault"].includes(field))) throw new Error("Safe configuration overrides refused");
     if (node.vault !== true) throw new Error("Each Safe must be a workspace vault");

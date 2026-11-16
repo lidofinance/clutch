@@ -1122,7 +1122,7 @@
     "assumption:harness-faithful": {
       "content": "47a244ba09b3323e",
       "sources": {
-        "doc:test/README.md#what-is-real-and-what-is-mocked": "e30211b689cab4c7",
+        "doc:test/README.md#what-is-real-and-what-is-mocked": "ced2661a9513b6f5",
         "lip:part-1": "040aa5e2039941c3",
         "test:test_02_enabling_vote_end_to_end": "9c32d74617af8705"
       }
@@ -2436,7 +2436,7 @@
         "ADR-004#d3": "80c6fff28979dc65",
         "ADR-004#d4": "8f1f54dd505057bf",
         "ADR-004#d7": "59b574bbc93df2c8",
-        "doc:test/README.md#what-is-real-and-what-is-mocked": "e30211b689cab4c7"
+        "doc:test/README.md#what-is-real-and-what-is-mocked": "ced2661a9513b6f5"
       }
     },
     "reuse:the-enabling-vote-script": {

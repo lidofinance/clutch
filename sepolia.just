@@ -10,9 +10,6 @@ forge := 'forge script --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" ' + signer 
 safe_exec := '''execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)'''
 safe_tail := '0 0 0 0 0x0000000000000000000000000000000000000000 0x0000000000000000000000000000000000000000 0x000000000000000000000000${SEPOLIA_SENDER:2}0000000000000000000000000000000000000000000000000000000000000000' + '01 --rpc-url "$SEPOLIA_RPC" ' + signer + ' --from "$SEPOLIA_SENDER"'
 
-preflight:
-    bun policy/constellation/sepolia/preflight.ts
-
 check:
     PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_operational_guards.py
     PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_sepolia_workflow.py
@@ -33,9 +30,10 @@ _guard:
     @test "${CLUTCH_SEPOLIA:-}" = 1
     @test -z "${CI:-}${PRIVATE_KEY:-}${EXECUTOR_KEY:-}"
     @test -n "${SEPOLIA_ACCOUNT:-}" && test -n "${SEPOLIA_SENDER:-}" && test -n "${SEPOLIA_RPC:-}"
+    @test -z "${SEPOLIA_SIGNER:-}" || { test "$SEPOLIA_SIGNER" = --unlocked && case "$SEPOLIA_RPC" in http://127.0.0.1:*) ;; *) false ;; esac; }
 
-# The stand, its deposit queues and the universal factory.
-deploy: _guard preflight
+# The stand, its deposit queues and the universal factory. The script checks the chain and each dependency's code hash first.
+deploy: _guard
     @test ! -e {{manifest}} || { echo 'Manifest exists: this stand is deployed.' >&2; exit 1; }
     {{forge}} script/sepolia/DeploySepolia.s.sol --verify
 

@@ -130,9 +130,8 @@ Foundry asks for the keystore password [s5].
 | Recipe | What it does | Public |
 |---|---|---|
 | `check` | Runs the offline tests of the Sepolia scripts and policy code | No |
-| `preflight` | Checks the chain ID and the code hash of each pinned dependency. Reads the sender's balance | No |
 | `rehearse` | Builds a fresh stand on a local Anvil fork and runs deploy, compile, apply, fund, every motion, the comparison of the chain with the artifact and the drills. It stops Anvil after the run | No |
-| `deploy` | Runs `preflight`, then deploys the stand, the deposit queues and the universal factory in one script. It writes `cache/sepolia/manifest.json`, and refuses to run when that file exists | Yes |
+| `deploy` | Checks the chain ID and the code hash of each pinned dependency, then deploys the stand, the deposit queues and the universal factory in one script. It writes `cache/sepolia/manifest.json`, and refuses to run when that file exists | Yes |
 | `compile` | Compiles the policy for the manifest into `cache/sepolia/policy.json` | No |
 | `apply` | Compiles the policy, then applies the artifact through test Voting | Yes |
 | `fund` | Wraps Sepolia ETH and sends the WETH to the Asset Safe. Sends test shares to the First-loss Safe | Yes |
@@ -144,7 +143,7 @@ Foundry asks for the keystore password [s5].
 
 Rules for each run:
 
-1. Run `check`, `preflight` and `rehearse` before a public run. The rehearsal must pass.
+1. Run `check` and `rehearse` before a public run. The rehearsal must pass.
 2. `deploy` stops if a manifest exists. The current stand has a manifest. A second stand needs a new decision (OD-150 A) [s5].
 3. No recipe resumes an interrupted public run. Inspect the receipts of the run and the chain. Then run the recipe again from the start. A second `fund` wraps and sends the full amounts again.
 4. Enact each policy motion before you create the next one, because a policy motion changes the policy version.

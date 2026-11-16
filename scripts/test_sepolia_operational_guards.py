@@ -150,6 +150,10 @@ globalThis.fetch = async (url, options) => {
         valid = {'CLUTCH_SEPOLIA': '1', 'SEPOLIA_ACCOUNT': 'fixture-account',
                  'SEPOLIA_SENDER': self.sender, 'SEPOLIA_RPC': 'https://rpc.invalid'}
         self.invoke(command, valid, 'public recipe guard positive control')
+        self.invoke(command, {**valid, 'SEPOLIA_SIGNER': '--unlocked', 'SEPOLIA_RPC': 'http://127.0.0.1:8547'}, 'local rehearsal signer')
+        for signer, rpc in [('--private-key test-value', 'http://127.0.0.1:8547'), ('--unlocked', 'https://rpc.invalid')]:
+            with self.subTest(signer=signer, rpc=rpc):
+                self.invoke(command, {**valid, 'SEPOLIA_SIGNER': signer, 'SEPOLIA_RPC': rpc}, 'public recipe signer ' + signer, 'failed')
         cases = [(name, None) for name in valid] + [('CLUTCH_SEPOLIA', '2'), ('CI', 'true'), ('PRIVATE_KEY', 'private-test-value'), ('EXECUTOR_KEY', 'executor-test-value')]
         for key, value in cases:
             with self.subTest(key=key):

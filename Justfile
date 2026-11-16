@@ -33,7 +33,7 @@ regen: policy-compile
 	{{py}} scripts/build_onboarding.py
 
 # Run every check that CI runs, except the fork suite
-check: check-docs check-policy check-browser check-workflows
+check: check-docs check-policy check-sepolia check-browser check-workflows
 
 # The docs bundle, the generated files, the repository checks and their tests
 check-docs:
@@ -50,6 +50,10 @@ check-docs:
 # The policy artifacts equal a fresh compile; the compiler's tests; the type check
 check-policy:
 	cd policy/constellation && bun install --frozen-lockfile --ignore-scripts && bun compiler/compile.ts --manifest manifests/fork-25946643.json --check && bun compiler/compile.ts --manifest manifests/rehearsal-26249900.json --check && bun compiler/motion.ts example --check && bun compiler/launch.ts write --check && bun test compiler && ./node_modules/.bin/tsc --noEmit -p .
+
+# The Sepolia stand's offline tests and type check
+check-sepolia:
+	just --justfile sepolia.just check
 
 # Every control of the onboarding guide, in headless Chromium
 check-browser:

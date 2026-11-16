@@ -18,8 +18,11 @@ FUNDING = str(5 * 10**15)
 
 
 def cast(*args):
-    # Cast reads the RPC from the environment, so a failed call prints no URL and no key.
-    return subprocess.check_output(["cast", *args], text=True, env={**os.environ, "ETH_RPC_URL": RPC}).strip()
+    # Some cast versions print the RPC URL, with its key, in an error. Mask it in every failure.
+    result = subprocess.run(["cast", *args], capture_output=True, text=True, env={**os.environ, "ETH_RPC_URL": RPC})
+    if result.returncode:
+        raise SystemExit(f"cast {args[0]} failed: {result.stderr.replace(RPC, '<RPC>').strip()}")
+    return result.stdout.strip()
 
 
 def call(to, signature, *args):

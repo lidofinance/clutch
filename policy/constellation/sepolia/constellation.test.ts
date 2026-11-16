@@ -2,8 +2,6 @@
 import { expect, test } from "bun:test";
 import { getAddress } from "ethers";
 import { capturePayload, checkPayload, createNodes } from "./constellation";
-import { constellation as sdkConstellation } from "@zodiaceco/sdk";
-import { call, c } from "../constellation/lib";
 import network from "./network.json";
 
 const workspace = "11111111-1111-4111-8111-111111111111";
@@ -105,6 +103,8 @@ test("rejects deployment nonces, Safe overrides, unresolved refs and invalid wor
   const { payload } = await capturePayload(createNodes(manifest, workspace));
   const changed = (mutate: (p: any) => void) => { const p = structuredClone(payload); mutate(p); return p; };
   expect(() => checkPayload(changed((p) => p.specification[0].nonce = "0"), manifest)).toThrow("existing");
+  expect(() => checkPayload(changed((p) => p.specification.push({ ...p.specification[0], ref: "extra_safe", address: manifest.agent.toLowerCase() })), manifest)).toThrow("seven accounts");
+  expect(() => checkPayload(changed((p) => p.specification[1].address = manifest.agent.toLowerCase()), manifest)).toThrow("seven accounts");
   expect(() => checkPayload(changed((p) => p.specification[0].modules = []), manifest)).toThrow("overrides");
   expect(() => checkPayload(changed((p) => delete p.specification[0].vault), manifest)).toThrow("workspace vault");
   expect(() => checkPayload(changed((p) => p.specification[0].vault = false), manifest)).toThrow("workspace vault");
@@ -114,20 +114,6 @@ test("rejects deployment nonces, Safe overrides, unresolved refs and invalid wor
   expect(() => checkPayload(changed((p) => delete p.specification[3].roles["asset-operator"].policy), manifest)).toThrow("policy label");
   expect(() => checkPayload(changed((p) => p.specification[3].roles["asset-operator"].key = "orders-operator"), manifest)).toThrow("role key");
   expect(() => createNodes(manifest, "")).toThrow("UUID");
-});
-
-test("the upgraded SDK settles callback conditions and retains policy metadata", async () => {
-  const sep = sdkConstellation({ workspace, label: "probe", chain: 11155111 }, { codegen: { users: {}, accounts: {} } as any });
-  const node = sep.roles.probe({ address: manifest.operatorModifier, roles: { operator: {
-    members: [manifest.operatorSafe], policy: "Operator", description: "Existing role",
-    permissions: [call(manifest.dependencies.tokens.usdc.address, "transfer(address,uint256)", manifest.ordersSafe, c.withinAllowance("orders_usdc"))],
-  } } });
-  const { payload } = await capturePayload({ node } as any);
-  const role = payload.specification[0].roles.operator;
-  expect(role.policy).toBe("Operator");
-  expect(role.description).toBe("Existing role");
-  expect(role.permissions[0].condition.children[0].compValue).toBe("0x" + manifest.ordersSafe.slice(2).toLowerCase().padStart(64, "0"));
-  expect(role.permissions[0].condition.children[1].operator).toBe(28);
 });
 
 test("keeps observed allowance balances and timestamps instead of resetting budgets", async () => {

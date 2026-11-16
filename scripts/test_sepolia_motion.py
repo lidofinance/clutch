@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,15 +34,21 @@ class SepoliaMotionTest(unittest.TestCase):
         output = subprocess.check_output(["bun", "-e", ARTIFACT, str(FIXTURE)], cwd=ROOT / "policy/constellation", text=True)
         cls.modifiers = {mod["address"]: mod for mod in json.loads(output)}
 
-    def run_script(self, *args, rpc="http://127.0.0.1:9"):
-        env = {**os.environ, "SEPOLIA_RPC": rpc, "SEPOLIA_MANIFEST": str(FIXTURE)}
+    def run_script(self, *args, rpc="http://127.0.0.1:9", path=os.environ["PATH"]):
+        env = {**os.environ, "SEPOLIA_RPC": rpc, "SEPOLIA_MANIFEST": str(FIXTURE), "PATH": path}
         return subprocess.run([sys.executable, str(ROOT / "scripts/sepolia_motion.py"), *args], env=env, capture_output=True, text=True, timeout=60)
 
     def test_failed_rpc_call_prints_no_url(self):
-        for args in [("input", "caps"), ("stop",)]:
-            result = self.run_script(*args, rpc="http://127.0.0.1:9/v2/SECRETKEY")
-            self.assertNotEqual(result.returncode, 0)
-            self.assertNotIn("SECRETKEY", result.stdout + result.stderr)
+        # A cast that prints its RPC URL in the error, as some cast versions do.
+        with tempfile.TemporaryDirectory() as bin_dir:
+            fake = Path(bin_dir) / "cast"
+            fake.write_text('#!/bin/sh\necho "error sending request for url ($ETH_RPC_URL)" >&2\nexit 1\n')
+            fake.chmod(0o755)
+            for args in [("input", "caps"), ("stop",)]:
+                result = self.run_script(*args, rpc="http://127.0.0.1:9/v2/SECRETKEY", path=f"{bin_dir}:{os.environ['PATH']}")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("<RPC>", result.stderr)
+                self.assertNotIn("SECRETKEY", result.stdout + result.stderr)
 
     def test_unknown_motion_names_the_motions(self):
         result = self.run_script("input", "nope")
