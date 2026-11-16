@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-16T19:54:04Z
+  at: 2026-11-16T20:11:16Z
 verified: []
 sources:
   - id: s1
@@ -178,6 +178,9 @@ sources:
   - id: s56
     resource: "urn:clutch:interview:2026-11-16-sepolia-decisions"
     title: EM's choices for OD-147, OD-148 and OD-151 and EM's confirmation of OD-152, 2026-11-16; the transcript is not in the repository
+  - id: s57
+    resource: "urn:clutch:interview:2026-11-16-sepolia-decisions-second-answer"
+    title: EM's confirmation of the OD-151 reading, EM's choice for OD-153 and EM's question on the Sepolia guard, 2026-11-16; the transcript is not in the repository
 ---
 
 # Decision log
@@ -187,6 +190,28 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`
+
+The agent reported what it had recorded, and three points that EM's answer had left open. EM answered each [s57].
+
+On the agent's reading of "OD-154" as OD-151:
+
+> you were right, it was a typo, thanks!
+
+On OD-153, where the agent recommended A:
+
+> let's chose A
+
+On the Sepolia guard, which required the branch `testnet/sepolia` and so refused a run from `main` after the merge of pull request #44:
+
+> can we allow both?
+
+Recorded as:
+
+- OD-151 B stands as EM's decision. The reading in the entry below is confirmed.
+- OD-153 A: on mainnet the orders modifier's governance role takes the key `orders-governance`, as on the stand, in the same change that brings the four account keys of OD-152 ([ADR 015](/adr/015-tests-on-sepolia.md#decision), decision 7). `main` keeps `governance` on both modifiers until that change.
+- The Sepolia guard accepts `testnet/sepolia` and `main`. The agent took EM's question as the request, and changed the guard and its tests. On each branch the commit must be on the same branch on GitHub, so a local `main` at a commit that is not merged fails. This refines OD-147 B (decision 4).
 
 ## 2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet
 

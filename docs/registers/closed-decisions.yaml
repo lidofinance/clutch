@@ -1119,6 +1119,7 @@
   closed: 2026-11-16
   log:
     - "2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet"
+    - "2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`"
   adr: [ADR-015]
 
 - id: OD-148
@@ -1147,6 +1148,7 @@
   closed: 2026-11-16
   log:
     - "2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet"
+    - "2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`"
   adr: [ADR-015]
 
 - id: OD-152
@@ -1155,4 +1157,11 @@
   log:
     - "2026-10-22 — OD-149, OD-150 and OD-152: the Sepolia role-key migration"
     - "2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet"
+  adr: [ADR-015]
+
+- id: OD-153
+  question: "Which key does the orders modifier's governance role take on mainnet?"
+  closed: 2026-11-16
+  log:
+    - "2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`"
   adr: [ADR-015]

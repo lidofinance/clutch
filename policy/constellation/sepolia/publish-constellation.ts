@@ -9,7 +9,10 @@ import { diffPolicy } from "./diff";
 import { readOnlyRpc } from "./prepare-constellation";
 
 const ROOT = path.resolve(import.meta.dir, "../../..");
-const BRANCH = "testnet/sepolia";
+/** The stand's branch, and `main` once the stand merges (ADR 015, decision 4). */
+const BRANCHES = ["testnet/sepolia", "main"];
+/** The remote branch that must hold the commit: the checked-out branch's own. */
+export const remoteOf = (branch: string) => (BRANCHES.includes(branch) ? branch : BRANCHES[0]);
 const DEFAULT_API = "https://app.zodiac.eco/api/v1";
 
 export type Git = { branch: string; dirty: boolean; pushed: boolean; commit: string };
@@ -25,14 +28,14 @@ export type Deps = {
   now: () => Date;
 };
 
-/** ADR 015: a human publishes to the Sepolia workspace from a pushed, clean testnet/sepolia. */
+/** ADR 015: a human publishes to the Sepolia workspace from a pushed, clean testnet/sepolia or main. */
 export function sepoliaRefusals(env: Record<string, string | undefined>, git: Git, workspace: string): string[] {
   const reasons: string[] = [];
   if (env.CLUTCH_SEPOLIA_PUSH !== "1") reasons.push("set CLUTCH_SEPOLIA_PUSH=1 to confirm a human publication to the Sepolia workspace");
   if (env.CI) reasons.push("CI never calls the hosted app");
-  if (git.branch !== BRANCH) reasons.push(`check out ${BRANCH}, not ${git.branch || "a detached HEAD"}`);
+  if (!BRANCHES.includes(git.branch)) reasons.push(`check out ${BRANCHES.join(" or ")}, not ${git.branch || "a detached HEAD"}`);
   if (git.dirty) reasons.push("commit or remove the local changes first");
-  if (!git.pushed) reasons.push(`push the commit to origin/${BRANCH} first`);
+  if (!git.pushed) reasons.push(`push the commit to origin/${remoteOf(git.branch)} first`);
   if (!env.SEPOLIA_ZODIAC_API_KEY) reasons.push("set SEPOLIA_ZODIAC_API_KEY to the key for the Sepolia workspace");
   if (env.SEPOLIA_ZODIAC_WORKSPACE !== workspace) reasons.push("set SEPOLIA_ZODIAC_WORKSPACE to the workspace of the prepared payload");
   if (!(env.SEPOLIA_ZODIAC_API_URL ?? DEFAULT_API).startsWith("https://")) reasons.push("SEPOLIA_ZODIAC_API_URL must use https");
@@ -169,10 +172,12 @@ export async function run(command: string, deps: Deps): Promise<number> {
 
 function gitState(): Git {
   const git = (...args: string[]) => Bun.spawnSync(["git", ...args], { cwd: ROOT });
+  const branch = git("rev-parse", "--abbrev-ref", "HEAD").stdout.toString().trim();
   return {
-    branch: git("rev-parse", "--abbrev-ref", "HEAD").stdout.toString().trim(),
+    branch,
     dirty: git("status", "--porcelain").stdout.toString().trim() !== "",
-    pushed: git("merge-base", "--is-ancestor", "HEAD", `origin/${BRANCH}`).exitCode === 0,
+    // A commit on `main` must be on origin/main: a local `main` at an unmerged commit of the stand's branch fails.
+    pushed: git("merge-base", "--is-ancestor", "HEAD", `origin/${remoteOf(branch)}`).exitCode === 0,
     commit: git("rev-parse", "HEAD").stdout.toString().trim(),
   };
 }

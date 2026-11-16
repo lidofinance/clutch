@@ -6,8 +6,8 @@ tags: [sepolia, deployment, testing, cow, first-loss]
 status: draft
 review_status: slop
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-16T17:54:56Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-16T20:11:16Z
 verified: []
 sources:
   - id: s1
@@ -88,7 +88,7 @@ The four modifiers hold 14 roles. The universal factory holds the nine motion ro
 | first-loss | `first-loss` | — | `first-loss-burn`, `insurance`, `insurance-governance` |
 
 The Easy Track executor holds no role and is not a module of a modifier. The burn factory is retired [s6].
-The orders modifier's governance role has the key `orders-governance`. The [decision log](/registers/decision-log.md#2026-11-16--yt-renames-the-orders-modifiers-governance-role-on-the-sepolia-stand) records why. On `main`, the governance role has the key `governance` on both modifiers [s6].
+The orders modifier's governance role has the key `orders-governance`. The [decision log](/registers/decision-log.md#2026-11-16--yt-renames-the-orders-modifiers-governance-role-on-the-sepolia-stand) records why. On `main`, the governance role has the key `governance` on both modifiers until the mainnet policy takes `orders-governance` (OD-153 A) [s5][s6].
 
 ## Addresses
 
@@ -183,7 +183,7 @@ Only the stand owner runs `constellation-resolve` and `constellation-publish`, w
 Both recipes refuse to run in these cases:
 
 - in CI
-- on another branch
+- on a branch other than `testnet/sepolia` and `main`
 - with local changes
 - with a commit that is not pushed
 - without the API key
