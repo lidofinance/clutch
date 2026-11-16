@@ -13,8 +13,9 @@ import {
     SepoliaShares,
     SepoliaRedeemQueue,
     SepoliaEasyTrack,
-    SepoliaFirstLossBurnFactory
+    SepoliaDepositQueue
 } from "../../src/mocks/SepoliaStand.sol";
+import {UniversalFactory} from "../../src/factory/UniversalFactory.sol";
 import {SafeExec} from "../../src/exec/SafeExec.sol";
 import {ICoWSettlement, ICoWFallback} from "./CoWInterfaces.sol";
 
@@ -41,7 +42,9 @@ contract DeploySepolia is Script {
         SepoliaShares eth;
         SepoliaRedeemQueue usdQueue;
         SepoliaRedeemQueue ethQueue;
-        SepoliaFirstLossBurnFactory factory;
+        SepoliaDepositQueue usdDepositQueue;
+        SepoliaDepositQueue ethDepositQueue;
+        UniversalFactory factory;
     }
     Stand internal s;
 
@@ -138,14 +141,26 @@ contract DeploySepolia is Script {
         s.ethQueue = new SepoliaRedeemQueue(s.eth, controller);
         s.usd.setQueue(address(s.usdQueue));
         s.eth.setQueue(address(s.ethQueue));
-        s.factory =
-            new SepoliaFirstLossBurnFactory(address(s.committee), s.firstLossRoles, address(s.usd), address(s.eth));
+        address weth = vm.parseJsonAddress(network, ".tokens.weth.address");
+        address usdc = vm.parseJsonAddress(network, ".tokens.usdc.address");
+        s.usdDepositQueue = new SepoliaDepositQueue(IERC20(usdc));
+        s.ethDepositQueue = new SepoliaDepositQueue(IERC20(weth));
+        s.factory = new UniversalFactory(
+            UniversalFactory.Config({
+                trustedCaller: address(s.committee),
+                executor: address(s.executor),
+                emergencySafe: address(s.emergency),
+                voting: address(voting),
+                operatorModifier: address(s.operator),
+                safetyModifier: address(s.safety),
+                ordersModifier: address(s.ordersRoles),
+                firstLossModifier: address(s.firstLossRoles)
+            })
+        );
         s.et.addEVMScriptFactory(address(s.factory));
         s.objection.mint(controller, 1000 ether);
         s.usd.mint(controller, 100 ether);
         s.eth.mint(controller, 100 ether);
-        address weth = vm.parseJsonAddress(network, ".tokens.weth.address");
-        address usdc = vm.parseJsonAddress(network, ".tokens.usdc.address");
         SafeExec.execAsOwner(
             voting, s.orders, weth, abi.encodeCall(IERC20.approve, (dependency("vaultRelayer"), type(uint256).max))
         );
@@ -174,7 +189,9 @@ contract DeploySepolia is Script {
         vm.serializeAddress(k, "firstLossModifier", address(s.firstLossRoles));
         vm.serializeAddress(k, "easyTrackExecutor", address(s.executor));
         vm.serializeAddress(k, "easyTrack", address(s.et));
-        vm.serializeAddress(k, "burnFactory", address(s.factory));
+        vm.serializeAddress(k, "universalFactory", address(s.factory));
+        vm.serializeAddress(k, "usdDepositQueue", address(s.usdDepositQueue));
+        vm.serializeAddress(k, "ethDepositQueue", address(s.ethDepositQueue));
         vm.serializeAddress(k, "objectionToken", address(s.objection));
         vm.serializeAddress(k, "usdShare", address(s.usd));
         vm.serializeAddress(k, "ethShare", address(s.eth));

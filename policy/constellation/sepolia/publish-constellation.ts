@@ -3,9 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { reconstructPermissions } from "zodiac-roles-sdk";
-import { compileStand as compile } from "./compile";
-import { build } from "./compile";
-import { checkPayload, type RuntimeAllowance } from "./constellation";
+import { build, compileStand as compile } from "./compile";
+import { checkPayload, derivedCaps, type RuntimeAllowance } from "./constellation";
 import { diffPolicy } from "./diff";
 import { readOnlyRpc } from "./prepare-constellation";
 
@@ -67,8 +66,7 @@ export function resolvedDifferences(result: unknown, payload: any, manifest: Rec
   }
   // The resolver reads the derived caps from the chain. A workspace cannot name them, so they stay out of the
   // compiled nodes; each must be a cap that the artifact expects, with the chain's balance.
-  const derived = new Map(build(manifest).modifiers.flatMap((mod) => mod.allowances.filter((a) => a.key.startsWith("0x6b3a"))
-    .map((a) => [`${lower(mod.address)}:${lower(a.key)}`, a] as const)));
+  const derived = derivedCaps(manifest);
   const nodes: Record<string, any> = {};
   for (const node of result.filter((n: any) => n.type === "ROLES")) {
     if (JSON.stringify(node.multisend) !== "[]") differences.push(`${node.ref}: unexpected transaction unwrappers`);
@@ -183,7 +181,7 @@ async function snapshot(manifest: Record<string, any>): Promise<Snapshot> {
   const endpoint = process.env.SEPOLIA_RPC;
   if (!endpoint) throw new Error("Set SEPOLIA_RPC in the local environment");
   const report = await diffPolicy(readOnlyRpc(endpoint), manifest, build(manifest));
-  if (!report.matches) throw new Error(`${report.differences.length} policy differences at block ${report.block}; run constellation-diff`);
+  if (!report.matches) throw new Error(`${report.differences.length} policy differences at block ${report.block}; run constellation <workspace UUID>`);
   return { block: report.block, blockHash: report.blockHash, allowances: report.allowances };
 }
 

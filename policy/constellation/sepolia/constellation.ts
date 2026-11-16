@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { constellation, push } from "@zodiaceco/sdk";
 import { processPermissions, reconstructPermissions } from "zodiac-roles-sdk";
-import { build, buildNodes } from "./compile";
-import { compileStand as compile } from "./compile";
+import { build, buildNodes, compileStand as compile } from "./compile";
 import { key } from "../constellation/lib";
+
+/** The caps that motions set under derived keys, by `modifier:key`. A workspace cannot name them. */
+export function derivedCaps(manifest: Record<string, any>) {
+  return new Map(build(manifest).modifiers.flatMap((mod) => mod.allowances.filter((a) => a.key.startsWith("0x6b3a"))
+    .map((a) => [`${mod.address.toLowerCase()}:${a.key.toLowerCase()}`, a] as const)));
+}
 
 export type RuntimeAllowance = { modifier: string; key: string; balance: string; timestamp: string };
 
@@ -109,7 +114,7 @@ export function checkPayload(payload: any, manifest: Record<string, any>, runtim
     const id = (modifier: string, allowanceKey: string) => `${modifier.toLowerCase()}:${allowanceKey.toLowerCase()}`;
     const known = new Set([
       ...Object.values(nodes).flatMap((node: any) => Object.keys(node.allowances ?? {}).map((name) => id(node.address, key(name)))),
-      ...build(manifest).modifiers.flatMap((mod) => mod.allowances.filter((a) => a.key.startsWith("0x6b3a")).map((a) => id(mod.address, a.key))),
+      ...derivedCaps(manifest).keys(),
     ]);
     const undeclared = runtime.filter((a) => !known.has(id(a.modifier, a.key)));
     if (undeclared.length) throw new Error(`Allowance on the chain without a declaration: ${undeclared.map((a) => a.key).join(", ")}`);

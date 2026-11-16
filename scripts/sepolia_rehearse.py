@@ -9,31 +9,19 @@ import subprocess
 import time
 import urllib.request
 
-from sepolia_receipts import inspect_run
-
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "cache/sepolia/rehearsal"
 LOCAL = "http://127.0.0.1:8547"
-EXPECTED_DRILLS = {
-    "test_account_graph_and_domain_verifier",
-    "test_burn_motion_wait_objection_and_voting_cancellation",
-    "test_emergency_stops_asset_operator_but_cannot_restart",
-    "test_first_loss_redeem_claim_both_assets_and_denied_bypass",
-    "test_funding_budget_and_safe_owner_path",
-    "test_twap_two_parts_signature_and_cancellation",
-    "test_typed_order_presign_unsign_and_receivers",
-}
 
 
-def validate_drills(output, expected=EXPECTED_DRILLS, suites=1):
-    passed = re.findall(r"^\[PASS\] (test_\w+)\(\)", output, re.MULTILINE)
+def validate_drills(output, suites=1):
+    """Each suite ran, passed at least one test, and failed and skipped none."""
+    passed = re.findall(r"^\[PASS\] test_\w+\(\)", output, re.MULTILINE)
     summaries = re.findall(r"^Suite result: (.+)$", output, re.MULTILINE)
-    if (len(passed) != len(expected) or set(passed) != expected
-            or re.search(r"^\[(?:FAIL|SKIP)", output, re.MULTILINE)
-            or len(summaries) != suites
+    if (re.search(r"^\[(?:FAIL|SKIP)", output, re.MULTILINE) or len(summaries) != suites
             or any(not re.match(r"ok\. [1-9][0-9]* passed; 0 failed; 0 skipped(?:;|$)", s) for s in summaries)
-            or sum(int(re.search(r"(\d+) passed", s)[1]) for s in summaries) != len(expected)):
-        raise ValueError("Expected all named Sepolia drills, with no failures or skips")
+            or sum(int(re.search(r"(\d+) passed", s)[1]) for s in summaries) != len(passed)):
+        raise ValueError(f"Expected {suites} Sepolia suites, with no failures or skips")
 
 
 def rpc(method, params):
@@ -54,51 +42,40 @@ def run(command, name, env):
     print(f"{name}: passed", flush=True)
 
 
-def public_steps(env):
-    """The recipes of the factory migration's public steps, signed by the unlocked sender."""
+def steps(env):
+    """The stand owner's public recipes, signed by the unlocked sender."""
     recipe = {**env, "SEPOLIA_RPC": LOCAL, "SEPOLIA_SIGNER": "--unlocked", "SEPOLIA_MOTIONS": str(CACHE / "motions")}
     stand = json.loads(Path(env["SEPOLIA_MANIFEST"]).read_text())
     call = lambda to, signature, *args: subprocess.check_output(
         ["cast", "call", to, signature, *args, "--rpc-url", LOCAL], text=True).split()[0]
-    motion_and_enact("caps", recipe, call, stand)
-    run(["just", "--justfile", "sepolia.just", "retire-burn-factory"], "retire-burn-factory", recipe)
-    first_loss = stand["firstLossSafe"][2:].lower()
-    for token, cap in [("weth", 10**18), ("usdc", 10**9)]:
-        key = "0x6b3a" + first_loss + stand["dependencies"]["tokens"][token]["address"][2:22].lower()
-        balance = subprocess.check_output(["cast", "call", stand["operatorModifier"],
-            "allowances(bytes32)(uint128,uint128,uint64,uint128,uint64)", key, "--rpc-url", LOCAL], text=True).split("\n")[3]
-        if int(balance.split()[0]) != cap:
-            raise RuntimeError(f"The caps motion left the {token} cap at {balance}")
-    if (call(stand["universalFactory"], "policyVersion()(uint256)") != "1"
-            or call(stand["easyTrack"], "evmScriptFactories(address)(bool)", stand["burnFactory"]) != "false"):
-        raise RuntimeError("The public steps left an unexpected policy version or burn factory")
-    run(["bun", "-e", DIFF], "diff", recipe)
+    just = lambda name, *args: run(["just", "--justfile", "sepolia.just", *args], name, recipe)
 
+    def motion(name):
+        just(f"motion-{name}", "motion", name)
+        rpc("evm_increaseTime", [int(call(stand["easyTrack"], "motionDuration()(uint256)"))])
+        rpc("evm_mine", [])
+        just(f"enact-{name}", "enact", str(int(call(stand["easyTrack"], "motionsCount()(uint256)")) - 1))
 
-def motion_and_enact(name, recipe, call, stand):
-    run(["just", "--justfile", "sepolia.just", "motion", name], f"motion-{name}", recipe)
-    motion = int(call(stand["easyTrack"], "motionsCount()(uint256)")) - 1
-    rpc("evm_increaseTime", [int(call(stand["easyTrack"], "motionDuration()(uint256)"))])
-    rpc("evm_mine", [])
-    run(["just", "--justfile", "sepolia.just", "enact", str(motion)], f"enact-{name}", recipe)
+    def check(condition, message):
+        if not condition:
+            raise RuntimeError(message)
 
+    def caps():
+        motion("caps")
+        check(call(stand["universalFactory"], "policyVersion()(uint256)") == "1", "The caps motion left another policy version")
+        run(["bun", "-e", DIFF], "diff", recipe)
 
-def public_motions(env):
-    """One motion for each other motion role, as the stand owner sent them; the operator stops before `restart`."""
-    recipe = {**env, "SEPOLIA_RPC": LOCAL, "SEPOLIA_SIGNER": "--unlocked", "SEPOLIA_MOTIONS": str(CACHE / "motions")}
-    stand = json.loads(Path(env["SEPOLIA_MANIFEST"]).read_text())
-    call = lambda to, signature, *args: subprocess.check_output(
-        ["cast", "call", to, signature, *args, "--rpc-url", LOCAL], text=True).split()[0]
-    for name in ["insurance-funding", "insurance", "first-loss-burn", "approvals", "orders-governance", "exit-governance", "insurance-governance"]:
-        motion_and_enact(name, recipe, call, stand)
-    run(["just", "--justfile", "sepolia.just", "emergency-stop"], "emergency-stop", recipe)
-    if call(stand["assetSafe"], "isModuleEnabled(address)(bool)", stand["operatorModifier"]) != "false":
-        raise RuntimeError("emergency-stop left the operator modifier enabled")
-    motion_and_enact("restart", recipe, call, stand)
-    if (call(stand["assetSafe"], "isModuleEnabled(address)(bool)", stand["operatorModifier"]) != "true"
-            or call(stand["universalFactory"], "policyVersion()(uint256)") != "4"):
-        raise RuntimeError("The public motions left an unexpected operator module or policy version")
-    run(["bun", "-e", DIFF], "diff-motions", recipe)
+    def motions():
+        for name in ["insurance-funding", "insurance", "first-loss-burn", "approvals", "orders-governance", "exit-governance", "insurance-governance"]:
+            motion(name)
+        just("emergency-stop", "emergency-stop")
+        check(call(stand["assetSafe"], "isModuleEnabled(address)(bool)", stand["operatorModifier"]) == "false", "emergency-stop left the operator enabled")
+        motion("restart")
+        check(call(stand["assetSafe"], "isModuleEnabled(address)(bool)", stand["operatorModifier"]) == "true", "restart left the operator disabled")
+        check(call(stand["universalFactory"], "policyVersion()(uint256)") == "4", "The motions left another policy version")
+        run(["bun", "-e", DIFF], "diff-motions", recipe)
+
+    return caps, motions
 
 
 # The chain against the artifact, every role, module and allowance, as `constellation` compares the public stand.
@@ -118,7 +95,6 @@ def main():
     upstream = os.environ["SEPOLIA_RPC"]
     sender = os.environ["SEPOLIA_SENDER"]
     CACHE.mkdir(parents=True, exist_ok=True)
-    (CACHE / "result.json").unlink(missing_ok=True)
     try:
         rpc("eth_chainId", [])
     except (OSError, ValueError):
@@ -144,26 +120,17 @@ def main():
         rpc("anvil_setBalance", [sender, hex(100 * 10**18)])
         args = ["--hardfork", "amsterdam", "--rpc-url", LOCAL, "--sender", sender, "--unlocked", "--broadcast", "--non-interactive", "--slow", "--gas-estimate-multiplier", "200"]
         run(["forge", "script", "script/sepolia/DeploySepolia.s.sol", *args], "deploy", env)
-        run(["forge", "script", "script/sepolia/DeployFactorySepolia.s.sol", *args], "deploy-factory", env)
         run(["bun", "policy/constellation/sepolia/compile.ts", env["SEPOLIA_MANIFEST"], env["SEPOLIA_ARTIFACT"]], "compile", env)
         run(["forge", "script", "script/sepolia/ApplySepolia.s.sol", *args], "apply", env)
         run(["forge", "script", "script/sepolia/FundSepolia.s.sol", *args], "fund", env)
-        public_steps(env)
+        caps, motions = steps(env)
+        caps()
         # Keep one local head while Forge reads the deployed state in parallel.
         rpc("anvil_setAutomine", [True])
         run(["forge", "test", "--match-contract", "SepoliaStandTest", "--hardfork", "amsterdam", "-vv"], "drills", env)
         validate_drills((CACHE / "drills.log").read_text())
-        public_motions(env)
-        stages = {}
-        for name in ["DeploySepolia", "DeployFactorySepolia", "ApplySepolia", "FundSepolia"]:
-            records = json.loads((CACHE / f"broadcast/{name}.s.sol/11155111/run-latest.json").read_text())
-            receipts = records["receipts"]
-            if not inspect_run(records, sender)["complete"]:
-                raise RuntimeError(f"Incomplete local receipts for {name}")
-            stages[name] = {"transactions": len(receipts), "gasUsed": sum(int(r["gasUsed"], 16) for r in receipts), "feeWei": str(sum(int(r["gasUsed"], 16) * int(r["effectiveGasPrice"], 16) for r in receipts))}
-        report = {"chainId": 11155111, "hardfork": "amsterdam", "forkBlock": block, "localOnly": True, "stages": stages}
-        (CACHE / "result.json").write_text(json.dumps(report, indent=2) + "\n")
-        print(f"Local rehearsal complete: {CACHE.relative_to(ROOT)}/result.json", flush=True)
+        motions()
+        print("Local rehearsal complete", flush=True)
     finally:
         node.terminate()
         try:

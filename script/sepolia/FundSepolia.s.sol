@@ -2,11 +2,7 @@
 pragma solidity >=0.8.24 <0.9.0;
 
 import {Script} from "forge-std/Script.sol";
-import {IERC20} from "../../src/interfaces/Tokens.sol";
-
-interface ISepoliaWETH is IERC20 {
-    function deposit() external payable;
-}
+import {IERC20, IWETH} from "../../src/interfaces/Tokens.sol";
 
 contract FundSepolia is Script {
     function run() external {
@@ -21,12 +17,12 @@ contract FundSepolia is Script {
         uint256 wethAmount = vm.envUint("SEPOLIA_FUND_WETH_WEI");
         uint256 shareAmount = vm.envUint("SEPOLIA_FUND_SHARES_WEI");
         require(wethAmount > 0 && shareAmount > 0, "Select positive test funding");
-        ISepoliaWETH weth = ISepoliaWETH(vm.parseJsonAddress(json, ".dependencies.tokens.weth.address"));
+        address weth = vm.parseJsonAddress(json, ".dependencies.tokens.weth.address");
         address asset = vm.parseJsonAddress(json, ".assetSafe");
         address firstLoss = vm.parseJsonAddress(json, ".firstLossSafe");
         vm.startBroadcast(controller);
-        weth.deposit{value: wethAmount}();
-        require(weth.transfer(asset, wethAmount), "WETH funding");
+        IWETH(weth).deposit{value: wethAmount}();
+        require(IERC20(weth).transfer(asset, wethAmount), "WETH funding");
         require(IERC20(vm.parseJsonAddress(json, ".usdShare")).transfer(firstLoss, shareAmount), "USD share funding");
         require(IERC20(vm.parseJsonAddress(json, ".ethShare")).transfer(firstLoss, shareAmount), "ETH share funding");
         vm.stopBroadcast();

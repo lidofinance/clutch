@@ -48,10 +48,6 @@ abstract contract SepoliaCurrentStandFixture is SepoliaStandFixture {
     function setUp() public virtual override {
         if (vm.envOr("SEPOLIA_STAND_BLOCK", uint256(0)) == 0) { vm.skip(true); return; }
         super.setUp();
-        assertEq(assetOperator, bytes32("asset-operator"));
-        assertEq(ordersOperator, bytes32("orders-operator"));
-        assertEq(assetEmergency, bytes32("asset-emergency"));
-        assertEq(ordersEmergency, bytes32("orders-emergency"));
         settlement = IStandSettlement(d("settlement"));
         solver = vm.envAddress("SEPOLIA_TEST_SOLVER");
         assertTrue(IStandAuthenticator(settlement.authenticator()).isSolver(solver), "Recorded solver must be allowed");

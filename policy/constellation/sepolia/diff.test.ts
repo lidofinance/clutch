@@ -132,7 +132,7 @@ function fixture() {
 test("14 roles and four modifiers match; timestamp zero is initialization, not drift", async () => {
   const f = fixture(); const report = await diffPolicy(f.rpc, f.manifest, f.artifact);
   expect(report.matches).toBe(true); expect(report.differences).toEqual([]);
-  expect(report.block).toBe(PIN); expect(report.blockHash).toBe(H(PIN)); expect(report.fromBlock).toBe(100);
+  expect(report.block).toBe(PIN); expect(report.blockHash).toBe(H(PIN));
   expect(report.allowances[0]).toMatchObject({ modifier: A(20), key: K(100), refill: "20", maxRefill: "100", period: "60", balance: "100", timestamp: "1000" });
   const ranges = f.calls.filter(([method]) => method === "eth_getLogs").map(([, params]) => params[0] as any);
   expect(ranges).toHaveLength(12);
@@ -145,7 +145,7 @@ test("consumed balance and accrued timestamp remain observations, while refill c
   f.setAllowance([20n, 100n, 60n, 70n, 1060n]);
   const report = await diffPolicy(f.rpc, f.manifest, f.artifact);
   expect(report.matches).toBe(true);
-  expect(report.allowances[0]).toMatchObject({ balance: "70", timestamp: "1060", consumedSinceLastSet: "30", consumedTotal: "30", balanceBelowInitial: "30" });
+  expect(report.allowances[0]).toMatchObject({ balance: "70", timestamp: "1060" });
   f.setAllowance([21n, 101n, 61n, 70n, 1060n]);
   expect((await diffPolicy(f.rpc, f.manifest, f.artifact)).differences.map((item) => item.path.split(".").at(-1))).toEqual(["refill", "maxRefill", "period"]);
 });

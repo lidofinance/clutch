@@ -195,7 +195,7 @@ The hosted Zodiac app refused to resolve the stand's 14 roles. It keeps one poli
 
 Recorded as:
 
-- The orders modifier's governance role takes the key `orders-governance`. Its members and grants stay. The operator modifier keeps `governance`. The [migration plan](/specs/sepolia-factory-migration.md) holds the public step and its checks.
+- The orders modifier's governance role takes the key `orders-governance`. Its members and grants stay. The operator modifier keeps `governance`. The [stand page](/specs/sepolia-stand.md) lists the roles, and the [test results](/research/sepolia-test-results.md#public-steps) record the public step and its checks.
 - `main` keeps `governance` on both modifiers. This is a test-stand choice of the stand owner (OD-150). It opens no decision, and EM has not decided it.
 
 ## 2026-11-13 — YT's choices for the Sepolia stand's move to the universal factory
@@ -208,7 +208,7 @@ The agent asked YT, the stand owner, how to move the existing Sepolia stand to t
 
 Recorded as:
 
-- The stand takes every motion role of `main`. The universal factory holds the nine motion roles on the four modifiers. The Easy Track executor holds no role and is no module of a modifier. The burn factory is retired. The [migration plan](/specs/sepolia-factory-migration.md) records the public steps of 2026-11-13 and their checks.
+- The stand takes every motion role of `main`. The universal factory holds the nine motion roles on the four modifiers. The Easy Track executor holds no role and is no module of a modifier. The burn factory is retired. The [test results](/research/sepolia-test-results.md#public-steps) record the public steps of 2026-11-13 and their checks.
 - A budget motion set the insurance-funding caps: 1 WETH and 1000 USDC in 30 days, under the derived keys of the First-loss Safe. The stand's tokens have no value.
 - These are test-stand choices of the stand owner, who sends the stand's public transactions (OD-150). They open no decision, and EM has not decided them. Mainnet parameters stay EM's.
 - The agent found one defect of its own after the policy step. `assignRoles` enables its module, also when it removes a role, so the executor stayed an enabled module. A fifth step disabled it, and the comparison of the chain with the artifact now runs in the local rehearsal.

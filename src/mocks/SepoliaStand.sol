@@ -2,10 +2,8 @@
 pragma solidity >=0.8.24 <0.9.0;
 
 import {IERC20} from "../interfaces/Tokens.sol";
-import {IRoles} from "../interfaces/IRoles.sol";
-import {MockEasyTrack, IEVMScriptFactory} from "./MockEasyTrack.sol";
+import {MockEasyTrack} from "./MockEasyTrack.sol";
 import {MockEVMScriptExecutor} from "./MockEVMScriptExecutor.sol";
-import {Call, EVMScriptLib} from "../exec/SafeExec.sol";
 
 /// @dev Test assets have no financial value. The controller can mint them.
 contract SepoliaToken {
@@ -148,29 +146,5 @@ contract SepoliaEasyTrack is MockEasyTrack {
             motions[ids[i]].status = MotionStatus.Canceled;
             emit MotionCanceled(ids[i]);
         }
-    }
-}
-
-/// @dev Typed burn factory for the stand. The two share tokens and trusted caller are fixed.
-contract SepoliaFirstLossBurnFactory is IEVMScriptFactory {
-    address public immutable trustedCaller;
-    IRoles public immutable modifier_;
-    address public immutable usdShare;
-    address public immutable ethShare;
-
-    constructor(address caller_, IRoles modifier__, address usd_, address eth_) {
-        trustedCaller = caller_;
-        modifier_ = modifier__;
-        usdShare = usd_;
-        ethShare = eth_;
-    }
-
-    function createEVMScript(address creator, bytes calldata data) external view returns (bytes memory) {
-        require(creator == trustedCaller, "burn factory: trusted caller");
-        (address token, uint256 amount) = abi.decode(data, (address, uint256));
-        require((token == usdShare || token == ethShare) && amount > 0, "burn factory: input");
-        Call[] memory calls = new Call[](1);
-        calls[0] = Call(token, abi.encodeWithSignature("burn(uint256)", amount));
-        return EVMScriptLib.buildAsGovernance(modifier_, bytes32("first-loss-burn"), calls);
     }
 }

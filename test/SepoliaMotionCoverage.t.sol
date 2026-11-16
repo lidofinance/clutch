@@ -4,19 +4,12 @@ pragma solidity >=0.8.24 <0.9.0;
 import {SepoliaStandFixture} from "./utils/SepoliaStandFixture.sol";
 import {ISafe} from "../src/interfaces/ISafe.sol";
 import {IRoles} from "../src/interfaces/IRoles.sol";
-import {IERC20} from "../src/interfaces/Tokens.sol";
+import {IERC20, IWETH} from "../src/interfaces/Tokens.sol";
+import {IComposableCoW} from "../script/sepolia/CoWInterfaces.sol";
 import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 import {MockAragonVoting} from "../src/mocks/MockAragonVoting.sol";
 import {MockEVMScriptExecutor} from "../src/mocks/MockEVMScriptExecutor.sol";
 import {SepoliaDepositQueue, SepoliaEasyTrack} from "../src/mocks/SepoliaStand.sol";
-
-interface IComposableCoWRemove {
-    function remove(bytes32 singleOrderHash) external;
-}
-
-interface IWETH {
-    function withdraw(uint256 amount) external;
-}
 
 /// @dev One universal-factory motion for each motion role of the stand, on a fork of the stand.
 contract SepoliaMotionCoverageTest is SepoliaStandFixture {
@@ -201,14 +194,14 @@ contract SepoliaMotionCoverageTest is SepoliaStandFixture {
 
     function test_MOT_orders_governance_motion_restores_a_revoked_cancel() public {
         address cow = d("composableCow");
-        bytes memory remove = abi.encodeCall(IComposableCoWRemove.remove, (bytes32(0)));
+        bytes memory remove = abi.encodeCall(IComposableCoW.remove, (bytes32(0)));
         exec(committee, ordersRoles, ordersOperator, cow, remove, 0);
         exec(
             emergency,
             ordersRoles,
             ordersEmergency,
             address(ordersRoles),
-            abi.encodeCall(IRoles.revokeFunction, (ordersOperator, cow, IComposableCoWRemove.remove.selector)),
+            abi.encodeCall(IRoles.revokeFunction, (ordersOperator, cow, IComposableCoW.remove.selector)),
             0
         );
         denied(committee, ordersRoles, ordersOperator, cow, remove, 0);
@@ -218,7 +211,7 @@ contract SepoliaMotionCoverageTest is SepoliaStandFixture {
                     ordersRoles,
                     ORDERS_GOVERNANCE,
                     address(ordersRoles),
-                    abi.encodeCall(IRoles.allowFunction, (ordersOperator, cow, IComposableCoWRemove.remove.selector, uint8(0)))
+                    abi.encodeCall(IRoles.allowFunction, (ordersOperator, cow, IComposableCoW.remove.selector, uint8(0)))
                 )
             )
         );

@@ -160,7 +160,7 @@ contract SepoliaConfigurationCoverageTest is SepoliaCoverageFixture {
         assertEq(factory.operatorModifier(),address(operator));assertEq(factory.safetyModifier(),address(safety));
         assertEq(factory.ordersModifier(),address(ordersRoles));assertEq(factory.firstLossModifier(),address(firstLossRoles));
         SepoliaEasyTrack et=SepoliaEasyTrack(a("easyTrack"));
-        assertEq(et.voting(),a("voting"));assertTrue(et.evmScriptFactories(address(factory)));assertFalse(et.evmScriptFactories(a("burnFactory")));
+        assertEq(et.voting(),a("voting"));assertTrue(et.evmScriptFactories(address(factory)));
         assertEq(address(et.evmScriptExecutor()),a("easyTrackExecutor"));assertEq(et.ldoToken().balanceOf(controller),1000 ether);
     }
     function test_CFG_approved_hash_nonce_replay_wrong_safe_chain_and_signatures() public {
@@ -1039,7 +1039,7 @@ contract SepoliaEmergencyCoverageTest is SepoliaCoverageFixture {
     }
     function test_EM_all_transfer_routes_tokens_and_forbidden_receivers() public {
         address[2] memory source=[asset,orders];address weth=token("weth");address usdc=token("usdc");address agent=a("agent");
-        address[21] memory receivers=[asset,orders,firstLoss,committee,emergency,agent,controller,a("voting"),a("easyTrackExecutor"),address(operator),address(safety),address(ordersRoles),address(firstLossRoles),weth,usdc,address(0),address(0xBAD),a("easyTrack"),a("burnFactory"),a("usdQueue"),a("ethQueue")];
+        address[21] memory receivers=[asset,orders,firstLoss,committee,emergency,agent,controller,a("voting"),a("easyTrackExecutor"),address(operator),address(safety),address(ordersRoles),address(firstLossRoles),weth,usdc,address(0),address(0xBAD),a("easyTrack"),a("universalFactory"),a("usdQueue"),a("ethQueue")];
         for(uint256 i;i<2;++i)for(uint256 t;t<2;++t){address token_=t==0?weth:usdc;IRoles mod=i==0?safety:ordersRoles;bytes32 key=i==0?assetEmergency:ordersEmergency;deal(token_,source[i],20);
             for(uint256 j;j<receivers.length;++j){uint256 before=balance(token_,receivers[j]);uint256 held=balance(token_,source[i]);
                 bool allowed=receivers[j]==agent||(i==0?receivers[j]==orders:receivers[j]==asset);

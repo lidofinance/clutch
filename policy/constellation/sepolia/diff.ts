@@ -11,12 +11,10 @@ type TargetState = { clearance: number; executionOptions: number; functions: Map
 type RoleState = { members: Set<string>; targets: Map<string, TargetState> };
 type Log = { address: string; topics: string[]; data: string; blockNumber: string; blockHash: string; transactionIndex: string; logIndex: string; transactionHash: string; removed: boolean };
 type Header = { number: string; hash: string; timestamp: string };
-type AllowanceHistory = { initialBalance: bigint; configuredTimestamp: bigint; consumedSinceLastSet: bigint; consumedTotal: bigint; configured: boolean };
 type Difference = { path: string; expected: unknown; actual: unknown };
 export type AllowanceObservation = {
   modifier: string; key: string; name?: string;
   refill: string; maxRefill: string; period: string; balance: string; timestamp: string;
-  initialBalance: string; configuredTimestamp: string; consumedSinceLastSet: string; consumedTotal: string; balanceBelowInitial: string;
 };
 
 // The deployed proxies emit OZ's uint64 Initialized event; the pinned SDK still declares uint8.
@@ -95,7 +93,6 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
   const modifiers = artifact.modifiers;
   if (modifiers.length !== 4 || modifiers.reduce((count, modifier) => count + modifier.roles.length, 0) !== 14) throw new Error("Expected four Sepolia modifiers and 14 roles");
   if (new Set(modifiers.map((modifier) => lower(modifier.address))).size !== modifiers.length) throw new Error("Duplicate modifier in artifact");
-  let eventCount = 0;
   for (const modifier of modifiers) {
     const address = getAddress(modifier.address);
     const prefix = `modifiers.${address}`;
@@ -122,12 +119,11 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
       }
     }
     logs.sort((a, b) => Number(BigInt(a.blockNumber) - BigInt(b.blockNumber)) || Number(BigInt(a.transactionIndex) - BigInt(b.transactionIndex)) || Number(BigInt(a.logIndex) - BigInt(b.logIndex)));
-    eventCount += logs.length;
     const roles = new Map<string, RoleState>();
     const enabled = new Set<string>();
     const defaultRoles = new Map<string, string>();
     const adapters = new Map<string, string>();
-    const history = new Map<string, AllowanceHistory>();
+    const configured = new Set<string>();
     let setups = 0;
     const role = (key: string) => {
       key = lower(key);
@@ -139,11 +135,6 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
       to = lower(to);
       if (!targets.has(to)) targets.set(to, { clearance: 0, executionOptions: 0, functions: new Map() });
       return targets.get(to)!;
-    };
-    const allowance = (key: string) => {
-      key = lower(key);
-      if (!history.has(key)) history.set(key, { initialBalance: 0n, configuredTimestamp: 0n, consumedSinceLastSet: 0n, consumedTotal: 0n, configured: false });
-      return history.get(key)!;
     };
     for (const log of logs) {
       let event;
@@ -170,17 +161,7 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
         case "RevokeFunction": target(a.roleKey, a.targetAddress).functions.delete(lower(a.selector)); break;
         case "SetDefaultRole": defaultRoles.set(lower(a.module), lower(a.defaultRoleKey)); break;
         case "SetUnwrapAdapter": adapters.set(`${lower(a.to)}${a.selector.slice(2).toLowerCase()}${"0".repeat(16)}`, lower(a.adapter)); break;
-        case "SetAllowance": {
-          const state = allowance(a.allowanceKey);
-          state.initialBalance = a.balance; state.configuredTimestamp = a.timestamp;
-          state.consumedSinceLastSet = 0n; state.configured = true;
-          break;
-        }
-        case "ConsumeAllowance": {
-          const state = allowance(a.allowanceKey);
-          state.consumedSinceLastSet += a.consumed; state.consumedTotal += a.consumed;
-          break;
-        }
+        case "SetAllowance": configured.add(lower(a.allowanceKey)); break;
       }
     }
     if (setups !== 1) throw new Error(`Incomplete creation event history: ${address}`);
@@ -224,18 +205,17 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
       }
     }
     const expectedAllowances = new Map(modifier.allowances.map((item) => [lower(item.key), item]));
-    for (const key of new Set([...expectedAllowances.keys(), ...history.keys()])) {
+    for (const key of new Set([...expectedAllowances.keys(), ...configured])) {
       const expected = expectedAllowances.get(key);
-      const h = allowance(key);
       const [refill, maxRefill, period, balance, timestamp] = await call<bigint[]>(address, "allowances", [key]);
       if (!expected) compare(`${prefix}.allowances.${key}`, null, "unexpected allowance history");
       else {
-        compare(`${prefix}.allowances.${key}.configured`, true, h.configured);
+        compare(`${prefix}.allowances.${key}.configured`, true, configured.has(key));
         compare(`${prefix}.allowances.${key}.refill`, BigInt(expected.refill).toString(), refill.toString());
         compare(`${prefix}.allowances.${key}.maxRefill`, (BigInt(expected.maxRefill) || (1n << 128n) - 1n).toString(), maxRefill.toString());
         compare(`${prefix}.allowances.${key}.period`, BigInt(expected.period).toString(), period.toString());
       }
-      allowances.push({ modifier: address, key, ...(expected ? { name: expected.name } : {}), refill: refill.toString(), maxRefill: maxRefill.toString(), period: period.toString(), balance: balance.toString(), timestamp: timestamp.toString(), initialBalance: h.initialBalance.toString(), configuredTimestamp: h.configuredTimestamp.toString(), consumedSinceLastSet: h.consumedSinceLastSet.toString(), consumedTotal: h.consumedTotal.toString(), balanceBelowInitial: (h.initialBalance > balance ? h.initialBalance - balance : 0n).toString() });
+      allowances.push({ modifier: address, key, ...(expected ? { name: expected.name } : {}), refill: refill.toString(), maxRefill: maxRefill.toString(), period: period.toString(), balance: balance.toString(), timestamp: timestamp.toString() });
     }
   }
   for (const address of new Set([manifest.assetSafe, manifest.ordersSafe, manifest.firstLossSafe, manifest.operatorSafe, manifest.emergencySafe] as string[])) {
@@ -251,16 +231,5 @@ export async function diffPolicy(rpc: Rpc, manifest: any, artifact: Artifact) {
   }
   const final = await read("eth_getBlockByNumber", [tag, false]) as Header;
   if (!final || lower(final.hash) !== lower(snapshot.hash)) throw new Error("Policy snapshot changed during reads; retry after reorg");
-  return {
-    scope: "current-sepolia-policy", chainId: 11155111, block, blockHash: snapshot.hash, fromBlock,
-    matches: differences.length === 0, differences, allowances,
-    history: { modifiers: modifiers.length, rolesExpected: 14, events: eventCount, maxBlocksPerRequest: LOG_RANGE },
-    limitations: [
-      "Permission mappings are reconstructed from canonical RPC logs; completeness beyond creation/getter cross-checks relies on the RPC log service.",
-      "Stored function entries are compared even under revoked targets; fully empty revoked roles are omitted.",
-      "Safe owners and threshold follow the reduced Sepolia profile; both guard slots must be zero. Safe versions, singleton/fallback slots, target behavior and executable transaction success are outside this comparison.",
-      "No default roles or transaction unwrappers are expected.",
-      "Allowance balance and timestamp are observations, not configuration drift. Consumption totals come from events; no financial valuation is computed.",
-    ],
-  };
+  return { chainId: 11155111, block, blockHash: snapshot.hash, matches: differences.length === 0, differences, allowances };
 }

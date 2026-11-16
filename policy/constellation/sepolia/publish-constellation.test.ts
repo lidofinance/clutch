@@ -106,7 +106,7 @@ test("a resolution with the derived caps and emptied old keys has no differences
 
 test("the resolution check refuses rewritten conditions, members, accounts, Safes and annotations", () => {
   const mutate = (change: (nodes: any[]) => void) => { const nodes = resolvedFrom(payload); change(nodes); return resolvedDifferences(nodes, payload, manifest, allowances); };
-  // Nor (3) rewritten to And (1), as the earlier draft rewrote it.
+  // An earlier draft rewrote Nor (3) to And (1).
   expect(mutate((nodes) => { norOf(governance(nodes)).operator = 1; })).toEqual([expect.stringContaining("(OD-38)")]);
   expect(mutate((nodes) => { norOf(governance(nodes)).children.pop(); })).toEqual([expect.stringMatching(/\(OD-38\)|other policy calls/)]);
   expect(mutate((nodes) => { governance(nodes).members = [lower(manifest.agent)]; })).toEqual(["the resolution compiles to other policy calls"]);

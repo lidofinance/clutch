@@ -34,7 +34,7 @@ The constellation in `policy/constellation/constellation` follows [ADR 005](../d
 
 ## Known divergence from the design
 
-- **Swaps.** The kit deploys no orders account: its operator funds a plain address that stands in for it. The enabling-vote rehearsal deploys the orders account with its policy, and `OrdersAccount.t.sol` settles its orders through CoW's settlement contract ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The orders modifier's governance and approvals roles are built, and two raw motions add a token and restore the account, one motion each, through the live Easy Track (decisions 41 and 46). The separate Sepolia stand tests the order signer for WETH/USDC.
+- **Swaps.** The kit deploys no orders account: its operator funds a plain address that stands in for it. The enabling-vote rehearsal deploys the orders account with its policy, and `OrdersAccount.t.sol` settles its orders through CoW's settlement contract ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The orders modifier's governance and approvals roles are built, and two raw motions add a token and restore the account, one motion each, through the live Easy Track (decisions 41 and 46). The separate Sepolia stand tests the order signer with WETH and USDC.
 - **First-loss Safe.** The kit deploys no first-loss Safe; a plain address stands in for it as the receiver of the insurance-funding role ([ADR 008](../docs/adr/008-funding-through-existing-payments.md), [ADR 014](../docs/adr/014-funding-by-top-up-motions.md)). The enabling-vote rehearsal deploys one, with its modifier. It enters the kit's deployment in phase 2.
 - **Exit-governance role.** The role is built, and `ExitGovernance.t.sol` tests it on the rehearsal ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md) decision 13). The orders token motion writes a token's exit through it, and the onboarding motion of an ERC-4626 lending vault writes that vault's exits.
 - **Pre-execution screening.** The operator is a plain address, not the committee's Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
@@ -52,45 +52,10 @@ A change to the policy changes the TypeScript and the artifact in the same commi
 
 ## Commands
 
-For the existing Sepolia stand (the [stand plan](../docs/specs/sepolia-stand-plan.md) lists the deploy, apply, fund and Constellation recipes):
-
-```sh
-just --justfile sepolia.just test-current
-SEPOLIA_STAND_BLOCK=<recorded-block> just --justfile sepolia.just test-current
-```
-
-The command reads `SEPOLIA_RPC` from the ignored `.env` and uses the existing
-`cache/sepolia/manifest.json` with account-specific role keys. It runs the shared
-stand, current-role and CoW settlement suites on a pinned fork. It sends no public
-transaction and does not reapply the policy. Test balances, solver impersonation
-and time changes stay in Forge. The runner requires the complete named test set
-with no failures or skips. Logs and the block/hash report stay under
-`cache/sepolia/current-stand/`. See the [test plan](../docs/specs/sepolia-test-plan.md)
-for the cases and transaction sequences. See the [test results](../docs/research/sepolia-test-results.md)
-for recorded outcomes, findings and coverage limits.
-
-For a captured CoW sell quote, prepare the feeAmount=0 order fields with:
-
-```sh
-python3 scripts/sepolia_cow_order.py < quote.json > order.json
-just --justfile sepolia.just check
-```
-
-The sell helper adds the quote fee to sellAmount and preserves the minimum buy and receiver. The signed zero fee field does not remove protocol fees. Buy quotes require their own conversion.
-
-The runner requires a saved local `cache/sepolia/constellation/payload.json`. It recompiles that declaration with both funding allowance balances/timestamps read at the fork block. It records the exact payload hash and refuses stale or changed inputs before reporting success. Refresh the local declaration after funding changes. A historical replay requires the matching archived payload, manifest and source revision. This does not check hosted workspace state.
-
-Before Forge starts, the current-stand runner validates the manifest network, named addresses, aliases, deployment block and code presence. It pins each runtime hash and checks the 13 declared dependency hashes. Observed code without a declared expectation remains separate from approved runtime verification.
-
-The current-stand runner derives Circle USDC's consumed relayer allowance from max Approval and subsequent direct settle Trade logs. It supplies SEPOLIA_EXPECTED_USDC_ALLOWANCE to the fixture and refuses unsupported event history. WETH retains its max approval. The USDC funding test uses the current remainder and the declared refill policy.
-
-Operational guard tests execute the actual resolve CLI in a disposable repository with a real local Git origin. A preload blocks hosted transport. The tests cover branch, dirty/unpushed state, opt-in, CI, workspace/manifest mismatch and wrong chain, plus the actual public recipe env guard. They use only synthetic credentials and do not exercise live publication or wallet signing.
-
-Workflow receipt-guard tests use a captured public four-call funding run to cover all 16 receipt subsets. Incomplete local records still require chain reconciliation before resume. The fixture excludes RPC URLs and signing material.
-
-Protocol-fee tests reconcile all seven public fills against captured policy rates, custom/uniform prices, Transfer logs and full-block buffer balances. They cover improvement-bound SELL and cap-bound BUY priceImprovement fees. Weekly fee payout and unobserved policy/rounding boundaries remain separate.
-
-The policy diff tests also check owners, threshold and both guard slots across all five Safes. Local fork mutations reproduce the old false matches and verify exact drift paths after correction. These checks use the reduced Sepolia signer profile and do not test production screening or alert delivery.
+For the Sepolia stand, `just --justfile sepolia.just check` runs the offline tests of the Sepolia scripts and policy code.
+`just --justfile sepolia.just test-current` runs the stand suites on a pinned fork. To replay a recorded block, set `SEPOLIA_STAND_BLOCK=<block>`.
+`test-current` reads `SEPOLIA_RPC` from the git-ignored `.env` and sends no public transaction. It fails unless each suite of the named test set runs and passes with no skipped test.
+The [Sepolia stand guide](../docs/specs/sepolia-stand.md) has the recipes and the test cases. The [results](../docs/research/sepolia-test-results.md) have the runs and the public transactions.
 
 The mainnet fork commands remain:
 
