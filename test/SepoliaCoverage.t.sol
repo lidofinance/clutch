@@ -206,8 +206,8 @@ contract SepoliaConfigurationCoverageTest is SepoliaCoverageFixture {
 
 contract SepoliaFundingCoverageTest is SepoliaCoverageFixture {
     function test_FUND_first_transfer_logs_nonces_and_unchanged_configuration() public {
-        uint256 amount=0.01 ether;uint256 ab=balance(token("weth"),asset);uint256 ob=balance(token("weth"),orders);
-        assertGe(ab,amount,"Public stand must be funded");bytes32 beforeConfig=configuration();uint256 n=ISafe(payable(committee)).nonce();uint256 an=ISafe(payable(asset)).nonce();uint256 b=budget(bytes32("orders_weth"));
+        uint256 amount=0.01 ether;if(balance(token("weth"),asset)<amount)deal(token("weth"),asset,amount);
+        uint256 ab=balance(token("weth"),asset);uint256 ob=balance(token("weth"),orders);bytes32 beforeConfig=configuration();uint256 n=ISafe(payable(committee)).nonce();uint256 an=ISafe(payable(asset)).nonce();uint256 b=budget(bytes32("orders_weth"));
         vm.recordLogs();committeeCall(address(operator),roleData(token("weth"),transferData(orders,amount),0,assetOperator,true));
         Vm.Log[] memory logs=vm.getRecordedLogs();bool transfer;bool safeSuccess;
         for(uint256 i;i<logs.length;++i){

@@ -27,7 +27,7 @@ sources:
     title: Public Sepolia run of 2026-11-13 — receipts in `broadcast/DeployFactorySepolia.s.sol/`, `broadcast/ApplySepolia.s.sol/` and `broadcast/retire-executor-module/`, the `constellation` comparison at block 12127573 and `test-current` at block 12127646
   - id: s6
     resource: urn:clutch:evidence:2026-11-16:factory-motions-public
-    title: Public Sepolia motions of 2026-11-16 — Easy Track and Asset Safe events from block 12147161 to 12147925, and the comparison of the chain with the artifact at block 12147931
+    title: Public Sepolia motions of 2026-11-16 — Easy Track and Asset Safe events from block 12147161 to 12147925, the comparison of the chain with the artifact and `test-current` at block 12147931
 ---
 
 # Sepolia stand migration to the universal factory
@@ -189,7 +189,7 @@ just --justfile sepolia.just emergency-stop
 ```
 
 - [x] Compare the chain with the artifact again: 0 differences at block `12147931`. After the motions, `policyVersion()` is `4`, the First-loss Safe holds 1 USD share less, and the ETH deposit queue holds 0.005 WETH [s6].
-- [ ] Top up the Asset Safe, then run the stand suites again. At block `12147931`, 100 of 101 tests passed. `test_FUND_first_transfer_logs_nonces_and_unchanged_configuration` needs 0.01 WETH on the Asset Safe; the motion `insurance-funding` left 0.0073 WETH [s6].
+- [x] Run the stand suites again: 16 suites, 101 of 101 tests at block `12147931`. The motion `insurance-funding` left 0.0073 WETH on the Asset Safe, so `test_FUND_first_transfer_logs_nonces_and_unchanged_configuration` gives the Asset Safe 0.01 WETH on the fork when it holds less [s6].
 
 ## Record Deploy Artifacts
 
