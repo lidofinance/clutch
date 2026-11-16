@@ -7,7 +7,7 @@ import path from "node:path";
 import { getAddress } from "ethers";
 import { processPermissions } from "zodiac-roles-sdk";
 import { capturePayload, createNodes } from "./constellation";
-import { resolvedDifferences, run, sepoliaRefusals, type Deps, type Git } from "./publish-constellation";
+import { remoteOf, resolvedDifferences, run, sepoliaRefusals, type Deps, type Git } from "./publish-constellation";
 import { key } from "../constellation/lib";
 import network from "./network.json";
 
@@ -52,9 +52,11 @@ test("the Sepolia guard refuses each missing condition of ADR 015", () => {
   const cases: [Record<string, string | undefined>, Partial<Git>, string][] = [
     [{ CLUTCH_SEPOLIA_PUSH: undefined }, {}, "CLUTCH_SEPOLIA_PUSH=1"],
     [{ CI: "true" }, {}, "CI never"],
-    [{}, { branch: "main" }, "check out testnet/sepolia"],
+    [{}, { branch: "feature" }, "check out testnet/sepolia or main"],
+    [{}, { branch: "HEAD" }, "check out testnet/sepolia or main"],
     [{}, { dirty: true }, "local changes"],
-    [{}, { pushed: false }, "push the commit"],
+    [{}, { pushed: false }, "push the commit to origin/testnet/sepolia"],
+    [{}, { branch: "main", pushed: false }, "push the commit to origin/main"],
     [{ SEPOLIA_ZODIAC_API_KEY: undefined }, {}, "SEPOLIA_ZODIAC_API_KEY"],
     [{ SEPOLIA_ZODIAC_WORKSPACE: "22222222-2222-4222-8222-222222222222" }, {}, "SEPOLIA_ZODIAC_WORKSPACE"],
     [{ SEPOLIA_ZODIAC_API_URL: "http://app.zodiac.eco/api/v1" }, {}, "https"],
@@ -64,6 +66,9 @@ test("the Sepolia guard refuses each missing condition of ADR 015", () => {
     expect(refusals).toHaveLength(1);
     expect(refusals[0]).toContain(reason);
   }
+  // the merged `main` passes too, and each branch answers to its own remote branch
+  expect(sepoliaRefusals(env, { ...git, branch: "main" }, workspace)).toEqual([]);
+  expect([remoteOf("main"), remoteOf("testnet/sepolia"), remoteOf("feature")]).toEqual(["main", "testnet/sepolia", "testnet/sepolia"]);
 });
 
 test("a resolution that equals the payload and the stand has no differences", () => {

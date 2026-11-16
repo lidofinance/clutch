@@ -104,8 +104,17 @@ globalThis.fetch = async (url, options) => {
                     env, label, reason, requests)
 
     def test_real_git_branch_dirty_and_unpushed_refusals(self):
+        self.git('checkout', '-b', 'feature')
+        self.publisher('wrong branch', reason='check out testnet/sepolia or main')
+        self.git('checkout', 'testnet/sepolia')
+        # `main` passes only when its commit is on origin/main
         self.git('checkout', '-b', 'main')
-        self.publisher('wrong branch', reason='check out testnet/sepolia')
+        self.publisher('main that origin does not hold', reason='push the commit to origin/main')
+        self.git('push', '-u', 'origin', 'main')
+        self.publisher('pushed main passes the guard', reason='Sepolia RPC, manifest and artifact required', requests=1)
+        self.git('-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-m', 'Unpushed main fixture')
+        self.publisher('unpushed commit on main', reason='push the commit to origin/main')
+        self.git('reset', '--hard', self.head)
         self.git('checkout', 'testnet/sepolia')
         self.git('checkout', '--detach')
         self.publisher('detached HEAD', reason='not HEAD')
