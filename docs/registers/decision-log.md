@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-16T16:00:00Z
+  at: 2026-11-16T19:54:04Z
 verified: []
 sources:
   - id: s1
@@ -175,6 +175,9 @@ sources:
   - id: s55
     resource: "urn:clutch:interview:2026-10-22-sepolia-migration"
     title: EM's choices for OD-149, OD-150 and OD-152, 2026-10-22; the transcript is not in the repository
+  - id: s56
+    resource: "urn:clutch:interview:2026-11-16-sepolia-decisions"
+    title: EM's choices for OD-147, OD-148 and OD-151 and EM's confirmation of OD-152, 2026-11-16; the transcript is not in the repository
 ---
 
 # Decision log
@@ -184,6 +187,30 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet
+
+EM asked the agent to review pull request #44, and then to explain OD-147, OD-148, OD-151 and OD-152. The agent explained them and recommended option B for the three open decisions. It asked EM to confirm the choice of 2026-10-22 for OD-152, because the transcript of that day is not in the repository. EM answered [s56]:
+
+> OD-152: answer: yes, Clutch uses four account-specific keys (asset-operator, orders-operator, asset-emergency, orders-emergency) on Sepolia and on mainnet
+> OD-147: option B works
+> OD-148: option B works
+> OD-154: option B works
+
+No decision has the number OD-154. The agent reads the fourth line as OD-151: it is the third decision that the agent explained as open, and it has an option B. EM has not confirmed this reading.
+
+Recorded as:
+
+- OD-152 stays closed with B, and EM confirms it for both networks. The mainnet policy on `main` still uses `operator` and `emergency` on two modifiers each. The move to the four keys is owed before the initial mainnet deployment ([ADR 015](/adr/015-tests-on-sepolia.md#mainnet-design-dependencies)).
+- OD-147 B: the stand owner may make hosted calls to the Sepolia workspace and send public Sepolia transactions from `testnet/sepolia`: from a commit that is on GitHub, with no local changes, through the Sepolia guard, with an API key for the Sepolia workspace in a git-ignored `.env` ([ADR 015](/adr/015-tests-on-sepolia.md#decision), decision 4).
+- OD-148 B: the existing-state payload reaches the Sepolia workspace through the committed script behind the Sepolia guard (decision 5).
+- OD-151 B, in the agent's reading of the fourth line: the stand owner may import the three existing Safes as vaults, enter the checked address-book entries, and remove the earlier workspace's draft aliases and cancelled proposals. The stand owner edits no role and no permission in the app (decision 6).
+
+What this entry does not decide:
+
+- The hosted publications of 2026-10-22 and 2026-11-16 ran before this answer ([ADR 015](/adr/015-tests-on-sepolia.md#confirmation)). EM's answer names the route, and says nothing about those runs.
+- The Sepolia guard requires the branch `testnet/sepolia`. After pull request #44 merges, it refuses a run from `main`. The agent told EM this in its review; EM's answer does not change the guard.
+- The orders modifier's governance role. The stand renamed it to `orders-governance` on 2026-11-16, and `main` keeps `governance` on two modifiers. The agent opened OD-153 for the mainnet key.
 
 ## 2026-11-16 — YT renames the orders modifier's governance role on the Sepolia stand
 

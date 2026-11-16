@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-16T18:01:17Z
+  at: 2026-11-16T19:54:39Z
 verified: []
 ---
 
@@ -38,7 +38,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-11-11 | none |
 | [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-13 | none |
 | [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-11-16 | none |
-| [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-13 | none |
+| [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-16 | none |
 | [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-13 | none |
 | [research/ai-first-practice-2026-09.md](/research/ai-first-practice-2026-09.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/cfo-feedback-2026-10-13.md](/research/cfo-feedback-2026-10-13.md) | Research Note | slop |  | 2026-11-13 | none |
