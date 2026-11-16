@@ -21,6 +21,7 @@ interface IWETH {
 /// @dev One universal-factory motion for each motion role of the stand, on a fork of the stand.
 contract SepoliaMotionCoverageTest is SepoliaStandFixture {
     bytes32 internal constant GOVERNANCE = "governance";
+    bytes32 internal constant ORDERS_GOVERNANCE = "orders-governance";
     bytes32 internal constant INSURANCE_FUNDING = "insurance-funding";
     bytes32 internal constant RESTART = "restart";
     bytes32 internal constant EXIT_GOVERNANCE = "exit-governance";
@@ -215,7 +216,7 @@ contract SepoliaMotionCoverageTest is SepoliaStandFixture {
             one(
                 write(
                     ordersRoles,
-                    GOVERNANCE,
+                    ORDERS_GOVERNANCE,
                     address(ordersRoles),
                     abi.encodeCall(IRoles.allowFunction, (ordersOperator, cow, IComposableCoWRemove.remove.selector, uint8(0)))
                 )

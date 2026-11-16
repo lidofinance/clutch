@@ -29,13 +29,13 @@ test("real SDK capture binds only existing accounts and uses the account-specifi
     const roles = payload.specification.filter((n: any) => n.type === "ROLES");
     expect(roles.map((n: any) => Object.keys(n.roles))).toEqual([
       ["asset-operator", "governance", "insurance-funding"], ["asset-emergency", "restart", "exit-governance"],
-      ["orders-operator", "orders-emergency", "governance", "approvals"], ["first-loss", "first-loss-burn", "insurance", "insurance-governance"],
+      ["orders-operator", "orders-emergency", "orders-governance", "approvals"], ["first-loss", "first-loss-burn", "insurance", "insurance-governance"],
     ]);
     expect(roles.flatMap((n: any) => Object.values(n.roles).map((r: any) => r.policy))).toEqual([
       "asset-operator", "governance", "insurance-funding", "asset-emergency", "restart", "exit-governance",
       "orders-operator", "orders-emergency", "orders-governance", "approvals", "first-loss", "first-loss-burn", "insurance", "insurance-governance",
     ].map((name) => `Clutch Sepolia — ${name}`));
-    // The workspace keeps one policy per label (HTTP 400 for a shared governance label, 2026-11-16).
+    // The workspace keeps one policy per role key (HTTP 400 for governance on two modifiers, 2026-11-16).
     const labels = roles.flatMap((n: any) => Object.values(n.roles).map((r: any) => r.policy));
     expect(new Set(labels).size).toBe(labels.length);
     expect(roles.map((n: any) => n.avatar)).toEqual(["$asset_safe", "$asset_safe", "$orders_safe", "$first_loss_safe"]);
@@ -82,7 +82,7 @@ test("every role with Nor goes in the legacy format, and no permission carries N
   const roles = payload.specification.filter((n: any) => n.type === "ROLES").flatMap((n: any) => Object.entries(n.roles).map(([name, role]: [string, any]) => [`${n.ref}.${name}`, role]));
   expect(roles.filter(([, role]: any) => hasNor(role.permissions))).toEqual([]);
   expect(roles.filter(([, role]: any) => role.targets).map(([name]: any) => name)).toEqual([
-    "operator_modifier.governance", "safety_modifier.exit-governance", "orders_modifier.governance", "first_loss_modifier.insurance-governance",
+    "operator_modifier.governance", "safety_modifier.exit-governance", "orders_modifier.orders-governance", "first_loss_modifier.insurance-governance",
   ]);
   for (const [, role] of roles.filter(([, role]: any) => role.targets) as any[]) expect(role.annotations).toEqual([]);
   expect(checkPayload(payload, manifest).calls.to).toHaveLength(100);

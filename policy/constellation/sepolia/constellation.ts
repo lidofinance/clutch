@@ -5,10 +5,6 @@ import { build, buildNodes } from "./compile";
 import { compileStand as compile } from "./compile";
 import { key } from "../constellation/lib";
 
-// The workspace keeps one policy per label, so a role name on two modifiers needs a second label.
-// The operator's governance keeps the label that the workspace already holds.
-const policyLabel = (ref: string, name: string) => `Clutch Sepolia — ${ref === "orders_modifier" && name === "governance" ? "orders-governance" : name}`;
-
 export type RuntimeAllowance = { modifier: string; key: string; balance: string; timestamp: string };
 
 function policyNodes(manifest: Record<string, any>, runtime?: RuntimeAllowance[]) {
@@ -42,7 +38,7 @@ export function createNodes(manifest: Record<string, any>, workspace: string, ru
       allowances: Object.fromEntries(Object.entries(allowances).map(([name, allowance]: [string, any]) => [name, { ...allowance, key: name }])),
       roles: Object.fromEntries(Object.entries(node.roles).map(([name, role]: [string, any]) => [name, {
         members: role.members as `0x${string}`[],
-        policy: policyLabel(ref, name),
+        policy: `Clutch Sepolia — ${name}`,
         permissions: role.permissions,
       }])),
     })];
@@ -94,7 +90,7 @@ export function checkPayload(payload: any, manifest: Record<string, any>, runtim
   }
   for (const node of payload.specification.filter((item: any) => item.type === "ROLES")) for (const [name, role] of Object.entries(node.roles) as [string, any][]) {
     if (role.key !== name) throw new Error(`${node.ref}.${name}: role key differs`);
-    if (role.policy !== policyLabel(node.ref, name)) throw new Error(`${node.ref}.${name}: policy label differs`);
+    if (role.policy !== `Clutch Sepolia — ${name}`) throw new Error(`${node.ref}.${name}: policy label differs`);
   }
   const nodes = Object.fromEntries(payload.specification.filter((node: any) => node.type === "ROLES").map((node: any) => [node.ref, resolve(node)]));
   if (Object.values(nodes).some((node: any) => JSON.stringify(node.multisend) !== "[]")) throw new Error("Unexpected transaction unwrappers");

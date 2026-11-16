@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T07:48:30Z
+  at: 2026-11-16T16:00:00Z
 verified: []
 sources:
   - id: s1
@@ -184,6 +184,19 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-16 — YT renames the orders modifier's governance role on the Sepolia stand
+
+The hosted Zodiac app refused to resolve the stand's 14 roles. It keeps one policy per role key, and the operator and orders modifiers both had a `governance` role with other permissions. The agent offered three options: rename the orders role on the chain, publish nothing now, or ask Zodiac. YT answered on 2026-11-16:
+
+> переименовать, но надо везде посмотреть где может отбить
+
+("Rename it, but check everywhere that it could break.")
+
+Recorded as:
+
+- The orders modifier's governance role takes the key `orders-governance`. Its members and grants stay. The operator modifier keeps `governance`. The [migration plan](/specs/sepolia-factory-migration.md) holds the public step and its checks.
+- `main` keeps `governance` on both modifiers. This is a test-stand choice of the stand owner (OD-150). It opens no decision, and EM has not decided it.
 
 ## 2026-11-13 — YT's choices for the Sepolia stand's move to the universal factory
 

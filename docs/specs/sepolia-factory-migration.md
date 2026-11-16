@@ -40,7 +40,7 @@ Only the stand owner sends public Sepolia transactions [s2].
 |---|---|
 | operator | `governance`, `insurance-funding` |
 | safety | `restart`, `exit-governance` |
-| orders | `governance`, `approvals` |
+| orders | `orders-governance`, `approvals` |
 | first-loss | `first-loss-burn`, `insurance`, `insurance-governance` |
 
 ## Pre-Deploy
@@ -149,6 +149,19 @@ just --justfile sepolia.just retire-burn-factory
 just --justfile sepolia.just retire-executor-module
 ```
 
+### 6. Rename the orders governance role
+
+Zodiac keeps one policy per role key: the label, the members and the permissions must match on each modifier. The operator and orders modifiers both had a `governance` role with other permissions, so the workspace refused the declaration. The stand owner chose to rename the orders role to `orders-governance`, as the stand already uses `asset-operator` and `orders-operator` [s6].
+
+`rename-orders-governance` sends 10 calls through test Voting. The first 5 give the universal factory the new key with the artifact's grants. The last 5 revoke each function and the target of the old key, and then its member, so that the comparison finds no role under the old key.
+
+- [x] Rehearse on a fork of the stand at block `12148455`: the comparison shows the two role keys before the rename and 0 differences after it. A motion through `orders-governance` enacts, and the comparison shows 0 differences again. `test-current` passes 101 of 101 [s6].
+- [ ] Run.
+
+```sh
+just --justfile sepolia.just rename-orders-governance
+```
+
 ## Post-Deploy Checks
 
 - [x] Compare the chain with the artifact: every role, module and allowance. The result must show 0 differences. At block `12127573`: 0 differences, 310 events [s5].
@@ -175,7 +188,7 @@ SEPOLIA_STAND_BLOCK=<block after step 5> just --justfile sepolia.just test-curre
 | `insurance` | `insurance` | approve and deposit 0.005 WETH in the ETH deposit queue |
 | `first-loss-burn` | `first-loss-burn` | burn 1 USD share |
 | `approvals` | `approvals` | the maximum WETH approval of the Orders Safe to the vault relayer, as now |
-| `orders-governance` | orders `governance` | `scopeTarget(orders-operator, WETH)`, as now |
+| `orders-governance` | `orders-governance` (orders `governance` until step 6) | `scopeTarget(orders-operator, WETH)`, as now |
 | `exit-governance` | `exit-governance` | `scopeTarget(asset-emergency, WETH)`, as now |
 | `insurance-governance` | `insurance-governance` | `scopeTarget(insurance, WETH)`, as now |
 | `restart` | `restart` | `enableModule(operator modifier)` on the Asset Safe, after `emergency-stop` |
@@ -195,7 +208,7 @@ just --justfile sepolia.just emergency-stop
 
 - [x] Copy the new manifest fields to `scripts/fixtures/sepolia-stand-manifest.json`. Remove the synthetic addresses from `verify-test-payload.test.ts`.
 - [x] `verify-deployment.ts` checks the initial deployment at its last block. It skips the factory and the queues, which came later; the stand suites check them. Its burn-factory checks stay, because the initial deployment registered the burn factory.
-- [ ] Publish the 14 roles to the Zodiac workspace with `constellation-resolve` and `constellation-publish` [s2]. The workspace names each allowance, so the declaration has no `insurance_weth` and `insurance_usdc`: a derived key has no name. The payload check accepts these two keys on the chain, and refuses any other allowance that the declaration does not name. Read the resolve output before publish. If it plans a change to a derived key, stop. The first resolve, on 2026-11-16 at commit `54e3c9a`, returned HTTP 400: the API refused permissions with Nor on `exit-governance` and `insurance-governance`. The payload now sends each role with Nor as targets, as it sends `governance` [s6]. The second resolve, at commit `8da746f`, returned HTTP 400: the workspace keeps one policy per label, and the operator and orders modifiers both had `Clutch Sepolia — governance`. The orders modifier's role now has the policy `Clutch Sepolia — orders-governance` [s6].
+- [ ] After step 6, run `constellation <workspace UUID>` again, then publish the 14 roles to the Zodiac workspace with `constellation-resolve` and `constellation-publish` [s2]. The workspace names each allowance, so the declaration has no `insurance_weth` and `insurance_usdc`: a derived key has no name. The payload check accepts these two keys on the chain, and refuses any other allowance that the declaration does not name. Read the resolve output before publish. If it plans a change to a derived key, stop. The first resolve, on 2026-11-16 at commit `54e3c9a`, returned HTTP 400: the API refused permissions with Nor on `exit-governance` and `insurance-governance`. The payload now sends each role with Nor as targets, as it sends `governance` [s6]. The second resolve, at commit `8da746f`, returned HTTP 400: the workspace keeps one policy per label, and the operator and orders modifiers both had `Clutch Sepolia — governance`. A third resolve, at commit `2fda8fa` with the label `Clutch Sepolia — orders-governance`, returned HTTP 400 again: one role key is one policy, whatever its label. Step 6 gives the role its own key [s6].
 - [x] Change the [stand plan](sepolia-stand-plan.md), the [test plan](sepolia-test-plan.md), the [setup checklist](sepolia-setup-checklist.md) and ADR 015 for the new roles.
 - [x] Record the stand owner's choices of scope and caps in the decision log.
 

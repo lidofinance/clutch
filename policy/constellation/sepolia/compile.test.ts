@@ -20,11 +20,15 @@ test("refuses a wrong chain and overlapping authority accounts", () => {
   expect(() => build({ ...manifest, dependencies: { ...network, chainId: 1 } })).toThrow("Sepolia manifest");
   expect(() => build({ ...manifest, ordersSafe: manifest.assetSafe })).toThrow("addresses must differ");
 });
-test("governance cannot grant access to any Safe or modifier", () => {
+test("neither governance role can grant access to any Safe or modifier", () => {
   const protectedAccounts = names.slice(0, 9).map((name) => manifest[name]);
   const grants = ["scopeTarget(bytes32,address)", "allowFunction(bytes32,address,bytes4,uint8)", "scopeFunction(bytes32,address,bytes4,(uint8,uint8,uint8,bytes)[],uint8)"].map((s) => id(s).slice(0, 10));
-  const governance = artifact.modifiers[0].roles.find((r) => r.name === "governance")!;
-  for (const fn of governance.targets.flatMap((t) => t.functions).filter((f) => grants.includes(f.selector))) expect(unguarded(fn.conditions, protectedAccounts)).toEqual([]);
+  for (const [ref, name] of [["operator_modifier", "governance"], ["orders_modifier", "orders-governance"]]) {
+    const governance = artifact.modifiers.find((m) => m.ref === ref)!.roles.find((r) => r.name === name)!;
+    const granting = governance.targets.flatMap((t) => t.functions).filter((f) => grants.includes(f.selector));
+    expect(granting.length).toBeGreaterThan(0);
+    for (const fn of granting) expect(unguarded(fn.conditions, protectedAccounts)).toEqual([]);
+  }
 });
 test("first-loss holder cannot burn, approve or transfer shares", () => {
   const firstLoss = artifact.modifiers.find((m) => m.avatar === manifest.firstLossSafe)!;
@@ -33,7 +37,7 @@ test("first-loss holder cannot burn, approve or transfer shares", () => {
 });
 
 test("the universal factory holds every motion role, and no call names the Easy Track executor", () => {
-  const motionRoles = ["governance", "insurance-funding", "restart", "exit-governance", "approvals", "first-loss-burn", "insurance", "insurance-governance"];
+  const motionRoles = ["governance", "insurance-funding", "restart", "exit-governance", "orders-governance", "approvals", "first-loss-burn", "insurance", "insurance-governance"];
   const held = artifact.modifiers.flatMap((m) => m.roles.filter((r) => motionRoles.includes(r.name)).map((r) => [m.ref, r.name, r.members.map((x: { address: string }) => x.address)]));
   expect(held).toHaveLength(9);
   for (const [, , members] of held) expect(members).toEqual([manifest.universalFactory]);
@@ -55,6 +59,6 @@ test("the artifact expects the insurance-funding caps of the budget motion, and 
 test("OD-152: each account has its own operator and emergency keys", () => {
   expect(artifact.modifiers.map((m) => m.roles.map((r) => r.name))).toEqual([
     ["asset-operator", "governance", "insurance-funding"], ["asset-emergency", "restart", "exit-governance"],
-    ["orders-operator", "orders-emergency", "governance", "approvals"], ["first-loss", "first-loss-burn", "insurance", "insurance-governance"],
+    ["orders-operator", "orders-emergency", "orders-governance", "approvals"], ["first-loss", "first-loss-burn", "insurance", "insurance-governance"],
   ]);
 });

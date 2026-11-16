@@ -95,6 +95,17 @@ retire-executor-module: _guard
         '{manifest: {chainId, controller, voting}, calls: {to: [.operatorModifier, .firstLossModifier], avatar: [.assetSafe, .firstLossSafe], data: [$op, $fl]}}' $m > $out
     SEPOLIA_ARTIFACT=$out forge script script/sepolia/ApplySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --sender "$SEPOLIA_SENDER" --broadcast --slow --gas-estimate-multiplier 200
 
+# Zodiac keeps one policy per role key, so the orders modifier's governance role moves to `orders-governance`.
+# Grants the new key, then revokes the old one's functions, target and member, through ApplySepolia.
+rename-orders-governance: _guard
+    #!/usr/bin/env bash
+    set -euo pipefail
+    m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}; out=cache/sepolia/rename-orders-governance.json
+    export FOUNDRY_BROADCAST=${FOUNDRY_BROADCAST:-broadcast/rename-orders-governance}
+    python3 scripts/sepolia_receipts.py fresh $FOUNDRY_BROADCAST/ApplySepolia.s.sol/11155111/run-latest.json
+    bun policy/constellation/sepolia/rename-orders-governance.ts $m $out
+    SEPOLIA_ARTIFACT=$out forge script script/sepolia/ApplySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --sender "$SEPOLIA_SENDER" --broadcast --slow --gas-estimate-multiplier 200
+
 compile:
     bun policy/constellation/sepolia/compile.ts cache/sepolia/manifest.json cache/sepolia/policy.json
 

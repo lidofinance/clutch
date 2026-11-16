@@ -210,7 +210,7 @@ contract SepoliaCurrentStandTest is SepoliaCurrentStandFixture {
             abi.encodeCall(IRoles.setAllowance, (bytes32("orders_weth"), 1, 1, 1, uint64(30 days - 1), 0)), 0);
         denied(executor, operator, bytes32("governance"), address(operator),
             abi.encodeCall(IRoles.setAllowance, (bytes32("foreign"), 1, 1, 1, uint64(30 days), 0)), 0);
-        permissionDenied(executor, ordersRoles, bytes32("governance"), address(ordersRoles), revoke, 0,
+        permissionDenied(executor, ordersRoles, bytes32("orders-governance"), address(ordersRoles), revoke, 0,
             CONDITION_VIOLATION);
     }
 

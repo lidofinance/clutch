@@ -118,7 +118,8 @@ export function buildNodes(manifest: Record<string, any>) {
         ]),
         ...revoke(m.ordersModifier, ordersOperator),
       ]),
-      governance: role(m.universalFactory, ordersGovernance),
+      // Zodiac keeps one policy per role key, so the orders governance role has its own key.
+      "orders-governance": role(m.universalFactory, ordersGovernance),
       approvals: role(m.universalFactory, tokens.map((token) => call(token, "approve(address,uint256)", d("vaultRelayer")))),
     }),
     first_loss_modifier: node(m.firstLossModifier, m.firstLossSafe, {
@@ -158,7 +159,7 @@ export function build(manifest: Record<string, any>) {
       const owner = allSafes.some((a) => a.toLowerCase() === target.address.toLowerCase()) ? target.address : artifact.modifiers.find((mod) => mod.address.toLowerCase() === target.address.toLowerCase())?.avatar;
       if (owner?.toLowerCase() !== modifier.avatar.toLowerCase()) throw new Error("Cross-account administration refused");
     }
-    if (r.name === "governance") for (const fn of target.functions) {
+    if (r.name === "governance" || r.name === "orders-governance") for (const fn of target.functions) {
       if (grants.has(fn.selector) && unguarded(fn.conditions, protectedAccounts).length) throw new Error("Governance leaves protected accounts unguarded");
     }
   }

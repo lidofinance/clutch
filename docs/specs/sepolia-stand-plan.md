@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-13T17:00:00Z
+  at: 2026-11-16T16:00:00Z
 verified: []
 sources:
   - id: s1
@@ -120,7 +120,7 @@ sources:
     title: Safe configuration drift reproduced on a pinned fork, verifier corrected and 44 regression cases passed
   - id: s37
     resource: /specs/sepolia-factory-migration.md
-    title: Sepolia stand migration to the universal factory — public steps and checks of 2026-11-13
+    title: Sepolia stand migration to the universal factory — public steps and checks of 2026-11-13 and 2026-11-16
 ---
 
 # Sepolia stand deployment
@@ -194,7 +194,7 @@ Enter the keystore password in the terminal. The script creates all five Safes; 
 | First-loss | 1.5.0 | Test Voting | First-loss modifier |
 
 The script also creates a separate test Agent, mock Easy Track, its executor, two share tokens, redemption queues and a typed burn factory.
-`deploy-factory` adds two deposit queues and the universal factory. Since 2026-11-13, the universal factory holds the nine motion roles, and the burn factory is retired [s37].
+`deploy-factory` adds two deposit queues and the universal factory. Since 2026-11-13, the universal factory holds the nine motion roles, and the burn factory is retired. On the orders modifier, the governance role has the key `orders-governance`, because Zodiac keeps one policy per role key [s37].
 The sender controls the test governance contracts. This setup does not test signer independence [s9].
 
 - [x] Public deployment: `39/39` receipts have status `1`, blocks `11955109–11955147`; no Safe execution failed [s13].

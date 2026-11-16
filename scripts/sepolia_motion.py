@@ -41,7 +41,7 @@ def writes(name, m):
         ],
         "first-loss-burn": [(m["firstLossModifier"], "first-loss-burn", m["usdShare"], cast("calldata", "burn(uint256)", str(10**18)))],
         "approvals": [(m["ordersModifier"], "approvals", weth, cast("calldata", "approve(address,uint256)", m["dependencies"]["contracts"]["vaultRelayer"]["address"], MAX))],
-        "orders-governance": [(m["ordersModifier"], "governance", m["ordersModifier"], scope("orders-operator"))],
+        "orders-governance": [(m["ordersModifier"], "orders-governance", m["ordersModifier"], scope("orders-operator"))],
         "exit-governance": [(m["safetyModifier"], "exit-governance", m["safetyModifier"], scope("asset-emergency"))],
         "insurance-governance": [(m["firstLossModifier"], "insurance-governance", m["firstLossModifier"], scope("insurance"))],
         "restart": [(m["safetyModifier"], "restart", m["assetSafe"], cast("calldata", "enableModule(address)", op))],
