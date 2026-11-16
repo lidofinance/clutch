@@ -58,13 +58,15 @@ export async function capturePayload(nodes: ReturnType<typeof createNodes>) {
   } as any });
   if (!captured) throw new Error("SDK produced no constellation payload");
   const result = JSON.parse(JSON.stringify(captured));
-  // SDK 2.1.2 emits permissions only. The captured API resolver accepts Nor
+  // SDK 2.1.2 emits permissions only. The API refuses a permission with Nor, and accepts Nor
   // through targets with empty annotations (Sepolia deployment findings, s18).
-  for (const node of result.payload.specification) {
-    const governance = node.roles?.governance;
-    if (!governance) continue;
-    Object.assign(governance, processPermissions(governance.permissions));
-    delete governance.permissions;
+  // Nor is operator 3 in Roles v2; the SDK's enum leaves it out.
+  const hasNor = (value: any): boolean => Array.isArray(value) ? value.some(hasNor)
+    : !!value && typeof value === "object" && (value.operator === 3 || Object.values(value).some(hasNor));
+  for (const node of result.payload.specification) for (const role of Object.values(node.roles ?? {}) as any[]) {
+    if (!hasNor(role.permissions)) continue;
+    Object.assign(role, processPermissions(role.permissions));
+    delete role.permissions;
   }
   return result;
 }

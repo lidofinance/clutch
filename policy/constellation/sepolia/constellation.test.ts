@@ -72,6 +72,19 @@ test("governance export preserves Nor in the legacy format accepted by the captu
   expect(checkPayload(payload, manifest).calls.to).toHaveLength(100);
 });
 
+// The hosted API refused permissions with Nor on exit-governance and insurance-governance (HTTP 400, 2026-11-16).
+test("every role with Nor goes in the legacy format, and no permission carries Nor", async () => {
+  const { payload } = await capturePayload(createNodes(manifest, workspace));
+  const hasNor = (value: any): boolean => JSON.stringify(value ?? null).includes('"operator":3');
+  const roles = payload.specification.filter((n: any) => n.type === "ROLES").flatMap((n: any) => Object.entries(n.roles).map(([name, role]: [string, any]) => [`${n.ref}.${name}`, role]));
+  expect(roles.filter(([, role]: any) => hasNor(role.permissions))).toEqual([]);
+  expect(roles.filter(([, role]: any) => role.targets).map(([name]: any) => name)).toEqual([
+    "operator_modifier.governance", "safety_modifier.exit-governance", "orders_modifier.governance", "first_loss_modifier.insurance-governance",
+  ]);
+  for (const [, role] of roles.filter(([, role]: any) => role.targets) as any[]) expect(role.annotations).toEqual([]);
+  expect(checkPayload(payload, manifest).calls.to).toHaveLength(100);
+});
+
 test("legacy governance readback refuses altered scopes and annotation-based permissions", async () => {
   const { payload } = await capturePayload(createNodes(manifest, workspace));
   const changed = (mutate: (role: any) => void) => {
