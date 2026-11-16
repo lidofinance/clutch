@@ -83,6 +83,27 @@ test("a resolution that lists roles in another order, as on 2026-10-20, has no d
   expect(resolvedDifferences(nodes, payload, manifest, allowances)).toEqual([]);
 });
 
+// The resolution of 2026-11-16: the chain's derived insurance caps, and old keys with revoked targets and no member.
+test("a resolution with the derived caps and emptied old keys has no differences", () => {
+  const derivedKey = (token: string) => "0x6b3a" + manifest.firstLossSafe.slice(2).toLowerCase() + token.slice(2, 22).toLowerCase();
+  const caps = ([[network.tokens.weth.address, String(10n ** 18n), "995000000000000000"], [network.tokens.usdc.address, String(10n ** 9n), "1000000000"]] as const)
+    .map(([token, cap, balance]) => ({ key: derivedKey(token), refill: cap, maxRefill: cap, period: "2592000", balance, timestamp: "1794585480" }));
+  const runtime = [...allowances, ...caps.map((c) => ({ modifier: manifest.operatorModifier, key: c.key, balance: c.balance, timestamp: c.timestamp }))];
+  const resolve = (change: (nodes: any[]) => void = () => {}) => {
+    const nodes = resolvedFrom(payload);
+    nodes.find((n: any) => n.ref === "operator_modifier").allowances.push(...structuredClone(caps));
+    nodes.find((n: any) => n.ref === "orders_modifier").roles.push({ key: key("governance"), members: [], annotations: [],
+      targets: [{ address: lower(manifest.ordersModifier), clearance: 0, executionOptions: 0, functions: [] }] });
+    change(nodes);
+    return resolvedDifferences(nodes, payload, manifest, runtime);
+  };
+  expect(resolve()).toEqual([]);
+  const operatorCaps = (nodes: any[]) => nodes.find((n) => n.ref === "operator_modifier").allowances.slice(-2);
+  expect(resolve((nodes) => { operatorCaps(nodes)[0].balance = "1"; })).toEqual([expect.stringContaining("derived allowance")]);
+  expect(resolve((nodes) => { operatorCaps(nodes)[1].refill = "1"; })).toEqual([expect.stringContaining("derived allowance")]);
+  expect(resolve((nodes) => { operatorCaps(nodes)[1].key = "0x6b3a" + "00".repeat(30); })).not.toEqual([]);
+});
+
 test("the resolution check refuses rewritten conditions, members, accounts, Safes and annotations", () => {
   const mutate = (change: (nodes: any[]) => void) => { const nodes = resolvedFrom(payload); change(nodes); return resolvedDifferences(nodes, payload, manifest, allowances); };
   // Nor (3) rewritten to And (1), as the earlier draft rewrote it.

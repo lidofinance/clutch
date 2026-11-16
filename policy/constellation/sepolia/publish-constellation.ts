@@ -65,6 +65,10 @@ export function resolvedDifferences(result: unknown, payload: any, manifest: Rec
     const safe = resolved.get(ref);
     if (safe.threshold !== 1 || !sameSet(safe.owners, [manifest.voting]) || !sameSet(safe.modules, want)) differences.push(`${ref}: owners, threshold or modules differ from the stand`);
   }
+  // The resolver reads the derived caps from the chain. A workspace cannot name them, so they stay out of the
+  // compiled nodes; each must be a cap that the artifact expects, with the chain's balance.
+  const derived = new Map(build(manifest).modifiers.flatMap((mod) => mod.allowances.filter((a) => a.key.startsWith("0x6b3a"))
+    .map((a) => [`${lower(mod.address)}:${lower(a.key)}`, a] as const)));
   const nodes: Record<string, any> = {};
   for (const node of result.filter((n: any) => n.type === "ROLES")) {
     if (JSON.stringify(node.multisend) !== "[]") differences.push(`${node.ref}: unexpected transaction unwrappers`);
@@ -72,7 +76,15 @@ export function resolvedDifferences(result: unknown, payload: any, manifest: Rec
       if (!Array.isArray(r.targets) || JSON.stringify(r.annotations) !== "[]") differences.push(`${node.ref}.${label(r.key)}: expected targets with empty annotations`);
       return [label(r.key), { members: r.members, permissions: reconstructPermissions(r.targets ?? []) }];
     }));
-    const nodeAllowances = Object.fromEntries((node.allowances ?? []).map((a: any) => [label(a.key), { ...a, key: label(a.key) }]));
+    const named = (node.allowances ?? []).filter((a: any) => {
+      const cap = derived.get(`${lower(node.address)}:${lower(a.key)}`);
+      if (!cap) return true;
+      const now = allowances?.find((r) => lower(r.modifier) === lower(node.address) && lower(r.key) === lower(a.key));
+      const settings = [a.refill, a.maxRefill, a.period].map(String).join() === [cap.refill, cap.maxRefill, cap.period].join();
+      if (!settings || (allowances && (!now || String(a.balance) !== now.balance || String(a.timestamp) !== now.timestamp))) differences.push(`${node.ref}: derived allowance ${a.key} differs from the artifact or the chain`);
+      return false;
+    });
+    const nodeAllowances = Object.fromEntries(named.map((a: any) => [label(a.key), { ...a, key: label(a.key) }]));
     nodes[node.ref] = { ...node, roles, allowances: nodeAllowances };
   }
   if (differences.length) return differences;
