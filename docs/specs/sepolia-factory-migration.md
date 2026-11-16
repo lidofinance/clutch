@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-13T17:00:00Z
+  at: 2026-11-16T12:00:00Z
 verified: []
 sources:
   - id: s1
@@ -25,6 +25,9 @@ sources:
   - id: s5
     resource: urn:clutch:evidence:2026-11-13:factory-migration-public
     title: Public Sepolia run of 2026-11-13 — receipts in `broadcast/DeployFactorySepolia.s.sol/`, `broadcast/ApplySepolia.s.sol/` and `broadcast/retire-executor-module/`, the `constellation` comparison at block 12127573 and `test-current` at block 12127646
+  - id: s6
+    resource: urn:clutch:evidence:2026-11-16:factory-motions-public
+    title: Public Sepolia motions of 2026-11-16 — Easy Track and Asset Safe events from block 12147161 to 12147925, and the comparison of the chain with the artifact at block 12147931
 ---
 
 # Sepolia stand migration to the universal factory
@@ -58,7 +61,7 @@ just check
 just --justfile sepolia.just check
 ```
 
-- [x] Rehearse a fresh stand on Anvil: deploy, `deploy-factory`, compile, apply, fund, `caps-motion`, `caps-enact`, `retire-burn-factory`, the comparison of the chain with the artifact, and 7 drills. The run checks the caps, the policy version and the retired burn factory. All pass [s4].
+- [x] Rehearse a fresh stand on Anvil: deploy, `deploy-factory`, compile, apply, fund, the caps motion, `retire-burn-factory`, the comparison of the chain with the artifact, and 7 drills. The run checks the caps, the policy version and the retired burn factory. All pass [s4].
 
 ```sh
 just --justfile sepolia.just rehearse
@@ -114,18 +117,18 @@ just --justfile sepolia.just apply
 
 ### 3. Insurance-funding caps
 
-The compiler sets no derived key. A budget motion sets it, as on mainnet [s1]. `caps-input` prints the motion's input: two `setAllowance` writes of the `governance` role, under the keys `0x6b3a`, the First-loss Safe and the first ten bytes of the token.
+The compiler sets no derived key. A budget motion sets it, as on mainnet [s1]. `motion-input caps` prints the motion's input: two `setAllowance` writes of the `governance` role, under the keys `0x6b3a`, the First-loss Safe and the first ten bytes of the token.
 
 - [x] Create the motion from the Committee Safe, and record its id: motion `7`, transaction `0xe402d64a04342007b667261cf1169fd42715bb12d70c6f2be98b4328c999db49`, block `12126985` [s5].
 
 ```sh
-just --justfile sepolia.just caps-motion
+just --justfile sepolia.just motion caps
 ```
 
 - [x] After the motion duration, enact it: transaction `0x61a10b1b301eec75df0ff56c8e95b2cde4d8a8fb205ae3bf37019bad775b6f50`, block `12127004` [s5].
 
 ```sh
-just --justfile sepolia.just caps-enact <id>
+just --justfile sepolia.just enact <id>
 ```
 
 ### 4. Retire the burn factory
@@ -164,7 +167,29 @@ SEPOLIA_STAND_BLOCK=<block after step 5> just --justfile sepolia.just test-curre
 
 ### Public motions
 
-- [ ] Send one motion for each new role, as `SepoliaMotionCoverageTest` does on the fork. Record the transactions in the [test plan](sepolia-test-plan.md#public-sepolia-transaction-sequences).
+`motion <name>` creates one motion from the Committee Safe and saves its input under its id. `enact <id>` enacts it after the motion duration. A policy motion changes the policy version, so enact each motion before the next is created. The motion `caps` of step 3 used the operator's `governance` role. Where a role can only change the policy, its motion scopes a target that the policy already scopes, so the chain still matches the artifact.
+
+| Name | Role | Writes |
+|---|---|---|
+| `insurance-funding` | `insurance-funding` | 0.005 WETH from the Asset Safe to the First-loss Safe |
+| `insurance` | `insurance` | approve and deposit 0.005 WETH in the ETH deposit queue |
+| `first-loss-burn` | `first-loss-burn` | burn 1 USD share |
+| `approvals` | `approvals` | the maximum WETH approval of the Orders Safe to the vault relayer, as now |
+| `orders-governance` | orders `governance` | `scopeTarget(orders-operator, WETH)`, as now |
+| `exit-governance` | `exit-governance` | `scopeTarget(asset-emergency, WETH)`, as now |
+| `insurance-governance` | `insurance-governance` | `scopeTarget(insurance, WETH)`, as now |
+| `restart` | `restart` | `enableModule(operator modifier)` on the Asset Safe, after `emergency-stop` |
+
+- [x] Send the motions in the order of the table. Before `restart`, stop the operator from the Emergency Safe. Motions `8` to `15` were created and enacted in the order of the table, from block `12147161` to `12147925`. `emergency-stop` disabled the operator at block `12147875`, and motion `15` enabled it again. The [test plan](sepolia-test-plan.md#public-sepolia-transaction-sequences) has the transactions [s6].
+
+```sh
+just --justfile sepolia.just motion <name>
+just --justfile sepolia.just enact <id>
+just --justfile sepolia.just emergency-stop
+```
+
+- [x] Compare the chain with the artifact again: 0 differences at block `12147931`. After the motions, `policyVersion()` is `4`, the First-loss Safe holds 1 USD share less, and the ETH deposit queue holds 0.005 WETH [s6].
+- [ ] Top up the Asset Safe, then run the stand suites again. At block `12147931`, 100 of 101 tests passed. `test_FUND_first_transfer_logs_nonces_and_unchanged_configuration` needs 0.01 WETH on the Asset Safe; the motion `insurance-funding` left 0.0073 WETH [s6].
 
 ## Record Deploy Artifacts
 

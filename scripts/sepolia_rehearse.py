@@ -56,15 +56,15 @@ def run(command, name, env):
 
 def public_steps(env):
     """The recipes of the factory migration's public steps, signed by the unlocked sender."""
-    recipe = {**env, "SEPOLIA_RPC": LOCAL, "SEPOLIA_SIGNER": "--unlocked"}
+    recipe = {**env, "SEPOLIA_RPC": LOCAL, "SEPOLIA_SIGNER": "--unlocked", "SEPOLIA_MOTIONS": str(CACHE / "motions")}
     stand = json.loads(Path(env["SEPOLIA_MANIFEST"]).read_text())
     call = lambda to, signature, *args: subprocess.check_output(
         ["cast", "call", to, signature, *args, "--rpc-url", LOCAL], text=True).split()[0]
-    run(["just", "--justfile", "sepolia.just", "caps-motion"], "caps-motion", recipe)
+    run(["just", "--justfile", "sepolia.just", "motion", "caps"], "caps-motion", recipe)
     motion = int(call(stand["easyTrack"], "motionsCount()(uint256)")) - 1
     rpc("evm_increaseTime", [int(call(stand["easyTrack"], "motionDuration()(uint256)"))])
     rpc("evm_mine", [])
-    run(["just", "--justfile", "sepolia.just", "caps-enact", str(motion)], "caps-enact", recipe)
+    run(["just", "--justfile", "sepolia.just", "enact", str(motion)], "caps-enact", recipe)
     run(["just", "--justfile", "sepolia.just", "retire-burn-factory"], "retire-burn-factory", recipe)
     first_loss = stand["firstLossSafe"][2:].lower()
     for token, cap in [("weth", 10**18), ("usdc", 10**9)]:
@@ -72,7 +72,7 @@ def public_steps(env):
         balance = subprocess.check_output(["cast", "call", stand["operatorModifier"],
             "allowances(bytes32)(uint128,uint128,uint64,uint128,uint64)", key, "--rpc-url", LOCAL], text=True).split("\n")[3]
         if int(balance.split()[0]) != cap:
-            raise RuntimeError(f"caps-enact left the {token} cap at {balance}")
+            raise RuntimeError(f"The caps motion left the {token} cap at {balance}")
     if (call(stand["universalFactory"], "policyVersion()(uint256)") != "1"
             or call(stand["easyTrack"], "evmScriptFactories(address)(bool)", stand["burnFactory"]) != "false"):
         raise RuntimeError("The public steps left an unexpected policy version or burn factory")

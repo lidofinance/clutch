@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/sonnet-5.5
-  at: 2026-11-13T17:00:00Z
+  at: 2026-11-16T12:00:00Z
 verified: []
 sources:
   - id: s1
@@ -25,6 +25,9 @@ sources:
   - id: s5
     resource: /specs/sepolia-stand-plan.md
     title: Stand addresses, funding and guarded public execution procedures
+  - id: s6
+    resource: /specs/sepolia-factory-migration.md
+    title: The stand's move to the universal factory, and its public motions of 2026-11-16
 ---
 
 # Sepolia stand test plan
@@ -116,3 +119,11 @@ Links identify recorded executions of each sequence. Fork calls and read-only re
 | Voting restart | Test Voting approves and executes the reviewed four-account restoration | [approve 1](https://sepolia.etherscan.io/tx/0xa789fe774cb7be7938086b6cd130a6c717c3b29bc3538b71c52b5aacc07b1367) → [restore 1](https://sepolia.etherscan.io/tx/0xb14421a250355c4d46cb71787e889a48f6a0f34f75c49c32553824e01f79aa7b) → [approve 2](https://sepolia.etherscan.io/tx/0x76a6fe0a6052372d974d4c31c9e7cb6218b857709302c5e325845fdd94b6da65) → [restore 2](https://sepolia.etherscan.io/tx/0x475ca91a79a5a941337f6c724e9c010e81e78e605e3125a9086257e3a214c665) → [approve 3](https://sepolia.etherscan.io/tx/0x46e57e5ba30a8faf9b8c89fd81814b036e121cab16da2a4655a99113f5d3da06) → [restore 3](https://sepolia.etherscan.io/tx/0xc26930957206cc42d27c790d6dbeac50bf31b73b1019bfafbcc5ec30472d6574) → [approve 4](https://sepolia.etherscan.io/tx/0x02a0eac5faef40fac871cc2c61f3d8181097bc28c05f2d9c96b0d213e11247bc) → [restore 4](https://sepolia.etherscan.io/tx/0xb7dafaec7d27260d57eb5d802d18ecc55efda7dc5dc724cfd3f314b549279db1) [s4] |
 | Funding interruption/resume | Wrap → interruption → resume only missing WETH/share transfers | [wrap](https://sepolia.etherscan.io/tx/0xb4f47a30c5b6acbd4ad377a1aa14ba5fb51af5ea63a47d3ad842971ae7ca712e) → [Asset WETH](https://sepolia.etherscan.io/tx/0xe45e1d44e1275d33feb5423d7465899d5ddbb4ff32e3f080b1525606ba7926ea) → [First-loss USD](https://sepolia.etherscan.io/tx/0xf800d0a4d626098061c858437b2a271d4c4b4089b2117af9be08520459507992) → [First-loss ETH](https://sepolia.etherscan.io/tx/0x021e631171ed441266575f0ca6c1dd7850538fd5511887cc865485083f6eac06) [s4] |
 | Submission failures | Lost submission → identical raw resume; mined response timeout; legacy/EIP-1559 pending replacement | [resume](https://sepolia.etherscan.io/tx/0x20752a5159e0f499c7864188c20e9f9682d5022552a16be7ec309b81e8f7b2e2) → [timeout](https://sepolia.etherscan.io/tx/0x1e621f229691b74d259d25f4f90e50974bb3ad2aadc7f30b1f774dfe6a4ac30d) → [legacy](https://sepolia.etherscan.io/tx/0x23a62e73fc112e4ab09253e4fe97169eeef85bd78e3ed7d4beca586ed860e2c7) → [EIP-1559](https://sepolia.etherscan.io/tx/0x05b08210d07de4459c29d586e8cdf9d6893b2747403efd06891d10776c92a5d7) [s4] |
+| Factory insurance funding | Committee createMotion → wait → enactMotion: universal factory → operator `insurance-funding` → WETH.transfer(First-loss, 0.005) | [create](https://sepolia.etherscan.io/tx/0xfdfd6f98da4dde2c377ba412683c9e56b013be95b4a0879bbf9be2f1a53ec252) → [enact](https://sepolia.etherscan.io/tx/0xc2b5c914609f15c1bcd317a8fb32a7b390457391a69e0dbc9c8f602eb1a14a02) [s6] |
+| Factory insurance | Committee createMotion → wait → enactMotion: universal factory → first-loss `insurance` → WETH.approve and ETH queue deposit(0.005) | [create](https://sepolia.etherscan.io/tx/0x5dd20a6d3b176539eb42f8a4ab77962c672240f8091b74de6bf57aa3e89a91b3) → [enact](https://sepolia.etherscan.io/tx/0x2cc9822f33577c242a1b35b26f0cb540366eb5bd6960f02b378984e889fd2faf) [s6] |
+| Factory First-loss burn | Committee createMotion → wait → enactMotion: universal factory → first-loss `first-loss-burn` → USD share burn(1) | [create](https://sepolia.etherscan.io/tx/0xc8477d86b006f0a30d13e6e4d90f45793b608a99319763dec597bb401d86a1fe) → [enact](https://sepolia.etherscan.io/tx/0x54540c3d9c58caaee05907f2a45e1a08aa708dc2080b8c21ad12f3983ce0490e) [s6] |
+| Factory approvals | Committee createMotion → wait → enactMotion: universal factory → orders `approvals` → WETH.approve(relayer, max) | [create](https://sepolia.etherscan.io/tx/0x1fdf430846762dab01471a9d13eafa509afd8585b34a9c649854ca4b7fe8bf49) → [enact](https://sepolia.etherscan.io/tx/0x37e765c8c5b4ec4735d05484feb8c45e6a925ddc91cd1280db147fdccd735004) [s6] |
+| Factory orders governance | Committee createMotion → wait → enactMotion: universal factory → orders `governance` → scopeTarget(orders-operator, WETH) | [create](https://sepolia.etherscan.io/tx/0x7a19e7e731429b7f2cd6ee178ddc69783ac3b7cedc16d94e4b4457ec91c7e439) → [enact](https://sepolia.etherscan.io/tx/0x0e14b820f652dd824a436ba2b8ace3d603db268d73ad69cbc497cf0264ff7fc4) [s6] |
+| Factory exit governance | Committee createMotion → wait → enactMotion: universal factory → safety `exit-governance` → scopeTarget(asset-emergency, WETH) | [create](https://sepolia.etherscan.io/tx/0x9608968dc18c6b2063a7edddc11ffc8c1aa28d69d1c32bdc8a4e6fe09b34679f) → [enact](https://sepolia.etherscan.io/tx/0xb15d8a9183b6b463868ffdd4d475221ab8413567a2436f7ead3d453306d079dd) [s6] |
+| Factory insurance governance | Committee createMotion → wait → enactMotion: universal factory → first-loss `insurance-governance` → scopeTarget(insurance, WETH) | [create](https://sepolia.etherscan.io/tx/0x619f116c316901935d352ae8a3d2681d45722fd479036a50740606158e2eaea9) → [enact](https://sepolia.etherscan.io/tx/0xdb48056491938b3c3df57a3831f42548bc75dafed628ff34313ae49e47177136) [s6] |
+| Factory restart | Emergency → safety modifier → Safe.disableModule(operator); then universal factory → safety `restart` → Safe.enableModule(operator) | [disable](https://sepolia.etherscan.io/tx/0xe911ffa38837c33f455a6f01183e394a84ab03fb0f1524c9bfd5e259264d3ba1) → [create](https://sepolia.etherscan.io/tx/0x60643701dd8f3863601262de6f47ed8cd2640daef0ecbb94e61488c77c0946f0) → [enact](https://sepolia.etherscan.io/tx/0x78481d1a0ff513967a7927bb70d1455deb7f35fe52b250daa5e7c8a040bd1b7f) [s6] |

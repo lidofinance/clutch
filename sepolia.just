@@ -35,37 +35,42 @@ deploy-factory: _guard
     python3 scripts/sepolia_receipts.py fresh broadcast/DeployFactorySepolia.s.sol/11155111/run-latest.json
     forge script script/sepolia/DeployFactorySepolia.s.sol --hardfork amsterdam --rpc-url "$SEPOLIA_RPC" --account "$SEPOLIA_ACCOUNT" --sender "$SEPOLIA_SENDER" --broadcast --verify --slow --gas-estimate-multiplier 200
 
-# The budget motion of the insurance-funding caps: 1 WETH and 1000 USDC in 30 days, under the derived keys
-# 0x6b3a ‖ First-loss Safe ‖ first ten bytes of the token. Prints the motion's input; reads the chain only.
-caps-input:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}
-    op=$(jq -r .operatorModifier $m); fl=$(jq -r .firstLossSafe $m | tr A-F a-f); uf=$(jq -r .universalFactory $m)
-    gov=$(cast format-bytes32-string governance)
-    cap() { local token; token=$(jq -r ".dependencies.tokens.$1.address" $m | tr A-F a-f)
-        cast calldata 'setAllowance(bytes32,uint128,uint128,uint128,uint64,uint64)' "0x6b3a${fl:2}${token:2:20}" $2 $2 $2 2592000 0; }
-    epoch=$(cast call $uf 'epoch()(uint256)' --rpc-url "$SEPOLIA_RPC"); version=$(cast call $uf 'policyVersion()(uint256)' --rpc-url "$SEPOLIA_RPC")
-    cast abi-encode 'f(uint256,uint256,(address,bytes32,address,bytes)[])' $epoch $version \
-        "[($op,$gov,$op,$(cap weth 1000000000000000000)),($op,$gov,$op,$(cap usdc 1000000000))]"
+# The input of one universal-factory motion; reads the chain only. scripts/sepolia_motion.py names the motions,
+# one for each motion role; `caps` sets the insurance-funding caps.
+motion-input name:
+    @python3 scripts/sepolia_motion.py input {{name}}
 
-# The Committee Safe is 1/1 with the sender as owner, so the sender's own call is its signature.
-# SEPOLIA_SIGNER replaces the keystore only on the local rehearsal.
-caps-motion: _guard
+# The Committee and Emergency Safes are 1/1 with the sender as owner, so the sender's own call is their signature.
+# SEPOLIA_SIGNER replaces the keystore only on the local rehearsal. The motion's input is saved under its id,
+# because a policy motion that enacts first changes the input that a later one would compute.
+motion name: _guard
     #!/usr/bin/env bash
     set -euo pipefail
-    m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}
-    data=$(cast calldata 'createMotion(address,bytes)' $(jq -r .universalFactory $m) $(just --justfile sepolia.just caps-input))
+    m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}; dir=${SEPOLIA_MOTIONS:-cache/sepolia/motions}; et=$(jq -r .easyTrack $m)
+    input=$(python3 scripts/sepolia_motion.py input {{name}})
+    id=$(cast call $et 'motionsCount()(uint256)' --rpc-url "$SEPOLIA_RPC" | cut -d' ' -f1)
+    data=$(cast calldata 'createMotion(address,bytes)' $(jq -r .universalFactory $m) $input)
     signature=0x000000000000000000000000${SEPOLIA_SENDER:2}$(printf '0%.0s' {1..64})01
     cast send $(jq -r .operatorSafe $m) 'execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)' \
-        $(jq -r .easyTrack $m) 0 $data 0 0 0 0 0x0000000000000000000000000000000000000000 0x0000000000000000000000000000000000000000 $signature \
+        $et 0 $data 0 0 0 0 0x0000000000000000000000000000000000000000 0x0000000000000000000000000000000000000000 $signature \
+        --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --from "$SEPOLIA_SENDER"
+    mkdir -p $dir && echo $input > $dir/$id.hex && echo "Motion {{name}}: id $id"
+
+enact id: _guard
+    #!/usr/bin/env bash
+    set -euo pipefail
+    m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}; dir=${SEPOLIA_MOTIONS:-cache/sepolia/motions}
+    cast send $(jq -r .easyTrack $m) 'enactMotion(uint256,bytes)' {{id}} $(cat $dir/{{id}}.hex) \
         --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --from "$SEPOLIA_SENDER"
 
-caps-enact id: _guard
+# The Emergency Safe's asset-emergency role disables the operator modifier; the `restart` motion enables it again.
+emergency-stop: _guard
     #!/usr/bin/env bash
     set -euo pipefail
     m=${SEPOLIA_MANIFEST:-cache/sepolia/manifest.json}
-    cast send $(jq -r .easyTrack $m) 'enactMotion(uint256,bytes)' {{id}} $(just --justfile sepolia.just caps-input) \
+    signature=0x000000000000000000000000${SEPOLIA_SENDER:2}$(printf '0%.0s' {1..64})01
+    cast send $(jq -r .emergencySafe $m) 'execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)' \
+        $(jq -r .safetyModifier $m) 0 $(python3 scripts/sepolia_motion.py stop) 0 0 0 0 0x0000000000000000000000000000000000000000 0x0000000000000000000000000000000000000000 $signature \
         --rpc-url "$SEPOLIA_RPC" ${SEPOLIA_SIGNER:---account $SEPOLIA_ACCOUNT} --from "$SEPOLIA_SENDER"
 
 retire-burn-factory: _guard
