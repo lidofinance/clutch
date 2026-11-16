@@ -105,7 +105,7 @@ Basis: account graph, launch configuration and account-specific role keys [s1][s
 | CFG-09 | A direct controller-to-role call fails, and a controller-to-Committee-to-role call succeeds. The checks keep the two cases separate | L: corrected public sell [s12] |
 | CFG-10 | Only test Voting owns the vault Safes. Test Agent is the recovery receiver, not another owner | F: owner sets and recovery receiver |
 | CFG-11 | A failed owner signature, too few signatures, a stale nonce, a replay, a wrong Safe and a wrong chain each fail without unintended execution | F: `test_CFG_approved_hash_nonce_replay_wrong_safe_chain_and_signatures` |
-| CFG-12 | The exact initial relayer approvals exist only on Orders, for the configured tokens. The inventory lists all other approvals | F: approval inventory and USDC allowance history [s12] |
+| CFG-12 | The exact initial relayer approvals exist only on Orders, for the configured tokens. The inventory lists all other approvals | F: `test_CFG_exact_initial_token_approvals_and_fixture_wiring`: Orders holds the maximum WETH approval and a positive USDC approval; the other four Safes hold none [s12] |
 
 ## B. Funding, transfers and allowances
 

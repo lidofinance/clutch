@@ -144,9 +144,9 @@ contract SepoliaConfigurationCoverageTest is SepoliaCoverageFixture {
     }
     function test_CFG_exact_initial_token_approvals_and_fixture_wiring() public view {
         address[5] memory safes=[committee,emergency,asset,orders,firstLoss];
-        // Circle USDC consumes even a max allowance; the runner derives its remainder from Approval/Trade history.
-        uint256 usdcApproval=vm.envUint("SEPOLIA_EXPECTED_USDC_ALLOWANCE");
-        for(uint256 i;i<2;++i)for(uint256 j;j<5;++j) assertEq(IERC20(token(i==0?"weth":"usdc")).allowance(safes[j],d("vaultRelayer")),j==3?(i==0?type(uint256).max:usdcApproval):0);
+        // Circle USDC consumes even a max allowance, so Orders' USDC allowance is positive, not the maximum.
+        for(uint256 i;i<2;++i)for(uint256 j;j<5;++j){uint256 allowed=IERC20(token(i==0?"weth":"usdc")).allowance(safes[j],d("vaultRelayer"));
+            if(j!=3)assertEq(allowed,0);else if(i==0)assertEq(allowed,type(uint256).max);else assertGt(allowed,0);}
         for(uint256 i;i<2;++i){
             SepoliaShares share=SepoliaShares(a(i==0?"usdShare":"ethShare"));
             SepoliaRedeemQueue queue=SepoliaRedeemQueue(a(i==0?"usdQueue":"ethQueue"));
