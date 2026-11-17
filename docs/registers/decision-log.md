@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-17T20:53:17Z
+  at: 2026-11-17T21:07:34Z
 verified: []
 sources:
   - id: s1
@@ -193,6 +193,9 @@ sources:
   - id: s61
     resource: /research/order-price-bound-2026-11-17.md
     title: A price bound on chain for like-for-like orders, without an outside price feed — the prototype and its limits
+  - id: s62
+    resource: "urn:clutch:interview:2026-11-17-order-price-bound-choice"
+    title: EM's choice for OD-157, 2026-11-17; the transcript is not in the repository
 ---
 
 # Decision log
@@ -202,6 +205,17 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-17 — OD-157 decided: no price bound for like-for-like orders
+
+The agent gave EM the research and the three options of OD-157, and recommended A. EM answered [s62]:
+
+> decision is A
+
+Recorded as:
+
+- OD-157 A: the operator's order signing gets no price bound for like-for-like orders. The order's limit, CoW's solver competition, screening, the orders budgets and the orders detector stay the controls ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 47).
+- The prototype and its fork tests leave the tree. This is the agent's choice, so that the test suite holds only the design's own code; the [research note](/research/order-price-bound-2026-11-17.md) links them at the commit where they stood.
 
 ## 2026-11-17 — the research on a price bound for like-for-like orders, and OD-157
 
@@ -213,7 +227,7 @@ The agent built a prototype and ran it on the rehearsal's fork ([research note](
 
 - The research that OD-154 owed is done. A custom condition of 1,688 bytes holds an operator's order to par inside one class of tokens, and one motion installs it.
 - The bound covers 12 of the 30 ordered pairs of the six order tokens. An order of two classes stays free, so the bound stops a slip and not a hostile signing quorum. The orders budgets stay the bound on such a quorum's loss.
-- The agent opened OD-157: whether to add the bound. It recommends no. EM has not decided.
+- The agent opened OD-157: whether to add the bound. It recommended no. The entry above holds EM's choice.
 
 ## 2026-11-17 — OD-154 to OD-156: the lessons of a Safe drained through its Roles module
 

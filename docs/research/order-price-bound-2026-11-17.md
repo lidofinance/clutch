@@ -9,15 +9,15 @@ valid_as_of: 2026-11-17
 stale_after: 2027-02-28T00:00:00Z
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-17T20:53:17Z
+  at: 2026-11-17T21:07:34Z
 verified: []
 sources:
   - id: s1
     resource: "https://repo.sourcify.dev/contracts/full_match/1/0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5/"
     title: The Roles mastercopy that the vault's modifiers use, verified source — the Custom operator, the custom-condition interface and the integrity rules
   - id: s2
-    resource: urn:clutch:source:order-price-bound-probe
-    title: test/research/LikeForLikeBound.sol and test/research/OrderPriceBound.t.sol — the prototype condition and its five fork tests
+    resource: "https://github.com/lidofinance/clutch/tree/bf2d7f7c6d34f0107ef2755a95206fbcd40d7d12/test/research"
+    title: The prototype condition and its five fork tests, at the commit where they stood — LikeForLikeBound.sol and OrderPriceBound.t.sol
   - id: s3
     resource: urn:clutch:evidence:2026-11-17:curve-par-reads
     title: Curve's stETH pool and 3pool read at blocks of May 2022 to May 2023, with the commands of this note
@@ -32,12 +32,12 @@ sources:
     title: A Safe drained through its Roles module on 2026-11-16 — a free minimum output
   - id: s7
     resource: /registers/decision-log.md
-    title: Decision log — OD-154, and EM's request of 2026-11-17 for this research
+    title: Decision log — OD-154, EM's request of 2026-11-17 for this research, and EM's choice for OD-157
 ---
 
 # A price bound on chain for like-for-like orders, without an outside price feed, 2026-11-17
 
-EM chose no price bound on chain for operator orders at launch, and asked for research on one kind of bound: a custom condition with no outside feed, for like-for-like pairs only, stablecoin to stablecoin and ETH-class to ETH-class (OD-154) [s7]. The agent read the Roles mastercopy's verified source, built a prototype, and ran it on the rehearsal's fork against the vault's own modifiers. It also read two Curve pools at past blocks.
+EM chose no price bound on chain for operator orders at launch, and asked for research on one kind of bound: a custom condition with no outside feed, for like-for-like pairs only, stablecoin to stablecoin and ETH-class to ETH-class (OD-154) [s7]. The agent read the Roles mastercopy's verified source, built a prototype, and ran it on the rehearsal's fork against the vault's own modifiers, at the commit that [s2] names. It also read two Curve pools at past blocks.
 
 ## Answer
 
@@ -125,9 +125,13 @@ The agent did not build these. Each needs its own research.
 - **A budget on what the operator signs** in orders of two classes, for each period. It caps the amount and not the price, as the orders budgets already do, and a cancelled order still spends it.
 - **An on-chain market reading**, such as a pool's time-weighted price. It is no feed that someone posts, but it is an outside market in the swap path, which the design keeps out (OD-45) [s4].
 
+## What followed
+
+EM chose not to add the bound (OD-157 A) [s7]. The prototype and its tests left the tree with that choice. They stay in the repository's history at commit `bf2d7f7` [s2]; `git checkout bf2d7f7 -- test/research` brings them back for a run.
+
 ## Limits of this note
 
-- The prototype is test code under `test/research/`. Nobody audited it.
+- The prototype was test code under `test/research/`. Nobody audited it.
 - The agent measured gas inside a fork test, not in a transaction.
 - The Curve reads are single quotes for one size. They are not a history of prices.
 - The classes follow the six order tokens of today. A seventh token changes the count of pairs.

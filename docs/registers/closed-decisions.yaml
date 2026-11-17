@@ -1187,3 +1187,11 @@
   log:
     - "2026-11-17 — OD-154 to OD-156: the lessons of a Safe drained through its Roles module"
   adr: [ADR-005#d35, ADR-005#d36, ADR-005#d37, ADR-009#d49]
+
+- id: OD-157
+  question: "Does the operator's order signing get the price bound for like-for-like orders?"
+  closed: 2026-11-17
+  log:
+    - "2026-11-17 — OD-157 decided: no price bound for like-for-like orders"
+  adr: [ADR-007#d47]
+  refines: [OD-154]
