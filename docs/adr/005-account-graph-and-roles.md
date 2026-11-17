@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-17T20:16:01Z
 verified: []
 sources:
   - id: s1
@@ -41,6 +41,9 @@ sources:
   - id: s13
     resource: /research/cfo-feedback-2026-10-13.md
     title: The committee's feedback of 2026-10-12 — emergency powers, the Easy Track restart and Lido's pause-or-disable rule
+  - id: s15
+    resource: /research/roles-module-drain-2026-11-16.md
+    title: A Safe drained through its Roles module on 2026-11-16 — a role held by one key, a free executor and a batch through MultiSend
   - id: s14
     resource: "https://research.lido.fi/t/4279"
     title: Lido forum — Treasury Management Principles and the Treasury Management Committee, 2023-04-04; token holders approve each new member
@@ -98,6 +101,9 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 32. The enabling vote applies the Safe batches by approved hash: Aragon Voting approves each batch's hash, and anyone executes the batches after the vote. The vote cannot carry the batches as its own items: Aragon Voting stores its script when a vote starts, and that transaction would need more gas than EIP-7825 lets one transaction use ([research note](/research/enabling-vote-rehearsal-2026-10-15.md)) (OD-92).
 33. A change of the committee's members needs no Snapshot each time. Monitoring alerts on every change of the owners or the threshold of the committee's Safe, and a runbook covers the change (OD-109).
 34. The emergency role's zeroing of an approval takes any spender, for each token that the operator can approve. It is the form that a motion writes for a new token, so the launch policy and the motions share one form ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13) (OD-139).
+35. Only the committee's Safe, the emergency Safe and the universal factory hold a role. A key that one person holds is never a role member. The compiler refuses any other member (OD-156) [s15].
+36. A role that a Safe holds calls no whole target, and each of its functions pins every address, bytes, string, tuple and array parameter. A parameter stays free only where the compiler's list names it with a reason: the times of a claim, the proof of an Earn deposit, the order of an unsign, the target of an emergency revoke, the previous module of the switch, and the spender of a zeroing. So no call names a route that the policy does not know, such as the executor of a swap. The roles that the universal factory holds write policy, and their own rules bound them (OD-156) [s15].
+37. No modifier has a transaction unwrapper. Each role call is one call, and one condition tree checks it (OD-156) [s15].
 
 ## Proposed direction
 
@@ -158,6 +164,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 - The compiler's tests of INV-027 are in `policy/constellation/compiler/compile.test.ts`; `compile.test.ts` also checks that the universal factory holds every motion role and no other.
 - The operator cannot widen or reach administration [s6]; the Asset Safe has no guard [s11].
 - The enabling-vote rehearsal: Aragon Voting approved a batch hash on each of the three Safes, and the batches ran (decision 32; [research note](/research/enabling-vote-rehearsal-2026-10-15.md)).
+- The compiler refuses a role member other than the three holders, a whole target or a free route parameter in a role that a Safe holds, and a modifier with an unwrapper (`bun test compiler`). On the fork, every role assignment after the enabling vote names one of the three holders, and no modifier has an unwrapper (`test_role_holders_and_no_unwrapper_after_the_enabling_vote`).
 
 ## Reversal conditions
 

@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-17T20:16:01Z
 verified: []
 sources:
   - id: s1
@@ -26,6 +26,9 @@ sources:
   - id: s12
     resource: "urn:clutch:restricted:mandate-draft-v0.1"
     title: Mandate draft v0.1 — the committee rebalances within two working days after each snapshot; outside the repository until the mandate is published
+  - id: s14
+    resource: /research/roles-module-drain-2026-11-16.md
+    title: A Safe drained through its Roles module on 2026-11-16 — nothing on chain bounds the price of an operator's order
   - id: s13
     resource: "https://research.lido.fi/t/10868/3"
     title: Lido forum — TMC-6 operational rules, 2025-11-17; sUSDS and tokenized money market funds at most 15 percent of the whole treasury, and a two-month runway floor
@@ -93,6 +96,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 46. The vault keeps no liquidity buffer (OD-110).
 47. Each monthly report shows the TMC-6 ratio for the whole treasury: sUSDS and tokenized money market funds over the DAO's total treasury, the vault's sUSDS included (OD-111).
 48. The gates of decisions 21, 36 and 41 are the gates of a top-up motion. The motion's forum post states the funded value, the headroom under the mandate size and the treasury share. Monitoring alerts on a top-up motion that breaks the headroom, and on one that follows an objected one (OD-144, OD-146).
+49. Monitoring runs the orders detector on the orders account. It alerts on an open order whose limit lies further below a market price than a threshold, on a fill that does, on an open order whose fields it cannot read, and on a token without a price. It takes an order's fields only when their identifier is one that the account signed. The committee and Lido's monitoring set the price source and the threshold; the repository holds neither. An alert pages the emergency Safe, which unsigns the order and sets the relayer's approval to zero ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 47) (OD-156) [s14].
 
 ## Proposed direction
 
@@ -171,6 +175,8 @@ The phase-1 detector specification gives each detector an ID, a watched state, a
 
 - INV-008, INV-011 and INV-012 in the [invariants](/specs/invariants.md).
 - Kit test: approvals bounded by a key or a ceiling, and an unlimited approval refused [s5].
+
+- The orders detector reports the drill of the fork suite: two limits at half the market, then the fill at the limit, and no open order after the emergency role's unsign (`test_orders_drill_a_limit_far_below_the_market`, `just test-fork`). Its unit tests cover the identifier, partial fills, cancelled and expired orders, TWAP orders and tokens without a price (`bun test compiler`).
 
 ## Reversal conditions
 

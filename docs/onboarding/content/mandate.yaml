@@ -140,7 +140,7 @@ blocks:
         why: "USDS and DAI carry USDC risk through Sky's peg stability module, so they are no escape from a USDC depeg."
         state: forum
         sources: ["ADR-007#d5", "ADR-007#d15", "OD-90"]
-      - text: "The swap section says plainly what the launch trades off: CoW's market, limit and TWAP orders through the orders account are the only venue, nothing on chain bounds their price, and Uniswap and 1inch wait for a screening check of the output."
+      - text: "The swap section says plainly what the launch trades off: CoW's market, limit and TWAP orders through the orders account are the only venue, nothing on chain bounds their price, and Uniswap and 1inch wait for a screening check of the output and for a permission that pins every route address."
         why: "The committee needs those order types, and a router swap without a bounded output loses value to front-running."
         state: owed
         sources: ["ADR-007#d18", "ADR-007#d20", "ADR-007#d26", "OD-90"]

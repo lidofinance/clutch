@@ -163,10 +163,10 @@
   assumption: "CoW's solver competition and EBBO rule, screening, the orders budgets and monitoring of each fill keep order prices close to the market."
   kind: trust
   why: "Nothing on chain bounds a CoW order's price: its limit is a number that the caller chooses."
-  breaks: "A careless or hostile limit sells below the market when solvers fail to compete or break the EBBO rule beyond what a bond repays, or when liquidity is thin. The budgets bound the operator's transfers; the emergency role's orders are neither budgeted nor screened."
-  watched_by: []
-  watch_note: "CoW DAO enforces the EBBO rule after the fact. [the screening vendor] has not confirmed a price check. The fill-price and recovery-limit alerts are not built."
-  sources: ["ADR-007#d26", "ADR-007#proposed-direction", "ADR-010#proposed-direction", "OD-43",
+  breaks: "A careless or hostile limit sells below the market when solvers fail to compete or break the EBBO rule beyond what a bond repays, or when liquidity is thin. A solver on CoW's list can fill a signed order at its limit. The budgets bound the operator's transfers; the emergency role's orders are neither budgeted nor screened."
+  watched_by: ["test:test_orders_drill_a_limit_far_below_the_market"]
+  watch_note: "CoW DAO enforces the EBBO rule after the fact. [the screening vendor] has not confirmed a price check. The orders detector is built: on the fork it reports a limit and a fill at half the market, and the emergency role unsigns the open order. Lido's monitoring does not run it yet, and its price source and its threshold are not set."
+  sources: ["ADR-007#d26", "ADR-007#d47", "ADR-009#d49", "OD-154", "ADR-007#proposed-direction", "ADR-010#proposed-direction", "OD-43",
     "doc:docs/specs/control-matrix.md#the-matrix",
     "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
 

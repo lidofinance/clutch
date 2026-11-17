@@ -183,6 +183,8 @@ contract LaunchOnboarding is Recorded {
         _onboard(key, 18);
         uint256 held = IERC20(token).balanceOf(address(asset));
         assertGe(held, budget, "the Asset Safe holds the token");
+        // the deposit names no referral
+        _opRefused(depositQueue, 0, abi.encodeCall(ILidoEarnDepositQueue.deposit, (uint224(budget / 2), Mainnet.COMMITTEE_SAFE, noProof)));
         _opRefused(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, uint256(budget) + 1)));
         _opRefused(token, 0, abi.encodeCall(IERC20.approve, (stranger, 1)));
         _op(token, 0, abi.encodeCall(IERC20.approve, (depositQueue, budget)));

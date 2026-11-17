@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { reconstructPermissions } from "zodiac-roles-sdk";
+import { signaturesOf } from "../compiler/compile";
 import { build, compileStand as compile } from "./compile";
 import { checkPayload, derivedCaps, type RuntimeAllowance } from "./constellation";
 import { diffPolicy } from "./diff";
@@ -94,7 +95,7 @@ export function resolvedDifferences(result: unknown, payload: any, manifest: Rec
   const wiring = (artifact: ReturnType<typeof compile>) => artifact.modifiers.map(({ ref, address, owner, avatar, target }) => [ref, address, owner, avatar, target].map(lower).join(":")).sort();
   try {
     const expected = checkPayload(payload, manifest, allowances);
-    const candidate = compile(nodes, manifest, {});
+    const candidate = compile(nodes, manifest, {}, signaturesOf(expected));
     if (JSON.stringify(calls(candidate)) !== JSON.stringify(calls(expected))) differences.push("the resolution compiles to other policy calls");
     if (JSON.stringify(wiring(candidate)) !== JSON.stringify(wiring(expected))) differences.push("the resolution wires the modifiers differently");
   } catch (error) {

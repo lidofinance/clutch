@@ -116,7 +116,8 @@ export default [
   // Lido Earn: asynchronous deposit and redeem. The approval spends the
   // budget, so the deposit itself is unbudgeted. Claims pay the Asset Safe.
   ...[EARN_USD, EARN_ETH].flatMap((vault) => [
-    call(vault.depositQueue, "deposit(uint224,address,bytes32[])"),
+    // the deposit names no referral: a free address is one that a caller chooses
+    call(vault.depositQueue, "deposit(uint224,address,bytes32[])", undefined, ZERO),
     call(vault.depositQueue, "cancelDepositRequest()"),
     call(vault.depositQueue, "claim(address)", c.avatar),
     call(vault.redeemQueue, "redeem(uint256)"),

@@ -138,8 +138,13 @@ export function buildNodes(manifest: Record<string, any>) {
 }
 
 /** The shared compiler names the orders Safe `ordersAccount`; the stand manifest calls it `ordersSafe`. The stand uses account-specific keys (OD-152). */
-export function compileStand(nodes: Parameters<typeof compile>[0], m: Record<string, any>, names: Parameters<typeof compile>[2]) {
-  return compile(nodes, { ...m, ordersAccount: m.ordersSafe, roleKeyScheme: "account" }, names);
+export function compileStand(
+  nodes: Parameters<typeof compile>[0],
+  m: Record<string, any>,
+  names: Parameters<typeof compile>[2],
+  known: Parameters<typeof compile>[3] = {},
+) {
+  return compile(nodes, { ...m, ordersAccount: m.ordersSafe, roleKeyScheme: "account" }, names, known);
 }
 
 export function build(manifest: Record<string, any>) {

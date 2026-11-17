@@ -4,7 +4,21 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { AbiCoder, id } from "ethers";
 import { Clearance } from "zodiac-roles-sdk";
-import { checkProtected, checkZeroing, compileManifest, refuseHosted, render, unguarded } from "./compile";
+import {
+  checkFreeParameters,
+  checkMembers,
+  checkProtected,
+  checkZeroing,
+  compile,
+  compileManifest,
+  FREE_BY_DESIGN,
+  freeRouteParameters,
+  parameterTypes,
+  refuseHosted,
+  refuseUnwrappers,
+  render,
+  unguarded,
+} from "./compile";
 import type { Artifact } from "./compile";
 
 const ROOT = path.resolve(import.meta.dir, "..");
@@ -1026,4 +1040,159 @@ test("the compiler refuses a first-loss exit that is not pinned to the Asset Saf
     c[1].compValue = pad(REHEARSAL.manifest.operatorSafe as string) as `0x${string}`;
   });
   expect(() => checkProtected(bad, REHEARSAL.manifest)).toThrow(/only the first-loss role's exit to the Asset Safe may/);
+});
+
+// ---------------------------------------------------------------------
+// INV-041 to INV-043: role holders, free routes and unwrappers
+// ---------------------------------------------------------------------
+
+const REHEARSAL_ARTIFACT = JSON.parse(readFileSync(path.join(ROOT, "artifacts/rehearsal-26249900.json"), "utf8")) as Artifact;
+const SWAP = "swapExactAmountIn(address,(address,address,uint256,uint256,uint256,bytes32,address),uint256,bytes,bytes)";
+const ROUTER = "0x00000000000000000000000000000000000A6619";
+const word32 = (value: string) => `0x${value.replace(/^0x/, "").toLowerCase().padStart(64, "0")}`;
+const node = (parent: number, paramType: number, operator: number, compValue = "0x") => ({ parent, paramType, operator, compValue });
+/** A router swap as the drained wallet's policy had it: tokens and beneficiary pinned, the executor and the data free. */
+const routerSwap = (executor: ReturnType<typeof node>, beneficiary: ReturnType<typeof node>) => [
+  node(0, 5, 5),
+  executor,
+  node(0, 3, 5),
+  node(2, 1, EQUAL_TO, word32("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48")),
+  node(2, 1, EQUAL_TO, word32("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48")),
+  node(2, 1, 0),
+  node(2, 1, 0),
+  node(2, 1, 0),
+  node(2, 1, 0),
+  beneficiary,
+];
+const heldBySafe = (a: Artifact) =>
+  a.modifiers.flatMap((m) =>
+    m.roles
+      .filter((r) => r.members.some((member: { address: string }) => member.address !== (a.manifest as Record<string, any>).universalFactory))
+      .map((r) => ({ m, r })),
+  );
+
+test("parameter types split at the top level only", () => {
+  expect(parameterTypes("address,(address,(uint256,bytes)[],bytes32),uint256,bytes")).toEqual([
+    "address",
+    "(address,(uint256,bytes)[],bytes32)",
+    "uint256",
+    "bytes",
+  ]);
+  expect(parameterTypes("")).toEqual([]);
+});
+
+test("a router swap with a free executor has free routes, and a pinned tuple is read field by field", () => {
+  const pinned = node(0, 1, EQUAL_TO, word32(ROUTER));
+  const avatar = node(2, 1, 15);
+  // the executor and both bytes parameters are free; the tuple is pinned field by field
+  expect(freeRouteParameters(SWAP, routerSwap(node(0, 1, 0), avatar), false)).toEqual(["0", "3", "4"]);
+  expect(freeRouteParameters(SWAP, routerSwap(pinned, avatar), false)).toEqual(["3", "4"]);
+  // a free beneficiary inside the tuple is found
+  expect(freeRouteParameters(SWAP, routerSwap(pinned, node(2, 1, 0)), false)).toEqual(["1.6", "3", "4"]);
+  // no condition at all, and a shape that no check can read, leave every route free
+  expect(freeRouteParameters(SWAP, [], true)).toEqual(["0", "1", "3", "4"]);
+  expect(freeRouteParameters(SWAP, [node(0, 0, 1), ...routerSwap(pinned, avatar).slice(1)], false)).toEqual(["0", "1", "3", "4"]);
+  // an Or of two Matches is free where either branch is free
+  const or = [node(0, 0, 2), node(0, 5, 5), node(0, 5, 5), node(1, 1, EQUAL_TO, word32(ROUTER)), node(2, 1, 0)];
+  expect(freeRouteParameters("transfer(address,uint256)", or, false)).toEqual(["0"]);
+});
+
+test("in the launch policy a role that a Safe holds leaves free only the listed parameters, and each listed one is in use", () => {
+  const used = new Set<string>();
+  for (const a of [artifact, REHEARSAL_ARTIFACT]) {
+    for (const { m, r } of heldBySafe(a)) {
+      for (const t of r.targets) {
+        expect(t.clearance).toBe(Clearance.Function);
+        for (const f of t.functions) {
+          for (const at of freeRouteParameters(f.signature!, f.conditions, f.wildcarded)) {
+            const entry = FREE_BY_DESIGN.find((e) => e.signature === f.signature && e.path === at);
+            expect(entry, `${m.ref}.${r.name}: ${f.signature} parameter ${at}`).toBeDefined();
+            used.add(`${f.signature}#${at}`);
+          }
+        }
+      }
+    }
+    expect(() => checkFreeParameters(a.modifiers, a.manifest as Record<string, any>)).not.toThrow();
+  }
+  expect([...used].sort()).toEqual(FREE_BY_DESIGN.map((e) => `${e.signature}#${e.path}`).sort());
+});
+
+test("the compiler refuses a router swap with a free executor for the operator, and takes it for a role of the factory", () => {
+  const swap = (executor: ReturnType<typeof node>) => ({
+    address: ROUTER,
+    name: "a swap router",
+    clearance: Clearance.Function,
+    executionOptions: 0,
+    functions: [{ selector: id(SWAP).slice(0, 10), signature: SWAP, executionOptions: 0, wildcarded: false, conditions: routerSwap(executor, node(2, 1, 15)) }],
+  });
+  const withSwap = (roleName: string, executor: ReturnType<typeof node>) => {
+    const modifiers = structuredClone(artifact.modifiers);
+    modifiers.flatMap((m) => m.roles).find((r) => r.name === roleName)!.targets.push(swap(executor) as any);
+    return modifiers;
+  };
+  expect(() => checkFreeParameters(withSwap("operator", node(0, 1, 0)), manifest)).toThrow(/leaves parameter 0, 3, 4 free/);
+  expect(() => checkFreeParameters(withSwap("operator", node(0, 1, EQUAL_TO, word32(ROUTER))), manifest)).toThrow(/leaves parameter 3, 4 free/);
+  expect(() => checkProtected(withSwap("operator", node(0, 1, 0)), manifest)).toThrow(/leaves parameter 0, 3, 4 free/);
+  // the universal factory's roles write policy; other checks bound them
+  expect(() => checkFreeParameters(withSwap("governance", node(0, 1, 0)), manifest)).not.toThrow();
+});
+
+test("the compiler refuses a whole target, an unconditioned deposit, a call without a signature and a spender that is free for a nonzero amount", () => {
+  const operator = (modifiers: Artifact["modifiers"]) => modifiers.flatMap((m) => m.roles).find((r) => r.name === "operator")!;
+  const emergency = (modifiers: Artifact["modifiers"]) => modifiers.flatMap((m) => m.roles).find((r) => r.name === "emergency")!;
+  const deposit = (modifiers: Artifact["modifiers"]) =>
+    operator(modifiers).targets.flatMap((t) => t.functions).find((f) => f.signature === "deposit(uint224,address,bytes32[])")!;
+
+  const whole = structuredClone(artifact.modifiers);
+  operator(whole).targets.push({ address: ROUTER, name: "a swap router", clearance: Clearance.Target, executionOptions: 0, functions: [] } as any);
+  expect(() => checkFreeParameters(whole, manifest)).toThrow(/may not call every function of a target/);
+
+  // the Earn deposit as it was before the referral was pinned
+  const open = structuredClone(artifact.modifiers);
+  Object.assign(deposit(open), { wildcarded: true, conditions: [] });
+  expect(() => checkFreeParameters(open, manifest)).toThrow(/deposit\(uint224,address,bytes32\[\]\) leaves parameter 1 free/);
+
+  const unnamed = structuredClone(artifact.modifiers);
+  (deposit(unnamed) as { signature: string | null }).signature = null;
+  expect(() => checkFreeParameters(unnamed, manifest)).toThrow(/needs its signature/);
+
+  // the zeroing's free spender belongs to a role that stops, with the amount pinned to zero
+  const zeroing = emergency(artifact.modifiers).targets.flatMap((t) => t.functions.filter((f) => f.selector === APPROVE).map((f) => ({ t, f })))[0];
+  const lent = structuredClone(artifact.modifiers);
+  operator(lent).targets.find((t) => t.address === zeroing.t.address)!.functions = [structuredClone(zeroing.f)];
+  expect(() => checkFreeParameters(lent, manifest)).toThrow(/approve\(address,uint256\) leaves parameter 0 free/);
+  const nonzero = structuredClone(artifact.modifiers);
+  const amount = emergency(nonzero).targets.flatMap((t) => t.functions).find((f) => f.selector === APPROVE)!.conditions[2];
+  amount.compValue = word32("0x01");
+  expect(() => checkFreeParameters(nonzero, manifest)).toThrow(/approve\(address,uint256\) leaves parameter 0 free/);
+});
+
+test("only the committee's Safe, the emergency Safe and the universal factory hold a role", () => {
+  for (const a of [artifact, REHEARSAL_ARTIFACT]) {
+    const m = a.manifest as Record<string, any>;
+    const holders = [m.operatorSafe, m.emergencySafe, m.universalFactory];
+    for (const r of a.modifiers.flatMap((mod) => mod.roles)) {
+      expect(r.members.length).toBeGreaterThan(0);
+      for (const member of r.members) expect(holders).toContain(member.address);
+    }
+    expect(() => checkMembers(a.modifiers, m)).not.toThrow();
+  }
+  const key = structuredClone(artifact.modifiers);
+  key.flatMap((m) => m.roles).find((r) => r.name === "operator")!.members.push({ address: "0x065f395147fc72747c7f48f67f039d4235884148", name: null });
+  expect(() => checkMembers(key, manifest)).toThrow(/may not hold a role/);
+  expect(() => checkProtected(key, manifest)).toThrow(/may not hold a role/);
+  expect(() => checkMembers(artifact.modifiers, { ...manifest, operatorSafe: undefined, emergencySafe: undefined, universalFactory: undefined })).toThrow(/names no account/);
+});
+
+test("a compile refuses a node that names an unwrapper", () => {
+  const safe = manifest.assetSafe as string;
+  const bare = { type: "ROLES", address: manifest.operatorModifier, owner: safe, avatar: safe, target: safe, roles: {}, allowances: {} };
+  expect(() => compile({ operator_modifier: { ...bare, multisend: ["0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761"] } }, manifest, {})).toThrow(/takes no transaction unwrapper/);
+});
+
+test("the compiler refuses a modifier with a transaction unwrapper", () => {
+  expect(() => refuseUnwrappers("operator_modifier", { type: "ROLES" })).not.toThrow();
+  expect(() => refuseUnwrappers("operator_modifier", { type: "ROLES", multisend: [] })).not.toThrow();
+  expect(() => refuseUnwrappers("operator_modifier", { type: "ROLES", multisend: ["0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761"] })).toThrow(/takes no transaction unwrapper/);
+  expect(() => refuseUnwrappers("operator_modifier", { type: "ROLES", unwrappers: [{ to: ROUTER }] })).toThrow(/takes no transaction unwrapper/);
 });

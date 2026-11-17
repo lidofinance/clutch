@@ -369,11 +369,15 @@
     - "Carry the operator role, the governance role, the operator's [[budget key|budget keys]], and the insurance-funding role, which may only transfer the vault's tokens to the first-loss Safe."
   cannot:
     - "Be replaced without a DAO vote. The safety policy names its address, so the vote also rewrites the safety policy."
+    - "Give a role to a key that one person holds. On each of the four modifiers, only the committee's Safe, the emergency Safe and the universal factory hold a role (INV-041)."
+    - "Take a batch of calls in one role call. No modifier has a transaction unwrapper, so one condition tree checks each call (INV-043)."
   numbers: ["budget period: 30 days"]
   address: "To be deployed"
   sources: ["ADR-005#d6", "ADR-005#proposed-direction", "ADR-014#proposed-direction", "lip:part-1",
     "test:test_D3_operator_lifecycle", "runbook:Replace the operator modifier",
-    "test:test_insurance_funding_pays_only_the_first_loss_safe", INV-039]
+    "test:test_insurance_funding_pays_only_the_first_loss_safe", INV-039,
+    "ADR-005#d35", "ADR-005#d37", "INV-041", "INV-043",
+    "test:test_role_holders_and_no_unwrapper_after_the_enabling_vote"]
 
 - id: roles-mastercopy
   node: operator-modifier
@@ -412,10 +416,12 @@
     - "Administer a modifier or the Safe, or change its own permissions."
     - "Use delegatecall on the Asset Safe. Its one delegatecall, to CoW's order signer, is on the orders account, and the compiler refuses any other."
     - "Reach the [[first-loss Safe]]. The committee's Safe acts there through a separate role."
+    - "Name a route that the policy does not know. Each of its calls pins every address, bytes, tuple and array parameter, and the compiler refuses a call that leaves one free (INV-042)."
   numbers: ["one role key: `operator`"]
   sources: ["ADR-005#proposed-direction", "ADR-009#d13", "ADR-009#d14", "ADR-013#d11",
     "ADR-014#d9", "ADR-014#proposed-direction", "OD-42", "OD-60", "OD-67", "INV-002", "INV-003", "INV-008",
-    "INV-018", "INV-038", "test:test_D3_operator_cannot_route_around_avatar", "ADR-005#d31", "OD-43"]
+    "INV-018", "INV-038", "test:test_D3_operator_cannot_route_around_avatar", "ADR-005#d31", "OD-43",
+    "ADR-005#d36", "INV-042"]
 
 - id: role-governance
   node: operator-modifier
@@ -568,7 +574,8 @@
     - "Run offline from a frozen lockfile with pinned versions."
   cannot:
     - "Compile an entry that only the hosted app can compile, such as an action or a DeFi Kit preset. It refuses one."
-  sources: ["ADR-004#d13", "doc:policy/constellation/PROVENANCE.md#build"]
+    - "Compile a role member other than the two Safes and the universal factory, a transaction unwrapper, or a call of a Safe's role that leaves a route parameter free, such as the executor of a swap."
+  sources: ["ADR-004#d13", "doc:policy/constellation/PROVENANCE.md#build", "ADR-005#d35", "ADR-005#d36", "ADR-005#d37"]
 
 - id: artifact
   node: policy
@@ -1023,8 +1030,10 @@
     - "Take a swap whose recipient and tokens a permission pins."
   cannot:
     - "Have their minimum output bounded by the modifier. They wait until [the screening vendor] can check a swap's minimum output against a market price before execution."
+    - "Join with a free executor, route or callback address, or with an approval for the maximum. A permission must pin each such address."
   sources: ["ADR-007#d20", "ADR-007#proposed-direction", "ADR-007#d17",
-    "doc:docs/research/cow-orders-account-2026-10-06.md#uniswap-and-1inch"]
+    "doc:docs/research/cow-orders-account-2026-10-06.md#uniswap-and-1inch",
+    "doc:docs/research/roles-module-drain-2026-11-16.md#what-the-policy-pinned-and-what-it-left-free"]
 
 # --- Monitoring ---------------------------------------------------------------------------------
 - id: lido-monitoring
@@ -1038,6 +1047,7 @@
     - "Alert on [[drift]] from the artifact on every modifier, the safety policy included, since motions can write exits there; on approvals and budget burn; on owner, threshold, module, guard and singleton changes of the new Safes and the committee's Safe; and on the orders account's fallback handler, domain verifier and relayer approvals."
     - "Alert on every transfer to the Aragon Agent."
     - "Check each fill against a market price, ask the committee at 30 days to confirm or cancel each open order, and alert on a recovery order whose limit sits far below a market price, on tokens left in the orders account and on late parts of conditional orders."
+    - "Run the orders detector: alert on an open order or a fill of the orders account that lies further below a market price than the threshold, on an order that it cannot read and on a token without a price. Nothing on chain bounds an operator order's price, so this alert and the emergency Safe's unsign are the answer."
     - "Alert on any change of the first-loss Safe's balance, owners or modules, page on every burn motion and every action of the first-loss role, and alert on a redemption before the guard is set and on an excess above the launch cap that stays."
     - "Page at high severity on every emergency swap."
     - "Follow a new Lido product's exposure against the protocol cap until a motion unlocks it, and record the changes of the screening rules that the vendor reports."
@@ -1053,7 +1063,9 @@
     "ADR-009#d28", "ADR-006#d11", "ADR-010#d19", "ADR-009#proposed-direction", "ADR-010#d12", "ADR-010#d18",
     "ADR-007#d24", "ADR-007#d26", "ADR-007#d29", "ADR-007#proposed-direction", "ADR-009#d34", "ADR-005#d33",
     "ADR-013#proposed-direction", "ADR-013#d19", "ADR-014#d9", "ADR-014#proposed-direction", "OD-42", "OD-43", "OD-49",
-    "OD-60", "OD-67", "ADR-009#d41", "ADR-009#d44", "ADR-009#d45", "ADR-010#d26", "doc:ROADMAP.md#roadmap"]
+    "OD-60", "OD-67", "ADR-009#d41", "ADR-009#d44", "ADR-009#d45", "ADR-010#d26", "doc:ROADMAP.md#roadmap",
+    "ADR-009#d49", "ADR-007#d47", "runbook:Stop an order far below the market",
+    "test:test_orders_drill_a_limit_far_below_the_market"]
 
 - id: vendor-monitoring
   node: monitoring

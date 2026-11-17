@@ -35,8 +35,17 @@ type Node = Record<string, any>;
 
 export type Artifact = ReturnType<typeof compile>;
 
-/** Compiles every Roles node of the constellation, in export order. */
-export function compile(nodes: Record<string, Node>, manifest: Record<string, any>, names: Record<string, string>) {
+/**
+ * Compiles every Roles node of the constellation, in export order. `known` gives the signature of a selector
+ * where an entry carries none, as after a round trip through a serialized payload; the checks of the parameters
+ * need it.
+ */
+export function compile(
+  nodes: Record<string, Node>,
+  manifest: Record<string, any>,
+  names: Record<string, string>,
+  known: Record<string, string> = {},
+) {
   const label = (address: string) => names[getAddress(address)] ?? null;
   const calls = { to: [] as string[], data: [] as string[], fn: [] as string[] };
   const emit = (to: string, fn: string, args: unknown[]) => {
@@ -50,6 +59,7 @@ export function compile(nodes: Record<string, Node>, manifest: Record<string, an
       throw new Error(`${ref}: only Roles modifiers compile. Clutch's own script deploys the Safes (ADR 004).`);
     }
     const address = getAddress(node.address);
+    refuseUnwrappers(ref, node);
 
     const allowances = Object.entries(node.allowances ?? {}).map(([name, spec]: [string, any]) => {
       if (spec.key !== undefined && spec.key !== name) throw new Error(`${ref}: allowance ${name} names key ${spec.key}`);
@@ -107,7 +117,7 @@ export function compile(nodes: Record<string, Node>, manifest: Record<string, an
             }
             return {
               selector: fn.selector,
-              signature: signatures.get(fn.selector) ?? null,
+              signature: signatures.get(fn.selector) ?? known[fn.selector] ?? null,
               executionOptions: fn.executionOptions,
               wildcarded: fn.wildcarded,
               conditions,
@@ -303,6 +313,144 @@ export function checkProtected(modifiers: Artifact["modifiers"], manifest: Recor
           if (kind === "grant") {
             checkGrantKeys(where, name, fn.conditions, role.key, writableKeys(manifest, target.address));
             checkGrantDelegatecall(where, name, fn.selector, fn.conditions, target.address === ordersModifier);
+          }
+        }
+      }
+    }
+  }
+  // After the checks of the vault's own accounts, whose messages name the narrower rule.
+  checkMembers(modifiers, manifest);
+  checkFreeParameters(modifiers, manifest);
+}
+
+/**
+ * Who may hold a role (ADR 005, decision 35): the committee's Safe, the emergency Safe and the universal factory,
+ * which the manifest names. A key that one person holds is never a role member, so no single key acts for a vault
+ * account.
+ */
+export function checkMembers(modifiers: Artifact["modifiers"], manifest: Record<string, any>) {
+  const holders = ["operatorSafe", "emergencySafe", "universalFactory"]
+    .filter((field) => typeof manifest[field] === "string")
+    .map((field) => getAddress(manifest[field]));
+  if (holders.length === 0) throw new Error("the manifest names no account that may hold a role (ADR 005, decision 35)");
+  for (const m of modifiers) {
+    for (const role of m.roles) {
+      for (const member of role.members) {
+        if (!holders.includes(getAddress(member.address))) {
+          throw new Error(
+            `${m.ref}.${role.name}: ${member.name ?? member.address} may not hold a role; only the committee's Safe, the emergency Safe and the universal factory may (ADR 005, decision 35)`,
+          );
+        }
+      }
+    }
+  }
+}
+
+/**
+ * The parameters that stay free by design in a role that a Safe holds, each with its reason (ADR 005, decision 36).
+ * `path` is the parameter's position; `stopOnly` keeps an entry to the roles that only stop.
+ */
+export const FREE_BY_DESIGN: { signature: string; path: string; stopOnly?: true; reason: string }[] = [
+  { signature: "claim(address,uint32[])", path: "1", reason: "the times of the account's own redeem requests; the receiver is pinned" },
+  { signature: "deposit(uint224,address,bytes32[])", path: "2", reason: "the proof for the queue's own allowlist; the queue credits the caller" },
+  {
+    signature: "unsignOrder((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32))",
+    path: "0",
+    reason: "an unsign only withdraws a signature of the orders account",
+  },
+  { signature: "revokeTarget(bytes32,address)", path: "1", stopOnly: true, reason: "a revoke only removes a permission, for any target" },
+  { signature: "revokeFunction(bytes32,address,bytes4)", path: "1", stopOnly: true, reason: "a revoke only removes a permission, for any target" },
+  { signature: "disableModule(address,address)", path: "0", stopOnly: true, reason: "the previous entry of the Safe's module list; the module is pinned" },
+  { signature: "approve(address,uint256)", path: "0", stopOnly: true, reason: "the zeroing of an approval, for any spender; the amount is pinned to zero" },
+];
+
+const PASS = 0;
+/** A parameter through which a call can name another account or carry another call. */
+const carriesARoute = (type: string) => type === "address" || type === "bytes" || type === "string" || type.startsWith("(") || type.endsWith("]");
+
+/** The types of a parameter list, split at its top level: `a,(b,c)[],d` gives three. */
+export function parameterTypes(list: string): string[] {
+  const types: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const ch of list) {
+    if (ch === "," && depth === 0) {
+      types.push(current);
+      current = "";
+      continue;
+    }
+    if (ch === "(") depth++;
+    if (ch === ")") depth--;
+    current += ch;
+  }
+  if (current !== "") types.push(current);
+  return types;
+}
+
+/**
+ * The parameters of a call that carry a route and that the condition leaves free, as positions such as `1` or,
+ * inside a tuple, `0.2`. A parameter is free when it has no node, or a Pass with no children. A tuple under a
+ * Matches is read field by field. A condition whose shape no check can read leaves every parameter free.
+ */
+export function freeRouteParameters(signature: string, conditions: Flat[], wildcarded: boolean): string[] {
+  const types = parameterTypes(signature.slice(signature.indexOf("(") + 1, signature.lastIndexOf(")")));
+  const open = (list: string[], prefix: string) => list.flatMap((t, i) => (carriesARoute(t) ? [`${prefix}${i}`] : []));
+  if (wildcarded || conditions.length === 0) return open(types, "");
+  const bs = branches(conditions);
+  if (bs === null) return open(types, "");
+  const free = new Set<string>();
+  const walk = (list: string[], parent: number, prefix: string) => {
+    const nodes = childrenOf(conditions, parent);
+    list.forEach((type, i) => {
+      const at = `${prefix}${i}`;
+      const node = nodes[i];
+      const isFree = node === undefined || (conditions[node].operator === PASS && childrenOf(conditions, node).length === 0);
+      if (isFree) {
+        if (carriesARoute(type)) free.add(at);
+      } else if (type.startsWith("(") && type.endsWith(")") && conditions[node].operator === MATCHES) {
+        walk(parameterTypes(type.slice(1, -1)), node, `${at}.`);
+      }
+    });
+  };
+  for (const b of bs) walk(types, b, "");
+  return [...free];
+}
+
+/**
+ * No free route in a role that a Safe holds (ADR 005, decision 36). Such a role calls no whole target, and each
+ * of its functions pins every address, bytes, string, tuple and array parameter, or has the parameter in
+ * `FREE_BY_DESIGN`. A swap router with a free executor, or a call with free calldata, does not compile. The roles
+ * that the universal factory alone holds write policy, and the checks above bound them.
+ */
+export function checkFreeParameters(modifiers: Artifact["modifiers"], manifest: Record<string, any>) {
+  const factory = typeof manifest.universalFactory === "string" ? getAddress(manifest.universalFactory) : null;
+  const zero = `0x${"0".repeat(64)}`;
+  for (const m of modifiers) {
+    for (const role of m.roles) {
+      if (role.members.length > 0 && role.members.every((member: { address: string }) => getAddress(member.address) === factory)) continue;
+      for (const target of role.targets) {
+        const where = `${m.ref}.${role.name} on ${target.name ?? target.address}`;
+        if (target.clearance !== Clearance.Function) {
+          throw new Error(`${where}: a role that a Safe holds may not call every function of a target (ADR 005, decision 36)`);
+        }
+        for (const fn of target.functions) {
+          if (!fn.signature) throw new Error(`${where}: ${fn.selector} needs its signature, so that its parameters can be checked (ADR 005, decision 36)`);
+          const signature = fn.signature;
+          const free = freeRouteParameters(signature, fn.conditions, fn.wildcarded).filter((at) => {
+            const entry = FREE_BY_DESIGN.find((e) => e.signature === signature && e.path === at);
+            if (!entry) return true;
+            if (entry.stopOnly && !STOP_ONLY.has(role.name)) return true;
+            // the zeroing: the spender stays free only where the amount is pinned to zero
+            if (fn.selector === selector("approve(address,uint256)")) {
+              const amount = childrenOf(fn.conditions, 0)[1];
+              return !(amount !== undefined && fn.conditions[amount].operator === EQUAL_TO && fn.conditions[amount].compValue === zero);
+            }
+            return false;
+          });
+          if (free.length > 0) {
+            throw new Error(
+              `${where}: ${signature} leaves parameter ${free.join(", ")} free; a role that a Safe holds pins every address, bytes, tuple and array parameter (ADR 005, decision 36)`,
+            );
           }
         }
       }
@@ -613,6 +761,17 @@ export function pinnedTo(conditions: Flat[], account: string) {
   );
 }
 
+/**
+ * A node that names a transaction unwrapper (ADR 005, decision 37). An unwrapper lets one role call carry a batch
+ * of calls. Clutch sets none: each role call is one call, which one condition tree checks.
+ */
+export function refuseUnwrappers(ref: string, node: Node) {
+  const named = [node.multisend, node.unwrappers].filter((list) => list !== undefined && !(Array.isArray(list) && list.length === 0));
+  if (named.length > 0) {
+    throw new Error(`${ref}: a modifier takes no transaction unwrapper; each role call is one call (ADR 005, decision 37)`);
+  }
+}
+
 /** An entry that only the hosted app can compile has no target, or carries an action or an annotation. */
 export function refuseHosted(where: string, entry: Entry) {
   if (entry.action !== undefined || entry.annotation !== undefined || entry.targetAddress === undefined) {
@@ -645,6 +804,12 @@ export async function compileManifest(manifestFile: string) {
   const names = Object.fromEntries(Object.entries(NAMES as Record<string, string>).map(([k, v]) => [getAddress(k), v]));
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   return compile(nodes, manifest, names);
+}
+
+/** The signature of each selector that an artifact names. */
+export function signaturesOf(artifact: Pick<Artifact, "modifiers">): Record<string, string> {
+  const functions = artifact.modifiers.flatMap((m) => m.roles.flatMap((r) => r.targets.flatMap((t) => t.functions)));
+  return Object.fromEntries(functions.flatMap((f) => (f.signature ? [[f.selector, f.signature]] : [])));
 }
 
 export function render(artifact: Artifact): string {

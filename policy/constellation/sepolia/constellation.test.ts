@@ -51,7 +51,8 @@ test("serializer preserves the transfer recipient and allowance instead of dropp
   expect(transfer.condition.children[1].operator).toBe(28);
   const corrupted = structuredClone(payload);
   delete corrupted.specification.find((n: any) => n.ref === "operator_modifier").roles["asset-operator"].permissions[0].condition;
-  expect(() => checkPayload(corrupted, manifest)).toThrow("differs");
+  // without its condition the transfer names any recipient, which the compiler refuses before the comparison
+  expect(() => checkPayload(corrupted, manifest)).toThrow("transfer(address,uint256) leaves parameter 0 free");
 });
 
 test("governance export preserves Nor in the legacy format accepted by the captured resolver", async () => {
