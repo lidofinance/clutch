@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-17T20:18:08Z
+  at: 2026-11-17T20:53:17Z
 verified: []
 ---
 
@@ -38,7 +38,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-11-11 | none |
 | [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-13 | none |
 | [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-11-17 | none |
-| [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-16 | none |
+| [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-17 | none |
 | [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-13 | none |
 | [research/ai-first-practice-2026-09.md](/research/ai-first-practice-2026-09.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/cfo-feedback-2026-10-13.md](/research/cfo-feedback-2026-10-13.md) | Research Note | slop |  | 2026-11-13 | none |
@@ -53,6 +53,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/legacy-investments-2026-10-05.md](/research/legacy-investments-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/lido-lend-insurance-2026-11-12.md](/research/lido-lend-insurance-2026-11-12.md) | Research Note | slop |  | 2026-11-13 | none |
 | [research/operator-safe-review-2026-10-15.md](/research/operator-safe-review-2026-10-15.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/order-price-bound-2026-11-17.md](/research/order-price-bound-2026-11-17.md) | Research Note | slop |  | 2026-11-17 | none |
 | [research/orders-account-fork-tests-2026-11-07.md](/research/orders-account-fork-tests-2026-11-07.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/orders-motion-roles-2026-11-08.md](/research/orders-motion-roles-2026-11-08.md) | Research Note | slop |  | 2026-11-12 | none |
 | [research/orders-token-motions-2026-11-08.md](/research/orders-token-motions-2026-11-08.md) | Research Note | slop |  | 2026-11-12 | none |
