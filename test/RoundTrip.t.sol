@@ -46,6 +46,48 @@ contract RoundTrip is Recorded {
         _write("enabling-vote.ndjson");
     }
 
+    /// @dev After the enabling vote: every role member is the committee's Safe, the emergency Safe or the
+    ///      universal factory, and no modifier has a transaction unwrapper. The events are the whole history of
+    ///      the four modifiers; the modifiers' own getter answers for the usual MultiSend contracts.
+    function test_role_holders_and_no_unwrapper_after_the_enabling_vote() public {
+        _deployAndEnable();
+        bytes32 assign = keccak256("AssignRoles(address,bytes32[],bool[])");
+        bytes32 unwrap = keccak256("SetUnwrapAdapter(address,bytes4,address)");
+        uint256 held;
+        for (uint256 i = 0; i < recorded.length; i++) {
+            bytes32 topic = recorded[i].topics[0];
+            assertTrue(topic != unwrap, "no modifier sets a transaction unwrapper");
+            if (topic != assign) continue;
+            (address member,, bool[] memory memberOf) = abi.decode(recorded[i].data, (address, bytes32[], bool[]));
+            for (uint256 k = 0; k < memberOf.length; k++) {
+                if (!memberOf[k]) continue;
+                held++;
+                assertTrue(
+                    member == Mainnet.COMMITTEE_SAFE || member == address(emergency) || member == address(uf),
+                    "only the committee's Safe, the emergency Safe and the universal factory hold a role"
+                );
+            }
+        }
+        assertEq(held, 14, "fourteen roles, each with one holder");
+
+        address[4] memory multiSends = [
+            0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761,
+            0x40A2aCCbd92BCA938b02010E17A5b8929b49130D,
+            0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526,
+            0x9641d764fc13c8B624c04430C7356C1C7C8102e2
+        ];
+        address[4] memory modifiers = [address(opMod), address(safetyMod), address(ordersMod), address(firstLossMod)];
+        bytes4 multiSend = bytes4(keccak256("multiSend(bytes)"));
+        for (uint256 m = 0; m < modifiers.length; m++) {
+            for (uint256 j = 0; j < multiSends.length; j++) {
+                bytes32 key = bytes32(bytes20(multiSends[j])) | (bytes32(multiSend) >> 160);
+                (bool ok, bytes memory ret) = modifiers[m].staticcall(abi.encodeWithSignature("unwrappers(bytes32)", key));
+                assertTrue(ok, "the modifier answers for its unwrappers");
+                assertEq(abi.decode(ret, (address)), address(0), "no unwrapper for a MultiSend contract");
+            }
+        }
+    }
+
     /// @dev After a motion that the `motion` command built: the modifiers hold the motion's head policy.
     function test_roundtrip_events_after_the_example_motion() public {
         _deployAndEnable();

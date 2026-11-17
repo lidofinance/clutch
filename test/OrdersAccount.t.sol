@@ -4,6 +4,7 @@ pragma solidity >=0.8.24 <0.9.0;
 import {IRoles} from "../src/interfaces/IRoles.sol";
 import {IERC20} from "../src/interfaces/Tokens.sol";
 import {console2} from "forge-std/Test.sol";
+import {Vm} from "forge-std/Vm.sol";
 import {Mainnet} from "./rehearsal/Mainnet.sol";
 import {EnabledVault} from "./rehearsal/EnabledVault.sol";
 import {VoteBuilder} from "./rehearsal/VoteBuilder.sol";
@@ -295,6 +296,10 @@ contract OrdersAccountRehearsal is EnabledVault {
         _refused(OPERATOR, cow, abi.encodeCall(IComposableCoW.create, (p, true)), CALL);
         _refused(
             OPERATOR, cow, abi.encodeCall(IComposableCoW.createWithContext, (p, Mainnet.COW_STOP_LOSS, "", true)), CALL
+        );
+        // the timestamp factory takes no data, and the policy takes none
+        _refused(
+            OPERATOR, cow, abi.encodeCall(IComposableCoW.createWithContext, (p, Mainnet.COW_TIMESTAMP_FACTORY, hex"01", true)), CALL
         );
         Params memory other = _twap(Mainnet.USDC, Mainnet.USDT, address(asset), 2, 1 days);
         other.handler = Mainnet.COW_STOP_LOSS;
@@ -1211,6 +1216,11 @@ contract OrdersAccountRehearsal is EnabledVault {
     /// @dev Settles one order alone at its limit price. This test is the solver, and the settlement pays the
     ///      buy side from its own balance.
     function _settle(Order memory o, uint256 scheme, bytes memory signature) internal {
+        _settleAtLimit(o, scheme, signature, true);
+    }
+
+    /// @dev The same settlement, which must succeed or revert as `expectOk` says.
+    function _settleAtLimit(Order memory o, uint256 scheme, bytes memory signature, bool expectOk) internal {
         ISolverAllowList auth = ISolverAllowList(settlement.authenticator());
         vm.prank(auth.manager());
         auth.addSolver(solver);
@@ -1225,6 +1235,105 @@ contract OrdersAccountRehearsal is EnabledVault {
         trades[0] = Trade(0, 1, o.receiver, o.sellAmount, o.buyAmount, o.validTo, o.appData, o.feeAmount, scheme, 0, signature);
         Interaction[][3] memory none;
         vm.prank(solver);
+        if (!expectOk) vm.expectRevert();
         settlement.settle(tokens, prices, trades, none);
+    }
+
+    // ---------------------------------------------------------------------
+    // The orders detector's drill: a limit far below the market
+    // ---------------------------------------------------------------------
+
+    string internal constant DRILL_DIR = ".roundtrip";
+    Vm.Log[] internal drillLogs;
+
+    /// @dev Nothing on chain bounds an order's price, and a solver may fill an order at its limit. The operator
+    ///      signs a fair order and two orders at half the market. A solver fills one of the two at its limit, and
+    ///      the Asset Safe takes that loss. The emergency role unsigns the other and sets the relayer's approval
+    ///      to zero, and then no solver can fill it. The settlement's logs and the orders go to `.roundtrip/`,
+    ///      where the orders detector must report the two limits, and then the fill.
+    function test_orders_drill_a_limit_far_below_the_market() public enabled {
+        _fund(Mainnet.USDC, 9_000e6);
+        Order memory fair = _order(Mainnet.USDC, Mainnet.USDT, address(asset), 2_000e6, 1_990e6, _in(1 hours));
+        Order memory bad = _order(Mainnet.USDC, Mainnet.USDT, address(asset), 4_000e6, 2_000e6, _in(2 hours));
+        Order memory worse = _order(Mainnet.USDC, Mainnet.USDT, address(asset), 3_000e6, 1_500e6, _in(3 hours));
+        vm.recordLogs();
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.ORDER_SIGNER, _sign(fair, LIFE, 0), DELEGATECALL);
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.ORDER_SIGNER, _sign(bad, LIFE, 0), DELEGATECALL);
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.ORDER_SIGNER, _sign(worse, LIFE, 0), DELEGATECALL);
+        _settle(fair, PRESIGN, abi.encodePacked(address(orders)));
+        _keepDrill();
+        _writeDrill("orders-drill-open.ndjson");
+
+        // a solver fills one order at its limit: 3,000 USDC for 1,500 USDT
+        uint256 before = IERC20(Mainnet.USDT).balanceOf(address(asset));
+        _settle(worse, PRESIGN, abi.encodePacked(address(orders)));
+        assertEq(IERC20(Mainnet.USDT).balanceOf(address(asset)) - before, 1_500e6, "the fill at the limit pays half the market");
+
+        // the emergency role unsigns the other order and sets the relayer's approval to zero
+        _ordersOk(address(emergency), EMERGENCY, Mainnet.ORDER_SIGNER, abi.encodeCall(IOrderSigner.unsignOrder, (bad)), DELEGATECALL);
+        assertEq(settlement.preSignature(_uid(bad)), 0, "the order is unsigned");
+        _refusedFill(bad);
+        _ordersOk(address(emergency), EMERGENCY, Mainnet.USDC, abi.encodeCall(IERC20.approve, (Mainnet.COW_VAULT_RELAYER, 0)), CALL);
+        assertEq(IERC20(Mainnet.USDC).allowance(address(orders), Mainnet.COW_VAULT_RELAYER), 0, "the relayer's approval is zero");
+        // with no approval, an order that the operator signs again does not fill either
+        _ordersOk(Mainnet.COMMITTEE_SAFE, OPERATOR, Mainnet.ORDER_SIGNER, _sign(bad, LIFE, 0), DELEGATECALL);
+        _refusedFill(bad);
+        _ordersOk(address(emergency), EMERGENCY, Mainnet.ORDER_SIGNER, abi.encodeCall(IOrderSigner.unsignOrder, (bad)), DELEGATECALL);
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(orders)), 4_000e6, "the unsigned order's funds stay in the orders account");
+        _keepDrill();
+        _writeDrill("orders-drill-after.ndjson");
+
+        string memory records = string.concat("[", _record(fair), ",", _record(bad), ",", _record(worse), "]");
+        vm.writeFile(
+            string.concat(DRILL_DIR, "/orders-drill.json"),
+            string.concat(
+                '{"owner":"', vm.toString(address(orders)), '","now":', vm.toString(block.timestamp), ',"orders":', records, "}\n"
+            )
+        );
+    }
+
+    /// @dev A fill at the limit that must revert. The recorder also keeps the logs of a call that reverts; they
+    ///      are no chain events, so they go.
+    function _refusedFill(Order memory o) internal {
+        _keepDrill();
+        _settleAtLimit(o, PRESIGN, abi.encodePacked(address(orders)), false);
+        vm.getRecordedLogs();
+    }
+
+    /// @dev Moves the settlement's logs since the last call into `drillLogs`, in order.
+    function _keepDrill() internal {
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter == Mainnet.COW_SETTLEMENT) drillLogs.push(logs[i]);
+        }
+    }
+
+    function _writeDrill(string memory name) internal {
+        assertGt(drillLogs.length, 0, "the settlement emitted events");
+        vm.createDir(DRILL_DIR, true);
+        string memory path = string.concat(DRILL_DIR, "/", name);
+        vm.writeFile(path, "");
+        for (uint256 i = 0; i < drillLogs.length; i++) {
+            Vm.Log storage log = drillLogs[i];
+            string memory topics = "";
+            for (uint256 t = 0; t < log.topics.length; t++) {
+                topics = string.concat(topics, t == 0 ? "" : ",", '"', vm.toString(log.topics[t]), '"');
+            }
+            vm.writeLine(
+                path,
+                string.concat('{"address":"', vm.toString(log.emitter), '","topics":[', topics, '],"data":"', vm.toString(log.data), '"}')
+            );
+        }
+    }
+
+    /// @dev An order's fields as the orders detector reads them. Each order of the drill is a sell order with
+    ///      ERC-20 balances.
+    function _record(Order memory o) internal pure returns (string memory) {
+        return string.concat(
+            '{"sellToken":"', vm.toString(o.sellToken), '","buyToken":"', vm.toString(o.buyToken), '","receiver":"', vm.toString(o.receiver),
+            '","sellAmount":"', vm.toString(o.sellAmount), '","buyAmount":"', vm.toString(o.buyAmount), '","validTo":', vm.toString(uint256(o.validTo)),
+            ',"appData":"', vm.toString(o.appData), '","feeAmount":"', vm.toString(o.feeAmount),
+            '","kind":"sell","partiallyFillable":false,"sellTokenBalance":"erc20","buyTokenBalance":"erc20"}'
+        );
     }
 }

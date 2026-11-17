@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-17T20:16:01Z
 verified: []
 sources:
   - id: s1
@@ -16,6 +16,9 @@ sources:
   - id: s2
     resource: /research/operator-safe-review-2026-10-15.md
     title: The committee's Safe as the operator, reviewed again on 2026-10-15 — its other duties under the guard
+  - id: s3
+    resource: /research/roles-module-drain-2026-11-16.md
+    title: A Safe drained through its Roles module on 2026-11-16 — what the policy pinned and what it left free
 ---
 
 # Threat model
@@ -51,7 +54,8 @@ Each row names a failure, what triggers it, what limits it and what detects it. 
 | Spender pulls without a deposit | A protocol spender is upgraded to steal, or an approval stands too long | Each approval spends its key's budget, so approvals per period cannot exceed it; approvals in the same transaction as the deposit; the emergency role zeroes approvals and can revoke the approve permission | Approval inventory and budget burn monitoring |
 | Exit impossible when it matters | Protocol illiquidity or asynchronous settlement | Receipt-token transfer to the Agent; claim later. A position that a motion onboarded gets its emergency exit from that motion (OD-49) | Position inventory monitoring |
 | First-loss shares or insurance funds misused | A burn, a payout or a redemption without an instruction | A burn or a payout needs an enacted motion, so LDO holders can block it for 72 hours (OD-67, OD-107); insurance money moves only within the budget key of its token, which a budget write sets (OD-129); a payout goes only to the address that the creating motion pinned, within the fund's cap; the first-loss role of the committee's Safe can only redeem to the Asset Safe, and it cannot transfer, approve or burn (OD-60, OD-108); before the guard is set, the committee returns any excess above the launch cap to the Aragon Agent; the Earn team's written instruction and the forum post come first | Alert on every action of the first-loss role, on every motion on the first-loss modifier, on a redemption request before the guard is set, and on any change of the first-loss Safe's balance, owners, modules or singleton |
-| An order fills far below the market | An order with a poor limit, or a solver that fills at the limit while the market is better | The order's own limit; CoW's solver competition; screening of operator orders once the guard is set; the orders budgets | Alert on each fill below a market price, and on open orders and tokens left in the orders account |
+| An order fills far below the market | An order with a poor limit, or a solver that fills at the limit while the market is better. Nothing on chain bounds an operator order's price (OD-154) | The order's own limit; CoW's solver competition; screening of operator orders once the guard is set; the orders budgets; the emergency role's unsign and its zeroing of the relayer's approval | The orders detector: an alert on an open order or a fill further below a market price than the threshold, on an order that it cannot read and on a token without a price ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 49); alerts on open orders and tokens left in the orders account |
+| A permission with a free route | A role's policy pins a swap's receiver and tokens, and leaves its executor or its minimum output free; a signing quorum that an attacker controls then moves the funds out through the free parameter, as in the drain of 2026-11-16 [s3] | No router at launch, and three conditions for a later one ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 20); the compiler refuses a free address, bytes, tuple or array parameter in a role that a Safe holds (INV-042); only two Safes and the universal factory hold a role (INV-041); no unwrapper (INV-043); the budgets bound what reaches the orders account | The compiler in CI; the round-trip check; the 72 hours of a motion that widens a permission |
 | CoW's watch-tower stops | Conditional orders are not posted to the order book | The orders wait and no funds move; the committee can cancel them and place ordinary orders | Alert when a conditional order's part is not posted on time |
 | Screening vendor outage | The vendor's key stops approving | Fail closed: operator activity, new motions and the committee's other duties stop; recovery is unaffected, and the Emergency Brakes multisig keeps its pause of the LDO buyback executor; the owners can remove the guard after ten days (OD-83) [s2] | Approval-latency and vendor-heartbeat monitoring |
 | Cap breach gets worse | The committee does not rebalance within its window | The emergency Safe disables the operator modifier on the fixed trigger; the safety modifier keeps working, so recovery stays available | Lido's and the policy provider's fortnightly cap readings on IPFS; the alert pages the emergency Safe when the trigger is met in either |

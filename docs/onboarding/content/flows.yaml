@@ -92,9 +92,11 @@ flows:
         edges: [swaps]
     escapes:
       - "The vendor refuses the order: nothing runs."
+      - "An open order's limit sits far below the market: the orders detector alerts, and the emergency Safe unsigns the order before a solver fills it."
       - "A fill comes in far below the market: monitoring alerts, and the emergency Safe can cancel the open orders and sweep the account."
     sources: ["ADR-007#d18", "ADR-007#d26", "ADR-007#d29", "ADR-007#proposed-direction", "INV-013",
       "INV-022", "INV-024", "runbook:Re-affirm open orders", "runbook:Cancel orders on a policy change",
+      "ADR-009#d49", "runbook:Stop an order far below the market",
       "doc:docs/research/cow-orders-account-2026-10-06.md#the-cow-order-signer", "ADR-007#d41",
       "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests",
       "test:test_orders_signer_order_settles_to_the_asset_safe",

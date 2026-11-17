@@ -180,7 +180,7 @@ test("the retirement of a token is four writes, and none is a revoke", () => {
     "Clutch operator modifier, as governance: set the budget orders_usds to 0, with a refill of 0 every 2592000 seconds",
     "Clutch operator modifier, as governance: change transfer(address,uint256) on USDS for the role operator, with 2 condition nodes",
     "Clutch orders modifier, as governance: change signOrder((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32),uint32,uint256) on CoW order signer for the role operator, with 26 condition nodes",
-    "Clutch orders modifier, as governance: change createWithContext((address,bytes32,bytes),address,bytes,bool) on ComposableCoW for the role operator, with 48 condition nodes",
+    "Clutch orders modifier, as governance: change createWithContext((address,bytes32,bytes),address,bytes,bool) on ComposableCoW for the role operator, with 49 condition nodes",
   ]);
   expect(plan.writes.map((w) => ROLES.parseTransaction({ data: w.data })!.name)).toEqual(["setAllowance", "scopeFunction", "scopeFunction", "scopeFunction"]);
   expect(checkMotion(policy, head, plan.writes)).toMatchObject({ ok: true, problems: [], differences: [] });

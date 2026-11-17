@@ -114,7 +114,7 @@ test("the resolution check refuses rewritten conditions, members, accounts, Safe
   // An earlier draft rewrote Nor (3) to And (1).
   expect(mutate((nodes) => { norOf(governance(nodes)).operator = 1; })).toEqual([expect.stringContaining("(OD-38)")]);
   expect(mutate((nodes) => { norOf(governance(nodes)).children.pop(); })).toEqual([expect.stringMatching(/\(OD-38\)|other policy calls/)]);
-  expect(mutate((nodes) => { governance(nodes).members = [lower(manifest.agent)]; })).toEqual(["the resolution compiles to other policy calls"]);
+  expect(mutate((nodes) => { governance(nodes).members = [lower(manifest.agent)]; })).toEqual([expect.stringContaining("may not hold a role")]);
   expect(mutate((nodes) => { governance(nodes).annotations = [{ uri: "https://example.invalid", schema: "https://example.invalid" }]; })).toEqual([expect.stringContaining("annotations")]);
   expect(mutate((nodes) => { nodes.find((n) => n.ref === "operator_modifier").allowances[0].balance = "1"; })).toEqual(["the resolution compiles to other policy calls"]);
   expect(mutate((nodes) => { nodes.find((n) => n.ref === "orders_modifier").multisend = [lower(manifest.agent)]; })).toEqual(["orders_modifier: unexpected transaction unwrappers"]);

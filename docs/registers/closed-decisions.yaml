@@ -1165,3 +1165,25 @@
   log:
     - "2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`"
   adr: [ADR-015]
+
+- id: OD-154
+  question: "Does an operator's order get a price bound on chain?"
+  closed: 2026-11-17
+  log:
+    - "2026-11-17 — OD-154 to OD-156: the lessons of a Safe drained through its Roles module"
+  adr: [ADR-007#d47]
+
+- id: OD-155
+  question: "Which conditions does a later swap router need?"
+  closed: 2026-11-17
+  log:
+    - "2026-11-17 — OD-154 to OD-156: the lessons of a Safe drained through its Roles module"
+  adr: [ADR-007#d20]
+  refines: [OD-43]
+
+- id: OD-156
+  question: "Which hardening steps follow the drain of a Safe through its Roles module on 2026-11-16?"
+  closed: 2026-11-17
+  log:
+    - "2026-11-17 — OD-154 to OD-156: the lessons of a Safe drained through its Roles module"
+  adr: [ADR-005#d35, ADR-005#d36, ADR-005#d37, ADR-009#d49]

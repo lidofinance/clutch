@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-17T20:16:01Z
 verified: []
 sources:
   - id: s1
@@ -29,6 +29,9 @@ sources:
   - id: s10
     resource: "urn:clutch:restricted:mandate-draft-v0.1"
     title: Mandate draft v0.1 — the emergency path may swap any asset into any of the four main stablecoins; outside the repository until the mandate is published
+  - id: s12
+    resource: /research/roles-module-drain-2026-11-16.md
+    title: A Safe drained through its Roles module on 2026-11-16 — a router swap with a free executor and a minimum output of 1
   - id: s11
     resource: /research/cow-orders-account-2026-10-06.md
     title: CoW orders from a dedicated orders account, 2026-10-06 — the order signer, ComposableCoW, the fallback-handler requirement, the watch-tower, router swaps and the hosted app
@@ -71,7 +74,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 17. A dedicated orders account carries the CoW orders of the operator and of the emergency role. It is a Safe that Aragon Voting owns one of one, with CoW's fallback handler and one modifier (OD-43, OD-57, OD-73).
 18. The operator funds the orders account by transfers pinned to it, under budgets. From it, the operator places CoW market, limit and TWAP orders whose proceeds go to the Asset Safe (OD-43, OD-79).
 19. The emergency role places orders whose proceeds go to the Aragon Agent, and can always send assets to the Agent (OD-43).
-20. The launch uses CoW only. Uniswap and 1inch come only if the screening vendor can bound a swap's minimum output before execution (OD-43).
+20. The launch uses CoW only. Uniswap and 1inch come only if three conditions hold. The screening vendor can bound a swap's minimum output against the market before execution. The permission pins every executor, route and callback address of the router. No approval to the router is for the maximum (OD-43, OD-155) [s12].
 21. Replaced by decision 41 (OD-103).
 22. The operator's lists start with stETH, wstETH, WETH, USDC, USDT and USDS. DAI and sUSDS stay off (OD-46, OD-91).
 23. Replaced by decision 29 (OD-61).
@@ -98,6 +101,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 44. The orders modifier's governance role writes, under the approvals key, only the relayer approval. It pins whole each tree that does not depend on the token: the return to the Asset Safe or the Aragon Agent, for the operator and the emergency role; the emergency role's zeroing of the relayer's approval; and the relayer approval. So no motion gives a role another receiver or spender, and only the approvals role raises an approval (OD-103).
 45. The motion that adds a token to the order lists also writes the token's exit on the Asset Safe, through the exit-governance role: a transfer to the Aragon Agent, or to the orders account, where a recovery order sells it (OD-49).
 46. One motion restores the orders account after an emergency stop. For the operator, the motion writes again the two targets, the order trees, the two cancels and, for each operator token, the transfer back to the Asset Safe or the Aragon Agent. Through the approvals role, it raises again the relayer approval of each recovery token that it names. The motion carries the order trees with the current lists, and the factory does not check them (OD-119, OD-134).
+47. An operator's order has no price bound on chain. Its controls are the order's own limit, CoW's solver competition, screening once the guard is set, the orders budgets, and the orders detector with the emergency role's unsign ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 49). A bound on chain without an outside price feed, for pairs of like tokens, is a research item (OD-154) [s12].
 
 ## Proposed direction
 
@@ -116,7 +120,7 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - **Relayer approvals.** The enabling vote has the orders account approve CoW's vault relayer for the maximum amount of every token that an order sells. A zero approval stops every order in that token until a motion raises it again (decisions 44 and 46); the transfer to the Agent stays available.
 - **Governance.** A motion writes through the orders modifier's governance and approvals roles ([ADR 013](/adr/013-one-easy-track-factory.md) decision 18): the token motion (decisions 41, 44 and 45) and the restore (decision 46). The governance role's policy leaves the content of an order tree, whose token lists change, to the motion ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11). No governance role takes a vault account or its modifier as a target (OD-38; INV-004, INV-040).
 - **Tokens.** Recovery sells stETH, wstETH, WETH, USDC, USDT, DAI, USDS and sUSDS: every launch asset of the Asset Safe except ETH, which is staked first, and Earn shares, which leave through their redeem queues. Recovery buys USDC, with USDT second (decision 5). The enabling vote sets both lists, and motions extend them (decision 41).
-- **Routers.** None at launch (decision 20). A later Uniswap or 1inch route runs from the orders account, pays the Asset Safe and needs a market-relative minimum-output check.
+- **Routers.** None at launch (decision 20). A later Uniswap or 1inch route runs from the orders account, pays the Asset Safe, and meets the three conditions of decision 20.
 - **Price controls.** Nothing on chain bounds the price. The [threat model](/specs/threat-model.md) lists the controls of operator orders. Emergency orders have neither screening nor budgets; decision 26 states their controls.
 - **Monitoring.** Watch open and conditional orders, 30-day confirmations, low recovery limits, idle tokens and each fill against the market. Owner, threshold, module, fallback-handler and domain-verifier changes are critical. Watch the relayer approvals and the watch-tower's posting.
 
@@ -129,6 +133,8 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - **Direct pre-signing:** not chosen. It hides the order's terms [s3]; the typed-order signer exposes them.
 - **Unstaking through Lido's withdrawal queue:** not chosen (decision 27). Its requests cannot be cancelled, only a DAO vote upgrades it [s9], and CoW orders buy WETH.
 - **A shorter or a longer order life:** not chosen (decision 29). A 30-day life forces the monthly renewals that the committee asked to avoid. A year lets resting orders outlive their context; pre-signed orders have no CoW maximum, so Clutch needs its own bound.
+
+- **A price bound on chain for operator orders at launch:** not chosen (OD-154). A bound that reads a price feed puts an outside setting in the swap path, which the design keeps out (OD-45). A bound without a feed covers only pairs of like tokens and is new code to audit; it is a research item (decision 47).
 
 ## Consequences
 
@@ -153,6 +159,8 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - After a restore motion, an order settles. The restore refuses stale lists, a token outside recovery's list, an unsorted approval list and a token operation in the same motion.
 - Still owed: the order book's acceptance of zero app data, the watch-tower's posting of TWAP parts, the screening vendor's answer on output checks, and the orders budgets from the attested computation.
 
+- The orders detector's drill runs on the fork: a solver fills one order at half the market, the emergency role unsigns another and sets the relayer's approval to zero, and then no solver fills it (`test_orders_drill_a_limit_far_below_the_market`). The policy refuses data for the timestamp factory (`test_orders_twap_refusals`).
+
 ## Reversal conditions
 
 - A fork test shows that CoW's fallback handler or the order signer does not work with a Safe v1.5.0 behind a roles modifier.
@@ -161,6 +169,8 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - CoW's watch-tower proves unreliable for the conditional orders that the committee depends on.
 - The screening guard cannot check the operator's transactions on the orders account.
 - CoW's EBBO rule fails to repay a loss, or recovery orders fill far below the on-chain market. Then the GoodAfterTime floor of the research note is the next step (decision 26).
+
+- An operator's order fills far below the market, or the orders detector's alerts come too late for the emergency role to unsign. Then the bound on chain of decision 47 is the next step.
 
 ## Open questions
 

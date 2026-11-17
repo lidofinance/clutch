@@ -71,7 +71,8 @@ export function unsignOrder() {
 /**
  * A TWAP order through ComposableCoW: CoW's TWAP handler, listed tokens, a pinned receiver and zero app data.
  * The start is zero and the value factory is CoW's current-timestamp factory, so the order starts at its
- * creation. Its parts and their spacing take one of the two shapes of decision 29.
+ * creation. The factory takes no data, so the data is pinned empty. Its parts and their spacing take one of
+ * the two shapes of decision 29.
  */
 export function twapOrder({ sell, buy, receiver }: Omit<Order, "life">) {
   const shape = (parts: bigint, spacing: bigint) =>
@@ -85,6 +86,7 @@ export function twapOrder({ sell, buy, receiver }: Omit<Order, "life">) {
     "createWithContext((address,bytes32,bytes),address,bytes,bool)",
     c.matches([TWAP_HANDLER, c.pass, (c.or as unknown as (...b: unknown[]) => unknown)(...shapes)]),
     TIMESTAMP_FACTORY,
+    "0x",
   );
 }
 

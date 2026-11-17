@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-16T20:11:16Z
+  at: 2026-11-17T20:16:23Z
 verified: []
 sources:
   - id: s1
@@ -181,6 +181,12 @@ sources:
   - id: s57
     resource: "urn:clutch:interview:2026-11-16-sepolia-decisions-second-answer"
     title: EM's confirmation of the OD-151 reading, EM's choice for OD-153 and EM's question on the Sepolia guard, 2026-11-16; the transcript is not in the repository
+  - id: s58
+    resource: "urn:clutch:interview:2026-11-17-roles-module-drain"
+    title: EM's request to compare the drain of 2026-11-16 with the design, and EM's choices for OD-154 to OD-156, 2026-11-17; the transcript is not in the repository
+  - id: s59
+    resource: /research/roles-module-drain-2026-11-16.md
+    title: A Safe drained through its Roles module on 2026-11-16, and the Clutch design — the transaction, the simulations and the comparison
 ---
 
 # Decision log
@@ -190,6 +196,26 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-17 — OD-154 to OD-156: the lessons of a Safe drained through its Roles module
+
+On 2026-11-16 an attacker drained a Safe of another team through its Roles module. EM gave the agent a press report and the transaction, and asked [s58]:
+
+> investigate how it relates with the clutch design, what we should do or not, how about hardening?
+
+The agent read the transaction, simulated the role member's calls, and checked the committed policy ([research note](/research/roles-module-drain-2026-11-16.md)) [s59]. The drained wallet's policy pinned a swap's receiver and tokens, and left its executor and its minimum output free. Clutch has no router and no free route. Nothing on chain bounds the price of an operator's order. The agent proposed five steps and one decision: a price bound on chain for operator orders, with A none, B a bound without an outside price feed for pairs of like tokens, and C a bound that reads a feed. It recommended A with research on B. EM answered [s58]:
+
+> I chose A, build 1-4, record 5 on my behalf, schedule research of B
+
+Recorded as:
+
+- OD-154 A: an operator's order gets no price bound on chain at launch. Research on B is owed ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 47), and the roadmap lists it.
+- OD-155, the agent's step 5: a later router needs three conditions, which are a minimum output that screening bounds against the market, every executor, route and callback address pinned, and no approval for the maximum ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 20). This refines OD-43.
+- OD-156, the agent's steps 1 to 4:
+  1. The compiler refuses a free address, bytes, string, tuple or array parameter, and a whole target, in a role that a Safe holds ([ADR 005](/adr/005-account-graph-and-roles.md) decision 36; INV-042).
+  2. The operator's Earn deposit names no referral, and a TWAP order's creation carries no data. The proof of an Earn deposit stays free, as in the insurance role: the queue checks it, and the queue credits the caller. This is the agent's reading of "pin the two leftovers".
+  3. The orders detector reports an open order and a fill far below a market price, and the fork suite drills the emergency role's answer ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 49). The repository holds no price source and no threshold; the committee and Lido's monitoring set them.
+  4. Only the committee's Safe, the emergency Safe and the universal factory hold a role, and no modifier has a transaction unwrapper ([ADR 005](/adr/005-account-graph-and-roles.md) decisions 35 and 37; INV-041, INV-043).
 
 ## 2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`
 

@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 /**
- * The two detectors of the vault's policy (ADR 013, decision 19; ADR 009, decision 7):
+ * The detectors of the vault (ADR 013, decision 19; ADR 009, decisions 7 and 49):
  *
  *   - the drift detector: the modifiers hold the policy that the repository says they hold;
- *   - the motion detector: every open motion of the universal factory is the repository's pending motion.
+ *   - the motion detector: every open motion of the universal factory is the repository's pending motion;
+ *   - the orders detector (`orders.ts`): no open order and no fill of the orders account lies far below the market.
  *
  *   bun compiler/watch.ts check --events <file>                          a fork's logs
  *   bun compiler/watch.ts check --rpc [URL] --from-block N [--json]      a chain's logs
  *   bun compiler/watch.ts settle --events <file> | --rpc …               record an enacted pending motion
+ *   bun compiler/watch.ts orders (--events <file> --now T | --rpc [URL] --from-block N) --orders <file>
+ *                                --prices <file> --max-below-bps N       the orders account's orders and fills
  *   bun compiler/watch.ts rehearsal --dir .roundtrip                     the fork suite's scenarios
  *
  * The repository says which policy the chain holds. With no pending motion, it is the committed artifact. With
@@ -26,6 +29,8 @@ import type { Artifact } from "./compile";
 import { acceptedByRole, checkMotion, decodeMotion, ENACTED_DIR, EXAMPLE_NETWORK, exampleMotion, load, loadEnacted, loadPending, PENDING_DIR } from "./motion";
 import type { Pending } from "./motion";
 import { exampleHead } from "./motion.example";
+import { COMPOSABLE_COW, COW_SETTLEMENT, watchOrders } from "./orders";
+import type { OrderRecord, OrdersWatch, Prices } from "./orders";
 import { fetchLogs, readEvents, REVOKE_DIFFERENCES, roundTrip } from "./roundtrip";
 import type { GetLogs, Log } from "./roundtrip";
 
@@ -278,15 +283,108 @@ function rehearsal(dir: string): number {
   const malformed = cases.filter((c) => c.malformedTree);
   const limit = malformed.length > 0 && malformed.every((c) => !c.accepted && answer(c) === true);
   console.log(`${limit ? "PASS" : "FAIL"}: the known limit holds: the modifier refuses a malformed tree that the role's policy accepts, and the check does not see it (${malformed.length} case)`);
+
+  // the orders detector on the drill of test/OrdersAccount.t.sol: both tokens at one unit, a threshold of 1%
+  const drill = JSON.parse(readFileSync(path.join(dir, "orders-drill.json"), "utf8")) as { owner: string; now: number; orders: OrderRecord[] };
+  const [fair, bad, worse] = drill.orders;
+  const one: Prices = { [fair.sellToken.toLowerCase()]: { decimals: 6, price: "1" }, [fair.buyToken.toLowerCase()]: { decimals: 6, price: "1" } };
+  const judge = (events: string, records: OrderRecord[]) => watchOrders(file(events), drill.owner, records, one, { maxBelowBps: 100, now: drill.now });
+  const kinds = (result: OrdersWatch) => result.alerts.map((a) => `${a.kind}:${a.belowBps ?? ""}`);
+  const say = (title: string, result: OrdersWatch, holds: boolean) => {
+    console.log(`${holds ? "PASS" : "FAIL"}: ${title}`);
+    if (!holds) for (const a of result.alerts) console.log(`  ${a.kind}: ${a.text}`);
+    ok = ok && holds;
+  };
+  const openOrders = judge("orders-drill-open.ndjson", drill.orders);
+  say(
+    "three orders are signed and the fair one is filled: an alert on each of the two limits at half the market, none on the fill",
+    openOrders,
+    openOrders.alert && same(kinds(openOrders), ["limit:5000", "limit:5000"]) && openOrders.open.length === 2 && openOrders.fills === 1,
+  );
+  const unread = judge("orders-drill-open.ndjson", [fair]);
+  say("the same logs without the two orders' fields: an alert on each open order that the detector cannot read", unread, same(kinds(unread), ["unreadable:", "unreadable:"]));
+  const forged = judge("orders-drill-open.ndjson", [fair, { ...bad, buyAmount: bad.sellAmount }, { ...worse, buyAmount: worse.sellAmount }]);
+  say("fields that the account did not sign cannot stand in for a signed order", forged, same(kinds(forged), ["unreadable:", "unreadable:"]));
+  const after = judge("orders-drill-after.ndjson", drill.orders);
+  say(
+    "a solver filled one order at its limit and the emergency role unsigned the other: an alert on the fill, and no open order",
+    after,
+    after.alert && same(kinds(after), ["fill:5000"]) && after.open.length === 0 && after.fills === 2,
+  );
   return ok && guards && limit ? 0 : 1;
+}
+
+/** The logs of the settlement and of ComposableCoW that name `owner`, from a node. The RPC URL is never printed. */
+async function ownerLogs(provider: JsonRpcProvider, owner: string, fromBlock: number, toBlock: number): Promise<Log[]> {
+  const topic = `0x${"0".repeat(24)}${getAddress(owner).slice(2).toLowerCase()}`;
+  const all: { blockNumber: number; index: number; address: string; topics: readonly string[]; data: string }[] = [];
+  let from = fromBlock;
+  let step = 50_000;
+  while (from <= toBlock) {
+    const to = Math.min(toBlock, from + step - 1);
+    try {
+      all.push(...(await provider.getLogs({ address: [COW_SETTLEMENT, COMPOSABLE_COW], topics: [null, topic], fromBlock: from, toBlock: to })));
+      from = to + 1;
+    } catch (error) {
+      if (step === 1) throw new Error("the node refused a one-block range of logs");
+      step = Math.max(1, Math.floor(step / 2));
+    }
+  }
+  all.sort((x, y) => x.blockNumber - y.blockNumber || x.index - y.index);
+  return all.map(({ address, topics, data }) => ({ address, topics: [...topics], data }));
+}
+
+/** The orders detector's command: exit 1 on an alert. */
+async function orders(opts: Record<string, string>, head: Artifact): Promise<number> {
+  for (const name of ["orders", "prices", "max-below-bps"]) {
+    if (opts[name] === undefined || opts[name] === "true") throw new Error(`--${name} is needed`);
+  }
+  const owner = opts.owner ?? (head.manifest as Record<string, any>).ordersAccount;
+  if (typeof owner !== "string") throw new Error("--owner is needed: the manifest names no orders account");
+  const threshold = Number(opts["max-below-bps"]);
+  if (!Number.isInteger(threshold) || threshold < 0 || threshold > 10_000) throw new Error("--max-below-bps is a whole number of basis points");
+  const records = JSON.parse(readFileSync(opts.orders, "utf8")) as OrderRecord[];
+  const raw = JSON.parse(readFileSync(opts.prices, "utf8")) as Prices;
+  const prices: Prices = Object.fromEntries(Object.entries(raw).map(([token, price]) => [getAddress(token).toLowerCase(), price]));
+  let logs: Log[];
+  let now: number;
+  if (opts.events) {
+    if (opts.now === undefined) throw new Error("--now is needed with --events: the time against which an order is open");
+    logs = readEvents(opts.events);
+    now = Number(opts.now);
+  } else {
+    const url = opts.rpc === undefined || opts.rpc === "true" || opts.rpc === "env" ? process.env.RPC : opts.rpc;
+    if (opts.rpc === undefined || !url) throw new Error("--events, or --rpc with a URL or RPC in the environment, is needed");
+    if (opts["from-block"] === undefined) throw new Error("--from-block is needed: the block of the orders account's deployment");
+    const provider = new JsonRpcProvider(url);
+    try {
+      const to = opts["to-block"] !== undefined ? Number(opts["to-block"]) : await provider.getBlockNumber();
+      logs = await ownerLogs(provider, owner, Number(opts["from-block"]), to);
+      now = opts.now !== undefined ? Number(opts.now) : (await provider.getBlock(to))!.timestamp;
+    } finally {
+      provider.destroy();
+    }
+  }
+  const result = watchOrders(logs, owner, records, prices, { maxBelowBps: threshold, now });
+  if (opts.json !== undefined) console.log(JSON.stringify(result, null, 2));
+  else {
+    console.log(`the orders of ${owner}: ${result.open.length} open, ${result.fills} fill(s), ${result.alerts.length} alert(s)`);
+    for (const a of result.alerts) console.log(`  ALERT ${a.kind}: ${a.text}`);
+  }
+  return result.alert ? 1 : 0;
 }
 
 async function main(argv: string[]): Promise<number> {
   const [command, ...rest] = argv;
   const opts = options(rest);
   if (command === "rehearsal") return rehearsal(opts.dir ?? ".roundtrip");
+  if (command === "orders") {
+    const network = opts.network ?? EXAMPLE_NETWORK;
+    return orders(opts, load(path.join(ROOT, "artifacts", `${network}.json`), network).policy);
+  }
   if (command !== "check" && command !== "settle") {
     console.error("usage: watch.ts check|settle [--network <name>] (--events <file> | --rpc [URL] --from-block N [--to-block N]) [--easy-track <address>] [--json]");
+    console.error("       watch.ts orders [--network <name>] (--events <file> --now T | --rpc [URL] --from-block N) --orders <file> --prices <file> --max-below-bps N [--owner <address>] [--json]");
     console.error("       watch.ts rehearsal [--dir .roundtrip]");
     return 2;
   }

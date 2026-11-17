@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { constellation, push } from "@zodiaceco/sdk";
 import { processPermissions, reconstructPermissions } from "zodiac-roles-sdk";
+import { signaturesOf } from "../compiler/compile";
 import { build, buildNodes, compileStand as compile } from "./compile";
 import { key } from "../constellation/lib";
 
@@ -109,8 +110,9 @@ export function checkPayload(payload: any, manifest: Record<string, any>, runtim
     if (role.permissions !== undefined || JSON.stringify(role.annotations) !== "[]") throw new Error("Legacy targets require empty annotations and no permissions");
     role.permissions = reconstructPermissions(role.targets);
   }
-  const candidate = compile(nodes, manifest, {});
   const expected = compile(policyNodes(manifest, runtime), manifest, {});
+  // A serialized payload carries no signatures; the policy's own give each selector its parameter types.
+  const candidate = compile(nodes, manifest, {}, signaturesOf(expected));
   const wiring = (artifact: typeof candidate) => artifact.modifiers.map(({ ref, address, owner, avatar, target }) => ({ ref, address, owner, avatar, target }));
   if (JSON.stringify(candidate.calls) !== JSON.stringify(expected.calls) || JSON.stringify(wiring(candidate)) !== JSON.stringify(wiring(expected))) throw new Error("Serialized constellation differs from the Sepolia policy");
   // A workspace names each allowance, so it cannot declare a derived key. A motion sets those keys; any other
