@@ -1113,3 +1113,55 @@
   replaces:
     - {od: OD-106}
   refines: [OD-140]
+
+- id: OD-147
+  question: "May the stand owner make hosted calls to the Sepolia workspace and send public Sepolia transactions from testnet/sepolia?"
+  closed: 2026-11-16
+  log:
+    - "2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet"
+    - "2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`"
+  adr: [ADR-015]
+
+- id: OD-148
+  question: "How does the existing-state payload reach the Sepolia workspace?"
+  closed: 2026-11-16
+  log:
+    - "2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet"
+  adr: [ADR-015]
+
+- id: OD-149
+  question: "May the stand owner execute a transaction that the Zodiac app builds for the Sepolia stand, through Deploy or Apply?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-149, OD-150 and OD-152: the Sepolia role-key migration"
+  adr: [ADR-015]
+
+- id: OD-150
+  question: "May the stand owner send public Sepolia transactions on the existing stand from testnet/sepolia?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-149, OD-150 and OD-152: the Sepolia role-key migration"
+  adr: [ADR-015]
+
+- id: OD-151
+  question: "Which records may the stand owner make by hand in the Zodiac app?"
+  closed: 2026-11-16
+  log:
+    - "2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet"
+    - "2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`"
+  adr: [ADR-015]
+
+- id: OD-152
+  question: "Should Clutch use four account-specific operator and emergency role keys for Sepolia and mainnet?"
+  closed: 2026-10-22
+  log:
+    - "2026-10-22 — OD-149, OD-150 and OD-152: the Sepolia role-key migration"
+    - "2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet"
+  adr: [ADR-015]
+
+- id: OD-153
+  question: "Which key does the orders modifier's governance role take on mainnet?"
+  closed: 2026-11-16
+  log:
+    - "2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`"
+  adr: [ADR-015]

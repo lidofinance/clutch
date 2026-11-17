@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T07:48:30Z
+  at: 2026-11-16T20:11:16Z
 verified: []
 sources:
   - id: s1
@@ -172,6 +172,15 @@ sources:
   - id: s54
     resource: "urn:clutch:interview:2026-11-13-guide-cards"
     title: EM's request to close the guide's gap on the top-up factories and the funding registries, 2026-11-13; the transcript is not in the repository
+  - id: s55
+    resource: "urn:clutch:interview:2026-10-22-sepolia-migration"
+    title: EM's choices for OD-149, OD-150 and OD-152, 2026-10-22; the transcript is not in the repository
+  - id: s56
+    resource: "urn:clutch:interview:2026-11-16-sepolia-decisions"
+    title: EM's choices for OD-147, OD-148 and OD-151 and EM's confirmation of OD-152, 2026-11-16; the transcript is not in the repository
+  - id: s57
+    resource: "urn:clutch:interview:2026-11-16-sepolia-decisions-second-answer"
+    title: EM's confirmation of the OD-151 reading, EM's choice for OD-153 and EM's question on the Sepolia guard, 2026-11-16; the transcript is not in the repository
 ---
 
 # Decision log
@@ -181,6 +190,80 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-16 — OD-153 decided: `orders-governance` on mainnet; the Sepolia guard accepts `main`
+
+The agent reported what it had recorded, and three points that EM's answer had left open. EM answered each [s57].
+
+On the agent's reading of "OD-154" as OD-151:
+
+> you were right, it was a typo, thanks!
+
+On OD-153, where the agent recommended A:
+
+> let's chose A
+
+On the Sepolia guard, which required the branch `testnet/sepolia` and so refused a run from `main` after the merge of pull request #44:
+
+> can we allow both?
+
+Recorded as:
+
+- OD-151 B stands as EM's decision. The reading in the entry below is confirmed.
+- OD-153 A: on mainnet the orders modifier's governance role takes the key `orders-governance`, as on the stand, in the same change that brings the four account keys of OD-152 ([ADR 015](/adr/015-tests-on-sepolia.md#decision), decision 7). `main` keeps `governance` on both modifiers until that change.
+- The Sepolia guard accepts `testnet/sepolia` and `main`. The agent took EM's question as the request, and changed the guard and its tests. On each branch the commit must be on the same branch on GitHub, so a local `main` at a commit that is not merged fails. This refines OD-147 B (decision 4).
+
+## 2026-11-16 — OD-147, OD-148 and OD-151 decided; OD-152 confirmed for mainnet
+
+EM asked the agent to review pull request #44, and then to explain OD-147, OD-148, OD-151 and OD-152. The agent explained them and recommended option B for the three open decisions. It asked EM to confirm the choice of 2026-10-22 for OD-152, because the transcript of that day is not in the repository. EM answered [s56]:
+
+> OD-152: answer: yes, Clutch uses four account-specific keys (asset-operator, orders-operator, asset-emergency, orders-emergency) on Sepolia and on mainnet
+> OD-147: option B works
+> OD-148: option B works
+> OD-154: option B works
+
+No decision has the number OD-154. The agent reads the fourth line as OD-151: it is the third decision that the agent explained as open, and it has an option B. EM has not confirmed this reading.
+
+Recorded as:
+
+- OD-152 stays closed with B, and EM confirms it for both networks. The mainnet policy on `main` still uses `operator` and `emergency` on two modifiers each. The move to the four keys is owed before the initial mainnet deployment ([ADR 015](/adr/015-tests-on-sepolia.md#mainnet-design-dependencies)).
+- OD-147 B: the stand owner may make hosted calls to the Sepolia workspace and send public Sepolia transactions from `testnet/sepolia`: from a commit that is on GitHub, with no local changes, through the Sepolia guard, with an API key for the Sepolia workspace in a git-ignored `.env` ([ADR 015](/adr/015-tests-on-sepolia.md#decision), decision 4).
+- OD-148 B: the existing-state payload reaches the Sepolia workspace through the committed script behind the Sepolia guard (decision 5).
+- OD-151 B, in the agent's reading of the fourth line: the stand owner may import the three existing Safes as vaults, enter the checked address-book entries, and remove the earlier workspace's draft aliases and cancelled proposals. The stand owner edits no role and no permission in the app (decision 6).
+
+What this entry does not decide:
+
+- The hosted publications of 2026-10-22 and 2026-11-16 ran before this answer ([ADR 015](/adr/015-tests-on-sepolia.md#confirmation)). EM's answer names the route, and says nothing about those runs.
+- The Sepolia guard requires the branch `testnet/sepolia`. After pull request #44 merges, it refuses a run from `main`. The agent told EM this in its review; EM's answer does not change the guard.
+- The orders modifier's governance role. The stand renamed it to `orders-governance` on 2026-11-16, and `main` keeps `governance` on two modifiers. The agent opened OD-153 for the mainnet key.
+
+## 2026-11-16 — YT renames the orders modifier's governance role on the Sepolia stand
+
+The hosted Zodiac app refused to resolve the stand's 14 roles. It keeps one policy per role key, and the operator and orders modifiers both had a `governance` role with other permissions. The agent offered three options: rename the orders role on the chain, publish nothing now, or ask Zodiac. YT answered on 2026-11-16:
+
+> переименовать, но надо везде посмотреть где может отбить
+
+("Rename it, but check everywhere that it could break.")
+
+Recorded as:
+
+- The orders modifier's governance role takes the key `orders-governance`. Its members and grants stay. The operator modifier keeps `governance`. The [stand page](/specs/sepolia-stand.md) lists the roles, and the [test results](/research/sepolia-test-results.md#public-steps) record the public step and its checks.
+- `main` keeps `governance` on both modifiers. This is a test-stand choice of the stand owner (OD-150). It opens no decision, and EM has not decided it.
+
+## 2026-11-13 — YT's choices for the Sepolia stand's move to the universal factory
+
+The agent asked YT, the stand owner, how to move the existing Sepolia stand to the universal factory. YT answered the agent's questions on 2026-11-12:
+
+> А что поменялось? надо все нужные проставить а старые убрать
+
+("What changed? Set every role that is needed and remove the old ones.") YT also chose three of the agent's options: retire the burn factory; insurance-funding caps of 1 WETH and 1000 USDC, as `orders_weth` and `orders_usdc`; and a new deposit-queue mock.
+
+Recorded as:
+
+- The stand takes every motion role of `main`. The universal factory holds the nine motion roles on the four modifiers. The Easy Track executor holds no role and is no module of a modifier. The burn factory is retired. The [test results](/research/sepolia-test-results.md#public-steps) record the public steps of 2026-11-13 and their checks.
+- A budget motion set the insurance-funding caps: 1 WETH and 1000 USDC in 30 days, under the derived keys of the First-loss Safe. The stand's tokens have no value.
+- These are test-stand choices of the stand owner, who sends the stand's public transactions (OD-150). They open no decision, and EM has not decided them. Mainnet parameters stay EM's.
+- The agent found one defect of its own after the policy step. `assignRoles` enables its module, also when it removes a role, so the executor stayed an enabled module. A fifth step disabled it, and the comparison of the chain with the artifact now runs in the local rehearsal.
 
 ## 2026-11-13 — the guide's cards for the top-up factories and the funding registries
 
@@ -744,6 +827,22 @@ Recorded as:
 
 - (OD-100) No Merkle-root policy. Easy Track motions carry versions, so that concurrent motions cannot overwrite each other ([ADR 013](/adr/013-one-easy-track-factory.md), decisions 1 and 2).
 - EM's aim that almost everything runs through Easy Track, without DAO votes, led to OD-101 (the entry of 2026-11-05 above). [s21]
+
+## 2026-10-22 — OD-149, OD-150 and OD-152: the Sepolia role-key migration
+
+EM answered [s55]:
+
+> OD-100 B, OD-97 C, OD-98 A. Сделай GPG-коммит и пуш, потом дай команды для публикации и запуска миграции.
+
+EM's answer uses the numbers that `testnet/sepolia` gave these decisions before it merged `main`: OD-97, OD-98 and OD-100 are now OD-149, OD-150 and OD-152.
+
+Recorded as:
+
+- OD-152 B: use `asset-operator`, `orders-operator`, `asset-emergency` and `orders-emergency` on both networks. Migrate only the existing Sepolia stand after package review and fork tests. Complete the mainnet design updates before its initial deployment. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
+- OD-149 C: the stand owner executes a locally compiled package through test Voting under the package review conditions in [ADR 015](/adr/015-tests-on-sepolia.md#decision).
+- OD-150 A: the stand owner may send public transactions on the existing Sepolia stand through `sepolia.just` and its guards, with the keystore. A second stand needs a new decision. [ADR 015](/adr/015-tests-on-sepolia.md#decision) records the decision.
+
+The choices do not close OD-147, OD-148 or OD-151 and do not record verification of the whole ADR. The owner reviews and authorises the exact calls before signing [s36].
 
 ## 2026-10-22 — ADR 001, ADR 003 and ADR 004 verified again
 

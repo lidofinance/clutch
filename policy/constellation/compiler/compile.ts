@@ -181,7 +181,7 @@ const ON_MODULE = new Map([
  * they hold only `narrow` calls, so they cannot give back what they removed:
  * a motion restarts (ADR 005, decision 26; ADR 013, decision 12).
  */
-const STOP_ONLY = new Set(["emergency"]);
+const STOP_ONLY = new Set(["emergency", "asset-emergency", "orders-emergency"]);
 
 /** The only role that may hold a `restart` call. */
 const RESTART_ROLE = "restart";
@@ -328,14 +328,15 @@ export function checkZeroing(modifiers: Artifact["modifiers"], manifest: Record<
     c[0].paramType === 5 && c[0].operator === MATCHES &&
     c[1].paramType === 1 && c[1].operator === 0 &&
     c[2].paramType === 1 && c[2].operator === EQUAL_TO && c[2].compValue === zero;
-  const emergency = approvals(roleOn(manifest.safetyModifier, "emergency"));
+  const account = manifest.roleKeyScheme === "account";
+  const emergency = approvals(roleOn(manifest.safetyModifier, account ? "asset-emergency" : "emergency"));
   for (const { target, fn } of emergency) {
     if (fn.wildcarded || fn.executionOptions !== 0 || !zeroing(fn.conditions)) {
       throw new Error(`the emergency role's approval on ${target.name ?? target.address} must be the zeroing for any spender, and nothing else (ADR 005, decision 34)`);
     }
   }
   const zeroed = new Set(emergency.map(({ target }) => target.address));
-  for (const { target } of approvals(roleOn(manifest.operatorModifier, "operator"))) {
+  for (const { target } of approvals(roleOn(manifest.operatorModifier, account ? "asset-operator" : "operator"))) {
     if (!zeroed.has(target.address)) {
       throw new Error(`the operator can approve ${target.name ?? target.address}, and the emergency role cannot set that approval to zero (ADR 005, decision 34)`);
     }
@@ -463,12 +464,15 @@ export function refuseDelegatecall(
  * operator modifier (INV-004), the emergency role's on the safety modifier (INV-025), the operator's, the
  * emergency role's and the approvals role's on the orders modifier (INV-040), and the insurance role's on the
  * first-loss modifier (INV-039). Any other module takes no grant.
+ * A manifest with `roleKeyScheme: account` uses the account-specific keys of OD-152 in place of `operator` and
+ * `emergency`.
  */
 export function writableKeys(manifest: Record<string, any>, modifier: string): string[] {
   const at = (field: string) => typeof manifest[field] === "string" && getAddress(manifest[field]) === getAddress(modifier);
-  if (at("operatorModifier")) return [keyOf("operator")];
-  if (at("safetyModifier")) return [keyOf("emergency")];
-  if (at("ordersModifier")) return ["operator", "emergency", "approvals"].map(keyOf);
+  const account = manifest.roleKeyScheme === "account";
+  if (at("operatorModifier")) return [keyOf(account ? "asset-operator" : "operator")];
+  if (at("safetyModifier")) return [keyOf(account ? "asset-emergency" : "emergency")];
+  if (at("ordersModifier")) return (account ? ["orders-operator", "orders-emergency", "approvals"] : ["operator", "emergency", "approvals"]).map(keyOf);
   if (at("firstLossModifier")) return [keyOf("insurance")];
   return [];
 }

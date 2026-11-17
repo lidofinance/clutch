@@ -75,6 +75,8 @@ CONTENT_CASES = [
     ("an open decision that a later one replaced", _source("OD-68"), "OD-68 was replaced by OD-78"),
     ("an OD in the text that the sources do not cite", lambda c: c["actors"][0].update(what=c["actors"][0]["what"] + " See OD-65."),
      "actor committee: the text names OD-65, which its sources do not cite"),
+    ("a three-digit OD in the text needs its source", lambda c: c["actors"][0].update(what=c["actors"][0]["what"] + " See OD-100."),
+     "actor committee: the text names OD-100, which its sources do not cite"),
     ("an OD that a mandate change names and cites itself", lambda c: (_first_change(c).update(why=_first_change(c)["why"] + " See OD-65."),
      _first_change(c)["sources"].append("OD-65")), None),
     ("an unknown invariant", _source("INV-999"), "unknown invariant INV-999"),
@@ -264,7 +266,7 @@ def main() -> int:
         r: b.resolve(r, facts) for r in ("ADR-007#d27", "ADR-007#d18", "OD-57", "ADR-007#consequences")}))
     report(chips == ["ADR 007, decisions 18 and 27", "OD-57", "ADR 007: Consequences"], "the decisions of one ADR share a chip", str(chips))
 
-    total = len(CONTENT_CASES) + len(PIN_CASES) + 10 + 6 + 2
+    total = len(CONTENT_CASES) + len(PIN_CASES) + 11 + 6 + 2
     print(f"{total - failures} passed, {failures} failed")
     return 1 if failures else 0
 

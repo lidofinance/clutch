@@ -7,4 +7,5 @@
 | [Control matrix](control-matrix.md) | Controls in the policy, screening, monitoring and UI |
 | [Threat model](threat-model.md) | Failure modes, with their triggers, mitigations and detection |
 | [Enabling vote](enabling-vote.md) | Prerequisites, the mandate's owed text, direct vote contents without Dual Governance, and later governance actions |
+| [Sepolia stand](sepolia-stand.md) | The test stand's accounts, roles, addresses, recipes, test cases and open items |
 | [LIP draft](lip-draft.md) | The external proposal: a skeleton that points to the owner pages until phase 4 |

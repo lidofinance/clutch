@@ -8,7 +8,7 @@ This harness runs the Clutch permission policy against production contracts on a
 
 | Component | Source |
 | --- | --- |
-| Safe v1.5.0 singleton | deployed, `0xFf51A5898e281Db6DfC7855790607438dF2ca44b`; the deploy preflight asserts its runtime codehash |
+| Safe v1.5.0 singleton | deployed, `0xFf51A5898e281Db6DfC7855790607438dF2ca44b`; the deploy script asserts its runtime codehash |
 | Safe v1.5.0 proxy factory | deployed, `0x14F2982D601c9458F93bd70B218933A6f8165e7b` |
 | Roles modifier mastercopy | deployed, `0xF2964CE6161ce0e75964Fe7927cE114cb0B283D5`, behind minimal proxies from the canonical module proxy factory |
 | Tokens and protocols | deployed mainnet contracts |
@@ -34,7 +34,7 @@ The constellation in `policy/constellation/constellation` follows [ADR 005](../d
 
 ## Known divergence from the design
 
-- **Swaps.** The kit deploys no orders account: its operator funds a plain address that stands in for it. The enabling-vote rehearsal deploys the orders account with its policy, and `OrdersAccount.t.sol` settles its orders through CoW's settlement contract ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The orders modifier's governance and approvals roles are built, and two raw motions add a token and restore the account, one motion each, through the live Easy Track (decisions 41 and 46).
+- **Swaps.** The kit deploys no orders account: its operator funds a plain address that stands in for it. The enabling-vote rehearsal deploys the orders account with its policy, and `OrdersAccount.t.sol` settles its orders through CoW's settlement contract ([ADR 007](../docs/adr/007-swapping-through-an-orders-account.md)). The orders modifier's governance and approvals roles are built, and two raw motions add a token and restore the account, one motion each, through the live Easy Track (decisions 41 and 46). The separate Sepolia stand tests the order signer with WETH and USDC.
 - **First-loss Safe.** The kit deploys no first-loss Safe; a plain address stands in for it as the receiver of the insurance-funding role ([ADR 008](../docs/adr/008-funding-through-existing-payments.md), [ADR 014](../docs/adr/014-funding-by-top-up-motions.md)). The enabling-vote rehearsal deploys one, with its modifier. It enters the kit's deployment in phase 2.
 - **Exit-governance role.** The role is built, and `ExitGovernance.t.sol` tests it on the rehearsal ([ADR 006](../docs/adr/006-governance-through-easy-track-factories.md) decision 13). The orders token motion writes a token's exit through it, and the onboarding motion of an ERC-4626 lending vault writes that vault's exits.
 - **Pre-execution screening.** The operator is a plain address, not the committee's Safe with the screening vendor's transaction guard ([ADR 010](../docs/adr/010-pre-execution-screening.md)). The harness has no guard test.
@@ -51,6 +51,13 @@ The constellation in `policy/constellation/constellation` follows [ADR 005](../d
 A change to the policy changes the TypeScript and the artifact in the same commit. Reviewers approve the artifact (ADR 004, decision 14).
 
 ## Commands
+
+For the Sepolia stand, `just --justfile sepolia.just check` runs the offline tests of the Sepolia scripts and policy code.
+`just --justfile sepolia.just test-current` runs the stand suites on a pinned fork. To replay a recorded block, set `SEPOLIA_STAND_BLOCK=<block>`.
+`test-current` reads `SEPOLIA_RPC` from the git-ignored `.env` and sends no public transaction. It fails unless each suite of the named test set runs and passes with no skipped test.
+The [Sepolia stand guide](../docs/specs/sepolia-stand.md) has the recipes and the test cases. The [results](../docs/research/sepolia-test-results.md) have the runs and the public transactions.
+
+The mainnet fork commands remain:
 
 ```sh
 RPC=<archive mainnet RPC> forge test     # the whole suite on the pinned fork
@@ -83,6 +90,7 @@ The dry run's last rehearsal on a local anvil fork, at block 26249900 with Arago
 | `utils/Fixture.sol` | the shared deployment at the manifest's addresses, with the artifact applied |
 | `utils/MotionCalls.sol` | the admin calls that the governance drills put in a motion; test inputs, not the policy |
 | `Bootstrap.t.sol` | the funding script |
+| `SepoliaCoverage.t.sol` | current-stand role and failure matrices, governance and emergency key/target cross-products, combined queue/order/governance restart, alternate stop orderings and pending-burn cancellation in the separate `SepoliaStopOrderingCoverageTest` suite, delegatecall downgrade, allowance timestamp overflow/recovery, typed-order domains, all 104 minimum/daily/weekly TWAP part identities, cancellation isolation, conditional entrypoint and StopLoss-payload refusals in `SepoliaConditionalEntryCoverageTest`, nonzero-remainder partial fee/price rounding in `SepoliaSettlementRoundingCoverageTest`, overfill rollback, approvals and synthetic First-loss failures |
 | `EnablingVoteRehearsal.t.sol` | the enabling vote on a fork of block 26249900, with the live Aragon Voting, Finance and Easy Track: a vote that carries the policy cannot start; the vote that registers the universal factory and the two top-up factories, pays nothing and approves the Safe batches; the first top-up by two motions after the batches; a later top-up in DAI, which the operator converts into USDS, a budget motion, the switch, the counter and a restart motion; Earn deposits; the first-loss burn and redemption request; the manifest; and the Safe batches, written to `.batches/` with the hash that each Safe computes, for `just batches-check`, which computes each hash again and checks each batch's calls against the policy (OD-92); the fork workflow runs that check after the suite |
 | `UniversalFactory.t.sol` | the universal factory against the live Easy Track: its address book of one call, the motion roles that it holds, its gates, the counter and the policy version, one motion that onboards an ERC-4626 lending vault, the modifiers' guards on a raw motion, a widening that the factory does not stop, the restart, insurance money and its measures |
 | `OrdersAccount.t.sol` | the orders account's policy on the rehearsal's vault, with CoW's deployed contracts: signer and TWAP orders settled through CoW's settlement contract, their refusals and life limits, the emergency role's cancels, sweeps and recovery orders, the revoke that keeps recovery, the funding from the Asset Safe, the operator's return to the Aragon Agent, the universal factory's governance and approvals roles on the orders modifier, a token's motion writes run by hand, and three raw motions through the live Easy Track: one for a token, the committed retirement of a token, and the restore after an emergency stop |

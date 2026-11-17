@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-13T07:48:30Z
+  at: 2026-11-16T21:11:57Z
 verified: []
 ---
 
@@ -34,10 +34,11 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/012-contributing-with-many-agents.md](/adr/012-contributing-with-many-agents.md) | Decision | slop | proposed | 2026-11-12 | none |
 | [adr/013-one-easy-track-factory.md](/adr/013-one-easy-track-factory.md) | Decision | slop | proposed | 2026-11-13 | none |
 | [adr/014-funding-by-top-up-motions.md](/adr/014-funding-by-top-up-motions.md) | Decision | slop | proposed | 2026-11-13 | none |
+| [adr/015-tests-on-sepolia.md](/adr/015-tests-on-sepolia.md) | Decision | slop | proposed | 2026-11-16 | none |
 | [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-11-11 | none |
 | [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-13 | none |
-| [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-11-13 | none |
-| [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-13 | none |
+| [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-11-16 | none |
+| [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-16 | none |
 | [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-13 | none |
 | [research/ai-first-practice-2026-09.md](/research/ai-first-practice-2026-09.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/cfo-feedback-2026-10-13.md](/research/cfo-feedback-2026-10-13.md) | Research Note | slop |  | 2026-11-13 | none |
@@ -60,11 +61,14 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/request-for-solution-2026-10-07.md](/research/request-for-solution-2026-10-07.md) | Research Note | slop |  | 2026-10-19 | none |
 | [research/safe-v150-due-diligence-2026-10-05.md](/research/safe-v150-due-diligence-2026-10-05.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/safe-v150-guard-compatibility-2026-10-02.md](/research/safe-v150-guard-compatibility-2026-10-02.md) | Research Note | slop |  | 2026-11-11 | none |
+| [research/sepolia-test-results.md](/research/sepolia-test-results.md) | Research Note | slop |  | 2026-11-16 | none |
 | [research/universal-factory-prototype-2026-11-05.md](/research/universal-factory-prototype-2026-11-05.md) | Research Note | slop |  | 2026-11-12 | none |
 | [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-11-11 | none |
 | [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-13 | none |
 | [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-13 | none |
-| [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-13 | none |
+| [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-16 | none |
 | [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-13 | none |
+| [specs/sepolia-setup-checklist.md](/specs/sepolia-setup-checklist.md) | Guide | slop |  | 2026-11-16 | none |
+| [specs/sepolia-stand.md](/specs/sepolia-stand.md) | Guide | slop |  | 2026-11-16 | none |
 | [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-11-12 | none |
 | [specs/threat-model.md](/specs/threat-model.md) | Specification | slop |  | 2026-11-13 | none |

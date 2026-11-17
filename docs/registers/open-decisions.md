@@ -7,12 +7,13 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
+  at: 2026-11-16T20:11:16Z
 verified: []
 sources:
   - id: s1
     resource: /registers/decision-log.md
     title: Decision log — EM's inputs
+
 ---
 
 # Open decisions
