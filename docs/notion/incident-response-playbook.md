@@ -8,7 +8,7 @@ review_status: slop
 valid_as_of: 2026-11-17
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-17T12:00:00Z
+  at: 2026-11-17T13:00:00Z
 verified: []
 sources:
   - id: s1
@@ -39,11 +39,11 @@ The Incident Lead coordinates assessment; authorized signers execute the approve
 | --- | --- |
 | Contract exploit or permission breach | Stop affected execution, revoke relevant permissions and assess safe withdrawal paths. |
 | Signer or interface compromise | Suspend use of the affected signing path, involve SecOps and initiate authorized revocation or rotation. |
-| Harmful or unexpected CoW order | Identify outstanding orders, initiate cancellation and verify whether settlement remains possible. |
+| Harmful or unexpected CoW order | Identify outstanding orders. Cancel each one with `unsignOrder` on the order signer and `remove` on ComposableCoW. Where needed, set the vault relayer's approval to zero. Verify that no settlement remains possible. |
 | Depeg, protocol distress or redemption failure | Stop new affected allocations; assess liquidity and initiate an orderly or emergency exit where appropriate. |
 | Monitoring or screening outage | Verify exposure independently and apply the agreed outage policy. Escalate if safe execution cannot be established. |
 
-**Emergency boundaries:** The assumed 3-of-5 emergency Safe may stop execution, revoke permissions, initiate exits, make approved defensive swaps and return assets to the DAO. It cannot open or increase investment positions.
+**Emergency boundaries:** The 3-of-5 emergency Safe can revoke the operator's permissions, disable the operator modifier, zero approvals, exit positions, cancel orders, place recovery orders that buy USDC or USDT and pay the Aragon Agent, and return assets to the Agent. It can raise the universal factory's counter, so that no open motion enacts. It cannot add a permission, enter a protocol except by staking ETH, or restore what it stopped ([ADR 005](/adr/005-account-graph-and-roles.md)). The Emergency Brakes multisig can pause Easy Track. It cannot unpause it.
 
 Initiate required defensive actions within the six-hour target, escalating immediately if blocked. Record submission, confirmation and outstanding settlement separately. Queued redemptions may take longer.
 
@@ -62,13 +62,13 @@ Use the incident channels and communication roles established by SecOps. Publish
 
 The report should cover the incident, exposure, actions taken, known losses, pending withdrawals and next steps. Distinguish market movements, investment losses and first-loss utilization.
 
-Recovery requires a documented cause assessment, reviewed remediation, reconciled balances and tested permissions. **Restart after a stop requires an Aragon vote, plus Snapshot where required**, under the working governance assumption. A forum update alone does not authorize restart.
+Recovery requires a documented cause assessment, reviewed remediation, reconciled balances and tested permissions. **A restart motion restarts the operator after a stop.** The universal factory's `restart` role enables the operator modifier after the 72-hour objection window, and restore motions bring back what the emergency role revoked. An Easy Track unpause needs an Aragon vote ([ADR 013](/adr/013-one-easy-track-factory.md) decision 12). A forum update alone does not authorize restart.
 
 ## 5. Readiness and follow-up
 
 Before launch, confirm responder coverage and rehearse operator shutdown, order cancellation, permission revocation, redemption and DAO return, including unavailable signers and failed primary tooling.
 
-Keep detailed, step-by-step incident runbooks on separate pages; link them here once validated.
+The [runbook backlog](/runbooks/index.md) lists one runbook per emergency or technical action, with its permission. No runbook is written or drilled yet.
 
 After an incident, complete the SecOps post-mortem process, assign remediation owners and update this playbook and the Threat Model.
 
@@ -131,12 +131,12 @@ The six-hour target concerns **initiating defensive actions**, not guaranteeing 
 - **Communications Lead:** coordinates the draft’s required forum report within 72 hours.
 - **Incident Lead:** coordinates the post-mortem and assigns remediation owners and deadlines.
 
-Recovery requires documented technical and financial readiness assessments. Neither independently authorizes restart; the applicable governance approvals remain required.
+Recovery requires documented technical and financial readiness assessments. Neither authorizes restart; a restart motion does.
 
 ### 6.5 Emergency committees
 
 - **Technical/security emergencies:** SecOps and Engineering coordinate the response, involving existing emergency committees only within their approved mandates and deployed permissions. Contract upgrades follow the applicable DAO approval process.
-- **Financial/vault emergencies:** The [Authorize an Active Treasury Management Mandate](https://app.notion.com/p/3ddbf633d0c9819c8bcdff1e2e916afb) proposes a separate 3-of-5 emergency Safe: two TMC members, two Emergency Brakes members and one independent signer. Approval, deployment, membership and exact permissions remain to be confirmed.
+- **Financial/vault emergencies:** A separate 3-of-5 emergency Safe acts. The committee appoints two signers, the Emergency Brakes multisig appoints two, and a DAO Snapshot appoints a fifth signer who is a member of neither ([ADR 005](/adr/005-account-graph-and-roles.md) decision 24). Its deployment and membership remain to be confirmed.
 
 **YT** will confirm the responsible bodies and escalation paths before operational use.
 

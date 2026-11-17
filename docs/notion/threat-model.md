@@ -8,7 +8,7 @@ review_status: slop
 valid_as_of: 2026-11-12
 generated:
   by: claude-code/opus-5.5
-  at: 2026-11-17T12:00:00Z
+  at: 2026-11-17T13:00:00Z
 verified: []
 sources:
   - id: s1
@@ -39,7 +39,7 @@ The main trust boundaries are:
 | Vault → underlying protocols and providers | Which external administrators, liquidity sources and services can affect assets or execution? | **YT + the treasury lead** |
 | Monitoring → responders and signers | Who receives, acknowledges and acts on alerts? What happens when they are unavailable? | **The security lead; the execution coordinator, with the deputy coordinator as deputy** |
 
-Before funding, attach the actual address/permission map, component versions, upgrade authorities and approved asset/strategy list. These design assumptions are not evidence of implementation.
+The [control matrix](/specs/control-matrix.md) maps the mandate's rules to their controls, and the [invariants](/specs/invariants.md) map each property to its test. Before funding, attach the deployed addresses, component versions and upgrade authorities. These design assumptions are not evidence of implementation.
 
 ## 2. Security objectives
 
@@ -70,6 +70,8 @@ A valid transaction is not necessarily economically safe.
 **Initial ratings below use Medium likelihood as an explicit planning baseline because implementation and operating evidence have not yet been assessed.** They are not measured probabilities. Impact assumes the scenario succeeds; residual risk must be assessed separately after controls are tested.
 
 ### Threat register
+
+The [repository threat model](/specs/threat-model.md) lists the failures of each mechanism, with trigger, mitigation and detection. This register keeps the risk rating.
 
 | Threat / scenario | Likelihood | Impact | Priority | Required controls and evidence | Owner |
 | --- | --- | --- | --- | --- | --- |
