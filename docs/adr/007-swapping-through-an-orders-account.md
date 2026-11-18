@@ -8,7 +8,7 @@ review_status: slop
 decision: proposed
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-17T20:16:01Z
+  at: 2026-11-17T21:07:34Z
 verified: []
 sources:
   - id: s1
@@ -29,6 +29,9 @@ sources:
   - id: s10
     resource: "urn:clutch:restricted:mandate-draft-v0.1"
     title: Mandate draft v0.1 — the emergency path may swap any asset into any of the four main stablecoins; outside the repository until the mandate is published
+  - id: s13
+    resource: /research/order-price-bound-2026-11-17.md
+    title: A price bound on chain for like-for-like orders, without an outside price feed — the prototype, what it refuses and what it lets through
   - id: s12
     resource: /research/roles-module-drain-2026-11-16.md
     title: A Safe drained through its Roles module on 2026-11-16 — a router swap with a free executor and a minimum output of 1
@@ -101,7 +104,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 44. The orders modifier's governance role writes, under the approvals key, only the relayer approval. It pins whole each tree that does not depend on the token: the return to the Asset Safe or the Aragon Agent, for the operator and the emergency role; the emergency role's zeroing of the relayer's approval; and the relayer approval. So no motion gives a role another receiver or spender, and only the approvals role raises an approval (OD-103).
 45. The motion that adds a token to the order lists also writes the token's exit on the Asset Safe, through the exit-governance role: a transfer to the Aragon Agent, or to the orders account, where a recovery order sells it (OD-49).
 46. One motion restores the orders account after an emergency stop. For the operator, the motion writes again the two targets, the order trees, the two cancels and, for each operator token, the transfer back to the Asset Safe or the Aragon Agent. Through the approvals role, it raises again the relayer approval of each recovery token that it names. The motion carries the order trees with the current lists, and the factory does not check them (OD-119, OD-134).
-47. An operator's order has no price bound on chain. Its controls are the order's own limit, CoW's solver competition, screening once the guard is set, the orders budgets, and the orders detector with the emergency role's unsign ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 49). A bound on chain without an outside price feed, for pairs of like tokens, is a research item (OD-154) [s12].
+47. An operator's order has no price bound on chain. Its controls are the order's own limit, CoW's solver competition, screening once the guard is set, the orders budgets, and the orders detector with the emergency role's unsign ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 49). A bound on chain without an outside price feed is not added. A custom condition can hold an order to par inside one class of tokens, but an order of two classes stays free, so the bound stops a slip and not a hostile signing quorum; the orders budgets bound that loss (OD-154, OD-157) [s12][s13].
 
 ## Proposed direction
 
@@ -134,7 +137,7 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - **Unstaking through Lido's withdrawal queue:** not chosen (decision 27). Its requests cannot be cancelled, only a DAO vote upgrades it [s9], and CoW orders buy WETH.
 - **A shorter or a longer order life:** not chosen (decision 29). A 30-day life forces the monthly renewals that the committee asked to avoid. A year lets resting orders outlive their context; pre-signed orders have no CoW maximum, so Clutch needs its own bound.
 
-- **A price bound on chain for operator orders at launch:** not chosen (OD-154). A bound that reads a price feed puts an outside setting in the swap path, which the design keeps out (OD-45). A bound without a feed covers only pairs of like tokens and is new code to audit; it is a research item (decision 47).
+- **A price bound on chain for operator orders at launch:** not chosen (OD-154). A bound that reads a price feed puts an outside setting in the swap path, which the design keeps out (OD-45). A bound without a feed covers only pairs of like tokens, lets an order of two classes through, and is new code to audit: not chosen (decision 47; OD-157).
 
 ## Consequences
 
@@ -170,7 +173,7 @@ The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
 - The screening guard cannot check the operator's transactions on the orders account.
 - CoW's EBBO rule fails to repay a loss, or recovery orders fill far below the on-chain market. Then the GoodAfterTime floor of the research note is the next step (decision 26).
 
-- An operator's order fills far below the market, or the orders detector's alerts come too late for the emergency role to unsign. Then the bound on chain of decision 47 is the next step.
+- An operator's order fills far below the market, or the orders detector's alerts come too late for the emergency role to unsign. Then a bound on chain is the next step, and it must cover orders of two classes (decision 47).
 
 ## Open questions
 
