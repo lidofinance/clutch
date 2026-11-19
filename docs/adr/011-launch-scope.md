@@ -9,13 +9,18 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T14:04:23Z
+  at: 2026-11-19T16:42:09Z
 verified:
   - by: human:em
     at: 2026-11-19T14:06:03Z
     recorded_by: claude-code/mythos-5.2
     ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
     sha256: 4b0ab2488189b9cf8942a02c2550b648e79b6ca11545be1cfb24174c4e7161d0
+  - by: human:em
+    at: 2026-11-19T16:55:18Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--nine-adrs-verified-again-od-169-em-or-yt-decides-the-open-decisions
+    sha256: e2b253403c6c523111a8d30e6f55e67ba529ad885cecfee7bb7b96e189c9e956
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -54,6 +59,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 13. Lido Lend is a separate deployment that is compatible with Morpho Blue, not markets on Morpho Blue's own contract. The vault lends through Lido Lend's lender vault, an ERC-4626 token, with the receiver and the owner pinned to the Asset Safe. It uses neither the lender vault's fallback exit nor its settlement, so no collateral enters the Asset Safe, and USDY cannot enter. A position returns only the asset that it lent: WETH and USDC, and USDT if a market lends it. The lender vault's address enters with the universal factory's onboarding motion, and that motion also adds its emergency exit ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 13) (OD-49, OD-102, OD-132, OD-133).
 14. Stated by [ADR 007](/adr/007-swapping-through-an-orders-account.md) decisions 13, 22 and 27.
 15. LDO is off the launch list. It is on neither the operator's order lists nor the recovery sell list (OD-91).
+16. Twyne is not in the launch scope. It can come after launch by an onboarding motion ([ADR 006](/adr/006-governance-through-easy-track-factories.md)), with its permissions, monitoring and exits, and after a check against the mandate's ban on borrowing (OD-162).
 
 ## Proposed direction
 
@@ -69,7 +75,7 @@ The rest of this section is agent-drafted. EM accepted it with this record (deci
 | sUSDS | savings position | an ERC-4626 position of the launch policy; the operator redeems it, and recovery can sell it in a CoW order |
 | earnETH, earnUSD | vault positions | asynchronous deposit and redeem; the DAO's first-loss shares sit in the first-loss Safe ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 19); insurance at launch ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 4) |
 | Orders account | CoW market, limit and TWAP orders for the operator; recovery orders into USDC or USDT for the emergency role | [ADR 007](/adr/007-swapping-through-an-orders-account.md) |
-| Lido Lend | lending, after launch | one motion of the universal factory that onboards Lido Lend's lender vault, an ERC-4626 vault, once Lido Lend's own contracts exist (decision 13); a position returns only WETH, USDC or USDT; in the protocol cap until it matures ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28); insurance at launch ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 4) |
+| Lido Lend | lending, after launch | one motion of the universal factory that onboards Lido Lend's lender vault, an ERC-4626 vault, once Lido Lend's own contracts exist (decision 13); a position returns only WETH, USDC or USDT; no cap holds it, and its budget key bounds each month's deposits ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28); insurance built in and unused before its Snapshot ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 4) |
 
 A top-up motion brings stETH, DAI, USDC, USDT or sUSDS. ETH, WETH, wstETH and USDS come from these inside the vault: by staking, wrapping and Sky's converter ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 3), because Aragon Voting pays any token through Finance.
 

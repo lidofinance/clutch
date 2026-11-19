@@ -14,7 +14,7 @@ import {EnabledVault} from "./rehearsal/EnabledVault.sol";
 ///      DAO's stablecoin list, which are DAI, USDC, USDT and sUSDS (OD-141). Aragon Voting is each registry's admin,
 ///      so a change of a limit passes no Dual Governance. The committee's Safe is the trusted caller of both top-up
 ///      factories, and the enabling vote registers them (OD-142). A period is three calendar months (OD-143). The
-///      fixture's first top-up already spent a part of each limit. Both limits are stand-ins.
+///      enabling vote's payments spend no limit, so each period starts full. Both limits are stand-ins.
 ///      Run: RPC=<archive RPC> forge test --match-contract TopUps -vv
 contract TopUps is EnabledVault {
     /// @dev The Easy Track executor's ceiling on one payment, in Finance's payment permission (chain reads of
@@ -30,15 +30,15 @@ contract TopUps is EnabledVault {
         _deployFactory();
     }
 
-    /// @dev The enabling vote registers the two top-up factories, and the first top-up comes by two motions.
+    /// @dev The enabling vote registers the two top-up factories and pays the initial funding.
     modifier withTopUps() {
         _enable();
         _;
     }
 
-    /// @dev The enabling vote registers both factories with their two calls each, and pays nothing. The launch
-    ///      top-up then comes by two motions, and each registry counts its part.
-    function test_topup_the_enabling_vote_registers_the_factories_and_the_first_top_up_is_two_motions() public withTopUps {
+    /// @dev The enabling vote registers both factories with their two calls each. Its own payments of the initial
+    ///      funding pass no registry, so each limit is whole for the first top-up motion.
+    function test_topup_the_enabling_vote_registers_the_factories_and_its_payments_spend_no_limit() public withTopUps {
         IEasyTrack et = IEasyTrack(Mainnet.EASY_TRACK);
         assertTrue(et.isEVMScriptFactory(stethTopUp) && et.isEVMScriptFactory(stableTopUp), "both factories are registered");
         assertEq(
@@ -62,8 +62,10 @@ contract TopUps is EnabledVault {
         assertEq(months, TOPUP_PERIOD_MONTHS, "a period of three months");
         (, months) = IRecipientsRegistry(stethRegistry).getLimitParameters();
         assertEq(months, TOPUP_PERIOD_MONTHS, "a period of three months");
-        assertEq(IRecipientsRegistry(stableRegistry).spendableBalance(), TOPUP_STABLE_LIMIT - 500_000e18, "the first top-up's USDC counts");
-        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), TOPUP_STETH_LIMIT - FIRST_TOPUP_STETH, "the first top-up's stETH counts");
+        assertEq(IRecipientsRegistry(stableRegistry).spendableBalance(), TOPUP_STABLE_LIMIT, "the vote's USDC payment spends no limit");
+        assertEq(IRecipientsRegistry(stethRegistry).spendableBalance(), TOPUP_STETH_LIMIT, "the vote's stETH payment spends no limit");
+        assertEq(IERC20(Mainnet.USDC).balanceOf(address(asset)), INITIAL_FUNDING_USDC, "the initial funding in USDC");
+        assertApproxEqAbs(IERC20(Mainnet.STETH).balanceOf(address(asset)), INITIAL_FUNDING_STETH, 2, "the initial funding in stETH");
     }
 
     /// @dev One motion of the committee's Safe pays stETH from the treasury to the Asset Safe after the objection

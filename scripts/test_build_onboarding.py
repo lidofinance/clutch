@@ -210,7 +210,7 @@ def main() -> int:
     where = {
         "decision": b.locate("ADR-007#d27", facts),
         "section": b.locate("ADR-007#proposed-direction", facts),
-        "row": b.locate("OD-65", facts),
+        "row": b.locate("OD-168", facts),
         "entry": b.locate("OD-57", facts),
         "test": b.locate("test:test_D3_withdrawal_queue_is_out_of_scope", facts),
         "lip": b.locate("lip:part-8", facts),
@@ -233,7 +233,7 @@ def main() -> int:
            == {str(n) for n in [1, 3, 6, 7, 8, 9, 10, 11, 12, 14, 15, 17, 18, 19, 20]}, "lists and ranges of decisions are read")
     adr9 = (ROOT / facts["adrs"]["ADR-009"]["path"]).read_text(encoding="utf-8")
     report("5. Replaced by decision 31 (OD-56)." in b.decision_text(adr9, "ADR-009", "31"), "ADR 009's decision 31 pins the line of the decision that it replaced")
-    report(texts["row"].startswith("| OD-65 |"), "an open OD reference pins its row", texts["row"][:80])
+    report(texts["row"].startswith("| OD-168 |"), "an open OD reference pins its row", texts["row"][:80])
     report(texts["entry"].startswith("- id: OD-57\n") and "\n- id: " not in texts["entry"], "a closed OD reference pins its entry", texts["entry"][:80])
     report(texts["test"].startswith("function test_D3_withdrawal_queue_is_out_of_scope(") and texts["test"].endswith("}"),
            "a test reference pins the test function", texts["test"][-80:])

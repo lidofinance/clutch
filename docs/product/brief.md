@@ -6,8 +6,8 @@ tags: [product, vision, goals, nsm]
 status: draft
 review_status: slop
 generated:
-  by: claude-code/opus-5.5
-  at: 2026-11-13T06:47:18Z
+  by: claude-code/mythos-5.2
+  at: 2026-11-19T16:42:09Z
 verified: []
 sources:
   - id: s1
@@ -74,7 +74,7 @@ Each gate must hold at 100 percent [s1]:
 
 - **Traceability:** each permission traces to a specification clause, ADR, test and deployed artifact.
 - **One-command verification:** one command verifies every permission change.
-- **Six hours:** a fork drill proves that each emergency action starts within the mandate's six-hour ceiling.
+- **Six hours:** a fork drill proves that each emergency action starts within six hours, which is Clutch's own ceiling.
 
 ## Submetrics
 

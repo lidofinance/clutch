@@ -1,6 +1,6 @@
 ---
 name: adr-draft
-description: Draft a new decision record (ADR) in the Clutch repository, or revise a proposed one. Use when a design question needs a recorded decision, when the acceptor states a decision in conversation, or when an item in docs/registers/open-decisions.md is ready to be written up.
+description: Draft a new decision record (ADR) in the Clutch repository, or revise a proposed one. Use when a design question needs a recorded decision, when EM or YT states a decision in conversation, or when an item in docs/registers/open-decisions.md is ready to be written up.
 license: AGPL-3.0-or-later
 ---
 

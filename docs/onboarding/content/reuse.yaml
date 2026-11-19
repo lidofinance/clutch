@@ -48,10 +48,10 @@
 
 - name: Aragon Finance
   column: reused
-  what: "The DAO's payment app. Easy Track's executor pays each top-up through it, with its own payment permission."
+  what: "The DAO's payment app. Aragon Voting pays the vault's initial funding through it in the enabling vote. Easy Track's executor pays each top-up through it, with its own payment permission."
   why: "The payment path exists already. Clutch changes no payment permission and no token list."
   owner: "Aragon Voting"
-  sources: ["ADR-014#d13", "ADR-014#d15", "ADR-014#context", "ADR-014#consequences", "INV-037",
+  sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#context", "ADR-014#consequences", "INV-037",
     "doc:docs/research/easy-track-first-2026-11-05.md#finance-payments-by-aragon-voting"]
 
 - name: Lido's top-up factories and funding registries
@@ -166,16 +166,16 @@
   what: "New detectors on Lido's monitoring platform: [[drift]], approvals, budgets, the universal factory's motions and its motion counter, Safe changes, orders and fills, transfers to the Aragon Agent, the first-loss Safe, the cap reading and missing reports, the comparison of the two readings, rule changes made in the Zodiac UI, and late approvals of the screening vendor."
   why: "Caps are detective: monitoring sees a breach and pages the emergency Safe."
   owner: "`@lidofinance/defi-tech` writes the specification"
-  sources: ["ADR-009#d1", "ADR-009#d17", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", "ADR-009#d41",
+  sources: ["ADR-009#d1", "ADR-009#d17", "ADR-009#d25", "ADR-009#d34", "ADR-009#d41",
     "ADR-009#d44", "ADR-010#d26", "ADR-009#proposed-direction", "ADR-013#proposed-direction", "ADR-014#d9",
     "OD-43"]
 
 - name: The control matrix and the screening rule list
   column: new
   what: "The [[control matrix]], and the written list of the screening vendor's rules with their change control."
-  why: "What the chain cannot enforce gets screening, monitoring and display. A relaxation of a screening rule gets review and notice."
+  why: "What the chain cannot enforce gets screening, monitoring and display. A relaxation of a screening rule gets review. One that loosens a limit of the mandate waits for a motion, and any other gets a notice."
   owner: "`@lidofinance/defi-tech`; the committee configures the vendor's rules"
-  sources: ["ADR-009#d26", "ADR-006#d11", "ADR-010#d19", "doc:docs/specs/control-matrix.md#control-matrix"]
+  sources: ["ADR-009#d26", "ADR-006#d11", "ADR-010#d19", "ADR-010#d23", "doc:docs/specs/control-matrix.md#control-matrix"]
 
 - name: The report generator
   column: new

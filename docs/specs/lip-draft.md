@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T07:06:18Z
+  at: 2026-11-19T16:13:59Z
 verified: []
 sources:
   - id: s2
@@ -90,7 +90,7 @@ Owners: [ADR 006](/adr/006-governance-through-easy-track-factories.md) and [ADR 
 
 #### Part 5: Funding and insurance **[Implemented in part]**
 
-Owners: [ADR 014](/adr/014-funding-by-top-up-motions.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the first top-up and a later top-up by top-up motions, moves insurance money within its budget, deposits it into Lido Earn, creates a fund with a payout address and pays out of it, burns first-loss shares by motion and returns order tokens to the Aragon Agent.
+Owners: [ADR 014](/adr/014-funding-by-top-up-motions.md) and [ADR 008](/adr/008-funding-through-existing-payments.md). The fork suite pays the initial funding in the enabling vote and a later top-up by a top-up motion, moves insurance money within its budget, deposits it into Lido Earn, creates a fund with a payout address and pays out of it, burns first-loss shares by motion and returns order tokens to the Aragon Agent.
 
 #### Part 6: Emergency response **[Implemented in part]**
 
@@ -128,7 +128,7 @@ The [parameters register](/registers/parameters.md) holds each value and its sta
 - **Weak amount controls.** Lido-product budget keys allow the whole mandate per month, and the caps are detective: the policy cannot see value ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md)).
 - **Screening.** The vendor's guard can stop operator activity and motion creation; recovery never depends on it, and the owners can remove it after ten days ([ADR 010](/adr/010-pre-execution-screening.md)).
 - **Stale motions.** A motion that fails at enactment holds one of Easy Track's 20 shared open-motion slots until it is cancelled (OD-94).
-- **Flows out of the vault.** Funds leave only to the Aragon Agent, through emergency and recovery paths and the operator's pinned return, and to an insurance fund's pinned payout address within its cap (OD-107, OD-108).
+- **Flows out of the vault.** Funds leave only to the Aragon Agent, through emergency and recovery paths and the operator's routine return, which is pinned to the Agent, and to an insurance fund's pinned payout address within its cap (OD-107, OD-108).
 - **Encoding and provenance.** The round-trip check rebuilds each modifier's state from its events on a fork and compares it with the artifact, so the chain checks the compiler's encoding (INV-016). It reads events, not storage, so it trusts the deployed Roles code to store what it emits. Before funding, every reused component is verified against a locally compiled tagged release.
 
 ## Failure Modes
@@ -139,10 +139,10 @@ The [threat model](/specs/threat-model.md) lists the failure modes, each with it
 
 The [open-decisions register](/registers/open-decisions.md) tracks every open item. These can change this proposal:
 
-1. **The emergency Safe's fifth signer.** A Snapshot appoints a member of neither the committee nor the Emergency Brakes multisig (OD-58); who holds the seat is open (OD-65).
+1. **The emergency Safe's fifth signer.** The mandate's Snapshot sets the class: a Lido Labs engineering contributor who is a member of neither the committee nor the Emergency Brakes multisig. The acceptor names the person (OD-58, OD-65).
 2. **The mandate's owed text.** The [enabling vote](/specs/enabling-vote.md) lists it (OD-90).
 3. **Twyne.** Its holder and form must be shown before it counts ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 17).
-4. **The vendor's confirmations.** The vendor confirms in writing that it accepts the exclusion of standing approvals, before a top-up above the launch cap, and that it agrees to be named, before the mandate is posted ([ADR 010](/adr/010-pre-execution-screening.md) decision 9; [ADR 001](/adr/001-repository-scope-visibility-licence-name.md) decision 8).
+4. **The vendor's confirmations.** The vendor confirms in writing that it accepts the exclusion of standing approvals, before the guard is set, and that it agrees to be named, before the mandate is posted ([ADR 010](/adr/010-pre-execution-screening.md) decision 9; [ADR 001](/adr/001-repository-scope-visibility-licence-name.md) decision 8).
 
 ## Links
 

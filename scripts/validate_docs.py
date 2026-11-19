@@ -27,7 +27,7 @@ Clutch rules on top of the Gaggle profile:
 - AGENTS.md holds at most 60 lines (ADR 003).
 - Every Runbook names the `permission` it exercises. A Runbook above `slop` needs a
   passing `drill` record, and the drill's time to initiate must not exceed six hours,
-  the mandate's ceiling (ADR 002, ROADMAP standing gates).
+  Clutch's own gate (ADR 002, ROADMAP standing gates).
 - A verification by a body, `human:tmc`, carries `ref`: an https or urn link to the
   body's decision record (ADR 002, OD-15).
 - An agent records a human's own verification only on that human's written instruction

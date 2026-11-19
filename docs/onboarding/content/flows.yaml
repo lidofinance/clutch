@@ -6,10 +6,10 @@ groups:
     summary: "What the committee does on a normal day. The policy checks every operator transaction before it runs, and so does the [[guard]] once it is set."
   - id: governance
     title: Changing what the operator may do
-    summary: "A permission changes by a [[motion]] of the [[universal factory]], after the [[objection window]]. After the enabling vote, no administrative action needs an Aragon vote. A screening rule changes by review and a forum notice."
+    summary: "A permission changes by a [[motion]] of the [[universal factory]], after the [[objection window]]. After the enabling vote, no administrative action needs an Aragon vote. A screening rule changes by review. A relaxation that loosens a limit of the mandate waits for a motion."
   - id: funding
     title: Funding, insurance and returns
-    summary: "Money comes from the DAO treasury by [[top-up motion|top-up motions]], within a limit for each three months. Insurance money moves from the Asset Safe by motion. Money goes back to the treasury only in an emergency or a recovery."
+    summary: "Money comes from the DAO treasury. The enabling vote pays the initial funding, and [[top-up motion|top-up motions]] follow, within a limit for each three months. Insurance money moves from the Asset Safe by motion, after a Snapshot approves the insurance framework. The committee returns stablecoin reserves to the treasury as a routine."
   - id: reporting
     title: Reporting and monitoring
     summary: "Caps are detective. Monitoring and reports measure the vault, publish the numbers and start the fix. No contract reverts on a cap."
@@ -59,7 +59,7 @@ flows:
     sources: ["ADR-006#d7", "ADR-006#d8", "ADR-006#d14", "ADR-005#proposed-direction", "ADR-010#d1",
       "ADR-010#d4", "ADR-010#d9", "ADR-010#d17", "ADR-010#d20", "ADR-010#d22", "ADR-009#d13",
       "ADR-009#proposed-direction", "INV-003", "INV-010", "test:test_D3_operator_lifecycle",
-      "test:test_D3b_earn_deposit_policy_layer", "ADR-005#d31", "OD-54", "OD-83"]
+      "test:test_D3b_earn_deposit_policy_layer", "ADR-005#d31", "OD-160", "OD-83"]
 
   - id: swap-order
     group: operations
@@ -151,7 +151,7 @@ flows:
     time: "At least 72 hours, then enactment."
     steps:
       - who: "Committee"
-        text: "The committee posts a disclosure on the forum. It sets up monitoring for the new target and updates the runbooks."
+        text: "The committee posts a disclosure on the forum before the motion, by the period that the mandate sets. It sets up monitoring for the new target and updates the runbooks."
         nodes: [committee, reporting, monitoring]
       - who: "Committee Safe"
         text: "The committee's Safe creates the motion. Its raw writes carry the operator's permissions for the target with their condition trees, the budget of each new spender and the emergency exits. The motion names the [[policy version]] and the [[motion counter]]. The guard, once set, screens this transaction."
@@ -196,11 +196,11 @@ flows:
     title: A budget motion
     label: specified
     summary: "How a [[budget key]] changes. There is no routine retune: the committee files a budget motion only after an event."
-    trigger: "An event: a new mandate size, a new spender, a product's unlock, or the setting of the guard. A price move is not an event."
+    trigger: "An event: a new mandate size, a new spender, or the setting of the guard. A price move is not an event."
     time: "72 hours."
     steps:
       - who: "Committee"
-        text: "The attested computation derives the key's new budget. The forum post names the event."
+        text: "The attested computation derives the key's new budget. The forum post names the event. For a higher budget, the post comes before the motion, by the period that the mandate sets."
         nodes: [committee, asset-safe]
       - who: "Committee Safe"
         text: "The committee's Safe creates a budget motion. One motion can set several keys. The guard, once set, screens it."
@@ -216,7 +216,7 @@ flows:
         nodes: [monitoring]
     sources: ["ADR-009#d3", "ADR-009#d15", "ADR-009#d31", "ADR-009#d45", "ADR-009#proposed-direction",
       "ADR-009#consequences", "ADR-013#d9", "ADR-013#d11", "INV-011", "INV-012",
-      "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period", "OD-54",
+      "lip:part-7", "test:test_D1_budget_motion_cannot_shorten_the_refill_period", "ADR-006#d4", "ADR-010#d22",
       "test:test_03_ramp_up"]
 
   - id: orders-token
@@ -278,32 +278,6 @@ flows:
       "runbook:Move the operator role to another Safe", "runbook:Replace the operator modifier",
       "ADR-005#d28"]
 
-  - id: unlock
-    group: governance
-    title: Unlocking a matured Lido product
-    label: specified
-    summary: "A [[new Lido product]], Lido Lend first, counts against the protocol cap until it matures. A budget motion with a forum post unlocks it."
-    trigger: "The product meets the maturity criteria in the mandate."
-    time: "72 hours."
-    steps:
-      - who: "Committee"
-        text: "The committee posts on the forum which maturity criteria the product meets."
-        nodes: [committee, reporting]
-      - who: "Committee Safe"
-        text: "The committee's Safe creates a budget motion that raises the product's budget key. The guard, once set, screens it."
-        nodes: [committee, screening, easytrack]
-        edges: [motions, screen]
-      - who: "LDO holders"
-        text: "LDO holders can object in the [[objection window]]."
-        nodes: [dao, easytrack]
-        edges: [object]
-      - who: "Easy Track"
-        text: "The motion enacts through the governance role. From then on, reports count the product as a Lido product, outside the protocol cap."
-        nodes: [easytrack, operator-modifier, reporting]
-        edges: [gov-role]
-    sources: ["ADR-009#d28", "ADR-006#d11", "ADR-010#d19", "ADR-009#proposed-direction", "ADR-006#d4",
-      "ADR-006#context", "runbook:Unlock a matured product"]
-
   - id: rule-change
     group: governance
     title: Relaxing a screening rule
@@ -314,8 +288,12 @@ flows:
       - who: "Committee and `@lidofinance/defi-tech`"
         text: "A pull request changes the written list of the vendor's rules in the control matrix. Reviewers approve it."
         nodes: [committee, policy]
+      - who: "Committee and LDO holders"
+        text: "A relaxation that loosens a limit of the mandate waits. An Easy Track motion with the matching on-chain change must pass its objection window first. Where no on-chain value changes with it, a Snapshot must pass first."
+        nodes: [committee, easytrack, dao]
+        edges: [motions, object]
       - who: "Committee"
-        text: "The committee gives notice on the forum."
+        text: "For any other relaxation, the committee gives notice on the forum."
         nodes: [committee, reporting]
       - who: "[the screening vendor]"
         text: "The vendor applies the change, after its own delay if it has one."
@@ -330,63 +308,62 @@ flows:
     label: specified
     summary: "How money moves from the DAO treasury to the vault: a [[top-up motion]] of the committee's Safe, within a registry's limit for three months. It pays the Asset Safe through Aragon Finance."
     trigger: "The vault needs more funds and has headroom under the mandate size, and the mandate's published eligibility conditions are met."
-    time: "About five days: the Aragon Voting vote."
+    time: "72 hours: the objection window."
     steps:
       - who: "Committee"
-        text: "The committee posts the funding on the forum: the funded value, the headroom under the mandate size, and the vault's share of the DAO's non-LDO treasury. The post links both readings' latest reports."
+        text: "The committee posts the funding on the forum: the vault's value, the headroom under the mandate size, the vault's share of the DAO's non-LDO treasury, and the treasury's stablecoin runway after the top-up. The post links both readings' latest reports."
         nodes: [committee, reporting]
-        check: "The committee's Safe creates no top-up motion while the monthly report is late, while the committee's estimate prices more than the set share of the vault (OD-62), or while Lido's reading and the policy provider's differ by more than the band (OD-84); monitoring alerts on one that starts (OD-122, OD-144)."
+        check: "Four gates hold a top-up motion. The committee's Safe creates none while the monthly report is late, while the committee's estimate prices more than the set share of the vault (OD-62), while Lido's reading and the policy provider's differ by more than the band (OD-84), or when the top-up would take the treasury's stablecoins below the runway floor of TMC-6 (OD-163). Monitoring alerts on one that starts (OD-122, OD-144). The alert on the runway floor is not built."
       - who: "LDO holders"
         text: "The committee's Safe creates the motion through a top-up factory, and LDO holders can object for 72 hours. One motion carries several payments, each within the executor's ceiling."
         nodes: [dao]
-      - who: "Aragon Voting and Aragon Finance"
-        text: "When the vote executes, Aragon Finance pays the Asset Safe from the Aragon Agent: one payment for each token."
-        nodes: [dao, funding, asset-safe]
+      - who: "Easy Track and Aragon Finance"
+        text: "After 72 hours without an objection, anyone enacts the motion. Aragon Finance pays the Asset Safe from the Aragon Agent: one payment for each entry of the motion."
+        nodes: [easytrack, dao, funding, asset-safe]
         edges: [treasury, top-up]
-        check: "INV-037: in the design, only the two top-up factories move treasury funds to the vault. Owed: a chain check of the registries' roles before the enabling vote."
-      - who: "The committee's Safe, above the launch cap"
-        text: "A top-up that takes the vault above the [[launch cap]] starts only after the guard is set on the committee's Safe with its bypass mode off, and the check runs until the motion is enacted. Before that, the committee creates no top-up above the cap. Nothing on chain holds this rule: the registries' limits are above the cap (OD-145)."
-        nodes: [dao, screening, committee]
-        edges: [screen]
+        check: "INV-037: after the enabling vote, only the two top-up factories move treasury funds to the vault. Owed: a chain check of the registries' roles before the enabling vote."
       - who: "Reporting"
-        text: "Reports count each top-up in US dollars at its value when it is funded."
+        text: "The size test uses the vault's value at the top-up: the vault's value at that time plus the top-up, in US dollars, may not exceed the mandate size. When gains take the vault's value above the size, nothing is sold, and top-ups stop."
         nodes: [reporting, asset-safe]
         edges: [report]
     escapes:
-      - "LDO holders object to the top-up motion: nothing moves."
+      - "LDO holders object to the top-up motion: nothing moves. Further funding then needs a Snapshot. Until it passes, the committee's Safe creates no top-up motion."
       - "No motion can pull funds from the treasury, so the vault works with the funds that it has."
-    sources: ["ADR-014#d13", "ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d16", "ADR-014#d17", "ADR-009#d48", "OD-144", "OD-145", "ADR-014#d15", "ADR-014#context", "ADR-014#proposed-direction",
-      "ADR-008#d32", "ADR-008#d33", "ADR-008#d34", "ADR-009#d19", "ADR-009#d21", "ADR-009#d36",
-      "ADR-009#d41", "ADR-009#d42", "ADR-010#d22", "OD-62", "OD-84", "INV-037", "runbook:Top up the vault",
+    sources: ["ADR-014#d13", "ADR-014#d15", "ADR-014#d16", "ADR-014#d17", "ADR-014#d18", "ADR-014#d19",
+      "ADR-009#d48", "OD-144", "OD-163", "ADR-014#context", "ADR-014#proposed-direction", "ADR-014#consequences",
+      "ADR-008#d32", "ADR-008#d33", "ADR-008#d34", "ADR-008#d37", "ADR-009#d19", "ADR-009#d21", "ADR-009#d36",
+      "ADR-009#d41", "ADR-009#d42", "OD-62", "OD-84", "INV-037", "runbook:Top up the vault",
       "lip:part-5", "OD-122"]
 
   - id: seed
     group: funding
     title: Launch funding and the first-loss shares
     label: specified
-    summary: "How the vault gets its first assets: the first top-up, one million dollars, by top-up motions after the enabling vote, and then the DAO's [[first-loss shares]]."
+    summary: "How the vault gets its first assets: the enabling vote pays the initial funding from the treasury, and then the Growth Committee's Safe transfers the DAO's [[first-loss shares]]."
     trigger: "The enabling vote executes."
     steps:
       - who: "Aragon Voting and Aragon Finance"
-        text: "After the Safe batches ran, the committee's Safe creates the motions of the first top-up. After 72 hours without an objection, anyone enacts them, and Finance pays the Asset Safe."
+        text: "The vote pays the initial funding: Aragon Finance pays stETH and stablecoins from the Aragon Agent to the Asset Safe, in the amounts that the mandate sets. The payments pass no top-up registry and no objection window."
         nodes: [dao, funding, asset-safe]
         edges: [treasury, top-up]
-        check: "The first top-up is the [[launch cap]]."
+        check: "The funds reach the Asset Safe before the Safe batches run. Until then the Safe has no module, and only Aragon Voting, its owner, can move them. On a fork, the vote's payments spend no registry's limit."
       - who: "Anyone"
         text: "Anyone sends the Safe batches, which apply the policy and grant the roles."
         nodes: [asset-safe, operator-modifier, safety-modifier, orders, first-loss]
         edges: [own-op, own-sf]
       - who: "Growth Committee Safe"
-        text: "The Growth Committee Safe transfers the earnETH and earnUSD shares to the [[first-loss Safe]], which needs no permission to receive them."
+        text: "The vote does not move the Earn positions. After it, the Growth Committee Safe transfers the earnETH and earnUSD shares to the [[first-loss Safe]], which needs no permission to receive them."
         nodes: [funding, first-loss]
       - who: "The committee"
         text: "From then on, on the Earn team's written instruction, a motion burns the shares, or the committee's Safe redeems them to the Asset Safe. Monitoring alerts on any change of the first-loss Safe's balance."
         nodes: [committee, first-loss, monitoring]
         edges: [first-loss-shares]
         check: "INV-021. The rehearsal deploys the first-loss Safe and applies its modifier's policy."
-    sources: ["ADR-014#d14", "ADR-014#d10", "ADR-014#proposed-direction", "ADR-010#d20", "ADR-008#d13",
-      "ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-008#proposed-direction", "ADR-005#d32", "INV-021",
-      "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares", "runbook:Top up the vault"]
+    sources: ["ADR-014#d14", "ADR-014#d10", "ADR-014#proposed-direction", "ADR-014#confirmation", "OD-161", "ADR-008#d13",
+      "ADR-008#d19", "ADR-008#d21", "ADR-008#d23", "ADR-008#proposed-direction", "ADR-005#d32", "INV-021", "INV-037",
+      "runbook:Move the legacy Earn shares", "runbook:Burn first-loss Earn shares",
+      "doc:docs/specs/enabling-vote.md#the-vote",
+      "test:test_topup_the_enabling_vote_registers_the_factories_and_its_payments_spend_no_limit"]
 
   - id: first-loss-burn
     group: funding
@@ -431,7 +408,7 @@ flows:
     title: An insurance fund
     label: built
     summary: "How the vault insures Lido products. Each step is a motion: the creation of a fund, its money from the Asset Safe, a burn and a payout."
-    trigger: "The committee decides to insure a product, under the framework that one Snapshot sets."
+    trigger: "The committee decides to insure a product. A Snapshot approved the insurance framework and raised the mandate size for it first: before that Snapshot, no insurance money moves."
     time: "72 hours for each motion."
     steps:
       - who: "Committee"
@@ -471,12 +448,12 @@ flows:
     group: funding
     title: Returning funds to the treasury
     label: built
-    summary: "Funds go back to the Aragon Agent only in an emergency or a recovery. The emergency Safe or the committee's Safe sends them, by a transfer pinned to the Agent, with no motion and no vote: a return to the treasury loses nothing, and at worst the vault stops working."
-    trigger: "An emergency, or a recovery, such as the excess above the launch cap or the end of the mandate."
+    summary: "The vault returns funds to the Aragon Agent as a routine. The committee builds stablecoin reserves in the vault, and returns them when the DAO's stablecoin runway falls below the level that the mandate sets. Emergency and recovery also send funds back. The committee's Safe or the emergency Safe sends them, by a transfer pinned to the Agent, with no motion and no vote: a return to the treasury loses nothing, and at worst the vault stops working."
+    trigger: "The DAO's stablecoin runway falls below the level that the mandate sets. Or: an emergency, a recovery or the end of the mandate."
     time: "Minutes."
     steps:
       - who: "Committee Safe"
-        text: "The committee's Safe sends a vault token to the Aragon Agent through the operator role, from the Asset Safe or from the orders account."
+        text: "For the routine return, the committee's Safe sends a vault token to the Aragon Agent through the operator role, from the Asset Safe or from the orders account."
         nodes: [committee, operator-modifier, asset-safe, dao]
         edges: [op-role, own-op, own]
         check: "Both returns are in the policy. On a fork, each order token goes to the Agent in any amount, spends no budget and reaches no other receiver."
@@ -486,7 +463,7 @@ flows:
         edges: [em-role, own-sf, own]
         check: "INV-038: funds reach the Aragon Agent only through these paths. Every redemption, claim and exit of a fund pays the Asset Safe."
       - who: "Monitoring"
-        text: "Monitoring alerts on every transfer to the Agent."
+        text: "Monitoring reports every transfer to the Agent, at a low severity."
         nodes: [monitoring, asset-safe]
         edges: [watch]
     escapes:
@@ -514,10 +491,11 @@ flows:
       - who: "Policy provider"
         text: "The Zodiac UI publishes its own reading of the same snapshot to IPFS, and monitoring compares the two."
         nodes: [policy, monitoring, reporting]
-      - who: "Committee"
-        text: "If a cap is breached in either reading, the committee rebalances within two working days."
-        nodes: [committee]
-    sources: ["ADR-009#d6", "ADR-009#d24", "ADR-009#d25", "ADR-009#d31", "ADR-009#d33", "ADR-009#d40",
+      - who: "Monitoring and the committee"
+        text: "If a cap is breached in either reading, an alert pages the emergency Safe and links the reading. The committee owns the fix."
+        nodes: [monitoring, emergency-safe, committee]
+        edges: [page]
+    sources: ["ADR-009#d6", "ADR-009#d25", "ADR-009#d31", "ADR-009#d33", "ADR-009#d34", "ADR-009#d40",
       "ADR-009#d41", "ADR-009#d42", "lip:part-9"]
 
   - id: monthly-report
@@ -551,7 +529,7 @@ flows:
     label: built
     summary: "A depeg, a curator failure or a protocol compromise. The emergency Safe acts through the safety modifier, and no guard screens it. Each step only reduces exposure."
     trigger: "An alert, or a signer sees the risk."
-    time: "Initiate within 6 hours: the mandate's ceiling. Drills must prove it."
+    time: "Initiate within 6 hours: Clutch's own gate. Drills must prove it."
     steps:
       - who: "Lido incident process"
         text: "The alert pages the emergency Safe's signers."
@@ -592,7 +570,7 @@ flows:
       "test:test_emergency_can_durably_stop_operator_reapproval", "runbook:Revoke the operator",
       "runbook:Zero the approvals", "runbook:Exit positions to the Safe",
       "runbook:Return assets to the Agent", "runbook:Raise the motion counter",
-      "test:test_orders_emergency_revocation_keeps_recovery", "ADR-011#consequences", "ADR-009#d34"]
+      "test:test_orders_emergency_revocation_keeps_recovery", "ADR-011#consequences", "ADR-009#d34", "OD-167"]
 
   - id: recovery-order
     group: emergencies
@@ -704,28 +682,29 @@ flows:
 
   - id: cap-breach
     group: emergencies
-    title: A cap breach that gets worse
+    title: A cap breach
     label: specified
-    summary: "Monitoring publishes the breach, the committee fixes it, and the emergency Safe stops the operator if the breach gets worse."
+    summary: "Monitoring publishes the breach and pages the emergency Safe. The committee owns the fix. The emergency Safe's signers stop the operator when they judge that the breach needs it: the [[switch]] has no fixed trigger."
     trigger: "A fortnightly cap reading, Lido's or the policy provider's, shows a breach."
-    time: "Two working days to fix, then the next fortnightly snapshot."
     steps:
       - who: "Monitoring"
         text: "Monitoring publishes Lido's cap reading to IPFS, and the policy provider publishes its own. A breach in either reading counts."
         nodes: [monitoring, reporting]
-      - who: "Committee"
-        text: "The committee has two working days to rebalance."
-        nodes: [committee]
       - who: "Monitoring"
-        text: "At the next fortnightly snapshot, the breach is still there and larger. Monitoring pages the emergency Safe and links the reading."
+        text: "An alert on the breach pages the emergency Safe and links the reading."
         nodes: [monitoring, emergency-safe]
         edges: [page]
+      - who: "Committee"
+        text: "The committee owns the fix, and rebalances."
+        nodes: [committee]
       - who: "Emergency Safe"
-        text: "The emergency Safe switches the operator modifier off, revokes the operator on the orders account, and raises the motion counter. The trigger is fixed, so the duty needs no judgment."
+        text: "The signers act on their judgment. If they judge that the breach needs it, the emergency Safe switches the operator modifier off, revokes the operator on the orders account, and raises the motion counter. The emergency role may act at any time."
         nodes: [emergency-safe, safety-modifier, asset-safe, operator-modifier, orders]
         edges: [em-role, own-sf]
-    sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d25", "ADR-009#d33", "ADR-009#d34",
-      "ADR-009#d41", "ADR-005#d25", "ADR-013#d10", "runbook:Switch the operator off"]
+    escapes:
+      - "A wrong price in one reading shows a breach that is not there: the signers' judgment bounds that risk."
+    sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d25", "ADR-009#d33", "ADR-009#d34",
+      "ADR-009#d41", "ADR-009#consequences", "OD-165", "ADR-005#d25", "ADR-013#d10", "runbook:Switch the operator off"]
 
   - id: vendor-outage
     group: emergencies
@@ -849,18 +828,18 @@ flows:
         text: "An external audit, Lido's review of the guard change, and fork drills that initiate within 6 hours."
         nodes: [policy, screening, orders]
       - who: "Phase 4: governance and deployment"
-        text: "The mandate's Snapshot vote, the LIP, deployment without the guard, and the enabling vote."
+        text: "The mandate's Snapshot vote, the LIP, deployment without the guard, and the enabling vote, which pays the initial funding."
         nodes: [dao, asset-safe, first-loss, funding]
       - who: "Phase 5: operation"
-        text: "Monthly reports, fortnightly cap readings, budget motions after events, drills, and top-ups by motion."
+        text: "Monthly reports, fortnightly cap readings, budget motions after events, drills, and top-ups by motion. The guard is set when the vault's volume in a quarter passes the mandate's threshold."
         nodes: [committee, reporting, monitoring]
-    sources: ["ADR-007#d40", "doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates", "OD-54", "OD-140", "OD-146"]
+    sources: ["ADR-007#d40", "doc:ROADMAP.md#roadmap", "doc:ROADMAP.md#standing-gates", "OD-160", "OD-161", "OD-140", "OD-146"]
 
   - id: enabling-vote
     group: deployment
     title: The enabling vote
     label: specified
-    summary: "One DAO vote, the [[enabling vote]], turns the system on. The first top-up follows by top-up motions."
+    summary: "One DAO vote, the [[enabling vote]], turns the system on and pays the vault's initial funding."
     trigger: "The mandate is approved and phase 3 is done."
     steps:
       - who: "Lido"
@@ -868,28 +847,28 @@ flows:
         nodes: [orders]
         check: "INV-022 and INV-023 passed on a fork on 2026-11-07. The tests run again at a recent block before the vote."
       - who: "Committee"
-        text: "The vote does not wait for the guard: the vault launches under the [[launch cap]]."
+        text: "The vote does not wait for the guard: the vault launches without it. The guard is set when the vault's volume in a quarter passes the threshold that the mandate sets."
         nodes: [screening, committee]
         edges: [screen]
       - who: "Lido"
         text: "Safe's releases, advisories and bug-bounty records are checked again shortly before the vote."
         nodes: [asset-safe, committee, emergency-safe]
       - who: "LDO holders"
-        text: "The vote registers the universal factory and the two top-up factories, and pays nothing. Aragon Voting runs these items itself, without Dual Governance. For the vault's Safes, it approves the hash of each Safe batch. The factory starts with its counter and its policy version at zero."
+        text: "The vote registers the universal factory and the two top-up factories, and pays the vault's initial funding from the treasury to the Asset Safe, through Finance. Aragon Voting runs these items itself, without Dual Governance. For the vault's Safes, it approves the hash of each Safe batch. The factory starts with its counter and its policy version at zero."
         nodes: [dao, asset-safe, operator-modifier, safety-modifier, orders, first-loss, easytrack, funding]
         edges: [own, own-op, own-sf, treasury, top-up]
       - who: "Anyone"
-        text: "After the vote executes, anyone sends each Safe batch with Voting's approval of its hash. The batches of one Safe run in nonce order."
+        text: "After the vote executes, anyone sends each Safe batch with Voting's approval of its hash. The batches of one Safe run in nonce order. The initial funding is in the Asset Safe before the batches run; until then the Safe has no module, and only Aragon Voting can move the funds."
         nodes: [asset-safe, orders, first-loss]
         check: "`just batches-check` computes each batch's hash again from the published batch, so a reviewer can match it to the vote. It fails on a call that is neither the policy nor the vault's setup."
       - who: "Growth Committee, then the committee's Safe"
-        text: "After the batches run, the Growth Committee moves the first-loss shares to the first-loss Safe. The committee's Safe creates motions only after the batches ran."
+        text: "The vote does not move the Earn positions. After the batches run, the Growth Committee moves the first-loss shares to the first-loss Safe. The committee's Safe creates motions only after the batches ran. From then on, top-up motions are the only funding path."
         nodes: [funding, first-loss, committee, easytrack]
         edges: [motions]
     sources: ["ADR-004#d14", "ADR-007#proposed-direction", "ADR-007#confirmation", "ADR-008#d13",
       "ADR-008#d19", "ADR-008#d21", "ADR-008#proposed-direction", "ADR-010#d16", "ADR-010#d20",
-      "ADR-010#d22", "ADR-013#d6", "ADR-013#proposed-direction", "ADR-014#d13", "ADR-014#d14",
-      "ADR-014#proposed-direction", "INV-022", "INV-023", "INV-032", "doc:ROADMAP.md#roadmap",
+      "ADR-010#d22", "ADR-013#d6", "ADR-013#proposed-direction", "ADR-014#d13", "ADR-014#d14", "ADR-014#d18",
+      "ADR-014#proposed-direction", "INV-022", "INV-023", "INV-032", "INV-037", "doc:ROADMAP.md#roadmap",
       "doc:docs/specs/enabling-vote.md#the-vote", "doc:docs/specs/enabling-vote.md#before-the-vote",
       "doc:docs/research/easy-track-first-2026-11-05.md#easy-track", "ADR-005#d28", "ADR-005#d32",
       "doc:docs/research/enabling-vote-rehearsal-2026-10-15.md#the-vote-that-fits"]
@@ -905,7 +884,7 @@ flows:
         text: "The committee's Safe changes its owner."
         nodes: [committee]
       - who: "Committee"
-        text: "A signer who leaves the committee or the Emergency Brakes multisig also leaves the emergency seat, and that body appoints the successor. Only a DAO Snapshot changes the fifth seat."
+        text: "A signer who leaves the committee or the Emergency Brakes multisig also leaves the emergency seat, and that body appoints the successor. The fifth seat belongs to a Lido Labs engineering contributor who is a member of neither body: the mandate's Snapshot sets this class, and the acceptor names the person."
         nodes: [committee, emergency-safe]
         edges: [signers-em]
       - who: "Monitoring"

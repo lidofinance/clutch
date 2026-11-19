@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T11:27:15Z
+  at: 2026-11-19T16:29:03Z
 verified: []
 sources:
   - id: s1
@@ -71,7 +71,7 @@ Plain and Technical detail levels apply to tabs and tour scenes; Technical adds 
 | Constellation | Accounts, modifiers, roles, holders, target and call counts from the committed artifact [s4]. Specified but unbuilt parts and changes from the provider's constellation appear separately, with reasons [s7]. |
 | RFP | Each original ask, its answer and verdict: asked, changed or unanswered. The research note records the asks [s8][s9]. |
 
-The guide omits personal names, unannounced counterparties, figures from the mandate or the attested computation, and fork stand-in addresses. Its only dollar figure is the launch cap, which EM set (OD-55).
+The guide omits personal names, unannounced counterparties, figures from the mandate or the attested computation, and fork stand-in addresses. It shows no dollar figure.
 The screening vendor stays "[the screening vendor]".
 
 ## How it is built

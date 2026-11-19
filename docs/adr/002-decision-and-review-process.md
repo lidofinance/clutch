@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T14:04:23Z
+  at: 2026-11-19T16:55:17Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -44,6 +44,11 @@ verified:
     recorded_by: claude-code/mythos-5.2
     ref: /registers/decision-log.md#2026-11-19--adr-002-verified-again-after-the-handover
     sha256: 2e62b93e3013b904e529dfc6cd0cb8e9190d03873ca194d305a6c6c430dabad0
+  - by: human:em
+    at: 2026-11-19T16:55:17Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--nine-adrs-verified-again-od-169-em-or-yt-decides-the-open-decisions
+    sha256: 4d177d90f4f5e34b75c28074fc1b3ef1490e6cdecc8926144c7198e157a3f57c
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -81,7 +86,8 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 10. A verification by the committee is committed by a member of the committee through a reviewed pull request. The entry carries `ref`, an https or urn link to the committee's decision record, such as a forum post or minutes (OD-15, OD-63).
 11. Decision 4 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry names the agent in `recorded_by` and links, in `ref`, the decision-log heading that quotes the instruction. An agent never records a body's verification ([ADR 003](/adr/003-agent-operating-model.md) decision 14) (OD-31).
 12. No body other than the acceptor verifies an ADR before it is accepted (OD-63).
-13. From 2026-11-23, a proposal that changes the shape of the design goes to EM before the acceptor decides it. EM's default answer is no change, and EM can allow an exception (OD-159).
+13. From 2026-11-23, a proposal that changes the shape of the design goes to EM before the acceptor decides it. EM's default answer is no change, and EM can allow an exception. The shape is: the accounts and their owners; the roles and who may hold one; the governance path; the one new contract; and the absence of a price bound on chain (OD-159, OD-166).
+14. From 2026-11-23, EM or YT decides an open decision. YT accepts the ADR that records it (decision 1) (OD-169).
 
 ## How the validator enforces it
 

@@ -32,7 +32,7 @@ changes:
   - area: Emergency holder
     kind: changed
     provider: "The Emergency Brakes multisig."
-    clutch: "A new [[Emergency Safe]] at 3 of 5: two committee members, two Emergency Brakes members and one member of neither body. The Emergency Brakes multisig keeps only the Easy Track pause."
+    clutch: "A new [[Emergency Safe]] at 3 of 5: two committee members, two Emergency Brakes members and one Lido Labs engineering contributor who is a member of neither body. The Emergency Brakes multisig keeps only the Easy Track pause."
     why: "Financial emergencies need the people who watch the portfolio every day, and no single body may act alone. The quorum without the committee is the mandate's independent exit."
     sources: ["ADR-005#d2", "ADR-005#d23", "ADR-005#d24"]
   - area: Module disabling

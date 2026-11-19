@@ -42,7 +42,7 @@ sections:
           "INV-002", "ADR-005#d31", "OD-83"]
       - asked: "An Emergency Safe at 3 of 5, which the RFP links to the Emergency Brakes multisig, revokes approvals, exits approved positions and returns assets to the fixed DAO treasury address."
         verdict: changed
-        clutch: "A new [[Emergency Safe]] at 3 of 5 holds the emergency role and the [[switch]]: two Emergency Brakes members, two committee members and one member of neither body. The Emergency Brakes multisig itself keeps only the Easy Track pause."
+        clutch: "A new [[Emergency Safe]] at 3 of 5 holds the emergency role and the [[switch]]: two Emergency Brakes members, two committee members and one Lido Labs engineering contributor who is a member of neither body. The Emergency Brakes multisig itself keeps only the Easy Track pause."
         why: "Financial emergencies need people who watch the portfolio every day, and technical ones need the engineering view. No single body acts alone, and the quorum without the committee returns assets without it."
         sources: ["ADR-005#d2", "ADR-005#d23", "ADR-005#d24", "ADR-005#d25", "ADR-005#proposed-direction",
           "INV-009", "lip:part-2"]
@@ -91,7 +91,7 @@ sections:
         sources: ["ADR-005#context", "ADR-005#proposed-direction", "test:test_D2_direct_DAO_path"]
       - asked: "The complete initial configuration is in place before ownership passes to the DAO, so no separate setup-only vote is needed."
         verdict: changed
-        clutch: "Ownership never passes. The [[enabling vote]] approves the Safe batches that configure the vault, registers the universal factory and the two top-up factories, so no setup-only vote is needed."
+        clutch: "Ownership never passes. The [[enabling vote]] approves the Safe batches that configure the vault, registers the universal factory and the two top-up factories, and pays the initial funding, so no setup-only vote is needed."
         why: "The Asset Safe is created with Aragon Voting as its only owner, so only the DAO can configure the vault."
         sources: ["ADR-004#d14", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-013#d6", "ADR-014#d14",
           "INV-001", "ADR-005#d32", "doc:script/DeployDryRun.s.sol",
@@ -154,8 +154,8 @@ sections:
         sources: ["ADR-009#d4", "ADR-009#d9", "ADR-011#d1"]
       - asked: "The answer explains which limits hold before execution and which depend on reporting and remediation."
         verdict: kept
-        clutch: "No limit reverts on chain, because the policy cannot see value. Before execution, budgets per spender bound how much can move each month, a requested screening rule refuses an operator transaction that breaks a cap, and the Zodiac UI refuses one in its own interface. The rest depends on reporting: a published cap reading every two weeks, and the emergency Safe's switch if a breach is not fixed within two working days and is larger at the next reading."
-        sources: ["ADR-009#d1", "ADR-009#d13", "ADR-009#d24", "ADR-009#d25", "ADR-009#d41", "ADR-009#d43",
+        clutch: "No limit reverts on chain, because the policy cannot see value. Before execution, budgets per spender bound how much can move each month, and the Zodiac UI refuses an operator transaction that breaks a cap, in its own interface. Once the guard is set, a requested screening rule refuses one too. The rest depends on reporting: a published cap reading every two weeks, and an alert on a breach that pages the emergency Safe. Its signers switch the operator off when they judge that the breach needs it."
+        sources: ["ADR-009#d1", "ADR-009#d13", "ADR-009#d25", "ADR-009#d34", "ADR-009#d41", "ADR-009#d43", "ADR-010#d22",
           "ADR-009#proposed-direction", "OD-39", "doc:docs/specs/control-matrix.md#the-matrix"]
       - asked: "The Operator Safe cannot add a target, a function, an asset or a wider parameter range without the governance process."
         verdict: kept
@@ -217,9 +217,9 @@ sections:
         sources: ["ADR-009#d8", "ADR-009#d17", "ADR-009#proposed-direction"]
       - asked: "Each operator transaction is simulated and checked before execution, and the answer names the service that checks it."
         verdict: changed
-        clutch: "Once the [[guard]] is set, the screening vendor checks each transaction of the committee's Safe before it runs, new motions included, and the guard refuses any that the vendor did not approve on chain, once. Until the [[launch cap]] lifts, the vault runs without the guard. The repository does not record whether the vendor simulates each transaction. From the launch, the Zodiac UI's signing flow refuses an operator transaction that would breach a cap, in its own interface only, and from the lift it requests the vendor's approval for each transaction it builds."
-        why: "EM allowed a launch without the guard under this cap, so the vendor is not on the launch's critical path. Above the cap, blocking before execution stays a hard requirement."
-        sources: ["ADR-010#d1", "ADR-010#d4", "ADR-010#d9", "ADR-010#d20", "ADR-010#d21", "ADR-010#d22",
+        clutch: "Once the [[guard]] is set, the screening vendor checks each transaction of the committee's Safe before it runs, new motions included, and the guard refuses any that the vendor did not approve on chain, once. The vault launches without the guard, which is set when the vault's volume in a quarter passes the threshold that the mandate sets. Until then, no service checks an operator transaction before execution. The repository does not record whether the vendor simulates each transaction. From the launch, the Zodiac UI's signing flow refuses an operator transaction that would breach a cap, in its own interface only. Once the guard is set, the UI requests the vendor's approval for each transaction that it builds."
+        why: "The mandate's text sets the guard at a volume threshold, so the vendor is not on the launch's critical path. Until the guard is set, the on-chain permissions, the budgets, monitoring and the emergency signers protect the funds."
+        sources: ["ADR-010#d1", "ADR-010#d4", "ADR-010#d9", "ADR-010#d20", "ADR-010#d22",
           "ADR-010#proposed-direction", "ADR-010#d25", "ADR-009#d43", "OD-01", "INV-010", "lip:part-9"]
       - asked: "The answer explains what happens when the monitoring or blocking service is unavailable. On-chain permissions stay the final enforcement layer, and losing monitoring never widens them."
         verdict: kept
@@ -235,7 +235,7 @@ sections:
     items:
       - asked: "The NAV shows the total in USD, the valuation time and the freshness of the data, by asset, protocol, strategy and position. The answer says whether NAV is the provider's product, a partner's or custom work."
         verdict: changed
-        clutch: "Two readings. Lido's report generator reads the vault at a pinned block, with each price's source and timestamp. The policy provider makes its own in the Zodiac UI, with the same rules, and shows the value per account, asset and protocol. Neither reads the other's data, both go to IPFS, and both count: a breach in either triggers the [[switch]], and no top-up motion starts while they differ by more than a band."
+        clutch: "Two readings. Lido's report generator reads the vault at a pinned block, with each price's source and timestamp. The policy provider makes its own in the Zodiac UI, with the same rules, and shows the value per account, asset and protocol. Neither reads the other's data, both go to IPFS, and both count: a breach in either pages the emergency Safe, and no top-up motion starts while they differ by more than a band."
         why: "Two independent readings check each other, and anyone can re-run Lido's at a pinned block."
         sources: ["ADR-009#d19", "ADR-009#d40", "ADR-009#d41", "ADR-009#d42", "ADR-009#d44",
           "ADR-009#proposed-direction", "ADR-009#d35", "ADR-009#d36", "ADR-014#proposed-direction"]
@@ -268,13 +268,13 @@ sections:
     title: What the RFP did not cover
     items: []
     added:
-      - text: "Funding: a [[top-up motion]], within a limit for each three months. The first top-up is one million dollars."
+      - text: "Funding: the enabling vote pays the initial funding, and a [[top-up motion]] pays each funding after it, within a limit for each three months."
         why: "The committee expects regular top-ups, so a vote for each would cost too much. The top-up factories are Lido's existing code in new instances."
-        sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "INV-037"]
-      - text: "Insurance: funds for earnETH, earnUSD and Lido Lend, built in at launch. Their money comes from the Asset Safe by motion, and every burn and payout is a motion."
+        sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d18", "INV-037"]
+      - text: "Insurance: funds for earnETH, earnUSD and Lido Lend, built in at launch and unused before a Snapshot approves the insurance framework. Their money comes from the Asset Safe by motion, and every burn and payout is a motion."
         why: "EM wants insurance for Lido Earn and Lido Lend ready at launch, and LDO holders can object to each flow of its money."
         sources: ["ADR-014#d4", "ADR-014#d5", "ADR-014#d6", "ADR-014#d7", "ADR-008#d26", "INV-039"]
-      - text: "Returns: funds go back to the Aragon Agent only in an emergency or a recovery. The committee's Safe may also send any vault token to the Agent, with no motion and no vote."
+      - text: "Returns: the vault returns funds to the Aragon Agent as a routine, when the DAO's stablecoin runway falls below the level that the mandate sets, and in an emergency or a recovery. The committee's Safe sends any vault token to the Agent, with no motion and no vote."
         why: "A return to the treasury loses nothing; at worst the vault stops working. Redemption and fund-exit proceeds stay in the vault."
         sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#consequences", "INV-038"]
       - text: "Budgets: each approval to a protocol spender spends that spender's [[budget key]], which refills no more often than every 30 days. A motion sets a budget, and the objection window bounds its size."
@@ -282,7 +282,7 @@ sections:
         sources: ["ADR-009#d13", "ADR-009#d15", "ADR-013#d11", "INV-008", "INV-012"]
       - text: "Reports: a monthly report that anyone can re-run at a pinned block, and a cap reading every two weeks on IPFS, Lido's next to the policy provider's own."
         why: "Tokenholders hold the committee to the mandate through its reports."
-        sources: ["ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d34", "ADR-009#d40", "ADR-009#d41",
+        sources: ["ADR-009#d19", "ADR-009#d25", "ADR-009#d34", "ADR-009#d40", "ADR-009#d41",
           "ADR-009#d42"]
       - text: "A [[control matrix]] that gives every rule of the mandate a control on each layer that can carry it, with an owner."
         why: "Much of the mandate cannot be enforced on chain."
