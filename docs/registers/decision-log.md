@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T16:55:17Z
+  at: 2026-11-19T18:27:56Z
 verified: []
 sources:
   - id: s1
@@ -211,6 +211,12 @@ sources:
   - id: s67
     resource: "urn:clutch:interview:2026-11-19-verification-and-deciders"
     title: EM's instruction to record nine verifications, and EM's answer on who decides open decisions, 2026-11-19; the transcript is not in the repository
+  - id: s68
+    resource: "urn:clutch:interview:2026-11-19-adr-012-and-agents-prune"
+    title: EM's instruction to align and verify ADR 012, and EM's authorization to prune AGENTS.md, 2026-11-19; the transcript is not in the repository
+  - id: s69
+    resource: "urn:clutch:interview:2026-11-19-adr-003"
+    title: EM's instruction to align and verify ADR 003, 2026-11-19; the transcript is not in the repository
 ---
 
 # Decision log
@@ -220,6 +226,31 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-19 — ADR 003 aligned with the pruning of AGENTS.md and verified
+
+After the entry below, ADR 003 decision 3 still said that EM prunes `AGENTS.md` by hand. The agent said so, and EM wrote [s69]:
+
+> 1. align ADR 003 and verify it on my behalf
+
+Recorded as:
+
+- [ADR 003](/adr/003-agent-operating-model.md) decision 3 says what happened: an agent drafted the file, and an agent pruned it on EM's written authorization of 2026-11-19. Its consequence says that the goal of a human-written instruction file is unmet, and that human review of each change is the control.
+- EM verifies ADR 003 again, so it stays accepted. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's.
+
+## 2026-11-19 — ADR 012 aligned with OD-169 and verified; AGENTS.md pruned
+
+After the handover's pull requests merged, the agent listed two leftovers. ADR 012 decision 4 named only the acceptor as the one who decides open decisions, against OD-169. And EM never pruned `AGENTS.md` by hand, which [ADR 003](/adr/003-agent-operating-model.md) decision 3 asks for. EM wrote [s68]:
+
+> 1. align ADR 012 and verify it on my behalf
+> 2. prune AGENTS.md for me, I authorize it now
+
+Recorded as:
+
+- [ADR 012](/adr/012-contributing-with-many-agents.md) decision 4 says that EM or YT triages and decides the open decisions (OD-169). EM verifies ADR 012 again. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's.
+- The agent pruned `AGENTS.md` on EM's written authorization, which is the explicit human request that an edit of the file needs. The rule of thumb is ADR 003's context: keep the specific rules that an agent would not follow by default, and drop the rest. The file went from 47 lines to 43 and lost about a fifth of its text.
+- What left the file: the list of frontmatter keys; the note on the 60-line limit; the history of the acceptor; the rule that no other body verifies an ADR; the reason why CoW's order signer counts as new code; the names of the checks that refuse a duplicate number or a citation in a contract's comment; the rule on a runbook's review status, which "write `slop` only" already covers; and the OD numbers behind the rules. Each stays in its ADR, in `CONTRIBUTING.md` or in the check's own message. No rule that limits what an agent may do left the file.
+- An agent pruned the file, and no human wrote it. ADR 003 decision 3 still says that EM prunes it by hand, and its consequence about a human-written instruction file still stands. The agent did not change ADR 003, because EM's instruction does not name it, and an edit breaks its verification.
 
 ## 2026-11-19 — nine ADRs verified again; OD-169: EM or YT decides the open decisions
 
