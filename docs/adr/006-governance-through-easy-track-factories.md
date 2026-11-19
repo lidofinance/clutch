@@ -4,12 +4,18 @@ title: "ADR 006: Governance through Easy Track factories"
 description: The governance role's guards, protocols onboarded by motion with their emergency exits, disclosure duties, removals and restores; ADR 013 holds the universal factory.
 tags: [governance, easy-track, factories]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T22:24:23Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:03Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: edb166161ba5b246a3f2bb0d12113c892878397d9c0d98204c81cbbd53a798f7
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -60,7 +66,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM accepted it with this record (decision log, 2026-11-19).
 
 - **The guards.** Modifier conditions keep the governance role from changing membership or emergency powers, granting administrative targets, using foreign budget keys or setting refill periods below 30 days [s6] (INV-004, INV-012). The guards do not stop a motion that grants a call on an ordinary target, such as a token transfer to any address; the objection window controls that risk ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11).
 - **Exit governance** writes through `scopeTarget`, `scopeFunction` and `allowFunction` (OD-49), within the limits of INV-025.

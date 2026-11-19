@@ -21,7 +21,7 @@
     - "Explain on the forum a difference above the band between Lido's reading and the policy provider's; no [[top-up motion]] starts until they agree."
     - "Unlock a matured Lido product by a forum post and a budget motion."
     - "Restart the operator after the [[switch]], by a motion."
-    - "Accept decision records as the permanent acceptor, after EM's interim period."
+    - "Accept decision records as the permanent acceptor, after the interim period."
     - "Remove the screening guard, once set, but only through a fixed 10-day timelock."
   cannot:
     - "Enable a module on its Safe while the guard is set: a module's transaction would not be screened (INV-010)."
@@ -658,22 +658,22 @@
 
 - id: em
   node: policy
-  name: EM, the interim acceptor
+  name: The interim acceptor
   status: existing
-  what: "The CTO role. EM decides the [[open decision|open decisions]] and accepts decision records until the committee takes over as the permanent acceptor."
+  what: "YT, the lead of the DeFi Engineering chapter, from 2026-11-23; EM, the CTO role, before that day. The acceptor decides the [[open decision|open decisions]] and accepts decision records until the committee takes over as the permanent acceptor. A proposal that changes the shape of the design goes to EM first."
   controlled_by: "A role, not an account."
   can:
     - "Accept a decision record. An acceptance is an engineering decision. It authorises nothing on chain."
   cannot:
     - "Keep the acceptor role after the interim period."
-  sources: ["ADR-002#d1", "ADR-002#d7", OD-63, "doc:docs/registers/open-decisions.md#open-decisions"]
+  sources: ["ADR-002#d1", "ADR-002#d7", "ADR-002#d13", OD-63, OD-158, OD-159, "doc:docs/registers/open-decisions.md#open-decisions"]
 
 - id: ai-agents
   node: policy
   name: AI agents
   status: new
   what: "Coding agents draft most text, code and tests, and open pull requests. Humans decide, review and merge."
-  controlled_by: "Humans: EM and the code-owner reviewers."
+  controlled_by: "Humans: the acceptor and the code-owner reviewers."
   can:
     - "Record a human's own acceptance, only on that human's explicit written instruction, marked as recorded."
   cannot:

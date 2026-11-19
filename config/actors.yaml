@@ -1,8 +1,10 @@
 # Allowlist for OKF actor ids in generated.by and verified[].by (OKF 0.2 section 7).
 #
-# human:em is EM, the interim acceptor of decisions (docs/adr/002).
+# human:yt is YT, the lead of the DeFi Engineering chapter: the interim acceptor of
+#   decisions from 2026-11-23 (docs/adr/002, OD-158).
+# human:em is EM, the interim acceptor until that day. A proposal that changes the
+#   shape of the design goes to EM first (OD-159).
 # human:tmc is the Treasury Management Committee, the permanent acceptor.
-# human:yt is YT, a decision proposer and page verifier, not an ADR acceptor.
 # The Emergency Brakes multisig verifies no ADR since 2026-10-13 (OD-63), so it is
 #   not listed.
 # Any agent id of the form <runner>/<model> may author a page in generated.by (ADR 012).

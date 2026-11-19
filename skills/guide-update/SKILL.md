@@ -1,6 +1,6 @@
 ---
 name: guide-update
-description: Change the Clutch onboarding guide (docs/onboarding/clutch-onboarding.html) — its content, tabs, style or script — and keep its build and browser tests green. Use when a decision, role, permission, flow or runbook changes, or when EM asks for a change to the guide.
+description: Change the Clutch onboarding guide (docs/onboarding/clutch-onboarding.html) — its content, tabs, style or script — and keep its build and browser tests green. Use when a decision, role, permission, flow or runbook changes, or when a maintainer asks for a change to the guide.
 license: AGPL-3.0-or-later
 ---
 

@@ -1195,3 +1195,17 @@
     - "2026-11-17 — OD-157 decided: no price bound for like-for-like orders"
   adr: [ADR-007#d47]
   refines: [OD-154]
+
+- id: OD-158
+  question: "Who accepts ADRs and decides open decisions after EM, and from which day?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the handover to YT and the DeFi tech team; ADR 005 to ADR 015 accepted"
+  adr: [ADR-002#d1, ADR-012#d4, ADR-012#d6]
+
+- id: OD-159
+  question: "What part does EM keep after the handover?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the handover to YT and the DeFi tech team; ADR 005 to ADR 015 accepted"
+  adr: [ADR-002#d13]

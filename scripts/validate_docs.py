@@ -35,7 +35,7 @@ Clutch rules on top of the Gaggle profile:
   decision-log heading that quotes the instruction. An agent never records a body's
   verification.
 - A team, such as `human:defi-tech`, verifies with `ref`: the link to the pull request that
-  a member approved. A team never accepts an ADR; only EM or the committee does (OD-50).
+  a member approved. A team never accepts an ADR; only an acceptor does: EM, YT or the committee (OD-50, OD-158).
 - A verification from 2026-10-07 on records `sha256`, the hash of the page's body. The
   check fails when the body differs from the hash of the latest verification, until a
   human verifies the page again with `just verify` (OD-51).
@@ -84,7 +84,8 @@ TYPES = {
 }
 AGENTS_MAX_LINES = 60
 BODY_ACTORS = ("human:tmc",)
-ACCEPTORS = ("human:em", "human:tmc")  # ADR 002: EM in the interim, the committee permanently
+# ADR 002: EM in the interim until 2026-11-23, YT from that day, the committee permanently (OD-158)
+ACCEPTORS = ("human:em", "human:yt", "human:tmc")
 # A team's verification links the pull request that a member approved (ADR 012, OD-50).
 PR_REF = re.compile(r"\Ahttps://github\.com/lidofinance/clutch/pull/\d+\Z")
 # Verifications from this date on record the hash of the page's body (ADR 012, OD-51).
@@ -338,7 +339,7 @@ def _check_concept(meta: dict[str, Any], text: str, allowed: set[str], docs: Pat
             if not acceptor.startswith("human:"):
                 out.append("an accepted Decision needs `accepted_by`, a human actor")
             elif acceptor not in ACCEPTORS:
-                out.append(f"accepted_by {acceptor!r}: only EM or the committee accepts an ADR (ADR 002); a team never does (OD-50)")
+                out.append(f"accepted_by {acceptor!r}: only an acceptor accepts an ADR: EM, YT or the committee (ADR 002); a team never does (OD-50)")
             else:
                 _check_actor(acceptor, allowed, "accepted_by", out)
                 if acceptor not in current_humans:

@@ -288,7 +288,7 @@
 - id: branch-rule
   assumption: "CODEOWNERS and the branch rule on `main` are active, so someone other than the author reviews every merge."
   kind: operational
-  why: "Agents draft almost everything. The review ladder and EM's acceptances are only as strong as these controls."
+  why: "Agents draft almost everything. The review ladder and the acceptances are only as strong as these controls."
   breaks: "A forged acceptance or verification could pass, because the validator cannot tell who wrote a `human:` entry."
   watched_by: ["doc:.github/CODEOWNERS"]
   watch_note: "The branch rule cannot be checked from an agent's environment. Agent-recorded entries show `(recorded)` in the status register."

@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-11T16:58:31Z
+  at: 2026-11-19T14:04:23Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -42,7 +42,7 @@ verified:
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the acceptor and on Emergency Brakes verification, 2026-09-30, and the confirmed reading, 2026-10-05, on recorded verifications, 2026-10-06, and on the end of the Emergency Brakes verification, 2026-10-13
+    title: Decision log — EM on the acceptor and on Emergency Brakes verification, 2026-09-30, and the confirmed reading, 2026-10-05, on recorded verifications, 2026-10-06, on the end of the Emergency Brakes verification, 2026-10-13, and on the handover, 2026-11-19
   - id: s2
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — the lend-markets review ladder and OKF 0.2
@@ -64,18 +64,19 @@ sources:
 
 EM decided each decision below; its ODs lead to EM's words in the [decision log](/registers/decision-log.md) [s1].
 
-1. EM accepts ADRs in the interim. The Treasury Management Committee is the permanent acceptor (decision log, 2026-09-30).
+1. YT, the lead of the DeFi Engineering chapter, accepts ADRs in the interim, from 2026-11-23. An acceptance by EM before that day stands. The Treasury Management Committee is the permanent acceptor (decision log, 2026-09-30; OD-158).
 2. Replaced by decision 12 (OD-63).
 3. `docs/` is an OKF 0.2 bundle. Every page carries `generated`, `verified`, `sources`, `status` and `review_status` [s3] (OD-12).
 4. `review_status` uses the ladder `slop`, `human-skimmed`, `human-reviewed`, `finalized` [s2]. Agents set only `slop` (OD-12).
 5. A review status above `slop` needs a human verification at or after `generated.at`. An edit that changes the content bumps `generated.at`, so it resets the page to `slop` (OD-12).
 6. ADRs use one global sequence. An ADR moves from `proposed` to `accepted`, `rejected` or `superseded`. `accepted` needs `accepted_by`, a human actor, and that actor's verification after the last edit (OD-12).
 7. An accepted ADR is an engineering decision. It authorises nothing on chain (OD-12).
-8. Decisions made before the repository existed enter as `proposed` ADRs, and EM accepts each text separately (OD-12).
+8. Decisions made before the repository existed enter as `proposed` ADRs, and the acceptor accepts each text separately (OD-12).
 9. A runbook needs a fork drill record, and a permission-policy change needs the output of the verification procedure, before either rises above `slop` (OD-12).
 10. A verification by the committee is committed by a member of the committee through a reviewed pull request. The entry carries `ref`, an https or urn link to the committee's decision record, such as a forum post or minutes (OD-15, OD-63).
 11. Decision 4 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry names the agent in `recorded_by` and links, in `ref`, the decision-log heading that quotes the instruction. An agent never records a body's verification ([ADR 003](/adr/003-agent-operating-model.md) decision 14) (OD-31).
 12. No body other than the acceptor verifies an ADR before it is accepted (OD-63).
+13. From 2026-11-23, a proposal that changes the shape of the design goes to EM before the acceptor decides it. EM's default answer is no change, and EM can allow an exception (OD-159).
 
 ## How the validator enforces it
 
@@ -97,7 +98,7 @@ The validator does not yet check policy-verification output. That check arrives 
 ## Consequences
 
 - Agent edits reset reviewed pages to `slop`.
-- EM accepts through one explicit edit, not in conversation. The committee re-ratifies interim acceptances.
+- The acceptor accepts through one explicit edit, not in conversation. The committee re-ratifies interim acceptances.
 - The validator detects an edit of a verified page by its body hash (OD-51). It cannot detect an edit of an unverified page that leaves `generated.at` unchanged.
 - The validator cannot identify who wrote a `human:` entry. Human pull request review is the control; CODEOWNERS and the `main` branch rule enforce it (OD-10, 2026-10-05).
 - A committee verification's `ref` makes the member's claim checkable against the decision record (decision 10). The entry remains a member's claim, not proof.

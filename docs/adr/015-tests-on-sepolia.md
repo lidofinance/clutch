@@ -4,12 +4,18 @@ title: "ADR 015: Tests on Sepolia"
 description: Sepolia test permissions and the role-key migration, with the same key scheme planned for mainnet.
 tags: [sepolia, testing, zodiac, deployment, process]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-16T20:11:16Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:04Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: ddda32af97941dde144172d0527984a1d1fa543b5d50ff8d48e6ea149644f01a
 sources:
   - id: s1
     resource: /adr/004-specifications-and-policy-as-data.md
@@ -124,8 +130,6 @@ EM decided on 2026-11-16, closing OD-147, OD-148, OD-151 and OD-153, and confirm
 5. The existing-state payload reaches the Sepolia workspace through a committed script behind the Sepolia guard. The script checks the payload hash and a fresh RPC comparison, calls resolve, compares the resolved specification with the payload, calls apply once and saves each status and body (OD-148 B).
 6. The stand owner may make these records by hand in the Zodiac app: the vault imports of the three existing Safes, the checked address-book entries, and the removal of the earlier workspace's draft aliases and cancelled proposals. The stand owner edits no role and no permission in the app (OD-151 B).
 7. On mainnet the orders modifier's governance role takes the key `orders-governance`, as on the stand, in the same change that brings the four keys of decision 1 (OD-153 A).
-
-These choices do not record acceptance or verification of the whole ADR [s13].
 
 ## Proposed direction
 

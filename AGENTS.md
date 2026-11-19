@@ -14,14 +14,14 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 - Frontmatter holds `type`, `title`, `description`, `status`, `review_status`, `generated`, `verified` and `sources`. Copy a neighbouring page of the same type.
 - Agents write `review_status: slop` only. Agents never add a `human:` entry to `verified`, and never set an ADR's `decision` to `accepted`.
 - One exception: on a human's explicit written instruction, an agent may record that human's own acceptance and verification with `just verify`. The entry carries `recorded_by`, a `ref` to the decision-log heading that quotes the instruction, and the hash of the page's body; the commit message says the agent made the edit. It never covers a body or a team, such as `human:tmc` or `human:defi-tech` (OD-15, OD-31, OD-50, OD-51).
-- EM accepts an ADR in the interim, and the Treasury Management Committee permanently. No other body verifies an ADR before it is accepted (OD-63).
+- The acceptor accepts an ADR: YT in the interim from 2026-11-23, EM before that day, and the Treasury Management Committee permanently. No other body verifies an ADR before it is accepted. A proposal that changes the shape of the design goes to EM first (OD-63, OD-158, OD-159).
 - A meaningful edit bumps `generated.at`, which resets a reviewed page to `slop`.
 - Cite per claim with inline `[sN]` markers that match `sources`.
 - Financial figures come only from an Attested Computation that ran. Never reason your way to a number.
 - Write in Simplified Technical English: one idea per sentence, active voice, controlled `must`, `should`, `can` and `may`, absolute ISO dates.
 - Refer to people by role. The only names used are EM and YT, the two people that `config/actors.yaml` lists.
 - Call the screening vendor "the screening vendor" until the vendor is announced. `scripts/check_redaction.py` refuses restricted terms and secrets; never work around it.
-- Open a decision only as a complete row of the open-decision register: the question with its options, the page that closes it, your recommendation and who decides. EM triages and decides in batched interviews, one decisions branch at a time; a build branch may also record the decisions that it raises (ADR 012, OD-124).
+- Open a decision only as a complete row of the open-decision register: the question with its options, the page that closes it, your recommendation and who decides. The acceptor triages and decides in batched interviews, one decisions branch at a time; a build branch may also record the decisions that it raises (ADR 012, OD-124).
 - Take a new OD, ADR or INV number from `main` when you open the pull request. The validator refuses a number that is used twice.
 - Pages other than the decision log show the current design only. Keep every decision number: a replaced decision becomes one line, "Replaced by …" or "Lapsed …", and an amended one carries its current text with its ODs (OD-128).
 

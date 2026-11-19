@@ -4,12 +4,18 @@ title: "ADR 010: Pre-execution screening"
 description: Transaction screening on the committee's Safe, the vendor's controls, outage behaviour, the launch cap, and the guard before any top-up above the cap.
 tags: [screening, guard, safe, security]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T07:06:18Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:03Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: ccc58b348d997865168688018b5de556eb119f736413986734d252b0ae07fa79
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -101,7 +107,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM accepted it with this record (decision log, 2026-11-19).
 
 - **Guard setup.** The owners add decision 10's build with `setGuard`, in one transaction; the factory does not change. The vendor disables bypass. Turning bypass on again needs the vendor's approval and a 10-day timelock [s11].
 - **Screened actions.** Every transaction of the committee's Safe (decision 24): Asset Safe and orders activity, first-loss actions ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 21), motion creation and the duties outside the vault. Enactment is unscreened; Easy Track's hash check fixes a motion's content at creation.

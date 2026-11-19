@@ -13,7 +13,7 @@ This repository is the single system of record for the product documents, decisi
 - Design and specification stage. Nothing is deployed.
 - Public. Every file and commit message must be suitable for publication (ADR 001, OD-95).
 - Agents drafted each document's first version. Pages stay `slop` until human review; see [document status](docs/registers/document-status.md).
-- EM accepts decisions in the interim. The Treasury Management Committee is the permanent acceptor.
+- YT accepts decisions in the interim, from 2026-11-23; EM accepted them before. The Treasury Management Committee is the permanent acceptor. `@lidofinance/defi-tech` maintains the repository.
 
 ## Start here
 

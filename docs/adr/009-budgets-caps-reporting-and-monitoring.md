@@ -4,12 +4,18 @@ title: "ADR 009: Budgets, exposure caps, reporting and monitoring"
 description: Budgets, exposure caps, pricing, reports, the two readings, monitoring and the duty to remediate.
 tags: [budgets, caps, reporting, monitoring, mandate]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-17T20:16:01Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:03Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: b63160b5ffd5fb03920ff2ec4018786c869e4e7f8925f6217598379c007d0af7
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -100,7 +106,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM accepted it with this record (decision log, 2026-11-19).
 
 - **Caps.** The mandate describes measurement, publication and remediation, not transaction reverts. Where the screening vendor can enforce a rule, it refuses an operator transaction that breaches it; emergency activity and price changes still need detective controls.
 - **Prices.** Same-denomination caps use balances. Liquid-staking and yield-bearing caps need on-chain rates; cross-class caps need market oracles.
