@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T15:51:10Z
+  at: 2026-11-19T16:12:06Z
 verified: []
 sources:
   - id: s1
@@ -202,6 +202,12 @@ sources:
   - id: s64
     resource: "urn:clutch:interview:2026-11-19-adr-002-verification"
     title: EM's instruction to record the verification of ADR 002, 2026-11-19; the transcript is not in the repository
+  - id: s65
+    resource: "urn:clutch:interview:2026-11-19-mandate-text"
+    title: EM's request to take the mandate's text of 2026-11-19 as the source of truth, and EM's answers to eight questions, 2026-11-19; the transcript is not in the repository
+  - id: s66
+    resource: "urn:clutch:restricted:mandate-text-2026-11-19"
+    title: The mandate's authorization text as of 2026-11-19; outside the repository until the mandate is published
 ---
 
 # Decision log
@@ -211,6 +217,49 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened
+
+EM gave the agent the current authorization text of the mandate [s66] and wrote [s65]:
+
+> 2. Ingest [a local file] as the up-to-date mandate authorization text (source of truth), update clutch artifacts if needed, update your interview questions accordingly, also highlight if something is not compatible with what we built
+
+The agent compared the text with the design. It listed the changes that follow from the text, and said that it would apply them unless EM objected. It asked eight questions where the text contradicts itself or the design:
+
+- Q1, when the screening guard starts. A: at the text's volume threshold, with no launch cap. B: as built, a launch cap by the vault's value. C: no guard at this mandate size. The agent recommended B.
+- Q2, whether the enabling vote pays. A: no, as built. B: yes, for the treasury's part. The agent recommended A.
+- Q3, Twyne. A: not at launch, a later onboarding by motion. B: built for launch. The agent recommended A.
+- Q4, the fifth emergency signer. A: the mandate's Snapshot sets the class, a Lido Labs engineering contributor on neither body, and the acceptor names the person against the criteria of OD-65's recommendation. B: a separate Snapshot names the person. The agent recommended A.
+- Q5, the runway floor at a top-up. A: a gate with a monitoring alert. B: the top-up post states the runway, with no detector. C: nothing in Clutch. The agent recommended B.
+- Q6, the treasury share, which the text does not hold. A: drop the test. B: keep it as Clutch's own rule. The agent recommended A.
+- Q7, the remedy for a cap breach, which the text no longer holds. A: keep the two working days and the switch duty as Clutch's own procedure. B: drop the fixed trigger; the emergency signers act on their judgment. The agent recommended A.
+- Q8, what counts as the shape of the design. A: a short list. B: no list. The agent recommended A.
+
+EM answered [s65]:
+
+> Q1: A
+> Q2: B
+> Q3: A
+> Q4: A
+> Q5: A
+> Q6: B
+> Q7: B
+> Q8: A
+
+Recorded as:
+
+- OD-160 A: the vault launches without the screening guard and without a launch cap. The guard is set when the vault's volume in a quarter passes the mandate's threshold ([ADR 010](/adr/010-pre-execution-screening.md) decisions 20 to 22). The text does not say what counts as volume or who reads it, so the agent opened OD-168.
+- OD-161 B: the enabling vote pays the vault's initial funding from the treasury to the Asset Safe. The Earn positions do not move by the vote ([ADR 014](/adr/014-funding-by-top-up-motions.md) decisions 14 and 18). The fork rehearsal's vote now carries the payments.
+- OD-162 A: Twyne is not in the launch scope ([ADR 011](/adr/011-launch-scope.md) decision 16).
+- OD-65 closed, by Q4 A: the fifth emergency signer is a Lido Labs engineering contributor on neither body; the mandate's Snapshot sets the class, and the acceptor names the person against the criteria ([ADR 005](/adr/005-account-graph-and-roles.md) decision 24).
+- OD-163 A: the runway floor is a fourth gate of a top-up motion, with a monitoring alert ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 48). The alert is not built.
+- OD-164 B: the treasury share stays, as Clutch's own rule; the acceptor sets its figure ([ADR 008](/adr/008-funding-through-existing-payments.md) decision 33).
+- OD-165 B: the switch has no fixed trigger. The emergency signers act on their judgment (ADR 009 decisions 24, 25, 34 and 41).
+- OD-166 A: the shape of the design is the accounts and their owners, the roles and who may hold one, the governance path, the one new contract, and the absence of a price bound on chain ([ADR 002](/adr/002-decision-and-review-process.md) decision 13).
+- OD-167, the changes that follow from the text. EM named the text the source of truth and did not object to the list, so the agent applied it. The size test uses the vault's value at the top-up (ADR 008 decisions 32 and 37). OD-41 lapses: no cap for a new Lido product (ADR 009 decision 28). Insurance is built and stays unused until a Snapshot (ADR 014 decision 4). Returns to the treasury are routine (ADR 014 decisions 8 and 9). A relaxation that loosens a limit of the mandate waits for its motion; the agent added the Snapshot for a relaxation without an on-chain change (ADR 010 decision 23). The disclosure of an onboarding or of a higher budget comes before the motion, by the mandate's period ([ADR 006](/adr/006-governance-through-easy-track-factories.md) decision 4). After an objected top-up, further funding needs a Snapshot (ADR 014 decision 19). The start of an emergency action within six hours stays Clutch's own gate.
+- The text still differs from the design in places that are the text's to fix. The [enabling-vote specification](/specs/enabling-vote.md) lists them as the mandate's owed text.
+- EM did not answer two more questions. One is whether YT also decides the open decisions from 2026-11-23; that reading of OD-158 stays the agent's. The other is the verification below.
+- This entry changes the accepted ADR 002, 004, 005, 006, 008, 009, 010, 011 and 014, which breaks EM's verification of each. EM's verification of them is owed. The agent recorded none, because no instruction names them.
 
 ## 2026-11-19 — ADR 002 verified again after the handover
 

@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T14:04:23Z
+  at: 2026-11-19T16:10:57Z
 verified:
   - by: human:em
     at: 2026-11-19T14:06:03Z
@@ -56,7 +56,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 14. The Treasury Management mandate takes over the first-loss terms of the March 2026 Earn allocation (OD-21).
 15. Replaced by decision 23 (OD-67).
 16. Lapsed (OD-42): the operator role cannot reach the first-loss Safe.
-17. A Twyne position counts in the funded value only when its holder and form are shown on chain or in a signed record (OD-21, OD-106).
+17. A Twyne position counts in the vault's value only when its holder and form are shown on chain or in a signed record (OD-21, OD-106).
 18. Lapsed (OD-42): the emergency role cannot reach the first-loss Safe.
 19. The first-loss shares sit in a dedicated first-loss Safe, not in the Asset Safe. Aragon Voting owns it one of one, and the first-loss modifier is its only module (OD-42, OD-60, OD-73).
 20. Replaced by ADR 010 decisions 20 and 22 (OD-106, OD-121).
@@ -71,12 +71,12 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 29. The framework fixes a checklist that every fund fills in, in its motion and its forum post: the product, and its share token or payout address; the motion's writes; the fund's cap; the loss trigger and a confirming party independent of the product team; the incident-update deadline; and the end of the terms (OD-66, OD-102).
 30. Replaced by ADR 014 decision 7 (OD-107).
 31. Replaced by ADR 014 decision 4 (OD-107).
-32. The mandate size follows the mandate's draft text. The vault holds up to the mandate size in assets. Each funding counts in US dollars at its value when it is funded. The legacy positions that move into the vault count too (OD-89).
-33. The vault never holds more than the mandate's share of the DAO's non-LDO treasury (OD-89).
+32. The mandate size follows the mandate's text. The test is made at every top-up: the vault's value at that time plus the top-up, in US dollars, may not exceed the mandate size. When gains take the vault's value above the size, nothing is sold, and top-ups stop. The legacy positions that move into the vault count in its value (OD-89, OD-167).
+33. The vault never holds more than a set share of the DAO's non-LDO treasury. The mandate's text holds no such share, so the rule is Clutch's own, and the acceptor sets the figure (OD-89, OD-164).
 34. More funding than the mandate size needs a separate DAO approval. A further funding or a replenishment uses an approved governance path only when the mandate's published eligibility conditions are met, and after the required disclosure (OD-89).
 35. Lapsed (OD-106): the vault has no funding registry.
 36. Lapsed (OD-106): the vault leaves Easy Track's payment permission unchanged.
-37. The funded value counts the first-loss shares at the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 35 and 36) (OD-98, OD-106).
+37. The vault's value counts the first-loss shares at the report's price rule ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decisions 35 and 36) (OD-98, OD-106, OD-167).
 
 ## Proposed direction
 

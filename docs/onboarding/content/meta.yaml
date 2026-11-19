@@ -57,7 +57,7 @@ reuse_columns:
 tab_intros:
   actors: "Every account, body and service, grouped as on the map. Each role shows its exact permissions, read from the compiled policy."
   flows: "What happens, step by step. Each flow can play on the map. The badge shows whether the flow is built and tested on a fork, specified, open or planned."
-  mandate: "The committee's rulebook, block by block: what the draft says, how Clutch keeps each rule, and what Clutch changed and why. Highlighted notes mark each change."
+  mandate: "The committee's rulebook, block by block: what its text says, how Clutch keeps each rule, and where the design and the text differ, and why. The text is the source of truth, and the design follows it. Highlighted notes mark Clutch's own rules and the changes that the text still owes."
   constellation: "The permission policy as code: the accounts, modifiers and roles that the committed artifact builds, what is specified but not built, and what Clutch changed from the policy provider's version."
   rfp: "The [[RFP|request for solution]] that Lido contributors sent to the policy provider, ask by ask: what it asked, how Clutch answers, and what Clutch changed or added, and why. Highlighted notes mark each difference."
   reuse: "What Clutch takes from audited code and existing platforms, and what it adds."
@@ -67,24 +67,25 @@ tab_intros:
   selfcheck: "Nine questions to check what you learned."
 quiz_note: "Pick an answer to see whether it is right and why. Nothing is stored or sent."
 owed:
-  - "A Snapshot appoints the [[Emergency Safe]]'s fifth signer."
+  - "The acceptor names the [[Emergency Safe]]'s fifth signer, in the class that the mandate's Snapshot sets: a Lido Labs engineering contributor who is a member of neither body."
   - "The committee's valuation policy sets the [[price waterfall]]'s band, the share of the vault that its last level may price, and the band between the two readings."
   - "[the screening vendor] confirms in writing that it accepts no standing approvals, and agrees to be named."
   - "[the screening vendor] says which rules it can check before execution: the caps, an order's limit and a router swap's minimum output."
   - "The policy provider answers Lido's requirement list for the Zodiac UI."
   - "[the screening vendor] says whether it records rule changes and whether it can delay a relaxation."
-  - "The mandate's Snapshot text and its forum post change before the Snapshot vote. The Mandate tab marks each change."
+  - "The mandate's text and its forum post change before the Snapshot vote. The Mandate tab marks each change that the text still owes."
   - "Fork tests of the onboarding motion of Lido Lend's lender vault once it is deployed, and of a settled redemption paid to the Asset Safe."
   - "The round-trip check and the two detectors against a deployed vault; they run on the rehearsal's vault today. Lido's monitoring must run the detectors on a schedule and page on an alert."
-  - "The [[attested computation]]'s figures, once the mandate is approved: the budgets, the orders budgets, the fixed approval ceilings, each top-up registry's limit, and the first top-up's tokens and amounts."
-  - "The mandate's drafters owe the holder and the form of the Twyne position."
+  - "The [[attested computation]]'s figures, once the mandate is approved: the budgets, the orders budgets, the fixed approval ceilings, each top-up registry's limit, and the initial funding's tokens and amounts."
+  - "What counts as the vault's volume for the guard's threshold, and who reads it (OD-168)."
   - "The enabling vote's Safe batches of the deployment, published as a file for the command that computes each hash again."
-  - "The mandate's drafters owe the [[treasury share]]'s base, the time of its test, the remedy for a breach that no vault transaction causes, and a further funding's eligibility conditions."
-  - "The alerts on a top-up motion that breaks a gate, the headroom or the launch cap. Until the guard is set, a rule and these alerts hold the launch cap (OD-145)."
+  - "The acceptor sets the [[treasury share]]'s figure, its base and the time of its test."
+  - "The committee publishes the operating expenses that the runway reading uses."
+  - "The alerts on a top-up motion that breaks a gate, the headroom or the runway floor, and on one that follows an objected one."
   - "The production deployment script."
 footer: |-
   **Hypothetical draft.** Nothing on this page is ratified, deployed or advice, and every number can change.
 
   **How this page is made.** A script builds it from the repository. CI fails when the page differs from a fresh build, when a link to a source does not resolve, or when a browser test fails. Each item is pinned to the text that it cites, so a change to that text fails CI until a person reviews the item.
 
-  **What it leaves out.** No person's name, no unannounced counterparty, and no figure from the mandate or the attested computation. The only dollar figure is the [[launch cap]], which EM set. The page makes no network request.
+  **What it leaves out.** No person's name, no unannounced counterparty, and no figure from the mandate or the attested computation. The page shows no dollar figure. The page makes no network request.

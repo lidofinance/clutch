@@ -1209,3 +1209,85 @@
   log:
     - "2026-11-19 — the handover to YT and the DeFi tech team; ADR 005 to ADR 015 accepted"
   adr: [ADR-002#d13]
+
+- id: OD-65
+  question: "Who holds the emergency Safe's fifth seat?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened"
+  adr: [ADR-005#d24]
+  refines: [OD-58]
+
+- id: OD-160
+  question: "When is the screening guard set, and does the launch keep a cap?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened"
+  adr: [ADR-010#d20, ADR-010#d21, ADR-010#d22]
+  replaces:
+    - {od: OD-54}
+    - {od: OD-55}
+    - {od: OD-145}
+    - {od: OD-142, part: true}
+
+- id: OD-161
+  question: "Does the enabling vote pay the vault's initial funding?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened"
+  adr: [ADR-014#d14, ADR-014#d18]
+  replaces:
+    - {od: OD-142, part: true}
+  refines: [OD-146]
+
+- id: OD-162
+  question: "Is Twyne in the launch scope?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened"
+  adr: [ADR-011#d16]
+
+- id: OD-163
+  question: "Does a top-up motion get a gate for the treasury's stablecoin runway?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened"
+  adr: [ADR-009#d48]
+  refines: [OD-144]
+
+- id: OD-164
+  question: "Does the treasury share stay when the mandate's text holds none?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened"
+  adr: [ADR-008#d33]
+  refines: [OD-89]
+
+- id: OD-165
+  question: "Does the switch keep a fixed trigger after a cap breach?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened"
+  adr: [ADR-009#d24, ADR-009#d25, ADR-009#d34, ADR-009#d41]
+  refines: [OD-29, OD-58]
+
+- id: OD-166
+  question: "What counts as the shape of the design?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened"
+  adr: [ADR-002#d13]
+  refines: [OD-159]
+
+- id: OD-167
+  question: "Which of Clutch's rules change to follow the mandate's text of 2026-11-19?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened"
+  adr: [ADR-008#d32, ADR-008#d37, ADR-009#d28, ADR-014#d4, ADR-014#d8, ADR-014#d9, ADR-014#d19, ADR-010#d23, ADR-006#d4]
+  replaces:
+    - {od: OD-41}
+    - {od: OD-107, part: true}
+    - {od: OD-108, part: true}
+    - {od: OD-64, part: true}
+  refines: [OD-89]

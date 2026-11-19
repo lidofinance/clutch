@@ -9,8 +9,8 @@ description: The Lido DAO owns the Asset Safe; it also owns the orders account a
   its five signers come from the committee and two from the Emergency Brakes multisig, which can pause Easy Track. One
   universal factory builds every Clutch motion but a top-up and holds every role that a motion uses, on all four modifiers. The map
   draws no arrow for the factory's other roles, for the roles on the orders account's modifier, or for the committee's
-  first-loss role. Funding comes through Finance to the Asset Safe, by a top-up motion of one of two top-up factories. Once the
-  screening guard is set, it approves each transaction of the committee's Safe. The Asset Safe uses approved protocols,
+  first-loss role. Funding comes through Finance to the Asset Safe, first as the initial funding in the enabling vote, and then by top-up motions of two top-up factories. The vault launches without the
+  screening guard. Once the guard is set, it approves each transaction of the committee's Safe. The Asset Safe uses approved protocols,
   swaps through CoW orders from the orders account, and pays insurance money to the first-loss Safe by motion.
   Monitoring watches the vault and pages the emergency Safe. Reporting publishes from the vault's snapshots.
 nodes:
@@ -30,7 +30,7 @@ nodes:
   label: Lido DAO
   sub: LDO vote · Voting owns the vault
   summary: The final authority. Aragon Voting is the only owner of the Asset Safe, and it alone changes a top-up
-    registry's limit. The Aragon Agent, the treasury, gets funds back only in an emergency or a recovery.
+    registry's limit. The Aragon Agent, the treasury, gets funds back as a routine, and in an emergency or a recovery.
   domain: gov
   kind: body
   status: existing
@@ -41,8 +41,8 @@ nodes:
 - id: funding
   label: Funding path
   sub: Finance · two top-up factories
-  summary: Moves money from the DAO treasury to the Asset Safe. A top-up motion of the committee's Safe pays it
-    through Aragon Finance. Two top-up factories build the motions, and two funding registries hold the limits for each three months.
+  summary: Moves money from the DAO treasury to the Asset Safe, through Aragon Finance. The enabling vote pays the initial funding.
+    After it, a top-up motion of the committee's Safe pays each top-up. Two top-up factories build the motions, and two funding registries hold the limits for each three months.
   domain: gov
   kind: contract
   status: existing
@@ -65,7 +65,7 @@ nodes:
 - id: emergency-safe
   label: Emergency Safe
   sub: 3 of 5 · two bodies and one
-  summary: 'Holds the emergency role and the switch. Two committee members, two Emergency Brakes members and one member of
+  summary: 'Holds the emergency role and the switch. Two committee members, two Emergency Brakes members and one Lido Labs engineering contributor of
     neither body sign it, so the committee cannot use it alone. It can only reduce exposure: revoke, switch off, exit, sell
     into stablecoins and send assets home.'
   domain: ops
@@ -78,7 +78,7 @@ nodes:
 - id: screening
   label: Screening guard
   sub: '[the screening vendor]'
-  summary: A transaction guard on the committee's Safe. It refuses any transaction that the vendor has not approved once. It is set after the launch, before a funding above the launch cap.
+  summary: A transaction guard on the committee's Safe. It refuses any transaction that the vendor has not approved once. The vault launches without it. It is set when the vault's volume in a quarter passes the threshold that the mandate sets.
   domain: ext
   kind: service
   status: instance
@@ -201,7 +201,7 @@ edges:
   kind: owns
   short: owns · assets home
   label: Aragon Voting is the Asset Safe's only owner, at 1 of 1. Assets go back to the Aragon Agent, the DAO's treasury,
-    only in an emergency or a recovery, by a transfer pinned to that fixed address.
+    as a routine and in an emergency or a recovery, by a transfer pinned to that fixed address.
   label_at:
   - 590
   - 466
@@ -285,7 +285,7 @@ edges:
   to: committee
   kind: screens
   short: approves each transaction
-  label: Once it is set, before a funding above the launch cap, the vendor's guard on the committee's Safe refuses a transaction that the vendor has not approved, once and exactly.
+  label: Once it is set, the vendor's guard on the committee's Safe refuses a transaction that the vendor has not approved, once and exactly. The vault launches without it.
   label_at:
   - 170
   - 330
@@ -331,14 +331,14 @@ edges:
   to: funding
   kind: governs
   short: votes
-  label: A top-up is an Easy Track motion. It pays through Aragon Finance, from the treasury that the Aragon
-    Agent holds, without Dual Governance.
+  label: The enabling vote pays the initial funding, and a top-up is an Easy Track motion. Each pays through Aragon Finance,
+    from the treasury that the Aragon Agent holds, without Dual Governance.
 - id: top-up
   from: funding
   to: asset-safe
   kind: governs
   short: top-ups
-  label: A top-up pays the Asset Safe only. The first top-up is one million dollars.
+  label: Finance pays the Asset Safe only. The enabling vote pays the initial funding, and a top-up motion pays each top-up after it.
   via:
   - - 1160
     - 84
@@ -359,7 +359,7 @@ edges:
   to: emergency-safe
   kind: screens
   short: pages
-  label: Monitoring pages the emergency Safe when the cap-breach trigger is met, for a defect in the permission layer, or
+  label: Monitoring pages the emergency Safe on a cap breach in either reading, for a defect in the permission layer, or
     for a financial emergency.
   via:
   - - 875

@@ -16,8 +16,7 @@ import {UniversalFactory} from "../src/factory/UniversalFactory.sol";
 ///      Aragon Finance and treasury take part. Only the Clutch accounts and
 ///      the universal factory are new; the two top-up factories are new
 ///      instances of Lido's own code. The vote registers the three factories and
-///      pays nothing, and the first top-up comes by two motions (OD-102,
-///      OD-142; enabling-vote spec). Lines that start with "REHEARSAL" are the
+///      pays the initial funding from the treasury (enabling-vote spec). Lines that start with "REHEARSAL" are the
 ///      measurements that the research notes report.
 ///      Run: RPC=<archive RPC> forge test --match-contract EnablingVoteRehearsal -vv
 contract EnablingVoteRehearsal is EnabledVault {
@@ -83,13 +82,12 @@ contract EnablingVoteRehearsal is EnabledVault {
     }
 
     // ---------------------------------------------------------------------
-    // 2. The vote that fits: the three factories, then hash approvals; the first top-up by motion
+    // 2. The vote that fits: the three factories, the initial funding, then hash approvals
     // ---------------------------------------------------------------------
 
     /// @dev The vote registers the universal factory with its address book and
-    ///      the two top-up factories, and pays nothing. After the batches, the
-    ///      first top-up reaches the Asset Safe by two top-up motions (checked
-    ///      in `_enable`).
+    ///      the two top-up factories, and pays the initial funding to the
+    ///      Asset Safe before the batches run (checked in `_enable`).
     function test_02_enabling_vote_end_to_end() public {
         _enable();
         _checkEnabled();

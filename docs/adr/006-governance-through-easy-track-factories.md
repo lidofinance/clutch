@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T14:04:23Z
+  at: 2026-11-19T16:10:57Z
 verified:
   - by: human:em
     at: 2026-11-19T14:06:03Z
@@ -47,14 +47,14 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 1. The only new contract is the universal factory; CoW's order signer counts as new code with it (decision log, 2026-09-22; OD-96, OD-102, OD-134).
 2. The DAO does not approve each new protocol by vote. A motion of the universal factory onboards it (decision log, 2026-09-22; OD-102).
 3. Stated by [ADR 005](/adr/005-account-graph-and-roles.md) decision 31 and [ADR 010](/adr/010-pre-execution-screening.md) decision 24 (decision log, 2026-09-22; OD-01).
-4. The minimum for every motion is a forum disclosure, alerting set up for the new target, and runbook discipline. The final stops are an objection, the Easy Track pause by the Emergency Brakes multisig, and a raise of the factory's counter (decision log, 2026-09-22; OD-102).
+4. The minimum for every motion is a forum disclosure, alerting set up for the new target, and runbook discipline. The disclosure of an onboarding or of a higher budget comes before the motion, by the period that the mandate sets (OD-167). The final stops are an objection, the Easy Track pause by the Emergency Brakes multisig, and a raise of the factory's counter (decision log, 2026-09-22; OD-102).
 5. Replaced by ADR 013 decision 5 (OD-102).
 6. Lapsed (OD-09): Easy Track never shortens a motion's window below 48 hours.
 7. An emergency removal is the emergency Safe's immediate revoke, posted on the forum afterwards (OD-09, OD-70).
 8. No DAO-scoped role keys, and no `assignRoles` for the governance role. Every operator permission lives under the `operator` role key (OD-09).
 9. A motion grants no delegatecall, with one exception: the order signer's, on the orders account ([ADR 007](/adr/007-swapping-through-an-orders-account.md) decision 41). On the Asset Safe, the governance role's `allowFunction` and `scopeFunction` take only the execution options None or Send, because a delegatecall from the Asset Safe runs foreign code in the Safe's own storage (OD-36, OD-103).
 10. A motion cannot give the operator the Asset Safe or any of its modules as a target. The governance role refuses each of them as the administered target, the safety modifier included. The deployment manifest lists every module that the Asset Safe enables. The compiler refuses a policy that lets a role reach the Asset Safe or one of its modules beyond a fixed set of calls, a grant that does not refuse every one of them, and a manifest that misses a compiled modifier. A DAO vote that enables another module on the Asset Safe also lists it in the manifest and applies the policy compiled again (OD-38).
-11. Easy Track motions are the timelock for every structural increase of exposure in the policy: a new target and a higher budget each wait for the objection window. The unlock of a matured Lido product is a budget motion with a forum post ([ADR 009](/adr/009-budgets-caps-reporting-and-monitoring.md) decision 28) (OD-41, OD-45).
+11. Easy Track motions are the timelock for every structural increase of exposure in the policy: a new target and a higher budget each wait for the objection window. (OD-45, OD-167).
 12. Replaced by ADR 007 decision 41 (OD-103).
 13. A motion that onboards a protocol also writes its emergency exit, through the exit-governance role on the safety modifier, which the universal factory holds ([ADR 013](/adr/013-one-easy-track-factory.md) decisions 11 and 18) (OD-49, OD-102, OD-118).
 14. A routine removal is a motion of the universal factory that revokes the permission, or writes it again without the removed entries. It waits for the objection window ([ADR 013](/adr/013-one-easy-track-factory.md) decision 11) (OD-70, OD-102).

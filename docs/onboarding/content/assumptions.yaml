@@ -58,23 +58,23 @@
 - id: guard-single-use
   assumption: "[the screening vendor]'s guard approves each exact transaction once, fails closed, and holds no standing approval."
   kind: trust
-  why: "Above the [[launch cap]], on-chain blocking before execution is a hard requirement. Once set, the [[guard]] screens every transaction of the committee's Safe."
+  why: "The [[guard]] is set when the vault's volume in a quarter passes the threshold that the mandate sets. Once set, it screens every transaction of the committee's Safe."
   breaks: "One standing approval of the modifier's execution function would approve all vault activity. One approved stray delegatecall can replace the code of the committee's Safe and drop the guard, and a module on that Safe would skip it. An outage stops the operator and new motions for up to ten days."
   watched_by: []
-  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector supports Safe v1.3.0 and must add this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before a funding above the launch cap (OD-54)."
+  watch_note: "INV-010 is pending and has no test. Restricted fork tests of the vendor's guard passed on 2026-10-02. Lido's guard detector supports Safe v1.3.0 and must add this instance. The vendor's written acceptance of the no-standing-approval rule is owed. All three come before the guard is set (OD-160)."
   sources: ["ADR-010#d20", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d12", "ADR-010#d17",
-    "ADR-010#d22", "ADR-010#proposed-direction", "INV-010", "OD-54",
+    "ADR-010#d22", "ADR-010#proposed-direction", "INV-010", "OD-160",
     "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard", "ADR-010#context"]
 
-- id: launch-cap
-  assumption: "Until the guard is live, the vault holds no more than its first top-up of one million dollars, the launch cap."
+- id: launch-without-guard
+  assumption: "Until the screening guard is set, the on-chain permissions, the budgets, monitoring and the emergency signers protect the vault."
   kind: operational
-  why: "EM allowed a launch without the screening guard under the [[launch cap]]. The cap holds by a rule: the committee creates no top-up above it before the guard is set (OD-145)."
-  breaks: "Until the guard is set, no operator transaction and no motion creation is screened, and a top-up motion above the cap enacts if nobody objects. A first-loss redemption can take the vault above the cap."
+  why: "The vault launches without the screening guard. The guard is set when the vault's volume in a quarter passes the threshold that the mandate sets, which may never happen."
+  breaks: "Until the guard is set, no operator transaction and no motion creation is screened, and no control before execution holds a cap or an order's price. The budgets bound what a hostile signing quorum can move in a period."
   watched_by: []
-  watch_note: "The alerts on a redemption before the guard is set, on an excess that stays, and on a vault value above the cap, are not built."
-  sources: ["ADR-010#d20", "ADR-010#d21", "ADR-010#d22", "OD-145", "ADR-010#proposed-direction", "ADR-014#d14",
-    "ADR-014#proposed-direction", "doc:docs/specs/control-matrix.md#the-matrix"]
+  watch_note: "Monitoring must run from go-live, and Lido's monitoring does not run the vault's detectors yet. What counts as volume, and who reads it, is open (OD-168)."
+  sources: ["ADR-010#d20", "ADR-010#d22", "ADR-010#proposed-direction", "ADR-010#consequences", "OD-160", "OD-168",
+    "doc:docs/specs/control-matrix.md#the-matrix"]
 
 - id: artifact-is-policy
   assumption: "The committed artifact, compiled from the constellation, is the only statement of the policy."
@@ -120,32 +120,32 @@
 - id: six-hour-start
   assumption: "The emergency Safe's signers can start any emergency action within six hours, and the Emergency Brakes multisig can pause Easy Track in that time."
   kind: operational
-  why: "Six hours is the mandate's ceiling and a hard gate. The measure is the time to initiate, not the time to fill an order."
+  why: "Six hours is Clutch's own gate, and a hard one. The measure is the time to initiate, not the time to fill an order."
   breaks: "Recovery comes late in a depeg. A misread runbook during a depeg loses funds in minutes."
   watched_by: []
   watch_note: "The validator refuses a reviewed runbook whose drill exceeds six hours. No runbook is written or drilled yet; drills are a phase 3 gate. No response-time data exists for a group that mixes members of two bodies; the first drill measures it."
-  sources: ["ADR-005#consequences", OD-58, "doc:docs/product/brief.md#hard-gates",
+  sources: ["ADR-005#consequences", OD-58, OD-167, "doc:docs/product/brief.md#hard-gates",
     "doc:docs/specs/specification-policy.md#runbooks", "doc:ROADMAP.md#standing-gates"]
 
 - id: emergency-seats
-  assumption: "The [[Emergency Safe]] keeps its seat rule: two committee members, two Emergency Brakes members and a fifth signer of neither body."
+  assumption: "The [[Emergency Safe]] keeps its seat rule: two committee members, two Emergency Brakes members and a fifth signer of neither body, who is a Lido Labs engineering contributor."
   kind: trust
-  why: "No quorum of the emergency Safe is the committee alone, and the quorum without the committee is the mandate's independent exit. It holds the switch, and the cap-breach trigger pages it."
-  breaks: "Seat capture: any three signers can change the owners, for example to add a third committee member. The committee could then act alone, or the independent exit would be lost. A worsening breach or a defect would go on."
+  why: "No quorum of the emergency Safe is the committee alone, and the quorum without the committee is the mandate's independent exit. It holds the switch, and an alert on a cap breach pages it."
+  breaks: "Seat capture: any three signers can change the owners, for example to add a third committee member. The committee could then act alone, or the independent exit would be lost. A cap breach or a defect would go on."
   watched_by: [INV-026, "test:test_operator_holds_only_the_operator_key"]
-  watch_note: "The emergency Safe is not deployed, and its fifth signer is not chosen. The owner-change alert and the paging alert on the trigger are not built."
+  watch_note: "The emergency Safe is not deployed, and the acceptor has not named its fifth signer. The owner-change alert and the paging alert on a cap breach are not built."
   sources: ["ADR-005#d24", "ADR-005#d25", "ADR-005#proposed-direction", "ADR-005#consequences",
-    "ADR-009#d34", "INV-026"]
+    "ADR-009#d25", "ADR-009#d34", "INV-026"]
 
 - id: cap-breach-fixed
-  assumption: "Monitoring detects a cap breach, and the committee fixes it within two working days."
+  assumption: "Monitoring detects a cap breach, the committee fixes it, and the emergency Safe's signers judge when a breach needs the switch."
   kind: design
-  why: "The permission layer cannot see value, so no contract reverts on a cap."
-  breaks: "A breach goes unseen or unfixed. Every detective control ends at a person, whom the mandate must name."
+  why: "The permission layer cannot see value, so no contract reverts on a cap. The switch has no fixed trigger: an alert pages the emergency Safe, and its signers act on their judgment."
+  breaks: "A breach goes unseen or unfixed. Every detective control ends at a person, whom the mandate must name. A wrong price in one reading can also lead the signers to stop the operator."
   watched_by: []
   watch_note: "The detector specification is phase 1 work. The fortnightly cap reading and its paging alert are decided, not built."
-  sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d24", "ADR-009#d25", "ADR-009#d33",
-    "ADR-009#proposed-direction", "lip:part-9"]
+  sources: ["ADR-009#d1", "ADR-009#d6", "ADR-009#d25", "ADR-009#d33", "ADR-009#d34", "ADR-009#d41",
+    "ADR-009#proposed-direction", "ADR-009#consequences", "lip:part-9"]
 
 - id: cow-on-v150
   assumption: "CoW's order signer, ComposableCoW and CoW's fallback handler work on Safe v1.5.0 behind a Roles modifier, and each role's orders pay only their pinned receiver."
@@ -160,13 +160,13 @@
     "doc:docs/research/orders-account-fork-tests-2026-11-07.md#the-fork-tests"]
 
 - id: order-prices
-  assumption: "CoW's solver competition and EBBO rule, screening, the orders budgets and monitoring of each fill keep order prices close to the market."
+  assumption: "CoW's solver competition and EBBO rule, the orders budgets and monitoring of each fill keep order prices close to the market. Screening joins them once the guard is set."
   kind: trust
   why: "Nothing on chain bounds a CoW order's price: its limit is a number that the caller chooses."
   breaks: "A careless or hostile limit sells below the market when solvers fail to compete or break the EBBO rule beyond what a bond repays, or when liquidity is thin. A solver on CoW's list can fill a signed order at its limit. The budgets bound the operator's transfers; the emergency role's orders are neither budgeted nor screened."
   watched_by: ["test:test_orders_drill_a_limit_far_below_the_market"]
   watch_note: "CoW DAO enforces the EBBO rule after the fact. [the screening vendor] has not confirmed a price check. The orders detector is built: on the fork it reports a limit and a fill at half the market, and the emergency role unsigns the open order. Lido's monitoring does not run it yet, and its price source and its threshold are not set."
-  sources: ["ADR-007#d26", "ADR-007#d47", "ADR-009#d49", "OD-154", "ADR-007#proposed-direction", "ADR-010#proposed-direction", "OD-43",
+  sources: ["ADR-007#d26", "ADR-007#d47", "ADR-009#d49", "OD-154", "ADR-007#proposed-direction", "ADR-010#d22", "ADR-010#proposed-direction", "OD-43",
     "doc:docs/specs/control-matrix.md#the-matrix",
     "doc:docs/research/cow-orders-account-2026-10-06.md#cows-rules-on-the-fill-price"]
 
@@ -181,27 +181,28 @@
     "doc:docs/research/cow-orders-account-2026-10-06.md#conditional-orders-twap-and-stop-loss"]
 
 - id: top-ups
-  assumption: "Funding is regular, so top-up motions carry all of it, within each registry's limit."
+  assumption: "After the enabling vote pays the initial funding, funding is regular, so top-up motions carry all of it, within each registry's limit."
   kind: operational
   why: "The committee expects a top-up about every three to four months. A top-up motion takes 72 hours and uses Lido's existing top-up factories in new instances."
-  breaks: "A captured committee can pull a registry's limit in each period if nobody objects. Before the guard is set, nothing on chain keeps a top-up under the launch cap (OD-145)."
+  breaks: "A captured committee can pull a registry's limit in each period if nobody objects. Nothing on chain holds the mandate size, the treasury share or the runway floor: the committee's rule, an alert and the objection do. The enabling vote's payments pass no registry limit and no objection window."
   watched_by: []
-  watch_note: "Fork tests cover the two factories, their registries and the first top-up. The chain check of the registries' roles before the enabling vote, and the alerts on a top-up motion, are owed."
-  sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d16", "OD-145", "ADR-014#consequences", "INV-037", "ADR-005#d28"]
+  watch_note: "Fork tests cover the two factories, their registries and the enabling vote's payments. The chain check of the registries' roles before the enabling vote, and the alerts on a top-up motion, are owed."
+  sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d16", "ADR-014#d18", "ADR-009#d48", "ADR-014#consequences",
+    "ADR-014#confirmation", "INV-037", "ADR-005#d28", "doc:docs/specs/control-matrix.md#the-matrix"]
 
-- id: returns-rare
-  assumption: "Funds go back to the Aragon Agent only in an emergency or a recovery."
+- id: returns-routine
+  assumption: "The committee returns stablecoin reserves to the Aragon Agent when the DAO's stablecoin runway falls below the level that the mandate sets."
   kind: design
-  why: "EM wants the vault to send funds back rarely. Redemption and fund-exit proceeds pay the Asset Safe, not the Agent."
+  why: "The return is a routine. The operator's transfer is pinned to the Agent and needs no motion and no vote. Redemption and fund-exit proceeds pay the Asset Safe, not the Agent."
   breaks: "A captured or careless committee can return any vault token to the Agent at any time. That stops the vault's work but loses nothing."
   watched_by: []
-  watch_note: "Fork tests cover the operator's return on the Asset Safe and on the orders account, and the first-loss claim that pays only the Asset Safe. INV-038 stays pending for the exit of an insurance fund. The alert on every transfer to the Agent is not built."
+  watch_note: "Fork tests cover the operator's return on the Asset Safe and on the orders account, and the first-loss claim that pays only the Asset Safe. INV-038 stays pending for the exit of an insurance fund. The report of every transfer to the Agent, at a low severity, is not built."
   sources: ["ADR-014#d8", "ADR-014#d9", "ADR-014#d10", "ADR-014#consequences", "INV-038"]
 
 - id: insurance-one-safe
   assumption: "One first-loss Safe, with one modifier, keeps the first-loss shares and the insurance funds of three products safe."
   kind: design
-  why: "Insurance is built in at launch for earnETH, earnUSD and Lido Lend, and its money comes from the Asset Safe by motion."
+  why: "Insurance is built in at launch for earnETH, earnUSD and Lido Lend, and stays unused before a Snapshot approves the insurance framework. Its money comes from the Asset Safe by motion."
   breaks: "A defect in the first-loss modifier reaches every fund at once. A payout from a fund with a fixed payout address leaves the vault, so it is safe only if the creating motion pinned the right address and cap."
   watched_by: []
   watch_note: "On a fork, insurance money moves by motion within its budget key, a motion deposits it into Lido Earn, and motions create a fund with a payout address and pay out of it within its cap. INV-039 is tested with a stand-in payout address; the Lend team has not named one."

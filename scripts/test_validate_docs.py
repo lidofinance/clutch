@@ -143,8 +143,8 @@ EDIT_CASES = [
     ("an agent never verifies", [(ADR, _verified("codex/gpt-5"))], "must name a human"),
     ("an unlisted human cannot verify", [(ADR, _verified("human:stranger"))], "is not in config/actors.yaml"),
     ("an OD ID is used once", [("docs/registers/open-decisions.md", lambda t: t.replace(
-        OPEN_ROW, OPEN_ROW + "| OD-65 | A copy | [ADR 012](/adr/012-contributing-with-many-agents.md) | A | EM |\n", 1))],
-     "OD-65 appears in more than one row"),
+        OPEN_ROW, OPEN_ROW + "| OD-168 | A copy | [ADR 012](/adr/012-contributing-with-many-agents.md) | A | EM |\n", 1))],
+     "OD-168 appears in more than one row"),
     ("an open decision needs a recommendation", [("docs/registers/open-decisions.md", lambda t: t.replace(
         OPEN_ROW, OPEN_ROW + "| OD-98 | A question? | [ADR 012](/adr/012-contributing-with-many-agents.md) |  | EM |\n", 1))],
      "OD-98: an open decision needs"),
@@ -157,8 +157,8 @@ EDIT_CASES = [
         "  adr: [ADR-010]\n", "  adr: [ADR-010#d999]\n", 1))], "ADR 010 has no decision 999"),
     ("a decision replaces only earlier ODs", [(CLOSED, lambda t: t.replace(
         "  adr: [ADR-010]\n", "  adr: [ADR-010]\n  replaces:\n    - {od: OD-79}\n", 1))], "can only replace an earlier OD"),
-    ("an OD is open or closed, not both", [(CLOSED, lambda t: t + '- id: OD-65\n  question: "A copy"\n  closed: 2026-10-14\n  note: "x"\n')],
-     "OD-65 is both open and closed"),
+    ("an OD is open or closed, not both", [(CLOSED, lambda t: t + '- id: OD-168\n  question: "A copy"\n  closed: 2026-10-14\n  note: "x"\n')],
+     "OD-168 is both open and closed"),
     ("no OD number is skipped", [(CLOSED, lambda t: _without_entry(t, "OD-03"))], "OD-03 is neither open nor closed"),
     ("a closed decision is listed once", [(CLOSED, lambda t: t + _entry_text(t, "OD-03"))], "OD-03 is listed more than once"),
 ]

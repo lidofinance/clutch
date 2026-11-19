@@ -24,7 +24,7 @@ Each ADR records its decision and review status, and shows the current design on
 | [007](007-swapping-through-an-orders-account.md) | CoW orders and recovery through the orders account, and its restore |
 | [008](008-funding-through-existing-payments.md) | First-loss shares, insurance funds and the mandate size |
 | [009](009-budgets-caps-reporting-and-monitoring.md) | Budgets, exposure caps, pricing and monitoring |
-| [010](010-pre-execution-screening.md) | Screening on the committee's Safe, the launch cap and the guard before any top-up above it |
+| [010](010-pre-execution-screening.md) | Screening on the committee's Safe, and the volume threshold at which the guard is set |
 | [011](011-launch-scope.md) | Launch assets, venues and deferred integrations |
 | [013](013-one-easy-track-factory.md) | One Easy Track factory with raw writes; Aragon votes after launch only for break-glass actions |
-| [014](014-funding-by-top-up-motions.md) | Funding by top-up motions, insurance at launch, and the flows back to the treasury |
+| [014](014-funding-by-top-up-motions.md) | The initial funding by the enabling vote, top-up motions, insurance, and the flows back to the treasury |

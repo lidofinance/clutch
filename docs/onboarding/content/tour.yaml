@@ -24,21 +24,21 @@
   sources: ["ADR-008#d21", "ADR-008#d23", "ADR-005#proposed-direction", "ADR-014#d9", "ADR-014#d10",
     "INV-003", "INV-038", "test:test_D3_operator_cannot_route_around_avatar", "ADR-005#d31"]
 
-- title: Every operator transaction is screened
-  text: "[the screening vendor]'s [[guard]] sits on the committee's Safe. It refuses any transaction that the vendor has not approved, once and exactly, the committee's other duties included.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path.\n\nThe vault launches without the guard, on a first top-up of one million dollars, which is its [[launch cap]]. A funding above the cap starts only once the guard is live."
+- title: Screening starts when the guard is set
+  text: "The vault launches without [the screening vendor]'s [[guard]]. The guard is set on the committee's Safe when the vault's volume in a quarter passes the threshold that the mandate sets. Until then, no control before execution holds a cap or an order's price: the on-chain permissions, the budgets, monitoring and the emergency signers protect the funds.\n\nOnce set, the guard refuses any transaction that the vendor has not approved, once and exactly, the committee's other duties included.\n\nIf the vendor stops, the operator stops too: the guard [[fail closed|fails closed]]. Recovery does not change, because no guard sits on the emergency path."
   tech: "The vendor's key approves each exact transaction on chain, before it runs; a transaction without an approval reverts. The owners can remove the guard only through a 10-day timelock. Its bypass mode stays off: turning it on needs the vendor's approval and a 10-day timelock (INV-010)."
   nodes: [screening, committee]
   edges: [screen]
   flows: [vendor-outage]
   sources: ["ADR-010#d1", "ADR-010#d3", "ADR-010#d4", "ADR-010#d9", "ADR-010#d10", "ADR-010#d20",
-    "ADR-010#d22", "ADR-010#proposed-direction", "ADR-014#d14", "ADR-014#proposed-direction", "INV-010"]
+    "ADR-010#d22", "ADR-010#proposed-direction", "INV-010"]
 
 - title: Changes by motion, through one factory
-  text: "The committee widens its own permissions only through Easy Track [[motion|motions]] of one [[universal factory]]. LDO holders have 72 hours to object, and 0.5% of LDO stops a motion. This window is the timelock for every structural increase of exposure, such as a new target or a higher budget. After the enabling vote, no administrative action needs an Aragon vote.\n\nA motion is a list of [[raw write|raw writes]], which the factory makes as its motion roles. The factory checks no write's content, so a motion can widen a permission, and the 72 hours are the bound on where funds go. The modifier checks each write against the motion role's policy: no role change, no [[delegatecall]], no administrative target, and never the Asset Safe or its modifiers."
+  text: "The committee widens its own permissions only through Easy Track [[motion|motions]] of one [[universal factory]]. LDO holders have 72 hours to object, and 0.5% of LDO stops a motion. This window is the timelock for every structural increase of exposure, such as a new target or a higher budget. The committee discloses an onboarding or a higher budget on the forum before the motion, by the period that the mandate sets. After the enabling vote, no administrative action needs an Aragon vote.\n\nA motion is a list of [[raw write|raw writes]], which the factory makes as its motion roles. The factory checks no write's content, so a motion can widen a permission, and the 72 hours are the bound on where funds go. The modifier checks each write against the motion role's policy: no role change, no [[delegatecall]], no administrative target, and never the Asset Safe or its modifiers."
   tech: "The factory's Easy Track registration allows one call only, the factory's own `applyMotion`, and the factory holds the motion roles; Easy Track's executor holds none (INV-032, OD-118). The governance role may call six functions on the operator modifier: `scopeTarget`, `revokeTarget`, `allowFunction`, `revokeFunction`, `scopeFunction` and `setAllowance`. The role key is pinned to `operator`, a `Nor` condition refuses the Asset Safe and its modules as targets, and the execution option must be below 2, so no delegatecall. `setAllowance` takes only the operator's budget keys: a launch key, or a derived key, which starts with `k:`. The refill period is at least 30 days (INV-004, INV-012). A motion enacts only if the motion counter did not change, and a motion that writes on a modifier only if the policy version did not change (INV-033)."
   nodes: [committee, easytrack, dao, operator-modifier]
   edges: [motions, object, gov-role]
-  flows: [onboard, budget, orders-token, unlock]
+  flows: [onboard, budget, orders-token]
   sources: ["ADR-006#d4", "ADR-006#d8", "ADR-006#d9", "ADR-006#d10", "ADR-006#d11", "ADR-006#context",
     "ADR-013#d3", "ADR-013#d5", "ADR-013#d6", "ADR-013#d10", "ADR-013#d11", "ADR-013#d18", "OD-118",
     "INV-004", "INV-012", "INV-032", "INV-033", "INV-034",
@@ -46,26 +46,26 @@
     "doc:policy/constellation/constellation/administration.ts"]
 
 - title: Swaps are CoW orders
-  text: "Every swap is a [[CoW]] order placed from the [[orders account]]. The operator sends a token there under a budget, then places a market, [[limit order|limit]] or [[TWAP]] order that pays the Asset Safe. A [[recovery order]] buys USDC or USDT and pays the Aragon Agent. A motion adds a new token to the order lists.\n\nNothing on chain bounds an order's price. CoW's competition rules, screening, the budgets and monitoring of each fill take its place."
+  text: "Every swap is a [[CoW]] order placed from the [[orders account]]. The operator sends a token there under a budget, then places a market, [[limit order|limit]] or [[TWAP]] order that pays the Asset Safe. A [[recovery order]] buys USDC or USDT and pays the Aragon Agent. A motion adds a new token to the order lists.\n\nNothing on chain bounds an order's price. CoW's competition rules, the budgets and monitoring of each fill take its place. Screening joins them once the guard is set."
   tech: "Market and limit orders: a delegatecall from the orders account to CoW's order signer, `signOrder`, with tokens from the lists, the Asset Safe as receiver and a `validDuration` of at most 90 days. TWAP orders go through ComposableCoW, with only the TWAP handler; a TWAP order is created with `createWithContext`, so it starts at its creation (INV-022, INV-024)."
   nodes: [asset-safe, orders]
   edges: [swaps]
   flows: [swap-order, standing-order, orders-token, recovery-order]
   sources: ["ADR-007#d5", "ADR-007#d17", "ADR-007#d18", "ADR-007#d19", "ADR-007#d29", "ADR-007#d26",
-    "ADR-007#d41", "ADR-007#proposed-direction", "INV-013", "INV-014", "INV-022", "INV-024"]
+    "ADR-007#d41", "ADR-007#proposed-direction", "ADR-010#d22", "INV-013", "INV-014", "INV-022", "INV-024"]
 
 - title: "Money in, money back"
-  text: "Funding comes from the DAO treasury by [[top-up motion|top-up motions]]: the committee's Safe creates one, LDO holders can object for 72 hours, and Aragon Finance pays the Asset Safe, within a limit for each three months. The first top-up is one million dollars. A change of a limit is an Aragon vote. The vault holds up to the [[mandate size]].\n\nMoney goes back to the treasury only in an emergency or a recovery: by the emergency Safe's transfers and recovery orders, or by the committee's transfer pinned to the Agent. Monitoring alerts on each one. Insurance money moves from the Asset Safe to the first-loss Safe, by motion."
-  tech: "A top-up motion holds one `newImmediatePayment` from Finance to the Asset Safe for each payment, and the executor's permission caps one payment. Two registries list the Asset Safe as their only recipient, and Aragon Voting is their admin, so no Dual Governance proposal is on the path of a limit change. The universal factory's address book holds no payment call (INV-037). Every redemption, claim and exit of a fund pays the Asset Safe (INV-038)."
+  text: "The [[enabling vote]] pays the vault's initial funding from the DAO treasury. After it, funding comes by [[top-up motion|top-up motions]]: the committee's Safe creates one, LDO holders can object for 72 hours, and Aragon Finance pays the Asset Safe, within a limit for each three months. A change of a limit is an Aragon vote. The vault holds up to the [[mandate size]].\n\nMoney goes back to the treasury as a routine. The committee builds stablecoin reserves in the vault, and returns them by its transfer pinned to the Agent when the DAO's stablecoin runway falls below the level that the mandate sets. In an emergency, the emergency Safe's transfers and recovery orders send assets back. Monitoring reports each transfer. Insurance money moves from the Asset Safe to the first-loss Safe by motion, and none moves before a Snapshot approves the insurance framework."
+  tech: "A top-up motion holds one `newImmediatePayment` from Finance to the Asset Safe for each payment, and the executor's permission caps one payment. The enabling vote's payments pass no registry and no objection window. Two registries list the Asset Safe as their only recipient, and Aragon Voting is their admin, so no Dual Governance proposal is on the path of a limit change. The universal factory's address book holds no payment call (INV-037). Every redemption, claim and exit of a fund pays the Asset Safe (INV-038)."
   nodes: [dao, funding, asset-safe, first-loss]
   edges: [treasury, top-up, own, insure]
   flows: [top-up, seed, return-to-agent, insurance]
-  sources: ["ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d7", "ADR-014#d8", "ADR-014#d9",
+  sources: ["ADR-014#d4", "ADR-014#d13", "ADR-014#d14", "ADR-014#d15", "ADR-014#d18", "ADR-014#d7", "ADR-014#d8", "ADR-014#d9",
     "ADR-014#d10", "ADR-014#proposed-direction", "ADR-008#d32", "ADR-008#d34", "INV-037", "INV-038",
     "INV-039"]
 
 - title: "Emergencies: two fast stops, one slow restart"
-  text: "The **emergency Safe** has five signers: two committee members, two members of the Emergency Brakes multisig and one member of neither body. Three must sign, so the committee cannot use it alone. Through the safety modifier it revokes the operator, switches the operator modifier off, exits positions and sends assets to the Aragon Agent.\n\nThe **Emergency Brakes multisig** keeps only the Easy Track pause, and touches no funds. No emergency body restarts what it stopped: a motion restarts the operator, after its 72-hour window, and only a DAO vote unpauses Easy Track."
+  text: "The **emergency Safe** has five signers: two committee members, two members of the Emergency Brakes multisig and one Lido Labs engineering contributor who is a member of neither body. Three must sign, so the committee cannot use it alone. Through the safety modifier it revokes the operator, switches the operator modifier off, exits positions and sends assets to the Aragon Agent.\n\nThe **Emergency Brakes multisig** keeps only the Easy Track pause, and touches no funds. No emergency body restarts what it stopped: a motion restarts the operator, after its 72-hour window, and only a DAO vote unpauses Easy Track."
   tech: "Target: initiate any emergency action within six hours. Drills on a fork must prove it before launch. The switch is `disableModule` on the Asset Safe, pinned to the operator modifier (INV-009); the emergency role holds no call that restores authority (INV-027). At every stop the emergency Safe raises the factory's motion counter, so every open motion fails (INV-033). The restart role may only enable the operator modifier (INV-035)."
   nodes: [emergency-safe, safety-modifier, operator-modifier, dao, asset-safe]
   edges: [signers-em, em-role, revoke, own]
@@ -75,12 +75,12 @@
     "ADR-013#d12", "INV-002", "INV-009", "INV-027", "INV-033", "INV-035", "lip:part-6"]
 
 - title: Caps are watched, not enforced
-  text: "No contract reverts on a [[cap]]. Monitoring publishes the cap reading to IPFS every two weeks, and the policy provider publishes its own reading; a breach in either counts. The Zodiac UI refuses an operator transaction that would breach a cap, but only in its own interface. Each month, the committee publishes a report that anyone can reproduce, with the [[TMC-6 ratio]] for the whole treasury.\n\nIf a breach is not fixed within two working days and is larger at the next reading, monitoring pages the emergency Safe, which switches the operator off. The [[control matrix]] lists each rule's controls on every layer."
+  text: "No contract reverts on a [[cap]]. Monitoring publishes the cap reading to IPFS every two weeks, and the policy provider publishes its own reading; a breach in either counts. The Zodiac UI refuses an operator transaction that would breach a cap, but only in its own interface. Each month, the committee publishes a report that anyone can reproduce, with the [[TMC-6 ratio]] for the whole treasury.\n\nAn alert on a breach pages the emergency Safe. Its signers switch the operator off when they judge that the breach needs it: no fixed trigger binds them. The [[control matrix]] lists each rule's controls on every layer."
   tech: "The cap reading is the report generator's output at the [[fortnightly snapshot]]'s pinned block. The alert that pages the emergency Safe links it (OD-32, OD-58). The two readings use the same rule data from this repository (OD-84, OD-86, OD-87)."
   nodes: [monitoring, reporting, asset-safe, emergency-safe, committee]
   edges: [watch, report, page]
   flows: [fortnightly, monthly-report, cap-breach]
-  sources: ["ADR-009#d1", "ADR-009#d19", "ADR-009#d24", "ADR-009#d25", "ADR-009#d26", "ADR-009#d33",
+  sources: ["ADR-009#d1", "ADR-009#d19", "ADR-009#d25", "ADR-009#d26", "ADR-009#d33",
     "ADR-009#d34", "ADR-009#d40", "ADR-009#d41", "ADR-009#d43", "ADR-009#d44", "ADR-009#d47", "OD-32",
     "OD-58", "OD-84", "OD-86", "OD-87"]
 

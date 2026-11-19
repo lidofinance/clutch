@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T14:04:23Z
+  at: 2026-11-19T16:10:57Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -81,7 +81,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 10. A verification by the committee is committed by a member of the committee through a reviewed pull request. The entry carries `ref`, an https or urn link to the committee's decision record, such as a forum post or minutes (OD-15, OD-63).
 11. Decision 4 has one exception. On a human's explicit written instruction, an agent may record that human's own acceptance and verification. The entry names the agent in `recorded_by` and links, in `ref`, the decision-log heading that quotes the instruction. An agent never records a body's verification ([ADR 003](/adr/003-agent-operating-model.md) decision 14) (OD-31).
 12. No body other than the acceptor verifies an ADR before it is accepted (OD-63).
-13. From 2026-11-23, a proposal that changes the shape of the design goes to EM before the acceptor decides it. EM's default answer is no change, and EM can allow an exception (OD-159).
+13. From 2026-11-23, a proposal that changes the shape of the design goes to EM before the acceptor decides it. EM's default answer is no change, and EM can allow an exception. The shape is: the accounts and their owners; the roles and who may hold one; the governance path; the one new contract; and the absence of a price bound on chain (OD-159, OD-166).
 
 ## How the validator enforces it
 

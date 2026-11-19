@@ -6,7 +6,7 @@ status: stable
 review_status: slop
 generated:
   by: process:status-register
-  at: 2026-11-19T15:51:10Z
+  at: 2026-11-19T16:42:09Z
 verified: []
 ---
 
@@ -23,7 +23,7 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/001-repository-scope-visibility-licence-name.md](/adr/001-repository-scope-visibility-licence-name.md) | Decision | human-reviewed | accepted | 2026-11-11 | human:em (recorded) |
 | [adr/002-decision-and-review-process.md](/adr/002-decision-and-review-process.md) | Decision | human-reviewed | accepted | 2026-11-19 | human:em (recorded) |
 | [adr/003-agent-operating-model.md](/adr/003-agent-operating-model.md) | Decision | human-reviewed | accepted | 2026-11-13 | human:em (recorded) |
-| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-11-13 | human:em (recorded) |
+| [adr/004-specifications-and-policy-as-data.md](/adr/004-specifications-and-policy-as-data.md) | Decision | human-reviewed | accepted | 2026-11-19 | human:em (recorded) |
 | [adr/005-account-graph-and-roles.md](/adr/005-account-graph-and-roles.md) | Decision | human-reviewed | accepted | 2026-11-19 | human:em (recorded) |
 | [adr/006-governance-through-easy-track-factories.md](/adr/006-governance-through-easy-track-factories.md) | Decision | human-reviewed | accepted | 2026-11-19 | human:em (recorded) |
 | [adr/007-swapping-through-an-orders-account.md](/adr/007-swapping-through-an-orders-account.md) | Decision | human-reviewed | accepted | 2026-11-19 | human:em (recorded) |
@@ -35,11 +35,11 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [adr/013-one-easy-track-factory.md](/adr/013-one-easy-track-factory.md) | Decision | human-reviewed | accepted | 2026-11-19 | human:em (recorded) |
 | [adr/014-funding-by-top-up-motions.md](/adr/014-funding-by-top-up-motions.md) | Decision | human-reviewed | accepted | 2026-11-19 | human:em (recorded) |
 | [adr/015-tests-on-sepolia.md](/adr/015-tests-on-sepolia.md) | Decision | human-reviewed | accepted | 2026-11-19 | human:em (recorded) |
-| [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-11-11 | none |
-| [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-13 | none |
+| [onboarding/guide.md](/onboarding/guide.md) | Guide | slop |  | 2026-11-19 | none |
+| [product/brief.md](/product/brief.md) | Product Brief | slop |  | 2026-11-19 | none |
 | [registers/decision-log.md](/registers/decision-log.md) | Register | slop |  | 2026-11-19 | none |
 | [registers/open-decisions.md](/registers/open-decisions.md) | Register | slop |  | 2026-11-19 | none |
-| [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-13 | none |
+| [registers/parameters.md](/registers/parameters.md) | Register | slop |  | 2026-11-19 | none |
 | [research/ai-first-practice-2026-09.md](/research/ai-first-practice-2026-09.md) | Research Note | slop |  | 2026-11-11 | none |
 | [research/cfo-feedback-2026-10-13.md](/research/cfo-feedback-2026-10-13.md) | Research Note | slop |  | 2026-11-13 | none |
 | [research/chain-reads-2026-09-30.md](/research/chain-reads-2026-09-30.md) | Research Note | slop |  | 2026-11-11 | none |
@@ -66,11 +66,11 @@ A verifier marked `(recorded)` did not type the entry: an agent recorded it on t
 | [research/sepolia-test-results.md](/research/sepolia-test-results.md) | Research Note | slop |  | 2026-11-16 | none |
 | [research/universal-factory-prototype-2026-11-05.md](/research/universal-factory-prototype-2026-11-05.md) | Research Note | slop |  | 2026-11-12 | none |
 | [research/zodiac-constellation-2026-10-06.md](/research/zodiac-constellation-2026-10-06.md) | Research Note | slop |  | 2026-11-11 | none |
-| [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-17 | none |
-| [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-13 | none |
+| [specs/control-matrix.md](/specs/control-matrix.md) | Specification | slop |  | 2026-11-19 | none |
+| [specs/enabling-vote.md](/specs/enabling-vote.md) | Specification | slop |  | 2026-11-19 | none |
 | [specs/invariants.md](/specs/invariants.md) | Specification | slop |  | 2026-11-19 | none |
-| [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-13 | none |
+| [specs/lip-draft.md](/specs/lip-draft.md) | Specification | slop |  | 2026-11-19 | none |
 | [specs/sepolia-setup-checklist.md](/specs/sepolia-setup-checklist.md) | Guide | slop |  | 2026-11-16 | none |
 | [specs/sepolia-stand.md](/specs/sepolia-stand.md) | Guide | slop |  | 2026-11-16 | none |
 | [specs/specification-policy.md](/specs/specification-policy.md) | Policy | slop |  | 2026-11-12 | none |
-| [specs/threat-model.md](/specs/threat-model.md) | Specification | slop |  | 2026-11-17 | none |
+| [specs/threat-model.md](/specs/threat-model.md) | Specification | slop |  | 2026-11-19 | none |
