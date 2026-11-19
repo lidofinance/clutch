@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T14:04:53Z
+  at: 2026-11-19T15:51:10Z
 verified: []
 sources:
   - id: s1
@@ -199,6 +199,9 @@ sources:
   - id: s63
     resource: "urn:clutch:interview:2026-11-19-handover"
     title: EM's request for a handover plan, 2026-11-18, and EM's answers to its six questions, 2026-11-19; the transcript is not in the repository
+  - id: s64
+    resource: "urn:clutch:interview:2026-11-19-adr-002-verification"
+    title: EM's instruction to record the verification of ADR 002, 2026-11-19; the transcript is not in the repository
 ---
 
 # Decision log
@@ -208,6 +211,16 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-19 — ADR 002 verified again after the handover
+
+The handover's entry below changed decisions 1, 8 and 13 of the accepted ADR 002, which broke EM's verification of the page. The agent said that EM's verification was owed. EM wrote [s64]:
+
+> 1. Record ADR 002 verification on my behalf
+
+Recorded as:
+
+- EM verifies ADR 002 again with the handover's text, so it stays accepted. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's.
 
 ## 2026-11-19 — the handover to YT and the DeFi tech team; ADR 005 to ADR 015 accepted
 
