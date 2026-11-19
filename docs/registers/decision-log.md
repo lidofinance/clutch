@@ -7,7 +7,7 @@ status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T18:20:51Z
+  at: 2026-11-19T18:27:56Z
 verified: []
 sources:
   - id: s1
@@ -214,6 +214,9 @@ sources:
   - id: s68
     resource: "urn:clutch:interview:2026-11-19-adr-012-and-agents-prune"
     title: EM's instruction to align and verify ADR 012, and EM's authorization to prune AGENTS.md, 2026-11-19; the transcript is not in the repository
+  - id: s69
+    resource: "urn:clutch:interview:2026-11-19-adr-003"
+    title: EM's instruction to align and verify ADR 003, 2026-11-19; the transcript is not in the repository
 ---
 
 # Decision log
@@ -223,6 +226,17 @@ Entries quote EM exactly, including typos. An agent copied them from the intervi
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-19 — ADR 003 aligned with the pruning of AGENTS.md and verified
+
+After the entry below, ADR 003 decision 3 still said that EM prunes `AGENTS.md` by hand. The agent said so, and EM wrote [s69]:
+
+> 1. align ADR 003 and verify it on my behalf
+
+Recorded as:
+
+- [ADR 003](/adr/003-agent-operating-model.md) decision 3 says what happened: an agent drafted the file, and an agent pruned it on EM's written authorization of 2026-11-19. Its consequence says that the goal of a human-written instruction file is unmet, and that human review of each change is the control.
+- EM verifies ADR 003 again, so it stays accepted. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's.
 
 ## 2026-11-19 — ADR 012 aligned with OD-169 and verified; AGENTS.md pruned
 

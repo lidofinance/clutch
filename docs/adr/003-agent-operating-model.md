@@ -9,7 +9,7 @@ decision: accepted
 accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T07:06:18Z
+  at: 2026-11-19T18:27:56Z
 verified:
   - by: human:em
     at: 2026-10-05T20:27:31Z
@@ -49,10 +49,15 @@ verified:
     recorded_by: claude-code/mythos-5.2
     ref: /registers/decision-log.md#2026-11-13--adr-003-and-adr-004-verified-after-the-switch-to-top-up-motions
     sha256: e80b38307b018b5c6764108e3a398eaffe5804c2cd445459713799426d8e64d1
+  - by: human:em
+    at: 2026-11-19T18:27:56Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--adr-003-aligned-with-the-pruning-of-agentsmd-and-verified
+    sha256: e97d21330396924f33488ef2a5ada97b7606412bfe35492b386dac844f674e08
 sources:
   - id: s1
     resource: /registers/decision-log.md
-    title: Decision log — EM on the agent operating model, 2026-09-30, and on code owners and the reading of decision 6, 2026-10-05, and on recorded verifications, 2026-10-06
+    title: Decision log — EM on the agent operating model, 2026-09-30, and on code owners and the reading of decision 6, 2026-10-05, on recorded verifications, 2026-10-06, and on the pruning of `AGENTS.md`, 2026-11-19
   - id: s2
     resource: /research/ai-first-practice-2026-09.md
     title: AI-first repository practice — evidence on instruction files, skills and attacks
@@ -73,7 +78,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 1. `AGENTS.md` is the single source of truth for agents. It holds rules only, at most 60 lines, and the validator fails the build above the cap. The map lives in `docs/index.md` (decision log, 2026-09-30).
 2. `CLAUDE.md` is a symlink to `AGENTS.md`. Other tool files are added only when a tool is used (decision log, 2026-09-30).
-3. An agent drafts the first `AGENTS.md`. EM prunes it by hand (decision log, 2026-09-30).
+3. An agent drafted the first `AGENTS.md`. An agent pruned it on EM's written authorization of 2026-11-19; EM did not prune it by hand (decision log, 2026-09-30 and 2026-11-19).
 4. Repeatable procedures are Agent Skills under `skills/`. The ADR-drafting skill is shared with Gaggle. Three skills are specific to Clutch: the permission-change verification procedure, the fork drill runner and a policy diff (decision log, 2026-09-30).
 5. Agents may branch, draft, write code and tests, and open pull requests (decision log, 2026-09-30).
 6. Agents never merge, never touch `deployed/` and never mark a page reviewed. Agents never change budgets, ceilings, the orders account's token lists, the top-up registries' limits or role membership (OD-43, OD-106, OD-140).
@@ -96,7 +101,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 - Agents read `docs/` on demand.
 - Humans choose parameters. Agents can draft options but never pick one.
-- The human-written instruction-file goal remains unmet until EM prunes the initial agent draft.
+- The goal of a human-written instruction file is unmet: an agent drafted the file, and an agent pruned it. Human review of each change of the file is the control (decision 7).
 - A freshness check is owed; it must fail on broken paths and obsolete commands. Until it exists, that goal remains unmet.
 - The procedures live in `skills/`: `adr-draft`, `decision-interview`, `record-decision`, `guide-update` and `research-note`.
 - An agent owns no GitHub account: its work lands through the account of the human who runs it (OD-23, [ADR 012](/adr/012-contributing-with-many-agents.md) decision 5). Another owning-team member must approve; the creator's approval does not count.
