@@ -4,12 +4,18 @@ title: "ADR 008: First-loss shares, insurance funds and the mandate size"
 description: The DAO's first-loss Earn shares in their own Safe, their burn by motion and their redemption to the Asset Safe, the framework for insurance funds, and the mandate size as a ceiling.
 tags: [first-loss, insurance, mandate, funding]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T07:06:18Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:03Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: 2a57e6246fb8044a0f3a3d321c7d75342f4015eb83a8fb5b2c6f6c38f6be406b
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -74,7 +80,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM accepted it with this record (decision log, 2026-11-19).
 
 - **First-loss custody.** A Safe v1.5.0 ([ADR 005](/adr/005-account-graph-and-roles.md) decision 13). Plain transfers bring the first-loss shares (decision 13), and a motion brings insurance money ([ADR 014](/adr/014-funding-by-top-up-motions.md) decision 7).
 - **First-loss burn.** The motion names an amount and the earnETH or earnUSD share (decision 23; [ADR 013](/adr/013-one-easy-track-factory.md#proposed-direction)).

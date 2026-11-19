@@ -4,12 +4,18 @@ title: "ADR 013: One Easy Track factory for the vault's permissions; Aragon vote
 description: One universal Easy Track factory carries every Clutch motion as a list of raw writes, holds the motion roles and makes each motion's writes in one call; after the enabling vote, Aragon votes remain only for role holders, a top-up registry's limits and break-glass actions.
 tags: [governance, easy-track, factory, raw-writes]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:03Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: 9a86f443b5b3f1fbad1bfcf3c50dd00fe8de222ec0c6bff4b4ee64760bb2758a
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -58,7 +64,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM accepted it with this record (decision log, 2026-11-19).
 
 - **A motion's calldata.** It holds the counter and the policy version that the motion read, and the list of writes, at most 64. `decodeEVMScriptCallData` returns them as they are, so a reviewer reads the writes from the motion itself. A failed enactment reverts as a whole; the motion stays open until the committee's Safe or Aragon Voting cancels it [s2].
 - **The factory's checks.** The creator is the committee's Safe. The counter is current. The motion has at least one write and at most 64. Each write names one of the four modifiers. If a write's target is one of the four modifiers, the policy version is current. The factory checks nothing else.

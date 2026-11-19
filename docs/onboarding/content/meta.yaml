@@ -67,7 +67,6 @@ tab_intros:
   selfcheck: "Nine questions to check what you learned."
 quiz_note: "Pick an answer to see whether it is right and why. Nothing is stored or sent."
 owed:
-  - "EM accepts ADR 005 to ADR 014."
   - "A Snapshot appoints the [[Emergency Safe]]'s fifth signer."
   - "The committee's valuation policy sets the [[price waterfall]]'s band, the share of the vault that its last level may price, and the band between the two readings."
   - "[the screening vendor] confirms in writing that it accepts no standing approvals, and agrees to be named."

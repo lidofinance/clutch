@@ -1,13 +1,13 @@
 ---
 type: Register
 title: Decision log
-description: EM's inputs and decisions for Clutch, quoted exactly and dated; the source of record for every claim that EM decided something.
+description: EM's inputs and decisions for Clutch, and the acceptor's from 2026-11-23, quoted exactly and dated; the source of record for every claim that one of them decided something.
 tags: [decisions, provenance]
 status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-17T21:07:34Z
+  at: 2026-11-19T15:51:10Z
 verified: []
 sources:
   - id: s1
@@ -196,15 +196,58 @@ sources:
   - id: s62
     resource: "urn:clutch:interview:2026-11-17-order-price-bound-choice"
     title: EM's choice for OD-157, 2026-11-17; the transcript is not in the repository
+  - id: s63
+    resource: "urn:clutch:interview:2026-11-19-handover"
+    title: EM's request for a handover plan, 2026-11-18, and EM's answers to its six questions, 2026-11-19; the transcript is not in the repository
+  - id: s64
+    resource: "urn:clutch:interview:2026-11-19-adr-002-verification"
+    title: EM's instruction to record the verification of ADR 002, 2026-11-19; the transcript is not in the repository
 ---
 
 # Decision log
 
-Entries quote EM exactly, including typos. An agent copied them from the interview transcripts. EM should confirm each entry by verifying this page. Newest first. Times are UTC.
+Entries quote EM exactly, including typos. An agent copied them from the interview transcripts. EM should confirm each entry by verifying this page. From 2026-11-23 an entry quotes the acceptor, YT, in the same way (OD-158). Newest first. Times are UTC.
 
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-19 — ADR 002 verified again after the handover
+
+The handover's entry below changed decisions 1, 8 and 13 of the accepted ADR 002, which broke EM's verification of the page. The agent said that EM's verification was owed. EM wrote [s64]:
+
+> 1. Record ADR 002 verification on my behalf
+
+Recorded as:
+
+- EM verifies ADR 002 again with the handover's text, so it stays accepted. At this instruction, the agent recorded EM's `verified` entry under the OD-31 rule: it names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification is EM's.
+
+## 2026-11-19 — the handover to YT and the DeFi tech team; ADR 005 to ADR 015 accepted
+
+EM wrote on 2026-11-18 [s63]:
+
+> now I want you to build a plan of github repo maintenance and decision-tracking handover: I (EM) will not longer the repo main maintainer, everything goes to the @lidofinance/defi-tech team; build the plan so we can execute it afterwards
+
+The agent gave a plan with six questions. H1: who accepts ADRs and decides open decisions after EM. H2: the cutover day, and EM's part after it. H3: whether EM accepts the proposed ADR 005 to ADR 015 before the cutover; the agent recommended that EM accept none. H4: who decides the questions that the mandate's draft raises. H5: who receives restricted material. H6: which agents of the team may record a verification. The agent also said that the edits of `AGENTS.md` and `config/actors.yaml` need EM's request. EM answered on 2026-11-19 [s63]:
+
+> getting back to handover:
+> - H1: YT accepts as the lead of the DeFi Engineering chapter, defi-tech team executes and approves PRs (as codeowners)
+> - H2: cutover day is November, 23rd; I can be needed if design shape proposed to change (I would not do it, but can allow some exceptions)
+> - H3: I accept them, record it; I allow you to change AGENTS.md and config/actors.yaml
+> - H4: let's make an interview with me
+> - H5: materials stay the same: provider names that we excluded before
+> - H6: let them decide after handover
+
+Recorded as:
+
+- OD-158: YT, the lead of the DeFi Engineering chapter, accepts ADRs in the interim from 2026-11-23 ([ADR 002](/adr/002-decision-and-review-process.md) decision 1). `@lidofinance/defi-tech` does the work and approves pull requests as code owners, as `.github/CODEOWNERS` already says. The agent reads "accepts" as the acceptor's whole part: from that day YT also triages and decides the open decisions ([ADR 012](/adr/012-contributing-with-many-agents.md) decisions 4 and 6). That reading is the agent's.
+- OD-159: from 2026-11-23, a proposal that changes the shape of the design goes to EM before the acceptor decides it. EM's default answer is no change, and EM can allow an exception (ADR 002 decision 13). The wording is the agent's reading of EM's second answer. EM did not say what counts as the shape.
+- H3: EM accepts ADR 005 to ADR 015. At this instruction, the agent set each record to `decision: accepted` with `accepted_by: human:em`, and recorded EM's `verified` entry under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The acceptance covers each record's whole text, the agent-drafted "Proposed direction" included, as it stands after this entry's edits. The acceptances are EM's.
+- EM asked in writing for the edits of `AGENTS.md` and `config/actors.yaml`. Both files now name YT as the interim acceptor from 2026-11-23.
+- H4: EM decides the questions of the mandate's draft in an interview. This entry records no answer to them.
+- H5: the rules for restricted material do not change. The names that the redaction list excludes stay excluded.
+- H6: the team chooses its recording agents after the handover. `config/actors.yaml` keeps its two agents.
+- ADR 002 is an accepted record, and decisions 1, 8 and 13 change its text, which breaks EM's verification of it. EM's instruction names ADR 005 to ADR 015 only, so the agent recorded no verification of ADR 002. EM's verification of ADR 002 is owed.
 
 ## 2026-11-17 — OD-157 decided: no price bound for like-for-like orders
 

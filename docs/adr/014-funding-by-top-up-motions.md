@@ -4,12 +4,18 @@ title: "ADR 014: Funding by top-up motions"
 description: Two top-up factories fund the vault by Easy Track motion within a limit for three months, the first top-up included; insurance for earnETH, earnUSD and Lido Lend comes from the Asset Safe; only emergency, recovery and the operator's pinned return pay the Aragon Agent.
 tags: [funding, finance, insurance, governance]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T07:44:55Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:04Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: 9f41b635e1a26ec13ed82dacf644161e71e1335a15a7758be23e84d6b8b00ef7
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -60,7 +66,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM accepted it with this record (decision log, 2026-11-19).
 
 - **Above a limit.** Top-up motions are the only funding path (decision 18). A funding above a registry's limit for a period needs an Aragon vote that changes the limit, which Aragon Voting does as the registry's admin. USDS is on no top-up list: the vault gets it as DAI, which the operator converts through Sky's converter ([ADR 011](/adr/011-launch-scope.md) decision 7).
 - **The first top-up (decision 14).** The enabling vote pays nothing. After it is enacted, anyone sends the Safe batches ([ADR 005](/adr/005-account-graph-and-roles.md) decision 32). Then the committee's Safe creates the motions of the first top-up, one for each factory that it uses, and anyone enacts them after the objection window. The first top-up is the launch cap ([ADR 010](/adr/010-pre-execution-screening.md) decision 20).

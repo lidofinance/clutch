@@ -7,7 +7,7 @@ status: draft
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-17T20:16:01Z
+  at: 2026-11-19T14:04:23Z
 verified: []
 sources:
   - id: s1
@@ -25,7 +25,7 @@ sources:
 
 Each invariant comes from the ADR that sets it [s1] and names the tests that check it: Solidity tests in `test/` and the compiler's tests. CI checks that every named test exists and that every Draft invariant names a test (`scripts/check_invariants.py`).
 
-State "Draft" means the ADR is proposed. State "Retired" means a decision removed what the invariant protected. State "Pending" means the invariant depends on an open decision or on work that is not built. "Violated" would mean that the policy breaks the invariant; no invariant is in that state.
+State "Draft" means that tests check the invariant and the vault is not deployed. State "Retired" means a decision removed what the invariant protected. State "Pending" means the invariant depends on an open decision or on work that is not built. "Violated" would mean that the policy breaks the invariant; no invariant is in that state.
 
 OD-152 B sets four account-specific role keys for the Sepolia stand and the mainnet design [s2]. The mainnet rows stay in force pending the required implementation. The paragraph below maps the new key references to named tests. Revise the mainnet policy and INV-018, INV-025 and INV-027 together before mainnet deployment. Preserve INV-004's governance restrictions and INV-009's emergency stop [s2].
 

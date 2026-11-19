@@ -4,12 +4,18 @@ title: "ADR 007: Swapping through an orders account"
 description: CoW orders of the operator and of recovery from the orders account, with its permissions, token lists, order life, price controls and restore.
 tags: [swaps, cow, orders, emergency, rebalancing]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-17T21:07:34Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:03Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: a8d0ca74573c6eed3528539f3d4469325839e163d40ea49250be1fc25b818c26
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -108,7 +114,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted [s11]. EM has not accepted it as text.
+The rest of this section is agent-drafted [s11]. EM accepted it with this record (decision log, 2026-11-19).
 
 - **Orders account.** A Safe v1.5.0 ([ADR 005](/adr/005-account-graph-and-roles.md) decision 13) with `ExtensibleFallbackHandler`, and ComposableCoW as the verifier of CoW's settlement domain. The enabling vote configures its one modifier, with the account as owner, avatar and target ([ADR 005](/adr/005-account-graph-and-roles.md) decision 21).
 - **Operator funding.** Each listed token's transfer to the orders account spends that token's orders budget (decision 18).

@@ -71,11 +71,23 @@ def _without_entry(text: str, od: str) -> str:
 OPEN_ROW = "|---|---|---|---|---|\n"
 
 
+def _as_proposed(text: str) -> str:
+    """A record as a proposed, unverified draft. Every record is accepted, so the cases below make their own draft."""
+    head, body = text.split("\n---\n", 1)
+    head = re.sub(r"\nverified:\n(?:  [^\n]*\n)+", "\nverified: []\n", head + "\n").rstrip("\n")
+    head = re.sub(r"\naccepted_by: [^\n]+", "", head)
+    head = head.replace("decision: accepted", "decision: proposed", 1)
+    head = re.sub(r"\nreview_status: [^\n]+", "\nreview_status: slop", head)
+    return head + "\n---\n" + body
+
+
 def _edited(validator, edits: list[tuple[str, Any]]) -> list[str]:
     """Every error after applying (path, change) edits to a fresh copy, as `path: message`."""
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _copy(root)
+        draft = root / ADR
+        draft.write_text(_as_proposed(draft.read_text(encoding="utf-8")), encoding="utf-8")
         for rel, change in edits:
             path = root / rel
             if callable(change):
@@ -165,7 +177,7 @@ def _lock_cases(validator) -> list[tuple[str, list[tuple[str, Any]], str | None]
          "an agent never records a body's or a team's verification"),
         ("a team never accepts an ADR", [(ADR, lambda t: _accepted_by("human:defi-tech")(
             _with_entry(validator, "human:defi-tech", "2026-10-07T07:00:00Z", ref=PR)(t)))],
-         "only EM or the committee accepts an ADR"),
+         "only an acceptor accepts an ADR"),
         ("a new verification records the body's hash", [(ADR, _with_entry(validator, "human:em", "2026-10-07T07:00:00Z", hashed=False))],
          "needs `sha256`, the hash of the page's body"),
         ("a verification before 2026-10-07 needs no hash", [(ADR, _with_entry(validator, "human:em", "2026-10-06T23:00:00Z", hashed=False))], None),
@@ -250,11 +262,19 @@ def main() -> int:
         _copy(root)
         clean = not validator.generated_issues(root)
         adr = root / "docs" / "adr" / "006-governance-through-easy-track-factories.md"
-        adr.write_text(adr.read_text(encoding="utf-8").replace("No open decision closes in this record.", "Nothing.", 1), encoding="utf-8")
+        adr.write_text(_as_proposed(adr.read_text(encoding="utf-8")), encoding="utf-8")
+        for path, text in validator.generated_files(root).items():
+            path.write_text(text, encoding="utf-8")
+        fresh = "docs/adr/006-governance-through-easy-track-factories.md" not in {i.path for i in validator.generated_issues(root)}
+        block = validator.render_adr_open_block(root, "006")
+        adr.write_text(adr.read_text(encoding="utf-8").replace(block, block.replace("\n\n", "\n\nNothing.\n\n", 1), 1), encoding="utf-8")
         stale = {i.path for i in validator.generated_issues(root)}
         checks.append(("the committed generated blocks are current", clean))
+        checks.append(("a proposed record's generated block is current after a write", fresh))
         checks.append(("a hand edit of a generated block is caught",
                        "docs/adr/006-governance-through-easy-track-factories.md" in stale))
+    yt = _edited(validator, [(ADR, lambda t: _accepted_by("human:yt")(_with_entry(validator, "human:yt", "2026-10-07T07:00:00Z")(t)))])
+    checks.append(("YT is an acceptor (OD-158)", not any("only an acceptor accepts an ADR" in e for e in yt)))
     for name, ok in checks:
         failures += not ok
         print(f"{'PASS' if ok else 'FAIL'}  {name}")

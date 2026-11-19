@@ -837,7 +837,7 @@ flows:
     trigger: "The roadmap."
     steps:
       - who: "Phase 0: decisions"
-        text: "EM accepts the ADRs."
+        text: "The acceptor accepts the ADRs. EM accepted ADR 001 to ADR 015."
         nodes: [committee, screening]
       - who: "Phase 1: specification"
         text: "The specifications, the control matrix, the screening rule list and the runbook drafts."

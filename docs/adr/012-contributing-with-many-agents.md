@@ -4,12 +4,18 @@ title: "ADR 012: Contributing with many agents"
 description: Contribution, human verification, decision interviews, CI, generated files, guide source pins, and pages that show the current design only.
 tags: [agents, contributors, process, security, ci]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-12T17:45:27Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:03Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: 893032545ea90ea4586b434809d0fb917fce09d21040bc80c26bc85281da0f3a
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -46,9 +52,9 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 1. Any agent may author a page: `generated.by` accepts any agent id of the form `<runner>/<model>`. Only the humans and teams that `config/actors.yaml` lists verify a page (decision log, 2026-10-07; OD-50).
 2. `CODEOWNERS` does not change for now (decision log, 2026-10-07).
 3. A change lands on `main` through a merge queue, or, without one, only when its branch is up to date with `main`. The checks run on the merged result (decision log, 2026-10-07).
-4. An agent opens a decision only as a complete row of the open-decision register: the question with its options, the page that closes it, its recommendation and who decides. EM triages the open decisions and decides them in batched interviews. One decisions branch is open at a time, and a decision may also be recorded on the build branch that raised it (decision log, 2026-10-07; OD-124).
+4. An agent opens a decision only as a complete row of the open-decision register: the question with its options, the page that closes it, its recommendation and who decides. The acceptor triages the open decisions and decides them in batched interviews. One decisions branch is open at a time, and a decision may also be recorded on the build branch that raised it (decision log, 2026-10-07; OD-124, OD-158).
 5. Agents own no GitHub accounts. An agent's work lands through the account of the human who runs it. Each commit carries a `Co-Authored-By` trailer for the agent, and each page names the agent in `generated.by` (decision log, 2026-10-07; OD-23).
-6. A team verifies through a member, with `ref` to the pull request that the member approved. `human:defi-tech` is the first team. A team's verification raises a page's review status and never accepts an ADR: only EM or the committee accepts one (OD-50).
+6. A team verifies through a member, with `ref` to the pull request that the member approved. `human:defi-tech` is the first team. A team's verification raises a page's review status and never accepts an ADR: only the acceptor of [ADR 002](/adr/002-decision-and-review-process.md) decision 1 accepts one (OD-50, OD-158).
 7. Each verification records `sha256`, the hash of the page's body. `just verify` writes the entry. The validator fails when the body differs from the hash of the latest verification, until a human verifies the page again. Verifications before 2026-10-07 carry no hash (OD-51).
 8. The fork suite runs in CI in the merge queue and on pushes to `main`, and never on a pull request. Its archive RPC key is the repository secret `MAINNET_RPC_URL` (OD-52).
 9. The request for solution's allocation figures are not restricted. The README opens with a disclosure: everything in the repository is a draft and not ratified, and every number is speculative (OD-53).
@@ -60,7 +66,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM accepted it with this record (decision log, 2026-11-19).
 
 `CONTRIBUTING.md` holds the workflow and the commands, `AGENTS.md` the agent rules, and [guide maintenance](/onboarding/guide.md) the guide's build, pins and tests. The bullets add only what those pages do not state.
 
@@ -91,7 +97,7 @@ The rest of this section is agent-drafted. EM has not accepted it as text.
 ## Consequences
 
 - The queue increases merge time to keep `main` green.
-- EM remains the decision bottleneck; batched interviews reduce interruptions.
+- The acceptor remains the decision bottleneck; batched interviews reduce interruptions.
 - Hashed redaction lists deter casual discovery, not guessing.
 - A pull request does not run the fork suite, so a broken fork test shows first in the merge queue or on `main`. The author runs `just test-fork` before the pull request.
 - Local anvil rehearsals may use one public test `PRIVATE_KEY` for one command.

@@ -6,7 +6,9 @@
 ## Who does what
 
 Humans decide, review, verify and merge. Agents draft text, code and tests.
-EM accepts decisions in the interim; the Treasury Management Committee is the permanent acceptor (OD-63).
+The acceptor accepts decisions: YT, the lead of the DeFi Engineering chapter, in the interim from 2026-11-23, and the Treasury Management Committee permanently (OD-63, OD-158).
+`@lidofinance/defi-tech` does the work and approves pull requests as code owners.
+A proposal that changes the shape of the design goes to EM first (OD-159).
 Any agent may author a page. Only humans and teams listed in `config/actors.yaml` can verify pages.
 Agents own no GitHub accounts. They use the contributor's account; the contributor opens and answers for the pull request.
 Each commit carries the agent's `Co-Authored-By` trailer. Pages name their agent authors in `generated.by`.
@@ -49,7 +51,7 @@ Add `--review human-reviewed` to set the review status.
 A team member adds `--ref <approved pull request>`; a committee member adds `--ref <committee decision record>`.
 
 A later body edit fails the check until the page is verified again (OD-51).
-Team verification raises review status; only EM or the committee accepts an ADR (OD-50).
+Team verification raises review status; only the acceptor accepts an ADR (OD-50).
 
 ## Generated files
 
@@ -77,7 +79,7 @@ Add a complete row to the [open-decisions register](docs/registers/open-decision
 question, options, closing page, recommendation and decider. The validator rejects incomplete rows.
 To close a decision, remove its row, add its entry to `docs/registers/closed-decisions.yaml` and run `just regen`.
 
-EM triages open decisions and decides in batched interviews, with one decisions branch at a time.
+The acceptor triages open decisions and decides in batched interviews, with one decisions branch at a time.
 The decision log quotes the interview exactly. Do not reconstruct a quote from memory or another source.
 
 ## Restricted material and secrets

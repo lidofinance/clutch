@@ -1,7 +1,7 @@
 # Plain definitions. `[[term]]` or `[[term|shown text]]` anywhere in the content links here;
 # the build fails on a link to a term that this file does not define.
 - term: ADR
-  plain: "A numbered decision record in `docs/adr/`. An agent drafts it, and it stays proposed until EM, and later the committee, accepts it. An acceptance authorises nothing on chain."
+  plain: "A numbered decision record in `docs/adr/`. An agent drafts it, and it stays proposed until the acceptor accepts it: EM until 2026-11-23, YT after, and later the committee. An acceptance authorises nothing on chain."
   sources: ["ADR-002#d1", "ADR-002#d6", "ADR-002#d7"]
 
 - term: Allowance

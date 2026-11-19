@@ -4,12 +4,18 @@ title: "ADR 011: Launch scope"
 description: The launch assets and venues, the later onboarding of Lido Lend, and the integrations outside the launch.
 tags: [scope, assets, launch, lido-lend]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-13T06:47:18Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:03Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: 4b0ab2488189b9cf8942a02c2550b648e79b6ca11545be1cfb24174c4e7161d0
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -51,7 +57,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM accepted it with this record (decision log, 2026-11-19).
 
 | Asset or venue | Role in the vault | Notes |
 |---|---|---|

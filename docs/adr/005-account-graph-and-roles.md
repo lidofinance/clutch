@@ -4,12 +4,18 @@ title: "ADR 005: Account graph and roles"
 description: The vault's Safes and their owners, the modifiers and their roles, the emergency Safe and the switch, and who resumes what an emergency stopped.
 tags: [architecture, roles, safe, zodiac, emergency]
 status: draft
-review_status: slop
-decision: proposed
+review_status: human-reviewed
+decision: accepted
+accepted_by: human:em
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-17T20:16:01Z
-verified: []
+  at: 2026-11-19T14:04:23Z
+verified:
+  - by: human:em
+    at: 2026-11-19T14:06:03Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
+    sha256: 96f250d97c7ba8692e539fed45fc54e4208bbab0eb6477927bfe4a49f99848b6
 sources:
   - id: s1
     resource: /registers/decision-log.md
@@ -107,7 +113,7 @@ EM decided each decision below; its ODs lead to EM's words in the [decision log]
 
 ## Proposed direction
 
-The rest of this section is agent-drafted. EM has not accepted it as text.
+The rest of this section is agent-drafted. EM accepted it with this record (decision log, 2026-11-19).
 
 - **Emergency Safe.** It holds no assets and has no guard. Because one person can use several addresses, the fifth signer also confirms their independence in writing. At every stop, the emergency Safe raises the universal factory's counter ([ADR 013](/adr/013-one-easy-track-factory.md) decision 10), and the creator of each motion queued before the stop cancels it.
 - **Modifiers.** The operator modifier and the safety modifier are Roles minimal proxies, each with the Asset Safe as owner, avatar and target. The first-loss Safe is the owner, avatar and target of its modifier. A narrowly scoped role can administer a modifier as the Safe without a vote, which makes the emergency revoke possible.

@@ -1,6 +1,6 @@
 # Decision records
 
-EM accepts ADRs in the interim. The Treasury Management Committee is the permanent acceptor.
+YT accepts ADRs in the interim, from 2026-11-23; EM accepted them before. The Treasury Management Committee is the permanent acceptor.
 No other body verifies an ADR before acceptance ([ADR 002](002-decision-and-review-process.md), OD-63).
 Each ADR records its decision and review status, and shows the current design only: a replaced decision keeps its number as one line that names what holds now (OD-128). Pending questions are in the [open-decisions register](/registers/open-decisions.md).
 
