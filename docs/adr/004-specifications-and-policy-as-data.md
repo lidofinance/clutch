@@ -54,6 +54,11 @@ verified:
     recorded_by: claude-code/mythos-5.2
     ref: /registers/decision-log.md#2026-11-13--adr-003-and-adr-004-verified-after-the-switch-to-top-up-motions
     sha256: 2e2f9184adf838551563c3a2eacfa2ca769ee29539c04b52143b53cf0a6adaaf
+  - by: human:em
+    at: 2026-11-19T16:55:17Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--nine-adrs-verified-again-od-169-em-or-yt-decides-the-open-decisions
+    sha256: b7bd0ac6b75c0d0a14caf27d4156c712bec77680b517842ced0ac62ab4956f67
 sources:
   - id: s1
     resource: /registers/decision-log.md

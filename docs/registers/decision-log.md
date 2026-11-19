@@ -1,13 +1,13 @@
 ---
 type: Register
 title: Decision log
-description: EM's inputs and decisions for Clutch, and the acceptor's from 2026-11-23, quoted exactly and dated; the source of record for every claim that one of them decided something.
+description: EM's inputs and decisions for Clutch, and YT's from 2026-11-23, quoted exactly and dated; the source of record for every claim that one of them decided something.
 tags: [decisions, provenance]
 status: stable
 review_status: slop
 generated:
   by: claude-code/mythos-5.2
-  at: 2026-11-19T16:12:06Z
+  at: 2026-11-19T16:55:17Z
 verified: []
 sources:
   - id: s1
@@ -208,15 +208,31 @@ sources:
   - id: s66
     resource: "urn:clutch:restricted:mandate-text-2026-11-19"
     title: The mandate's authorization text as of 2026-11-19; outside the repository until the mandate is published
+  - id: s67
+    resource: "urn:clutch:interview:2026-11-19-verification-and-deciders"
+    title: EM's instruction to record nine verifications, and EM's answer on who decides open decisions, 2026-11-19; the transcript is not in the repository
 ---
 
 # Decision log
 
-Entries quote EM exactly, including typos. An agent copied them from the interview transcripts. EM should confirm each entry by verifying this page. From 2026-11-23 an entry quotes the acceptor, YT, in the same way (OD-158). Newest first. Times are UTC.
+Entries quote EM exactly, including typos. An agent copied them from the interview transcripts. EM should confirm each entry by verifying this page. From 2026-11-23 an entry quotes the decider, EM or YT, in the same way (OD-158, OD-169). Newest first. Times are UTC.
 
 Square brackets mark a redaction. Redactions keep the screening vendor's identity, the addresses that reveal it, the unapproved mandate size, two indicative tranche figures, a price level that EM gave as an example, a local file path, a person's name, and the name and link of another, private repository out of the repository ([ADR 001](/adr/001-repository-scope-visibility-licence-name.md)).
 
 Most answers are numbered. The numbers refer to the questions that the agent asked in the interview, and each "Recorded as" line names the question.
+
+## 2026-11-19 — nine ADRs verified again; OD-169: EM or YT decides the open decisions
+
+The entry below changed nine accepted ADRs, which broke EM's verification of each. The agent asked EM to verify them, and asked again whether YT also decides the open decisions from 2026-11-23. EM wrote [s67]:
+
+> 1. verify ADR 002, 004, 005, 006, 008, 009, 010, 011 and 014 again on my behalf
+> 2. Q9: Either me or YT can decide on open decisions from 2026-11-23
+
+Recorded as:
+
+- OD-169: from 2026-11-23, EM or YT decides an open decision, and YT accepts the ADR that records it ([ADR 002](/adr/002-decision-and-review-process.md) decision 14). This replaces the agent's reading of OD-158, that YT alone decides. `AGENTS.md`, `CONTRIBUTING.md`, the open-decision register and the skills say so. The edit of `AGENTS.md` is part of the handover, for which EM asked in writing.
+- EM verifies ADR 002, 004, 005, 006, 008, 009, 010, 011 and 014 again, so they stay accepted. At this instruction, the agent recorded EM's `verified` entries under the OD-31 rule: each names the agent in `recorded_by`, links this heading in `ref`, and carries the hash of the page's body. The verification of ADR 002 covers decision 14, which the agent wrote for this entry. The verifications are EM's.
+- ADR 012 decision 4 still names only the acceptor as the one who triages and decides. The agent did not change it, because EM's instruction does not name ADR 012, and an edit breaks its verification.
 
 ## 2026-11-19 — the mandate's text of 2026-11-19: OD-160 to OD-167 decided, OD-65 closed, OD-168 opened
 

@@ -1291,3 +1291,11 @@
     - {od: OD-108, part: true}
     - {od: OD-64, part: true}
   refines: [OD-89]
+
+- id: OD-169
+  question: "Who decides the open decisions from 2026-11-23?"
+  closed: 2026-11-19
+  log:
+    - "2026-11-19 — nine ADRs verified again; OD-169: EM or YT decides the open decisions"
+  adr: [ADR-002#d14]
+  refines: [OD-158]

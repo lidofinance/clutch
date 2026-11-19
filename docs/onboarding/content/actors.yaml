@@ -663,14 +663,14 @@
   node: policy
   name: The interim acceptor
   status: existing
-  what: "YT, the lead of the DeFi Engineering chapter, from 2026-11-23; EM, the CTO role, before that day. The acceptor decides the [[open decision|open decisions]] and accepts decision records until the committee takes over as the permanent acceptor. A proposal that changes the shape of the design goes to EM first."
+  what: "YT, the lead of the DeFi Engineering chapter, from 2026-11-23; EM, the CTO role, before that day. The acceptor accepts decision records until the committee takes over as the permanent acceptor. From 2026-11-23, EM or YT decides an [[open decision]]. A proposal that changes the shape of the design goes to EM first."
   controlled_by: "A role, not an account."
   can:
     - "Accept a decision record. An acceptance is an engineering decision. It authorises nothing on chain."
     - "Name the [[Emergency Safe]]'s fifth signer, in the class that the mandate's Snapshot sets, and set the figure of the [[treasury share]]."
   cannot:
     - "Keep the acceptor role after the interim period."
-  sources: ["ADR-002#d1", "ADR-002#d7", "ADR-002#d13", "ADR-005#d24", "ADR-008#d33", OD-63, OD-158, OD-159, "doc:docs/registers/open-decisions.md#open-decisions"]
+  sources: ["ADR-002#d1", "ADR-002#d7", "ADR-002#d13", "ADR-002#d14", "ADR-005#d24", "ADR-008#d33", OD-63, OD-158, OD-159, OD-169, "doc:docs/registers/open-decisions.md#open-decisions"]
 
 - id: ai-agents
   node: policy

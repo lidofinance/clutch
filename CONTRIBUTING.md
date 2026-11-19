@@ -79,7 +79,7 @@ Add a complete row to the [open-decisions register](docs/registers/open-decision
 question, options, closing page, recommendation and decider. The validator rejects incomplete rows.
 To close a decision, remove its row, add its entry to `docs/registers/closed-decisions.yaml` and run `just regen`.
 
-The acceptor triages open decisions and decides in batched interviews, with one decisions branch at a time.
+EM or YT triages open decisions and decides in batched interviews, with one decisions branch at a time (OD-169).
 The decision log quotes the interview exactly. Do not reconstruct a quote from memory or another source.
 
 ## Restricted material and secrets

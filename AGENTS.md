@@ -21,7 +21,7 @@ Clutch is the Lido Active Treasury system: a DAO-owned Safe whose operator acts 
 - Write in Simplified Technical English: one idea per sentence, active voice, controlled `must`, `should`, `can` and `may`, absolute ISO dates.
 - Refer to people by role. The only names used are EM and YT, the two people that `config/actors.yaml` lists.
 - Call the screening vendor "the screening vendor" until the vendor is announced. `scripts/check_redaction.py` refuses restricted terms and secrets; never work around it.
-- Open a decision only as a complete row of the open-decision register: the question with its options, the page that closes it, your recommendation and who decides. The acceptor triages and decides in batched interviews, one decisions branch at a time; a build branch may also record the decisions that it raises (ADR 012, OD-124).
+- Open a decision only as a complete row of the open-decision register: the question with its options, the page that closes it, your recommendation and who decides. EM or YT triages and decides in batched interviews, one decisions branch at a time; a build branch may also record the decisions that it raises (ADR 012, OD-124).
 - Take a new OD, ADR or INV number from `main` when you open the pull request. The validator refuses a number that is used twice.
 - Pages other than the decision log show the current design only. Keep every decision number: a replaced decision becomes one line, "Replaced by …" or "Lapsed …", and an amended one carries its current text with its ODs (OD-128).
 

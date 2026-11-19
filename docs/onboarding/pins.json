@@ -120,7 +120,7 @@
     "actor:committee": {
       "content": "d59618eb77f48bc6",
       "sources": {
-        "ADR-002#d1": "e5dcf4dfc0a9fe11",
+        "ADR-002#d1": "61c60b688b2eedb6",
         "ADR-005#d21": "a26c7ab6db320cab",
         "ADR-005#d24": "b2fc0e6aad2ceabf",
         "ADR-005#d31": "5b68be533417691b",
@@ -252,17 +252,19 @@
       }
     },
     "actor:em": {
-      "content": "770bcaf6d041851b",
+      "content": "7bd1647f025d8f4f",
       "sources": {
-        "ADR-002#d1": "e5dcf4dfc0a9fe11",
+        "ADR-002#d1": "61c60b688b2eedb6",
         "ADR-002#d13": "45f4d753e40233f4",
+        "ADR-002#d14": "dc6c913beffa42b0",
         "ADR-002#d7": "fa61ca9ec86277fe",
         "ADR-005#d24": "b2fc0e6aad2ceabf",
         "ADR-008#d33": "972d748a23c85f27",
         "OD-158": "5d9311d49c474c6d",
         "OD-159": "ee9574f72222638a",
+        "OD-169": "c6371619da96f9e4",
         "OD-63": "472ba631b85e1195",
-        "doc:docs/registers/open-decisions.md#open-decisions": "898b4807b2d9d28e"
+        "doc:docs/registers/open-decisions.md#open-decisions": "6e62ee753695ca38"
       }
     },
     "actor:emergency-safe": {
@@ -916,7 +918,7 @@
         "ADR-010#d9": "4954c60aec6dc966",
         "ADR-010#proposed-direction": "d720629cd64e67bf",
         "INV-010": "435717ec1dd0eaf8",
-        "OD-168": "c75c0a8f61d413b8",
+        "OD-168": "2537845fa25ba37e",
         "doc:docs/research/safe-v150-guard-compatibility-2026-10-02.md#fork-test-of-the-vendors-guard": "472d8dd018fa8990"
       }
     },
@@ -1177,7 +1179,7 @@
         "ADR-010#d22": "cf866e400cc392c6",
         "ADR-010#proposed-direction": "d720629cd64e67bf",
         "OD-160": "42361a52284f0831",
-        "OD-168": "c75c0a8f61d413b8",
+        "OD-168": "2537845fa25ba37e",
         "doc:docs/specs/control-matrix.md#the-matrix": "3c20ca866817c988"
       }
     },
@@ -2266,7 +2268,7 @@
         "ADR-010#proposed-direction": "d720629cd64e67bf",
         "INV-010": "435717ec1dd0eaf8",
         "OD-160": "42361a52284f0831",
-        "OD-168": "c75c0a8f61d413b8",
+        "OD-168": "2537845fa25ba37e",
         "doc:docs/specs/control-matrix.md#the-matrix": "3c20ca866817c988",
         "doc:docs/specs/enabling-vote.md#the-mandates-owed-text": "ce0d95eaacd27343"
       }
@@ -3200,7 +3202,7 @@
     "term:adr": {
       "content": "2670e32bf1d30dcd",
       "sources": {
-        "ADR-002#d1": "e5dcf4dfc0a9fe11",
+        "ADR-002#d1": "61c60b688b2eedb6",
         "ADR-002#d6": "326c541db84ea590",
         "ADR-002#d7": "fa61ca9ec86277fe"
       }
@@ -3531,7 +3533,7 @@
     "term:open-decision": {
       "content": "c96ba21de127cccb",
       "sources": {
-        "doc:docs/registers/open-decisions.md#open-decisions": "898b4807b2d9d28e"
+        "doc:docs/registers/open-decisions.md#open-decisions": "6e62ee753695ca38"
       }
     },
     "term:orders-account": {

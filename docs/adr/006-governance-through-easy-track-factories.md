@@ -16,6 +16,11 @@ verified:
     recorded_by: claude-code/mythos-5.2
     ref: /registers/decision-log.md#2026-11-19--the-handover-to-yt-and-the-defi-tech-team-adr-005-to-adr-015-accepted
     sha256: edb166161ba5b246a3f2bb0d12113c892878397d9c0d98204c81cbbd53a798f7
+  - by: human:em
+    at: 2026-11-19T16:55:18Z
+    recorded_by: claude-code/mythos-5.2
+    ref: /registers/decision-log.md#2026-11-19--nine-adrs-verified-again-od-169-em-or-yt-decides-the-open-decisions
+    sha256: d839518b4682f198cec6753172f68febaa54712824ea194667bb93c812c8184a
 sources:
   - id: s1
     resource: /registers/decision-log.md
